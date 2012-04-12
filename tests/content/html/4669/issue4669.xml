@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<XMLWithHTMLTags>
+    <tag>
+        <subnodeOfTag>some content</subnodeOfTag>
+    </tag>
+    <link>
+        <subnodeOfLink>some link</subnodeOfLink>
+    </link>
+    <style>
+        <subnodeOfStyle>some style</subnodeOfStyle>
+    </style>
+    <script>
+        <subnodeOfScript>some script</subnodeOfScript>
+    </script>
+</XMLWithHTMLTags>

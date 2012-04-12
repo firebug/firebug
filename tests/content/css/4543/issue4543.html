@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4543: Don't jump to next CSS property value's inline editor, if a semicolon is entered inside a string</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #element1 {
+              width: 100px;
+              height: 100px;
+              background: #FFFFFF url("data:image/pngbase64,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") no-repeat 50% 50%;
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4543">Issue 4543</a>: Don't jump to next CSS property value's inline editor, if a semicolon is entered inside a string</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Inspect the white <code>&lt;div&gt;</code> above (<code>#element1</code>)</li>
+                    <li>Switch to the HTML panel and there to the Style side panel (if you're not already there)</li>
+                    <li>Click on the value of the <code>background</code> property to start editing it</li>
+                    <li>Move the text cursor between the <code>g</code> and the <code>b</code> of <code>pngbase64</code></li>
+                    <li>Type a semicolon</li>
+                    <li>Click somewhere outside of the input field to stop editing</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>The semicolon will be entered and the Firebug logo appears inside the &lt;div&gt;</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

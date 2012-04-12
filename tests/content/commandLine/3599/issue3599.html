@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for console object</title>
+</head>
+<body>
+
+<h1>Issue #3599</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3599">Issue #3599</a>
+- <span class="h3">The value of undefined no longer show in the console</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Copy the code and paste it into the Firebug's command line:
+<pre style="color:green">var a = 10;</pre></li>
+<li>The Console panel should display:
+<pre style="color:green">
+>>> var a = 10;
+undefined;
+</pre></li>
+</li>
+</ol>
+
+<i>The 'undefined' should be displayed at the end (since no result value).</i>
+
+</body>
+</html>

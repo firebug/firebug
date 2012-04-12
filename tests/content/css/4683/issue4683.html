@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4683: Font preview on mouseover</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #content {
+              min-height: 100px;
+          }
+
+          #fontFamilyTest1 {
+              font-family: Verdana;
+          }
+
+          #fontFamilyTest2 {
+              font-family: Courier New;
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4683">Issue 4683</a>: Font preview on mouseover</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue4683.html</em> from the Location Menu</li>
+                    <li>
+                        Hover the value of the <code>font-family</code> property of the rule with the selector <code>#fontFamilyTest1</code><br/>
+                        <span class="ok">&rArr; A tooltip must appear showing a sample text using the <em>Verdana</em> font</span>
+                    </li>
+                    <li>
+                        Hover the value of the <code>font-family</code> property of the rule with the selector <code>#fontFamilyTest2</code><br/>
+                        <span class="ok">&rArr; A tooltip must appear showing a sample text using the <em>Courier New</em> font</span>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li class="ok">A tooltip must appear showing a sample text of the hovered font</li>
+                </ul>
+            </section>
+            <footer>Stampolidis Anastasios, tasoss@gmail.com</footer>
+        </div>
+    </body>
+</html>

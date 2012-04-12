@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2426</title>
+</head>
+<body>
+
+<h1>Issue #2426</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2426">Issue #2426</a>
+- <span class="h3">Copy XPath should include namespace</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the HTML panel.</li>
+<li>Find <code style="color:green">Inspect This <span/>Element</code> text in the panel.
+    You can use the search box or the Inspector tool.</li>
+<li>Right click on the <i>header:messageid</i> element and pick <i>Copy XPath</i>.</li>
+<li>Check the clipboard, you should get:
+<pre>/html/body/soap-env:envelope/soap-env:header/soap-env:body/tns:getresponse/tns:header/header:messageid</pre>
+</ol>
+
+<SOAP-ENV:Envelope
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <SOAP-ENV:Header/>
+   <SOAP-ENV:Body>
+      <tns:GetResponse xmlns:tns="http://www.abc.com/GetResponse/v01"
+xmlns:header="http://www.abc.com/Common/MessageHeader/v02">
+         <tns:Header>
+            <header:MessageId>Inspect This Element</header:MessageId>
+         </tns:Header>
+         <tns:Body/>
+      </tns:GetResponse>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+</body>
+</html>

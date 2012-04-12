@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4689: Add option to copy parts of JSON data</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css"
+            type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4689">Issue 4689</a>:
+                Add option to copy parts of JSON data</h1>
+        </header>
+        <div>
+        
+        <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Enable the Console & Net panels</li>
+                    <li>Select the Console panel</li>
+                    <li>Enable the "Show XMLHttpRequests" option</li>
+                    <li>Click this button:
+                        <button id="testButton" onclick="getJSONResponse()">Get JSON</button>
+                    </li>
+                    <li> 
+                    Choose i or ii
+                    <ol type="i">
+                        <li>In the Console panel click on the first request (data.json) and then press the JSON tab</li>
+                        <li>In the Net panel click on the request containing 'data.json' and then press the JSON tab</li>
+                    </ol>
+                        </li>
+                    <li>Right click on 0 and choose 'Copy "0" as JSON'</li>
+                    <li>Check system clipboard</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>In both cases (choosing either 4i or 4ii) the clipboard should contain <code>{"name":"foo","surname":"bar","address":{"no":"15","name":"foobar"}}</code>
+                    </li>
+                </ul>
+            </section>
+            <footer>
+                Tasoss, tasoss@gmail.com
+            </footer>
+        </div>
+    </body>
+
+<script type="text/javascript">
+function getJSONResponse(callback)
+{
+    var request = new XMLHttpRequest();
+    request.open("GET", "data.json", true);
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+            if (callback) {
+                setTimeout(function() {
+                    callback(request);
+                }, 300);
+            }
+        }
+    }
+    request.send(null);
+}
+
+</script>
+
+</html>

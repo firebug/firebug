@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test for Issue #1867</title>
+</head>
+<body>
+
+<h1>Test for Issue #1867</h1>
+
+<ol>
+    <li>Close Firebug UI</li>
+    <li>Upload a file</li>
+    <li>Try to delete the file. It should not be locked. BUG</li>
+</ol>
+
+<form action="Issue1867Submit.html" enctype="multipart/form-data" method="post"
+    target="upload_target" onsubmit="startUpload();">
+    <p>
+        Please specify a file :<br>
+        <input id="userFile" type="file" name="datafile" size="40">
+    </p>
+    <div>
+        <input id="userSubmit" type="submit" value="Send">
+    </div>
+</form>
+
+<iframe id="upload_target" name="upload_target" src="#" 
+    style="width:500;height:70;border:1px solid #0;"></iframe>
+
+<script type="text/javascript">
+function startUpload()
+{
+}
+</script>
+
+</body>
+</html>

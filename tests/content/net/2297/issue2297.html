@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #2297</title>
+    <script type="text/javascript" src="non-existing-script.js"></script>
+</head>
+<body>
+
+<h1>Issue #2297</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2297">Issue #2297</a>
+- <span class="h3">Reporting failure to load javascript</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Net panel.</li>
+<li>Switch to the Console panel and use the options menu to
+enable <i>Show Network Errors</i> option.</li>
+<li>Reload this page.</li>
+<li>You should see a <span style="color:green;font-weight:bold">NetworkError</span> in the Console panel and the status bar should
+display <span style="color:red;font-weight:bold">1 Error</span>.</li>
+<li>Click on the error and you shoud be navigated into the Net panel where the appropriate
+entry (displayed in red color) should be opened.</li>
+</ol>
+
+</body>
+</html>

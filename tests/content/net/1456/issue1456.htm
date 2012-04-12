@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #1456</title>
+    <script src="prototype.js" type="text/javascript"></script>
+    <script src="scriptaculous.js?load=effects" type="text/javascript"></script>
+</head>
+<body>
+
+<h1>Issue #1456</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=1456">Issue #1456</a>
+- <span class="h3">XMLHttpRequest / Response totally wrong</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Click on the <b>Execute Request</b> button to initiate XHR request.</li>
+<li>Open Firebug and activate Net panel.</li>
+<li>Expand the <span style="color:green">.../Issue1456.txt</span> request and check Response tab.</li>
+<li>Content of the tab should be the same the green text below (appears after the request is finished).</li>
+</ol>
+
+<pre id="response" style="color:green"></pre>
+<button id="testButton" onclick="runTest()">Execute Request</button>
+<input type="textbox" name="tb" id="tb" style="display:none" />
+<br/><br/>
+
+<script type="text/javascript">
+function runTest()
+{
+    new Ajax.Request("issue1456.txt",
+    {
+        method: "get",
+        onSuccess: function(response) {
+            document.getElementById("response").innerHTML = response.responseText;
+        },
+    });
+}
+</script>
+</body>
+</html>

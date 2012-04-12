@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+</head>
+<body>
+
+<h1>Command line API: monitorEvents</h1>
+
+<p>This test-case is intended for command line <b>monitorEvents</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Execute <span style="color:green">monitorEvents($("testButton"), "click")</span> expression on the command line.</li>
+<li>Press the <span style="color:green">Execute Test</span> button below.</li>
+<li>The Console should display something like as follows:
+<span style="color:green">click clientX=57, clientY=232</span><br/>
+<i>Of course the coordinates can be different.</i></li>
+</ol>
+
+<button id="testButton">Execute Test</button>
+<br/><br/>
+
+</body>
+</html>

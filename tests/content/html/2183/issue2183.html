@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2183: Editing a text node with "Show Full Text" off displays cropped text instead of full text</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2183">Issue 2183</a>: Editing a text node with "Show Full Text" off displays cropped text instead of full text</h1>
+        </header>
+        <div>
+            <section id="content">
+                <p id="paragraph">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Make sure <em>Show Full Text</em> is unchecked inside the Options Menu</li>
+                    <li>
+                        Inspect the <code>&lt;p&gt;</code> tag above (<code>#paragraph</code>)<br/>
+                        <span class="ok">&rArr; The content of the <code>&lt;p&gt;</code> should be cropped</span>
+                    </li>
+                    <li>
+                        Click on the node's content inside the <em>HTML</em> panel to edit it<br/>
+                        <span class="ok">&rArr; The inline editor will be shown containing the full text</span>
+                    </li>
+                    <li>
+                        Change <code>Lorem</code> to <code>Loram</code> and stop inline editing by clicking somewhere outside the inline editor<br/>
+                        <span class="ok">&rArr; The page should show the full text starting with <code>Loram</code></span><br/>
+                        <span class="ok">&rArr; The node's contents inside the <em>HTML</em> panel are cropped and start with <code>Loram</code></span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Inline editing of long HTML node contents should work as expected</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

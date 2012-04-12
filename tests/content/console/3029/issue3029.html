@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3029</title>
+</head>
+<body>
+
+<h1>Issue #3029</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3029">Issue #3029</a>
+- <span class="h3">long property value of object change to 'undefined'</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>An expandable <span style="color:green">myProperty</span> should appear in
+the Console.</li>
+<li>Click on the expand button. The entire value should be displayed.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+<br/><br/>
+<i>In the original bug, <b>undefined</b> was displayed after expanding.</i>
+
+<script type="text/javascript">
+var oTest = {
+    myProperty: "0123456789012345678901234567890123456789012345678901234567890123456789"
+}
+function onExecuteTest()
+{
+    console.dir(oTest);
+}
+</script>
+  
+</body>
+</html>

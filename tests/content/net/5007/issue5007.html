@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5007: Headers from POST request body are not displayed anymore</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5007">Issue 5007</a>: Headers from POST request body are not displayed anymore</h1>
+        </header>
+        <div>
+            <section id="content">
+                <form action="" method="post">
+                    <input type="text" name="param" value="value"/>
+                    <button type="submit">Send</button>
+                </form>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send</em> button above<br/>
+                        <span class="ok">The <em>Net</em> panel will display a POST request to issue5007.html</span>
+                    </li>
+                    <li>Expand that request by clicking on it</li>
+                    <li>Inside the <em>Headers</em> tab have a look for the <code>Content-Type</code> and <code>Content-Length</code> header</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <code>Content-Type</code> and <code>Content-Length</code> header must be displayed inside the <em>Headers</em> tab</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

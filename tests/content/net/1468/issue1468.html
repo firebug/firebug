@@ -1,0 +1,20 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for Issue #1468</h1>
+<ul>
+    <li>Open Firebug UI and enable Net panel.</li>
+    <li>Browse for a file and click the <b>Send File</b> button.</li>
+</ul>
+
+<form id="userForm" method="post" action="issue1468Submit.html"
+    enctype="multipart/form-data" name="TestForm">
+Send this file: <input id="userFile" type="file" name="userfile" />
+<input id="userSubmit" type="submit" value="Send File"/>
+</form>
+
+</body>
+</html>

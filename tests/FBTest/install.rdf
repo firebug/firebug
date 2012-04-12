@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>fbtest@mozilla.com</em:id>
+    <em:name>FBTest</em:name>
+    <em:version>@VERSION@@RELEASE@</em:version>
+    <em:creator>Jan Odvarko</em:creator>
+
+    <em:description>Firebug Unit Test Console</em:description>
+
+    <!-- Any suitably modern toolkit application -->
+    <em:targetApplication>
+      <Description>
+        <em:id>toolkit@mozilla.org</em:id>
+        <em:minVersion>2.0.0</em:minVersion>
+        <em:maxVersion>20.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
+        <em:minVersion>4.0</em:minVersion>
+        <em:maxVersion>20.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <em:updateURL>https://getfirebug.com/releases/fbtest/1.9/update.rdf</em:updateURL>
+    <em:homepageURL>http://getfirebug.com/wiki/index.php/Firebug_Tests</em:homepageURL>
+
+  </Description>
+</RDF>

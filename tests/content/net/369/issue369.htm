@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #369</title>
+</head>
+<body>
+
+<h1>Issue #369</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=369">Issue #369</a>
+- <span class="h3"> Inspect JSON data in HTTP responses  </span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+    <li>Each button generates a XHR that returns JSON data.</li>
+    <li>Open Firebug, enable Net panel and click a button.</li>
+    <li>Check the response displayed in the Net panel. The JSON tab must display a JSON data.</li>
+</ol>
+
+<button onclick="makeRequest1();">Simple JSON</button>
+<button onclick="makeRequest2();">JSON in a function</button>
+<button onclick="makeRequest3();">Secure JSON</button>
+<button onclick="makeRequest4();">JSON in a loop</button>
+<button onclick="makeRequest5();">Break in Script</button>
+<button onclick="makeRequest6();">JSON in a funtion 2</button>
+
+<br/><br/>
+
+<script type="text/javascript">
+function makeRequest1(callback)
+{
+    makeRequest("issue369-1.txt", callback);
+}
+
+function makeRequest2(callback)
+{
+    makeRequest("issue369-2.txt", callback);
+}
+
+function makeRequest3(callback)
+{
+    makeRequest("issue369-3.txt", callback);
+}
+
+function makeRequest4(callback)
+{
+    makeRequest("issue369-4.txt", callback);
+}
+
+function makeRequest5(callback)
+{
+    makeRequest("issue369-5.txt", callback);
+}
+
+function makeRequest6(callback)
+{
+    makeRequest("issue369-6.txt", callback);
+}
+
+function makeRequest(url, callback) 
+{
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (request.readyState == 4 && request.status == 200 && callback)
+            callback(request);
+    };
+
+    request.open("POST", url, true);
+    request.send(null);
+}
+
+</script>
+  
+</body>
+</html>

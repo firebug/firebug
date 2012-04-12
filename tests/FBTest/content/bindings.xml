@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<!-- Test URL Bar (history of test files) -->
+<binding id="urlbar" extends="chrome://global/content/bindings/toolbar.xml#toolbar">
+
+    <resources>
+        <stylesheet src="chrome://fbtest/skin/testConsole.css"/>
+    </resources>
+
+    <content>
+        <xul:toolbaritem xbl:inherits="tooltiptext=barTooltiptext">
+            <xul:label anonid="testLabel" xbl:inherits="value=label"/>
+        </xul:toolbaritem>
+        <xul:toolbaritem flex="1" xbl:inherits="tooltiptext=barTooltiptext">
+            <xul:textbox anonid="textBox" flex="1" enablehistory="true"
+                type="autocomplete" xbl:inherits="autocompletesearch"
+                ontextentered="this.parentNode.parentNode.handleCommand();"/>
+        </xul:toolbaritem>
+        <xul:toolbarbutton anonid="testListPicker" label="..."
+            xbl:inherits="disabled=disablePicker,tooltiptext=pickerTooltiptext"
+            command="cmd_openTestList" />
+    </content>
+
+    <implementation>
+        <constructor><![CDATA[
+            this.mTextBox = document.getAnonymousElementByAttribute(this, "anonid", "textBox");
+            this.mLabel = document.getAnonymousElementByAttribute(this, "anonid", "testLabel");
+
+            // Get context menu of the textBox.
+            var inputBox = this.mTextBox.inputField.parentNode;
+            var menuPopup = document.getAnonymousElementByAttribute(inputBox,
+                "anonid", "input-box-contextmenu");
+
+            var self = this;
+
+            // xxxHonza: how to do the localization? Firebug object doesn't exist at this time.
+            var items = [];
+            items.push("-");
+            items.push({
+                label: "Reset History List",
+                nol10n: true,
+                command: function() { FBTestApp.TestConsole.resetHistoryList(self); }
+            });
+            items.push({
+                label: "Load Registered Tests",
+                nol10n: true,
+                command: function() { FBTestApp.TestConsole.loadTestList("fbtest:all"); }
+            });
+
+            // xxxHonza: Could FBL be not fully loaded yet?
+            if (!FBL.createMenuItem)
+                return;
+
+            for (var i = 0; i < items.length; ++i)
+                FBL.createMenuItem(menuPopup, items[i]);
+        ]]></constructor>
+
+        <property name="testLabel"
+            onget="return this.mLabel.value;"
+            onset="this.mLabel.value = val; return val;"/>
+
+        <property name="testURL"
+            onget="return this.mTextBox.value;"
+            onset="this.mTextBox.value = val; return val;"/>
+
+        <method name="handleCommand">
+            <body><![CDATA[
+                FBTestApp.TestConsole.setAndLoadTestList();
+            ]]></body>
+        </method>
+    </implementation>
+</binding>
+
+</bindings>

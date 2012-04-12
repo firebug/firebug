@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4233</title>
+</head>
+<body>
+
+<h1>Issue #4233</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4233">Issue #4233</a>
+- <span class="h3">[Large patch] Better auto-completion</span>.
+<br/>
+<i>Simon Lindholm, simon.lindholm10@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Step by step type following expressions in the the command line
+and verify that the autocompletion popup window<br/> appears for:</li>
+<ul>
+    <li><code style="color:green">i</code></li>
+    <li><code style="color:green">document.q</code></li>
+    <li><code style="color:green">window.window.window.i</code></li>
+    <li><code style="color:green">document.querySelector('div').a</code></li>
+    <li><code style="color:green">document.querySelectorAll('div')[0].a</code></li>
+    <li><code style="color:green">document.querySelector('div').querySelector.c</code></li>
+    <li><code style="color:green">document.querySelector('div').parentNode.querySelector('div').a</code></li>
+    <li><code style="color:green">alert.c</code></li>
+    <li><code style="color:green">Ma</code></li>
+    <li><code style="color:green">window.Math.s</code></li>
+    <li><code style="color:green">for (var i = 0; i &lt; 2; ++i) document.querySelectorAll('div')[i].a</code></li>
+    <li><code style="color:green">[].s</code></li>
+    <li><code style="color:green">''.s</code></li>
+    <li><code style="color:green">'"'+i</code></li>
+    <li><code style="color:green">id[/\[/]=i</code></li>
+    <li><code style="color:green">throw(1)/i</code></li>
+    <li><code style="color:green">id(1)/i</code></li>
+    <li><code style="color:green">(1)/i</code></li>
+    <li><code style="color:green">/a/.t</code></li>
+    <li><code style="color:green">(1)/i</code></li>
+    <li><code style="color:green">var a = i</code></li>
+    <li><code style="color:green">if(1){i</code></li>
+    <li><code style="color:green">a=0;{i</code></li>
+    <li><code style="color:green">({a: i</code></li>
+    <li><code style="color:green">{i</code></li>
+    <li><code style="color:green">{a: window, i</code></li>
+    <li><code style="color:green">date().g</code></li>
+    <li><code style="color:green">mk4().c</code></li>
+    <li><code style="color:green">mk4().chain().c</code></li>
+    <li><code style="color:green">getterSeemingEval('window').i</code></li>
+    <li><code style="color:green">getterSeemingEval('[window]')[0].i</code></li>
+    <li><code style="color:green">String.prototype.ch</code></li>
+    <li><code style="color:green">new Date().g</code></li>
+</ul>
+
+and doesn't appear for:
+<ul>
+    <li><code style="color:green">if(1)/i</code></li>
+    <li><code style="color:green">if(1)/i</code></li>
+    <li><code style="color:green">(function()/i</code></li>
+    <li><code style="color:green">/[/; i</code></li>
+    <li><code style="color:green">1+/i</code></li>
+    <li><code style="color:green">id[/[/]=i</code></li>
+    <li><code style="color:green">id[/[/]/i</code></li>
+    <li><code style="color:green">var i</code></li>
+    <li><code style="color:green">var a = 0, i</code></li>
+    <li><code style="color:green">var a, i</code></li>
+    <li><code style="color:green">({ i</code></li>
+    <li><code style="color:green">({a: window, i</code></li>
+    <li><code style="color:green">function(i</code></li>
+    <li><code style="color:green">function f(i</code></li>
+    <li><code style="color:green">f=function(i</code></li>
+    <li><code style="color:green">function i</code></li>
+    <li><code style="color:green">function([i</code></li>
+    <li><code style="color:green">id(eval('window')).i</code></li>
+    <li><code style="color:green">(window).i</code></li>
+    <li><code style="color:green">q='';q.s</code></li>
+</ul>
+
+</ol>
+
+<script type="text/javascript">
+function getterSeemingEval(e) {
+    return eval(e);
+}
+function id(x) {
+    return x;
+}
+
+function mkP() {}
+mkP.prototype.chain = function() {
+    return this;
+};
+function mk4() {
+    return new mkP();
+}
+
+function date() {
+    return new Date();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<html>
+<head>
+    <title>debuggerKeywords Test Page</title>
+</head>
+<body>
+<h1>debuggerKeywords Tests</h1>
+
+<ol>
+    <li>Open Firebug, enable the Script panel and reload this page.</li>
+    <li>Step by step click on each button.</li>
+    <li>Every time you click a button the debugger should stop at a <b>debugger</b>
+        keyword in the Script panel.</li>
+    <li>Before you click the next button click on <b>Continue</b> (F8) debugger button.</li>
+</ol>
+
+<button id="debuggerSimple" onclick="debuggerSimple();">debugger Simple</button>
+<button id="debuggerShallow" onclick="debuggerShallow();">debugger Shallow</button>
+<button id="debuggerDeep" onclick="debuggerDeep();">debugger Deep</button>
+<button id="debuggerInXHR" onclick="loadXHRDebugger();">debugger in XHR</button>
+<button id="debuggerInScript" onclick="loadScriptDebugger();">debugger in Script</button>
+<button id="windowEvalScriptDebugger" onclick="windowEvalScriptDebugger();">debugger in window.eval()</button>
+
+<br/><br/>
+
+<i>The execution context (yellow arrow on the left side) should be displyaed directly
+at the row with the debugger keyword.</i>
+
+<script type="application/x-javascript" >
+function debuggerSimple()
+{
+    debugger;   //@debuggerSimpleRow - don't remove this comment
+}
+
+function debuggerShallow()
+{
+    var foo = "poo";
+    debugger;   //@debuggerShallowRow - don't remove this comment
+}
+
+function debuggerDeep()
+{
+    var foo = 42;
+    debuggerdeep2(1, "TheStringValue");
+}
+
+function debuggerdeep2(aNumber, aString)
+{
+    var fun = "no";
+    debuggerdeep3(aNumber, aString, fun, debuggerDeep);
+    fun = "yes";
+    var stuff = 88;
+}
+
+function debuggerdeep3(bNumber, bString, bAlsoString, aFunction)
+{
+    var bar = "hello";
+    var baz = document.body;
+
+    var obj = {
+        touch:
+        function(cString)
+        {
+            debugger;   //@debuggerDeepRow - don't remove this comment
+            this.touched = cString;
+        }
+    };
+    obj.touch(bString+bAlsoString);
+}
+
+function loadXHRDebugger(callback)
+{
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function()
+    {
+        if (req.readyState == 4 && (req.status == 200 || req.status === 0) )
+        {
+            if (callback)
+                callback(req);
+
+            eval(req.responseText);
+            var f = 8;
+            var g = 9;
+        }
+        else if (req.readyState == 4)
+         {
+            console.error("loadXHRDebugger failed to load XHR from "+req.href);
+        }
+    }
+
+    req.open("GET", "debuggerKeyword1.js", true);
+    req.send(null);
+}
+
+var scriptLoaded = null;
+function loadScriptDebugger(callback)
+{
+    // Helper callback from loaded script test.
+    scriptLoaded = function() {
+        if (callback)
+            callback();
+    }
+
+    var script = document.createElement("script");
+    script.setAttribute("src", "debuggerKeyword2.js");
+    document.body.appendChild(script);
+}
+
+function windowEvalScriptDebugger()
+{
+    var script = "function bar4()\n{\n   debugger;   /*@debuggerScriptRow - don't remove this comment*/\n}\nbar4();";
+    window.eval(script);  // FAILS https://bugzilla.mozilla.org/show_bug.cgi?id=645160
+
+    var x = eval;
+    x(script);   // FAILS
+
+    eval(script);
+}
+
+</script>
+</body>
+</html>

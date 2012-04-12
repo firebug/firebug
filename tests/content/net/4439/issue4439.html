@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4439</title>
+</head>
+<body>
+
+<h1>Issue #4439</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4439">Issue #4439</a>
+- <span class="h3">Net Tab GET and POST responses empty when response's Content-Type is text/json</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Net panel</li>
+<li>Click on the <b>JSON Request</b> button to initiate request for JSON data.</li>
+<li>Expand the <span style="color:green">issue4439.txt</span> request and check that JSON
+tab is available with some data.</li>
+</ol>
+
+<button id="testButton" onclick="jsonRequest()">JSON Request</button>
+
+<br/><br/>
+
+<script type="text/javascript">
+function jsonRequest()
+{
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue4439.txt", true);
+    request.send(null);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+Tests for the following are missing:
+
+* #onContextDestoryed call back - I don't see an API to close a tab in FBTestFirebug
+* #onContextChanged call back - I don't see an API to change the active tab in FBTestFirebug

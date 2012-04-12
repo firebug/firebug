@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2271</title>
+</head>
+<body>
+
+<h1>Issue #2271</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2271">Issue #2271</a>
+- <span class="h3">JS errors in AJAX callback functions are not shown</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel. Make sure the <i>Show XMLHttpRequests</i> option is on.</li>
+<li>Click on the <code>Execute Test</code> button below.</li>
+<li>See Firefox Error Console. There should be following error:</li>
+<code style="color:red">Error: document.getElementId is not a function<br/>
+Source File: http://legoas/firebug/tests/2271/issue2271.html
+Line: 35</code>
+<li>See also Firebug's Console panel. The error should also be there.</li>
+<li>If the error isn't there -> BUG</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("GET", "issue2271.php", true);
+
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+            document.getElementId("something").innerText = request.responseText;
+        }
+    }
+
+    request.send(null);
+}
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,25 @@
+content    fbtest   content/
+skin       fbtest   classic/1.0     skin/classic/
+locale     fbtest   en-US           locale/en-US/
+
+# Maps resource://fbtest/* to files in modules/*
+resource fbtest modules/
+
+
+overlay    chrome://firebug/content/firebugOverlay.xul     chrome://fbtest/content/overlayFirebug.xul
+overlay    chrome://firebug/content/firefox/browserOverlayWithFrame.xul    chrome://fbtest/content/overlayFirebug.xul
+overlay    chrome://fbtest/content/testConsole.xul     chrome://fbtest/content/haltOnFailedTest.xul
+
+component {F483275E-ECC6-4028-B375-92498C0AD76F} components/commandLine.js
+contract @mozilla.org/commandlinehandler/general-startup;1?type=FBTest {F483275E-ECC6-4028-B375-92498C0AD76F}
+category command-line-handler  m-FBTest @mozilla.org/commandlinehandler/general-startup;1?type=FBTest
+
+component {3008FA55-C12F-4992-9930-B9D52F0CF037} components/testHistory.js
+contract @mozilla.org/autocomplete/search;1?name=FBTestHistory {3008FA55-C12F-4992-9930-B9D52F0CF037}
+
+component {B37D6564-77D9-4613-B088-324389E1A8F3} components/testHistory.js
+contract @mozilla.org/autocomplete/search;1?name=FBTestCaseHistory {B37D6564-77D9-4613-B088-324389E1A8F3}
+
+component {3882FC1B-D32A-4722-B935-FA82142808A5} components/testHistory.js
+contract @mozilla.org/autocomplete/search;1?name=FBTestDriverHistory {3882FC1B-D32A-4722-B935-FA82142808A5}
+

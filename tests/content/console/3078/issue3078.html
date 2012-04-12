@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3078</title>
+  <script>
+    for (var i = 0; i < 300; ++i)
+      console.log(i);
+  </script>
+</head>
+<body>
+
+<h1>Issue #3078</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3078">Issue #3078</a>
+- <span class="h3">Console does scroll to the bottom for log entries in the head section</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Reload this page.</li>
+<li>Console panel should be scrolled at the bottom.</li>
+</ol>
+  
+</body>
+</html>

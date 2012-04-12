@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for console object</title>
+</head>
+<body>
+
+<h1>Console object API: warn</h1>
+
+<p>This test-case is intended for <b>console.exception</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>The Console panel should display:
+    <code style="color:red">ReferenceError: asdf is not defined</code></li>
+<li>There should be the source line displayed:
+    <code style="color:green">asdf.asdf = 1;</code></li>
+<li>There should be a source line displayed:
+    <code style="color:blue">exception.html (line 34)</code></li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+<br/><br/>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    try
+    {
+        asdf.asdf = 1;
+    }
+    catch (e)
+    {
+        console.exception(e);
+    }
+}
+</script>
+  
+</body>
+</html>

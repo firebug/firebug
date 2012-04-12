@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test case for console API: profile, profileEnd</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function onExecuteTest()
+        {
+            console.profile("Fibonacci");
+            fib(25);
+            console.profileEnd();
+        }
+
+        function fib(n)
+        {
+            return n<2?n:fib(n-1)+fib(n-2);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Test case for console API: profile, profileEnd</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> and <em>Console</em> panel and switch to the <em>Console</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Click on the <em>Execute Test</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Console</em> panel should display a result table with profile data</li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>

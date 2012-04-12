@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for encoded ampersand in URL</title>
+</head>
+<body>
+
+<h1>Test Case for encoded ampersand in URL</h1>
+
+<ol>
+<li>Open Firebug and enable the Net panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>Expand the new entry and select <b>Params</b> tab.</li>
+<li>Verify the content. It should be following:
+<pre>
+value1   1
+value2   2
+value3   3
+</pre>
+</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+<br/><br/>
+<i>Ampersands in the URL <span style="color:green">&amp;amp;</span> should be properly escaped.</i>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("GET", "test.php?value1=1&amp;value2=2&amp;value3=3", true);
+
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+        }
+    }
+
+    request.send(null);
+}
+</script>
+  
+</body>
+</html>

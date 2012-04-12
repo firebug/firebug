@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4087: Contents of Command Line and Command Editor do not persist on page reload</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4411">Issue 4087</a>: Contents of Command Line and Command Editor do not persist on page reload</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the the <em>Console</em> panel</li>
+                    <li>Type <code>var test = 'Hello';</code> into the Command Line or Command Editor</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li><code>var test = 'Hello';</code> should persist inside the Command Line/Command Editor</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,99 @@
+function runTest()
+{
+    FBTest.sysout("issue4509.START");
+
+    FBTest.openNewTab(basePath + "script/stepping/4509/issue4509.html", function(win)
+    {
+        FBTest.openFirebug();
+        FBTest.enableConsolePanel();
+        FBTest.enableScriptPanel();
+        FBTest.selectPanel("script");
+
+        var tasks = new FBTest.TaskList();
+        tasks.push(testViaContextMenu);
+        tasks.push(testViaCtrlClick);
+        tasks.push(testViaMiddleClick);
+
+        tasks.run(function()
+        {
+            FBTest.testDone("issue4509.DONE");
+        });
+    });
+}
+
+function testViaContextMenu(callback)
+{
+    FBTest.waitForBreakInDebugger(null, 10, false, function(row)
+    {
+        // Get row 12
+        var sourceRow = row.nextSibling.nextSibling.
+            getElementsByClassName("sourceRowText").item(0);
+
+        FBTest.executeContextMenuCommand(sourceRow, {id: "contextMenuRunUntil"}, function()
+        {
+            FBTest.waitForBreakInDebugger(null, 12, false, function(row)
+            {
+                verifyResults(row, callback);
+            });
+        });
+    });
+
+    FBTest.reload();
+}
+
+function testViaCtrlClick(callback)
+{
+    FBTest.waitForBreakInDebugger(null, 10, false, function(row)
+    {
+        // Get row 12
+        var row12 = row.nextSibling.nextSibling;
+
+        FBTest.waitForBreakInDebugger(null, 12, false, function(row)
+        {
+            verifyResults(row, callback);
+        });
+        FBTest.sendMouseEvent({type: "mousedown", ctrlKey: true}, row12.firstChild);
+    });
+
+    FBTest.reload();
+}
+
+function testViaMiddleClick(callback)
+{
+    FBTest.waitForBreakInDebugger(null, 10, false, function(row)
+    {
+        // Get row 12
+        var row12 = row.nextSibling.nextSibling;
+
+        FBTest.waitForBreakInDebugger(null, 12, false, function(row)
+        {
+            verifyResults(row, callback);
+        });
+        FBTest.sendMouseEvent({type: "mousedown", button: 1}, row12.firstChild);
+    });
+
+    FBTest.reload();
+}
+
+//************************************************************************************************
+
+function verifyResults(row, callback)
+{
+    var config = {tagName: "div", classes: "logRow logRow-log"};
+    FBTest.waitForDisplayedElement("console", config, function(row)
+    {
+        var expected = "That's the first log line.";
+        var logRow = row.getElementsByClassName("objectBox objectBox-text").item(0);
+        FBTest.compare(expected, logRow.textContent, "Console panel must have '"+
+            expected+"' as output");
+
+        FBTest.waitForDebuggerResume(function()
+        {
+            callback();
+        });
+
+        FBTest.clickContinueButton();
+    });
+
+    FBTest.selectPanel("console");
+}

@@ -1,0 +1,24 @@
+<html>
+    <body>
+        <script src="ext-base.js"></script>
+        <script src="ext-all-debug.js"></script>
+
+        <div id="formdiv"></div>
+        <script>
+            var formpanel = new Ext.form.FormPanel({
+                height: 200
+                ,width: 200
+                ,items: [
+                    {xtype:'textfield', name:'name', fieldLabel:'Name'}
+                    ,{xtype:'textfield', name:'surname', fieldLabel:'Surname'}
+                ]
+            });
+
+            formpanel.render('formdiv');
+            var form = formpanel.getForm();
+
+            //Place breakpoint on next line and step into
+            form.setValues({name:'test name', surname:'test surname'});
+        </script>
+    </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4542: Quotes Issue With JavaScript Function Calls Inside Inline Event Handlers</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet">
+        <style type="text/css">
+            #output {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4542">Issue 4542</a>: Quotes Issue With JavaScript Function Calls Inside Inline Event Handlers</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="sayHi" onclick="var output = document.getElementById(output'); output.style.display = 'block'; output.innerHTML = Hi there, tester!&quot;">
+                    Say hi
+                </button>
+                <section id="output">
+                </section>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the HTML panel</li>
+                    <li>Inspect the <em>Say hi</em> button above</li>
+                    <li>Click the value of the <code>onclick</code> attribute to start inline editing</li>
+                    <li>Move the text cursor between the opening bracket and <code>output</code> of <code>getElementById(output&#39;)</code></li>
+                    <li>
+                        Enter a single quote (<code>&#39;</code>)<br/>
+                        <span class="ok">&rArr; The single quote is entered into the input field</span>
+                    </li>
+                    <li>Move the text cursor before the <code>H</code> of <code>Hi</code></li>
+                    <li>
+                        Enter a double quote (&quot;)<br/>
+                        <span class="ok">&rArr; The double quote is entered into the input field</span>
+                    </li>
+                    <li>Click the <em>Say hi</em> button above</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li><code>Hi there, tester!</code> shown below the button</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

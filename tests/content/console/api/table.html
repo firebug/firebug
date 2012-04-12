@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test case for console API: table</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        code {
+            white-space: normal;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        table :-moz-any(th, td) {
+            width: 50px;
+            border: 1px solid #000000;
+        }
+        </style>
+        <script type="text/javascript">
+        function Person(firstName, lastName, age)
+        {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.age = age;
+        }
+        
+        var table = new Array(3);
+        for (var i=0; i<table.length; i++)
+            table[i] = [i+1, i+2, i+3];
+        
+        var family = {};
+        family.mother = new Person("Susan", "Doyle", 32);
+        family.father = new Person("John", "Doyle", 33);
+        family.daughter = new Person("Lily", "Doyle", 5);
+        family.son = new Person("Mike", "Doyle", 8);
+        family.mother.desc = "mother";
+        family.father.desc = "father";
+        
+        function onExecuteTest1()
+        {
+            var columns = [
+                {property: "0", label: "a"},
+                {property: "1", label: "b"},
+                {property: "2", label: "c"}
+            ];
+            console.table(table, columns);
+        }
+        
+        function onExecuteTest2()
+        {
+            var columns = [
+                {property: 0, label: "a"},
+                {property: 1, label: "b"},
+                {property: 2, label: "c"}
+            ];
+            console.table(table, columns);
+        }
+        
+        function onExecuteTest3()
+        {
+            console.table(family);
+        }
+        
+        function onExecuteTest4()
+        {
+            console.table({
+                a: "propA",
+                b: "propB",
+                c: "propC",
+            });
+        }
+        
+        function onExecuteTest5()
+        {
+            console.groupCollapsed("My family");
+            console.table(family);
+            console.groupEnd();
+        }
+        
+        function onExecuteTest6()
+        {
+            console.table(table, [1, 2]);
+        }
+        
+        function onExecuteTest7()
+        {
+            var columns = [
+                {property:1, label: "2nd"},
+                {property:2, label: "3rd"}
+            ];
+            console.table(table, columns);
+        }
+        
+        function onExecuteTest8()
+        {
+            var columns = [
+                {property: "firstName"},
+                {property: "lastName"}
+            ];
+            console.table(family, columns);
+        }
+        
+        function onExecuteTest9()
+        {
+            var columns = ["firstName", "lastName"];
+            console.table(family, columns);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Test case for console.table</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton1" onclick="onExecuteTest1()">Test 1</button>
+                <button id="testButton2" onclick="onExecuteTest2()">Test 2</button>
+                <button id="testButton3" onclick="onExecuteTest3()">Test 3</button>
+                <button id="testButton4" onclick="onExecuteTest4()">Test 4</button>
+                <button id="testButton5" onclick="onExecuteTest5()">Test 5</button>
+                <button id="testButton6" onclick="onExecuteTest6()">Test 6</button>
+                <button id="testButton7" onclick="onExecuteTest7()">Test 7</button>
+                <button id="testButton8" onclick="onExecuteTest8()">Test 8</button>
+                <button id="testButton9" onclick="onExecuteTest9()">Test 9</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Click the <em>Test 1</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>a</th><th>b</th><th>c</th>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td><td>2</td><td>3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td><td>3</td><td>4</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td><td>4</td><td>5</td>
+                                    </tr>
+                                </table>
+                            </code>
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 2</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like the one of step 3.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 3</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>firstName</th><th>lastName</th><th>age</th><th>desc</th>
+                                    </tr>
+                                    <tr>
+                                        <td>"Susan"</td><td>"Doyle"</td><td>32</td><td>"mother"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"John"</td><td>"Doyle"</td><td>33</td><td>"father"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Lily"</td><td>"Doyle"</td><td>5</td><td>undefined</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Mike"</td><td>"Doyle"</td><td>8</td><td>undefined</td>
+                                    </tr>
+                                </table> 
+                            </code>
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 4</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>Object Properties</th>
+                                    </tr>
+                                    <tr>
+                                        <td>"propA"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"propB"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"propC"</td>
+                                    </tr>
+                                </table> 
+                            </code>
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 5</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console wrapped into a collapsed group named <code>My family</code> looking like the one of step 5. 
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 6</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>1</th>
+                                        <th>2</th>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>4</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>5</td>
+                                    </tr>
+                                </table> 
+                            </code>
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 7</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like the one of step 8, but with <code>2nd</code> and <code>3rd</code> as headers.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 8</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like the first two columns of step 5. 
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 9</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like the one of step 10. 
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The console should always display an output using tabular layout.</li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>

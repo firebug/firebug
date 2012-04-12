@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2580</title>
+</head>
+<body>
+
+<h1>Issue #2580</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2580">Issue #2580</a>
+- <span class="h3">json object "next" word as object attribute</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the DOM panel.</li>
+<li>Look for an object <span style="color:green">a</span> and expand it.</li>
+<li>You should see three properties: <span style="color:green">a</span>,
+    <span style="color:green">b</span> and <span style="color:green">next</span></li>
+<li>If the <span style="color:green">next</span> property is missing -> BUG</li>
+</ol>
+
+<script type="text/javascript">
+var a = {a:1, b:2, next:3};
+</script>
+  
+</body>
+</html>

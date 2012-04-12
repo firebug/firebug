@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #601</title>
+</head>
+<body>
+
+<h1>Issue #601</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=601">Issue #601</a>
+- <span class="h3">XHR in console shows stale/cached output</span>.
+
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Use the <i>POST</i> button to post data to a server (it will generate XMLHttpRequests).</li>
+<li>The posted data will be displayed here: <span id="postData" style="font-weight:bold"/></li>
+<li>Open Console panel or Net panel and see the XHR entry.</li>
+<li>Open the XHR entry and see the Response tab.</li>
+
+<li>The tab should display the same response as here: 
+    <span id="responseData" style="color:green">{response must be displayed here}</span></li>
+</ol>
+
+<button id="testButton" onclick="postRequest()">POST</button>
+
+<p><i>As soon as the user opens the Response tab (of the appropriate XHR entry)
+additional request is made. This requst doesn't use the original post data,
+so the response may be different.</i></p>
+
+<script type="text/javascript">
+function postRequest(postData, callback)
+{
+    try
+    {
+        if (!postData)
+        {
+            var date = (new Date()).toUTCString();
+            postData = "date=" + date;
+        }
+
+        var postElement = document.getElementById("postData");
+        postElement.innerHTML = postData;
+
+        var request = new XMLHttpRequest();
+        request.open("POST", "issue601.php", true);
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setRequestHeader("Content-Length", postData.length);
+
+        request.onreadystatechange = function()
+        {
+            if (request.readyState == 4 && request.status == 200)
+            {
+                var responseElement = document.getElementById("responseData");
+                responseElement.innerHTML = request.responseText;
+
+                if (callback) {
+                    setTimeout(function() {
+                        callback(request);
+                    }, 300);
+                }
+            }
+        }
+
+        request.send(postData);
+    }
+    catch (err)
+    {
+        alert("Error initializing XMLHttpRequest.\n" + err);
+    }
+}
+</script>
+  
+</body>
+</html>

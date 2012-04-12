@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://global/skin/findBar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://fbtest/skin/testConsole.css"?>
+<?xml-stylesheet href="chrome://fbtest/content/bindings.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        id="TestConsole"
+        windowtype="FBTestConsole"
+        title="Firebug Test Console"
+        width="640" height="480"
+        screenX="10" screenY="10"
+        persist="screenX screenY width height sizemode">
+
+    <!-- Firefox -->
+    <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+    <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
+
+    <!-- Firebug -->
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/moduleConfig.js"/>
+
+    <script type="application/x-javascript" src="resource://firebug/require.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/main.js"/>
+
+    <!-- FBTest -->
+    <script type="application/x-javascript" src="chrome://fbtest/content/jsdiff.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testCore.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testResultRep.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testListRep.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testRunner.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testConsole.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testLogger.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testCouchUploader.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/notify.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/testListLoader.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/propTree.js"/>
+
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
+        <stringbundle id="strings_fbtest" src="chrome://fbtest/locale/fbtest.properties"/>
+        <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
+    </stringbundleset>
+
+    <commandset id="mainCommandSet">
+        <command id="cmd_runAll" oncommand="FBTestApp.TestConsole.onRunAll()"/>
+        <command id="cmd_stopTest" oncommand="FBTestApp.TestConsole.onStop()"/>
+        <command id="cmd_noTestTimeout" oncommand="FBTestApp.TestConsole.onToggleNoTestTimeout()"/>
+        <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
+        <command id="cmd_openTestList" oncommand="FBTestApp.TestConsole.onOpenTestList()"/>
+        <command id="cmd_refreshTestList" oncommand="FBTestApp.TestConsole.onRefreshTestList()"/>
+        <command id="cmd_restartFirefox" oncommand="FBTestApp.TestConsole.onRestartFirefox()"/>
+        <command id="cmd_randomTestSelection" oncommand="FBTestApp.TestConsole.onToggleRandomTestSelection()"/>
+        <command id="cmd_close" oncommand="window.close()" />
+        <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
+        <command id="cmd_findAgain" oncommand="gFindBar.onFindAgainCmd();"/>
+        <command id="cmd_findPrevious" oncommand="gFindBar.onFindPreviousCmd();"/>
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_find" key="f" command="cmd_find" modifiers="accel"/>
+        <key id="key_runAll" key="l" command="cmd_runAll" modifiers="accel"/>
+        <key id="key_close"  key="w" command="cmd_close" modifiers="accel"/>
+    </keyset>
+
+    <toolbox id="taskPlace">
+        <!-- Bar with testList.html URL (e.g. chrome://firebug/content/testList.html -->
+        <toolbar id="testListUrlBar" class="testURLBar fbInternational" align="center"
+            autocompletesearch="FBTestHistory" disablePicker="false"
+            coollapsed="false" label="fbtest.urlbar.label.Test List"
+            barTooltiptext="fbtest.urlbar.tooltip.Test_List_URL"
+            pickerTooltiptext="fbtest.cmd.tip.Browse For Test List"/>
+
+        <!-- Bar with test cases root URL (e.g. https://getfirebug.com/tests/content/) -->
+        <toolbar id="testCaseUrlBar" class="testURLBar fbInternational" align="center"
+            autocompletesearch="FBTestCaseHistory" disablePicker="true"
+            collapsed="true" label="fbtest.urlbar.label.Test_Cases"
+            barTooltiptext="fbtest.urlbar.tooltip.Test_Cases_URL"/>
+
+        <!-- Bar with test drivers root URL (e.g. https://getfirebug.com/tests/content/) -->
+        <toolbar id="testDriverUrlBar" class="testURLBar fbInternational" align="center"
+            autocompletesearch="FBTestDriverHistory" disablePicker="false"
+            collapsed="true" label="fbtest.urlbar.label.Test_Drivers"
+            barTooltiptext="fbtest.urlbar.tooltip.Test_Drivers_URL"/>
+    </toolbox>
+
+    <toolbox id="testDriverToolbox">
+        <toolbar id="testDriverToolbar" align="center"> <!--  context="consoleToolbarContextMenu" -->
+
+            <toolbarbutton id="runAll" type="menu-button"
+                orient="horizontal"
+                label="fbtest.cmd.Run All" class="toolbar-image-button fbInternational"
+                tooltiptext="fbtest.cmd.tip.Run All Tests"
+                command="cmd_runAll">
+                <menupopup onpopupshowing="FBTestApp.TestConsole.onOptionsShowing(this)">
+                    <menuitem id="randomTestSelection"
+                        label="fbtest.cmd.Random Test Selection"
+                        class="menuitem-iconic fbInternational"
+                        option="randomTestSelection"
+                        tooltiptext="fbtest.cmd.tip.Random_Test_Selection"
+                        command="cmd_randomTestSelection"/>
+                </menupopup>
+            </toolbarbutton>
+            <toolbarbutton id="stopTest"
+                label="fbtest.cmd.Stop" class="toolbar-image-button fbInternational"
+                tooltiptext="fbtest.cmd.tip.Stop"
+                command="cmd_stopTest"/>
+            <toolbarbutton id="noTestTimeout"
+                label="fbtest.cmd.noTestTimeout" class="toolbar-image-button fbInternational"
+                tooltiptext="fbtest.cmd.tip.noTestTimeout"
+                command="cmd_noTestTimeout"/>
+
+            <toolbarseparator id="FBTestButtons_end" flex="1"/>
+
+            <toolbarbutton id="testToolsMenu"
+                class="toolbar-text-button fbInternational"
+                label="fbtest.cmd.Tools"
+                tooltiptext="fbtest.cmd.tip.Tools"
+                type="menu">
+                <menupopup>
+                    <menuitem id="restartFirefox"
+                        label="fbtest.cmd.Restart" class="menuitem-iconic fbInternational"
+                        tooltiptext="fbtest.cmd.tip.Restart"
+                        command="cmd_restartFirefox"/>
+                    <menuitem id="refreshList"
+                        label="fbtest.cmd.Refresh" class="menuitem-iconic fbInternational"
+                        tooltiptext="fbtest.cmd.Refresh"
+                        command="cmd_refreshTestList"/>
+                </menupopup>
+            </toolbarbutton>
+
+        </toolbar>
+    </toolbox>
+
+    <!--<menupopup id="consoleToolbarContextMenu"
+        onpopupshowing="FBTestApp.TestConsole.onViewToolbarsPopupShowing(event);">
+        <menuitem id="menu_showTestListURLBar" type="checkbox" checked="true" class="fbInternational"
+            label="fbtest.urlbar.name.Test List URL Bar" toolbar="testListUrlBar"
+            oncommand="FBTestApp.TestConsole.showURLBar(event)"/>
+        <menuitem id="menu_showTestCaseURLBar" type="checkbox" checked="false" class="fbInternational"
+            label="fbtest.urlbar.name.Test Cases URL Bar" toolbar="testCaseUrlBar"
+            oncommand="FBTestApp.TestConsole.showURLBar(event)"/>
+        <menuitem id="menu_showTestDriverURLBar" type="checkbox" checked="false" class="fbInternational"
+            label="fbtest.urlbar.name.Test Drivers URL Bar" toolbar="testDriverUrlBar"
+            oncommand="FBTestApp.TestConsole.showURLBar(event)"/>
+    </menupopup>-->
+
+    <popupset id="mainPopupSet">
+        <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);" />
+        <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
+    </popupset>
+
+    <hbox flex="3">
+        <vbox flex="3">
+            <!-- The type must be set to content in order to see the scroll bar for
+                pages like e.g. swarm (it was cotent-primary before) -->
+            <browser id="taskBrowser" src="" flex="1" type="content"
+                disablehistory="true" contextmenu="fbContextMenu"
+                tooltip="fbTooltip"/>
+
+            <findbar id="FindToolbar" browserid="taskBrowser"/>
+        </vbox>
+    </hbox>
+
+    <splitter id="testConsoleSplitter" state="open" collapse="after" resizeBefore="closest"
+        resizeAfter="closest" persist="state substate"/>
+
+    <!-- Test frame, all tests are launched as frames within this frame -->
+    <hbox>
+        <vbox flex="1">
+            <browser disablehistory="true" id="testFrame" flex="1"
+                src="chrome://fbtest/content/testFrame.html" />
+        </vbox>
+    </hbox>
+
+    <!-- Status bar info -->
+    <statusbar id="statusBar" context="statusBarContextMenu">
+        <label id="testCount" tooltiptext="fbtest.tooltip.TestCount" class="fbInternational"/>
+        <label id="passingTests" tooltiptext="fbtest.tooltip.Passing" class="fbInternational"/>
+        <label id="failingTests" tooltiptext="fbtest.tooltip.Failing" class="fbInternational"/>
+        <label id="todoTests" tooltip="todoTestsTooltip"/>
+        <tooltip id="todoTestsTooltip" onpopupshowing="return FBTestApp.TestSummary.onTodoShowTooltip(this)"/>
+        <label id="progressMessage" crop="end" flex="1" />
+        <progressmeter id="progressMeter" mode="determined"/>
+    </statusbar>
+
+    <!-- Status bar context menu -->
+    <menupopup id="statusBarContextMenu"
+        onpopupshowing="return FBTestApp.TestConsole.onStatusBarPopupShowing(event);">
+        <menuitem id="menu_hidePassingTests" type="checkbox" checked="false"
+            label="fbtest.contextmenu.label.Hide Passing Tests" class="fbInternational"
+            oncommand="FBTestApp.TestConsole.hidePassingTests(event)"/>
+        <menuitem id="menu_uploadTestResults"
+            label="fbtest.contextmenu.label.Submit Test Results" class="fbInternational"
+            oncommand="FBTestApp.TestCouchUploader.onUpload()"/>
+    </menupopup>
+</window>

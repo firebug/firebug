@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4411: No infotip for rgba, hsl and hsla CSS color values</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #content {
+              min-height: 100px;
+          }
+
+          #content div {
+              width: 100px;
+              height: 100px;
+              float: left;
+              margin-right: 10px;
+              line-height: 100px;
+              text-align: center;
+          }
+
+          #hex {
+              background-color: #8CFF8C;
+          }
+
+          #name {
+              background-color: lightgreen;
+          }
+
+          #rgb {
+              background-color: rgb(140, 255, 140);
+          }
+
+          #rgba {
+              background-color: rgba(140, 255, 140, 0.5);
+          }
+
+          #hsl {
+              background-color: hsl(120, 100%, 77%);
+          }
+
+          #hsla {
+              background-color: hsla(120, 100%, 77%, 0.5);
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4411">Issue 4411</a>: No infotip for rgba, hsl and hsla CSS color values</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="hex">hex</div>
+                <div id="name">named color</div>
+                <div id="rgb">rgb</div>
+                <div id="rgba">rgba</div>
+                <div id="hsl">hsl</div>
+                <div id="hsla">hsla</div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Switch to the CSS Panel</li>
+                    <li>
+                      Hover the values of the <code>background-color</code> styles of <code>#hex</code>, <code>#name</code>, 
+                      <code>#rgb</code>, <code>#rgba</code>, <code>#hsl</code> and <code>#hsla</code>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>Infotips should always be shown regardless of how the color was specified. Colors with alpha channel should have a background pattern to make the transparency more visible.</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

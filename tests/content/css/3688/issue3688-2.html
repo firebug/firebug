@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3688</title>
+  <link rel="stylesheet" type="text/css" href="issue3688-2.css" />
+</head>
+<body>
+
+<h1>Issue #3688</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3688">Issue #3688</a>
+- <span class="h3">The CSS panel is sometimes displaying styles coming from Firebug</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the CSS panel.</li>
+<li>Sinc there are not stylesheets attached to this page, there must be a warning
+displayed in the panel (something like):<br/>
+<span style="color:green">There are no rules in this stylesheet. You can create a rule for it.</span>
+</li>
+<li>Refresh the page and verify that the warning is still there.</li>
+</ol>
+
+</body>
+</html>

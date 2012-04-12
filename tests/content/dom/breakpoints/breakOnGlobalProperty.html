@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Break On Property</title>
+</head>
+<body>
+<div id="content"></div>
+
+<h1>Break On Property</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<p>This test is intended to verify <i>Break On Property</i> support within the
+HTML panel.
+</p>
+
+<ol>
+<li>Open Firebug and select the DOM panel.</li>
+<li>Right click on <code style="color:green">_testProperty</code> within the panel and pick
+<span style="color:green">Break On Property Change</span>.</li>
+<li>Click on one of the buttons below.</li>
+<li>The debugger must stop JS execution and show the source code line that caused
+the change in the DOM.</li>
+</ol>
+
+<button id="addProperty" onclick="addProperty()">Add Property</button>
+<button id="changeProperty" onclick="changeProperty()">Change Property</button>
+<button id="removeProperty" onclick="removeProperty()">Remove Property</button>
+
+<script type="text/javascript">
+var _testProperty;
+function now()
+{
+    return (new Date()).getTime();
+}
+
+function addProperty()
+{
+    _testProperty = "An initial value";
+}
+
+function changeProperty()
+{
+    _testProperty = "New Value: " + now();
+}
+
+function removeProperty()
+{
+    delete _testProperty;
+}
+
+addProperty();
+</script>
+
+<br/><br/>
+<i>Make sure <b>extensions.firebug.filterSystemURLs</b> preference is set to true.
+If not, set it and reload the page.</i>
+
+</body>
+</html>

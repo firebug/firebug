@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for DOM Storage</title>
+</head>
+<body>
+
+<h1>DOM Storage</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<ol>
+<li>Open Firebug, enable the Console panel and select the DOM panel.</li>
+<li>Click on the <code style="color:green">Clear Storage</code> button below.</li>
+<li>Refresh the page (or pick <i>Refresh</i> from DOM panel option menu).</li>
+<br/>
+<li>Verify following properties:<br/>
+<code>globalStorage</code> should display <code>0 items in Storage</code><br/>
+<code>localStorage</code> should display <code>0 items in Storage</code><br/>
+<code>sessionStorage</code> should display <code>0 items in Storage</code><br/>
+<br/>
+</li>
+<li>Switch to the Console panel and verify the log<br/>
+<code>globalStorage</code> <span style="color: green">0 items in Storage</span><br/>
+<code>localStorage</code> <span style="color: green">0 items in Storage</span><br/>
+<code>sessionStorage</code> <span style="color: green">0 items in Storage</span><br/>
+<br/>
+</li>
+<li>Switch back to the DOM panel.</li>
+<li>Click on the <code style="color:green">Init Storage</code> button below and refresh the page.</li>
+<br/>
+<li>Verify following properties:<br/>
+<code>globalStorage</code> should display <code>1 item in Storage test1="Hello1"</code><br/>
+<code>localStorage</code> should display <code>10 items in Storage item6="6", item3="3", more...</code><br/>
+<code>sessionStorage</code> should display <code>2 items in Storage issue="value1", name="item1"</code><br/>
+</li>
+<br/>
+<li>Switch to the Console panel and verify the log<br/>
+<code>globalStorage:</code> <span style="color: green">1 item in Storage test1="Hello1"</span><br/>
+<code>localStorage:</code> <span style="color: green">10 items in Storage item6="6", item3="3", item8="8", item0="0", item5="5", item2="2", item7="7", item4="4", item9="9", item1="1"</span><br/>
+<code>sessionStorage:</code> <span style="color: green">2 items in Storage issue="value1", name="item1"</span><br/>
+<br/>
+</ol>
+
+<button id="clearStorage" onclick="clearStorage()">Clear Storage</button>
+<button id="initStorage" onclick="initStorage()">Init Storage</button>
+
+<script type="text/javascript">
+function initStorage()
+{
+    // Initialize local storage
+    for (var i=0; i<10; i++)
+        localStorage.setItem("item"+i, i);
+
+
+    if (window.console)
+    {
+        console.log('length of '+localStorage.length);
+        console.log("localStorage: ", localStorage);
+    }
+
+
+    // Initialize session storage
+    sessionStorage.name = "item1";
+    sessionStorage.issue = "value1";
+
+    if (window.console)
+        console.log("sessionStorage: ", sessionStorage);
+
+    // Initialize global storage
+    globalStorage[location.hostname].test1 = "Hello1";
+
+    if (window.console)
+        console.log("globalStorage: ", globalStorage);
+}
+
+function clearStorage()
+{
+    localStorage.clear();
+
+    if (window.console)
+        console.log("localStorage: ", localStorage);
+
+    sessionStorage.clear();
+
+    if (window.console)
+        console.log("sessionStorage: ", sessionStorage);
+
+    delete globalStorage[location.hostname].test1;
+
+    if (window.console)
+        console.log("globalStorage: ", sessionStorage);
+}
+
+</script>
+
+</body>
+</html>

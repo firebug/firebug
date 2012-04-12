@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Mutation Breakpoints I.</title>
+</head>
+<body>
+<div id="content"></div>
+
+<h1>Test Case for Mutation Breakpoints</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<p>This test is intended to verify <i>Mutation Breakpoints</i> support within the
+HTML panel. This features allows to debug following mutation events:
+<ul>
+    <li><i>DOMAttrModified</i></li>
+    <li><i>DOMCharacterDataModified</i></li>
+    <li><i>DOMNodeInserted</i></li>
+    <li><i>DOMNodeRemoved</i></li>
+</ul>
+</p>
+
+<ol>
+<li>Open Firebug enable the Script panel and select the HTML panel.</li>
+<li>Click <span style="color:green">Break On Mutate </span> button in the toolbar.
+(<img src="chrome://firebug/skin/breakNextActive.png" style="vertical-align: bottom;"/>)</li>
+<li>Click the buttons below step by step.</li>
+<li>The debugger must stop JS execution and show the source code line that caused
+the change in the DOM.</li>
+</ol>
+
+<button id="breakOnAttrModified" onclick="breakOnAttrModified()">Break on Attribute Modified</button>
+<button id="breakOnNodeInserted" onclick="breakOnNodeInserted()">Break on Node Inserted</button>
+<button id="breakOnNodeRemoved" onclick="breakOnNodeRemoved()">Break on Node Removed</button>
+<button id="breakOnTextModified" onclick="breakOnTextModified()">Break on Text Modified</button>
+
+<script type="text/javascript">
+var content = document.getElementById("content");
+function breakOnAttrModified()
+{
+    var now = (new Date()).getTime();
+    content.setAttribute("test", now);
+}
+
+function breakOnTextModified()
+{
+    var now = (new Date()).getTime();
+    content.innerHTML = now;
+}
+
+function breakOnNodeInserted()
+{
+    content.appendChild(document.createElement("div"));
+}
+
+function breakOnNodeRemoved()
+{
+    if (content.firstChild)
+        content.removeChild(content.firstChild);
+    else
+        alert("You have to append a node first. Use 'Break on Node Inserted'.");
+}
+
+</script>
+
+<br/><br/>
+<h3>The test should pass two ways:</h3>
+<ol>
+<li><i>Make sure <b>extensions.firebug.filterSystemURLs</b> preference is set to true.
+If not, set it and reload the page.</i>
+</li>
+<li><i>Make sure <b>extensions.firebug.filterSystemURLs</b> preference is set to false.
+If not, set it and reload the page.</i>
+</li>
+</ol>
+</body>
+</html>

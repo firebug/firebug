@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4528: Break in non-selected tab leaves Firebug broken</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            section#output {
+                display: none;
+            }
+        </style>
+        <script type="text/javascript">
+            function breakDelayed()
+            {
+                var timeout = 3000;
+                var output = document.getElementById("output");
+                var breakDelayedButton = document.getElementById("breakDelayed")
+
+                breakDelayedButton.setAttribute("disabled", true);
+                output.style.display = "block";
+  
+                var endTime = new Date();
+                endTime = endTime.getTime() + timeout;
+                var intervalID = setInterval(function() {
+                    var now = new Date();
+                    var delta = endTime - now.getTime();
+
+                    delta = delta > 0 ? delta : 0;
+                    if (delta == 0)
+                    {
+                        clearInterval(intervalID);
+                        breakDelayedButton.removeAttribute("disabled");
+                    }
+                    output.innerHTML = "<code>debugger;</code> keyword will be triggered in " + (delta / 1000) + "ms";
+                }, 1);
+
+                setTimeout(function() {
+                    debugger;
+                }, timeout + 10);
+            }
+
+            function init()
+            {
+                var breakDelayedButton = document.getElementById("breakDelayed")
+                breakDelayedButton.addEventListener("click", breakDelayed, false);
+            }
+
+            window.addEventListener("load", init, false);
+        </script>
+    </head>
+    <body>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4528">Issue 4528</a>: Break in non-selected tab leaves Firebug broken</h1>
+        <div>
+            <section id="content">
+                <button id="breakDelayed">Break delayed</button>
+                <section id="output"></section>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Enable and switch to the <em>Script</em> panel</li>
+                    <li>Open another tab in Firefox and load <code>http://getfirebug.com</code> in it</li>
+                    <li>Open Firebug for it</li>
+                    <li>Switch back to this tab</li>
+                    <li>Click the button <em>Break delayed</em></li>
+                    <li>Before the timer runs out switch to the other tab again</li>
+                </ol>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>The break inside this tab is not influencing the <em>Script</em> panel in the second tab</li>
+                </ul>
+            </section>
+            <footer>John J. Barton, johnjbarton@johnjbarton.com</footer>
+        </div>
+    </body>
+</html>

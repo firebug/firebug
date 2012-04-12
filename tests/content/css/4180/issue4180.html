@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 4180: Incorrect background value order</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #element1 {
+              width: 100px;
+              height: 100px;
+              background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4180">Issue 4180</a>: Incorrect background value order</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>Switch to the Style side panel</li>
+                    <li>Have a look at the value of the <code>background</code> property</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li><code>#8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF) repeat scroll 0 0</code></li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 3985: Can't break on code inserted twice using iframes, in one iframe</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../templates/default/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3985">Issue 3985</a>:
+        Can't break on code inserted twice using iframes, in one iframe</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug UI and enable the Script panel, reload the page</li>
+            <li>Set a breakpoit in <code>issue3985-iframe.js</code> at line <code>3</code></li>
+            <li>Reload the page and click the button</li>
+            <li>The breakpoint must hit</li>
+        </ol>
+    </section>
+    <br/><br/>
+    <iframe id="testFrame" src="issue3985-iframe.html"></iframe>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

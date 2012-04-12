@@ -1,0 +1,30 @@
+<html>
+<head>
+<script>
+try
+{
+    console.log.apply(console, ["stock Firebug 1.8"]);
+}
+catch(exc)
+{
+    console.error("apply failed ", exc);
+}
+
+
+(function() {
+    if (window.console.__rebound__) return;
+    var firebugConsole = window.console; // save chrome object
+    // Overwrite console object with a web page privileged object having some
+    // chrome privileged methods.  That way apply/call work
+    window.console = {   // overwrite ref
+       log: Function.bind.call(firebugConsole.log, firebugConsole),
+
+       __rebound__: true,
+    };
+})();
+console.log.apply(console, ["rebound Firebug 1.8"]);
+</script>
+</head>
+<body>
+</body>
+</html>

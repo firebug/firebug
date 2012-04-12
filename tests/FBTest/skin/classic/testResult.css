@@ -1,0 +1,218 @@
+/* See license.txt for terms of usage */
+
+.testResultTable {
+    width: 100%;
+    border-left: 1px solid #EFEFEF;
+}
+
+.testResultRow {
+    background: white;
+    height:17px;
+}
+
+.testResultRow:hover {
+    background: #EFEFEF;
+}
+
+.testResultCol {
+    padding: 0;
+    vertical-align: top;
+    border-bottom: 1px solid #EFEFEF;  
+    white-space: nowrap;
+}
+
+.testResultLabel {
+    overflow: hidden;
+    min-width: 70px;
+    padding: 1px 0 2px 18px !important;
+    font-size: 11px;
+}
+
+.opened > .testResultCol > .testResultMessage {
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+}
+
+.testResultMessage {
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 2px;
+    padding-left: 18px;
+    position: absolute;
+    background-color: white;
+}
+
+.testError .testResultMessage,
+.testError .CompareTab,
+.testError.testResultSummaryLabel {
+    color: red;
+    font-weight: normal;
+}
+
+.testResultFileName {
+    color: Gray;
+    margin-right: 7px;
+    text-align: right;
+}
+
+/************************************************************************************************/
+
+/* Moving mouse over the result-message shows entire text */
+.testResultMessage:hover {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+.testResultFullMessage {
+    display: none;
+    -moz-user-select: none;
+    max-width: 100%;
+    background: #EFEFEF;
+    padding-left: 18px;
+    position: absolute;
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 2px;
+}
+
+.testResultCol:hover > .testResultFullMessage {
+    display: block;
+}
+
+/************************************************************************************************/
+
+/* Support for filtering usin showPass and showFail preferences 
+.testTable .testResultRow,
+.testTable .testResultRow {
+    display: none;
+}
+
+.testTable .testResultRow.testResultSummaryRow {
+    display: table-row !important;
+}
+
+.testTable.showPass .testResultRow.testOK {
+    display: table-row !important;
+}
+
+.testTable.showFail .testResultRow.testError {
+    display: table-row !important;
+}
+*/
+
+/************************************************************************************************/
+
+/* Summary row styles */
+.testResultSummaryRow {
+    border: none;
+    background: #BBBBBB !important;
+    font-weight: bold;
+}
+
+.testResultSummaryRow > .testResultCol {
+    border-top: 1px solid #999999;
+    border-bottom: 2px solid;
+    -moz-border-bottom-colors: #EFEFEF #999999;
+    padding-top: 1px;
+    padding-bottom: 2px;
+}
+
+.testResultSummaryLabel {
+    padding-left: 18px;
+}
+
+.summaryPass.testResultSummaryLabel {
+    color: Green;
+}
+
+/************************************************************************************************/
+
+/* Custom styles for tabView bodies */
+.tabStackBody,
+.tabCompareBody,
+.tabExceptionBody {
+    padding: 5px 0 5px 10px;
+}
+
+.testResultStackInfoBody {
+    font-size: 11px;
+}
+
+/************************************************************************************************/
+
+/* Styles for Compare tab */
+.testResultCompareInfoBody {
+    width: 100%;
+    font-size: 11px;
+}
+
+.testResultCompareTitle > TD {
+    margin-bottom: 4px;
+    border-bottom: 1px solid #D7D7D7;
+    padding-top: 8px;
+    padding-bottom: 2px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-weight: bold;
+    color: #565656;
+}
+
+.testResultCompareTitle > TD:first-child {
+    width: 100%;
+}
+
+.testResultCompareSwitch {
+    font-weight: normal !important;
+    color: #565656 !important;
+    white-space: nowrap;
+    padding-right: 7px;
+}
+
+.testResultCompareSwitch:hover {
+    cursor: pointer;
+    color: blue !important;
+    text-decoration: underline !important;
+}
+
+.testResultExpected,
+.testResultActual,
+.testResultDiff {
+    padding: 5px;
+    font-size: 11px !important;
+    font-family: Monospace;
+    color: Gray;
+}
+
+.testResultFrame {
+    border: 1px solid rgb(215, 215, 215);
+    width: 100%;
+}
+
+/************************************************************************************************/
+
+/* Styles for parse error message */
+.xmlInfoErrorMsg {
+    color: red;
+    padding-bottom: 15px;
+}
+
+.xmlInfoErrorSource {
+    color: gray;
+}
+
+/************************************************************************************************/
+
+.stackFrameLink {
+    color:blue;
+}
+
+.stackFrameLink:hover {
+    cursor:pointer;
+    text-decoration:underline;
+}
+
+/************************************************************************************************/
+
+/* Support for FBTraceConsole */ 
+.DBG_FBTEST {
+    color: rgb(255, 165, 0);
+}

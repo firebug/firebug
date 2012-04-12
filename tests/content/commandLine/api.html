@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+</head>
+<body>
+
+<h1>Command line API</h1>
+
+<p>This test-case is intended for Firebug <b>command line</b>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Execute following expressions in the command line and check the results
+    <i>'expression' -> 'result'</i>
+</li>
+<ol>
+    <li><code>$("test1") -> &lt;div id="test1"&gt;</code></li>
+    <li><code>$$(".a.c") -> [div.a, div.a]</code></li>
+    <li><code>$x("html/body/span/div[1]") -> [div.test]</code></li>
+    <li><code>dir(a) -> a: 10</code></li>
+    <li><code>dirxml($('test3')) -> &lt;div id="test3"&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code></li>
+    <li><code>keys(b) -> ["a", "name"]</code></li>
+    <li><code>values(b) -> [7, "a"]</code></li>
+    <li><code>table(a) -> Object Properties: 10 (tabular output)</code></li>
+    <li><code>$$(".a").map(function(item){return item.localName;}); -> ["div", "div", "div"]</code></li>
+    <li><code>$x(\"//div[contains(@class, 'a')]\").map -> map()</code></li>
+    <li><code>keys(b).map -> map()</code></li>
+    <li><code>values(b).map -> map()</code></li>
+    
+</ol>
+</ol>
+
+<div id="test1"></div>
+<div class="a b c d"></div>
+<div class="a c"></div>
+
+<span id="test2">
+    <div class="test"></div>
+    <div class="a"></div>
+</span>
+
+<div id="test3">
+    <div></div>
+</div>
+
+<script type="text/javascript">
+var a = {a: 10};
+var b = {a: 7};
+b.name = "a";
+</script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>Firebug Test Page HTML Wrapper</title>
+<script type="application/x-javascript" src="chrome://fbtest/content/FBTestFirebug.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/FBTestMutation.js"></script>
+<script type="application/x-javascript" src="chrome://fbtest/content/FBTestSelection.js"></script>
+<script type="application/x-javascript">
+// XPCOM
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cr = Components.results;
+
+// Backward compatibility
+FBTest.Firebug = FBTest;
+FBTestFirebug = FBTest;
+
+try
+{
+    // Helper shortcuts
+    window.FW = FBTest.FirebugWindow;   // Set by test harness
+    window.basePath = FBTest.getHTTPURLBase();
+    window.baseLocalPath = FBTest.getLocalURLBase();
+}
+catch (e)
+{
+    FBTrace.sysout("FBTest; EXCEPTION " + e, e);
+}
+</script>
+__TestIncludeURLs__
+<script type="application/x-javascript" src="__TestDriverURL__"></script>
+<style>
+body {
+  background-color: white;
+}
+</style>
+</head>
+
+<body>
+<h1 id="testTitle">Test Driver Code Loads Here</h1>
+<span id="firebugTestElement"></span>
+</body>
+
+</html>

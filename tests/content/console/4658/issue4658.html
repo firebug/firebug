@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4658: Console shows wrong file names </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../templates/default/testcase.css"
+        type="text/css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/wsdojo/dojo/dojo.js.uncompressed.js" 
+        djConfig = 'parseOnLoad: true'></script>
+</head>
+<body>
+<script type="text/javascript" >
+    dojo.require("ws.monitor.FirebugBug");
+
+    var fb;
+    dojo.addOnLoad(function(){
+        fb = new ws.monitor.FirebugBug();
+    });
+
+    function onClickButton(){
+        fb.print("clicked");
+    }
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4658">Issue 4658</a>:
+        Console shows wrong file names </h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select and enable the Console panel, reload the page.</li>
+            <li>Click this button <button id="testButton" onclick="onClickButton()">Click Me</button></li>
+            <li>There should be a log in the Console panel, location: FirebugBug.js (line 6)</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

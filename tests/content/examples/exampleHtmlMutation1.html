@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for mutation</title>
+</head>
+<body style="color:green">
+
+<h1>Test Case for mutation</h1>
+
+<p>This test-case is intended for mutation events.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the HTML panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>The action removes <code>style</code> attribute from the body element (page is not green any more).<br/>
+You should observer a highlight of the body element in the HTML view</li>
+</ol>
+
+<i>Refresh the page to repeate the test.</i>
+<br/><br/>
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    document.body.removeAttribute("style");
+}
+</script>
+  
+</body>
+</html>

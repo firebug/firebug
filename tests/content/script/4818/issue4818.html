@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4818: frame.eval fails for everthing but the newest frame of the stack</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../templates/default/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="application/javascript">
+function func1()
+{
+    var v1 = "value1";
+    func2()
+}
+
+function func2()
+{
+    var v2 = "value2";
+    debugger;
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4818">Issue 4818</a>:
+        frame.eval fails for everthing but the newest frame of the stack</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug UI, enable the Script panel, reload the page.</li>
+            <li>Click this button to break on line 20
+                <button id="testButton" onclick="func1()">Break</button></li>
+            <li>Create two new watch expressions in the <i>Watch</i> panel: <code>v1</code> and <code>v2</code></li>
+            <li>The Watch panel should show <code>v1: is not defined</code> and <code>v2: "value2"</code></li>
+            <li>Click on <code>func1</code> bread-crumb (Script panel toolbar) to change
+                the current (debug) frame.</li>
+            <li>The Watch panel should show <code>v1: "value1</code> and <code>v2: is not defined</code></li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

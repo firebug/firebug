@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Test Case for Issue #4415</title>
+<script type="text/javascript">
+function onExecuteTest()
+{
+    func1(10, 20, 30);
+}
+
+function func1(a, b , c)
+{
+    func2();
+}
+
+function func2()
+{
+    debugger;
+}
+</script>
+</head>
+<body>
+
+<h1>Issue #4415</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4415">Issue #4415</a>
+- <span class="h3">Callstack panel is broken</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable and select the Script panel, reload.</li>
+<li>Switch to the <i>Stack</i> (side) panel</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>The debugger should break at line 18</li>
+<li>The Stack panel should display 4 stack-frames.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+</body>
+</html>

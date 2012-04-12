@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 3652: CSS autocomplete is broken</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #element1 {
+              width: 100px;
+              height: 100px;
+              background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+              color: green;
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3652">Issue 3652</a>: CSS autocomplete is broken</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug and select the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>Select the <em>Style</em> side panel</li>
+                    <li>Click on the value <code>green</code> of the CSS property <code>color</code> to open the inline editor</li>
+                    <li>
+                        Press <code class="key">r</code><br/>
+                        <span class="ok">&rArr; <code>red</code> should be offered as value</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Up</code><br/>
+                        <span class="ok">&rArr; <code>royalBlue</code> should be offered as value</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Down</code><br/>
+                        <span class="ok">&rArr; <code>red</code> should be offered as value</span>
+                    </li>
+                    <li>Press <code class="key">Home</code></li>
+                    <li>
+                        Press <code class="key">Up</code><br/>
+                        <span class="ok">&rArr; <code>Purple</code> (with capital <code>P</code>) should be offered as value</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Down</code><br/>
+                        <span class="ok">&rArr; <code>Red</code> (with capital <code>R</code>) should be offered as value</span>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>
+                        There should always be suggestions when pressing
+                        <code class="key">Up</code>/<code class="key">Down</code>
+                    </li>
+                    <li>
+                        The suggestions should always represent the next value in alphabetical order
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

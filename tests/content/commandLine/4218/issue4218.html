@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4218: Command line history doesn't reset when entering duplicate command</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4218">Issue 4218</a>: Command line history doesn't reset when entering duplicate command</h1>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> side panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>1</code> and press <code class="key">Enter</code></li>
+                    <li>Type <code>2</code> and press <code class="key">Enter</code></li>
+                    <li>
+                        Press <code class="key">Up</code><br/>
+                        <span class="ok">&rArr; <code>2</code> should be shown inside the Command Line</span>
+                    </li>
+                    <li>Press <code class="key">Enter</code></li>
+                    <li>
+                        Press <code class="key">Up</code><br/>
+                        <span class="ok">&rArr; <code>2</code> should be shown inside the Command Line</span>
+                    </li>
+                </ol>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>Pressing <code class="key">Up</code> inside the Command Line should always display the last executed command</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

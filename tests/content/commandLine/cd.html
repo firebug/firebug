@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+</head>
+<body>
+
+<h1>Command line API: cd</h1>
+
+<p>This test-case is intended for command line <b>cd</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Execute following expressions in the command line and check the results
+    <i>'expression' -> 'result'</i>
+</li>
+<ol>
+    <li><code>cd(frames[0]) -> "Current window:", Window cdFrame.html]</code></li>
+    <li><code>$("test-iframe-1") -> &lt;div id="test-iframe-1"&gt;</code></li>
+    <li><code>cd(top) -> ["Current window:", Window cd.html]</code></li>
+</ol>
+</ol>
+
+<i>Special case to test: Focus the command line and reload the window
+by pressing F5 key (the command line should be still focused after reload).
+Now write <span style="color:green">cd(frames[0])</span> into it and press
+enter (make sure the command line doesn't lose the focus).
+Logged <b>Current window</b> should not be <b>undefined</b>.</i>
+
+<iframe name="testFrame" src="cdFrame.html" style="display:none" />
+
+</body>
+</html>

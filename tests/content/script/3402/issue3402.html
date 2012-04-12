@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3402</title>
+  <script type="text/javascript">
+  var FBL = {
+      escapeForSourceLine: function(str) { return str; }
+  };
+  var FBTrace = {};
+  </script>
+  <script type="text/javascript" src="domplate.js" ></script>
+</head>
+<body>
+
+<h1>Issue #3402</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3402">Issue #3402</a>
+- <span class="h3">Can't create/remove a breakpoint</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable the Script panel and reload this page.</li>
+<li>Select the Script panel and pick <i>domplate.js</i> from the location list.</li>
+<li>Create a breakpoint on line <span style="color:green">1069</span>.</li>
+<li>Select the HTML panel</li>
+<li>Swich back to the Script panel and remove the breakpoint.
+If it can't be removed -> BUG</li>
+</ol>
+
+<i>Try to open this page yet in another tab and repeat the test.</i>
+<br/><br/>
+
+<div id="content"></div>
+
+<script type="text/javascript">
+with (FBL)
+{
+    var template = domplate(
+    {
+        table:
+            TABLE({border: "1"},
+                TBODY(
+                    FOR("row", "$data.rows",
+                        TR(
+                            FOR("value", "$row.values",
+                                TD({onclick: "$onClick"},
+                                    "$value"
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+
+        onClick: function(event){
+            alert("If you see this, it works!");
+        }
+    });
+}
+
+var tableData = {
+    rows: [{
+        values: [1, 2, 3, 4]
+    }, {
+        values: [11, 22, 33, 44]
+    }, {
+        values: [111, 222, 333, 444]
+    }, ]
+};
+
+var parentNode = document.getElementById("content");
+template.table.replace({data: tableData}, parentNode, template);
+</script>
+
+</body>
+</html>

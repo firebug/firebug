@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5009: Watch side panel shows &quot;Command line closed?&quot;</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        var variable = "Hello Firebug user!"; // Just some JavaScript to see something inside the Script panel
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5009">Issue 5009</a>: Watch side panel shows &quot;Command line closed?&quot;</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Script</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Switch to the <em>Watch</em> side panel</li>
+                    <li>Click the <em>New watch expression...</em> field to add a new watch expression</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The watch expression field should be focussed and allow entering a new watch expression</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

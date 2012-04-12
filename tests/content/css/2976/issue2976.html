@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #2976</title>
+    <style type="text/css">
+        #myElement {
+            color: red;
+            font-weight: bold;
+            background-color: LightYellow;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Issue #2976</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2976">Issue #2976</a>
+- <span class="h3">Enhancement: Copy Style Declaration context menu option</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the HTML panel.</li>
+<li>Find <code style="color:green">myElem<span/>ent</code> in the panel
+(<i>/html/body/span</i>). You can use the search box.</li>
+<li>Select the element within the panel (click on it).</li>
+<li>Select the <b>Style</b> side panel. You should see one CSS rule:
+<code style="color:green">#myEl<span>em</span>ent</code>.</li>
+<li>Right click on the rule name and pick <i>Copy Style Declaration</i>.</li>
+<li>Check the clipboard, you should get:
+<pre>
+background-color: LightYellow;
+color: red;
+font-weight: bold;
+</pre>
+</li>
+</ol>
+
+<span id="myElement">Test Element</div>
+
+</body>
+</html>

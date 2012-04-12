@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #2221</title>
+</head>
+<body>
+
+<h1>Issue #2221</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2221">Issue #2221</a>
+- <span class="h3">POST variables disappear if they contain non-english characters</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Net Panel</li>
+<li>Click on the <b>Send</b> button.</li>
+<li>Expand the POST entry in the Net panel and select <b>Post</b> tab.</li>
+<li>A section <b>Parsed Parameters</b> must properly display value of the <b>param1</b>:<br/>
+    <code style="color:green">param1=<span id="preivew"></span></code></li>
+</ol>
+
+<form action="issue2221.php" method="post" target="my_target"
+    enctype="text/plain"><p>
+    param1: <input type="text" name="param1" id="param1">
+    <input type="submit" value="Send" id="userSubmit">
+</p></form>
+
+<iframe id="my_target" name="my_target" src="#" 
+    style="width:250;height:40;border:1px solid #0;"></iframe>
+<br/>
+<br/>
+
+<script type="text/javascript">
+var param1 = document.getElementById("param1");
+var preview = document.getElementById("preivew");
+preview.innerHTML = param1.value = unescape("%E5%E4%F6%FC%E9");
+</script>
+
+</body>
+</html>

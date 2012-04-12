@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script>
+</script>
+</head>
+<body>
+<h1>Test for Issue #372</h1>
+<ul>
+    <li>Open Firebug UI and enable Net panel.</li>
+</ul>
+<button id="testButton" onclick="runTest()">Execute Request</button>
+<script>
+
+function runTest()
+{
+    // Prepare test data.
+    var xml = "<root><test id=\"1\"/></root>";
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xml, "text/xml");
+
+    // Send data through XHR POST.
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue372.txt", true);
+    request.setRequestHeader("Content-Type", "text/xml;charset=utf-8;");
+    request.send(xmlDoc);
+}
+</script>
+</body>
+</html>

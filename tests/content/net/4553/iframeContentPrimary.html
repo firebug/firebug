@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head>
+      <title>Issue xxxx: Issue summary</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <link href="issueXXXX_files/testcase.css" type="text/css" rel="stylesheet">
+
+    <img src="a404.png" onerror='var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);file.initWithPath("/invalid");'>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4553">Issue 4553</a>: Net > url > HTML must be content-primary</h1>
+        </header>
+        <div>
+            <section id="content">
+                <!--
+                    All inspectable elements, form fields etc. needed to execute the test should be placed here.
+                    If you generate output via JavaScript, put it into <section id="output"></section>.
+                 -->
+                <input type="text">
+                <button>execute</button>
+                <section id="output">
+                </section>
+            </section>
+            <section id="description">
+                <!--
+                    The steps to reproduce the test case should be described here in detail.
+                    If you just have one test case, you can leave out the <h2> headline.
+                    If you want to give further information about this test case, please put
+                    it should be put inside a <p> paragraph preceding the steps to reproduce
+                    the test case.
+                 -->
+                <p>Additional information</p>
+                <h2>Case 1</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open this web page</li>
+                    <li>Open Firebug enable Net panel, reload</li>
+                    <li>Net panel > iframeContentPrimary.html > HTML tab</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>Expected Error message <b>Permission denied for &lt;moz-safe-about:blank&gt; to get property XPCComponents.classes</b></li>
+                    <li>Actual: Error message file access</li>
+                </ul>
+
+            </section>
+            <footer>
+                <!--
+                    Your name and your email address (or other contact information) should be placed here.
+                    This is important in the case we need to contact you for further reference.
+                 -->
+                &lt;Author name&gt;, &lt;email address&gt;
+            </footer>
+        </div>
+
+</body></html>

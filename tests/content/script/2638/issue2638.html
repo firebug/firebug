@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2638: Show info popup when hovering a breakpoint / execution indicator icon</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            var a = 0;
+            for (var i=0; i<10; i++)
+                a += i;
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2638">Issue 2638</a>: Show info popup when hovering a breakpoint / execution indicator icon</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Script</em> panel</li>
+                    <li>
+                        Right-click on the breakpoint column at line 10 (<code>a += i;</code>)<br/>
+                        <span class="ok">Breakpoint condition editor will be opened</span>
+                    </li>
+                    <li>Enter <code>i == 5</code> into the condition editor and hit <code class="key">Enter</code></li>
+                    <li>Hover the breakpoint inside the breakpoint column</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>A popup appears displaying the breakpoint condition</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

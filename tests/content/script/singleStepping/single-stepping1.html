@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Single Stepping 1</title>
+</head>
+<body>
+
+<script type="text/javascript" charset="utf-8">
+function onExecuteTest()
+{
+    var a = 10;
+    var b = 20;
+    var c = 30;
+    var d = a + b + c;
+}
+</script>
+
+<h1>Test Single Stepping 1</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<ol>
+<li>Open Firebug (F12) and select the Script panel.</li>
+<li>Create a breakpoint on line 14</li>
+<li>Click the <span style="color:green">Execute Test</span> button</li>
+<li>The debugger should break on line 14</li>
+<li>Step over to 15</li>
+<li>Step over to 16</li>
+<li>Step over to 17 -> BUG the debugger is resumed and line 17 can't be reached</li>
+</ol>
+
+<button id="testButton" type="button" onClick="onExecuteTest();">Execute Test</button>
+
+</body>
+</html>

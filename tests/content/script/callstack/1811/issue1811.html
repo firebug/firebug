@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 1811: Add prettyName/displayName support to Profiler output and Stacks</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+var a = function()
+{
+    return function()
+    {
+        debugger;
+    }
+}
+
+var b = a();
+b.displayName = "customDisplayName";
+
+function onExecuteTest()
+{
+    b();
+}
+
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=1811">Issue 1811</a>:
+        Add prettyName/displayName support to Profiler output and Stacks</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Script panel</li>
+            <li>Click on this button
+                <button id="testButton" onclick="onExecuteTest()">Execute Test</button></li>
+            <li>The debugger should break at line 14</li>
+            <li>Switch to the Stack (side) panel</li>
+        </ol>
+        <br/>
+        <h3>Expected result</h3>
+        <ul>
+            <li>The stack should display following three functions:
+<pre style="color:green">
+    customDisplayName()
+    onExecuteTest()
+    onclick()
+</pre>
+            </li>
+        </ul>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com
+    </footer>
+</div>
+</body>
+</html>

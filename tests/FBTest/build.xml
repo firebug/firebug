@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+
+<!-- In order to build FBTest extension run: $ant build
+    The final xpi file should be located in a release directory -->
+<project name="fbtest" basedir="." default="build">
+
+    <!-- Properties -->
+    <property file="content/fbtest.properties"/>
+
+    <!-- Directories -->
+    <property name="build.dir" value="release"/>
+    <property name="release.dir" value="./release"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/fbtest/${VERSION}"/>
+    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/fbtest${VERSION}"/>
+
+    <available file="${GETFIREBUG}" property="deploy.dir.available"/>
+
+    <!-- echo -->
+    <target name="echo">
+        <echo message="Build directory: ${build.dir}"/>
+        <echo message="Deploy directory ${GETFIREBUG} available: ${deploy.dir.available}"/>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Build -->
+    <target name="build" depends="clean">
+
+        <!-- Copy components directory -->
+        <copy todir="${build.dir}/components">
+            <fileset dir="components">
+               <include name="*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy content directory -->
+        <copy todir="${build.dir}/content">
+            <fileset dir="content">
+               <include name="*.js"/>
+               <include name="*.css"/>
+               <include name="*.xml"/>
+               <include name="*.xul"/>
+               <include name="*.html"/>
+               <include name="*.properties"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy defaults directory -->
+        <copy todir="${build.dir}/defaults">
+            <fileset dir="defaults">
+               <include name="**/*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy locale directory -->
+        <copy todir="${build.dir}/locale">
+            <fileset dir="locale">
+               <include name="**/*.properties"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy skin directory -->
+        <copy todir="${build.dir}/skin">
+            <fileset dir="skin">
+               <include name="**/*.css"/>
+               <include name="**/*.png"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy modules directory -->
+        <copy todir="${build.dir}/modules">
+            <fileset dir="modules">
+               <include name="**/*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy extension installation files and licence.txt -->
+        <copy file="chrome.manifest" todir="${build.dir}"/>
+        <copy file="install.rdf" todir="${build.dir}"/>
+        <copy file="license.txt" todir="${build.dir}"/>
+        <copy file="update.rdf" todir="${build.dir}"/>
+
+        <!-- Update release version from fbtest.properties file -->
+        <replace file="${build.dir}/install.rdf" propertyFile="content/fbtest.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+
+        <!-- Create final fbTest.xpi file -->
+        <zip destfile="${build.dir}/fbTest-${VERSION}${RELEASE}.xpi"
+            basedir="${build.dir}" update="true" />
+
+        <!-- Generate update.rdf file -->
+        <replace file="${build.dir}/update.rdf" propertyFile="content/fbtest.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+
+        <!-- Final version message -->
+        <echo message="FBTest version: ${VERSION}${RELEASE}"/>
+
+        <!-- Deploy -->
+        <antcall target="deploy" />
+    </target>
+
+    <!-- Deploy if target available -->
+    <target name="deploy" if="deploy.dir.available">
+
+        <!-- Deploy xpi & update.rdf files -->
+        <copy file="${build.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${build.dir}/fbTest-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+    </target>
+
+    <!-- Deploy if target available -->
+    <target name="deploy-jsdoc" if="deploy.dir.available">
+
+        <!-- Deploy jsdoc -->
+        <copy todir="${deploy-jsdoc.dir}">
+            <fileset dir="${release.dir}/jsdoc"/>
+        </copy>
+
+        <echo message="JSDoc deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+    </target>
+
+    <!-- Support for generating docs from source code comments using js-doc-toolkit -->
+    <target name="jsdoc" description="Generate documentation">
+
+        <property name="jsdoc.dir" value="../../../jsdoc/"/>
+        <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
+        <property name="jsdoc-output.dir" value="${release.dir}/jsdoc/"/>
+
+        <path id="jsdoctoolkit">
+            <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
+            <fileset dir="${jsdoc.dir}" includes="*.jar"/>
+        </path>
+
+        <taskdef name="jsdoctoolkit"
+            classpathref="jsdoctoolkit"
+            classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+
+        <echo message="Generate doc from FBTest source ($svn/jsdoc/out/)."/>
+
+        <!-- Clean the output direcotory -->
+        <delete dir="${jsdoc-output.dir}"/>
+
+        <!-- Parse all source files -->
+        <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
+            template="firebug"
+            outputdir="${jsdoc-output.dir}"
+            inputdir="." />
+
+        <!-- Deploy -->
+        <antcall target="deploy-jsdoc" />
+    </target>
+</project>

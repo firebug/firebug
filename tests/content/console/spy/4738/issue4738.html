@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4738: "Open in new tab" opens wrong url when reusing XMLHttpRequest objects</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../../templates/default/testcase.css"
+            type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4738">Issue 4738</a>:
+                "Open in new tab" opens wrong url when reusing XMLHttpRequest objects</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Select and enable the <em>Console</em> panel</li>
+                    <li>Click this button:
+                        <button id="testButton" onclick="testFunction();">Execute Test</button>
+                    </li>
+                    <li>Right-click on the first request (ending with) <code>path1</code> and pick <em>Copy Location</em>.</li>
+                    <li>Check system clipboard</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The clipboard contains a URL ending with <code>path1</code></li>
+                </ul>
+            </section>
+            <footer>
+                Jan Odvarko, odvarko@gmail.com
+            </footer>
+        </div>
+    </body>
+
+<script>
+function testFunction()
+{
+    request = new XMLHttpRequest();
+    request.open('GET','/path1',true); // Must be a valid path on server!
+    request.send(false);
+    request.abort();
+    request.open('GET','/path2',true); // Must be a valid path on server!
+    request.send(false);
+}
+</script>
+
+</html>

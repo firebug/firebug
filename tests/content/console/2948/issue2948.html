@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2948</title>
+</head>
+<body>
+
+<h1>Issue #2948</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2948">Issue #2948</a>
+- <span class="h3">Console stops working (No XHR or log outputs)</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Check "Show XMLHttpRequests" via the Options Mini Menu</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below
+and verify that there is a XHR log in the Console.</li>
+<li>Click on the <code style="color:green">Open Popup</code> button and close the opened window.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button 
+and again verify that there is a new XHR log.</li>
+</ol>
+
+<button id="executeRequest" onclick="onExecuteTest()">Execute Test</button>
+<span id="response" style="color: green"></span>
+<button id="openPopup" onclick="onOpenPopup()">Open Popup</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var postData = "date=" + (new Date()).toUTCString();
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue2948.php", true);
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-Length", postData.length);
+
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+            var responseElement = document.getElementById("response");
+            responseElement.innerHTML = request.responseText;
+        }
+    }
+
+    request.send(postData);
+}
+
+function onOpenPopup()
+{
+    var popup = window.open("issue2948-popup.html", "bug", "width=500");
+
+    // Catch load event and notify possible listener (test driver).
+    popup.addEventListener("load", function()
+    {
+        var event = document.createEvent("Events");
+        event.initEvent("popup-loaded", true, false);
+        document.setUserData("popup-window", popup, null);
+        document.dispatchEvent(event)
+    }, false);
+}
+</script>
+
+</body>
+</html>

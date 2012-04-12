@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3204: console.* formatted strings print %* placeholder when surrounded by newlines</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../../templates/default/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            code {
+                white-space: pre; 
+            }
+        </style>
+        <script type="text/javascript">
+            window.addEventListener("load", function() {
+                console.log("String placeholder:\n%s", "string");
+                console.log("Number placeholder:\n%d", 1);
+                console.log("Float placeholder:\n%f", 2.0);
+                console.log("Object placeholder:\n%o", document.body);
+                console.log("Space before string placeholder:\n %s", "string");
+                console.log("Space after placeholder:\n%s ", "string");
+                console.log("%cDifferent log message style including string placeholder:\n%s", "color: #008000; background-color: #EBFFF5;", "string");
+                console.debug("Placeholder for debug info:\n%s", "debug info");
+                console.info("Placeholder for info:\n%s", "info");
+                console.warn("Placeholder for warning:\n%s", "warning");
+                console.error("Placeholder for error:\n%s", "error");
+            }, false);
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3204">Issue 3204</a>: console.* formatted strings print %* placeholder when surrounded by newlines</h1>
+        </header>
+        <div>
+            <section id="description">
+                <!--
+                    The steps to reproduce the test case should be described here in detail.
+                 -->
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The console contains 11 formatted messages and the placeholders are always replaced correctly:
+                        <code>
+String placeholder:
+string
+--------------------------------------------------
+Number placeholder:
+1
+--------------------------------------------------
+Float placeholder:
+2
+--------------------------------------------------
+Object placeholder:
+&lt;body&gt;
+--------------------------------------------------
+Space before string placeholder:
+string
+--------------------------------------------------
+Space after placeholder:
+string
+--------------------------------------------------
+Different log message style including string placeholder:
+string
+--------------------------------------------------
+Placeholder for debug info:
+debug info
+--------------------------------------------------
+Placeholder for info:
+info
+--------------------------------------------------
+Placeholder for warning:
+warning
+--------------------------------------------------
+Placeholder for error:
+error
+                        </code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

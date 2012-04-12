@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+</head>
+<body>
+
+<h1>Command line: dom</h1>
+
+<p>This test-case is intended for <b>console.assert</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ul>
+<li>Open Firebug and enable the Console panel</li>
+<li>Execute following expressions in the command line and check the results
+    <i>'expression' -> 'result'</i>
+</li>
+<ol>
+    <li><code>state = true -> true</code></li>
+    <li><code>window -> Window dom.html</code></li>
+    <li><code>document -> Document dom.html</code></li>
+    <li><code>aa -> "three"</code></li>
+    <li><code>cc -> null</code></li>
+    <li><code>dd -> 2</code></li>
+    <li><code>dd = 999 -> 999 <i style="color:green">and consequently</i> dd -> 999</code></li>
+    <li><code>set_d_val -> set_d_val(td)</code></li>
+    <li><code>set_d_val(998) -> 998</code></li>
+    <li><code>blah -> ReferenceError: blah is not defined { message="blah is not defined",  more...}</code></li>
+    <li><code>var blah = 'oink' -> >>> var blah = 'oink' <i style="color:green">and consequently</i>
+        blah -> "oink"</code></li>
+    <li><code>document.getElementsByTagName('h1')[0] -> "&lt;h1&gt;"</code></li>
+</ol>
+</ul>
+
+<i>Except of #11 the <code style="color:green">&gt;&gt;&gt; ...</code> logs are not mentioned, but also expected.</i>
+
+<script type="text/javascript">
+var state = false;
+var aa = "three";
+var bb = undefined;
+var cc = null;
+var dd = 2;
+
+function set_d_val(td) {
+    dd = td;
+    return dd;
+}
+</script>
+  
+</body>
+</html>

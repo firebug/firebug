@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Test Case for Issue #2871-b</title>
+<script type="text/javascript">
+function obj()
+{
+    var _this = this;
+    var www = 'asdasd';
+    this.ttt = 'asd';
+    this.closure = function()
+    {
+        w = www;
+        // t = _this.ttt;
+        rrr = 5;
+    }
+    setInterval(this.closure, 2000);
+}
+
+function init()
+{
+    var a = new obj();
+}
+</script>
+</head>
+<body onload="init()">
+
+<h1>Issue #2871-b</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2871">Issue #2871</a>
+- <span class="h3">Bug in watching variables defined in a javascript closure prior to function execution</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable the Script panel and reload this page.</li>
+<li>Create a breakpoint on line <span style="color:green">15</span> - in <i>issue2871-b.html</i> file.</li>
+<li>The breakpoint should hit automatically (in ~2 sec).</li>
+<li>Keep debugger halted and add a new watch expression: <code style="color:green">_this</code></li>
+<li>The Watch panel should display following value:
+<code style="color:green;font-weight:bold">Object { ttt=<span style="color:red">"asd"</span> }</code></li>
+</ol>
+
+</body>
+</html>

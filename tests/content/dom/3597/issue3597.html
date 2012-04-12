@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3597</title>
+</head>
+<body>
+
+<h1>Issue #3597</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3597">Issue #3597</a>
+- <span class="h3"> Objects turned into string have their DOM panel representation messed up</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and switch to the DOM panel.</li>
+<li>Open up all the toggles in the DOM tab for <span style="color:green">_testString</span></li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>Use the tab's option menu (next tot the <i>DOM</i> label) and pick <span style="color:green">Refresh</span>.</li>
+<li><code style="color:green">_testString</code> changes from object to string and so,
+it shouldn't display any children and should not be expandable any more.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+var _testString = {childObj: {a:5,b:4,lastItem:5}};
+
+function onExecuteTest()
+{
+    _testString = JSON.stringify(_testString);
+}
+</script>
+  
+</body>
+</html>

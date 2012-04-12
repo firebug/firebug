@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4434: autocomplete in console debugger does not recognize variables in catch block.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../templates/default/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+var myGlobal1 = "1";
+function onClick(myParam1)
+{
+    var myVar1 = 8;
+    try
+    {
+        throw "exp";
+    }
+    catch (e)
+    {
+        debugger;
+    }
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4434">Issue 4434</a>:
+        autocomplete in console debugger does not recognize variables in catch block.</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Console and Script panel, reload this page.</li>
+            <li>Press this button: <button id="testButton" onclick="onClick('test')">Click Me</button></li>
+            <li>The debugger shoul stop at line <code>21</code></li>
+            <li>Go to the console panel and make sure that autocompletion offers
+                following variables (in the commane line):<br/>
+                <code>myGlobal1</code><br/>
+                <code>myParam1</code><br/>
+                <code>myVar1</code><br/>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

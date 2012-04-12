@@ -1,0 +1,11 @@
+CACHE MANIFEST
+
+# v8
+CACHE:
+appCache.css
+appCache.js
+appCache-1.php
+
+NETWORK:
+appCache.html
+appCache-2.php

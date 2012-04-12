@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2659</title>
+</head>
+<body>
+
+<h1>Issue #2659</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2659">Issue #2659</a>
+- <span class="h3">{issue-summary}</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Reload this page.</li>
+<li>You should see <b>one</b> log in the Console panel:
+<code style="color:green">Test log for issue2659</code>.</li>
+<li>Press the <i>Persist</i> button on the toolbar</li>
+<li>Reload this page.</li>
+<li>You should see <b>two</b> log in the Console panel.</li>
+</ol>
+
+<script>
+if (window.console)
+    window.console.log("Test log for issue2659");
+</script>
+</body>
+</html>

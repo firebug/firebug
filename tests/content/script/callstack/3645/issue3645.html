@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title>Test Case for Issue #3645</title>
+</head>
+<body>
+
+<script type="text/javascript">
+function debuggerDeep()
+{
+    debuggerdeep2();
+}
+function debuggerdeep2()
+{
+    debuggerdeep3();
+}
+function debuggerdeep3()
+{
+    debugger;
+}
+</script>
+
+<h1>Issue #3645</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3645">Issue #3645</a>
+- <span class="h3">_firebugRerun and friends need to be elided from the panel status path</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable the Script panel and reload this page.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>The debugger should break.</li>
+<li>Select the <i>Stack</i> side panel. You should see following stack frames:
+<pre>
+debuggerdeep3()
+debuggerdeep2()
+debuggerDeep()
+onclick()
+</pre>
+<li>Click the <b>Rerun</b> button in the toolbar.</li>
+<li>Select the <i>Stack</i> side panel. You should see the same stack frames.</li>
+</ol>
+
+<button id="testButton" onclick="debuggerDeep();">Execute Test</button>
+
+</body>
+</html>

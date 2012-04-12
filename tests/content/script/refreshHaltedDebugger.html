@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Debugger</title>
+</head>
+<body>
+
+<h1>Refresh when FB halted in the debugger</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<ol>
+<li>Open Firebug and enable the Script panel.</li>
+<li>Refresh</li>
+<li>Press <span style="color:green">Execute Test</span> button.</li>
+<li>Firebug should stop at <i>debugger</i> keyword.</li>
+<li>Refresh</li>
+<li>Press <span style="color:green">Execute Test</span> button.</li>
+<li>Firebug should stop at <i>debugger</i> keyword. Does not -> BUG</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest() {
+    debugger;
+}
+</script>
+
+</body>
+</html>

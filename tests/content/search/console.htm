@@ -1,0 +1,34 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>DOM Walker Test</title>
+    <script type="text/javascript" src="../env.js"></script>
+    <script type="text/javascript" src="search.js"></script>
+    <script type="text/javascript">
+        function clear() {
+            FBTest.click( FW.document.getElementById( "fbConsoleButtons" ).getElementsByTagName("toolbarbutton")[0] );
+        }
+
+        openAndSelectPanel(Firebug.Console.panelName);
+
+        window.onload = function() {
+
+            clear();
+            console.log("script");
+            console.log("Script");
+            console.log("none");
+
+            executeSearch("Script" );
+
+            var logPanel = Firebug.Console.getPanel(Firebug.currentContext).panelNode;
+            FBTest.compare(
+                    logPanel.getElementsByClassName("matched").length,
+                    2,
+                    "Filter matched 2 items");
+            FBTest.testDone();
+        };
+    </script>
+</head>
+<body>
+</body>
+</html>
