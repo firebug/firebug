@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5130: Array indices are sorted alphabetically instead of numerically</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5130">Issue 5130</a>:
+        Array indices are sorted alphabetically instead of numerically</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Select and enable the Console panel</li>
+            <li>Execute following expression in the command line:<br/>
+                <code style="color:green">console.dir([0,1,2,3,4,5,6,7,8,9,10]);</code>
+            </li>
+            <li>The output should be sorted according to the index (not alphabetically).</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>
