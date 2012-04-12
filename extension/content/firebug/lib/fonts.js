@@ -40,6 +40,29 @@ Fonts.getFonts = function(node)
 }
 
 /**
+ * Retrieves all fonts used in a context, cached so that the first use is
+ * potentially slow (several seconds on the HTML5 spec), and later ones are
+ * instant but not up-to-date.
+ * @context: Context to return the fonts for
+ * @return Array of fonts
+ */
+Fonts.getFontsUsedInContext = function(context)
+{
+    if (context.fontCache)
+        return context.fontCache;
+
+    var fonts = [];
+    if (context.window)
+    {
+        var doc = context.window.document;
+        if (doc)
+            fonts = Fonts.getFonts(doc.documentElement);
+    }
+    context.fontCache = fonts;
+    return fonts;
+}
+
+/**
  * Retrieves the information about a font
  * @context: Context of the font
  * @win: Window the font is used in

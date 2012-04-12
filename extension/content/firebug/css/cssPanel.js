@@ -15,6 +15,8 @@ define([
     "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/string",
+    "firebug/lib/array",
+    "firebug/lib/fonts",
     "firebug/lib/xml",
     "firebug/lib/persist",
     "firebug/lib/system",
@@ -26,7 +28,7 @@ define([
     "firebug/css/cssModule"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Xml, Persist, System, Menu) {
+    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu) {
 
 with (Domplate) {
 
@@ -1670,18 +1672,30 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
             var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
 
-            var q = expr.charAt(0);
-            if ((propName === "font" || propName === "font-family") &&
-                expr.length > 1 && (q === '"' || q === "'"))
+            if (propName === "font" || propName === "font-family")
             {
-                keywords = keywords.slice();
-                for (var i = 0; i < keywords.length; ++i)
+                if (this.panel && this.panel.context)
                 {
-                    // Treat values starting with capital letters as font names
-                    // that can be quoted.
-                    var k = keywords[i];
-                    if (k.charAt(0).toLowerCase() !== k.charAt(0))
-                        keywords[i] = q + k + q;
+                    // Add the fonts used in this context (they might be inaccessible
+                    // for this element, but probably aren't).
+                    var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
+                    for (var i = 0; i < fonts.length; i++)
+                        ar.push(fonts[i].CSSFamilyName);
+                    keywords = Arr.merge(keywords, ar);
+                }
+
+                var q = expr.charAt(0);
+                if (expr.length > 1 && (q === '"' || q === "'"))
+                {
+                    keywords = keywords.slice();
+                    for (var i = 0; i < keywords.length; ++i)
+                    {
+                        // Treat values starting with capital letters as font names
+                        // that can be quoted.
+                        var k = keywords[i];
+                        if (k.charAt(0).toLowerCase() !== k.charAt(0))
+                            keywords[i] = q + k + q;
+                    }
                 }
             }
             return keywords;
