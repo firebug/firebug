@@ -1823,15 +1823,21 @@ function isPrototype(name)
     return (name == "prototype" || name == "__proto__");
 }
 
-function isReadOnly(obj, propName)
+function isReadOnly(object, propName)
 {
     try
     {
-        var desc = Object.getOwnPropertyDescriptor(obj, propName);
-        if (desc)
-            return !desc.writable;
+        var desc;
+        while (object)
+        {
+            desc = Object.getOwnPropertyDescriptor(object, propName);
+            if (desc)
+                break;
+            object = Object.getPrototypeOf(object);
+        }
+        return (desc && !desc.writable && !desc.set);
     }
-    catch (err)
+    catch (e)
     {
     }
 }
