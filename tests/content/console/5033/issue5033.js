@@ -24,11 +24,19 @@ function runTest()
                     FBTest.testDone("issue5033.DONE");
                 });
 
-                // Click step over three times to resume the debugger.
+                // Click step over five times to resume the debugger.
                 FBTest.waitForBreakInDebugger(null, 11, false, function()
                 {
                     FBTest.waitForBreakInDebugger(null, 12, false, function()
                     {
+                        FBTest.waitForBreakInDebugger(null, 2, false, function()
+                        {
+                            FBTest.waitForBreakInDebugger(null, 3, false, function()
+                            {
+                                FBTest.clickStepOverButton();
+                            });
+                            FBTest.clickStepOverButton();
+                        });
                         FBTest.clickStepOverButton();
                     });
                     FBTest.clickStepOverButton();
