@@ -24,8 +24,8 @@ function runTest()
 
             // Press 'Down' and verify auto-completion
             FBTest.sendShortcut("VK_DOWN");
-            FBTest.compare(/Georgia,\s*serif/, editor.value, "Property value must be 'Georgia,serif'");
-            FBTest.compare("Georgia", editor.value.substring(editor.selectionStart, editor.selectionEnd), "'Georgia' must be selected");
+            FBTest.compare(/Courier New,\s*serif/, editor.value, "Property value must be 'Courier New,serif'");
+            FBTest.compare("Courier New", editor.value.substring(editor.selectionStart, editor.selectionEnd), "'Georgia' must be selected");
 
             // Press 'Up' and verify auto-completion
             FBTest.sendShortcut("VK_UP");
