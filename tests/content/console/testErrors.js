@@ -20,7 +20,7 @@ function runTest()
 function fireTest(win, ith)
 {
     var syntaxErrorMsg = FF3p6OrLess ? "missing ; before statement" :
-        "identifier starts immediately after numeric literal";
+        /identifier starts immediately after numeric literal/;
 
     var buttons = [
         "syntaxError",
@@ -33,11 +33,11 @@ function fireTest(win, ith)
 
     var titles = [
         syntaxErrorMsg,
-        "foops is not defined",
-        "B3 is not defined",
-        "uncaught exception: hi",
-        "String contains an invalid character",
-        "Not enough arguments"
+        /foops is not defined/,
+        /B3 is not defined/,
+        /uncaught exception: hi/,
+        /String contains an invalid character/,
+        /Not enough arguments/
     ];
 
     var sources = ["2BeOrNot2Be(40)",
