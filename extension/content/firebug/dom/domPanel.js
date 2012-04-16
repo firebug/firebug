@@ -1507,6 +1507,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var rowName = getRowName(row);
             var rowObject = this.getRowObject(row);
             var rowValue = this.getRowPropertyValue(row);
+            var member = row.domObject;
 
             var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof StackFrame.StackFrame;
@@ -1554,14 +1555,18 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 tooltiptext = "dom.tip.Edit_Property";
             }
 
-            items.push(
-                "-",
-                {
-                    label: label,
-                    tooltiptext: tooltiptext,
-                    command: Obj.bindFixed(this.editProperty, this, row)
-                }
-            );
+            var readOnly = (!isWatch && !isStackFrame && member && member.readOnly);
+            if (!readOnly)
+            {
+                items.push(
+                    "-",
+                    {
+                        label: label,
+                        tooltiptext: tooltiptext,
+                        command: Obj.bindFixed(this.editProperty, this, row)
+                    }
+                );
+            }
 
             if (isWatch || (!isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
             {
@@ -1575,7 +1580,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            var member = row ? row.domObject : null;
             if (!Dom.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
