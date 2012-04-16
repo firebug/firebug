@@ -571,7 +571,7 @@ Css.getURLForStyleSheet = function(styleSheet)
     if (!styleSheet.href && !styleSheet.ownerNode)
         return null;
 
-    return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
+    return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.documentURI);
 };
 
 /**
@@ -597,10 +597,16 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     for (var i = 0; i < styleSheets.length; i++)
     {
         var curSheet = styleSheets[i];
+
         if (FBTrace.DBG_CSS)
+        {
             FBTrace.sysout("getInstanceForStyleSheet: compare href " + i +
                 " " + curSheet.href + " " + curSheet.media.mediaText + " " +
                 (curSheet.ownerNode && Xpath.getElementXPath(curSheet.ownerNode)));
+        }
+
+        if (Firebug.shouldIgnore(curSheet.ownerNode))
+            break;
 
         if (curSheet == styleSheet)
             break;

@@ -273,8 +273,9 @@ function escapeGroupsForEntities(str, lists, type)
         else
         {
             var listEntity;
-            for each (var list in lists)
+            for (var j = 0, listsLen = lists.length; j < listsLen; j++)
             {
+                var list = lists[j];
                 if (list.group != "text")
                 {
                     listEntity = entityConversionLists.normal[list.group][result];

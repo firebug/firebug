@@ -22,7 +22,7 @@
     </script>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
 
-    <script type="application/x-javascript" src="resource://firebug/require.js"/>
+    <script type="application/x-javascript" src="resource://firebug/mini-require.js"/>
     <script type="application/x-javascript" src="resource://firebug/require-debug.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/main.js"/>
 

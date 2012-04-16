@@ -442,8 +442,8 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return false;
 
-                // If nsIScriptError2 is supported and error's parent widow is available,
-                // check if it corresponds to the context.window. If not bail out to avoid
+                // If the error's parent widow is available, check if it
+                // corresponds to the context.window. If not bail out to avoid
                 // error reporting in a wrong window.
                 var errorWindow = getErrorWindow(object);
                 if (errorWindow && errorWindow != context.window)
@@ -531,8 +531,8 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                     url, object);
         }
 
-        // Use nsIScriptError2 (if available) to compare the parent window guessed by Firebug
-        // with the window produced by the new nsIScriptError2.outerWindowID
+        // Use nsIScriptError/nsIScriptError2 to compare the parent window
+        // guessed by Firebug with the window found through outerWindowID
         if (FBTrace.DBG_ERRORLOG)
         {
             var win1 = getErrorWindow(object);
@@ -857,42 +857,45 @@ function checkForUncaughtException(context, object)
  * This method should be the primary way how to find the parent window for any
  * error object.
  *
- * @param {Object} object Error object (implementing nsIScriptError2 since Fx40)
+ * @param {Object} object Error object (implementing nsIScriptError2 or nsIScriptError)
  */
 function getErrorWindow(object)
 {
     try
     {
-        // Bug 605492 introduces new API: nsIScriptError2.outerWindowID so use it
-        // if it's available.
-        var path = "no nsIScriptError2";
-        if (Ci["nsIScriptError2"])
+        // nsIScriptError2 is merged into nsIScriptError in Firefox 12 (bug
+        // 711721), so check the two interfaces in order.
+        var why;
+        if (object instanceof (Ci["nsIScriptError2"] || Ci["nsIScriptError"]))
         {
-            path = "not a nsIScriptError2";
-            if (object instanceof Ci.nsIScriptError2)
+            if (object.outerWindowID)
             {
-                path = "no outerWindowID";
-                if (object.outerWindowID)
-                {
-                    var win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
-                    path = "no getOuterWindowWithId";
-                    if (win)
-                        return win;
-                }
-
+                var win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+                if (win)
+                    return win;
+                else
+                    why = "no getOuterWindowWithId";
             }
+            else
+            {
+                why = "no outerWindowID";
+            }
+        }
+        else
+        {
+            why = "not an nsIScriptError";
         }
 
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.getErrorWindow failed " + path, object);
-
-        return null;
+            FBTrace.sysout("errors.getErrorWindow failed " + why, object);
     }
     catch (err)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.getErrorWindowl; EXCEPTION" + err, err);
+            FBTrace.sysout("errors.getErrorWindow; EXCEPTION" + err, err);
     }
+
+    return null;
 }
 
 function getExceptionContext(context, object)

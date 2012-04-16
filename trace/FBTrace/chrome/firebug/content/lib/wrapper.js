@@ -16,12 +16,12 @@ var Wrapper = {};
 
 Wrapper.getContentView = function(object)
 {
-    if (typeof(object) === 'undefined' || object == null)
+    if (typeof(object) === "undefined" || object == null)
         return false;
 
     // There is an exception when accessing StorageList.wrappedJSObject (which is
     // instance of StorageObsolete)
-    if (object instanceof window.StorageList)
+    if ("StorageList" in window && object instanceof window.StorageList)
         return false;
 
     return (object.wrappedJSObject);
@@ -35,7 +35,7 @@ Wrapper.unwrapObject = function(object)
 
     // There is an exception when accessing StorageList.wrappedJSObject (which is
     // instance of StorageObsolete)
-    if (object instanceof window.StorageList)
+    if ("StorageList" in window && object instanceof window.StorageList)
         return object;
 
     if (object.wrappedJSObject)
@@ -55,19 +55,26 @@ Wrapper.unwrapIValue = function(object, viewChrome)
         // XPCSafeJSObjectWrapper is not defined in Firefox 4.0
         // this should be the only call to getWrappedValue in firebug
         if (typeof(XPCSafeJSObjectWrapper) != "undefined")
+        {
             return XPCSafeJSObjectWrapper(unwrapped);
+        }
         else if (typeof(unwrapped) == "object")
-            return XPCNativeWrapper.unwrap(unwrapped);
-        else
-            return unwrapped;
+        {
+            var result = XPCNativeWrapper.unwrap(unwrapped);
+            if (result)
+                return result;
+        }
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("unwrapIValue FAILS for "+object+" cause: "+exc,
+        {
+            FBTrace.sysout("unwrapIValue FAILS for " + object + " cause: " + exc,
                 {exc: exc, object: object, unwrapped: unwrapped});
-        return unwrapped;
+        }
     }
+
+    return unwrapped;
 }
 
 Wrapper.unwrapIValueObject = function(scope, viewChrome)
@@ -86,13 +93,16 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
             break;
 
         if (prop.value.jsType === prop.value.TYPE_NULL) // null is an object (!)
+        {
             scopeVars[name] = null;
+        }
         else
         {
             if (!Wrapper.shouldIgnore(name))
                 scopeVars[name] = Wrapper.unwrapIValue(prop.value, viewChrome);
         }
     }
+
     return scopeVars;
 };
 

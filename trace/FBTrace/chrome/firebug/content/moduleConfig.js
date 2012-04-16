@@ -118,7 +118,8 @@ Firebug.registerExtension = function(extName, extConfig)
 
             // Refresh Firebug tab-bar to make sure that any new registered panels
             // are displayed.
-            Firebug.chrome.syncMainPanels();
+            if (Firebug.chrome)
+                Firebug.chrome.syncMainPanels();
 
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("firebug.main; Extension '" + extName + " - modules loaded!");

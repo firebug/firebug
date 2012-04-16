@@ -46,8 +46,11 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
             keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
         });
 
-        for each(var elem in this.disabledKeyElements)
+        for (var i=0; i<this.disabledKeyElements.length; i++)
+        {
+            var elem = this.disabledKeyElements[i];
             elem.removeAttribute("disabled");
+        }
 
         this.keysets = this.disabledKeyElements = null;
     },

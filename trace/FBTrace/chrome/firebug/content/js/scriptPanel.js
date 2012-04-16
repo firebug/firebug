@@ -1118,7 +1118,15 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // but we have to refresh, so do the default.
         if (!this.selectedSourceBox)
         {
-            this.navigate();
+            // If the current source-box has been deleted because it's out of sync
+            // (the victim, see above), we need to navigate again to the same URL.
+            // Otherwise the script panel would coincidentally switch to another script.
+            // (see issue 5134)
+            var object;
+            if (previousUrl)
+                object = this.context.getCompilationUnit(previousUrl);
+
+            this.navigate(object);
 
             // Restore the scroll position (issue 5111)
             if (this.selectedSourceBox)
@@ -1545,6 +1553,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Firebug.TabCacheModel.addObserver(this);
         else
             Firebug.TabCacheModel.removeObserver(this);
+
+        // If the Script is disabled make sure the BON tab flag (orange background)
+        // is properly updated.
+        Firebug.Breakpoint.updatePanelTabs(Firebug.currentContext);
     },
 
     // implements Tool
