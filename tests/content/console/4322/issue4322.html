@@ -1,33 +1,38 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Test Case for Issue #4322</title>
-</head>
-<body>
-
-<h1>Issue #4322</h1>
-
-<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4322">Issue #4322</a>
-- <span class="h3">console doesn't report errors</span>.
-<br/>
-<i>Jan Odvarko, odvarko@gmail.com</i>
-</p>
-
-<ol>
-<li>Open Firebug and enable the Console panel.</li>
-<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
-<li></li>
-<li></li>
-</ol>
-
-<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
-
-<script type="text/javascript">
-function onExecuteTest()
-{
-    var url = '../products/adddiscountitem.aspx?sid=' + getSession() + "&id="+id+ "&disclId=" + document.getElementById("dicountListId").value + '&type=' + percentageOrAmount + '&discountType=' + discountType;
-}
-</script>
-  
-</body>
+    <head>
+        <title>Issue 4322: console doesn't report errors</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function onExecuteTest()
+        {
+            var url = '../products/adddiscountitem.aspx?sid=' + getSession() + "&id="+id+ "&disclId=" + document.getElementById("dicountListId").value + '&type=' + percentageOrAmount + '&discountType=' + discountType;
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4322">Issue 4322</a>: console doesn't report errors</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Click the <em>Execute test</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The console should be cleared</li>
+                    <li>The <em>Profile</em> button should not be pressed anymore</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
 </html>
