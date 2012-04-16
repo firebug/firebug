@@ -18,9 +18,11 @@ function runTest()
 
                 if (FBTest.compare(2, rows.length, "There must be two logs"))
                 {
-                    FBTest.compare(/console.log\('hello'\)/, rows[0].textContent,
-                        "'hello' must be shown inside the Console");
-                    FBTest.compare("hello", rows[1].textContent,
+                    FBTest.compare(/console.log\('hello'\)/,
+                        rows[0].getElementsByClassName("objectBox-text").item(0).textContent,
+                        "'console.log('hello')' must be shown inside the Console");
+                    FBTest.compare("hello",
+                        rows[1].getElementsByClassName("objectBox-text").item(0).textContent,
                         "'hello' must be shown inside the Console");
                 }
 
@@ -30,9 +32,11 @@ function runTest()
 
                 if (FBTest.compare(4, rows.length, "There must be four logs"))
                 {
-                    FBTest.compare(/console.log\('hello'\)/, rows[2].textContent,
-                        "'hello' must be shown inside the Console");
-                    FBTest.compare("hello", rows[3].textContent,
+                    FBTest.compare(/console.log\('hello'\)/,
+                        rows[2].getElementsByClassName("objectBox-text").item(0).textContent,
+                        "'console.log('hello')' must be shown inside the Console");
+                    FBTest.compare("hello",
+                        rows[3].getElementsByClassName("objectBox-text").item(0).textContent,
                         "'hello' must be shown inside the Console");
                 }
 
