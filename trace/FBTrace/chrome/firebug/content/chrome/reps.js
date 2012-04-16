@@ -213,7 +213,10 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var fnText = Str.safeToString(fn);
         var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
         var anonFn  = /^function \(/.test(fnText);
-        return namedFn ? namedFn[1] : (anonFn ? "function()" : fnText);
+        var displayName = fn.displayName;
+
+        return namedFn ? namedFn[1] : (displayName ? displayName + "()" :
+            (anonFn ? "function()" : fnText));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -590,6 +593,8 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     onToggleProperties: function(event)
     {
+        Events.cancelEvent(event);
+
         var target = event.originalTarget;
         if (Css.hasClass(target, "objectBox-array"))
         {
@@ -597,10 +602,14 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
             if (Css.hasClass(target, "opened"))
+            {
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);
+            }
             else
+            {
                 Dom.clearNode(propBox);
+            }
         }
     },
 
@@ -655,7 +664,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             else if (obj instanceof Ci.nsIDOMHistory)
                 return false;
             // do this first to avoid security 1000 errors
-            else if (obj instanceof view.StorageList)
+            else if ("StorageList" in view && obj instanceof view.StorageList)
                 return false;
             // do this first to avoid exceptions
             else if (obj.toString() === "[xpconnect wrapped native prototype]")
@@ -2701,7 +2710,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof window.StorageList);
+        return ("StorageList" in window && object instanceof window.StorageList);
     },
 
     getRealObject: function(object, context)

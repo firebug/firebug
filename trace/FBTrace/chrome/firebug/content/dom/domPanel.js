@@ -436,7 +436,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             if (isArguments(object))
                 object = Arr.cloneArray(object);
 
-            if (object instanceof window.StorageList)
+            if ("StorageList" in window && object instanceof window.StorageList)
             {
                 var domain = context.window.location.hostname;
                 object = object.namedItem(domain);
@@ -566,9 +566,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
+        function sortOrdinal(a, b) { return parseInt(a.name) > parseInt(b.name) ? 1 : -1; }
 
         var members = [];
 
+        ordinals.sort(sortOrdinal);
         members.push.apply(members, ordinals);
 
         if (Firebug.showUserProps)
@@ -663,7 +665,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             }
         }
 
-        if (value instanceof window.StorageList)
+        if ("StorageList" in window && value instanceof window.StorageList)
         {
             var domain = context.window.location.hostname;
             hasChildren = value.namedItem(domain).length > 0;
@@ -1821,15 +1823,21 @@ function isPrototype(name)
     return (name == "prototype" || name == "__proto__");
 }
 
-function isReadOnly(obj, propName)
+function isReadOnly(object, propName)
 {
     try
     {
-        var desc = Object.getOwnPropertyDescriptor(obj, propName);
-        if (desc)
-            return !desc.writable;
+        var desc;
+        while (object)
+        {
+            desc = Object.getOwnPropertyDescriptor(object, propName);
+            if (desc)
+                break;
+            object = Object.getPrototypeOf(object);
+        }
+        return (desc && !desc.writable && !desc.set);
     }
-    catch (err)
+    catch (e)
     {
     }
 }

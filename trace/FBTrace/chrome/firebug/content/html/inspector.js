@@ -1691,26 +1691,31 @@ var highlighterCache =
             }
         };
 
-        var clearBoxModelCache = function(arr) {
-            var i, lineName, name, node, highlighter;
-
-            for(i = arr.length - 1; i >= 0; i--)
+        var clearBoxModelCache = function(arr)
+        {
+            var node;
+            for (var i = arr.length - 1; i >= 0; i--)
             {
-                for each (name in ["lines", "offset", "parent"])
+                var names = ["lines", "offset", "parent"];
+                for (var j=0; j<names.length; j++)
                 {
-                    if(name === "lines")
+                    var name = names[j];
+                    if (name === "lines")
                     {
-                        for each (lineName in ["bottom", "left", "top", "right"])
+                        var lineNames = ["bottom", "left", "top", "right"];
+                        for (var k=0; k<lineNames.length; k++)
                         {
+                            var lineName = lineNames[k];
                             node = arr[i].lines[lineName];
-                            if(node && node.parentNode)
+
+                            if (node && node.parentNode)
                                 node.parentNode.removeChild(node);
                         }
                     }
                     else
                     {
                         node = arr[i][name];
-                        if(node && node.parentNode)
+                        if (node && node.parentNode)
                             node.parentNode.removeChild(node);
                     }
                 }
@@ -1720,6 +1725,7 @@ var highlighterCache =
         clearBoxModelCache(this.highlighters.boxModelArr);
         clearCache(this.highlighters.frameArr);
         clearCache(this.highlighters.proxyEltArr);
+
         this.highlighters.boxModelArr=[];
         this.highlighters.frameArr=[];
         this.highlighters.proxyEltArr=[];

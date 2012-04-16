@@ -835,13 +835,22 @@ var FirebugChrome =
         {
             var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
             panelBar1.updatePanels(panelTypes);
+
+            // Upadate also BON tab flag (orange background if BON is active)
+            // every time the user changes the current tab in Firefox.
+            Firebug.Breakpoint.updatePanelTabs(Firebug.currentContext);
         }
     },
 
     syncSidePanels: function()
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("syncSidePanels "+panelBar1.selectedPanel);
+        {
+            FBTrace.sysout("chrome.syncSidePanels; main panel: " +
+                (panelBar1.selectedPanel ? panelBar1.selectedPanel.name : "no panel") +
+                ", side panel: " +
+                (panelBar2.selectedPanel ? panelBar2.selectedPanel.name : "no panel"));
+        }
 
         if (!panelBar1.selectedPanel)
             return;
@@ -871,9 +880,15 @@ var FirebugChrome =
             }
         }
         else
+        {
             panelBar2.selectPanel(null);
+        }
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("chrome.syncSidePanels; selected side panel " + panelBar1.selectedPanel);
 
         sidePanelDeck.selectedPanel = panelBar2;
+
         Dom.collapse(sidePanelDeck, !panelBar2.selectedPanel);
         Dom.collapse(panelSplitter, !panelBar2.selectedPanel);
     },
@@ -1671,7 +1686,6 @@ var FirebugChrome =
 
     appendToolbarButton: function(button, before)
     {
-        FBTrace.sysout("append Toolb button");
         var toolbar = FirebugChrome.$("fbPanelBar1-buttons");
         var element = Toolbar.createToolbarButton(toolbar, button, before);
         element.repObject = button;

@@ -570,9 +570,14 @@ StackFrame.getDisplayName = function(scope, script)
     try
     {
         if (scope)
+        {
             return Wrapper.unwrapIValue(scope).arguments.callee.displayName;
+        }
         else if (script)
-            return script.functionName;
+        {
+            var fnObj = Wrapper.unwrapIValue(script.functionObject);
+            return (fnObj && fnObj.displayName) ? fnObj.displayName : script.functionName;
+        }
     }
     catch (err)
     {
@@ -686,7 +691,7 @@ StackFrame.getArgumentsFromCallScope = function(frame)
 
 // ********************************************************************************************* //
 
-var saveShowStackTrace = {};
+var saveShowStackTrace;
 
 /**
  * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
@@ -702,7 +707,11 @@ StackFrame.suspendShowStackTrace = function()
  */
 StackFrame.resumeShowStackTrace = function()
 {
-    Firebug.showStackTrace = saveShowStackTrace;
+    if (saveShowStackTrace)
+    {
+        Firebug.showStackTrace = saveShowStackTrace;
+        delete saveShowStackTrace;
+    }
 };
 
 // ********************************************************************************************* //

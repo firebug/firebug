@@ -71,7 +71,10 @@ function $el(name, attributes, children, parent)
 
     if (parent)
     {
-        parent.appendChild(el);
+        if (attributes.position)
+            parent.insertBefore(el, parent.children[attributes.position - 1]);
+        else
+            parent.appendChild(el);
 
         // Mark to remove when Firebug is uninstalled.
         el.setAttribute("firebugRootNode", true);
@@ -85,7 +88,7 @@ function $command(id, oncommand, arg)
     // Wrap the command within a startFirebug call. If Firebug isn't yet loaded
     // this will force it to load.
     oncommand = "Firebug.GlobalUI.startFirebug(function(){" + oncommand + "})";
-    if (arg) 
+    if (arg)
         oncommand = "void function(arg){" + oncommand + "}(" + arg + ")";
 
     return $el("command", {
@@ -338,32 +341,47 @@ Firebug.GlobalUI =
 
     onMenuShowing: function(popup)
     {
-        var currPos = FirebugLoader.getPref("framePosition");
-        var detachFirebug = document.getElementById("menu_detachFirebug");
-        if (detachFirebug)
+        var collapsed = "true";
+        if (Firebug.chrome)
         {
-            detachFirebug.setAttribute("label", (currPos == "detached" ?
-                Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
+            var fbContentBox = Firebug.chrome.$("fbContentBox");
+            collapsed = fbContentBox.getAttribute("collapsed");
         }
 
+        var currPos = FirebugLoader.getPref("framePosition");
+        var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
+
         // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
-        // (use the menu, which is just showing).
         var toggleFirebug = popup.querySelector("#menu_toggleFirebug");
         if (toggleFirebug)
         {
-            var collapsed = "true";
-            if (Firebug.chrome)
-            {
-                var fbContentBox = Firebug.chrome.$("fbContentBox");
-                collapsed = fbContentBox.getAttribute("collapsed");
-            }
-
-            toggleFirebug.setAttribute("label", (collapsed == "true" ?
+            var hiddenUI = (collapsed == "true" || placement == "minimized");
+            toggleFirebug.setAttribute("label", (hiddenUI ?
                 Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
 
-            // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
-            // but just focuses the external window)
-            toggleFirebug.setAttribute("collapsed", (currPos == "detached" ? "true" : "false"));
+            toggleFirebug.setAttribute("tooltiptext", (hiddenUI ?
+                Locale.$STR("firebug.menu.tip.Open_Firebug") :
+                Locale.$STR("firebug.menu.tip.Minimize_Firebug")));
+
+            // If Firebug is detached, use "Focus Firebug Window" label
+            if (currPos == "detached" && Firebug.currentContext)
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
+                toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
+            }
+
+            // Hide "Focus Firebug Window" item if the menu is opened from within
+            // the detached Firebug window.
+            var currentLocation = toggleFirebug.ownerDocument.defaultView.top.location.href;
+            var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
+            toggleFirebug.setAttribute("collapsed", (inDetachedWindow ? "true" : "false"));
+        }
+
+        // Hide "Deactivate Firebug" menu if Firebug is not active.
+        var closeFirebug = popup.querySelector("#menu_closeFirebug");
+        if (closeFirebug)
+        {
+            closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
     },
 
@@ -479,7 +497,7 @@ Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browserOverlay.cs
  * This element (a broadcaster) is storing Firebug state information. Other elements
  * (like for example the Firebug start button) can watch it and display the info to
  * the user.
- */ 
+ */
 $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet"));
 
 // ********************************************************************************************* //
@@ -512,11 +530,35 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 // ********************************************************************************************* //
 // Global Shortcuts
 
-$key("key_toggleFirebug", "VK_F12", "", "cmd_toggleFirebug", 1);
-$key("key_toggleInspecting", "c", "accel,shift", "cmd_toggleInspecting", 2);
-$key("key_focusCommandLine", "l", "accel,shift", "cmd_focusCommandLine", 3);
-$key("key_detachFirebug", "VK_F12", "accel", "cmd_detachFirebug", 4);
-$key("key_closeFirebug", "VK_F12", "shift", "cmd_closeFirebug", 5);
+(function(globalShortcuts)
+{
+    var keyset = $("mainKeyset");
+
+    globalShortcuts.forEach(function(id)
+    {
+        var shortcut = FirebugLoader.getPref("key.shortcut." + id);
+        var tokens = shortcut.split(" ");
+        var key = tokens.pop();
+
+        var keyProps = {
+            id: "key_" + id,
+            modifiers: tokens.join(","),
+            command: "cmd_" + id,
+            position: 1
+        };
+
+        if (key.length <= 1)
+            keyProps.key = key;
+        else if (KeyEvent["DOM_"+key])
+            keyProps.keycode = key;
+
+        $el("key", keyProps, keyset);
+    });
+
+    keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
+})(["toggleFirebug", "toggleInspecting", "focusCommandLine",
+    "detachFirebug", "closeFirebug"]);
+
 
 /* Used by the global menu, but should be really global shortcuts?
 key_increaseTextSize
@@ -967,7 +1009,6 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
         command: "cmd_toggleFirebug",
         key: "key_toggleFirebug",
         label: "firebug.Firebug",
-        command: "cmd_toggleFirebug",
         iconic: "true",
         "class": "fbInternational"
     }, [firebugMenuPopup.cloneNode(true)]),
@@ -998,7 +1039,7 @@ $toolbarButton("inspector-button", {
     image: "chrome://firebug/skin/inspect.png"
 });
 
-// TODO: why contextmenu doesn't work without cloning 
+// TODO: why contextmenu doesn't work without cloning
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
     tooltiptext: "firebug.ShowFirebug",
@@ -1012,7 +1053,9 @@ $toolbarButton("firebug-button", {
 // Appends Firebug start button into Firefox toolbar automatically after installation.
 // The button is appended only once so, if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
-if (!$("firebug-button") && !FirebugLoader.getPref("toolbarCustomizationDone"))
+// toolbarpalette check is for seamonkey, where it is in the document
+if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
+    && !FirebugLoader.getPref("toolbarCustomizationDone"))
 {
     FirebugLoader.setPref("toolbarCustomizationDone", true);
 
@@ -1137,6 +1180,21 @@ var SessionObserver =
 var currentVersion = FirebugLoader.getPref("currentVersion");
 if (checkFirebugVersion(currentVersion) > 0)
     observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
+
+// ********************************************************************************************* //
+// Context Menu Workaround
+
+if (typeof(nsContextMenu) != "undefined")
+{
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+    var setTargetOriginal = nsContextMenu.prototype.setTarget;
+    nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+    {
+        setTargetOriginal.apply(this, arguments);
+        if (this.isTargetAFormControl(aNode))
+            this.shouldDisplay = true;
+    };
+}
 
 // ********************************************************************************************* //
 

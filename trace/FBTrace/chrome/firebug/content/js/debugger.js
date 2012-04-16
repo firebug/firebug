@@ -1140,6 +1140,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             var context = this.breakContext;
 
+            // If the script panel is disabled, Firebug can't break (issue 4290).
+            if (!Firebug.PanelActivation.isPanelEnabled("script"))
+                return RETURN_CONTINUE;
+
             if (FBTrace.DBG_BP || (!context && FBTrace.DBG_FBS_ERRORS))
                 FBTrace.sysout("debugger.onBreak breakContext: " +
                     (context ? context.getName() : " none!"), StackFrame.getJSDStackDump(frame));
@@ -1345,6 +1349,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         var context = this.breakContext;
         delete this.breakContext;
+
+        // If the script panel is disabled, Firebug can't break on error.
+        if (!Firebug.PanelActivation.isPanelEnabled("script"))
+            return 0;
 
         try
         {

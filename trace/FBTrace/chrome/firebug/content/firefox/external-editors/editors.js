@@ -295,8 +295,11 @@ var gUrlMappingManager = {
             "\n"
         ];
 
-        for each (var transform in this.pathTransformations)
+        for (var i = 0; i < this.pathTransformations.length; i++)
+        {
+            var transform = this.pathTransformations[i];
             val.push(transform.regexp.source, splitter, transform.filePath, '\n');
+        }
 
         val.push(splitter, "\n")
 
@@ -379,32 +382,39 @@ var gUrlMappingManager = {
         if (!this.checkHeaderRe)
             this.checkHeaderRe = /^$/
     },
+
     onTestInput: function()
     {
         var testBox = document.getElementById("test");
         var resultBox = document.getElementById("result");
         var href = testBox.value;
+
         if (this.checkHeaderRe.test(href))
         {
             resultBox.value = "firebug will send query to server";
         }
         else
         {
-            for each (var transform in this.pathTransformations)
+            for (var i = 0; i < this.pathTransformations.length; i++)
             {
+                var transform = this.pathTransformations[i];
                 if (transform.regexp.test(href))
                 {
                     var path = href.replace(transform.regexp, transform.filePath);
                     break;
                 }
             }
-            if (path) {
+
+            if (path)
+            {
                 resultBox.style.cssText = "box-shadow: 0px 0px 1.5px 1px lime;";
                 href = path;
             }
+
             resultBox.value = href.replace(/([^:\\\/])[\\\/]+/g, '$1/');
         }
     },
+
     onMainInput: function()
     {
         this.parse(document.getElementById("urlMappings").value);
