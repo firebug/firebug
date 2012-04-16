@@ -62,6 +62,18 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             theme: "chrome://firebug/skin/orion-firebug.css"
         };
 
+        // Custom shortcuts for Orion editor
+        config.keys = [{
+            action: "firebug-cmdEditor-execute",
+            code: KeyEvent.DOM_VK_RETURN,
+            accel: true,
+            callback: this.onExecute.bind(this),
+        },{
+            action: "firebug-cmdEditor-escape",
+            code: KeyEvent.DOM_VK_ESCAPE,
+            callback: this.onEscape.bind(this),
+        }];
+
         // Initialize Orion editor.
         this.parent = document.getElementById("fbCommandEditor");
         this.editor.init(this.parent, config, this.onEditorLoad.bind(this));
@@ -75,7 +87,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        this.parent.removeEventListener("keypress", this.onKeyPress);
+        this.editor.removeEventListener("keypress", this.onKeyPress);
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
 
         this.editor.destroy();
@@ -88,7 +100,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
-        this.parent.addEventListener("keypress", this.onKeyPress);
+        this.editor.addEventListener("keypress", this.onKeyPress);
 
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
@@ -102,7 +114,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Event Handlers
+    // Keyboard shortcuts
 
     onKeyPress: function(event)
     {
@@ -112,15 +124,34 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         {
             case KeyEvent.DOM_VK_RETURN:
                 if (Events.isControl(event))
-                    Firebug.CommandLine.enter(Firebug.currentContext);
+                    this.onExecute();
             break;
 
             case KeyEvent.DOM_VK_ESCAPE:
-                Firebug.CommandLine.cancel(Firebug.currentContext);
+                this.onEscape();
                 event.preventDefault();
             break;
         }
     },
+
+    onExecute: function()
+    {
+        var context = Firebug.currentContext;
+        Firebug.CommandLine.update(context);
+        Firebug.CommandLine.enter(context);
+        return true;
+    },
+
+    onEscape: function()
+    {
+        var context = Firebug.currentContext;
+        Firebug.CommandLine.update(context);
+        Firebug.CommandLine.cancel(context);
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Contex Menu
 
     onContextMenu: function(event)
     {

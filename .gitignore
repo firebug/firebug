@@ -5,6 +5,9 @@
 *.tmp
 .*.gz
 
+# Temporary files created by Eclipse
+.tmp*
+
 # Editor junk
 *.project
 /.pydevproject

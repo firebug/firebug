@@ -1,4 +1,3 @@
-/* See license.txt for terms of usage */
 
 define([
     "firebug/lib/object",
@@ -76,6 +75,16 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
     loadedContext: function(context, persistedState)
     {
         context.mutationBreakpoints.load(context);
+
+        // If there are mutation breakpoints, make sure the HTML panel
+        // is automatically created and mutation listeners registered.
+        // Mutation breakpoints should work even if the HTML panel has
+        // never been selected by the user since the page load.
+        if (!context.mutationBreakpoints.isEmpty())
+        {
+            var panel = context.getPanel("html");
+            panel.registerMutationListeners();
+        }
     },
 
     destroyContext: function(context, persistedState)
@@ -341,6 +350,62 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         return sourceElt;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    registerMutationListeners: function(win)
+    {
+        if (this.context.attachedMutation)
+            return;
+
+        this.context.attachedMutation = true;
+
+        var self = this;
+        function addListeners(win)
+        {
+            var doc = win.document;
+
+            // xxxHonza: an iframe doesn't have to be loaded yet so, do not
+            // register mutation elements in such cases since they wouldn't
+            // be removed.
+            // The listeners can be registered later in watchWindowDelayed,
+            // but it's also risky. Mutation listeners should be registered
+            // at the moment when it's clear that the window/frame has been
+            // loaded.
+            if (doc.location == "about:blank")
+                return;
+
+            Events.addEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
+            Events.addEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
+            Events.addEventListener(doc, "DOMNodeInserted", self.onMutateNode, false);
+            Events.addEventListener(doc, "DOMNodeRemoved", self.onMutateNode, false);
+        }
+
+        // If a window is specified use it, otherwise register listeners for all
+        // context windows (including the main window and all embedded iframes).
+        if (win)
+            addListeners(win);
+        else
+            Win.iterateWindows(this.context.window, addListeners);
+    },
+
+    unregisterMutationListeners: function(win)
+    {
+        var self = this;
+        function removeListeners(win)
+        {
+            var doc = win.document;
+            Events.removeEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
+            Events.removeEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
+            Events.removeEventListener(doc, "DOMNodeInserted", self.onMutateNode, false);
+            Events.removeEventListener(doc, "DOMNodeRemoved", self.onMutateNode, false);
+        }
+
+        if (win)
+            removeListeners(win);
+        else
+            Win.iterateWindows(this.context.window, removeListeners);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1077,14 +1142,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
 
-        Win.iterateWindows(this.context.window, Obj.bind(function(win)
-        {
-            var doc = win.document;
-            Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-            Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-            Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-            Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
-        }, this));
+        this.unregisterMutationListeners();
     },
 
     initializeNode: function(oldPanelNode)
@@ -1124,30 +1182,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (this.context.loaded)
         {
-            if (!this.context.attachedMutation)
-            {
-                this.context.attachedMutation = true;
-
-                Win.iterateWindows(this.context.window, Obj.bind(function(win)
-                {
-                    var doc = win.document;
-
-                    // xxxHonza: an iframe doesn't have to be loaded yet so, do not
-                    // register mutation elements in such cases since they wouldn't
-                    // be removed.
-                    // The listeners can be registered later in watchWindowDelayed,
-                    // but it's also risky. Mutation listeners should be registered
-                    // at the moment when it's clear that the window/frame has been
-                    // loaded.
-                    if (doc.location == "about:blank")
-                        return;
-
-                    Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-                    Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-                    Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-                    Events.addEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
-                }, this));
-            }
+            this.registerMutationListeners();
 
             Persist.restoreObjects(this, state);
         }
@@ -1159,20 +1194,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         delete this.infoTipURL;
 
         Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
-
-        if (this.context.attachedMutation)
-        {
-            this.context.attachedMutation = false;
-
-            Win.iterateWindows(this.context.window, Obj.bind(function(win)
-            {
-                var doc = win.document;
-                Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-                Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-                Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-                Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
-            }, this));
-        }
     },
 
     watchWindow: function(context, win)
@@ -1203,18 +1224,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         if (this.context.attachedMutation)
-        {
-            var doc = win.document;
-
-            // See HTMLPanel.show
-            if (doc.location == "about:blank")
-                return;
-
-            Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-            Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-            Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-            Events.addEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
-        }
+            this.registerMutationListeners(win);
     },
 
     unwatchWindow: function(context, win)
@@ -1236,11 +1246,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             });
         }
 
-        var doc = win.document;
-        Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-        Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-        Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-        Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
+        this.unregisterMutationListeners(win);
     },
 
     mutateDocumentEmbedded: function(win, remove)

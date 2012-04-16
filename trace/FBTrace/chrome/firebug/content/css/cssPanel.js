@@ -15,6 +15,8 @@ define([
     "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/string",
+    "firebug/lib/array",
+    "firebug/lib/fonts",
     "firebug/lib/xml",
     "firebug/lib/persist",
     "firebug/lib/system",
@@ -26,7 +28,7 @@ define([
     "firebug/css/cssModule"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Xml, Persist, System, Menu) {
+    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu) {
 
 with (Domplate) {
 
@@ -163,7 +165,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 // ********************************************************************************************* //
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
+const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
@@ -1668,20 +1670,60 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            return Css.getCSSKeywordsByProperty(nodeType, propName);
+            var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
+
+            if (propName === "font" || propName === "font-family")
+            {
+                if (this.panel && this.panel.context)
+                {
+                    // Add the fonts used in this context (they might be inaccessible
+                    // for this element, but probably aren't).
+                    var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
+                    for (var i = 0; i < fonts.length; i++)
+                        ar.push(fonts[i].CSSFamilyName);
+                    keywords = Arr.merge(keywords, ar);
+                }
+
+                var q = expr.charAt(0);
+                if (expr.length > 1 && (q === '"' || q === "'"))
+                {
+                    keywords = keywords.slice();
+                    for (var i = 0; i < keywords.length; ++i)
+                    {
+                        // Treat values starting with capital letters as font names
+                        // that can be quoted.
+                        var k = keywords[i];
+                        if (k.charAt(0).toLowerCase() !== k.charAt(0))
+                            keywords[i] = q + k + q;
+                    }
+                }
+            }
+            return keywords;
         }
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
     {
+        var propName = null;
+        if (Css.hasClass(this.target, "cssPropValue"))
+        {
+            var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+            propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
+        }
+
         var range = parseCSSValue(value, offset);
         var type = (range && range.type) || "";
         var expr = (range ? value.substring(range.start, range.end) : "");
 
-        var completion = null, selection;
+        var completion = null, selection, info;
         if (type === "int")
         {
-            var newValue = this.incrementExpr(expr, amt);
+            if (propName === "opacity")
+            {
+                info = {minValue: 0, maxValue: 1};
+                amt /= 100;
+            }
+            var newValue = this.incrementExpr(expr, amt, info);
             if (newValue !== null)
             {
                 completion = newValue;
@@ -1703,7 +1745,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            var info;
             if (type === "rgb" || type === "hsl")
             {
                 info = {};
@@ -2253,7 +2294,7 @@ function parseCSSValue(value, offset)
 
     var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
 
-    if (!type && m[8] && m[8].indexOf("gradient") != -1)
+    if (!type && m[10] && m[10].indexOf("gradient") != -1)
     {
         var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
         if (!arg)
