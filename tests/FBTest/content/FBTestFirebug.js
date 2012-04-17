@@ -1362,6 +1362,12 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
 
     // Get document of Firebug's panel.html
     var panel = chrome.getSelectedPanel();
+    if (!panel)
+    {
+        FBTest.ok(panel, "Firebug needs a selected panel!");
+        return;
+    }
+
     var doc = panel.panelNode.ownerDocument;
 
     // Complete attributes that must be set on sourceRow element.
