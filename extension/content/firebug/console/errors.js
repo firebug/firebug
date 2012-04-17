@@ -366,7 +366,17 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
-            error.correctWithStackTrace(Firebug.errorStackTrace);
+            // Firebug.errorStackTrace is set in onError (JSD hook).
+            // However it can happen that the stack trace doesn't belong to the error
+            // happening here (e.g. onError is not executed for throws).
+            // So, use the url and line number to check whether the remembered stack
+            // corresponds to what the current error says (see issue 5400).
+            // Note that this can exclude come stacks:
+            // see https://bugzilla.mozilla.org/show_bug.cgi?id=703519
+            var trace = Firebug.errorStackTrace;
+            var frame = (trace.frames && trace.frames[0]) ? trace.frames[0] : null;
+            if (frame && frame.href == error.href && frame.line == error.lineNo)
+                error.correctWithStackTrace(trace);
         }
         else if (checkForUncaughtException(context, object))
         {
