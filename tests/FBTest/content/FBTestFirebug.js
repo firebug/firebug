@@ -1039,6 +1039,12 @@ this.isPanelTabDisabled = function(name)
  */
 this.getPanel = function(name)
 {
+    if (!FW.Firebug.currentContext)
+    {
+        this.ok(FW.Firebug.currentContext, "There is no current context!");
+        return;
+    }
+
     return FW.Firebug.currentContext.getPanel(name);
 };
 
