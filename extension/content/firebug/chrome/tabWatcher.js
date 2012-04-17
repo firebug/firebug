@@ -258,13 +258,14 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
                 FBTrace.sysout("-> watchTopWindow delayShowContext id:" +
                     context.showContextTimeout, context);
 
-            if (context.browser.webProgress.isLoadingDocument && --tryAgain > 0)
+            if (context.browser && context.browser.webProgress.isLoadingDocument && --tryAgain > 0)
             {
                 this.rushShowContextTimeout(win, context, tryAgain);
                 return;
             }
 
-            if (context.window)   // Sometimes context.window is not defined ?
+            // Sometimes context.window is not defined, especially when running tests.
+            if (context.window)
             {
                 this.rushShowContext(win, context);  // calls showContext
             }

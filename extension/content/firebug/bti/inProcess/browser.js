@@ -193,8 +193,10 @@ Browser.prototype.setContextByWebApp = function(webApp, context)
 {
     var topMost = webApp.getTopMostWindow();
     if (context.window !== topMost)
-        Debug.ERROR("Browser setContextByWebApp mismatched context ",
+    {
+        FBTrace.sysout("Browser setContextByWebApp mismatched context ",
             {context: context, win: topMost});
+    }
 
     // xxxHonza: possible mem leak, the context object isn't removed from the array sometimes
     // Do not use for now (this will be used for remoting).
@@ -309,8 +311,9 @@ Browser.prototype.getTools = function()
  */
 Browser.prototype.getTool = function(name)
 {
-    if (FBTrace.DBG_ERRORS && !this.tools[name])
-        FBTrace.sysout("BTI.Browser.getTool; Unknown tool: " + name);
+    // This pollutes the FBTrace console too much.
+    //if (FBTrace.DBG_ERRORS && !this.tools[name])
+    //    FBTrace.sysout("BTI.Browser.getTool; Unknown tool: " + name);
 
     return this.tools[name];
 }

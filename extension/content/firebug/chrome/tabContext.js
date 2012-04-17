@@ -110,6 +110,12 @@ Firebug.TabContext.prototype =
 
     addSourceFile: function(sourceFile)
     {
+        if (!this.sourceFileMap)
+        {
+            FBTrace.sysout("tabContext.addSourceFile; ERROR no source map!");
+            return;
+        }
+
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
 

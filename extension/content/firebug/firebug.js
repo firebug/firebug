@@ -850,8 +850,9 @@ window.Firebug =
             Firebug.setPlacement("minimized");
             this.showBar(false);
 
-            // Focus the browser window again 
-            Firebug.currentContext.window.focus();
+            // Focus the browser window again
+            if (Firebug.currentContext)
+                Firebug.currentContext.window.focus();
         }
     },
 

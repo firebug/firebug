@@ -1181,8 +1181,16 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return type == "object" && object && object.constructor && object.constructor.toString &&
-            regexpConstructorRE.test(object.constructor.toString());
+        try
+        {
+            return type == "object" && object && object.constructor && object.constructor.toString &&
+                regexpConstructorRE.test(object.constructor.toString());
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err)
+        }
     },
 
     getSource: function(object)
