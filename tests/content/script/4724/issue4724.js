@@ -29,17 +29,17 @@ function runTest()
                                 break;
                         }
 
-                        FBTest.ok(menuItem, "'" + menuItemLabel  + "' item must be available in the context menu.");
+                        FBTest.ok(menuItem, "'" + menuItemLabel  +
+                            "' item must be available in the context menu.");
 
-                        // If the menu item isn't available close the context menu and bail out.
-                        if (!menuItem)
+                        if (menuItem)
                         {
+                            FBTest.ok(menuItem.getAttribute("checked") == "true",
+                                "Menu item must be checked");
                             contextMenu.hidePopup();
-                            return;
                         }
 
-                        FBTest.ok(menuItem.getAttribute("checked") == "true", "Menu item must be checked");
-
+                        contextMenu.hidePopup();
                         FBTest.testDone("issue4724.DONE");
                     }, 10);
                 }
@@ -48,7 +48,9 @@ function runTest()
                 contextMenu.addEventListener("popupshown", onPopupShown, false);
 
                 // Right click on line 8
-                var lineNode = FBTest.getSourceLineNode(line).getElementsByClassName("sourceRowText").item(0);
+                var lineNode = FBTest.getSourceLineNode(line).getElementsByClassName(
+                    "sourceRowText").item(0);
+
                 var eventDetails = {type: "contextmenu", button: 2};
                 FBTest.synthesizeMouse(lineNode, 2, 2, eventDetails);
             });
