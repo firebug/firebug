@@ -9,7 +9,7 @@ function runTest()
             var panel = FW.Firebug.chrome.selectPanel("script");
 
             var chrome = FW.Firebug.chrome;
-            FBTest.waitForBreakInDebugger(chrome, 20, false, function(row)
+            FBTest.waitForBreakInDebugger(chrome, 21, false, function(row)
             {
                 var doc = chrome.window.document;
                 var button = doc.getElementById("fbStepOutButton");

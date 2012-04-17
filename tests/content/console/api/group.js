@@ -33,7 +33,7 @@ function test1(callback)
             "logRow logRow-group logGroup opened")[0];
 
         FBTest.ok(FW.FBL.hasClass(group, "opened"), "The group must be opened by default");
-        var expected = /Group1\s*log\s*group.html\s*\(\w*\s*38\)\s*group.html\s*\(\w*\s*37\)/;
+        var expected = /Group1\s*log\s*group.html\s*\(\w*\s*39\)\s*group.html\s*\(\w*\s*38\)/;
         FBTest.compare(expected, group.textContent, "The group must contain one log message");
 
         callback();
@@ -63,7 +63,7 @@ function test2(callback)
             "logRow logRow-group logGroup")[0];
 
         FBTest.ok(!FW.FBL.hasClass(group, "opened"), "The group must be collapsed by default");
-        var expected = /Group2\s*log\s*group.html\s*\(\w*\s*46\)\s*group.html\s*\(\w*\s*45\)/;
+        var expected = /Group2\s*log\s*group.html\s*\(\w*\s*47\)\s*group.html\s*\(\w*\s*46\)/;
         FBTest.compare(expected, group.textContent, "The group must contain one log message");
 
         callback();

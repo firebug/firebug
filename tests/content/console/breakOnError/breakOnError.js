@@ -9,7 +9,7 @@ function runTest()
         {
             var panel = FBTest.selectPanel("console");
 
-            FBTest.waitForBreakInDebugger(null, 27, false, function(row)
+            FBTest.waitForBreakInDebugger(null, 28, false, function(row)
             {
                 // Resume debugger.
                 FBTest.clickContinueButton();

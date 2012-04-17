@@ -7,7 +7,7 @@ function runTest()
         return;
     }
 
-    var lineNo = 15;
+    var lineNo = 16;
 
     FBTest.sysout("issue2871-b.START");
     FBTest.openNewTab(basePath + "script/2871/issue2871-b.html", function(win)

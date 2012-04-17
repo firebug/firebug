@@ -13,12 +13,12 @@ function runTest()
 
             // Wait for break in debugger.
             var chrome = FW.Firebug.chrome;
-            FBTest.waitForBreakInDebugger(chrome, 25, false, function(sourceRow)
+            FBTest.waitForBreakInDebugger(chrome, 26, false, function(sourceRow)
             {
                 FBTest.progress("refreshHaltedDebugger; Halted on debugger keyword I.");
 
                 // Wait for another break.
-                FBTest.waitForBreakInDebugger(chrome, 25, false, function(sourceRow)
+                FBTest.waitForBreakInDebugger(chrome, 26, false, function(sourceRow)
                 {
                     FBTest.progress("refreshHaltedDebugger; Halted on debugger keyword II.");
                     FBTest.clickContinueButton(chrome);

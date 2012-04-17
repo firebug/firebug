@@ -10,7 +10,7 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 FBTest.compare(new RegExp("This is a debug message\\s*Object\\s*{\\s*a=1\\s*}" +
-                    FW.FBL.$STRF("Line", ["debug.html", 30]).replace(/([\\"'\(\)])/g, "\\$1")),
+                    FW.FBL.$STRF("Line", ["debug.html", 31]).replace(/([\\"'\(\)])/g, "\\$1")),
                     row.textContent, "The proper message must be displayed.");
                 FBTest.testDone("console.debug.DONE");
             });

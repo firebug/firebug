@@ -7,7 +7,7 @@ function runTest()
         return;
     }
 
-    var lineNo = 15;
+    var lineNo = 16;
     var fileName = basePath + "script/2871/issue2871.html";
 
     FBTest.sysout("issue2871.START");

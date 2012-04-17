@@ -40,7 +40,7 @@ function createBreakpoint(callback)
 function executeBreakpoint(callback, win)
 {
     // Asynchronously wait for break in debugger.
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 29, false, function(row)
+    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 30, false, function(row)
     {
         FBTest.clickContinueButton();
         callback();

@@ -9,7 +9,7 @@ function runTest()
             var panel = FW.Firebug.chrome.selectPanel("script");
             var stackPanel = FW.Firebug.chrome.selectSidePanel("callstack");
 
-            FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 18, false, function(row)
+            FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 19, false, function(row)
             {
                 var panelNode = stackPanel.panelNode;
 

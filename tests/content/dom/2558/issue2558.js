@@ -13,7 +13,7 @@ function runTest()
 
             // Wait for break in debugger.
             var chrome = FW.Firebug.chrome;
-            FBTest.waitForBreakInDebugger(chrome, 31, false, function(sourceRow)
+            FBTest.waitForBreakInDebugger(chrome, 32, false, function(sourceRow)
             {
                 FBTest.progress("issue2558; Halted on debugger keyword.");
                 FW.Firebug.chrome.selectSidePanel("watches");

@@ -8,7 +8,7 @@ function runTest()
             var panel = FW.Firebug.chrome.getSelectedPanel();
             FBTest.compare("script", panel.name, "Got selected panel " + panel.name);
 
-            var lineNo = 21;
+            var lineNo = 22;
             var fileUrl = basePath + "script/4213/issue4213.html";
             FBTest.setBreakpoint(null, fileUrl, lineNo, null, function()
             {

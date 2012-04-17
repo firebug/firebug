@@ -10,7 +10,7 @@ function runTest()
             var panel = FW.Firebug.chrome.selectPanel("script");
 
             // Asynchronously wait for break in debugger.
-            FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 18, false, function(row)
+            FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 19, false, function(row)
             {
                 var stackPanel = FW.Firebug.chrome.selectSidePanel("callstack");
                 var panelNode = stackPanel.panelNode;

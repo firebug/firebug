@@ -14,7 +14,7 @@ function runTest()
 
             // Asynchronously wait for break in debugger.
             var chrome = FW.Firebug.chrome;
-            FBTest.waitForBreakInDebugger(chrome, 21, false, function(row)
+            FBTest.waitForBreakInDebugger(chrome, 22, false, function(row)
             {
                 // TODO: test code, verify UI, etc.
 

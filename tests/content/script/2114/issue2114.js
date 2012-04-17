@@ -10,7 +10,7 @@ function runTest()
         FBTest.enableScriptPanel(function(win)
         {
             // Set a breakpoint
-            var lineNo = 31;
+            var lineNo = 32;
             FBTest.setBreakpoint(null, null, lineNo, null, function(row)
             {
                 FBTest.compare("true", row.getAttribute("breakpoint"), "Line "+lineNo+

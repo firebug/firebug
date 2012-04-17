@@ -21,7 +21,7 @@ function runTest()
 
 function executeTest(callback, win)
 {
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 18, false, function(row)
+    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 19, false, function(row)
     {
         verifyStackFrames();
         callback();
@@ -32,7 +32,7 @@ function executeTest(callback, win)
 
 function clickRerun(callback, win)
 {
-    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 18, false, function(row)
+    FBTest.waitForBreakInDebugger(FW.Firebug.chrome, 19, false, function(row)
     {
         verifyStackFrames();
         FBTest.clickContinueButton();

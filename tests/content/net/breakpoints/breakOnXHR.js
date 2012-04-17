@@ -16,13 +16,13 @@ function runTest()
             addBreakpoint(win, callback);
         });
         testSuite.push(function(callback) {
-            breakOnXHR(win, 44, callback);
+            breakOnXHR(win, 45, callback);
         });
         testSuite.push(function(callback) {
             setCondition(win, callback);
         });
         testSuite.push(function(callback) {
-            breakOnXHR(win, 44, callback);
+            breakOnXHR(win, 45, callback);
         });
         testSuite.push(function(callback) {
             removeBreakpoint(win, callback);

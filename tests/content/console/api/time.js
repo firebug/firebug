@@ -11,7 +11,7 @@ function runTest()
             {
                 //var reTextContent = /a:\s*(\d+)ms\s*time\.html\s*\(line 32\)/;
                 var reTextContent = new RegExp("a:\\s*(\\d+)ms\\s*" +
-                    FW.FBL.$STRF("Line", ["time.html", 32]).replace(/([\\"'\(\)])/g, "\\$1"))
+                    FW.FBL.$STRF("Line", ["time.html", 33]).replace(/([\\"'\(\)])/g, "\\$1"))
                 var m = row.textContent.match(reTextContent);
                 FBTest.compare(reTextContent, row.textContent, "Logged textContent must be" +
                     "something like '" + reTextContent.toString() + "'");
