@@ -2208,6 +2208,9 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             // Click on specified menu item.
             self.synthesizeMouse(menuItem);
 
+            // Make sure the context menu is closed.
+            contextMenu.hidePopup();
+
             if (callback)
             {
                 // Since the command is dispatched asynchronously,
