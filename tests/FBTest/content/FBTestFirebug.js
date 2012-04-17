@@ -824,9 +824,31 @@ this.setPanelState = function(model, panelName, callbackTriggersReload, enable)
     // Open Firebug UI
     this.pressToggleFirebug(true);
 
-    // Enable specified panel.
     var panelType = FW.Firebug.getPanelType(panelName);
-    FW.Firebug.PanelActivation.setPanelState(panelType, enable);
+    if (panelType.prototype.isEnabled() != enable)
+    {
+        var panelTab;
+
+        var doc = FW.Firebug.chrome.window.document;
+        var panelTabs = doc.getElementById("fbPanelBar1-panelTabs");
+        for (var child = panelTabs.firstChild; child; child = child.nextSibling)
+        {
+            if (panelType == child.panelType)
+            {
+                panelTab = child;
+                break;
+            }
+        }
+
+        if (!panelTab)
+            return;
+
+        // Execute directly menu commands.
+        if (enable)
+            panelTab.tabMenu.onEnable();
+        else
+            panelTab.tabMenu.onDisable();
+    }
 
     // Clear cache and reload.
     this.clearCache();
