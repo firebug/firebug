@@ -631,7 +631,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (event.keyCode === KeyEvent.DOM_VK_TAB ||
             event.keyCode === KeyEvent.DOM_VK_RETURN)
         {
-            this.stopEditing();
+            Firebug.Editor.stopEditing();
             Events.cancelEvent(event);
         }
     },
