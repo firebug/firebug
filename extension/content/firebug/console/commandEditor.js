@@ -89,7 +89,14 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        this.editor.removeEventListener("keypress", this.onKeyPress);
+        try
+        {
+            this.editor.removeEventListener("keypress", this.onKeyPress);
+        }
+        catch (err)
+        {
+        }
+
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.removeEventListener(TEXT_CHANGED, this.onTextChanged);
 
@@ -103,7 +110,15 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
-        this.editor.addEventListener("keypress", this.onKeyPress);
+        try
+        {
+            // This event is not supported in Fx11 so, catch the exception
+            // which is thrown.
+            this.editor.addEventListener("keypress", this.onKeyPress);
+        }
+        catch (err)
+        {
+        }
 
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
