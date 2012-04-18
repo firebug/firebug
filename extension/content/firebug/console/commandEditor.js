@@ -19,6 +19,7 @@ var Cu = Components.utils;
 
 var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
+var TEXT_CHANGED = "";
 
 try
 {
@@ -27,6 +28,7 @@ try
 
     MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
     CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
+    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
 }
 catch (err)
 {
@@ -89,6 +91,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         this.editor.removeEventListener("keypress", this.onKeyPress);
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
+        this.editor.removeEventListener(TEXT_CHANGED, this.onTextChanged);
 
         this.editor.destroy();
         this.editor = null;
@@ -104,6 +107,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
+        this.editor.addEventListener(TEXT_CHANGED, this.onTextChanged);
 
         this.editor.setCaretOffset(this.editor.getCharCount());
 
@@ -148,6 +152,14 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         Firebug.CommandLine.update(context);
         Firebug.CommandLine.cancel(context);
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Other Events
+
+    onTextChanged: function(event)
+    {
+        Firebug.CommandLine.onCommandLineInput(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
