@@ -593,11 +593,11 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     onToggleProperties: function(event)
     {
-        Events.cancelEvent(event);
-
         var target = event.originalTarget;
         if (Css.hasClass(target, "objectBox-array"))
         {
+            Events.cancelEvent(event);
+
             Css.toggleClass(target, "opened");
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
