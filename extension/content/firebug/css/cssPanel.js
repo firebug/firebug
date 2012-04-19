@@ -1504,7 +1504,92 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
+        if (rule instanceof window.CSSStyleRule)
+        {
+            if (Css.hasClass(target, "cssPropName"))
+            {
+  
+                if (value && previousValue != value)  // name of property has changed.
+                {
+                    // Record the original CSS text for the inline case so we can reconstruct at a later
+                    // point for diffing purposes
+                    var baseText = rule.style ? rule.style.cssText : rule.cssText;
+  
+                    propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
+                    parsedValue = parsePriority(propValue);
+  
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
+                            " = " + propValue);
+  
+                    if (propValue && propValue != "undefined")
+                    {
+                        if (FBTrace.DBG_CSS)
+                            FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
+                                " = " + propValue);
+  
+                        if (previousValue)
+                            Firebug.CSSModule.removeProperty(rule, previousValue);
+  
+                        Firebug.CSSModule.setProperty(rule, value, parsedValue.value,
+                            parsedValue.priority);
+                    }
+  
+                    Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                        previousValue, baseText]);
+                }
+                else if (!value)
+                {
+                    // name of the property has been deleted, so remove the property.
+                    Firebug.CSSModule.removeProperty(rule, previousValue);
+                }
+            }
+            else if (Dom.getAncestorByClass(target, "cssPropValue"))
+            {
+                propName = Dom.getChildByClass(row, "cssPropName").textContent;
+                propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
+  
+                if (FBTrace.DBG_CSS)
+                {
+                    FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
+                        " = "+propValue+"\n");
+                   // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
+                }
+  
+                if (value && value != "null")
+                {
+                    parsedValue = parsePriority(value);
+                    Firebug.CSSModule.setProperty(rule, propName, parsedValue.value,
+                        parsedValue.priority);
+                }
+                else if (previousValue && previousValue != "null")
+                {
+                    Firebug.CSSModule.removeProperty(rule, propName);
+                }
+            }
+  
+            if (value)
+            {
+                var saveSuccess = !!rule.style.getPropertyValue(propName || value);
+                if(!saveSuccess && !propName)
+                {
+                    propName = value.replace(/-./g, function(match)
+                    {
+                        return match[1].toUpperCase()
+                    });
+    
+                    if (propName in rule.style || propName == "float")
+                        saveSuccess = "almost";
+                }
+    
+                this.box.setAttribute("saveSuccess", saveSuccess);
+            }
+            else
+            {
+                this.box.removeAttribute("saveSuccess");
+            }
+        }
+        else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
         {
             if (FBTrace.DBG_CSS)
             {
@@ -1528,88 +1613,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 FBTrace.sysout("CSSEditor.saveEdit: @charset: " + previousValue + "->" + value);
 
             rule.encoding = value;
-        }
-        else if (Css.hasClass(target, "cssPropName"))
-        {
-
-            if (value && previousValue != value)  // name of property has changed.
-            {
-                // Record the original CSS text for the inline case so we can reconstruct at a later
-                // point for diffing purposes
-                var baseText = rule.style ? rule.style.cssText : rule.cssText;
-
-                propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-                parsedValue = parsePriority(propValue);
-
-                if (FBTrace.DBG_CSS)
-                    FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                        " = " + propValue);
-
-                if (propValue && propValue != "undefined")
-                {
-                    if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                            " = " + propValue);
-
-                    if (previousValue)
-                        Firebug.CSSModule.removeProperty(rule, previousValue);
-
-                    Firebug.CSSModule.setProperty(rule, value, parsedValue.value,
-                        parsedValue.priority);
-                }
-
-                Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
-                    previousValue, baseText]);
-            }
-            else if (!value)
-            {
-                // name of the property has been deleted, so remove the property.
-                Firebug.CSSModule.removeProperty(rule, previousValue);
-            }
-        }
-        else if (Dom.getAncestorByClass(target, "cssPropValue"))
-        {
-            propName = Dom.getChildByClass(row, "cssPropName").textContent;
-            propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-
-            if (FBTrace.DBG_CSS)
-            {
-                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
-                    " = "+propValue+"\n");
-               // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
-            }
-
-            if (value && value != "null")
-            {
-                parsedValue = parsePriority(value);
-                Firebug.CSSModule.setProperty(rule, propName, parsedValue.value,
-                    parsedValue.priority);
-            }
-            else if (previousValue && previousValue != "null")
-            {
-                Firebug.CSSModule.removeProperty(rule, propName);
-            }
-        }
-
-        if (value)
-        {
-            var saveSuccess = !!rule.style.getPropertyValue(propName || value);
-            if(!saveSuccess && !propName)
-            {
-                propName = value.replace(/-./g, function(match)
-                {
-                    return match[1].toUpperCase()
-                });
-
-                if(propName in rule.style || propName == "float")
-                    saveSuccess = "almost";
-            }
-
-            this.box.setAttribute("saveSuccess",saveSuccess);
-        }
-        else
-        {
-            this.box.removeAttribute("saveSuccess");
         }
 
         Firebug.Inspector.repaint();
