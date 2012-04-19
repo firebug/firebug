@@ -634,7 +634,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                                 TD({"class": "stackFrame"},
                                     A({"class": "stackFrameLink", onclick: "$onClickStackFrame",
                                         lineNumber: "$stack.lineNumber"},
-                                        "$stack.fileName"),
+                                        "$stack|getStackFileName"),
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")"),
                                     SPAN("&nbsp;"),
@@ -759,6 +759,21 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     stackIterator: function(message)
     {
         return message.getStackArray();
+    },
+
+    getStackFileName: function(stack)
+    {
+        var url = stack.fileName;
+
+        // Scripts loaded using loadSubScript (e.g. loaded by a module loader)
+        // Use spcific URL syntax:
+        // loader -> script URL
+        // Get the last part "script URL" in order to have meaningful URL
+        var urls = url.split("->");
+        if (urls.length == 2)
+            url = FBL.trim(urls[1]);
+
+        return url;
     },
 
     onClickStackFrame: function(event)
