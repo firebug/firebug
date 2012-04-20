@@ -57,34 +57,7 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
             if (!context.eventsMonitored)
                 context.eventsMonitored = [];
 
-            var eventTypes = [];
-            if (!types)
-            {
-                eventTypes = Events.getEventTypes();
-            }
-            else
-            {
-                if (typeof types == "string")
-                {
-                    eventTypes = Events.isEventFamily(types) ? Events.getEventTypes(types) : [types];
-                }
-                else
-                {
-                    for (var i = 0; i < types.length; ++i)
-                    {
-                        if (Events.isEventFamily(types[i]))
-                        {
-                            var familyEventTypes = Events.getEventTypes(types[i]);
-                            for (var j = 0; j < familyEventTypes.length; ++j)
-                                eventTypes.push(familyEventTypes[j]);
-                        }
-                        else
-                        {
-                            eventTypes.push(types[i]);
-                        }
-                    }
-                }
-            }
+            var eventTypes = getMonitoredEventTypes(types);
 
             if (FBTrace.DBG_EVENTS)
                 FBTrace.sysout("EventMonitor.monitorEvents", eventTypes);
@@ -100,19 +73,13 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
         }
     },
 
-    unmonitorEvents: function(object, type, context)
+    unmonitorEvents: function(object, types, context)
     {
         var eventsMonitored = context.eventsMonitored;
-        var eventTypes = [];
+        var eventTypes = getMonitoredEventTypes(types);
 
-        if (!type)
-        {
-            eventTypes = Events.getEventTypes();
-        }
-        else
-        {
-            eventTypes = [type];
-        }
+        if (FBTrace.DBG_EVENTS)
+            FBTrace.sysout("EventMonitor.unmonitorEvents", eventTypes);
 
         for (var i = 0; i < eventTypes.length; ++i)
         {
@@ -174,6 +141,43 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
         return true;
     }
 });
+
+//********************************************************************************************* //
+// Helpers
+
+function getMonitoredEventTypes(types)
+{
+    var eventTypes = [];
+    if (!types)
+    {
+        eventTypes = Events.getEventTypes();
+    }
+    else
+    {
+        if (typeof types == "string")
+        {
+            eventTypes = Events.isEventFamily(types) ? Events.getEventTypes(types) : [types];
+        }
+        else
+        {
+            for (var i = 0; i < types.length; ++i)
+            {
+                if (Events.isEventFamily(types[i]))
+                {
+                    var familyEventTypes = Events.getEventTypes(types[i]);
+                    for (var j = 0; j < familyEventTypes.length; ++j)
+                        eventTypes.push(familyEventTypes[j]);
+                }
+                else
+                {
+                    eventTypes.push(types[i]);
+                }
+            }
+        }
+    }
+
+    return eventTypes;
+}
 
 // ********************************************************************************************* //
 // Registration & Export
