@@ -1061,6 +1061,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var type;
         var monitored = EventMonitor.areEventsMonitored(elt, null, context);
+        var items = [];
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
             type = "HTML";
@@ -1073,12 +1074,13 @@ FirebugReps.Element = domplate(Firebug.Rep,
         else
             type = "XML";
 
-        var items = [
+        items.push(
         {
             label: Locale.$STRF("html.Copy_Node", [type]),
             tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
             command: Obj.bindFixed(this.copyHTML, this, elt)
-        }];
+        });
+
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
         {
             items.push(
@@ -1089,7 +1091,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
         }
 
-        return items.concat([
+        items = items.concat([
             {
                 label: "CopyXPath",
                 tooltiptext: "html.tip.Copy_XPath",
@@ -1101,7 +1103,23 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Copy_CSS_Path",
                 id: "fbCopyCSSPath",
                 command: Obj.bindFixed(this.copyCSSPath, this, elt)
-            },
+            }
+        ]);
+
+        var tag = elt.localName.toLowerCase();
+        if (tag == "script" || tag == "link" || tag == "a" || tag == "img")
+        {
+            items = items.concat([
+                "-",
+                {
+                    label: "OpenInTab",
+                    tooltiptext: "firebug.tip.Open_In_Tab",
+                    command: Obj.bindFixed(this.browseObject, this, elt, context)
+                }
+            ]);
+        }
+
+        items = items.concat([
             "-",
             {
                 label: "ShowEventsInConsole",
@@ -1120,6 +1138,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 command: Obj.bindFixed(elt.scrollIntoView, elt)
             }
         ]);
+
+        return items;
     }
 });
 
