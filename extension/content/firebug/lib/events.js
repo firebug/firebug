@@ -161,8 +161,17 @@ Events.isMiddleClick = function(event, allowKeyModifiers)
 
 Events.isRightClick = function(event, allowKeyModifiers)
 {
-
     return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
+};
+
+Events.isSingleClick = function(event)
+{
+    return event instanceof MouseEvent && event.detail == 1;
+};
+
+Events.isDoubleClick = function(event)
+{
+    return event instanceof MouseEvent && event.detail == 2;
 };
 
 Events.noKeyModifiers = function(event)

@@ -1009,7 +1009,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     onClick: function(event)
     {
-        if (Events.isLeftClick(event) && event.detail == 2)
+        if (Events.isLeftClick(event) && Events.isDoubleClick(event))
         {
             // The double-click (detail == 2) expands an HTML element, but the user must click
             // on the element itself not on the twisty.
@@ -1020,7 +1020,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (!Css.hasClass(event.target, "twisty") && !Css.hasClass(event.target, "nodeLabel"))
                 this.toggleNode(event);
         }
-        else if (Events.isAltClick(event) && event.detail == 2 && !this.editing)
+        else if (Events.isAltClick(event) && Events.isDoubleClick(event) && !this.editing)
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
