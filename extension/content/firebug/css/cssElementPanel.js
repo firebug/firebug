@@ -15,11 +15,13 @@ define([
     "firebug/lib/css",
     "firebug/lib/xpath",
     "firebug/lib/array",
+    "firebug/lib/fonts",
+    "firebug/lib/options",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -73,6 +75,14 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             DIV({"class": "cssElementRuleContainer"},
                 TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            ),
+
+        CSSFontPropValueTag:
+            SPAN({"class": "cssFontPropValue"},
+                SPAN("$otherValues"),
+                SPAN({"class": "cssFontPropBefore"}, "$before"),
+                SPAN({"class": "cssFontUsed"}, "$used"),
+                SPAN({"class": "cssFontPropAfter"}, "$after")
             )
     }),
 
@@ -105,6 +115,24 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
+
+            var props = result.getElementsByClassName("cssProp");
+
+            for (var i = 0; i < props.length; i++)
+            {
+                var prop = props[i];
+                var propName = prop.getElementsByClassName("cssPropName").item(0).textContent;
+                if (propName == "font-family" || propName == "font")
+                {
+                    var propValueElem = prop.getElementsByClassName("cssPropValue").item(0);
+                    var propValue = propValueElem.textContent;
+                    var fontParts = getFontParts(element, propValue);
+
+                    // xxxsz: Web fonts are not covered by this.
+                    // For that to work we need to react to when the fonts are loaded.
+                    this.template.CSSFontPropValueTag.replace(fontParts, propValueElem);
+                }
+            }
 
             Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
         }
@@ -602,6 +630,80 @@ function safeGetContentState(selection)
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
             FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
     }
+}
+
+function getFontForGenericFontFamily(genericFontFamily)
+{
+    var fontsDomain = "font.name."+genericFontFamily;
+
+    // xxxsz: Is there a possibility to find out the language group used for a specific page?
+    return Options.getPref(fontsDomain, "x-western");
+}
+
+function getFontParts(element, value)
+{
+    const genericFontFamilies =
+    {
+        "serif": 1,
+        "sans-serif": 1,
+        "cursive": 1,
+        "fantasy": 1,
+        "monospace": 1,
+    };
+    const reFontFamilies = new RegExp("^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
+        "x{0,2}-(small|large)|medium|larger|smaller) )(.*)$|.*");
+    var matches = reFontFamilies.exec(value);
+    var fontParts = {otherValues: "", before: "", used: "", after: ""};
+    var i = 0;
+
+    if (!matches)
+        return;
+
+    var fonts;
+    if (matches[6])
+    {
+        fontParts.otherValues = matches[1];
+        fonts = matches[6].split(",");
+    }
+    else
+    {
+        fonts = matches[0].split(",");
+    }
+
+    var usedFonts = Fonts.getFonts(element);
+    for (; i < fonts.length; ++i)
+    {
+        var font = fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase();
+        if (genericFontFamilies.hasOwnProperty(font))
+            font = getFontForGenericFontFamily(font).toLowerCase();
+
+        for (var j = 0; j < usedFonts.length; ++j)
+        {
+            if (font == usedFonts[j].CSSFamilyName.toLowerCase())
+            {
+                fontParts.used = fonts[i];
+                break;
+            }
+        }
+
+        if (fontParts.used != "")
+            break;
+
+        fontParts.before += fonts[i];
+        if (i < fonts.length-1)
+            fontParts.before += ", ";
+    }
+
+    if (i < fonts.length-1)
+        fontParts.after = ", ";
+    for (++i; i < fonts.length; ++i)
+    {
+        fontParts.after += fonts[i];
+        if (i < fonts.length-1)
+            fontParts.after += ", ";
+    }
+
+    return fontParts;
 }
 
 // ********************************************************************************************* //

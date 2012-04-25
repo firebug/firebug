@@ -37,11 +37,15 @@
 }
 
 .cssPropName {
-    color: DarkGreen;
+    color: darkgreen;
 }
 
-.cssPropValue {
-    color: DarkBlue;
+.cssPropValue, .cssFontPropValue {
+    color: darkblue;
+}
+
+.cssFontPropBefore, .cssFontPropAfter {
+    color: #787878;
 }
 
 .cssOverridden > .cssPropName,
