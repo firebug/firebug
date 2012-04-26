@@ -555,6 +555,26 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         return ret;
     },
 
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        var prop = Dom.getAncestorByClass(target, "cssProp");
+        if (prop)
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
+  
+        if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
+            propNameNode.textContent.toLowerCase() == "font-family"))
+        {
+            var prevSibling = target.previousElementSibling;
+            while (prevSibling)
+            {
+                rangeOffset += prevSibling.textContent.length;
+                prevSibling = prevSibling.previousElementSibling;
+            }
+        }
+
+        return CSSStyleSheetPanel.prototype.showInfoTip(infoTip, target, x, y, rangeParent, rangeOffset);
+    },
+
     updateContentState: function(state, remove)
     {
         if (FBTrace.DBG_CSS)
@@ -691,16 +711,16 @@ function getFontParts(element, value)
 
         fontParts.before += fonts[i];
         if (i < fonts.length-1)
-            fontParts.before += ", ";
+            fontParts.before += ",";
     }
 
     if (i < fonts.length-1)
-        fontParts.after = ", ";
+        fontParts.after = ",";
     for (++i; i < fonts.length; ++i)
     {
         fontParts.after += fonts[i];
         if (i < fonts.length-1)
-            fontParts.after += ", ";
+            fontParts.after += ",";
     }
 
     return fontParts;

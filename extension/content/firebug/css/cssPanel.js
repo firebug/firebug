@@ -1114,7 +1114,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
+        var prop = Dom.getAncestorByClass(target, "cssProp");
+        if (prop)
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
 
         if (propValue)
         {
