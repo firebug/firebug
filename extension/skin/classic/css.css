@@ -44,7 +44,7 @@
     color: darkblue;
 }
 
-.cssFontPropBefore, .cssFontPropAfter {
+.cssPropValueUnused, .cssFontPropSeparator {
     color: #787878;
 }
 

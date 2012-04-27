@@ -79,11 +79,22 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         CSSFontPropValueTag:
             SPAN({"class": "cssFontPropValue"},
-                SPAN("$otherValues"),
-                SPAN({"class": "cssFontPropBefore"}, "$before"),
-                SPAN({"class": "cssFontUsed"}, "$used"),
-                SPAN({"class": "cssFontPropAfter"}, "$after")
-            )
+                FOR("part", "$propValueParts",
+                    SPAN({"class": "$part.class"}, "$part.value"),
+                    SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
+                )
+            ),
+
+        getSeparator: function(part)
+        {
+            if (part.type == "otherProps")
+                return " ";
+
+            if (part.last)
+                return "";
+
+            return ",";
+        }
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -126,11 +137,12 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 {
                     var propValueElem = prop.getElementsByClassName("cssPropValue").item(0);
                     var propValue = propValueElem.textContent;
-                    var fontParts = getFontParts(element, propValue);
+                    var fontPropValueParts = getFontPropValueParts(element, propValue);
 
-                    // xxxsz: Web fonts are not covered by this.
-                    // For that to work we need to react to when the fonts are loaded.
-                    this.template.CSSFontPropValueTag.replace(fontParts, propValueElem);
+                    // xxxsz: Web fonts not being loaded at display time
+                    // won't be marked as used. See issue 5420.
+                    this.template.CSSFontPropValueTag.replace({propValueParts: fontPropValueParts},
+                        propValueElem);
                 }
             }
 
@@ -652,16 +664,19 @@ function safeGetContentState(selection)
     }
 }
 
-function getFontForGenericFontFamily(genericFontFamily)
+function getFontPropValueParts(element, value)
 {
-    var fontsDomain = "font.name."+genericFontFamily;
+    function isFontInDefinition(fonts, font)
+    {
+        for (var i = 0; i < fonts.length; ++i)
+        {
+            if (font == fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase())
+                return true;
+        }
 
-    // xxxsz: Is there a possibility to find out the language group used for a specific page?
-    return Options.getPref(fontsDomain, "x-western");
-}
+        return false;
+    }
 
-function getFontParts(element, value)
-{
     const genericFontFamilies =
     {
         "serif": 1,
@@ -671,9 +686,9 @@ function getFontParts(element, value)
         "monospace": 1,
     };
     const reFontFamilies = new RegExp("^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
-        "x{0,2}-(small|large)|medium|larger|smaller) )(.*)$|.*");
+        "x{0,2}-(small|large)|medium|larger|smaller)) (.*)$|.*");
     var matches = reFontFamilies.exec(value);
-    var fontParts = {otherValues: "", before: "", used: "", after: ""};
+    var parts = [];
     var i = 0;
 
     if (!matches)
@@ -682,7 +697,7 @@ function getFontParts(element, value)
     var fonts;
     if (matches[6])
     {
-        fontParts.otherValues = matches[1];
+        parts.push({type: "otherProps", value: matches[1]});
         fonts = matches[6].split(",");
     }
     else
@@ -691,39 +706,36 @@ function getFontParts(element, value)
     }
 
     var usedFonts = Fonts.getFonts(element);
+    var genericFontUsed = false;
     for (; i < fonts.length; ++i)
     {
         var font = fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase();
-        if (genericFontFamilies.hasOwnProperty(font))
-            font = getFontForGenericFontFamily(font).toLowerCase();
-
+        var isUsedFont = false;
         for (var j = 0; j < usedFonts.length; ++j)
         {
-            if (font == usedFonts[j].CSSFamilyName.toLowerCase())
+            var usedFont = usedFonts[j].CSSFamilyName.toLowerCase();
+            if (font == usedFont || (genericFontFamilies.hasOwnProperty(font) &&
+                !genericFontUsed && !isFontInDefinition(fonts, usedFont)))
             {
-                fontParts.used = fonts[i];
+                parts.push({type: "used", value: fonts[i]});
+
+                isUsedFont = true;
+                if (genericFontFamilies.hasOwnProperty(font))
+                    genericFontUsed = true;
                 break;
             }
         }
 
-        if (fontParts.used != "")
-            break;
+        if (!isUsedFont)
+            parts.push({type: "unused", class: "cssPropValueUnused", value: fonts[i]});
 
-        fontParts.before += fonts[i];
-        if (i < fonts.length-1)
-            fontParts.before += ",";
     }
 
-    if (i < fonts.length-1)
-        fontParts.after = ",";
-    for (++i; i < fonts.length; ++i)
-    {
-        fontParts.after += fonts[i];
-        if (i < fonts.length-1)
-            fontParts.after += ",";
-    }
+    // xxxsz: Domplate doesn't allow to check for the last element in an array yet,
+    // so use this as hack
+    parts[parts.length-1].last = true;
 
-    return fontParts;
+    return parts;
 }
 
 // ********************************************************************************************* //
