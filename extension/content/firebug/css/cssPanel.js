@@ -679,7 +679,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         // XXjoe Hack to only allow clicking on the checkbox
-        if ((event.clientX <= 20) && !Events.isSingleClick(event))
+        if ((event.clientX <= 20) && Events.isSingleClick(event))
         {
             if (Css.hasClass(event.target, "textEditor inlineExpander"))
                 return;
