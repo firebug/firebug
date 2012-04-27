@@ -103,6 +103,7 @@
         <key id="key_decreaseTextSize" key="-" modifiers="accel" command="cmd_decreaseTextSize"/>
         <key id="key_normalTextSize" key="0" modifiers="accel" command="cmd_normalTextSize"/>
         <key id="key_help" keycode="VK_F1" command="cmd_openHelp"/>
+        <key id="key_toggleBreakOn" key="b" modifiers="accel alt" command="cmd_breakOnNext"/>
     </keyset>
 
 </overlay>
