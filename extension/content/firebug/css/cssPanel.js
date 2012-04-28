@@ -1120,15 +1120,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (propValue)
         {
-            var text = propValue.textContent;
-            if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
-                propNameNode.textContent.toLowerCase() == "font-family"))
+            var text = propValue.textContent, cssValue;
+            var propName = (propNameNode && propNameNode.textContent.toLowerCase());
+            if (propName == "font" || propName == "font-family")
             {
-                var cssValue = parseCssFontFamilyValue(text, rangeOffset);
+                if (text.charAt(rangeOffset) !== ",")
+                    cssValue = parseCssFontFamilyValue(propName, text, rangeOffset, true);
             }
             else
             {
-                var cssValue = parseCSSValue(text, rangeOffset);
+                cssValue = parseCSSValue(text, rangeOffset);
             }
 
             if (cssValue)
@@ -1645,8 +1646,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteRange: function(value, offset)
     {
-        if (Css.hasClass(this.target, "cssPropName"))
+        if (!Css.hasClass(this.target, "cssPropValue"))
             return {start: 0, end: value.length};
+
+        var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+        if (propName === "font" || propName === "font-family")
+            return parseCssFontFamilyValue(propName, value, offset);
         else
             return parseCSSValue(value, offset);
     },
@@ -2234,37 +2240,48 @@ function parseRepeatValue(value)
     return m ? m[0] : "";
 }
 
-function parseCssFontFamilyValue(value, offset)
+function parseCssFontFamilyValue(propName, value, offset)
 {
-    if (value.charAt(offset) == ",")
-        return "";
+    var reFonts;
+    if (propName === "font")
+        reFonts = /^(.*\d\S*\s)?(.*?)(\s?!.*)?$/;
+    else
+        reFonts = /^()(.*?)(\s?!.*)?$/;
 
-    var reFonts = /^(.*\d\S*\s)?(.*?)(\s?!important)?$/;
     var m = reFonts.exec(value);
     if (!m)
-        return "";
+        return parseCSSValue(value, offset);
 
     var fonts = m[2].split(",");
-    var fontsLength = fonts.length;
     var totalLength = m[1] ? m[1].length : 0;
 
-    // offset begins at 0
-    offset += 1;
-    if (m[1] && offset <= m[1].length)
-        return "";
+    // Parse things that aren't font names as regular CSS properties.
+    if (m[1] && offset < m[1].length)
+        return parseCSSValue(value, offset);
 
-    for (var i = 0; i < fontsLength; ++i)
+    for (var i = 0; i < fonts.length; ++i)
     {
-        // +1 because we add the length of ","
-        totalLength += fonts[i].length + 1;
-        if (totalLength >= offset)
+        totalLength += fonts[i].length;
+        if (offset <= totalLength)
         {
+            // Give back the value and location of this font, whitespace-trimmed.
+            var font = fonts[i], ws = /^\s*(.*)$/.exec(font);
+            font = ws[1];
+            var end = totalLength, start = end - font.length;
             return {
-                value: fonts[i],
+                value: font,
+                start: start,
+                end: end,
                 type: "fontFamily"
             };
         }
+
+        // include ","
+        ++totalLength;
     }
+
+    // Parse !important.
+    return parseCSSValue(value, offset);
 }
 
 function parseCSSValue(value, offset)
