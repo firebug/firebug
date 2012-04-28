@@ -1506,7 +1506,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSStyleRule)
+        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
         {
             if (Css.hasClass(target, "cssPropName"))
             {
