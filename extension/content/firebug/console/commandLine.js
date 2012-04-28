@@ -655,7 +655,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             var completionBox = this.getCompletionBox();
 
             var options = {
-                completionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
                 tabWarnings: true,
                 includeCurrentScope: true
             };
