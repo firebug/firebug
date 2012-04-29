@@ -80,7 +80,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         CSSFontPropValueTag:
             SPAN({"class": "cssFontPropValue"},
                 FOR("part", "$propValueParts",
-                    SPAN({"class": "$part.class"}, "$part.value"),
+                    SPAN({"class": "$part.type|getClass"}, "$part.value"),
                     SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
                 )
             ),
@@ -90,10 +90,25 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             if (part.type == "otherProps")
                 return " ";
 
-            if (part.last)
+            if (part.lastFont || part.type == "important")
                 return "";
 
             return ",";
+        },
+
+        getClass: function(type)
+        {
+            switch (type)
+            {
+                case "used":
+                    return "cssPropValueUsed";
+
+                case "unused":
+                    return "cssPropValueUnused";
+
+                default:
+                    return "";
+            }
         }
     }),
 
@@ -685,8 +700,8 @@ function getFontPropValueParts(element, value)
         "fantasy": 1,
         "monospace": 1,
     };
-    const reFontFamilies = new RegExp("^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
-        "x{0,2}-(small|large)|medium|larger|smaller)) (.*)$|.*");
+    const reFontFamilies = new RegExp("(^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
+        "x{0,2}-(small|large)|medium|larger|smaller)) (.*?)|.*?)( !important)?$");
     var matches = reFontFamilies.exec(value);
     var parts = [];
     var i = 0;
@@ -695,14 +710,14 @@ function getFontPropValueParts(element, value)
         return;
 
     var fonts;
-    if (matches[6])
+    if (matches[7])
     {
-        parts.push({type: "otherProps", value: matches[1]});
-        fonts = matches[6].split(",");
+        parts.push({type: "otherProps", value: matches[2]});
+        fonts = matches[7].split(",");
     }
     else
     {
-        fonts = matches[0].split(",");
+        fonts = matches[1].split(",");
     }
 
     var usedFonts = Fonts.getFonts(element);
@@ -727,13 +742,15 @@ function getFontPropValueParts(element, value)
         }
 
         if (!isUsedFont)
-            parts.push({type: "unused", class: "cssPropValueUnused", value: fonts[i]});
-
+            parts.push({type: "unused", value: fonts[i]});
     }
 
     // xxxsz: Domplate doesn't allow to check for the last element in an array yet,
     // so use this as hack
-    parts[parts.length-1].last = true;
+    parts[parts.length-1].lastFont = true;
+
+    if (matches[8])
+        parts.push({type: "important", value: " !important"});
 
     return parts;
 }
