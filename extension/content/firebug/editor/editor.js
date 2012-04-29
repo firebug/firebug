@@ -904,10 +904,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             Events.cancelEvent(event);
         }
-        else
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE ||
+            event.keyCode == KeyEvent.DOM_VK_DELETE)
         {
-            // If the user backspaces, don't autocomplete after the upcoming input event
-            this.ignoreNextInput = event.keyCode == KeyEvent.DOM_VK_BACK_SPACE;
+            // If the user deletes text, don't autocomplete after the upcoming input event
+            this.ignoreNextInput = true;
         }
     },
 
@@ -1133,14 +1134,9 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 FBTrace.sysout(preExpr+sep+expr+sep+postExpr + " offset: " + offset);
             }
 
-            if (!cycle)
-            {
-                if (!expr)
-                    return false;
-
-                if (lastExpr && Str.hasPrefix(lastExpr, expr))
-                    return false;
-            }
+            // Don't complete globals unless cycling.
+            if (!cycle && !expr)
+                return false;
 
             lastExpr = expr;
             lastOffset = offset;
@@ -1166,11 +1162,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 }
             }
 
-            // Don't complete globals unless cycling.
-            if (!cycle && !value)
-                return false;
-
-            var values = evaluator(preExpr, expr, postExpr);
+            var values = evaluator(preExpr, expr, postExpr, context);
 
             if (searchExpr)
                 this.setCandidatesBySearchExpr(searchExpr, values);
