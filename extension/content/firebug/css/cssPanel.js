@@ -110,6 +110,24 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
         )
 });
 
+var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@namespace"),
+            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
+            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
+            "&quot;;"
+        ),
+
+    getSeparator: function(prefix)
+    {
+        return prefix == "" ? "" : " ";
+    }
+});
+
 var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -393,9 +411,18 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 }
+                else if (rule instanceof window.CSSNameSpaceRule)
+                {
+                    var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
+                    var namespace = rule.cssText.match(reNamespace);
+                    var prefix = namespace[2] || "";
+                    var name = namespace[3];
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                        name: name, isNotEditable: true});
+                }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
+                  rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSMediaRule)
                 {
