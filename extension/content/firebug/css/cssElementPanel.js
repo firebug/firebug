@@ -720,7 +720,14 @@ function getFontPropValueParts(element, value)
         fonts = matches[1].split(",");
     }
 
-    var usedFonts = Fonts.getFonts(element);
+    // Clone the element to just get the fonts used in it and not its descendants
+    var clonedElement = element.cloneNode(false);
+    clonedElement.textContent = element.textContent;
+    Firebug.setIgnored(clonedElement);
+    element.parentNode.appendChild(clonedElement);
+    var usedFonts = Fonts.getFonts(clonedElement);
+    clonedElement.parentNode.removeChild(clonedElement);
+
     var genericFontUsed = false;
     for (; i < fonts.length; ++i)
     {
