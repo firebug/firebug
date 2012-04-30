@@ -411,20 +411,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSNameSpaceRule)
-                {
-                    var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
-                    var namespace = rule.cssText.match(reNamespace);
-                    var prefix = namespace[2] || "";
-                    var name = namespace[3];
-                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
-                        name: name, isNotEditable: true});
-                }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
                   rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSMediaRule)
+                else if (rule instanceof window.CSSMediaRule ||
+                    rule instanceof window.CSSMozDocumentRule)
                 {
                     appendRules.apply(this, [Css.safeGetCSSRules(rule)]);
                 }
@@ -437,6 +429,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         props: props, isSystemSheet: isSystemSheet,
                         isNotEditable: true
                     });
+                }
+                else if (rule instanceof window.CSSNameSpaceRule)
+                {
+                    var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
+                    var namespace = rule.cssText.match(reNamespace);
+                    var prefix = namespace[2] || "";
+                    var name = namespace[3];
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                        name: name, isNotEditable: true});
                 }
                 else
                 {
