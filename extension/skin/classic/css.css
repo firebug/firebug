@@ -37,11 +37,15 @@
 }
 
 .cssPropName {
-    color: DarkGreen;
+    color: darkgreen;
 }
 
-.cssPropValue {
-    color: DarkBlue;
+.cssPropValue, .cssFontPropValue {
+    color: darkblue;
+}
+
+.cssPropValueUnused, .cssFontPropSeparator {
+    color: #787878;
 }
 
 .cssOverridden > .cssPropName,
@@ -104,12 +108,12 @@
 
 .cssProp.disabledStyle {
     background: transparent url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
-    opacity: 1;
     color: #CCCCCC;
 }
 
 .cssProp.disabledStyle > .cssPropName,
-.cssProp.disabledStyle > .cssPropValue {
+.cssProp.disabledStyle > .cssPropValue,
+.cssProp.disabledStyle > .cssPropValue span {
     color: inherit;
 }
 

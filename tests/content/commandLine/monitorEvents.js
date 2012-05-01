@@ -1,50 +1,80 @@
 function runTest()
 {
-    FBTest.sysout("commandline.monitorEvents.START");
+    FBTest.sysout("monitorEvents.START");
+
     FBTest.openNewTab(basePath + "commandLine/monitorEvents.html", function(win)
     {
         FBTest.openFirebug();
+
         FBTest.enableConsolePanel(function(win)
         {
-            var tasks = new FBTest.TaskList();
+            var taskList = new FBTest.TaskList();
 
-            // Monitor click events of a button on the test page.
-            tasks.push(monitorClickEvents);
+            taskList.push(executeAndVerify, win, "'click'", ["click"],
+                [/^click\s+clientX=\d+,\s+clientY=\d+$/]);
 
-            // Click the button to generate a click event.
-            tasks.push(clickButton, win);
+            taskList.push(executeAndVerify, win, "'key'", ["click", "key"],
+                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
+                 /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
 
-            tasks.run(function() {
-                FBTest.testDone("commandline.monitorEvents.DONE");
+            taskList.push(executeAndVerify, win, "['click', 'key']", ["click", "key"],
+                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /^keydown\s+charCode=\d+,\s+keyCode=\d+$/,
+                 /^keypress\s+charCode=\d+,\s+keyCode=\d+$/, /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
+
+            taskList.push(executeAndVerify, win, null, ["click", "key"],
+                [/^click\s+clientX=\d+,\s+clientY=\d+$/, /focus/,
+                 /^keydown\s+charCode=\d+,\s+keyCode=\d+$/, /^keypress\s+charCode=\d+,\s+keyCode=\d+$/,
+                 /^keyup\s+charCode=\d+,\s+keyCode=\d+$/]);
+
+            taskList.run(function() {
+                FBTest.testDone("monitorEvents.DONE");
             });
         });
     });
 }
 
-function monitorClickEvents(callback)
+/**
+ * Helper function for executing expression on the command line.
+ * @param {Function} callback Appended by the test harness.
+ * @param {String} expression Expression to be executed.
+ * @param {String} expected Expected value displayed.
+ * @param {String} tagName Name of the displayed element.
+ * @param {String} class Class of the displayed element.
+ */
+function executeAndVerify(callback, win, eventTypes, actions, expected)
 {
-    var config = {tagName: "pre", classes: "objectBox objectBox-text"};
+    var config = {tagName: "a", classes: "objectLink objectLink-object", counter: expected.length};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        FBTest.compare(">>> monitorEvents($(\"testButton\"), \"click\")",
-            row.textContent,
-            "The command line should display standard output for executed command.");
+        var panelNode = FBTest.getPanel("console").panelNode;
+        var rows = panelNode.getElementsByClassName("objectLink");
+        for (var i = 0; i < expected.length; i++)
+        {
+            FBTest.compare(expected[i], rows[i].textContent, "Verify: " +
+                rows[i].textContent + " should be " + expected[i]);
+        }
+
+        FBTest.clickToolbarButton(null, "fbConsoleClear");
         callback();
     });
 
-    FBTest.executeCommand("monitorEvents($(\"testButton\"), \"click\")");
-}
-
-function clickButton(callback, win)
-{
-    var config = {tagName: "a", classes: "objectLink objectLink-object"};
-    FBTest.waitForDisplayedElement("console", config, function(row)
+    var expression = "monitorEvents(document.getElementById(\"monitoredElement\")";
+    if (eventTypes)
+        expression += ", "+eventTypes;
+    expression += ")";
+    FBTest.executeCommand(expression);
+    for (var i = 0; i < actions.length; i++)
     {
-        FBTest.compare(/click clientX=\d+, clientY=\d+/,
-            row.textContent,
-            "The command line should display an info about the click event.");
-        callback();
-    });
+        switch(actions[i])
+        {
+            case "click":
+                FBTest.click(win.document.getElementById("monitoredElement"));
+                break;
 
-    FBTest.click(win.document.getElementById("testButton"));
+            case "key":
+                win.document.getElementById("monitoredElement").focus();
+                FBTest.synthesizeKey("a", null, win);
+                break;
+        }
+    }
 }

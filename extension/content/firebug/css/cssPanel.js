@@ -110,6 +110,24 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
         )
 });
 
+var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@namespace"),
+            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
+            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
+            "&quot;;"
+        ),
+
+    getSeparator: function(prefix)
+    {
+        return prefix == "" ? "" : " ";
+    }
+});
+
 var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -395,9 +413,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
+                  rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSMediaRule)
+                else if (rule instanceof window.CSSMediaRule ||
+                    rule instanceof window.CSSMozDocumentRule)
                 {
                     appendRules.apply(this, [Css.safeGetCSSRules(rule)]);
                 }
@@ -410,6 +429,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         props: props, isSystemSheet: isSystemSheet,
                         isNotEditable: true
                     });
+                }
+                else if (rule instanceof window.CSSNameSpaceRule)
+                {
+                    var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
+                    var namespace = rule.cssText.match(reNamespace);
+                    var prefix = namespace[2] || "";
+                    var name = namespace[3];
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                        name: name, isNotEditable: true});
                 }
                 else
                 {
@@ -679,7 +707,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         // XXjoe Hack to only allow clicking on the checkbox
-        if ((event.clientX <= 20) && (event.detail == 1))
+        if ((event.clientX <= 20) && Events.isSingleClick(event))
         {
             if (Css.hasClass(event.target, "textEditor inlineExpander"))
                 return;
@@ -691,7 +719,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 Events.cancelEvent(event);
             }
         }
-        else if ((event.clientX >= 20) && (event.detail == 2))
+        else if ((event.clientX >= 20) && Events.isDoubleClick(event))
         {
             row = Dom.getAncestorByClass(event.target, "cssRule");
             if (row && !Dom.getAncestorByClass(event.target, "cssPropName")
@@ -1114,19 +1142,22 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
+        var prop = Dom.getAncestorByClass(target, "cssProp");
+        if (prop)
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
 
         if (propValue)
         {
-            var text = propValue.textContent;
-            if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
-                propNameNode.textContent.toLowerCase() == "font-family"))
+            var text = propValue.textContent, cssValue;
+            var propName = (propNameNode && propNameNode.textContent.toLowerCase());
+            if (propName == "font" || propName == "font-family")
             {
-                var cssValue = parseCssFontFamilyValue(text, rangeOffset);
+                if (text.charAt(rangeOffset) !== ",")
+                    cssValue = parseCssFontFamilyValue(propName, text, rangeOffset, true);
             }
             else
             {
-                var cssValue = parseCSSValue(text, rangeOffset);
+                cssValue = parseCSSValue(text, rangeOffset);
             }
 
             if (cssValue)
@@ -1504,7 +1535,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSStyleRule)
+        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
         {
             if (Css.hasClass(target, "cssPropName"))
             {
@@ -1643,8 +1674,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteRange: function(value, offset)
     {
-        if (Css.hasClass(this.target, "cssPropName"))
+        if (!Css.hasClass(this.target, "cssPropValue"))
             return {start: 0, end: value.length};
+
+        var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+        if (propName === "font" || propName === "font-family")
+            return parseCssFontFamilyValue(propName, value, offset);
         else
             return parseCSSValue(value, offset);
     },
@@ -2232,37 +2268,48 @@ function parseRepeatValue(value)
     return m ? m[0] : "";
 }
 
-function parseCssFontFamilyValue(value, offset)
+function parseCssFontFamilyValue(propName, value, offset)
 {
-    if (value.charAt(offset) == ",")
-        return "";
+    var reFonts;
+    if (propName === "font")
+        reFonts = /^(.*\d\S*\s)?(.*?)(\s?!.*)?$/;
+    else
+        reFonts = /^()(.*?)(\s?!.*)?$/;
 
-    var reFonts = /^(.*\d\S*\s)?(.*?)(\s?!important)?$/;
     var m = reFonts.exec(value);
     if (!m)
-        return "";
+        return parseCSSValue(value, offset);
 
     var fonts = m[2].split(",");
-    var fontsLength = fonts.length;
     var totalLength = m[1] ? m[1].length : 0;
 
-    // offset begins at 0
-    offset += 1;
-    if (m[1] && offset <= m[1].length)
-        return "";
+    // Parse things that aren't font names as regular CSS properties.
+    if (m[1] && offset < m[1].length)
+        return parseCSSValue(value, offset);
 
-    for (var i = 0; i < fontsLength; ++i)
+    for (var i = 0; i < fonts.length; ++i)
     {
-        // +1 because we add the length of ","
-        totalLength += fonts[i].length + 1;
-        if (totalLength >= offset)
+        totalLength += fonts[i].length;
+        if (offset <= totalLength)
         {
+            // Give back the value and location of this font, whitespace-trimmed.
+            var font = fonts[i], ws = /^\s*(.*)$/.exec(font);
+            font = ws[1];
+            var end = totalLength, start = end - font.length;
             return {
-                value: fonts[i],
+                value: font,
+                start: start,
+                end: end,
                 type: "fontFamily"
             };
         }
+
+        // include ","
+        ++totalLength;
     }
+
+    // Parse !important.
+    return parseCSSValue(value, offset);
 }
 
 function parseCSSValue(value, offset)

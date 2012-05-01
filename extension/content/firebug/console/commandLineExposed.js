@@ -48,7 +48,7 @@ function createFirebugCommandLine(context, win)
         var command = commands[i];
 
         // If the method is already defined, don't override it.
-        if (contentView[command])
+        if (command in contentView)
             continue;
 
         function createCommandHandler(cmd) {
@@ -68,7 +68,7 @@ function createFirebugCommandLine(context, win)
         var command = consoleShortcuts[i];
 
         // If the method is already defined, don't override it.
-        if (contentView[command])
+        if (command in contentView)
             continue;
 
         function createShortcutHandler(cmd) {
@@ -86,7 +86,7 @@ function createFirebugCommandLine(context, win)
     for (var i=0; i<props.length; i++)
     {
         var prop = props[i];
-        if (contentView[prop])
+        if (prop in contentView)
             continue;
 
         function createVariableHandler(prop) {

@@ -32,12 +32,10 @@ function runTest()
                     {
                         var cssRulesLabels = panel.panelNode.
                             querySelectorAll(".memberRow.ordinalRow[level=\"1\"] .memberLabel");
-                        FBTrace.sysout("cssRulesLabels", cssRulesLabels);
                         var cssRules = [];
                         for (var i=0; i<cssRulesLabels.length; i++)
                         {
                             var cssRulesLabel = cssRulesLabels[i];
-                            FBTrace.sysout("memberRow", FW.FBL.getAncestorByClass(cssRulesLabel, "memberRow"));
                             cssRules.push(FW.FBL.getAncestorByClass(cssRulesLabel, "memberRow").
                                 getElementsByClassName("memberValueCell").item(0));
                         }

@@ -222,7 +222,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     onKeyPress: function(event)
     {
-        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+        if (!Events.noKeyModifiers(event))
             return false;
 
         // ESC

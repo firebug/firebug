@@ -15,11 +15,13 @@ define([
     "firebug/lib/css",
     "firebug/lib/xpath",
     "firebug/lib/array",
+    "firebug/lib/fonts",
+    "firebug/lib/options",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -73,7 +75,41 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             DIV({"class": "cssElementRuleContainer"},
                 TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
-            )
+            ),
+
+        CSSFontPropValueTag:
+            SPAN({"class": "cssFontPropValue"},
+                FOR("part", "$propValueParts",
+                    SPAN({"class": "$part.type|getClass"}, "$part.value"),
+                    SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
+                )
+            ),
+
+        getSeparator: function(part)
+        {
+            if (part.type == "otherProps")
+                return " ";
+
+            if (part.lastFont || part.type == "important")
+                return "";
+
+            return ",";
+        },
+
+        getClass: function(type)
+        {
+            switch (type)
+            {
+                case "used":
+                    return "cssPropValueUsed";
+
+                case "unused":
+                    return "cssPropValueUnused";
+
+                default:
+                    return "";
+            }
+        }
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -105,6 +141,25 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
+
+            var props = result.getElementsByClassName("cssProp");
+
+            for (var i = 0; i < props.length; i++)
+            {
+                var prop = props[i];
+                var propName = prop.getElementsByClassName("cssPropName").item(0).textContent;
+                if (propName == "font-family" || propName == "font")
+                {
+                    var propValueElem = prop.getElementsByClassName("cssPropValue").item(0);
+                    var propValue = propValueElem.textContent;
+                    var fontPropValueParts = getFontPropValueParts(element, propValue);
+
+                    // xxxsz: Web fonts not being loaded at display time
+                    // won't be marked as used. See issue 5420.
+                    this.template.CSSFontPropValueTag.replace({propValueParts: fontPropValueParts},
+                        propValueElem);
+                }
+            }
 
             Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
         }
@@ -527,6 +582,26 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         return ret;
     },
 
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        var prop = Dom.getAncestorByClass(target, "cssProp");
+        if (prop)
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
+  
+        if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
+            propNameNode.textContent.toLowerCase() == "font-family"))
+        {
+            var prevSibling = target.previousElementSibling;
+            while (prevSibling)
+            {
+                rangeOffset += prevSibling.textContent.length;
+                prevSibling = prevSibling.previousElementSibling;
+            }
+        }
+
+        return CSSStyleSheetPanel.prototype.showInfoTip(infoTip, target, x, y, rangeParent, rangeOffset);
+    },
+
     updateContentState: function(state, remove)
     {
         if (FBTrace.DBG_CSS)
@@ -602,6 +677,89 @@ function safeGetContentState(selection)
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
             FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
     }
+}
+
+function getFontPropValueParts(element, value)
+{
+    function isFontInDefinition(fonts, font)
+    {
+        for (var i = 0; i < fonts.length; ++i)
+        {
+            if (font == fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase())
+                return true;
+        }
+
+        return false;
+    }
+
+    const genericFontFamilies =
+    {
+        "serif": 1,
+        "sans-serif": 1,
+        "cursive": 1,
+        "fantasy": 1,
+        "monospace": 1,
+    };
+    const reFontFamilies = new RegExp("(^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
+        "x{0,2}-(small|large)|medium|larger|smaller)) (.*?)|.*?)( !important)?$");
+    var matches = reFontFamilies.exec(value);
+    var parts = [];
+    var i = 0;
+
+    if (!matches)
+        return;
+
+    var fonts;
+    if (matches[7])
+    {
+        parts.push({type: "otherProps", value: matches[2]});
+        fonts = matches[7].split(",");
+    }
+    else
+    {
+        fonts = matches[1].split(",");
+    }
+
+    // Clone the element to just get the fonts used in it and not its descendants
+    var clonedElement = element.cloneNode(false);
+    clonedElement.textContent = element.textContent;
+    Firebug.setIgnored(clonedElement);
+    element.parentNode.appendChild(clonedElement);
+    var usedFonts = Fonts.getFonts(clonedElement);
+    clonedElement.parentNode.removeChild(clonedElement);
+
+    var genericFontUsed = false;
+    for (; i < fonts.length; ++i)
+    {
+        var font = fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase();
+        var isUsedFont = false;
+        for (var j = 0; j < usedFonts.length; ++j)
+        {
+            var usedFont = usedFonts[j].CSSFamilyName.toLowerCase();
+            if (font == usedFont || (genericFontFamilies.hasOwnProperty(font) &&
+                !genericFontUsed && !isFontInDefinition(fonts, usedFont)))
+            {
+                parts.push({type: "used", value: fonts[i]});
+
+                isUsedFont = true;
+                if (genericFontFamilies.hasOwnProperty(font))
+                    genericFontUsed = true;
+                break;
+            }
+        }
+
+        if (!isUsedFont)
+            parts.push({type: "unused", value: fonts[i]});
+    }
+
+    // xxxsz: Domplate doesn't allow to check for the last element in an array yet,
+    // so use this as hack
+    parts[parts.length-1].lastFont = true;
+
+    if (matches[8])
+        parts.push({type: "important", value: " !important"});
+
+    return parts;
 }
 
 // ********************************************************************************************* //

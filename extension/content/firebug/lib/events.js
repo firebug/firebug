@@ -161,8 +161,17 @@ Events.isMiddleClick = function(event, allowKeyModifiers)
 
 Events.isRightClick = function(event, allowKeyModifiers)
 {
-
     return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
+};
+
+Events.isSingleClick = function(event)
+{
+    return event instanceof MouseEvent && event.detail == 1;
+};
+
+Events.isDoubleClick = function(event)
+{
+    return event instanceof MouseEvent && event.detail == 2;
 };
 
 Events.noKeyModifiers = function(event)
@@ -218,34 +227,48 @@ const eventTypes =
     composition: [
         "composition",
         "compositionstart",
-        "compositionend" ],
+        "compositionend"
+    ],
+
     contextmenu: [
-        "contextmenu" ],
+        "contextmenu"
+    ],
+
     drag: [
         "dragenter",
         "dragover",
         "dragexit",
         "dragdrop",
-        "draggesture" ],
+        "draggesture"
+    ],
+
     focus: [
         "focus",
-        "blur" ],
+        "blur"
+    ],
+
     form: [
         "submit",
         "reset",
         "change",
         "select",
-        "input" ],
+        "input"
+    ],
+
     key: [
         "keydown",
         "keyup",
-        "keypress" ],
+        "keypress"
+    ],
+
     load: [
         "load",
         "beforeunload",
         "unload",
         "abort",
-        "error" ],
+        "error"
+    ],
+
     mouse: [
         "mousedown",
         "mouseup",
@@ -253,7 +276,9 @@ const eventTypes =
         "dblclick",
         "mouseover",
         "mouseout",
-        "mousemove" ],
+        "mousemove"
+    ],
+
     mutation: [
         "DOMSubtreeModified",
         "DOMNodeInserted",
@@ -261,21 +286,31 @@ const eventTypes =
         "DOMNodeRemovedFromDocument",
         "DOMNodeInsertedIntoDocument",
         "DOMAttrModified",
-        "DOMCharacterDataModified" ],
+        "DOMCharacterDataModified"
+    ],
+
     paint: [
         "paint",
         "resize",
-        "scroll" ],
+        "scroll"
+    ],
+
     scroll: [
         "overflow",
         "underflow",
-        "overflowchanged" ],
+        "overflowchanged"
+    ],
+
     text: [
-        "text" ],
+        "text"
+    ],
+
     ui: [
         "DOMActivate",
         "DOMFocusIn",
-        "DOMFocusOut" ],
+        "DOMFocusOut"
+    ],
+
     xul: [
         "popupshowing",
         "popupshown",
@@ -284,11 +319,40 @@ const eventTypes =
         "close",
         "command",
         "broadcast",
-        "commandupdate" ],
+        "commandupdate"
+    ],
+
     clipboard: [
         "cut",
         "copy",
-        "paste" ],
+        "paste"
+    ]
+};
+
+Events.getEventTypes = function(family)
+{
+    var types = [];
+    for (var eventFamily in eventTypes)
+    {
+        if (!family || family == eventFamily)
+        {
+            for (type in eventTypes[eventFamily])
+                types.push(eventTypes[eventFamily][type]);
+        }
+    }
+
+    return types;
+};
+
+Events.isEventFamily = function(eventType)
+{
+    for (var family in eventTypes)
+    {
+        if (eventType == family)
+            return true;
+    }
+
+    return false;
 };
 
 Events.getEventFamily = function(eventType)
@@ -425,7 +489,7 @@ if (FBTrace.DBG_EVENTLISTENERS && typeof(Firebug) != "undefined")
     Firebug.Events.getRegisteredListeners = function()
     {
         return listeners;
-    }
+    };
 }
 
 // ********************************************************************************************* //

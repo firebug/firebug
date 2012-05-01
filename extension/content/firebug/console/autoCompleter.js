@@ -34,7 +34,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     this.textBox = textBox;
     this.completionBox = completionBox;
     this.options = options;
-    this.showCompletionPopup = options.completionPopup;
 
     this.completionBase = {
         pre: null,
@@ -45,7 +44,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     this.revertValue = null;
 
-    this.completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
+    this.showCompletionPopup = options.showCompletionPopup;
+    this.completionPopup = options.completionPopup;
     this.selectedPopupElement = null;
 
     /**
@@ -293,7 +293,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     {
         this.completionBox.value = this.getCompletionBoxValue();
 
-        if (this.showCompletionPopup && this.completions && this.completions.list.length > 1)
+        var show = this.showCompletionPopup ||
+            (this.completionPopup && this.completionPopup.state === "open");
+        if (show && this.completions && this.completions.list.length > 1)
             this.popupCandidates();
         else
             this.closePopup();
@@ -311,7 +313,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return false;
 
         if (event.keyCode === KeyEvent.DOM_VK_TAB &&
-            !Events.isControl(event) && this.textBox.value !== "")
+            !Events.isControl(event) && !Events.isControlShift(event) &&
+            this.textBox.value !== "")
         {
             if (this.completions)
             {
@@ -387,7 +390,22 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         {
             // Close the completion popup on escape in keydown, so that the popup
             // does not close itself and prevent event propagation on keypress.
-            this.closePopup();
+            // (Unless the popup is only open due to Ctrl+Space, in which case
+            // that's precisely what we want.)
+            if (this.showCompletionPopup)
+                this.closePopup();
+        }
+        else if (event.keyCode === KeyEvent.DOM_VK_SPACE && Events.isControl(event))
+        {
+            // Force-show the completion popup.
+            if (!this.completions)
+            {
+                // If completions have been hidden, show them again.
+                this.hide();
+                this.complete(context);
+            }
+            if (this.completionPopup && this.completions)
+                this.popupCandidates();
         }
     };
 
@@ -440,7 +458,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var title = this.completionPopup.ownerDocument.
             createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = Locale.$STR("console.Use Arrow keys or Enter");
+        title.innerHTML = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
 
@@ -500,7 +518,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     this.closePopup = function()
     {
-        if (this.completionPopup.state == "closed")
+        if (!this.completionPopup || this.completionPopup.state === "closed")
             return;
 
         try
@@ -558,12 +576,18 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     {
         this.completionBox.value = "";
 
-        Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
-        Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
+        if (this.completionPopup)
+        {
+            Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+            Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
+        }
     };
 
-    Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
-    Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
+    if (this.completionPopup)
+    {
+        Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+        Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
+    }
 };
 
 // ********************************************************************************************* //

@@ -169,7 +169,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 Firebug.chrome.select(object, "script");
                 Events.cancelEvent(event);
             }
-            else if (event.detail == 2 && !object)
+            else if (Events.isDoubleClick(event) && !object)
             {
                 var panel = row.parentNode.parentNode.domPanel;
                 if (panel)
