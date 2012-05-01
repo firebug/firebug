@@ -2101,7 +2101,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         return {start: start, end: end};
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, context)
+    getAutoCompleteList: function(preExpr, expr, postExpr, context, out)
     {
         if (!Css.hasClass(this.target, "cssSelector"))
             return [];
@@ -2252,6 +2252,9 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             return !reInternal.test(str);
         });
+
+        if (ret.indexOf(":hover") !== -1)
+            out.suggestion = ":hover";
 
         return ret.sort();
     },

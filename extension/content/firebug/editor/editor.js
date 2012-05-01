@@ -1049,6 +1049,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 {
     var candidates = null;
+    var suggestedDefault = null;
     var lastValue = "";
     var originalOffset = -1;
     var originalValue = null;
@@ -1079,6 +1080,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
     this.reset = function()
     {
         candidates = null;
+        suggestedDefault = null;
         originalOffset = -1;
         originalValue = null;
         lastExpr = null;
@@ -1162,7 +1164,9 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 }
             }
 
-            var values = evaluator(preExpr, expr, postExpr, context);
+            var out = {};
+            var values = evaluator(preExpr, expr, postExpr, context, out);
+            suggestedDefault = out.suggestion || null;
 
             if (searchExpr)
                 this.setCandidatesBySearchExpr(searchExpr, values);
@@ -1289,7 +1293,15 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
     this.pickDefaultCandidate = function()
     {
-        // The shortest candidate is default value
+        // If we have a suggestion and it's in the candidate list, use that
+        if (suggestedDefault)
+        {
+            var ind = candidates.indexOf(suggestedDefault);
+            if (ind !== -1)
+                return ind;
+        }
+
+        // Otherwise, default to the shortest candidate
         var pick = 0;
         for (var i = 1; i < candidates.length; i++)
         {
