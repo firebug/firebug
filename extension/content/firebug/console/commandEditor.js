@@ -174,6 +174,10 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onTextChanged: function(event)
     {
+        // Ignore changes that are triggered by Firebug's restore logic.
+        if (Firebug.CommandEditor.ignoreChanges)
+            return;
+
         Firebug.CommandLine.onCommandLineInput(event);
     },
 
@@ -215,8 +219,22 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     setText: function(text)
     {
-        if (this.editor)
-            this.editor.setText(text);
+        try
+        {
+            // When manually setting the text, ignore the TEXT_CHANGED event.
+            this.ignoreChanges = true;
+
+            if (this.editor)
+                this.editor.setText(text);
+        }
+        catch (err)
+        {
+            // No exception is really expected, we just need the finally clause.
+        }
+        finally
+        {
+            this.ignoreChanges = false;
+        }
     },
 
     getText: function()
