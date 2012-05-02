@@ -95,17 +95,17 @@ this.openConsole = function(prefDomain, windowURL)
     if (!prefDomain)
         prefDomain = "extensions.firebug";
 
-    var self = this;
+    var consoleWindow = null;
     FBL.iterateBrowserWindows("FBTraceConsole", function(win) {
         if (win.TraceConsole && win.TraceConsole.prefDomain == prefDomain) {
-            self.consoleWindow = win;
+            consoleWindow = win;
             return true;
         }
     });
 
     // Try to connect an existing trace-console window first.
-    if (this.consoleWindow && this.consoleWindow.TraceConsole) {
-        this.consoleWindow.focus();
+    if (consoleWindow && consoleWindow.TraceConsole) {
+        consoleWindow.focus();
         return;
     }
 
@@ -126,7 +126,7 @@ this.openConsole = function(prefDomain, windowURL)
                 prefDomain +" args["+p+"]= "+ args[p]+"\n");
     }
 
-    this.consoleWindow = window.openDialog(
+    window.openDialog(
         windowURL,
         "FBTraceConsole." + prefDomain,
         "chrome,resizable,scrollbars=auto,minimizable,dialog=no",
