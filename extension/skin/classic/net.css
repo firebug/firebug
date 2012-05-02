@@ -391,20 +391,13 @@
 /*
  * Timing info tip is reusing net timeline styles to display the same
  * colors for individual request phases. Notice that the info tip must
- * respect also loaded and fromCache styles that also modify the
+ * respect also 'loaded' and 'fromCache' styles that also modify the
  * actual color. These are used both on the same element in case
  * of the tooltip.
  */
-.loaded .netReceivingBar,
-.loaded.netReceivingBar {
-    background: #D7D7D7 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
-    border-color: #D7D7D7;
-}
-
 .fromCache .netReceivingBar,
 .fromCache.netReceivingBar {
-    background: #FAFAFA -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
-    border-color: #FAFAFA;
+    background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
 }
 
 .netSummaryRow .netTimeLabel,
