@@ -97,15 +97,19 @@ function $command(id, oncommand, arg)
     }, $("mainCommandSet"))
 }
 
-function $key(id, keycode, modifiers, command, position)
+function $key(id, key, modifiers, command, position)
 {
-    return $el("key", {
+    var attributes = 
+    {
         id: id,
-        keycode: keycode,
         modifiers: modifiers,
         command: command,
         position: position
-    }, $("mainKeyset"))
+    };
+
+    attributes[KeyEvent["DOM_"+key] ? "keycode" : "key"] = key;
+
+    return $el("key", attributes, $("mainKeyset"));
 }
 
 function $menupopup(attributes, children, parent)

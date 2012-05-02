@@ -57,6 +57,7 @@ this.initialize = function()
             ]);
 
             $command("cmd_openTraceConsole", "FBTraceFirebugOverlay.openConsole()");
+            $key("key_openTraceConsole", "r", "shift", "cmd_openTraceConsole");
 
             // Always Open Test Console (option)
             var optionsPopup = parent.querySelector("#FirebugMenu_OptionsPopup");

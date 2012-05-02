@@ -62,6 +62,7 @@ this.onLoad = function()
             ]);
 
             $command("cmd_openTestConsole", "FBTestFirebugOverlay.open()");
+            $key("key_openTestConsole", "t", "shift", "cmd_openTestConsole");
 
             // Always Open Test Console (option)
             var optionsPopup = parent.querySelector("#FirebugMenu_OptionsPopup");
