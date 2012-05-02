@@ -37,8 +37,10 @@ this.initialize = function()
     {
         // Extend Firebug global menu (more instances exists).
         var parents = document.querySelectorAll(".fbFirebugMenuPopup");
-        for each (var parent in parents)
+        for (var i=0; i<parents.length; i++)
         {
+            var parent = parents[i];
+
             // Open Test Console
             $menupopupOverlay(parent, [
                 $menuseparator({
