@@ -2171,7 +2171,108 @@ Css.charsets =
     "Windows-1256",
     "Windows-1257",
     "Windows-1258"
-]
+];
+
+// http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
+// Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
+// but that's not relevant for our purposes.
+Css.pseudoClasses =
+[
+    ":active",
+    ":checked",
+    ":default",
+    ":disabled",
+    ":empty",
+    ":enabled",
+    ":first-child",
+    ":first-of-type",
+    ":focus",
+    ":hover",
+    ":indeterminate",
+    ":in-range",
+    ":invalid",
+    ":lang()",
+    ":last-child",
+    ":last-of-type",
+    ":link",
+    ":not()",
+    ":nth-child()",
+    ":nth-last-child()",
+    ":nth-last-of-type()",
+    ":nth-of-type()",
+    ":only-child",
+    ":only-of-type",
+    ":optional",
+    ":out-of-range",
+    ":required",
+    ":root",
+    ":target",
+    ":valid",
+    ":visited",
+    ":-moz-any()",
+    ":-moz-any-link",
+    ":-moz-bound-element",
+    ":-moz-broken",
+    ":-moz-drag-over",
+    ":-moz-empty-except-children-with-localname()",
+    ":-moz-first-node",
+    ":-moz-focusring",
+    ":-moz-full-screen",
+    ":-moz-full-screen-ancestor",
+    ":-moz-handler-blocked",
+    ":-moz-handler-clicktoplay",
+    ":-moz-handler-crashed",
+    ":-moz-handler-disabled",
+    ":-moz-has-handlerref",
+    ":-moz-is-html",
+    ":-moz-last-node",
+    ":-moz-loading",
+    // ":-moz-locale-dir(ltr)", // http://bugzil.la/588996
+    // ":-moz-locale-dir(rtl)",
+    ":-moz-lwtheme",
+    ":-moz-lwtheme-brighttext",
+    ":-moz-lwtheme-darktext",
+    ":-moz-math-increment-script-level",
+    ":-moz-only-whitespace",
+    ":-moz-placeholder",
+    ":-moz-read-only",
+    ":-moz-read-write",
+    ":-moz-submit-invalid",
+    ":-moz-suppressed",
+    ":-moz-system-metric(images-in-menus)",
+    ":-moz-system-metric(mac-graphite-theme)",
+    ":-moz-system-metric(scrollbar-end-backward)",
+    ":-moz-system-metric(scrollbar-end-forward)",
+    ":-moz-system-metric(scrollbar-start-backward)",
+    ":-moz-system-metric(scrollbar-start-forward)",
+    ":-moz-system-metric(scrollbar-thumb-proportional)",
+    ":-moz-system-metric(touch-enabled)",
+    ":-moz-system-metric(windows-default-theme)",
+    ":-moz-table-border-nonzero",
+    ":-moz-type-unsupported",
+    ":-moz-ui-invalid",
+    ":-moz-ui-valid",
+    ":-moz-user-disabled",
+    ":-moz-window-inactive"
+];
+
+// http://mxr.mozilla.org/mozilla-central/source/browser/devtools/styleinspector/CssLogic.jsm
+Css.pseudoElements =
+[
+    "::after",
+    "::before",
+    "::first-letter",
+    "::first-line",
+    "::selection",
+    "::-moz-focus-inner",
+    "::-moz-focus-outer",
+    "::-moz-list-bullet",
+    "::-moz-list-number",
+    "::-moz-math-anonymous",
+    "::-moz-math-stretchy",
+    "::-moz-progress-bar",
+    "::-moz-selection"
+];
 
 Css.nonEditableTags =
 {

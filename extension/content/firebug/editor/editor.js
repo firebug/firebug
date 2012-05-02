@@ -904,10 +904,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             Events.cancelEvent(event);
         }
-        else
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE ||
+            event.keyCode == KeyEvent.DOM_VK_DELETE)
         {
-            // If the user backspaces, don't autocomplete after the upcoming input event
-            this.ignoreNextInput = event.keyCode == KeyEvent.DOM_VK_BACK_SPACE;
+            // If the user deletes text, don't autocomplete after the upcoming input event
+            this.ignoreNextInput = true;
         }
     },
 
@@ -1048,6 +1049,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 {
     var candidates = null;
+    var suggestedDefault = null;
     var lastValue = "";
     var originalOffset = -1;
     var originalValue = null;
@@ -1078,6 +1080,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
     this.reset = function()
     {
         candidates = null;
+        suggestedDefault = null;
         originalOffset = -1;
         originalValue = null;
         lastExpr = null;
@@ -1133,14 +1136,9 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 FBTrace.sysout(preExpr+sep+expr+sep+postExpr + " offset: " + offset);
             }
 
-            if (!cycle)
-            {
-                if (!expr)
-                    return false;
-
-                if (lastExpr && Str.hasPrefix(lastExpr, expr))
-                    return false;
-            }
+            // Don't complete globals unless cycling.
+            if (!cycle && !expr)
+                return false;
 
             lastExpr = expr;
             lastOffset = offset;
@@ -1166,11 +1164,9 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 }
             }
 
-            // Don't complete globals unless cycling.
-            if (!cycle && !value)
-                return false;
-
-            var values = evaluator(preExpr, expr, postExpr);
+            var out = {};
+            var values = evaluator(preExpr, expr, postExpr, context, out);
+            suggestedDefault = out.suggestion || null;
 
             if (searchExpr)
                 this.setCandidatesBySearchExpr(searchExpr, values);
@@ -1297,7 +1293,15 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
     this.pickDefaultCandidate = function()
     {
-        // The shortest candidate is default value
+        // If we have a suggestion and it's in the candidate list, use that
+        if (suggestedDefault)
+        {
+            var ind = candidates.indexOf(suggestedDefault);
+            if (ind !== -1)
+                return ind;
+        }
+
+        // Otherwise, default to the shortest candidate
         var pick = 0;
         for (var i = 1; i < candidates.length; i++)
         {
