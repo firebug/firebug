@@ -42,7 +42,7 @@ this.onLoad = function()
     with (Firebug.GlobalUI)
     {
         // Extend Firebug global menu (more instances exists).
-        var parents = document.querySelectorAll(".fbFirebugMenuPopup");
+        var parents = document.getElementsByClassName("fbFirebugMenuPopup");
         for (var i=0; i<parents.length; i++)
         {
             var parent = parents[i];
