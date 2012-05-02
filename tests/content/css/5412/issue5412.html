@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5412: Auto-completion for CSS selectors</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element1 {
+            width: 100px;
+            height: 100px;
+            background-color: #78FF8C;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5412">Issue 5412</a>: Auto-completion for CSS selectors</h1>
+        </header>
+        <div>
+            <section id="content">
+                <span class="a first"></span>
+                <div id="element1" class="element1">
+                    <span class="a second" data-test="test"></span>
+                    <span class="b"></span>
+                </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>
+                        Select <em>issue5412.html</em> from the Location Menu</br>
+                        <span class="ok">&rArr; One CSS rule should be listed</span>
+                    </li>
+                    <li>
+                        Open the rule for editing, and enter various things to check completions:
+                    </li>
+                    <li>"#" <span class="ok">&rArr; "#content"</span></li>
+                    <li>"." <span class="ok">&rArr; ".a"</span></li>
+                    <li>"s" <span class="ok">&rArr; "span"</span></li>
+                    <li>"#e" <span class="ok">&rArr; "#element1"</span></li>
+                    <li>"#element1." <span class="ok">&rArr; "#element1.element1"</span></li>
+                    <li>"#element1#" <span class="ok">&rArr; "#element1#"</span></li>
+                    <li>".element1." <span class="ok">&rArr; ".element1."</span></li>
+                    <li>"section &gt; h" <span class="ok">&rArr; "section &gt; h1"</span></li>
+                    <li>"section&gt;h" <span class="ok">&rArr; "section&gt;h1"</span></li>
+                    <li>"#element1 .a." <span class="ok">&rArr; "#element1 .a.second"</span></li>
+                    <li>"span, #element1 .a." <span class="ok">&rArr; "span, #element1 .a.second"</span></li>
+                    <li>".a[" <span class="ok">&rArr; ".a["</span></li>
+                    <li>".a[t" <span class="ok">&rArr; ".a[t"</span></li>
+                    <li>".a[data-test=test]." <span class="ok">&rArr; ".a[data-test=test].second"</span></li>
+                    <li>":" <span class="ok">&rArr; ":hover"</span></li>
+                    <li>"a:hover::a" <span class="ok">&rArr; "a:hover::after"</span></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>There should be (context-sensitive) auto-completion for CSS selectors.</li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>
