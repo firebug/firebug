@@ -1661,7 +1661,7 @@ var FirebugChrome =
     breakOnNext: function(context, event)
     {
         // Avoid bubbling from associated options.
-        if (event.target.id != "cmd_breakOnNext")
+        if (event.target.id != "cmd_toggleBreakOn")
             return;
 
         if (!context)

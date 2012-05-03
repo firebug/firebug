@@ -1694,7 +1694,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         try
         {
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext",
+            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn",
                 "breakable");
 
             if (FBTrace.DBG_BP)
@@ -1706,7 +1706,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             // If currentBreakable is false, then we are armed, but we broke
             if (currentBreakable == "false")
-                Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+                Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", "true");
 
             // If Firebug is minimized, open the UI to show we are stopped
             if (Firebug.isMinimized())

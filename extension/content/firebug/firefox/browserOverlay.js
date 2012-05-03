@@ -513,6 +513,7 @@ $command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar
 $command("cmd_toggleFirebug", "Firebug.toggleBar()");
 $command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg)", "document.popupNode");
+$command("cmd_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event)");
 $command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
 $command("cmd_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
@@ -556,12 +557,14 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
         else if (KeyEvent["DOM_"+key])
             keyProps.keycode = key;
 
+        FBTrace.sysout("keyProps", keyProps);
+
         $el("key", keyProps, keyset);
     });
 
     keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
 })(["toggleFirebug", "toggleInspecting", "focusCommandLine",
-    "detachFirebug", "closeFirebug"]);
+    "detachFirebug", "closeFirebug", "toggleBreakOn"]);
 
 
 /* Used by the global menu, but should be really global shortcuts?

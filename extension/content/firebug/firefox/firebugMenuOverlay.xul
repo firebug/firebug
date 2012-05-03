@@ -28,7 +28,7 @@
         <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
         <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) Firebug.chrome.focusLocationList(Firebug.currentContext);"/>
 
-        <command id="cmd_breakOnNext" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
+        <command id="cmd_toggleBreakOn" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
 
         <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
@@ -103,7 +103,7 @@
         <key id="key_decreaseTextSize" key="-" modifiers="accel" command="cmd_decreaseTextSize"/>
         <key id="key_normalTextSize" key="0" modifiers="accel" command="cmd_normalTextSize"/>
         <key id="key_help" keycode="VK_F1" command="cmd_openHelp"/>
-        <key id="key_toggleBreakOn" key="b" modifiers="accel alt" command="cmd_breakOnNext"/>
+        <key id="key_toggleBreakOn" key="b" modifiers="accel alt" command="cmd_toggleBreakOn"/>
     </keyset>
 
 </overlay>
