@@ -80,7 +80,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         CSSFontPropValueTag:
             SPAN({"class": "cssFontPropValue"},
                 FOR("part", "$propValueParts",
-                    SPAN({"class": "$part.type|getClass"}, "$part.value"),
+                    SPAN({"class": "$part.type|getClass", _repObject: "$part.font"}, "$part.value"),
                     SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
                 )
             ),
@@ -441,6 +441,11 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         }
     },
 
+    inspectDeclaration: function(rule)
+    {
+        Firebug.chrome.select(rule, "stylesheet");
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
@@ -580,6 +585,26 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         }
 
         return ret;
+    },
+
+    getContextMenuItems: function(style, target)
+    {
+        var items = CSSStyleSheetPanel.prototype.getContextMenuItems(style, target);
+
+        if (style instanceof Ci.nsIDOMFontFace && style.rule)
+        {
+            items.push(
+                "-",
+                {
+                    label: "css.label.Inspect_Declaration",
+                    tooltiptext: "css.tip.Inspect_Declaration",
+                    id: "fbInspectDeclaration",
+                    command: Obj.bindFixed(this.inspectDeclaration, this, style.rule)
+                }
+            );
+        }
+
+        return items;
     },
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
@@ -739,7 +764,7 @@ function getFontPropValueParts(element, value)
             if (font == usedFont || (genericFontFamilies.hasOwnProperty(font) &&
                 !genericFontUsed && !isFontInDefinition(fonts, usedFont)))
             {
-                parts.push({type: "used", value: fonts[i]});
+                parts.push({type: "used", value: fonts[i], font: usedFonts[j]});
 
                 isUsedFont = true;
                 if (genericFontFamilies.hasOwnProperty(font))
