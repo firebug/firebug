@@ -450,7 +450,15 @@ Events.addEventListener = function(parent, eventId, listener, capturing)
 
 Events.removeEventListener = function(parent, eventId, listener, capturing)
 {
-    parent.removeEventListener(eventId, listener, capturing);
+    try
+    {
+        parent.removeEventListener(eventId, listener, capturing);
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("events.removeEventListener; (" + eventId + ") " + e, e);
+    }
 
     if (FBTrace.DBG_EVENTLISTENERS)
     {

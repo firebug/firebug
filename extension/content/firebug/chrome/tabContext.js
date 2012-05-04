@@ -210,7 +210,12 @@ Firebug.TabContext.prototype =
         if (this.throttleTimeout)
             clearTimeout(this.throttleTimeout);
 
-        // All existing DOM listeners need to be cleared
+        // All existing DOM listeners need to be cleared. Note that context is destroyed
+        // when the top level window is unloaded. However, some listeners can be registered
+        // to iframes (documents), which can be already unloaded at this point.
+        // Removing listeners from such 'unloaded' documents (or window) can throw
+        // "TypeError: can't access dead object"
+        // We should avoid these exceptions (event if they are not representing mem leaks)
         this.unregisterAllListeners();
 
         state.panelState = {};
@@ -621,7 +626,19 @@ Firebug.TabContext.prototype =
         for (var i=0; i<this.listeners.length; i++)
         {
             var l = this.listeners[i];
-            l.parent.removeEventListener(l.eventId, l.listener, l.capturing);
+
+            try
+            {
+                l.parent.removeEventListener(l.eventId, l.listener, l.capturing);
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("tabContext.unregisterAllListeners; (" + l.eventId +
+                        ") " + e, e);
+                }
+            }
         }
 
         this.listeners = null;

@@ -638,6 +638,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
                 "no window or closed ") + " aborted: " + context.aborted);
 
         context.destroy(persistedState);
+
+        // Remove context from the list of contexts.
         Arr.remove(contexts, context);
 
         for (var name in context)
