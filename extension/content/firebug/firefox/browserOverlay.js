@@ -557,8 +557,6 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
         else if (KeyEvent["DOM_"+key])
             keyProps.keycode = key;
 
-        FBTrace.sysout("keyProps", keyProps);
-
         $el("key", keyProps, keyset);
     });
 
