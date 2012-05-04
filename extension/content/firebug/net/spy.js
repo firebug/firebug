@@ -90,8 +90,11 @@ Firebug.Spy = Obj.extend(Firebug.Module,
                 + context.spies.length + ") " + context.getName());
 
         // Make sure that all Spies in progress are detached at this moment.
-        for (var i=0; i<context.spies.length; i++)
-            context.spies[i].detach(true);
+        // Clone the array beforehand since the spy object is removed from the
+        // original arrya within detach.
+        var spies = Arr.cloneArray(context.spies);
+        for (var i=0; i<spies.length; i++)
+            spies[i].detach(true);
 
         delete context.spies;
 
@@ -809,7 +812,12 @@ function callPageHandler(spy, event, originalHandler)
         // Calling the page handler throwed an exception (see #502959)
         // This should be fixed in Firefox 3.5
         if (originalHandler && event)
-            originalHandler.handleEvent(event);
+        {
+            if (originalHandler.handleEvent)
+                originalHandler.handleEvent(event);
+            else
+                originalHandler.call(spy.xhrRequest, event);
+        }
     }
     catch (exc)
     {
