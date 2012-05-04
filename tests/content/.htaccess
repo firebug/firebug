@@ -1,0 +1,4 @@
+# enable directory browsing
+Options +Indexes 
+AddType application/x-xpinstall .xpi
+AddType 'text/html; charset=UTF-8' html
