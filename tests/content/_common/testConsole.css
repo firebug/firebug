@@ -1,0 +1,91 @@
+/* See license.txt for terms of usage */
+
+body {
+    background-color: #FFFFFF;
+    height: 100%;
+}
+
+/************************************************************************************************/
+
+#consoleToolbar toolbarbutton {
+    margin:1px;
+    -moz-box-orient: vertical;
+}
+
+#consoleToolbar toolbarbutton .toolbarbutton-icon {
+    padding:5px;
+}
+
+/************************************************************************************************/
+/* Toolbar buttons */
+
+#runAll {
+    list-style-image: url("chrome://fbtest/skin/runAll.png");
+    -moz-image-region: rect(0px 16px 16px 0px);
+}
+
+#stopTest {
+    list-style-image: url("chrome://firebug/skin/trace/clear.png");
+}
+
+#haltOnFailedTest {
+    list-style-image: url("chrome://fbtest/skin/downloadButtons-aero.png");
+    -moz-image-region: rect(0px 48px 16px 32px);
+}
+
+#refreshList {
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 64px 16px 48px);
+}
+
+#noTestTimeout {
+    list-style-image: url(chrome://fbtest/skin/Throbber-small.png);
+}
+
+#restartFirefox {
+    list-style-image: url("chrome://fbtest/skin/restart.png");
+}
+
+/************************************************************************************************/
+/* Test List URL Bar */
+
+/* Use IDs as the selector so, the height attribute is applied. Class selector doesn't work */
+#testListUrlBar textbox,
+#testCaseUrlBar textbox,
+#testDriverUrlBar textbox {
+    height: 20px;
+    border: 1px solid gray;
+}
+
+.testUrlBar > toolbarbutton {
+    list-style-image: url(chrome://browser/skin/Search-glass.png);
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
+
+.testUrlBar > toolbarbutton:hover {
+    -moz-image-region: rect(0px 32px 16px 16px);
+}
+
+/************************************************************************************************/
+/* Statusbar */
+
+#passingTests {
+    color: green;
+    padding-top: 3px;
+}
+
+#failingTests {
+    color: red;
+    padding-top: 3px;
+}
+
+#todoTests {
+    color: gray;
+    padding-top: 3px;
+}
+
+#progressMessage {
+    color: black;
+    padding-top: 3px;
+    text-align: right;
+}
