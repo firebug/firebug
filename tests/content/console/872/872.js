@@ -22,7 +22,7 @@ function fireTest(win)
     lookForLogRow.onRecognize(function sawLogRow(elt)
     {
         FBTest.progress("matched logRow-errorMessage", elt);
-        checkConsoleLogMessage(elt, "This is an error from an iframe!", null);
+        checkConsoleLogMessage(elt, /This is an error from an iframe!/, null);
         setTimeout(function allowCleanup()
         {
             FBTest.testDone("872.done");

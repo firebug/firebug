@@ -3,6 +3,7 @@ function runTest()
     FBTest.sysout("issue1693.START");
     FBTest.openNewTab(basePath + "console/1693/issue1693.html", function(win)
     {
+        FBTest.selectPanel("console");
         FBTest.enableConsolePanel(function(win)
         {
             FBTest.progress("issue1693.Select the Console panel and execute large request.");

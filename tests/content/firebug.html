@@ -3,12 +3,12 @@
 <html>
 <head>
     <title>Firebug 1.9 Test List</title>
-    <script type="text/javascript" src="testListUtils.js"></script>
-    <link rel="stylesheet" href="testList.css" type="text/css"/>
-    <link rel="stylesheet" href="styles/testConsole.css" type="text/css"/>
-    <link rel="stylesheet" href="styles/testList.css" type="text/css"/>
-    <link rel="stylesheet" href="styles/testResult.css" type="text/css"/>
-    <link rel="stylesheet" href="styles/tabView.css" type="text/css"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="_common/testListUtils.js"></script>
+    <link rel="stylesheet" href="_common/testConsole.css" type="text/css"/>
+    <link rel="stylesheet" href="_common/testList.css" type="text/css"/>
+    <link rel="stylesheet" href="_common/testResult.css" type="text/css"/>
+    <link rel="stylesheet" href="_common/tabView.css" type="text/css"/>
 </head>
 <body>
 
@@ -17,7 +17,7 @@
  * Root directory of the test tree. If it's empty, the parent directory of this file
  * is used as the test root directory.
  */
-var driverBaseURI = getDriverBaseURI() + "branches/1.9/";
+var driverBaseURI = getDriverBaseURI();
 var serverURI = driverBaseURI;
 
 /**
@@ -38,7 +38,6 @@ var serverURI = driverBaseURI;
 var testList = [
     {group: "loader", uri: "loader/dependencies/main.js",                   desc: "ModuleLoader: test module dependencies" },
     {group: "loader", uri: "loader/instanceof/main.js",                     desc: "ModuleLoader: verify 'instanceof' keyword in a module." },
-    {group: "loader", uri: "loader/paths/absolutepath.js",                  desc: "ModuleLoader: test absolute module path" },
     {group: "loader", uri: "loader/paths/relativepath.js",                  desc: "ModuleLoader: test relative module path" },
     {group: "lib",      uri: "lib/absoluteURL.js",                     desc: "Verify FBL absoluteURLs" },
     {group: "lib",      uri: "lib/cssClasses.js",                      desc: "Verify FBL.setClass, FBL.hasClass, FBL.removeClass" },
