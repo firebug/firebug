@@ -199,8 +199,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initialize: function()
     {
-        Firebug.consoleFilterTypes = "";
-
         // Initialize log limit.
         this.updateMaxLimit();
 
