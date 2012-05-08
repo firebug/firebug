@@ -1850,7 +1850,12 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,
 
     getSourceLinkTitle: function(frame)
     {
-        var fileName = Str.cropString(Url.getFileName(frame.href), 17);
+        var fileName = Url.getFileName(frame.href);
+
+        var maxWidth = Firebug.sourceLinkLabelWidth;
+        if (maxWidth > 0)
+            var fileName = Str.cropString(fileName, maxWidth);
+
         return Locale.$STRF("Line", [fileName, frame.line]);
     },
 
