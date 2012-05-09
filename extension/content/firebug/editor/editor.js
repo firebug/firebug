@@ -1117,45 +1117,41 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         if (!candidates || !cycle || value != lastValue || offset != lastOffset)
         {
-            originalOffset = offset;
+            originalOffset = lastOffset = offset;
             originalValue = lastValue = value;
 
             // Find the part of the string that is being completed
-            var range = getRange(value, offset);
+            var range = getRange(value, lastOffset);
             if (!range)
                 range = {start: 0, end: value.length};
 
             preExpr = value.substr(0, range.start);
-            var expr = value.substring(range.start, range.end);
+            lastExpr = value.substring(range.start, range.end);
             postExpr = value.substr(range.end);
             exprOffset = range.start;
 
             if (FBTrace.DBG_EDITOR)
             {
                 var sep = (value.indexOf("|") > -1) ? "^" : "|";
-                FBTrace.sysout(preExpr+sep+expr+sep+postExpr + " offset: " + offset);
+                FBTrace.sysout(preExpr+sep+lastExpr+sep+postExpr + " offset: " + lastOffset);
             }
 
             // Don't complete globals unless cycling.
-            if (!cycle && !expr)
+            if (!cycle && !lastExpr)
                 return false;
 
-            lastExpr = expr;
-            lastOffset = offset;
-
-            var searchExpr = "";
+            var search = false;
 
             // Check if the cursor is somewhere in the middle of the expression
-            if (expr && offset != range.end)
+            if (lastExpr && offset != range.end)
             {
                 if (cycle)
                 {
-                    // Complete by resetting the completion list to the full
-                    // list of candidates, finding our current position in it,
-                    // and cycling from there.
-                    searchExpr = expr;
-                    lastOffset = offset = range.start;
-                    lastExpr = expr = "";
+                    // Complete by resetting the completion list to a more complete
+                    // list of candidates, finding our current position in it, and
+                    // cycling from there.
+                    search = true;
+                    lastOffset = range.start;
                 }
                 else
                 {
@@ -1165,13 +1161,13 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
             }
 
             var out = {};
-            var values = evaluator(preExpr, expr, postExpr, context, out);
+            var values = evaluator(preExpr, lastExpr, postExpr, context, out);
             suggestedDefault = out.suggestion || null;
 
-            if (searchExpr)
-                this.setCandidatesBySearchExpr(searchExpr, values);
+            if (search)
+                this.setCandidatesBySearchExpr(lastExpr, values);
             else
-                this.setCandidatesByExpr(expr, values);
+                this.setCandidatesByExpr(lastExpr, values);
         }
 
         if (!candidates.length)
@@ -1182,7 +1178,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         // Adjust the case of the completion - when editing colors, 'd' should
         // be completed into 'darkred', not 'darkRed'.
-        var userTyped = lastExpr.substr(0, offset-exprOffset);
+        var userTyped = lastExpr.substr(0, lastOffset-exprOffset);
         completion = this.convertCompletionCase(completion, userTyped);
 
         var line = preExpr + completion + postExpr;
@@ -1190,7 +1186,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         // Show the completion
         lastValue = textBox.value = line;
-        textBox.setSelectionRange(offset, offsetEnd);
+        textBox.setSelectionRange(lastOffset, offsetEnd);
 
         return true;
     };
