@@ -1,0 +1,3 @@
+[submodule "extension/httpmonitor"]
+	path = extension/httpmonitor
+	url = git@github.com:firebug/httpmonitor.git

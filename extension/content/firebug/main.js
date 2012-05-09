@@ -54,6 +54,10 @@ paths["firebug/firefox/window"] = "firebug/chrome/window";
 paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
 paths["firebug/net/httpLib"] = "firebug/lib/http";
 
+// HTTP Monitor
+paths["httpmonitor/lib/trace"] = "firebug/lib/trace";
+paths["httpmonitor/lib/locale"] = "firebug/lib/locale";
+
 var originalLoad = require.load;
 require.load = function(context, fullName, url)
 {

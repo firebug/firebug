@@ -23,7 +23,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
 
     baseConfig.paths = baseConfig.paths || {
         "arch": baseConfig.arch,
-        "firebug": "chrome://firebug/content"
+        "firebug": "chrome://firebug/content",
+        "httpmonitor": "chrome://firebug-httpmonitor/content"
     };
 
     var config = {};
