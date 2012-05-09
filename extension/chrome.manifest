@@ -1,5 +1,6 @@
 content firebug content/firebug/
 content firebug content/firebug/ contentaccessible=yes
+content firebug-httpmonitor httpmonitor/content/httpmonitor/
 
 # Maps resource://firebug/* to files in modules/*
 # resource firebug modules/

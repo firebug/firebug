@@ -27,17 +27,20 @@ Obj.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 
 Obj.extend = function(l, r)
 {
-    if (!l || !r)
-    {
-        FBTrace.sysout("object.extend; ERROR", [l, r]);
-        throw new Error("Obj.extend on undefined object");
-    }
-
     var newOb = {};
-    for (var n in l)
-        newOb[n] = l[n];
-    for (var n in r)
-        newOb[n] = r[n];
+    for (var i=0; i<arguments.length; i++)
+    {
+        var arg = arguments[i];
+
+        if (!arg)
+        {
+            FBTrace.sysout("object.extend; ERROR", arguments);
+            throw new Error("Obj.extend on undefined object");
+        }
+
+        for (var n in arg)
+            newOb[n] = arg[n];
+    }
     return newOb;
 };
 
