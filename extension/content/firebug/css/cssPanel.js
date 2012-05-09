@@ -23,9 +23,9 @@ define([
     "firebug/chrome/menu",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
-    "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
-    "firebug/css/cssModule"
+    "firebug/css/cssModule",
+    "firebug/css/cssReps"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
     SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu) {
@@ -1172,7 +1172,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
-                    return Firebug.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
+                    return FirebugReps.CSS.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
                     if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
@@ -1187,11 +1187,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return FirebugReps.CSS.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
 
                 case "fontFamily":
-                    return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+                    return FirebugReps.CSS.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
             }
 
             delete this.infoTipType;

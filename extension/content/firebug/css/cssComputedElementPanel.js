@@ -8,10 +8,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xml",
+    "firebug/lib/url",
     "firebug/css/cssElementPanel",
-    "firebug/chrome/menu"
+    "firebug/chrome/menu",
+    "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, CSSElementPanel, Menu) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, CSSElementPanel, Menu) {
 
 with (Domplate) {
 
@@ -54,7 +57,8 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
             TABLE({width: "100%", role: "group"},
                 TBODY({role: "presentation"},
                     FOR("prop", "$props",
-                        TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                        TR({"class": "focusRow computedStyleRow", role: "listitem",
+                            _repObject: "$prop"},
                             TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
                             TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
                         )
@@ -227,6 +231,68 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
         Firebug.Options.set("computedStylesDisplay", display);
+    },
+
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        var propValue = Dom.getAncestorByClass(target, "stylePropValue");
+        if (propValue)
+        {
+            var text = propValue.textContent;
+            var prop = Dom.getAncestorByClass(target, "computedStyleRow");
+            var propNameNode = prop.getElementsByClassName("stylePropName").item(0);
+            var propName = propNameNode.textContent.toLowerCase();
+            var cssValue;
+
+            if (propName == "font" || propName == "font-family")
+                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
+            else
+                cssValue = Firebug.CSSModule.parseCSSValue(text, rangeOffset);
+
+            if (!cssValue)
+                return false;
+
+            if (cssValue.value == this.infoTipValue)
+            {
+                return true;
+            }
+
+            this.infoTipValue = cssValue.value;
+
+            switch (cssValue.type)
+            {
+                case "rgb":
+                case "hsl":
+                case "gradient":
+                case "colorKeyword":
+                    this.infoTipType = "color";
+                    this.infoTipObject = cssValue.value;
+                    return FirebugReps.CSS.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
+
+                case "url":
+                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
+                        propNameNode.textContent))
+                    {
+                        var rule = Firebug.getRepObject(target);
+                        var baseURL = this.getStylesheetURL(rule, true);
+                        var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
+                        var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
+                        var repeat = Firebug.CSSModule.parseRepeatValue(text);
+
+                        this.infoTipType = "image";
+                        this.infoTipObject = absURL;
+
+                        return FirebugReps.CSS.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                    }
+
+                case "fontFamily":
+                    return FirebugReps.CSS.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+            }
+
+            delete this.infoTipType;
+            delete this.infoTipValue;
+            delete this.infoTipObject;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
