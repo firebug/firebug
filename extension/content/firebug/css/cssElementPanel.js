@@ -624,7 +624,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return CSSStyleSheetPanel.prototype.showInfoTip(infoTip, target, x, y, rangeParent, rangeOffset);
+        return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
     updateContentState: function(state, remove)

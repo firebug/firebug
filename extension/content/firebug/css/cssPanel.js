@@ -1143,68 +1143,61 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        var prop = Dom.getAncestorByClass(target, "cssProp");
-        if (prop)
-            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
-
         if (propValue)
         {
-            var text = propValue.textContent, cssValue;
-            var propName = (propNameNode && propNameNode.textContent.toLowerCase());
+            var text = propValue.textContent;
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
+            var propName = propNameNode.textContent.toLowerCase();
+            var cssValue;
+
             if (propName == "font" || propName == "font-family")
-            {
-                if (text.charAt(rangeOffset) !== ",")
-                    cssValue = parseCssFontFamilyValue(propName, text, rangeOffset, true);
-            }
+                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
             else
+                cssValue = Firebug.CSSModule.parseCSSValue(text, rangeOffset);
+
+            if (!cssValue)
+                return false;
+
+            if (cssValue.value == this.infoTipValue)
+                return true;
+
+            this.infoTipValue = cssValue.value;
+
+            switch (cssValue.type)
             {
-                cssValue = parseCSSValue(text, rangeOffset);
-            }
-
-            if (cssValue)
-            {
-                if (cssValue.value == this.infoTipValue)
-                    return true;
-
-                this.infoTipValue = cssValue.value;
-
-                if (cssValue.type == "rgb" || cssValue.type == "hsl" ||
-                    cssValue.type == "gradient" ||
-                    (!cssValue.type && Css.isColorKeyword(cssValue.value)))
-                {
+                case "rgb":
+                case "hsl":
+                case "gradient":
+                case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
-
                     return Firebug.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
-                }
-                else if (cssValue.type == "url")
-                {
-                    var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-                    if (propNameNode && Css.isImageRule(Xml.getElementSimpleType(
-                        Firebug.getRepObject(target)),propNameNode.textContent))
+
+                case "url":
+                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
+                        propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
                         var baseURL = this.getStylesheetURL(rule, true);
-                        var relURL = parseURLValue(cssValue.value);
+                        var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
-                        var repeat = parseRepeatValue(text);
+                        var repeat = Firebug.CSSModule.parseRepeatValue(text);
 
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
                         return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
-                }
-                else if (cssValue.type == "fontFamily")
-                {
-                    return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
-                }
-            }
-        }
 
-        delete this.infoTipType;
-        delete this.infoTipValue;
-        delete this.infoTipObject;
+                case "fontFamily":
+                    return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+            }
+
+            delete this.infoTipType;
+            delete this.infoTipValue;
+            delete this.infoTipObject;
+        }
     },
 
     getEditor: function(target, value)
@@ -1663,7 +1656,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (charCode == 59 /*";"*/ && Css.hasClass(target, "cssPropValue"))
         {
-            var cssValue = parseCSSValue(this.input.value, this.input.selectionStart);
+            var cssValue = Firebug.CSSModule.parseCSSValue(this.input.value, this.input.selectionStart);
             // Simple test, if we are inside a string (see issue 4543)
             var isValueInString = (cssValue.value.indexOf("\"") != -1);
 
@@ -1681,9 +1674,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
         if (propName === "font" || propName === "font-family")
-            return parseCssFontFamilyValue(propName, value, offset);
+            return Firebug.CSSModule.parseCSSFontFamilyValue(value, offset);
         else
-            return parseCSSValue(value, offset);
+            return Firebug.CSSModule.parseCSSValue(value, offset);
     },
 
     getAutoCompleteList: function(preExpr, expr, postExpr)
@@ -1704,9 +1697,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else
         {
             if (expr.charAt(0) === "!")
-            {
                 return ["!important"];
-            }
 
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
@@ -1752,7 +1743,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
         }
 
-        var range = parseCSSValue(value, offset);
+        var range = Firebug.CSSModule.parseCSSValue(value, offset);
         var type = (range && range.type) || "";
         var expr = (range ? value.substring(range.start, range.end) : "");
 
@@ -2435,106 +2426,6 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
-}
-
-function parseURLValue(value)
-{
-    var m = reURL.exec(value);
-    return m ? m[1] : "";
-}
-
-function parseRepeatValue(value)
-{
-    var m = reRepeat.exec(value);
-    return m ? m[0] : "";
-}
-
-function parseCssFontFamilyValue(propName, value, offset)
-{
-    var reFonts;
-    if (propName === "font")
-        reFonts = /^(.*\d\S*\s)?(.*?)(\s?!.*)?$/;
-    else
-        reFonts = /^()(.*?)(\s?!.*)?$/;
-
-    var m = reFonts.exec(value);
-    if (!m)
-        return parseCSSValue(value, offset);
-
-    var fonts = m[2].split(",");
-    var totalLength = m[1] ? m[1].length : 0;
-
-    // Parse things that aren't font names as regular CSS properties.
-    if (m[1] && offset < m[1].length)
-        return parseCSSValue(value, offset);
-
-    for (var i = 0; i < fonts.length; ++i)
-    {
-        totalLength += fonts[i].length;
-        if (offset <= totalLength)
-        {
-            // Give back the value and location of this font, whitespace-trimmed.
-            var font = fonts[i], ws = /^\s*(.*)$/.exec(font);
-            font = ws[1];
-            var end = totalLength, start = end - font.length;
-            return {
-                value: font,
-                start: start,
-                end: end,
-                type: "fontFamily"
-            };
-        }
-
-        // include ","
-        ++totalLength;
-    }
-
-    // Parse !important.
-    return parseCSSValue(value, offset);
-}
-
-function parseCSSValue(value, offset)
-{
-    var start = 0;
-    var m;
-    while (true)
-    {
-        m = reSplitCSS.exec(value);
-        if (m && m.index+m[0].length < offset)
-        {
-            value = value.substr(m.index+m[0].length);
-            start += m.index+m[0].length;
-            offset -= m.index+m[0].length;
-        }
-        else
-            break;
-    }
-
-    if (!m)
-        return;
-
-    var type;
-    if (m[1])
-        type = "url";
-    else if (m[2] || m[4])
-        type = "rgb";
-    else if (m[3])
-        type = "hsl";
-    else if (m[5])
-        type = "int";
-
-    var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
-
-    if (!type && m[10] && m[10].indexOf("gradient") != -1)
-    {
-        var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
-        if (!arg)
-            return;
-
-        cssValue.value += arg[0];
-        cssValue.type = "gradient";
-    }
-    return cssValue;
 }
 
 function getRuleLine(rule)
