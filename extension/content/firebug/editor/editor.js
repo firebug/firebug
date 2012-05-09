@@ -1301,12 +1301,24 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 return ind;
         }
 
-        // Otherwise, default to the shortest candidate
-        var pick = 0;
-        for (var i = 1; i < candidates.length; i++)
+        var userTyped = lastExpr.substr(0, lastOffset-exprOffset);
+        var utLen = userTyped.length;
+
+        // Otherwise, default to the shortest candidate that matches the case,
+        // or the shortest one that doesn't
+        var pick = -1, pcand, pcaseState;
+        for (var i = 0; i < candidates.length; i++)
         {
-            if (candidates[i].length < candidates[pick].length)
+            var cand = candidates[i];
+            var caseState = (cand.substr(0, utLen) === userTyped ? 1 : 0);
+            if (pick === -1 ||
+                caseState > pcaseState ||
+                (caseState === pcaseState && cand.length < pcand.length))
+            {
                 pick = i;
+                pcand = cand;
+                pcaseState = caseState;
+            }
         }
         return pick;
     };
