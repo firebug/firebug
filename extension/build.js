@@ -157,7 +157,8 @@ function prepareBuild()
                     "firebug/net/spy",
                     "firebug/js/tabCache",
                     "firebug/chrome/activation",
-                    "firebug/css/cssComputedElementPanel",
+                    "firebug/css/cssElementPanel",
+                    "firebug/css/cssComputedElementPanel"
                 ],
             },
             __dirname + "/content/firebug/main.js"

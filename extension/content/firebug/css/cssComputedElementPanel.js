@@ -10,11 +10,11 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/url",
-    "firebug/css/cssElementPanel",
     "firebug/chrome/menu",
+    "firebug/lib/string",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, CSSElementPanel, Menu) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Menu, Str) {
 
 with (Domplate) {
 
@@ -25,111 +25,215 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // ********************************************************************************************* //
-// CSS Elemenet Panel (HTML side panel)
+// CSS Computed panel (HTML side panel)
 
 function CSSComputedElementPanel() {}
 
-CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
+CSSComputedElementPanel.prototype = Obj.extend(Firebug.Panel,
 {
     template: domplate(
     {
-        computedTag:
+        computedStylesTag:
             DIV({"class": "a11yCSSView", role: "list", "aria-label":
-                Locale.$STR("aria.labels.computed styles")},
-                FOR("group", "$groups",
-                    DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
-                        H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
-                            IMG({"class": "twisty", role: "presentation"}),
-                            SPAN({"class": "cssComputedLabel"}, "$group.title")
-                        ),
-                        TAG("$stylesTag", {props: "$group.props"})
-                    )
-                )
-            ),
+                Locale.$STR("aria.labels.computed styles")}),
 
-        computedAlphabeticalTag:
-            DIV({"class": "a11yCSSView", role: "list",
-                "aria-label" : Locale.$STR("aria.labels.computed styles")},
-                TAG("$stylesTag", {props: "$props"})
+        groupedStylesTag:
+            FOR("group", "$groups",
+                DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list",
+                        $hidden: "$group.props|hasNoStyles", _repObject: "$group"},
+                    H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
+                        IMG({"class": "twisty", role: "presentation"}),
+                        SPAN({"class": "cssComputedLabel"}, "$group.title")
+                    ),
+                    TAG("$stylesTag", {props: "$group.props"})
+                )
             ),
 
         stylesTag:
-            TABLE({width: "100%", role: "group"},
+            TABLE({"class": "computedStyleTable", role: "list"},
                 TBODY({role: "presentation"},
                     FOR("prop", "$props",
-                        TR({"class": "focusRow computedStyleRow", role: "listitem",
-                            _repObject: "$prop"},
-                            TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
-                            TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
+                        TR({"class": "focusRow computedStyleRow computedStyle", role: "listitem",
+                                $hasSelectors: "$prop|hasSelectors", _repObject: "$prop"},
+                            TD({"class": "stylePropName", role: "presentation"},
+                                "$prop.property"
+                            ),
+                            TD({role: "presentation"},
+                                SPAN({"class": "stylePropValue"}, "$prop.value"))
+                        ),
+                        TR({"class": "focusRow computedStyleRow matchedSelectors", _repObject: "$prop"},
+                            TD({colspan: 2},
+                                TAG("$selectorsTag", {prop: "$prop"})
+                            )
                         )
                     )
                 )
-            )
+            ),
+
+        selectorsTag:
+            TABLE({"class": "matchedSelectorsTable", role: "list"},
+                TBODY({role: "presentation"},
+                    FOR("selector", "$prop.matchedSelectors",
+                        TR({"class": "focusRow computedStyleRow styleSelector "+
+                            "$selector.status|getStatusClass", role: "listitem",
+                                _repObject: "$selector"},
+                            TD({"class": "selectorName", role: "presentation"},
+                                "$selector.selector.text"),
+                            TD({role: "presentation"},
+                                SPAN({"class": "stylePropValue"}, "$selector.value")),
+                            TD({"class": "styleSourceLink", role: "presentation"},
+                                TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
+                            )
+                        )
+                    )
+                )
+            ),
+          
+        getStatusClass: function(status)
+        {
+            return statusClasses[status];
+        },
+
+        hasNoStyles: function(props)
+        {
+            return props.length == 0;
+        },
+
+        hasSelectors: function(prop)
+        {
+            return prop.matchedRuleCount != 0;
+        },
+
+        getSourceLink: function(selector)
+        {
+            var href = selector.href;
+            var line = selector.ruleLine;
+            var rule = selector.selector._cssRule._domRule;
+            var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
+            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css", rule, instance) : null;
+            return sourceLink;
+        }
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     updateComputedView: function(element)
     {
-        if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSComputedElementPanel.updateComputedView;", element);
-
         var win = element.ownerDocument.defaultView;
-        var style = win.getComputedStyle(element, "");
+        var computedStyle = win.getComputedStyle(element);
+
+        var props = [];
+        for (var i = 0; i < computedStyle.length; ++i)
+        {
+            var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
+
+            if ((!Firebug.showMozillaSpecificStyles && Str.hasPrefix(prop.property, "-moz")) ||
+                (Firebug.showUserDefinedStylesOnly && prop.matchedRuleCount == 0))
+            {
+                continue;
+            }
+
+            props.push(prop);
+        }
+
+        var parentNode = this.template.computedStylesTag.replace({}, this.panelNode);
 
         if (Firebug.computedStylesDisplay == "alphabetical")
         {
-            var props = [];
-
-            for (var groupName in styleGroups)
-            {
-                var groupProps = styleGroups[groupName];
-
-                for (var i = 0; i < groupProps.length; ++i)
-                {
-                    var propName = groupProps[i];
-                    if (!Firebug.showMozillaSpecificStyles && propName.match(/^-moz/))
-                        continue;
-
-                    var propValue = Css.stripUnits(Css.rgbToHex(style.getPropertyValue(propName)));
-                    if (propValue)
-                        props.push({name: propName, value: propValue});
-                }
-            }
-
             this.sortProperties(props);
 
-            var result = this.template.computedAlphabeticalTag.replace(
-                {props: props}, this.panelNode);
+            var result = this.template.stylesTag.replace({props: props}, parentNode);
         }
         else
         {
             var groups = [];
-
             for (var groupName in styleGroups)
             {
                 var title = Locale.$STR("StyleGroup-" + groupName);
-                var group = {title: title, props: []};
-                groups.push(group);
+                var group = {name: groupName, title: title, props: []};
 
-                var props = styleGroups[groupName];
-                for (var i = 0; i < props.length; ++i)
+                var groupProps = styleGroups[groupName];
+                for (var i = 0; i < groupProps.length; ++i)
                 {
-                    var propName = props[i];
-                    if (!Firebug.showMozillaSpecificStyles && propName.match(/^-moz/))
-                      continue;
+                    var propName = groupProps[i];
+                    if (!Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz"))
+                        continue;
 
-                    var propValue = Css.stripUnits(Css.rgbToHex(style.getPropertyValue(propName)));
-                    if (propValue)
-                        group.props.push({name: propName, value: propValue});
+                    var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+
+                    if (Firebug.showUserDefinedStylesOnly && prop.matchedRuleCount == 0)
+                        continue;
+
+                    group.props.push(prop);
+
+                    for (var j = 0; j < props.length; ++j)
+                    {
+                        if (props[j].property == propName)
+                        {
+                            props.splice(j, 1);
+                            break;
+                        }
+                    }
                 }
-                group.opened = this.groupOpened[title];
+
+                group.opened = this.groupOpened[groupName];
+
+                groups.push(group);
             }
 
-            var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
+            if (props.length > 0)
+            {
+                var group = groups[groups.length-1];
+                for (var i = 0; i < props.length; ++i)
+                {
+                    var propName = props[i].property;
+                    if (!Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz"))
+                        continue;
+
+                    var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+
+                    group.props.push(prop);
+                }
+
+                group.opened = this.groupOpened[group.name];
+            }
+
+            var result = this.template.groupedStylesTag.replace({groups: groups}, parentNode);
         }
 
-        Events.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
+        Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
+    },
+
+    toggleGroup: function(node)
+    {
+        var groupNode = Dom.getAncestorByClass(node, "computedStylesGroup");
+        var group = Firebug.getRepObject(groupNode);
+
+        Css.toggleClass(groupNode, "opened");
+        this.groupOpened[group.name] = Css.hasClass(groupNode, "opened");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClick: function(event)
+    {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var cssComputedHeader = Dom.getAncestorByClass(event.target, "cssComputedHeader");
+        if (cssComputedHeader)
+        {
+            this.toggleGroup(event.target);
+            return;
+        }
+
+        var computedStyle = Dom.getAncestorByClass(event.target, "computedStyle");
+        if (computedStyle && Css.hasClass(computedStyle, "hasSelectors"))
+        {
+            this.toggleStyle(event.target);
+            return;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -149,22 +253,45 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
         }
 
         this.onClick = Obj.bind(this.onClick, this);
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
 
         // Listen for CSS changes so the Computed panel is properly updated when needed.
         Firebug.CSSModule.addListener(this);
 
-        CSSElementPanel.prototype.initialize.apply(this, arguments);
+        Firebug.Panel.initialize.apply(this, arguments);
     },
 
     destroy: function()
     {
         Firebug.CSSModule.removeListener(this);
 
-        CSSElementPanel.prototype.destroy.apply(this, arguments);
+        Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
-    updateView: function(element)
+    initializeNode: function(oldPanelNode)
+    {
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
+
+        Firebug.Panel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode: function()
+    {
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
+
+        Firebug.Panel.destroyNode.apply(this, arguments);
+    },
+
+    supportsObject: function(object, type)
+    {
+        return object instanceof window.Element ? 1 : 0;
+    },
+
+    refresh: function()
+    {
+        this.updateSelection(this.selection);
+    },
+
+    updateSelection: function(element)
     {
         this.updateComputedView(element);
     },
@@ -231,6 +358,17 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
         Firebug.Options.set("computedStylesDisplay", display);
+    },
+
+    getStylesheetURL: function(rule, getBaseUri)
+    {
+        // if the parentStyleSheet.href is null, CSS std says its inline style
+        if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
+            return rule.parentStyleSheet.href;
+        else if (getBaseUri)
+            return this.selection.ownerDocument.baseURI;
+        else
+            return this.selection.ownerDocument.location.href;
     },
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
