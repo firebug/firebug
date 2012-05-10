@@ -94,9 +94,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             this.sortProperties(props);
 
-            FBTrace.sysout("props", props);
             var result = this.template.stylesTag.replace({props: props}, parentNode);
-            FBTrace.sysout("result", result);
         }
         else
         {
@@ -199,8 +197,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         this.groupOpened = [];
         for (var groupName in styleGroups)
         {
-            var title = Locale.$STR("StyleGroup-" + groupName);
-            this.groupOpened[title] = true;
+            this.groupOpened[groupName] = true;
         }
 
         this.onClick = Obj.bind(this.onClick, this);
