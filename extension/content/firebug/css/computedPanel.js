@@ -119,6 +119,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateComputedView: function(element)
     {
+        function isUnwantedProp(propName)
+        {
+            return !Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz")
+        }
+
         var win = element.ownerDocument.defaultView;
         var computedStyle = win.getComputedStyle(element);
 
@@ -127,11 +132,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
 
-            if ((!Firebug.showMozillaSpecificStyles && Str.hasPrefix(prop.property, "-moz")) ||
-                (Firebug.showUserDefinedStylesOnly && prop.matchedRuleCount == 0))
-            {
+            if (isUnwantedProp(prop.property))
                 continue;
-            }
 
             props.push(prop);
         }
@@ -156,13 +158,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 for (var i = 0; i < groupProps.length; ++i)
                 {
                     var propName = groupProps[i];
-                    if (!Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz"))
+                    if (isUnwantedProp(propName))
                         continue;
 
                     var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
-
-                    if (Firebug.showUserDefinedStylesOnly && prop.matchedRuleCount == 0)
-                        continue;
 
                     group.props.push(prop);
 
@@ -187,7 +186,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 for (var i = 0; i < props.length; ++i)
                 {
                     var propName = props[i].property;
-                    if (!Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz"))
+                    if (isUnwantedProp(propName))
                         continue;
 
                     var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
@@ -384,7 +383,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (propName == "font" || propName == "font-family")
             {
-                if (value.charAt(offset) == ",")
+                if (text.charAt(rangeOffset) == ",")
                     return;
 
                 cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
