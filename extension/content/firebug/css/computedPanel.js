@@ -149,8 +149,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(computedStyle[i]) :
                 Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
 
-            if (isUnwantedProp(prop.property))
+            if (isUnwantedProp(prop.property) ||
+                (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0))
+            {
                 continue;
+            }
 
             props.push(prop);
         }
@@ -180,6 +183,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
   
                     var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
                         Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+
+                    if (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0)
+                        continue;
 
                     group.props.push(prop);
 
@@ -354,7 +360,17 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        var items = [
+        var items = [];
+
+        if (this.cssLogic)
+        {
+            items.push(
+                Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
+                "style.option.tip.Show_User_Agent_CSS")
+            );
+        }
+
+        items.push(
             {
                 label: "Sort_alphabetically",
                 type: "checkbox",
@@ -371,7 +387,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }
-        ];
+        );
 
         return items;
     },
