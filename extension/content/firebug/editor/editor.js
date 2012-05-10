@@ -1161,7 +1161,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
             }
 
             var out = {};
-            var values = evaluator(preExpr, lastExpr, postExpr, context, out);
+            var values = evaluator(preExpr, lastExpr, postExpr, range, context, out);
             suggestedDefault = out.suggestion || null;
 
             if (search)
