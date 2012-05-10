@@ -243,7 +243,16 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var group = Firebug.getRepObject(groupNode);
 
         Css.toggleClass(groupNode, "opened");
-        this.groupOpened[group.name] = Css.hasClass(groupNode, "opened");
+        var opened = Css.hasClass(groupNode, "opened");
+        this.groupOpened[group.name] = opened;
+
+        if (opened)
+        {
+            var offset = Dom.getClientOffset(node);
+            var titleAtTop = offset.y < this.panelNode.scrollTop;
+            Dom.scrollTo(groupNode, this.panelNode, null,
+                groupNode.offsetHeight > this.panelNode.clientHeight || titleAtTop ? "top" : "bottom");
+        }
     },
 
     toggleAllStyles: function(event, expand)

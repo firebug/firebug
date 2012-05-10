@@ -535,7 +535,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     }
 };
 
-Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
+Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
 {
     if (!element)
         return;
@@ -548,33 +548,83 @@ Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 
     var offset = Dom.getClientOffset(element);
 
-    if (!notY)
+    if (!alignmentX)
+        alignmentX = "centerOrLeft";
+
+    if (!alignmentY)
+        alignmentY = "centerOrTop";
+
+    if (alignmentY)
     {
         var topSpace = offset.y - scrollBox.scrollTop;
-        var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
-            - (offset.y + element.offsetHeight);
+        var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight) -
+            (offset.y + element.offsetHeight);
 
+        // Element is vertically not completely visible
         if (topSpace < 0 || bottomSpace < 0)
         {
-            var centerY = offset.y - (scrollBox.clientHeight/2);
-            scrollBox.scrollTop = centerY;
+            switch (alignmentY)
+            {
+                case "top":
+                    scrollBox.scrollTop = offset.y;
+                    break;
+
+                case "center":
+                case "centerOrTop":
+                    var elementFitsIntoScrollBox = element.offsetHeight <= scrollBox.clientHeight;
+                    var y = elementFitsIntoScrollBox || alignmentY != "centerOrTop" ?
+                        offset.y - (scrollBox.clientHeight - element.offsetHeight) / 2 :
+                        offset.y;
+                    scrollBox.scrollTop = y;
+                    break;
+
+                case "bottom":
+                    var y = offset.y + element.offsetHeight - scrollBox.clientHeight;
+                    scrollBox.scrollTop = y;
+                    break;
+            }
         }
     }
 
-    if (!notX)
+    if (alignmentX)
     {
         var leftSpace = offset.x - scrollBox.scrollLeft;
-        var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth)
-            - (offset.x + element.clientWidth);
+        var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth) -
+            (offset.x + element.clientWidth);
 
+        // Element is horizontally not completely visible
         if (leftSpace < 0 || rightSpace < 0)
         {
-            var centerX = offset.x - (scrollBox.clientWidth/2);
-            scrollBox.scrollLeft = centerX;
+            switch (alignmentY)
+            {
+                case "left":
+                    scrollBox.scrollLeft = offset.x;
+                    break;
+
+                case "center":
+                case "centerOrLeft":
+                    var elementFitsIntoScrollBox = element.offsetWidth <= scrollBox.clientWidth;
+                    var x = elementFitsIntoScrollBox || alignmentX != "centerOrLeft" ?
+                        offset.x - (scrollBox.clientWidth - element.offsetWidth) / 2 :
+                        offset.x;
+                    scrollBox.scrollLeft = y;
+                    break;
+
+                case "right":
+                    var x = offset.x + element.offsetWidth - scrollBox.clientWidth;
+                    scrollBox.scrollLeft = x;
+                    break;
+            }
         }
     }
-    if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
+
+    if (FBTrace.DBG_PANELS)
+        FBTrace.sysout("dom.scrollTo", element.innerHTML);
+};
+
+Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
+{
+    Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft", notY ? "none" : "centerOrTop");
 };
 
 // ********************************************************************************************* //
