@@ -1694,7 +1694,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return Firebug.CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, range)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1748,7 +1748,38 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             else
             {
-                return Css.getCSSKeywordsByProperty(nodeType, propName);
+                var lowerProp = propName.toLowerCase(), avoid;
+                if (["background", "border", "font"].indexOf(lowerProp) !== -1)
+                {
+                    if (cycle)
+                    {
+                        // Cycle only within the same category, if possible.
+                        var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, expr);
+                        if (cat)
+                            return (cat in Css.cssKeywords ? Css.cssKeywords[cat] : [cat]);
+                    }
+                    else
+                    {
+                        // Avoid repeated properties. We assume the values to be solely
+                        // space-separated tokens, within a comma-separated part (like
+                        // for CSS3 multiple backgrounds). This is absolutely wrong, but
+                        // good enough in practice because non-tokens for which it fails
+                        // likely aren't in any category.
+                        // "background-position" and "background-repeat" values can occur
+                        // twice, so they are special-cased.
+                        avoid = [];
+                        var preTokens = preExpr.split(",").reverse()[0].split(" ");
+                        var postTokens = postExpr.split(",")[0].split(" ");
+                        var tokens = preTokens.concat(postTokens);
+                        for (var i = 0; i < tokens.length; ++i)
+                        {
+                            var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, tokens[i]);
+                            if (cat && cat !== "position" && cat !== "bgRepeat")
+                                avoid.push(cat);
+                        }
+                    }
+                }
+                return Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
             }
         }
     },
@@ -2111,7 +2142,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         return {start: start, end: end};
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, range, context, out)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
     {
         if (!Css.hasClass(this.target, "cssSelector"))
             return [];

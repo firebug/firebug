@@ -24,7 +24,7 @@ var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-Css.getCSSKeywordsByProperty = function(nodeType, propName)
+Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
     if (!cssKeywordMap[nodeType])
     {
@@ -48,9 +48,34 @@ Css.getCSSKeywordsByProperty = function(nodeType, propName)
         }
     }
 
-    return propName.toLowerCase() in cssKeywordMap[nodeType] ?
-        cssKeywordMap[nodeType][propName.toLowerCase()] : [];
+    propName = propName.toLowerCase();
+
+    if (avoid)
+        return getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid);
+
+    return cssKeywordMap[nodeType][propName] || [];
 };
+
+function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
+{
+    if (!(nodeType in Css.cssInfo) || !(propName in Css.cssInfo[nodeType]))
+        return [];
+
+    var list = [];
+    var types = Css.cssInfo[nodeType][propName];
+    for (var i = 0; i < types.length; ++i)
+    {
+        var type = types[i];
+        if (avoid.indexOf(type) !== -1)
+            continue;
+        var keywords = Css.cssKeywords[type];
+        if (keywords)
+            list.push.apply(list, keywords);
+        else
+            list.push(type);
+    }
+    return list;
+}
 
 Css.getCSSPropertyNames = function(nodeType)
 {
@@ -65,6 +90,29 @@ Css.getCSSPropertyNames = function(nodeType)
     return cssPropNames[nodeType];
 };
 
+Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
+{
+    if (!(nodeType in Css.cssInfo) || !(shorthandProp in Css.cssInfo[nodeType]))
+        return null;
+
+    var category = null;
+    var types = Css.cssInfo[nodeType][shorthandProp];
+    for (var i = 0; i < types.length; ++i)
+    {
+        var type = types[i];
+        var keywords = Css.cssKeywords[type];
+        if (keywords ? (keywords.indexOf(keyword) !== -1) : (type === keyword))
+        {
+            // Set this as the matched category, or if there is one already
+            // bail out (we don't have a unique one).
+            if (category)
+                return null;
+            category = type;
+        }
+    }
+    return category;
+};
+
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
@@ -77,10 +125,6 @@ Css.isColorKeyword = function(keyword)
         var colors = Css.cssKeywords["color"];
         for (var i = 0; i < colors.length; ++i)
             cssColorNames.push(colors[i].toLowerCase());
-
-        var systemColors = Css.cssKeywords["systemColor"];
-        for (var i = 0; i < systemColors.length; ++i)
-            cssColorNames.push(systemColors[i].toLowerCase());
     }
 
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
@@ -667,28 +711,27 @@ Css.rgbToHex = function(value)
 Css.cssInfo = {};
 Css.cssInfo.html =
 {
-    "background": ["bgRepeat", "bgAttachment", "position", "color", "systemColor",
-        "mozBackgroundImage", "none"],
+    "background": ["bgRepeat", "bgAttachment", "position", "color", "bgImage"],
     "background-attachment": ["bgAttachment"],
-    "background-color": ["color", "systemColor"],
-    "background-image": ["none", "mozBackgroundImage"],
+    "background-color": ["color"],
+    "background-image": ["bgImage"],
     "background-position": ["position"],
     "background-repeat": ["bgRepeat"],
     "background-size": ["bgSize"],
     "background-clip": ["boxModels"], //FF4.0
     "background-origin": ["boxModels"], //FF4.0
 
-    "border": ["borderStyle", "thickness", "color", "systemColor", "none"],
-    "border-top": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-right": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-bottom": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-left": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
+    "border": ["borderStyle", "thickness", "color", "none"],
+    "border-top": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-right": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-bottom": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-left": ["borderStyle", "borderCollapse", "color", "none"],
     "border-collapse": ["borderCollapse"],
-    "border-color": ["color", "systemColor"],
-    "border-top-color": ["color", "systemColor"],
-    "border-right-color": ["color", "systemColor"],
-    "border-bottom-color": ["color", "systemColor"],
-    "border-left-color": ["color", "systemColor"],
+    "border-color": ["color"],
+    "border-top-color": ["color"],
+    "border-right-color": ["color"],
+    "border-bottom-color": ["color"],
+    "border-left-color": ["color"],
     "border-spacing": [],
     "border-style": ["borderStyle"],
     "border-top-style": ["borderStyle"],
@@ -706,13 +749,13 @@ Css.cssInfo.html =
     "border-bottom-right-radius": [], //FF4.0
     "border-bottom-left-radius": [], //FF4.0
 
-    "box-shadow": ["boxShadow", "color", "systemColor", "none"], //FF4.0
+    "box-shadow": ["boxShadow", "color", "none"], //FF4.0
 
     "bottom": ["auto"],
     "caption-side": ["captionSide"],
     "clear": ["clear", "none"],
     "clip": ["auto"],
-    "color": ["color", "systemColor"],
+    "color": ["color"],
     "content": ["content", "none"],
     "counter-increment": ["none"],
     "counter-reset": ["none"],
@@ -757,8 +800,8 @@ Css.cssInfo.html =
 
     "opacity": [],
 
-    "outline": ["borderStyle", "color", "systemColor", "none"],
-    "outline-color": ["color", "systemColor"],
+    "outline": ["borderStyle", "color", "none"],
+    "outline-color": ["color"],
     "outline-style": ["borderStyle"],
     "outline-width": [],
 
@@ -773,7 +816,7 @@ Css.cssInfo.html =
     "padding-left": [],
 
     "pointer-events": ["auto", "none"],
-    "position": ["position"],
+    "position": ["elPosition"],
     "quotes": ["none"],
     "resize": ["resize"], //FF4.0
     "right": ["auto"],
@@ -802,14 +845,14 @@ Css.cssInfo.html =
     "-moz-border-image-slice": [],
     "-moz-border-image-source": [],
     "-moz-border-image-width": [],
-    "-moz-border-top-colors": ["color", "systemColor"],
-    "-moz-border-right-colors": ["color", "systemColor"],
-    "-moz-border-bottom-colors": ["color", "systemColor"],
-    "-moz-border-left-colors": ["color", "systemColor"],
-    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "-moz-border-start-color": ["color", "systemColor"],
-    "-moz-border-end-color": ["color", "systemColor"],
+    "-moz-border-top-colors": ["color"],
+    "-moz-border-right-colors": ["color"],
+    "-moz-border-bottom-colors": ["color"],
+    "-moz-border-left-colors": ["color"],
+    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "none"],
+    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "none"],
+    "-moz-border-start-color": ["color"],
+    "-moz-border-end-color": ["color"],
     "-moz-border-start-style": ["borderStyle"],
     "-moz-border-end-style": ["borderStyle"],
     "-moz-border-start-width": ["thickness"],
@@ -829,10 +872,10 @@ Css.cssInfo.html =
     "-moz-binding": [],
     "-moz-column-count": ["auto"],
     "-moz-column-gap": ["normal"],
-    "-moz-column-rule": ["thickness", "borderStyle", "color", "systemColor"],
+    "-moz-column-rule": ["thickness", "borderStyle", "color"],
     "-moz-column-rule-width": ["thickness"],
     "-moz-column-rule-style": ["borderStyle"],
-    "-moz-column-rule-color": ["color",  "systemColor"],
+    "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto"],
     "-moz-image-region": [],
     "-moz-transform": ["mozTransformFunction", "none"],
@@ -1064,58 +1107,6 @@ Css.cssKeywords =
         "hidden"
     ],
 
-    "systemColor":
-    [
-        "ActiveBorder",
-        "ActiveCaption",
-        "AppWorkspace",
-        "Background",
-        "ButtonFace",
-        "ButtonHighlight",
-        "ButtonShadow",
-        "ButtonText",
-        "CaptionText",
-        "GrayText",
-        "Highlight",
-        "HighlightText",
-        "InactiveBorder",
-        "InactiveCaption",
-        "InactiveCaptionText",
-        "InfoBackground",
-        "InfoText",
-        "Menu",
-        "MenuText",
-        "Scrollbar",
-        "ThreeDDarkShadow",
-        "ThreeDFace",
-        "ThreeDHighlight",
-        "ThreeDLightShadow",
-        "ThreeDShadow",
-        "Window",
-        "WindowFrame",
-        "WindowText",
-        "-moz-mac-unified-toolbar",
-        "-moz-win-borderless-glass",
-        "-moz-win-browsertabbar-toolbox",
-        "-moz-win-communicationstext",
-        "-moz-win-communications-toolbox",
-        "-moz-win-exclude-glass", // FF 6.0
-        "-moz-win-glass",
-        "-moz-win-mediatext",
-        "-moz-win-media-toolbox",
-        "-moz-window-button-box",
-        "-moz-window-button-box-maximized",
-        "-moz-window-button-close",
-        "-moz-window-button-maximize",
-        "-moz-window-button-minimize",
-        "-moz-window-button-restore",
-        "-moz-window-frame-bottom",
-        "-moz-window-frame-left",
-        "-moz-window-frame-right",
-        "-moz-window-titlebar",
-        "-moz-window-titlebar-maximized"
-    ],
-
     "color":
     [
         "aliceblue",
@@ -1273,8 +1264,8 @@ Css.cssKeywords =
         "-moz-buttondefault",
         "-moz-buttonhoverface",
         "-moz-buttonhovertext",
-        "-moz-default-background-color", // ff 5.0
-        "-moz-default-color", // ff 5.0
+        "-moz-default-background-color", // FF 5.0
+        "-moz-default-color", // FF 5.0
         "-moz-cellhighlight",
         "-moz-cellhighlighttext",
         "-moz-field",
@@ -1298,8 +1289,57 @@ Css.cssKeywords =
         "-moz-menuhover",
         "-moz-menuhovertext",
         "-moz-win-communicationstext",
+        "-moz-nativehyperlinktext",
+
+        // System colors
+        "ActiveBorder",
+        "ActiveCaption",
+        "AppWorkspace",
+        "Background",
+        "ButtonFace",
+        "ButtonHighlight",
+        "ButtonShadow",
+        "ButtonText",
+        "CaptionText",
+        "GrayText",
+        "Highlight",
+        "HighlightText",
+        "InactiveBorder",
+        "InactiveCaption",
+        "InactiveCaptionText",
+        "InfoBackground",
+        "InfoText",
+        "Menu",
+        "MenuText",
+        "Scrollbar",
+        "ThreeDDarkShadow",
+        "ThreeDFace",
+        "ThreeDHighlight",
+        "ThreeDLightShadow",
+        "ThreeDShadow",
+        "Window",
+        "WindowFrame",
+        "WindowText",
+        "-moz-mac-unified-toolbar",
+        "-moz-win-borderless-glass",
+        "-moz-win-browsertabbar-toolbox",
+        "-moz-win-communicationstext",
+        "-moz-win-communications-toolbox",
+        "-moz-win-exclude-glass", // FF 6.0
+        "-moz-win-glass",
         "-moz-win-mediatext",
-        "-moz-nativehyperlinktext"
+        "-moz-win-media-toolbox",
+        "-moz-window-button-box",
+        "-moz-window-button-box-maximized",
+        "-moz-window-button-close",
+        "-moz-window-button-maximize",
+        "-moz-window-button-minimize",
+        "-moz-window-button-restore",
+        "-moz-window-frame-bottom",
+        "-moz-window-frame-left",
+        "-moz-window-frame-right",
+        "-moz-window-titlebar",
+        "-moz-window-titlebar-maximized"
     ],
 
     "auto":
@@ -1629,7 +1669,7 @@ Css.cssKeywords =
         "-moz-stack"
     ],
 
-    "position":
+    "elPosition":
     [
         "static",
         "relative",
@@ -1795,12 +1835,13 @@ Css.cssKeywords =
         "space"
     ],
 
-    "mozBackgroundImage":
+    "bgImage":
     [
         "-moz-linear-gradient", // FF4.0
         "-moz-radial-gradient", // FF4.0
         "-moz-element", // FF4.0
-        "-moz-image-rect" // FF4.0
+        "-moz-image-rect", // FF4.0
+        "none"
     ],
 
     "mozTransformFunction":
