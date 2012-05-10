@@ -1694,7 +1694,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return Firebug.CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1717,10 +1717,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
 
-            if (propName === "font" || propName === "font-family")
+            if (range.type === "fontFamily")
             {
+                var keywords = Css.cssKeywords["fontFamily"].slice();
                 if (this.panel && this.panel.context)
                 {
                     // Add the fonts used in this context (they might be inaccessible
@@ -1744,8 +1744,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             keywords[i] = q + k + q;
                     }
                 }
+                return keywords;
             }
-            return keywords;
+            else
+            {
+                return Css.getCSSKeywordsByProperty(nodeType, propName);
+            }
         }
     },
 
@@ -2107,7 +2111,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         return {start: start, end: end};
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, context, out)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, context, out)
     {
         if (!Css.hasClass(this.target, "cssSelector"))
             return [];

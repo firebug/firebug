@@ -721,8 +721,9 @@ Css.cssInfo.html =
     "display": ["display", "none"],
     "empty-cells": ["-moz-show-background"],
     "float": ["float", "none"],
-    "font": ["fontStyle", "fontVariant", "fontWeight", "fontFamily", "mozFont"],
 
+    // specification of font families in "font" is special-cased
+    "font": ["fontStyle", "fontSize", "fontVariant", "fontWeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
     "font-size-adjust": [],
@@ -890,7 +891,7 @@ Css.cssInfo.svg = {
     "filter": ["none"],
     "flood-color": ["currentColor"],
     "flood-opacity": [],
-    "font": ["fontStyle","fontVariant","fontWeight"],
+    "font": ["fontStyle", "fontSize", "fontVariant", "fontWeight"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
     "font-size-adjust": [],
