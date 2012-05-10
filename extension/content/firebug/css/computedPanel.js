@@ -10,13 +10,31 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/url",
+    "firebug/js/sourceLink",
     "firebug/chrome/menu",
     "firebug/lib/string",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Menu, Str) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu, Str) {
 
 with (Domplate) {
+    
+//********************************************************************************************* //
+// Constants
+
+const Cu = Components.utils;
+
+const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBestMatch"];
+
+try
+{
+    Cu.import("resource:///modules/devtools/CssLogic.jsm");
+}
+catch (err)
+{
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available!");
+}
 
 // ********************************************************************************************* //
 // CSS Computed panel (HTML side panel)
@@ -48,20 +66,65 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 TBODY({role: "presentation"},
                     FOR("prop", "$props",
                         TR({"class": "focusRow computedStyleRow computedStyle", role: "listitem",
-                                _repObject: "$prop"},
+                                $hasSelectors: "$prop|hasSelectors", _repObject: "$prop"},
                             TD({"class": "stylePropName", role: "presentation"},
                                 "$prop.property"
                             ),
                             TD({role: "presentation"},
                                 SPAN({"class": "stylePropValue"}, "$prop.value"))
+                        ),
+                        TR({"class": "focusRow computedStyleRow matchedSelectors", _repObject: "$prop"},
+                            TD({colspan: 2},
+                                TAG("$selectorsTag", {prop: "$prop"})
+                            )
                         )
                     )
                 )
             ),
 
+        selectorsTag:
+            TABLE({"class": "matchedSelectorsTable", role: "list"},
+                TBODY({role: "presentation"},
+                    FOR("selector", "$prop.matchedSelectors",
+                        TR({"class": "focusRow computedStyleRow styleSelector "+
+                            "$selector.status|getStatusClass", role: "listitem",
+                                _repObject: "$selector"},
+                            TD({"class": "selectorName", role: "presentation"},
+                                "$selector.selector.text"),
+                            TD({role: "presentation"},
+                                SPAN({"class": "stylePropValue"}, "$selector.value")),
+                            TD({"class": "styleSourceLink", role: "presentation"},
+                                TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
+                            )
+                        )
+                    )
+                )
+            ),
+
+        getStatusClass: function(status)
+        {
+            return statusClasses[status];
+        },
+
         hasNoStyles: function(props)
         {
             return props.length == 0;
+        },
+
+        hasSelectors: function(prop)
+        {
+            return prop.matchedRuleCount != 0;
+        },
+
+        getSourceLink: function(selector)
+        {
+            var href = selector.href;
+            var line = selector.ruleLine;
+            var rule = selector.selector._cssRule._domRule;
+            var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
+
+            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css", rule, instance) : null;
+            return sourceLink;
         }
     }),
 
@@ -77,10 +140,14 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var win = element.ownerDocument.defaultView;
         var computedStyle = win.getComputedStyle(element);
 
+        if (this.cssLogic)
+            this.cssLogic.highlight(element);
+
         var props = [];
         for (var i = 0; i < computedStyle.length; ++i)
         {
-            var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
+            var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(computedStyle[i]) :
+                Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
 
             if (isUnwantedProp(prop.property))
                 continue;
@@ -110,8 +177,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     var propName = groupProps[i];
                     if (isUnwantedProp(propName))
                         continue;
-
-                    var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+  
+                    var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
+                        Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
 
                     group.props.push(prop);
 
@@ -138,8 +206,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     var propName = props[i].property;
                     if (isUnwantedProp(propName))
                         continue;
-
-                    var prop = Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+  
+                    var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
+                        Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
 
                     group.props.push(prop);
                 }
@@ -162,6 +231,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         this.groupOpened[group.name] = Css.hasClass(groupNode, "opened");
     },
 
+    toggleAllStyles: function(event, expand)
+    {
+        var computedStyles = this.panelNode.getElementsByClassName("computedStyle");
+
+        for (var i = 0; i < computedStyles.length; ++i)
+        {
+            if (!Css.hasClass(computedStyles[i], "hasSelectors"))
+                continue;
+
+            var isOpened = Css.hasClass(computedStyles[i], "opened");
+            if ((expand && !isOpened) || (!expand && isOpened))
+                this.toggleStyle(computedStyles[i]);
+        }
+    },
+
+    toggleStyle: function(node)
+    {
+        var styleNode = Dom.getAncestorByClass(node, "computedStyle");
+        var style = Firebug.getRepObject(styleNode);
+
+        Css.toggleClass(styleNode, "opened");
+        this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
+    },
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
@@ -194,16 +287,19 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     initialize: function()
     {
+        if (typeof CssLogic != "undefined")
+            this.cssLogic = new CssLogic();
+
         this.groupOpened = [];
         for (var groupName in styleGroups)
-        {
             this.groupOpened[groupName] = true;
-        }
 
-        this.onClick = Obj.bind(this.onClick, this);
+        this.styleOpened = [];
 
         // Listen for CSS changes so the Computed panel is properly updated when needed.
         Firebug.CSSModule.addListener(this);
+
+        this.onClick = Obj.bind(this.onClick, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -246,13 +342,19 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "computedStylesDisplay" || name == "showMozillaSpecificStyles")
+        var optionMap = {
+            showUserAgentCSS: 1,
+            computedStylesDisplay: 1,
+            showMozillaSpecificStyles: 1
+        };
+
+        if (name in optionMap)
             this.refresh();
     },
 
     getOptionsMenuItems: function()
     {
-        return [
+        var items = [
             {
                 label: "Sort_alphabetically",
                 type: "checkbox",
@@ -270,17 +372,59 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 tooltiptext: "panel.tip.Refresh"
             }
         ];
+
+        return items;
     },
 
     getContextMenuItems: function(style, target)
     {
-        return [
+        var items = [];
+        var computedStyles = this.panelNode.getElementsByClassName("computedStyle");
+        var expandAll = false;
+        var collapseAll = false;
+        for (var i = 0; i < computedStyles.length; ++i)
+        {
+            if (!Css.hasClass(computedStyles[i], "hasSelectors"))
+                continue;
+
+            if (!expandAll && !Css.hasClass(computedStyles[i], "opened"))
+                expandAll = true;
+            if (!collapseAll && Css.hasClass(computedStyles[i], "opened"))
+                collapseAll = true;
+        }
+
+        if (expandAll)
+        {
+            items.push(
+                {
+                    label: "computed.option.label.Expand_All_Styles",
+                    command: Obj.bind(this.toggleAllStyles, this, true),
+                    tooltiptext: "computed.option.tip.Expand_All_Styles"
+                }
+            );
+        }
+
+        if (collapseAll)
+        {
+            items.push(
+                {
+                    label: "computed.option.label.Collapse_All_Styles",
+                    command: Obj.bind(this.toggleAllStyles, this, false),
+                    tooltiptext: "computed.option.tip.Collapse_All_Styles"
+                }
+            );
+        }
+
+        items.push(
+            "-",
             {
                 label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }
-        ];
+        );
+
+        return items;
     },
 
     onMouseDown: function(event)
@@ -332,13 +476,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var propValue = Dom.getAncestorByClass(target, "stylePropValue");
         if (propValue)
         {
-            var text = propValue.textContent;
-            var prop = Dom.getAncestorByClass(target, "computedStyleRow");
-            var propNameNode = prop.getElementsByClassName("stylePropName").item(0);
-            var propName = propNameNode.textContent.toLowerCase();
+            var propInfo = Firebug.getRepObject(target);
+
+            var text = propInfo.value;
             var cssValue;
 
-            if (propName == "font" || propName == "font-family")
+            if (propInfo.property == "font" || propInfo.property == "font-family")
             {
                 if (text.charAt(rangeOffset) == ",")
                     return;
@@ -370,10 +513,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
                 case "url":
                     if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
-                        propNameNode.textContent))
+                        propInfo.property))
                     {
-                        var rule = Firebug.getRepObject(target);
-                        var baseURL = this.getStylesheetURL(rule, true);
+                        var baseURL = propInfo.matchedSelectors[0].href;
                         var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
                         var repeat = Firebug.CSSModule.parseRepeatValue(text);
@@ -421,8 +563,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     }
 });
 
-// ********************************************************************************************* //
-// Helpers
+
+//********************************************************************************************* //
+//Helpers
 
 const styleGroups =
 {
@@ -572,41 +715,15 @@ const styleGroups =
         "orient"
     ],
 
-    other: [
-        "cursor",
-        "list-style-image",
-        "list-style-position",
-        "list-style-type",
-        "marker-offset",
-        "-moz-user-focus",
-        "-moz-user-select",
-        "-moz-user-modify",
-        "-moz-user-input",
-        "-moz-animation", // FF5.0
-        "-moz-animation-delay", // FF5.0
-        "-moz-animation-direction", // FF5.0
-        "-moz-animation-duration", // FF5.0
-        "-moz-animation-iteration-count", // FF5.0
-        "-moz-animation-name", // FF5.0
-        "-moz-animation-play-state", // FF5.0
-        "-moz-animation-timing-function", // FF5.0
-        "-moz-animation-fill-mode", // FF5.0
-        "-moz-transition", // FF4.0
-        "-moz-transition-delay", // FF4.0
-        "-moz-transition-duration", // FF4.0
-        "-moz-transition-property", // FF4.0
-        "-moz-transition-timing-function", // FF4.0
-        "-moz-force-broken-image-icon",
-        "-moz-window-shadow"
-    ]
+    other: []
 };
 
-// ********************************************************************************************* //
-// Registration
+//********************************************************************************************* //
+//Registration
 
 Firebug.registerPanel(CSSComputedPanel);
 
 return CSSComputedPanel;
 
-// ********************************************************************************************* //
+//********************************************************************************************* //
 }});

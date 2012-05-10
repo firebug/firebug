@@ -40,48 +40,55 @@
     color: darkgreen;
 }
 
-.cssPropValue, .cssFontPropValue {
+.cssPropValue,
+.cssFontPropValue {
     color: darkblue;
 }
 
-.cssPropValueUnused, .cssFontPropSeparator {
+.cssPropValueUnused,
+.cssFontPropSeparator,
+.cssParentMatch {
     color: #787878;
 }
 
 .cssOverridden > .cssPropName,
-.cssOverridden > .cssPropValue {
+.cssOverridden > .cssPropValue,
+.cssOverridden > .selectorName,
+.cssOverridden > td > .stylePropValue {
     text-decoration: line-through;
 }
 
-.computedStylesGroup table {
-  display: none;
+.computedStyleTable {
+    width: 100%;
 }
 
-.computedStylesGroup.opened table {
-  display: block;
+.computedStylesGroup > .computedStyleTable {
+    display: none;
+}
+
+.computedStylesGroup.opened > .computedStyleTable {
+    display: table;
 }
 
 .cssInheritHeader, .cssComputedHeader {
-  position: relative;
+    position: relative;
 }
 
-.cssComputedHeader {
-  cursor: pointer;
+.cssComputedHeader,
+.computedStyle.hasSelectors {
+    cursor: pointer;
 }
 
 .computedStylesGroup > .cssComputedHeader {
-  margin: 0;
+    margin: 0;
 }
 
-.computedStylesGroup.opened > .cssComputedHeader {
-  margin: 0 0 4px;
+.computedStylesGroup.hidden {
+    display: none;
 }
 
 .cssComputedHeader > .twisty {
-  background-position: 4px 3px !important;
-}
-
-.cssInheritedRule {
+    background-position: 4px 3px !important;
 }
 
 .cssInheritLabel,
@@ -92,6 +99,59 @@
 
 .cssComputedLabel {
     margin-left: 14px;
+}
+
+.computedStyleRow:not(:last-child) > td {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+.computedStyleRow > td:first-child {
+    width: 160px;
+}
+
+.selectorName {
+    -moz-padding-start: 24px;
+}
+
+.stylePropName {
+    font-weight: bold;
+    padding: 0 4px 0 18px;
+}
+
+.stylePropName > .twisty {
+    display: block;
+    position: relative;
+    float: left;
+    background-position: 2px 1px;
+    margin-right: 4px;
+}
+
+.matchedSelectorsTable {
+    width: 100%;
+}
+
+.styleSelector > td:first-child {
+    width: 160px;
+}
+
+.styleSelector > td:n-th-child(2) {
+    width: 140px;
+}
+
+.matchedSelectors {
+    display: none;
+}
+
+.computedStyle.opened + .matchedSelectors {
+    display: table-row;
+}
+
+.styleSourceLink > .objectLink-sourceLink {
+    position: relative;
+    top: 0;
+    left: 0;
+    padding: 0;
+    text-align: right;
 }
 
 .cssRule .objectLink-sourceLink {
@@ -127,16 +187,6 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-.stylePropName {
-    font-weight: bold;
-    padding: 0 4px 4px 4px;
-    width: 50%;
-}
-
-.stylePropValue {
-    width: 50%;
-}
 
 .useA11y .a11yCSSView .focusRow:focus {
     outline: none;

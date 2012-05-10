@@ -53,9 +53,11 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "onlyShowAppliedStyles",
     "showUserAgentCSS",
     "expandShorthandProps",
+    "cssEditMode",
+
+    // Computed
     "computedStylesDisplay",
     "showMozillaSpecificStyles",
-    "cssEditMode",
 
     // Script
     "decompileEvals", "replaceTabs", "maxScriptLineLength",
