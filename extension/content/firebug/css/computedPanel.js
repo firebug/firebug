@@ -13,9 +13,10 @@ define([
     "firebug/js/sourceLink",
     "firebug/chrome/menu",
     "firebug/lib/string",
+    "firebug/lib/persist",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu, Str) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu, Str, Persist) {
 
 with (Domplate) {
     
@@ -65,7 +66,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             TABLE({"class": "computedStyleTable", role: "list"},
                 TBODY({role: "presentation"},
                     FOR("prop", "$props",
-                        TR({"class": "focusRow computedStyleRow computedStyle", role: "listitem",
+                        TR({"class": "focusRow computedStyleRow computedStyle",
+                                $opened: "$prop.opened", role: "listitem",
                                 $hasSelectors: "$prop|hasSelectors", _repObject: "$prop"},
                             TD({"class": "stylePropName", role: "presentation"},
                                 "$prop.property"
@@ -164,6 +166,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             this.sortProperties(props);
 
+            for (var i = 0; i < props.length; ++i)
+                props[i].opened = this.styleOpened[props[i].property];
+
             var result = this.template.stylesTag.replace({props: props}, parentNode);
         }
         else
@@ -186,6 +191,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
                     if (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0)
                         continue;
+
+                    prop.opened = this.styleOpened[propName];
 
                     group.props.push(prop);
 
@@ -215,6 +222,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
   
                     var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
                         Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+
+                    prop.opened = this.styleOpened[propName];
 
                     group.props.push(prop);
                 }
@@ -310,8 +319,13 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
-    destroy: function()
+    destroy: function(state)
     {
+        state.groupOpened = this.groupOpened;
+        state.styleOpened = this.styleOpened;
+
+        Persist.persistObjects(this, state);
+
         Firebug.CSSModule.removeListener(this);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
@@ -329,6 +343,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
+    },
+
+    show: function(state)
+    {
+        // Wait for loadedContext to restore the panel
+        if (this.context.loaded)
+        {
+            var state;
+            Persist.restoreObjects(this, state);
+
+            if (state)
+            {
+                if (state.groupOpened)
+                    this.groupOpened = state.groupOpened;
+
+                if (state.styleOpened)
+                    this.styleOpened = state.styleOpened;
+            }
+        }
+    },
+
+    updateView: function(element)
+    {
+        this.updateComputedView(element);
     },
 
     supportsObject: function(object, type)
