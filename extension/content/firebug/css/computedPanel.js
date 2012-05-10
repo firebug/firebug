@@ -27,9 +27,9 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // CSS Computed panel (HTML side panel)
 
-function CSSComputedElementPanel() {}
+function CSSComputedPanel() {}
 
-CSSComputedElementPanel.prototype = Obj.extend(Firebug.Panel,
+CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -643,9 +643,9 @@ const styleGroups =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(CSSComputedElementPanel);
+Firebug.registerPanel(CSSComputedPanel);
 
-return CSSComputedElementPanel;
+return CSSComputedPanel;
 
 // ********************************************************************************************* //
 }});

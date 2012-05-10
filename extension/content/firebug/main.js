@@ -43,6 +43,8 @@ catch (err)
 // http://getfirebug.com/wiki/index.php/Extension_Migration
 // http://code.google.com/p/fbug/issues/detail?id=5199
 var paths = {};
+paths["firebug/css/cssComputedElementPanel"] = "firebug/css/computedPanel";
+paths["firebug/css/cssElementPanel"] = "firebug/css/stylePanel";
 paths["firebug/firefox/annotations"] = "firebug/chrome/annotations";
 paths["firebug/firefox/privacy"] = "firebug/chrome/privacy";
 paths["firebug/firefox/system"] = "firebug/lib/system";

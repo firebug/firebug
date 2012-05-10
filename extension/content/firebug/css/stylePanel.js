@@ -43,9 +43,9 @@ const STATE_HOVER   = 0x04;
 // ********************************************************************************************* //
 // CSS Elemenet Panel (HTML side panel)
 
-function CSSElementPanel() {}
+function CSSStylePanel() {}
 
-CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
+CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 {
     template: domplate(
     {
@@ -790,9 +790,9 @@ function getFontPropValueParts(element, value)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(CSSElementPanel);
+Firebug.registerPanel(CSSStylePanel);
 
-return CSSElementPanel;
+return CSSStylePanel;
 
 // ********************************************************************************************* //
 }});
