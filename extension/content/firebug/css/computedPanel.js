@@ -321,6 +321,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     destroy: function(state)
     {
+        state.scrollTop = this.panelNode.scrollTop ? this.panelNode.scrollTop : this.lastScrollTop;
         state.groupOpened = this.groupOpened;
         state.styleOpened = this.styleOpened;
 
@@ -355,6 +356,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (state)
             {
+                if (state.scrollTop)
+                    this.panelNode.scrollTop = state.scrollTop;
+
                 if (state.groupOpened)
                     this.groupOpened = state.groupOpened;
 
@@ -362,6 +366,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     this.styleOpened = state.styleOpened;
             }
         }
+    },
+
+    hide: function()
+    {
+        this.lastScrollTop = this.panelNode.scrollTop;
     },
 
     updateView: function(element)
