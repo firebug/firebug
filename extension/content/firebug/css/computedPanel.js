@@ -587,7 +587,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
                         propInfo.property))
                     {
-                        var baseURL = propInfo.matchedSelectors[0].href;
+                        var baseURL = propInfo.href || propInfo.matchedSelectors[0].href;
                         var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
                         var repeat = Firebug.CSSModule.parseRepeatValue(text);
