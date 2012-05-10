@@ -291,16 +291,10 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     parseCSSFontFamilyValue: function(value, offset)
     {
-        if (value.charAt(offset) == ",")
-            return;
-
         const reFontFamilies = new RegExp("(^(.*(\\d+(\\.\\d+)?"+
             "(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|(x{1,2}-)?(small|large)|medium|larger|smaller) )"+
             "(.*?)|.*?)(\s*!.*)?$");
         var matches = reFontFamilies.exec(value);
-
-        if (!matches)
-            return this.parseCSSValue(value, offset);
 
         // Parse things that aren't font names as regular CSS properties.
         if (!matches ||

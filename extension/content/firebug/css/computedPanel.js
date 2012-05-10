@@ -383,17 +383,22 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             var cssValue;
 
             if (propName == "font" || propName == "font-family")
+            {
+                if (value.charAt(offset) == ",")
+                    return;
+
                 cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
+            }
             else
+            {
                 cssValue = Firebug.CSSModule.parseCSSValue(text, rangeOffset);
+            }
 
             if (!cssValue)
                 return false;
 
             if (cssValue.value == this.infoTipValue)
-            {
                 return true;
-            }
 
             this.infoTipValue = cssValue.value;
 
