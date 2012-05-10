@@ -347,9 +347,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     getPropertyInfo: function(computedStyle, propName) {
         var propInfo = {
             property: propName,
-            value: computedStyle.getPropertyValue(propName),
-            matchedSelectors: [],
-            matchedRuleCount: 0
+            value: computedStyle.getPropertyValue(propName)
         };
 
         return propInfo;

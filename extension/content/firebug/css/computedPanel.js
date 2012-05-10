@@ -19,12 +19,6 @@ function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Menu, Str) 
 with (Domplate) {
 
 // ********************************************************************************************* //
-// Constants
-
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
-// ********************************************************************************************* //
 // CSS Computed panel (HTML side panel)
 
 function CSSComputedPanel() {}
@@ -54,64 +48,20 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 TBODY({role: "presentation"},
                     FOR("prop", "$props",
                         TR({"class": "focusRow computedStyleRow computedStyle", role: "listitem",
-                                $hasSelectors: "$prop|hasSelectors", _repObject: "$prop"},
+                                _repObject: "$prop"},
                             TD({"class": "stylePropName", role: "presentation"},
                                 "$prop.property"
                             ),
                             TD({role: "presentation"},
                                 SPAN({"class": "stylePropValue"}, "$prop.value"))
-                        ),
-                        TR({"class": "focusRow computedStyleRow matchedSelectors", _repObject: "$prop"},
-                            TD({colspan: 2},
-                                TAG("$selectorsTag", {prop: "$prop"})
-                            )
                         )
                     )
                 )
             ),
-
-        selectorsTag:
-            TABLE({"class": "matchedSelectorsTable", role: "list"},
-                TBODY({role: "presentation"},
-                    FOR("selector", "$prop.matchedSelectors",
-                        TR({"class": "focusRow computedStyleRow styleSelector "+
-                            "$selector.status|getStatusClass", role: "listitem",
-                                _repObject: "$selector"},
-                            TD({"class": "selectorName", role: "presentation"},
-                                "$selector.selector.text"),
-                            TD({role: "presentation"},
-                                SPAN({"class": "stylePropValue"}, "$selector.value")),
-                            TD({"class": "styleSourceLink", role: "presentation"},
-                                TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
-                            )
-                        )
-                    )
-                )
-            ),
-          
-        getStatusClass: function(status)
-        {
-            return statusClasses[status];
-        },
 
         hasNoStyles: function(props)
         {
             return props.length == 0;
-        },
-
-        hasSelectors: function(prop)
-        {
-            return prop.matchedRuleCount != 0;
-        },
-
-        getSourceLink: function(selector)
-        {
-            var href = selector.href;
-            var line = selector.ruleLine;
-            var rule = selector.selector._cssRule._domRule;
-            var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
-            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css", rule, instance) : null;
-            return sourceLink;
         }
     }),
 
@@ -144,7 +94,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             this.sortProperties(props);
 
+            FBTrace.sysout("props", props);
             var result = this.template.stylesTag.replace({props: props}, parentNode);
+            FBTrace.sysout("result", result);
         }
         else
         {
@@ -357,6 +309,14 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
         Firebug.Options.set("computedStylesDisplay", display);
+    },
+
+    sortProperties: function(props)
+    {
+        props.sort(function(a, b)
+        {
+            return a.property > b.property ? 1 : -1;
+        });
     },
 
     getStylesheetURL: function(rule, getBaseUri)
