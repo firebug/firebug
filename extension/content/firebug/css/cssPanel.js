@@ -1164,7 +1164,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 if (text.charAt(rangeOffset) == ",")
                     return;
 
-                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
+                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, propName);
             }
             else
             {
@@ -1689,7 +1689,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
         if (propName == "font" || propName == "font-family")
-            return Firebug.CSSModule.parseCSSFontFamilyValue(value, offset);
+            return Firebug.CSSModule.parseCSSFontFamilyValue(value, offset, propName);
         else
             return Firebug.CSSModule.parseCSSValue(value, offset);
     },

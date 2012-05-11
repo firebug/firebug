@@ -570,19 +570,19 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var propInfo = Firebug.getRepObject(target);
 
-            var text = propInfo.value;
+            var prop = propInfo.property, value = propInfo.value;
             var cssValue;
 
-            if (propInfo.property == "font" || propInfo.property == "font-family")
+            if (prop == "font" || prop == "font-family")
             {
-                if (text.charAt(rangeOffset) == ",")
+                if (value.charAt(rangeOffset) == ",")
                     return;
 
-                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
+                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(value, rangeOffset, prop);
             }
             else
             {
-                cssValue = Firebug.CSSModule.parseCSSValue(text, rangeOffset);
+                cssValue = Firebug.CSSModule.parseCSSValue(value, rangeOffset);
             }
 
             if (!cssValue)
@@ -604,13 +604,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
-                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
-                        propInfo.property))
+                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)), prop))
                     {
                         var baseURL = propInfo.href || propInfo.matchedSelectors[0].href;
                         var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
-                        var repeat = Firebug.CSSModule.parseRepeatValue(text);
+                        var repeat = Firebug.CSSModule.parseRepeatValue(value);
 
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;

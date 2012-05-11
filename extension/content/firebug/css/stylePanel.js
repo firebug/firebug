@@ -152,7 +152,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 {
                     var propValueElem = prop.getElementsByClassName("cssPropValue").item(0);
                     var propValue = propValueElem.textContent;
-                    var fontPropValueParts = getFontPropValueParts(element, propValue);
+                    var fontPropValueParts = getFontPropValueParts(element, propValue, propName);
 
                     // xxxsz: Web fonts not being loaded at display time
                     // won't be marked as used. See issue 5420.
@@ -706,7 +706,7 @@ function safeGetContentState(selection)
     }
 }
 
-function getFontPropValueParts(element, value)
+function getFontPropValueParts(element, value, propName)
 {
     function isFontInDefinition(fonts, font)
     {
@@ -727,25 +727,29 @@ function getFontPropValueParts(element, value)
         "fantasy": 1,
         "monospace": 1,
     };
-    const reFontFamilies = new RegExp("(^(.*(\\d+(\\.\\d+)?(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|"+
-        "x{0,2}-(small|large)|medium|larger|smaller)) (.*?)|.*?)( !important)?$");
-    var matches = reFontFamilies.exec(value);
+
     var parts = [];
-    var i = 0;
 
-    if (!matches)
-        return;
+    // (Mirroring CSSModule.parseCSSFontFamilyValue)
+    if (propName === "font")
+    {
+        var rePreFont = new RegExp(
+            "^.*" + // anything, then
+            "(" +
+                "\\d+(\\.\\d+)?([a-z]*|%)|" + // a number (with possible unit)
+                "(x{1,2}-)?(small|large)|medium|larger|smaller" + // or an named size description
+            ") "
+        );
+        var matches = rePreFont.exec(value);
+        if (!matches)
+            return;
+        var preProps = matches[0].slice(0, -1);
+        parts.push({type: "otherProps", value: preProps});
+        value = value.substr(matches[0].length);
+    }
 
-    var fonts;
-    if (matches[7])
-    {
-        parts.push({type: "otherProps", value: matches[2]});
-        fonts = matches[7].split(",");
-    }
-    else
-    {
-        fonts = matches[1].split(",");
-    }
+    var matches = /^(.*?)( !important)?$/.exec(value);
+    var fonts = matches[1].split(",");
 
     // Clone the element to just get the fonts used in it and not its descendants
     var clonedElement = element.cloneNode(false);
@@ -756,7 +760,7 @@ function getFontPropValueParts(element, value)
     clonedElement.parentNode.removeChild(clonedElement);
 
     var genericFontUsed = false;
-    for (; i < fonts.length; ++i)
+    for (var i = 0; i < fonts.length; ++i)
     {
         var font = fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase();
         var isUsedFont = false;
@@ -784,7 +788,7 @@ function getFontPropValueParts(element, value)
     // so use this as hack
     parts[parts.length-1].lastFont = true;
 
-    if (matches[8])
+    if (matches[2])
         parts.push({type: "important", value: " !important"});
 
     return parts;
