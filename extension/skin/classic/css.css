@@ -58,8 +58,10 @@
     text-decoration: line-through;
 }
 
-.computedStyleTable {
+.computedStyleTable,
+.matchedSelectorsTable {
     width: 100%;
+    border-spacing: 0;
 }
 
 .computedStylesGroup > .computedStyleTable {
@@ -79,6 +81,10 @@
     cursor: pointer;
 }
 
+.computedStyle.hasSelectors > .stylePropName {
+    background-position: 4px 4px !important;
+}
+
 .computedStylesGroup > .cssComputedHeader {
     margin: 0;
 }
@@ -88,7 +94,7 @@
 }
 
 .cssComputedHeader > .twisty {
-    background-position: 4px 3px !important;
+    background-position: 4px 4px !important;
 }
 
 .cssInheritLabel,
@@ -101,8 +107,16 @@
     margin-left: 14px;
 }
 
-.computedStyleRow:not(:last-child) > td {
+.computedStyle:not(:nth-last-child(2)) > td,
+.computedStyle:nth-last-child(2).opened > td,
+.computedStyle:not(:nth-last-child(2)) + .matchedSelectors .styleSelector > td,
+.computedStyle:nth-last-child(2) + .matchedSelectors .styleSelector:not(:last-child) > td {
     border-bottom: 1px solid #EFEFEF;
+}
+
+.computedStyleRow > td {
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .computedStyleRow > td:first-child {
@@ -116,18 +130,6 @@
 .stylePropName {
     font-weight: bold;
     padding: 0 4px 0 18px;
-}
-
-.stylePropName > .twisty {
-    display: block;
-    position: relative;
-    float: left;
-    background-position: 2px 1px;
-    margin-right: 4px;
-}
-
-.matchedSelectorsTable {
-    width: 100%;
 }
 
 .styleSelector > td:first-child {
