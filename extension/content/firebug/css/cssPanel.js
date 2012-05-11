@@ -21,14 +21,15 @@ define([
     "firebug/lib/persist",
     "firebug/lib/system",
     "firebug/chrome/menu",
+    "firebug/css/cssReps",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox",
     "firebug/css/cssModule",
-    "firebug/css/cssReps"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu) {
+    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu,
+    CSSInfoTip) {
 
 with (Domplate) {
 

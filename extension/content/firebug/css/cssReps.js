@@ -20,11 +20,9 @@ with (Domplate) {
 const maxWidth = 100
 const maxHeight = 80;
 
-CSSInfoTip = {};
-
 // ********************************************************************************************* //
 
-CSSInfoTip = Obj.extend(Firebug.InfoTip,
+var CSSInfoTip = Obj.extend(Firebug.InfoTip,
 {
     dispatchName: "cssInfoTip",
 

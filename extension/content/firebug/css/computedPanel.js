@@ -16,10 +16,11 @@ define([
     "firebug/lib/persist",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu, Str, Persist) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu,
+    Str, Persist, CSSInfoTip) {
 
 with (Domplate) {
-    
+
 //********************************************************************************************* //
 // Constants
 
