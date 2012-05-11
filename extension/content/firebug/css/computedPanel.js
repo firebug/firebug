@@ -162,76 +162,84 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         var parentNode = this.template.computedStylesTag.replace({}, this.panelNode);
 
-        if (Firebug.computedStylesDisplay == "alphabetical")
+        if (props.length != 0)
         {
-            this.sortProperties(props);
-
-            for (var i = 0; i < props.length; ++i)
-                props[i].opened = this.styleOpened[props[i].property];
-
-            var result = this.template.stylesTag.replace({props: props}, parentNode);
+            if (Firebug.computedStylesDisplay == "alphabetical")
+            {
+                this.sortProperties(props);
+    
+                for (var i = 0; i < props.length; ++i)
+                    props[i].opened = this.styleOpened[props[i].property];
+    
+                var result = this.template.stylesTag.replace({props: props}, parentNode);
+            }
+            else
+            {
+                var groups = [];
+                for (var groupName in styleGroups)
+                {
+                    var title = Locale.$STR("StyleGroup-" + groupName);
+                    var group = {name: groupName, title: title, props: []};
+    
+                    var groupProps = styleGroups[groupName];
+                    for (var i = 0; i < groupProps.length; ++i)
+                    {
+                        var propName = groupProps[i];
+                        if (isUnwantedProp(propName))
+                            continue;
+      
+                        var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
+                            Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+    
+                        if (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0)
+                            continue;
+    
+                        prop.opened = this.styleOpened[propName];
+    
+                        group.props.push(prop);
+    
+                        for (var j = 0; j < props.length; ++j)
+                        {
+                            if (props[j].property == propName)
+                            {
+                                props.splice(j, 1);
+                                break;
+                            }
+                        }
+                    }
+    
+                    group.opened = this.groupOpened[groupName];
+    
+                    groups.push(group);
+                }
+    
+                if (props.length > 0)
+                {
+                    var group = groups[groups.length-1];
+                    for (var i = 0; i < props.length; ++i)
+                    {
+                        var propName = props[i].property;
+                        if (isUnwantedProp(propName))
+                            continue;
+      
+                        var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
+                            Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
+    
+                        prop.opened = this.styleOpened[propName];
+    
+                        group.props.push(prop);
+                    }
+    
+                    group.opened = this.groupOpened[group.name];
+                }
+    
+                var result = this.template.groupedStylesTag.replace({groups: groups}, parentNode);
+            }
         }
         else
         {
-            var groups = [];
-            for (var groupName in styleGroups)
-            {
-                var title = Locale.$STR("StyleGroup-" + groupName);
-                var group = {name: groupName, title: title, props: []};
-
-                var groupProps = styleGroups[groupName];
-                for (var i = 0; i < groupProps.length; ++i)
-                {
-                    var propName = groupProps[i];
-                    if (isUnwantedProp(propName))
-                        continue;
-  
-                    var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
-                        Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
-
-                    if (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0)
-                        continue;
-
-                    prop.opened = this.styleOpened[propName];
-
-                    group.props.push(prop);
-
-                    for (var j = 0; j < props.length; ++j)
-                    {
-                        if (props[j].property == propName)
-                        {
-                            props.splice(j, 1);
-                            break;
-                        }
-                    }
-                }
-
-                group.opened = this.groupOpened[groupName];
-
-                groups.push(group);
-            }
-
-            if (props.length > 0)
-            {
-                var group = groups[groups.length-1];
-                for (var i = 0; i < props.length; ++i)
-                {
-                    var propName = props[i].property;
-                    if (isUnwantedProp(propName))
-                        continue;
-  
-                    var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
-                        Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
-
-                    prop.opened = this.styleOpened[propName];
-
-                    group.props.push(prop);
-                }
-
-                group.opened = this.groupOpened[group.name];
-            }
-
-            var result = this.template.groupedStylesTag.replace({groups: groups}, parentNode);
+            FirebugReps.Warning.tag.replace({object: "computed.No_User-Defined_Styles"},
+                this.panelNode);
         }
 
         Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
