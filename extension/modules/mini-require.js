@@ -14,6 +14,8 @@ var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
+var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+
 // ********************************************************************************************* //
 // Module Loader implementation
 
@@ -57,13 +59,19 @@ var Loader =
         }
 
         var self = this;
-        var args = deps.map(function(dep) {
-            return self.loadModule(dep);
+        var args = deps.map(function(dep)
+        {
+            var result = self.loadModule(dep);
+            if (!result)
+                consoleService.logStringMessage("mini-require; Cycle dependency detected!");
+            return result;
         });
 
         try
         {
             var module = this.currentModule[this.currentModule.length - 1];
+            module.deps = deps;
+            module.args = args;
             module.exports = callback.apply(module.scope, args);
         }
         catch (err)
@@ -150,6 +158,38 @@ var Loader =
 
         // If there is no protocol, use baseUrl.
         return baseUrl + moduleUrl;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debugging Dependencies
+
+    getDependencies: function()
+    {
+        var result = {};
+        for (var p in this.modules)
+            this.getDeps(p, result);
+        return result;
+    },
+
+    getDeps: function(moduleId, result)
+    {
+        var deps = result[moduleId];
+        if (deps)
+            return deps;
+
+        deps = result[moduleId] = {};
+
+        var module = this.modules[moduleId];
+        if (!module.deps)
+            return deps;
+
+        for (var i=0; i<module.deps.length; i++)
+        {
+            var id = module.deps[i];
+            deps[id] = this.getDeps(id, result);
+        }
+
+        return deps;
     }
 }
 
