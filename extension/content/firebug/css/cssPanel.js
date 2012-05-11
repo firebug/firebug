@@ -436,10 +436,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
                     var namespace = rule.cssText.match(reNamespace);
-                    var prefix = namespace[2] || "";
-                    var name = namespace[3];
-                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
-                        name: name, isNotEditable: true});
+                    if (namespace)
+                    {
+                        var prefix = namespace[2] || "";
+                        var name = namespace[3];
+                        rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                            name: name, isNotEditable: true});
+                    }
+                    else
+                    {
+                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+                        {
+                            FBTrace.sysout("cssPanel.getStyleSheetRules; Missing Namespace! " +
+                                "FIX ME", rule);
+                        }
+                    }
                 }
                 else
                 {
