@@ -8,7 +8,6 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/console/console",
     "firebug/js/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -16,7 +15,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, Console,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
     StackFrame, Events, Css, Dom, Str, FBS) {
 
 // ********************************************************************************************* //
