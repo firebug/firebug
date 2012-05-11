@@ -20,11 +20,11 @@ with (Domplate) {
 const maxWidth = 100
 const maxHeight = 80;
 
-FirebugReps.CSS = {};
+CSSInfoTip = {};
 
 // ********************************************************************************************* //
 
-FirebugReps.CSS.InfoTip = Obj.extend(Firebug.InfoTip,
+CSSInfoTip = Obj.extend(Firebug.InfoTip,
 {
     dispatchName: "cssInfoTip",
 
@@ -216,9 +216,7 @@ function getFontFaceCSS(font)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerRep(FirebugReps.CSS);
-
-return FirebugReps.CSS;
+return CSSInfoTip;
 
 // ********************************************************************************************* //
 }});

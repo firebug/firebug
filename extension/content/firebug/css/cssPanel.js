@@ -1179,7 +1179,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
-                    return FirebugReps.CSS.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
+                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
                     if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
@@ -1194,11 +1194,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return FirebugReps.CSS.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
 
                 case "fontFamily":
-                    return FirebugReps.CSS.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
             }
 
             delete this.infoTipType;
