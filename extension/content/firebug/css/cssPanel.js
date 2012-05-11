@@ -448,7 +448,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                         {
                             FBTrace.sysout("cssPanel.getStyleSheetRules; Missing Namespace! " +
-                                "FIX ME", rule);
+                                "ERROR FIX ME", rule);
                         }
                     }
                 }

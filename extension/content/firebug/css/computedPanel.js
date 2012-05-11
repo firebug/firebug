@@ -124,9 +124,18 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             var href = selector.href;
             var line = selector.ruleLine;
             var rule = selector.selector._cssRule._domRule;
-            var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
 
-            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css", rule, instance) : null;
+            if (!rule.parentStyleSheet)
+            {
+                FBTrace.sysout("computedPanel.getSourceLink; no parent Stylesheet! " +
+                    "ERROR FIX ME");
+                return null;
+            }
+
+            var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
+            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css",
+                rule, instance) : null;
+
             return sourceLink;
         }
     }),
