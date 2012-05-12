@@ -393,6 +393,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     this.styleOpened = state.styleOpened;
             }
         }
+
+        if (this.selection)
+            this.refresh();
     },
 
     hide: function()

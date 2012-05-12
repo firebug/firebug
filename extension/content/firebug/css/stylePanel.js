@@ -467,6 +467,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     show: function(state)
     {
+        if (this.selection)
+            this.refresh();
     },
 
     watchWindow: function(context, win)
