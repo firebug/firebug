@@ -1789,6 +1789,23 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
     },
 
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssPropValue"))
+            return null;
+
+        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
+        // into 'no-repeat' should work).
+        var row = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        if (!Css.multiValuedProperties.hasOwnProperty(propName))
+            return null;
+
+        if (range.type === "fontFamily")
+            return ",";
+        return " ";
+    },
+
     doIncrementValue: function(value, amt, offset, offsetEnd)
     {
         var propName = null;
@@ -2303,6 +2320,16 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             out.suggestion = ":hover";
 
         return ret.sort();
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssSelector"))
+            return null;
+
+        // For e.g. 'd|span', expand to a descendant selector; otherwise assume
+        // that this is part of the same selector part.
+        return (reSelectorChar.test(prefixOf.charAt(0)) ? " " : "");
     },
 
     advanceToNext: function(target, charCode)

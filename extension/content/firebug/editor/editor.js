@@ -755,6 +755,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return [];
     },
 
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        return null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleter: function()
@@ -763,7 +768,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.autoCompleter = new Firebug.AutoCompleter(false,
                 Obj.bind(this.getAutoCompleteRange, this),
-                Obj.bind(this.getAutoCompleteList, this));
+                Obj.bind(this.getAutoCompleteList, this),
+                Obj.bind(this.getAutoCompletePropSeparator, this));
         }
 
         return this.autoCompleter;
@@ -1046,7 +1052,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ********************************************************************************************* //
 // Autocompletion
 
-Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
+Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator)
 {
     var candidates = null;
     var suggestedDefault = null;
@@ -1136,10 +1142,6 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 FBTrace.sysout(preExpr+sep+lastExpr+sep+postExpr + " offset: " + lastOffset);
             }
 
-            // Don't complete globals unless cycling.
-            if (!cycle && !lastExpr)
-                return false;
-
             var search = false;
 
             // Check if the cursor is somewhere in the middle of the expression
@@ -1153,12 +1155,36 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                     search = true;
                     lastOffset = range.start;
                 }
-                else
+                else if (offset != range.start+1)
                 {
-                    // We can't complete unless we are at the right edge.
+                    // Nothing new started, just fail.
                     return false;
                 }
+                else
+                {
+                    // Try to parse the typed character as the start of a new
+                    // property, moving the rest of lastExpr over into postExpr
+                    // (possibly with a separator added). If there is no support
+                    // for prefix-completions, fail.
+                    // Note that this does not show unless there is a completion.
+                    var moveOver = lastExpr.substr(1);
+                    lastExpr = lastExpr.charAt(0);
+
+                    var sep = getNewPropSeparator(range, lastExpr, moveOver);
+                    if (sep === null)
+                        return false;
+                    if (!Str.hasPrefix(moveOver, sep))
+                        moveOver = sep + moveOver;
+
+                    postExpr = moveOver + postExpr;
+                    range.end = range.start;
+                    range.start = offset;
+                }
             }
+
+            // Don't complete globals unless cycling.
+            if (!cycle && !lastExpr)
+                return false;
 
             var out = {};
             var values = evaluator(preExpr, lastExpr, postExpr, range, search, context, out);
