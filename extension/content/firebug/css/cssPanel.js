@@ -1718,9 +1718,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
 
+            var keywords;
             if (range.type === "fontFamily")
             {
-                var keywords = Css.cssKeywords["fontFamily"].slice();
+                keywords = Css.cssKeywords["fontFamily"].slice();
                 if (this.panel && this.panel.context)
                 {
                     // Add the fonts used in this context (they might be inaccessible
@@ -1744,7 +1745,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             keywords[i] = q + k + q;
                     }
                 }
-                return keywords;
             }
             else
             {
@@ -1779,8 +1779,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         }
                     }
                 }
-                return Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
+                keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
             }
+
+            // Add the magic inherit property, if it's sufficiently alone.
+            if (!preExpr)
+                keywords = keywords.concat(["inherit"]);
+            return keywords;
         }
     },
 

@@ -865,7 +865,7 @@ Css.cssInfo.html =
     "-moz-box-pack": ["mozBoxPack"],
     "-moz-box-sizing": ["mozBoxSizing"],
     "-moz-user-focus": ["userFocus", "none"],
-    "-moz-user-input": ["userInput", "inherit", "none"],
+    "-moz-user-input": ["userInput", "none"],
     "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
     "-moz-background-inline-policy": [],
@@ -900,7 +900,7 @@ Css.cssInfo.html =
     "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF5.0
     "orient": ["horizontal", "vertical"], // FF6.0
     "-moz-text-blink": ["none", "blink"], // FF6.0
-    "-moz-text-decoration-color": ["color", "inherit"], // FF6.0
+    "-moz-text-decoration-color": ["color"], // FF6.0
     "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF6.0
     "-moz-hyphens": ["mozHyphens"], // FF6.0
@@ -950,7 +950,7 @@ Css.cssInfo.svg = {
     "lighting-color": ["currentColor"],
     "marker": ["none"],
     "marker-end": ["none"],
-    "mask": ["inherit", "none"],
+    "mask": ["none"],
     "opacity": [],
     "overflow": ["auto", "svgOverflow"],
     "pointer-events": ["pointerEvents", "none"],
@@ -1508,7 +1508,6 @@ Css.cssKeywords =
         "katakana",
         "hiragana-iroha",
         "katakana-iroha",
-        "inherit",
         "-moz-arabic-indic",
         "-moz-bengali",
         "-moz-cjk-earthly-branch",
@@ -1553,23 +1552,20 @@ Css.cssKeywords =
         "open-quote",
         "close-quote",
         "no-open-quote",
-        "no-close-quote",
-        "inherit"
+        "no-close-quote"
     ],
 
     "fontStyle":
     [
         "normal",
         "italic",
-        "oblique",
-        "inherit"
+        "oblique"
     ],
 
     "fontVariant":
     [
         "normal",
-        "small-caps",
-        "inherit"
+        "small-caps"
     ],
 
     "fontWeight":
@@ -1577,8 +1573,7 @@ Css.cssKeywords =
         "normal",
         "bold",
         "bolder",
-        "lighter",
-        "inherit"
+        "lighter"
     ],
 
     "fontSize":
@@ -1617,7 +1612,6 @@ Css.cssKeywords =
         "message-box",
         "small-caption",
         "status-bar",
-        "inherit",
         "-moz-fixed"
     ],
 
@@ -1674,8 +1668,7 @@ Css.cssKeywords =
         "static",
         "relative",
         "absolute",
-        "fixed",
-        "inherit"
+        "fixed"
     ],
 
     "float":
@@ -1703,7 +1696,6 @@ Css.cssKeywords =
         "overline",
         "line-through",
         "blink",
-        "inherit",
         "-moz-anchor-decoration"
     ],
 
@@ -1711,8 +1703,7 @@ Css.cssKeywords =
     [
         "capitalize",
         "lowercase",
-        "uppercase",
-        "inherit"
+        "uppercase"
     ],
 
     "unicodeBidi":
@@ -1726,8 +1717,7 @@ Css.cssKeywords =
     [
         "visible",
         "hidden",
-        "collapse",
-        "inherit"
+        "collapse"
     ],
 
     "whiteSpace":
@@ -1736,8 +1726,7 @@ Css.cssKeywords =
         "pre",
         "nowrap",
         "pre-wrap",
-        "pre-line",
-        "inherit"
+        "pre-line"
     ],
 
     "verticalAlign":
@@ -1749,8 +1738,7 @@ Css.cssKeywords =
         "text-top",
         "middle",
         "bottom",
-        "text-bottom",
-        "inherit"
+        "text-bottom"
     ],
 
     "thickness":
@@ -1958,8 +1946,7 @@ Css.cssKeywords =
         "double",
         "dotted",
         "dashed",
-        "wavy",
-        "inherit"
+        "wavy"
     ],
 
     "mozHyphens": // FF 6.0
@@ -1972,8 +1959,7 @@ Css.cssKeywords =
     "textOverflow": // FF 7.0
     [
        "clip",
-       "ellipsis",
-       "inherit"
+       "ellipsis"
     ],
        
     "mozTextAlignLast": // FF 12.0
@@ -1984,8 +1970,7 @@ Css.cssKeywords =
        "left",
        "right",
        "center",
-       "justify",
-       "inherit"
+       "justify"
     ],
        
     "width":
@@ -2014,8 +1999,7 @@ Css.cssKeywords =
     "wordWrap":
     [
         "normal",
-        "break-word",
-        "inherit"
+        "break-word"
     ],
 
     // start SVG specific
@@ -2168,8 +2152,7 @@ Css.cssKeywords =
         "none",
         "both",
         "horizontal",
-        "vertical",
-        "inherit"
+        "vertical"
     ]
 };
 
