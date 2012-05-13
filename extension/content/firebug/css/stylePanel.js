@@ -708,17 +708,6 @@ function safeGetContentState(selection)
 
 function getFontPropValueParts(element, value, propName)
 {
-    function isFontInDefinition(fonts, font)
-    {
-        for (var i = 0; i < fonts.length; ++i)
-        {
-            if (font == fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase())
-                return true;
-        }
-
-        return false;
-    }
-
     const genericFontFamilies =
     {
         "serif": 1,
@@ -756,25 +745,26 @@ function getFontPropValueParts(element, value, propName)
     clonedElement.textContent = element.textContent;
     Firebug.setIgnored(clonedElement);
     element.parentNode.appendChild(clonedElement);
-    var usedFonts = Fonts.getFonts(clonedElement);
+    var usedFonts = Fonts.getFonts(clonedElement).slice();
     clonedElement.parentNode.removeChild(clonedElement);
 
     var genericFontUsed = false;
     for (var i = 0; i < fonts.length; ++i)
     {
         var font = fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase();
+        var isGeneric = genericFontFamilies.hasOwnProperty(font);
         var isUsedFont = false;
 
         for (var j = 0; j < usedFonts.length; ++j)
         {
             var usedFont = usedFonts[j].CSSFamilyName.toLowerCase();
-            if (font == usedFont || (genericFontFamilies.hasOwnProperty(font) &&
-                !genericFontUsed && !isFontInDefinition(fonts, usedFont)))
+            if (font == usedFont || (isGeneric && !genericFontUsed))
             {
                 parts.push({type: "used", value: fonts[i], font: usedFonts[j]});
+                usedFonts.splice(j, 1);
 
                 isUsedFont = true;
-                if (genericFontFamilies.hasOwnProperty(font))
+                if (isGeneric)
                     genericFontUsed = true;
                 break;
             }
