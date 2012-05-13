@@ -712,7 +712,7 @@ function getFontPropValueParts(element, value)
     {
         for (var i = 0; i < fonts.length; ++i)
         {
-            if (font == fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase())
+            if (font == fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase())
                 return true;
         }
 
@@ -758,8 +758,9 @@ function getFontPropValueParts(element, value)
     var genericFontUsed = false;
     for (; i < fonts.length; ++i)
     {
-        var font = fonts[i].replace(/^"(.*)"$/, "$1").toLowerCase();
+        var font = fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase();
         var isUsedFont = false;
+        FBTrace.sysout("font", font);
         for (var j = 0; j < usedFonts.length; ++j)
         {
             var usedFont = usedFonts[j].CSSFamilyName.toLowerCase();
