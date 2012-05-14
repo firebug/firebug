@@ -90,6 +90,10 @@
     background-position: 4px 4px !important;
 }
 
+.computedStylesGroup > .computedStyleTable > tbody > .computedStyle.hasSelectors > .stylePropName {
+    background-position: 10px 4px !important;
+}
+
 .computedStylesGroup > .cssComputedHeader {
     margin: 0;
 }
@@ -135,7 +139,11 @@
 .stylePropName {
     vertical-align: top;
     font-weight: bold;
-    padding: 0 4px 0 18px;
+    padding: 0 4px 0 24px;
+}
+
+.styleSelector > td > .stylePropValue {
+    padding-left: 3px;
 }
 
 .styleSelector > td:first-child {
