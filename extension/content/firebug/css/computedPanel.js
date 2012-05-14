@@ -74,7 +74,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                                 "$prop.property"
                             ),
                             TD({role: "presentation"},
-                                SPAN({"class": "stylePropValue"}, "$prop.value"))
+                                SPAN({"class": "stylePropValue"}, "$prop.value|formatValue"))
                         ),
                         TR({"class": "focusRow computedStyleRow matchedSelectors", _repObject: "$prop"},
                             TD({colspan: 2},
@@ -130,6 +130,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 rule, instance) : null;
 
             return sourceLink;
+        },
+
+        formatValue: function(value)
+        {
+            // Add a zero-width space after a comma to allow line breaking
+            return value.replace(/,/g, ",\u200B");
         }
     }),
 
@@ -170,10 +176,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             if (Firebug.computedStylesDisplay == "alphabetical")
             {
                 this.sortProperties(props);
-    
+
                 for (var i = 0; i < props.length; ++i)
                     props[i].opened = this.styleOpened[props[i].property];
-    
+
                 var result = this.template.stylesTag.replace({props: props}, parentNode);
             }
             else
@@ -183,24 +189,24 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     var title = Locale.$STR("StyleGroup-" + groupName);
                     var group = {name: groupName, title: title, props: []};
-    
+
                     var groupProps = styleGroups[groupName];
                     for (var i = 0; i < groupProps.length; ++i)
                     {
                         var propName = groupProps[i];
                         if (isUnwantedProp(propName))
                             continue;
-      
+
                         var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
                             Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
-    
+
                         if (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0)
                             continue;
-    
+
                         prop.opened = this.styleOpened[propName];
-    
+
                         group.props.push(prop);
-    
+
                         for (var j = 0; j < props.length; ++j)
                         {
                             if (props[j].property == propName)
@@ -210,12 +216,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                             }
                         }
                     }
-    
+
                     group.opened = this.groupOpened[groupName];
-    
+
                     groups.push(group);
                 }
-    
+
                 if (props.length > 0)
                 {
                     var group = groups[groups.length-1];
@@ -224,18 +230,18 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                         var propName = props[i].property;
                         if (isUnwantedProp(propName))
                             continue;
-      
+
                         var prop = this.cssLogic ? this.cssLogic.getPropertyInfo(propName) :
                             Firebug.CSSModule.getPropertyInfo(computedStyle, propName);
-    
+
                         prop.opened = this.styleOpened[propName];
-    
+
                         group.props.push(prop);
                     }
-    
+
                     group.opened = this.groupOpened[group.name];
                 }
-    
+
                 var result = this.template.groupedStylesTag.replace({groups: groups}, parentNode);
             }
         }
@@ -289,7 +295,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         Css.toggleClass(styleNode, "opened");
         this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
@@ -648,7 +654,6 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         this.selection = null;
     }
 });
-
 
 //********************************************************************************************* //
 //Helpers
