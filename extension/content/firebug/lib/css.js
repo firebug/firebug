@@ -786,11 +786,11 @@ Css.cssInfo.html =
     "list-style-position": ["listStylePosition"],
     "list-style-type": ["listStyleType", "none"],
 
-    "margin": [],
+    "margin": ["auto"],
     "margin-top": [],
-    "margin-right": [],
+    "margin-right": ["auto"],
     "margin-bottom": [],
-    "margin-left": [],
+    "margin-left": ["auto"],
 
     "marker-offset": ["auto"],
     "min-height": ["none"],
