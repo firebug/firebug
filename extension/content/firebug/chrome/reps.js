@@ -1392,6 +1392,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSKeyframeRule";
         }
+        else if (rule instanceof window.CSSNameSpaceRule)
+        {
+            return "CSSNameSpaceRule";
+        }
 
         return "CSSRule";
     },
@@ -1427,6 +1431,14 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
             rule instanceof window.MozCSSKeyframeRule)
         {
             return rule.keyText;
+        }
+        else if (rule instanceof window.CSSNameSpaceRule)
+        {
+            var reNamespace = /^@namespace (.+ )?url\("(.*?)"\);$/;
+            var namespace = rule.cssText.match(reNamespace);
+            var prefix = namespace[1] || "";
+            var name = namespace[2];
+            return prefix + name;
         }
 
         return "";
