@@ -36,9 +36,6 @@ function runTest()
             function checkResults(count) {
                 FBTest.compare(count, rows.length, "Row Count");
                 for (var i = 0; i < rows.length; i++) {
-                    FBTrace.sysout("row " + rows[i], {
-                        row: rows[i].firstChild.firstChild.testProp
-                    })
                     FBTest.compare(i%11, rows[i].firstChild.firstChild.testProp, "Row property");
                 }
             }
