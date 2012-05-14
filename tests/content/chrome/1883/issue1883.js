@@ -4,8 +4,12 @@ function runTest()
     var Firebug = FBTest.FirebugWindow.Firebug;
     var FBTrace = FBTest.FirebugWindow.FBTrace;
 
-    FBTest.openNewTab(basePath + "chrome/1883/issue1883.html", function(win) {
-        with (FBTest.FirebugWindow.FBL) { with (FBTest.FirebugWindow) {
+    FBTest.openNewTab(basePath + "chrome/1883/issue1883.html", function(win)
+    {
+        win = FBTest.FirebugWindow.FBL.getContentView(win);
+
+        with (FBTest.FirebugWindow.FBL) { with (FBTest.FirebugWindow)
+        {
             function ArrayIterator(array) {
                 var index = -1;
 
@@ -17,8 +21,8 @@ function runTest()
             }
 
             var rowTag = domplate({
-                tag: TR(TD(DIV({_testProp: "$test"},"$test"))),
-                $onclick: function() { alert('test'); }
+                tag: TR(TD(DIV({_testProp: "$test", onclick: "$onclick"},"$test"))),
+                onclick: function() { alert('test'); }
             });
             var iterTag = domplate({
                 tag: FOR("test", "$test|testIter", rowTag.tag),
@@ -32,6 +36,9 @@ function runTest()
             function checkResults(count) {
                 FBTest.compare(count, rows.length, "Row Count");
                 for (var i = 0; i < rows.length; i++) {
+                    FBTrace.sysout("row " + rows[i], {
+                        row: rows[i].firstChild.firstChild.testProp
+                    })
                     FBTest.compare(i%11, rows[i].firstChild.firstChild.testProp, "Row property");
                 }
             }
