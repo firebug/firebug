@@ -133,6 +133,7 @@
 }
 
 .stylePropName {
+    vertical-align: top;
     font-weight: bold;
     padding: 0 4px 0 18px;
 }
