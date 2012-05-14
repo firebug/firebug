@@ -760,7 +760,7 @@ function getFontPropValueParts(element, value)
     {
         var font = fonts[i].replace(/^["'](.*)["']$/, "$1").toLowerCase();
         var isUsedFont = false;
-        FBTrace.sysout("font", font);
+
         for (var j = 0; j < usedFonts.length; ++j)
         {
             var usedFont = usedFonts[j].CSSFamilyName.toLowerCase();
