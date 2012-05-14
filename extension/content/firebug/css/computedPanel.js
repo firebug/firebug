@@ -121,16 +121,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         getSourceLink: function(selector)
         {
-            var href = selector.href;
+            var href = selector.href.href || selector.href;
             var line = selector.ruleLine;
             var rule = selector.selector._cssRule._domRule;
-
-            if (!rule.parentStyleSheet)
-            {
-                FBTrace.sysout("computedPanel.getSourceLink; no parent Stylesheet! " +
-                    "ERROR FIX ME");
-                return null;
-            }
 
             var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
             var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css",
@@ -162,7 +155,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 Firebug.CSSModule.getPropertyInfo(computedStyle, computedStyle[i]);
 
             if (isUnwantedProp(prop.property) ||
-                (!Firebug.showUserAgentCSS && prop.matchedRuleCount == 0))
+                (this.cssLogic && !Firebug.showUserAgentCSS && prop.matchedRuleCount == 0))
             {
                 continue;
             }
