@@ -432,25 +432,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isNotEditable: true
                     });
                 }
-                else if (rule instanceof window.CSSNameSpaceRule)
+                else if (rule instanceof window.CSSNameSpaceRule &&
+                    !(rule instanceof window.MozCSSKeyframesRule ||
+                        rule instanceof window.MozCSSKeyframeRule))
                 {
+                    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
+                    // MozCSSKeyframesRules and MozCSSKeyframeRules are recognized as
+                    // CSSNameSpaceRules, so explicitly check whether the rule is not a
+                    // MozCSSKeyframesRule or a MozCSSKeyframeRule
+
                     var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
                     var namespace = rule.cssText.match(reNamespace);
-                    if (namespace)
-                    {
-                        var prefix = namespace[2] || "";
-                        var name = namespace[3];
-                        rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
-                            name: name, isNotEditable: true});
-                    }
-                    else
-                    {
-                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-                        {
-                            FBTrace.sysout("cssPanel.getStyleSheetRules; Missing Namespace! " +
-                                "ERROR FIX ME", rule);
-                        }
-                    }
+                    var prefix = namespace[2] || "";
+                    var name = namespace[3];
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                        name: name, isNotEditable: true});
                 }
                 else
                 {
