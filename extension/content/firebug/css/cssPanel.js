@@ -1709,7 +1709,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
 
             var keywords;
-            if (range.type === "fontFamily")
+            if (range.type === "url")
+            {
+                // We can't complete urls yet.
+                return [];
+            }
+            else if (range.type === "fontFamily")
             {
                 keywords = Css.cssKeywords["fontFamily"].slice();
                 if (this.panel && this.panel.context)
