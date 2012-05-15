@@ -65,11 +65,10 @@ function executeTest(elementID, expectedValue, callback)
 
         // Need to scroll the panel a bit, so that the background prop is visible (issue 4727)
         var panel = FW.FBL.getAncestorByClass(node, "panelNode");
-        panel.scrollTop = panel.scrollTop + 20;
+        panel.scrollTop += 20;
 
         var rule = FW.FBL.getAncestorByClass(node, "cssRule");
-        var propValue = rule.querySelector(".cssPropValue");
-        FBTest.mouseOver(propValue);
+        var propValue = rule.getElementsByClassName("cssPropValue").item(0);
 
         var config = {tagName: "div", classes: "infoTipColorBox"};
         FBTest.waitForDisplayedElement("stylesheet", config, function (infoTip)
@@ -87,5 +86,7 @@ function executeTest(elementID, expectedValue, callback)
 
             callback();
         });
+
+        FBTest.mouseOver(propValue);
     });
 }
