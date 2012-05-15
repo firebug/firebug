@@ -1031,27 +1031,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        if (this.selection instanceof window.Element)
+        if (!Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                 "-",
                 {
-                    label: "EditStyle",
-                    tooltiptext: "style.tip.Edit_Style",
-                    command: Obj.bindFixed(this.editElementStyle, this)
+                    label: "NewRule",
+                    tooltiptext: "css.tip.New_Rule",
+                    id: "fbNewCSSRule",
+                    command: Obj.bindFixed(this.insertRule, this, target)
                 }
             );
-        }
-        else if (!Url.isSystemStyleSheet(this.selection))
-        {
-            items.push(
-                    "-",
-                    {
-                        label: "NewRule",
-                        tooltiptext: "css.tip.New_Rule",
-                        command: Obj.bindFixed(this.insertRule, this, target)
-                    }
-                );
         }
 
         if (Css.hasClass(target, "cssSelector"))
