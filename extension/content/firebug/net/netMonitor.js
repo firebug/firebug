@@ -46,6 +46,9 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
     dispatchName: "netMonitor",
     maxQueueRequests: 500,
 
+    // List of temporary contexts, created before initContext is executed.
+    contexts: [],
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
 
@@ -65,7 +68,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
 
     shutdown: function()
     {
-        Firebug.HttpMonitorModule.shutdown.apply(this, arguments);
+        HttpMonitorModule.shutdown.apply(this, arguments);
 
         TraceModule.removeListener(this.traceNetListener);
         TraceModule.removeListener(this.traceActivityListener);
@@ -116,6 +119,83 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
         // xxxHonza
         //NetHttpActivityObserver.unregisterObserver();
         //Firebug.connection.eachContext(unmonitorContext);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Document Load Observer
+
+    onLoadDocument: function(request, win)
+    {
+        var name = Http.safeGetRequestName(request);
+        var browser = Firefox.getBrowserForWindow(win);
+
+        if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
+        {
+            if (FBTrace.DBG_NET)
+            {
+                FBTrace.sysout("netMonitor.onLoadDocument; Activation logic says don't create " +
+                    "temp context for: " + name);
+            }
+            return;
+        }
+
+        var tabId = Win.getWindowProxyIdForWindow(win);
+        if (!tabId)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("netMonitor.onLoadDocument; ERROR no Tab ID!");
+            return;
+        }
+
+        if (this.contexts[tabId])
+            return;
+
+        // Initialize NetProgress with a fake parent context. It'll be properly replaced
+        // by real context in initContext.
+        var browser = Firebug.TabWatcher.getBrowserByWindow(win);
+        var context = {window: win, browser: browser};
+        this.contexts[tabId] = context;
+        context.netProgress = this.initNetContext(context);
+
+        this.attachObservers(context);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("netMonitor.onModifyRequest; Top document loading...");
+    },
+
+    initContext: function(context, persistedState)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("netMonitor.initContext for: " + context.getName());
+
+        var win = context.window;
+        var tabId = Win.getWindowProxyIdForWindow(win);
+        var tempContext = this.contexts[tabId];
+
+        // Put netProgress in to the right context now when it finally exist.
+        if (tempContext)
+        {
+            context.netProgress = tempContext.netProgress;
+            context.netProgress.context = context;
+            delete this.contexts[tabId];
+
+            // Yet register the rest of the observers (e.g. tab cache)
+            this.attachObservers(context);
+            return;
+        }
+
+        // Temp context wasn't created so, use standard logic.
+        HttpMonitorModule.initContext.apply(this, arguments);
+
+        //xxxHonza: needed by NetExport, should be probably somewhere else.
+        // Set Page title and id into all document objects.
+        /*var netProgress = context.netProgress;
+        for (var i=0; i<netProgress.documents.length; i++)
+        {
+            var doc = netProgress.documents[i];
+            doc.id = context.uid;
+            doc.title = NetUtils.getPageTitle(context);
+        }*/
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
