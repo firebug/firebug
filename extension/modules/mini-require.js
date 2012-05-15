@@ -11,6 +11,8 @@ var require, define;
 // Constants
 
 var Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
