@@ -4180,7 +4180,7 @@ var ScriptInterrupter =
             catch (e)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
+                    FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION " + e, e);
             }
        }
 
