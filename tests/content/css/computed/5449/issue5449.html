@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 5449: Show infotips in Computed side panel</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+      #element {
+          width: 100px;
+          height: 100px;
+          background-image: url(firebug.png), -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+          background-repeat: no-repeat;
+          background-color: #8C8CFF;
+          font-family: Arial,Helvetica,sans-serif;
+          text-align: center;
+          vertical-align: middle;
+          line-height: 100px;
+      }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5449">Issue 5449</a>: Show infotips in Computed side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element">Text</div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Switch to the CSS Panel</li>
+                    <li>
+                      Hover the values of the <code>background-color</code> styles of <code>#hex</code>, <code>#name</code>, 
+                      <code>#rgb</code>, <code>#rgba</code>, <code>#hsl</code> and <code>#hsla</code>
+                    </li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>Infotips should always be shown regardless of how the color was specified. Colors with alpha channel should have a background pattern to make the transparency more visible.</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>
