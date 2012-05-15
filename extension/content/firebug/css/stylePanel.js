@@ -592,6 +592,23 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getContextMenuItems: function(style, target)
     {
         var items = CSSStyleSheetPanel.prototype.getContextMenuItems(style, target);
+        var insertIndex = 0;
+
+        for (var i = 0; i < items.length; ++i)
+        {
+            if (items[i].id == "fbNewCSSRule")
+            {
+                items.splice(i, 1);
+                insertIndex = i;
+                break;
+            }
+        }
+
+        items.splice(insertIndex, 0, {
+            label: "EditStyle",
+            tooltiptext: "style.tip.Edit_Style",
+            command: Obj.bindFixed(this.editElementStyle, this)
+        });
 
         if (style instanceof Ci.nsIDOMFontFace && style.rule)
         {
