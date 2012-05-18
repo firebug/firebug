@@ -1724,7 +1724,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
 var AttrTag = Firebug.HTMLPanel.AttrTag =
     SPAN({"class": "nodeAttr editGroup"},
-        "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.nodeName"), "=&quot;",
+        "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.name"), "=&quot;",
         SPAN({"class": "nodeValue editable"}, "$attr|getAttrValue"), "&quot;"
     );
 
