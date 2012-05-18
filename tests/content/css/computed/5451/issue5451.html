@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5451: Persist scrolling in Computed side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5451">Issue 5451</a>: Persist scrolling in Computed side panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>
+                        Check the panel option <em>Show User Agent CSS</em><br/>
+                        <span class="ok">&rArr; The panel should display CSS properties and a scrollbar to scroll through them</span>
+                    </li>
+                    <li>Scroll the panel down to the <em>Background</em> group</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The panel should be scrolled to the <em>Background</em> group again</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

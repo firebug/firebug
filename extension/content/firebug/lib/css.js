@@ -24,7 +24,7 @@ var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-Css.getCSSKeywordsByProperty = function(nodeType, propName)
+Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
     if (!cssKeywordMap[nodeType])
     {
@@ -48,9 +48,34 @@ Css.getCSSKeywordsByProperty = function(nodeType, propName)
         }
     }
 
-    return propName.toLowerCase() in cssKeywordMap[nodeType] ?
-        cssKeywordMap[nodeType][propName.toLowerCase()] : [];
+    propName = propName.toLowerCase();
+
+    if (avoid)
+        return getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid);
+
+    return cssKeywordMap[nodeType][propName] || [];
 };
+
+function getCSSPropertyKeywordsExcludingCategories(nodeType, propName, avoid)
+{
+    if (!(nodeType in Css.cssInfo) || !(propName in Css.cssInfo[nodeType]))
+        return [];
+
+    var list = [];
+    var types = Css.cssInfo[nodeType][propName];
+    for (var i = 0; i < types.length; ++i)
+    {
+        var type = types[i];
+        if (avoid.indexOf(type) !== -1)
+            continue;
+        var keywords = Css.cssKeywords[type];
+        if (keywords)
+            list.push.apply(list, keywords);
+        else
+            list.push(type);
+    }
+    return list;
+}
 
 Css.getCSSPropertyNames = function(nodeType)
 {
@@ -65,6 +90,29 @@ Css.getCSSPropertyNames = function(nodeType)
     return cssPropNames[nodeType];
 };
 
+Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
+{
+    if (!(nodeType in Css.cssInfo) || !(shorthandProp in Css.cssInfo[nodeType]))
+        return null;
+
+    var category = null;
+    var types = Css.cssInfo[nodeType][shorthandProp];
+    for (var i = 0; i < types.length; ++i)
+    {
+        var type = types[i];
+        var keywords = Css.cssKeywords[type];
+        if (keywords ? (keywords.indexOf(keyword) !== -1) : (type === keyword))
+        {
+            // Set this as the matched category, or if there is one already
+            // bail out (we don't have a unique one).
+            if (category)
+                return null;
+            category = type;
+        }
+    }
+    return category;
+};
+
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
@@ -77,10 +125,6 @@ Css.isColorKeyword = function(keyword)
         var colors = Css.cssKeywords["color"];
         for (var i = 0; i < colors.length; ++i)
             cssColorNames.push(colors[i].toLowerCase());
-
-        var systemColors = Css.cssKeywords["systemColor"];
-        for (var i = 0; i < systemColors.length; ++i)
-            cssColorNames.push(systemColors[i].toLowerCase());
     }
 
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
@@ -401,7 +445,7 @@ Css.isValidStylesheet = function(styleSheet)
 Css.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
-    style.setAttribute("charset","utf-8");
+    style.setAttribute("charset", "utf-8");
     style.setAttribute("type", "text/css");
 
     var cssText = url ? Http.getResource(url) : null;
@@ -667,28 +711,27 @@ Css.rgbToHex = function(value)
 Css.cssInfo = {};
 Css.cssInfo.html =
 {
-    "background": ["bgRepeat", "bgAttachment", "position", "color", "systemColor",
-        "mozBackgroundImage", "none"],
+    "background": ["bgRepeat", "bgAttachment", "position", "color", "bgImage"],
     "background-attachment": ["bgAttachment"],
-    "background-color": ["color", "systemColor"],
-    "background-image": ["none", "mozBackgroundImage"],
+    "background-color": ["color"],
+    "background-image": ["bgImage"],
     "background-position": ["position"],
     "background-repeat": ["bgRepeat"],
     "background-size": ["bgSize"],
     "background-clip": ["boxModels"], //FF4.0
     "background-origin": ["boxModels"], //FF4.0
 
-    "border": ["borderStyle", "thickness", "color", "systemColor", "none"],
-    "border-top": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-right": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-bottom": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "border-left": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
+    "border": ["borderStyle", "thickness", "color", "none"],
+    "border-top": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-right": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-bottom": ["borderStyle", "borderCollapse", "color", "none"],
+    "border-left": ["borderStyle", "borderCollapse", "color", "none"],
     "border-collapse": ["borderCollapse"],
-    "border-color": ["color", "systemColor"],
-    "border-top-color": ["color", "systemColor"],
-    "border-right-color": ["color", "systemColor"],
-    "border-bottom-color": ["color", "systemColor"],
-    "border-left-color": ["color", "systemColor"],
+    "border-color": ["color"],
+    "border-top-color": ["color"],
+    "border-right-color": ["color"],
+    "border-bottom-color": ["color"],
+    "border-left-color": ["color"],
     "border-spacing": [],
     "border-style": ["borderStyle"],
     "border-top-style": ["borderStyle"],
@@ -706,13 +749,13 @@ Css.cssInfo.html =
     "border-bottom-right-radius": [], //FF4.0
     "border-bottom-left-radius": [], //FF4.0
 
-    "box-shadow": ["boxShadow", "color", "systemColor", "none"], //FF4.0
+    "box-shadow": ["boxShadow", "color", "none"], //FF4.0
 
     "bottom": ["auto"],
     "caption-side": ["captionSide"],
     "clear": ["clear", "none"],
     "clip": ["auto"],
-    "color": ["color", "systemColor"],
+    "color": ["color"],
     "content": ["content", "none"],
     "counter-increment": ["none"],
     "counter-reset": ["none"],
@@ -721,8 +764,9 @@ Css.cssInfo.html =
     "display": ["display", "none"],
     "empty-cells": ["-moz-show-background"],
     "float": ["float", "none"],
-    "font": ["fontStyle", "fontVariant", "fontWeight", "fontFamily", "mozFont"],
 
+    // specification of font families in "font" is special-cased
+    "font": ["fontStyle", "fontSize", "fontVariant", "fontWeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
     "font-size-adjust": [],
@@ -742,11 +786,11 @@ Css.cssInfo.html =
     "list-style-position": ["listStylePosition"],
     "list-style-type": ["listStyleType", "none"],
 
-    "margin": [],
+    "margin": ["auto"],
     "margin-top": [],
-    "margin-right": [],
+    "margin-right": ["auto"],
     "margin-bottom": [],
-    "margin-left": [],
+    "margin-left": ["auto"],
 
     "marker-offset": ["auto"],
     "min-height": ["none"],
@@ -756,8 +800,8 @@ Css.cssInfo.html =
 
     "opacity": [],
 
-    "outline": ["borderStyle", "color", "systemColor", "none"],
-    "outline-color": ["color", "systemColor"],
+    "outline": ["borderStyle", "color", "none"],
+    "outline-color": ["color"],
     "outline-style": ["borderStyle"],
     "outline-width": [],
 
@@ -772,7 +816,7 @@ Css.cssInfo.html =
     "padding-left": [],
 
     "pointer-events": ["auto", "none"],
-    "position": ["position"],
+    "position": ["elPosition"],
     "quotes": ["none"],
     "resize": ["resize"], //FF4.0
     "right": ["auto"],
@@ -801,14 +845,14 @@ Css.cssInfo.html =
     "-moz-border-image-slice": [],
     "-moz-border-image-source": [],
     "-moz-border-image-width": [],
-    "-moz-border-top-colors": ["color", "systemColor"],
-    "-moz-border-right-colors": ["color", "systemColor"],
-    "-moz-border-bottom-colors": ["color", "systemColor"],
-    "-moz-border-left-colors": ["color", "systemColor"],
-    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
-    "-moz-border-start-color": ["color", "systemColor"],
-    "-moz-border-end-color": ["color", "systemColor"],
+    "-moz-border-top-colors": ["color"],
+    "-moz-border-right-colors": ["color"],
+    "-moz-border-bottom-colors": ["color"],
+    "-moz-border-left-colors": ["color"],
+    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "none"],
+    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "none"],
+    "-moz-border-start-color": ["color"],
+    "-moz-border-end-color": ["color"],
     "-moz-border-start-style": ["borderStyle"],
     "-moz-border-end-style": ["borderStyle"],
     "-moz-border-start-width": ["thickness"],
@@ -821,17 +865,17 @@ Css.cssInfo.html =
     "-moz-box-pack": ["mozBoxPack"],
     "-moz-box-sizing": ["mozBoxSizing"],
     "-moz-user-focus": ["userFocus", "none"],
-    "-moz-user-input": ["userInput", "inherit", "none"],
+    "-moz-user-input": ["userInput", "none"],
     "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
     "-moz-background-inline-policy": [],
     "-moz-binding": [],
     "-moz-column-count": ["auto"],
     "-moz-column-gap": ["normal"],
-    "-moz-column-rule": ["thickness", "borderStyle", "color", "systemColor"],
+    "-moz-column-rule": ["thickness", "borderStyle", "color"],
     "-moz-column-rule-width": ["thickness"],
     "-moz-column-rule-style": ["borderStyle"],
-    "-moz-column-rule-color": ["color",  "systemColor"],
+    "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto"],
     "-moz-image-region": [],
     "-moz-transform": ["mozTransformFunction", "none"],
@@ -845,7 +889,7 @@ Css.cssInfo.html =
     "-moz-transition-duration": [], //FF4.0 TODO
     "-moz-transition-timing-function": ["mozTransitionTimingFunction"], //FF4.0 TODO
     "-moz-transition-delay": [], //FF4.0 TODO
-    "-moz-animation":[], // FF5.0
+    "-moz-animation": [], // FF5.0
     "-moz-animation-delay": [], // FF5.0
     "-moz-animation-direction": [], // FF5.0
     "-moz-animation-duration": [], // FF5.0
@@ -856,7 +900,7 @@ Css.cssInfo.html =
     "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF5.0
     "orient": ["horizontal", "vertical"], // FF6.0
     "-moz-text-blink": ["none", "blink"], // FF6.0
-    "-moz-text-decoration-color": ["color", "inherit"], // FF6.0
+    "-moz-text-decoration-color": ["color"], // FF6.0
     "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF6.0
     "-moz-hyphens": ["mozHyphens"], // FF6.0
@@ -890,7 +934,7 @@ Css.cssInfo.svg = {
     "filter": ["none"],
     "flood-color": ["currentColor"],
     "flood-opacity": [],
-    "font": ["fontStyle","fontVariant","fontWeight"],
+    "font": ["fontStyle", "fontSize", "fontVariant", "fontWeight"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
     "font-size-adjust": [],
@@ -906,11 +950,11 @@ Css.cssInfo.svg = {
     "lighting-color": ["currentColor"],
     "marker": ["none"],
     "marker-end": ["none"],
-    "mask": ["inherit", "none"],
+    "mask": ["none"],
     "opacity": [],
     "overflow": ["auto", "svgOverflow"],
     "pointer-events": ["pointerEvents", "none"],
-    "shape-rendering": ["auto","shapeRendering"],
+    "shape-rendering": ["auto", "shapeRendering"],
     "stop-color": ["currentColor"],
     "stop-opacity": [],
     "stroke": [],
@@ -922,8 +966,8 @@ Css.cssInfo.svg = {
     "stroke-opacity": [],
     "stroke-width": [],
     "text-anchor": ["mozBoxPack"],
-    "text-decoration": ["none","textDecoration"],
-    "text-rendering": ["none","textRendering"],
+    "text-decoration": ["none", "textDecoration"],
+    "text-rendering": ["none", "textRendering"],
     "unicode-bidi": ["unicodeBidi"],
     "visibility": ["visibility"],
     "word-spacing": ["normal"],
@@ -963,6 +1007,23 @@ Css.inheritedStyleNames =
     "white-space": 1,
     "word-spacing": 1,
     "word-wrap": 1
+};
+
+Css.multiValuedProperties =
+{
+    "background": 1,
+    "background-position": 1,
+    "border": 1,
+    "border-color": 1,
+    "border-style": 1,
+    "border-width": 1,
+    "border-radius": 1,
+    "box-shadow": 1,
+    "font": 1,
+    "font-family": 1,
+    "margin": 1,
+    "padding": 1,
+    "-moz-animation": 1
 };
 
 Css.cssKeywords =
@@ -1061,58 +1122,6 @@ Css.cssKeywords =
     [
         "visible",
         "hidden"
-    ],
-
-    "systemColor":
-    [
-        "ActiveBorder",
-        "ActiveCaption",
-        "AppWorkspace",
-        "Background",
-        "ButtonFace",
-        "ButtonHighlight",
-        "ButtonShadow",
-        "ButtonText",
-        "CaptionText",
-        "GrayText",
-        "Highlight",
-        "HighlightText",
-        "InactiveBorder",
-        "InactiveCaption",
-        "InactiveCaptionText",
-        "InfoBackground",
-        "InfoText",
-        "Menu",
-        "MenuText",
-        "Scrollbar",
-        "ThreeDDarkShadow",
-        "ThreeDFace",
-        "ThreeDHighlight",
-        "ThreeDLightShadow",
-        "ThreeDShadow",
-        "Window",
-        "WindowFrame",
-        "WindowText",
-        "-moz-mac-unified-toolbar",
-        "-moz-win-borderless-glass",
-        "-moz-win-browsertabbar-toolbox",
-        "-moz-win-communicationstext",
-        "-moz-win-communications-toolbox",
-        "-moz-win-exclude-glass", // FF 6.0
-        "-moz-win-glass",
-        "-moz-win-mediatext",
-        "-moz-win-media-toolbox",
-        "-moz-window-button-box",
-        "-moz-window-button-box-maximized",
-        "-moz-window-button-close",
-        "-moz-window-button-maximize",
-        "-moz-window-button-minimize",
-        "-moz-window-button-restore",
-        "-moz-window-frame-bottom",
-        "-moz-window-frame-left",
-        "-moz-window-frame-right",
-        "-moz-window-titlebar",
-        "-moz-window-titlebar-maximized"
     ],
 
     "color":
@@ -1272,8 +1281,8 @@ Css.cssKeywords =
         "-moz-buttondefault",
         "-moz-buttonhoverface",
         "-moz-buttonhovertext",
-        "-moz-default-background-color", // ff 5.0
-        "-moz-default-color", // ff 5.0
+        "-moz-default-background-color", // FF 5.0
+        "-moz-default-color", // FF 5.0
         "-moz-cellhighlight",
         "-moz-cellhighlighttext",
         "-moz-field",
@@ -1297,8 +1306,57 @@ Css.cssKeywords =
         "-moz-menuhover",
         "-moz-menuhovertext",
         "-moz-win-communicationstext",
+        "-moz-nativehyperlinktext",
+
+        // System colors
+        "ActiveBorder",
+        "ActiveCaption",
+        "AppWorkspace",
+        "Background",
+        "ButtonFace",
+        "ButtonHighlight",
+        "ButtonShadow",
+        "ButtonText",
+        "CaptionText",
+        "GrayText",
+        "Highlight",
+        "HighlightText",
+        "InactiveBorder",
+        "InactiveCaption",
+        "InactiveCaptionText",
+        "InfoBackground",
+        "InfoText",
+        "Menu",
+        "MenuText",
+        "Scrollbar",
+        "ThreeDDarkShadow",
+        "ThreeDFace",
+        "ThreeDHighlight",
+        "ThreeDLightShadow",
+        "ThreeDShadow",
+        "Window",
+        "WindowFrame",
+        "WindowText",
+        "-moz-mac-unified-toolbar",
+        "-moz-win-borderless-glass",
+        "-moz-win-browsertabbar-toolbox",
+        "-moz-win-communicationstext",
+        "-moz-win-communications-toolbox",
+        "-moz-win-exclude-glass", // FF 6.0
+        "-moz-win-glass",
         "-moz-win-mediatext",
-        "-moz-nativehyperlinktext"
+        "-moz-win-media-toolbox",
+        "-moz-window-button-box",
+        "-moz-window-button-box-maximized",
+        "-moz-window-button-close",
+        "-moz-window-button-maximize",
+        "-moz-window-button-minimize",
+        "-moz-window-button-restore",
+        "-moz-window-frame-bottom",
+        "-moz-window-frame-left",
+        "-moz-window-frame-right",
+        "-moz-window-titlebar",
+        "-moz-window-titlebar-maximized"
     ],
 
     "auto":
@@ -1467,7 +1525,6 @@ Css.cssKeywords =
         "katakana",
         "hiragana-iroha",
         "katakana-iroha",
-        "inherit",
         "-moz-arabic-indic",
         "-moz-bengali",
         "-moz-cjk-earthly-branch",
@@ -1512,23 +1569,20 @@ Css.cssKeywords =
         "open-quote",
         "close-quote",
         "no-open-quote",
-        "no-close-quote",
-        "inherit"
+        "no-close-quote"
     ],
 
     "fontStyle":
     [
         "normal",
         "italic",
-        "oblique",
-        "inherit"
+        "oblique"
     ],
 
     "fontVariant":
     [
         "normal",
-        "small-caps",
-        "inherit"
+        "small-caps"
     ],
 
     "fontWeight":
@@ -1536,8 +1590,7 @@ Css.cssKeywords =
         "normal",
         "bold",
         "bolder",
-        "lighter",
-        "inherit"
+        "lighter"
     ],
 
     "fontSize":
@@ -1576,7 +1629,6 @@ Css.cssKeywords =
         "message-box",
         "small-caption",
         "status-bar",
-        "inherit",
         "-moz-fixed"
     ],
 
@@ -1628,13 +1680,12 @@ Css.cssKeywords =
         "-moz-stack"
     ],
 
-    "position":
+    "elPosition":
     [
         "static",
         "relative",
         "absolute",
-        "fixed",
-        "inherit"
+        "fixed"
     ],
 
     "float":
@@ -1662,7 +1713,6 @@ Css.cssKeywords =
         "overline",
         "line-through",
         "blink",
-        "inherit",
         "-moz-anchor-decoration"
     ],
 
@@ -1670,8 +1720,7 @@ Css.cssKeywords =
     [
         "capitalize",
         "lowercase",
-        "uppercase",
-        "inherit"
+        "uppercase"
     ],
 
     "unicodeBidi":
@@ -1685,8 +1734,7 @@ Css.cssKeywords =
     [
         "visible",
         "hidden",
-        "collapse",
-        "inherit"
+        "collapse"
     ],
 
     "whiteSpace":
@@ -1695,8 +1743,7 @@ Css.cssKeywords =
         "pre",
         "nowrap",
         "pre-wrap",
-        "pre-line",
-        "inherit"
+        "pre-line"
     ],
 
     "verticalAlign":
@@ -1708,8 +1755,7 @@ Css.cssKeywords =
         "text-top",
         "middle",
         "bottom",
-        "text-bottom",
-        "inherit"
+        "text-bottom"
     ],
 
     "thickness":
@@ -1794,12 +1840,13 @@ Css.cssKeywords =
         "space"
     ],
 
-    "mozBackgroundImage":
+    "bgImage":
     [
         "-moz-linear-gradient", // FF4.0
         "-moz-radial-gradient", // FF4.0
         "-moz-element", // FF4.0
-        "-moz-image-rect" // FF4.0
+        "-moz-image-rect", // FF4.0
+        "none"
     ],
 
     "mozTransformFunction":
@@ -1916,8 +1963,7 @@ Css.cssKeywords =
         "double",
         "dotted",
         "dashed",
-        "wavy",
-        "inherit"
+        "wavy"
     ],
 
     "mozHyphens": // FF 6.0
@@ -1930,8 +1976,7 @@ Css.cssKeywords =
     "textOverflow": // FF 7.0
     [
        "clip",
-       "ellipsis",
-       "inherit"
+       "ellipsis"
     ],
        
     "mozTextAlignLast": // FF 12.0
@@ -1942,8 +1987,7 @@ Css.cssKeywords =
        "left",
        "right",
        "center",
-       "justify",
-       "inherit"
+       "justify"
     ],
        
     "width":
@@ -1972,8 +2016,7 @@ Css.cssKeywords =
     "wordWrap":
     [
         "normal",
-        "break-word",
-        "inherit"
+        "break-word"
     ],
 
     // start SVG specific
@@ -2126,8 +2169,7 @@ Css.cssKeywords =
         "none",
         "both",
         "horizontal",
-        "vertical",
-        "inherit"
+        "vertical"
     ]
 };
 

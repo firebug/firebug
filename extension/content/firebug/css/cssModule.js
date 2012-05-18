@@ -289,24 +289,30 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return cssValue;
     },
 
-    parseCSSFontFamilyValue: function(value, offset)
+    parseCSSFontFamilyValue: function(value, offset, propName)
     {
-        const reFontFamilies = new RegExp("(^(.*(\\d+(\\.\\d+)?"+
-            "(em|ex|ch|rem|cm|mm|in|pt|pc|px|%)|(x{1,2}-)?(small|large)|medium|larger|smaller) )"+
-            "(.*?)|.*?)(\s*!.*)?$");
-        var matches = reFontFamilies.exec(value);
-
-        // Parse things that aren't font names as regular CSS properties.
-        if (!matches ||
-            (matches[2] && offset < matches[2].length) ||
-            (matches[9] && offset >= matches[0].length - matches[9].length))
+        var skipped = 0;
+        if (propName === "font")
         {
-            return this.parseCSSValue(value, offset);
+            var rePreFont = new RegExp(
+                "^.*" + // anything, then
+                "(" +
+                    "\\d+(\\.\\d+)?([a-z]*|%)|" + // a number (with possible unit)
+                    "(x{1,2}-)?(small|large)|medium|larger|smaller" + // or an named size description
+                ") "
+            );
+            var m = rePreFont.exec(value);
+            if (!m || offset < m[0].length)
+                return this.parseCSSValue(value, offset);
+            skipped = m[0].length;
+            value = value.substr(skipped);
+            offset -= skipped;
         }
 
-        var fonts = matches[matches[8] ? 8 : 1].split(",");
+        var matches = /^(.*?)(\s*!.*)?$/.exec(value);
+        var fonts = matches[1].split(",");
 
-        var totalLength = matches[2] ? matches[2].length : 0;
+        var totalLength = 0;
         for (var i = 0; i < fonts.length; ++i)
         {
             totalLength += fonts[i].length;
@@ -318,8 +324,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 var start = end - font.length;
                 return {
                     value: font,
-                    start: start,
-                    end: end,
+                    start: start + skipped,
+                    end: end + skipped,
                     type: "fontFamily"
                 };
             }
@@ -329,7 +335,13 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         }
 
         // Parse !important.
-        return this.parseCSSValue(value, offset);
+        var ret = this.parseCSSValue(value, offset);
+        if (ret)
+        {
+            ret.start += skipped;
+            ret.end += skipped;
+        }
+        return ret;
     },
 
     parseURLValue: function(value)

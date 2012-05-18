@@ -284,13 +284,12 @@ this.mouseUp = function(node)
     this.sendMouseEvent({type: "mouseup"}, node);
 };
 
-this.mouseOver = function(node)
+this.mouseOver = function(node, offsetX, offsetY)
 {
-    var doc = node.ownerDocument;
-    var event = doc.createEvent("MouseEvents");
-    event.initMouseEvent("mouseover", true, true, doc.defaultView, 0, 0, 0, 0, 0,
-        false, false, false, false, 0, null);
-    this.synthesizeMouse(node, 0, 0, event);
+    var win = node.ownerDocument.defaultView;
+
+    var eventDetails = {type: "mouseover"};
+    this.synthesizeMouse(node, offsetX, offsetY, eventDetails, win);
 };
 
 this.sendMouseEvent = function(event, target, win)
@@ -400,8 +399,8 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 
     // Hit the middle of the button
     // (Clicks to hidden parts of the element doesn't open the context menu).
-    offsetX = offsetX || 0.5 * Math.max(1, rect.width);
-    offsetY = offsetY || 0.5 * Math.max(1, rect.height);
+    offsetX = (typeof offsetX != "undefined" ? offsetX : 0.5 * Math.max(1, rect.width));
+    offsetY = (typeof offsetY != "undefined" ? offsetY : 0.5 * Math.max(1, rect.height));
 
     // include frame offset
     offsetX += frameOffset.left;

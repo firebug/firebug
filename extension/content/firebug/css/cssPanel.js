@@ -1031,27 +1031,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        if (this.selection instanceof window.Element)
+        if (!Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                 "-",
                 {
-                    label: "EditStyle",
-                    tooltiptext: "style.tip.Edit_Style",
-                    command: Obj.bindFixed(this.editElementStyle, this)
+                    label: "NewRule",
+                    tooltiptext: "css.tip.New_Rule",
+                    id: "fbNewCSSRule",
+                    command: Obj.bindFixed(this.insertRule, this, target)
                 }
             );
-        }
-        else if (!Url.isSystemStyleSheet(this.selection))
-        {
-            items.push(
-                    "-",
-                    {
-                        label: "NewRule",
-                        tooltiptext: "css.tip.New_Rule",
-                        command: Obj.bindFixed(this.insertRule, this, target)
-                    }
-                );
         }
 
         if (Css.hasClass(target, "cssSelector"))
@@ -1164,7 +1154,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 if (text.charAt(rangeOffset) == ",")
                     return;
 
-                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, true);
+                cssValue = Firebug.CSSModule.parseCSSFontFamilyValue(text, rangeOffset, propName);
             }
             else
             {
@@ -1689,12 +1679,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
         if (propName == "font" || propName == "font-family")
-            return Firebug.CSSModule.parseCSSFontFamilyValue(value, offset);
+            return Firebug.CSSModule.parseCSSFontFamilyValue(value, offset, propName);
         else
             return Firebug.CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1717,10 +1707,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
 
-            if (propName === "font" || propName === "font-family")
+            var keywords;
+            if (range.type === "fontFamily")
             {
+                keywords = Css.cssKeywords["fontFamily"].slice();
                 if (this.panel && this.panel.context)
                 {
                     // Add the fonts used in this context (they might be inaccessible
@@ -1745,8 +1736,64 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     }
                 }
             }
+            else
+            {
+                var lowerProp = propName.toLowerCase(), avoid;
+                if (["background", "border", "font"].indexOf(lowerProp) !== -1)
+                {
+                    if (cycle)
+                    {
+                        // Cycle only within the same category, if possible.
+                        var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, expr);
+                        if (cat)
+                            return (cat in Css.cssKeywords ? Css.cssKeywords[cat] : [cat]);
+                    }
+                    else
+                    {
+                        // Avoid repeated properties. We assume the values to be solely
+                        // space-separated tokens, within a comma-separated part (like
+                        // for CSS3 multiple backgrounds). This is absolutely wrong, but
+                        // good enough in practice because non-tokens for which it fails
+                        // likely aren't in any category.
+                        // "background-position" and "background-repeat" values can occur
+                        // twice, so they are special-cased.
+                        avoid = [];
+                        var preTokens = preExpr.split(",").reverse()[0].split(" ");
+                        var postTokens = postExpr.split(",")[0].split(" ");
+                        var tokens = preTokens.concat(postTokens);
+                        for (var i = 0; i < tokens.length; ++i)
+                        {
+                            var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, tokens[i]);
+                            if (cat && cat !== "position" && cat !== "bgRepeat")
+                                avoid.push(cat);
+                        }
+                    }
+                }
+                keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
+            }
+
+            // Add the magic inherit property, if it's sufficiently alone.
+            if (!preExpr)
+                keywords = keywords.concat(["inherit"]);
             return keywords;
         }
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssPropValue"))
+            return null;
+
+        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
+        // into 'no-repeat' should work).
+        var row = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        if (!Css.multiValuedProperties.hasOwnProperty(propName))
+            return null;
+
+        if (range.type === "fontFamily")
+            return ",";
+        return " ";
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
@@ -2107,7 +2154,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         return {start: start, end: end};
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, context, out)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
     {
         if (!Css.hasClass(this.target, "cssSelector"))
             return [];
@@ -2263,6 +2310,16 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             out.suggestion = ":hover";
 
         return ret.sort();
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssSelector"))
+            return null;
+
+        // For e.g. 'd|span', expand to a descendant selector; otherwise assume
+        // that this is part of the same selector part.
+        return (reSelectorChar.test(prefixOf.charAt(0)) ? " " : "");
     },
 
     advanceToNext: function(target, charCode)

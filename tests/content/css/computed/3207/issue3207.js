@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.sysout("issue3207.START");
 
-    FBTest.openNewTab(basePath + "css/3207/issue3207.html", function(win)
+    FBTest.openNewTab(basePath + "css/computed/3207/issue3207.html", function(win)
     {
         FBTest.openFirebug();
         FBTest.selectPanel("html");
@@ -22,7 +22,7 @@ function runTest()
                 "'font-family' property must be listed inside the Computed side panel"))
             {
                 var propValue = propNames[i].parentNode.querySelector(".stylePropValue").textContent;
-                FBTest.compare("\"Trebuchet MS\",Helvetica,sans-serif", propValue,
+                FBTest.compare(/^"Trebuchet MS",[\s\u200b]*Helvetica,[\s\u200b]*sans-serif$/, propValue,
                     "Property value must be '\"Trebuchet MS\",Helvetica,sans-serif'");
             }
 

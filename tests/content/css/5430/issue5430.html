@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5430: Show @namespace rules inside CSS panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @namespace "http://www.w3.org/1999/xhtml";
+        @namespace svg "http://www.w3.org/2000/svg";    
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5430">Issue 5430</a>: Show @namespace rules inside CSS panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5430.html</em> from the Location Menu</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be two <code>@namespace</code> rules listed inside the <em>CSS</em> panel:
+                        <code>
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace svg "http://www.w3.org/2000/svg";    
+                        </code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
