@@ -104,7 +104,7 @@
 }
 
 #fbStatusBar[showErrors] #fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/errorIcon.png);
+    list-style-image: url(chrome://firebug/skin/error.svg);
 }
 
 #fbStatusIcon {
