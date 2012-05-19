@@ -45,7 +45,7 @@ function $el(name, attributes, children, parent)
 {
     attributes = attributes || {};
 
-    if (!Array.isArray(children))
+    if (!Array.isArray(children) && !parent)
     {
         parent = children;
         children = null;
