@@ -1648,20 +1648,24 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!Css.hasClass(target, "nodeValue"))
             return;
 
-        var attribute = Dom.getAncestorByClass(target, "nodeAttr");
-        var nodeName = attribute.getElementsByClassName("nodeName").item(0).textContent;
-
         var node = Firebug.getRepObject(target);
-        if (node && node.nodeType == 1 && node.localName.toUpperCase() == "IMG" && nodeName == "src")
+        if (node && node.nodeType == 1)
         {
-            var url = node.src;
+            var nodeName = node.localName.toUpperCase();
+            var attribute = Dom.getAncestorByClass(target, "nodeAttr");
+            var attributeName = attribute.getElementsByClassName("nodeName").item(0).textContent;
 
-            // This state cleared in hide()
-            if (url == this.infoTipURL)
-                return true;
+            if ((nodeName == "IMG" || nodeName == "INPUT") && attributeName == "src")
+            {
+                var url = node.src;
 
-            this.infoTipURL = url;
-            return CSSInfoTip.populateImageInfoTip(infoTip, url);
+                // This state cleared in hide()
+                if (url == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = url;
+                return CSSInfoTip.populateImageInfoTip(infoTip, url);
+            }
         }
     },
 
