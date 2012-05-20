@@ -19,9 +19,9 @@ define([
     "firebug/lib/persist",
     "firebug/chrome/menu",
     "firebug/lib/url",
+    "firebug/css/cssReps",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
-    "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
@@ -29,7 +29,9 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url) { with (Domplate) {
+    Url, CSSInfoTip) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1654,7 +1656,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return true;
 
             this.infoTipURL = url;
-            return Firebug.InfoTip.populateImageInfoTip(infoTip, url);
+            return CSSInfoTip.populateImageInfoTip(infoTip, url);
         }
     },
 
