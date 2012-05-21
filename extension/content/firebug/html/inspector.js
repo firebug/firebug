@@ -118,6 +118,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                     if (FBTrace.DBG_INSPECT)
                         FBTrace.sysout("Removing inspector highlighter due to setTimeout loop");
 
+                    if (!oldContext.highlightTimeout)
+                        return;
+
                     delete oldContext.highlightTimeout;
 
                     if (oldContext.window && oldContext.window.document)
@@ -127,7 +130,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                         if (oldContext.inspectorMouseMove)
                             Events.removeEventListener(oldContext.window.document, "mousemove",
                                 oldContext.inspectorMouseMove, true);
-                    }
+                        }
                 }, inspectDelay);
             }
         }
