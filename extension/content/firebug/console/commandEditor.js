@@ -7,8 +7,9 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/dom",
     "firebug/lib/locale",
+    "firebug/lib/css",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -61,7 +62,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         {
             mode: MODE_JAVASCRIPT,
             showLineNumbers: false,
-            theme: "chrome://firebug/skin/orion-firebug.css"
         };
 
         // Custom shortcuts for Orion editor
@@ -115,9 +115,17 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             // This event is not supported in Fx11 so, catch the exception
             // which is thrown.
             this.editor.addEventListener("keypress", this.onKeyPress);
+
+            // Customize the default theme. Source Editor component doesn't have public
+            // API for customizing existing themes. So, use this construct, but be aware
+            // that _view and _frameDocument are private variables and could change.
+            var editorDoc = this.editor._view._frameDocument;
+            Css.appendStylesheet(editorDoc, "chrome://firebug/skin/orion-firebug.css");
         }
         catch (err)
         {
+            if (FBTrace.DBG_ERROR)
+                FBTrace.sysout("commandEditor.onEditorLoad; EXCEPTION " + err, err);
         }
 
         // xxxHonza: Context menu support is going to change in SourceEditor
