@@ -456,13 +456,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             },
             Menu.optionMenu("Show_Mozilla_specific_styles",
                 "showMozillaSpecificStyles",
-                "computed.option.tip.Show_Mozilla_Specific_Styles"),
-            "-",
-            {
-                label: "Refresh",
-                command: Obj.bind(this.refresh, this),
-                tooltiptext: "panel.tip.Refresh"
-            }
+                "computed.option.tip.Show_Mozilla_Specific_Styles")
         );
 
         return items;
