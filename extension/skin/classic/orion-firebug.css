@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
 /************************************************************************************************/
+/* The Default Mozilla Orion Theme */
+
+@import "chrome://browser/skin/devtools/orion.css";
+
+/************************************************************************************************/
 /* Custom Styles for Command Editor (Orion) */
 
 .view {
