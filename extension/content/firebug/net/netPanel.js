@@ -24,6 +24,7 @@ define([
     "firebug/net/netProgress",
 
     "httpmonitor/net/netPanel",
+    "httpmonitor/net/netFile",
 
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
@@ -39,7 +40,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, HttpMonitorPanel) {
+    Arr, System, Menu, NetUtils, NetProgress, HttpMonitorPanel, NetFile) {
 
 with (Domplate) {
 
@@ -112,7 +113,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel, HttpMonitorPanel.prototy
     {
         var items = HttpMonitorPanel.prototype.getContextMenuItems.apply(this, arguments);
 
-        var file = Chrome.getRepObject(target);
+        var file = Firebug.getRepObject(target);
         if (!file || !(file instanceof NetFile))
             return items;
 
