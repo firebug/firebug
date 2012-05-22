@@ -1727,18 +1727,38 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     keywords = Arr.merge(keywords, ar);
                 }
 
-                var q = expr.charAt(0);
-                if (expr.length > 1 && (q === '"' || q === "'"))
+                var q = expr.charAt(0), isQuoted = (q === '"' || q === "'");
+                if (!isQuoted)
                 {
-                    keywords = keywords.slice();
-                    for (var i = 0; i < keywords.length; ++i)
-                    {
-                        // Treat values starting with capital letters as font names
-                        // that can be quoted.
-                        var k = keywords[i];
-                        if (k.charAt(0).toLowerCase() !== k.charAt(0))
-                            keywords[i] = q + k + q;
-                    }
+                    // Default to ' quotes, unless " occurs somewhere.
+                    q = (/"/.test(preExpr + postExpr) ? '"' : "'");
+                }
+
+                // Don't complete '.
+                if (expr.length <= 1 && isQuoted)
+                    return [];
+
+                // When completing, quote fonts if the input is quoted; when
+                // cycling, quote them instead in the way the user seems to
+                // expect to have them quoted.
+                var reSimple = /^[a-z][a-z0-9-]*$/i;
+                var isComplex = !reSimple.test(expr.replace(/^['"]?|['"]?$/g, ""));
+                var quote = function(str)
+                {
+                    if (!cycle || isComplex !== isQuoted)
+                        return (isQuoted ? q + str + q : str);
+                    else
+                        return (reSimple.test(str) ? str : q + str + q);
+                };
+
+                keywords = keywords.slice();
+                for (var i = 0; i < keywords.length; ++i)
+                {
+                    // Treat values starting with capital letters as font names
+                    // that can be quoted.
+                    var k = keywords[i];
+                    if (k.charAt(0).toLowerCase() !== k.charAt(0))
+                        keywords[i] = quote(k);
                 }
             }
             else
