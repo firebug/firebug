@@ -157,6 +157,9 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
         this.contexts[tabId] = context;
         context.netProgress = this.initNetContext(context);
 
+        // Attach page observers (activity observer, http observer, cache listener,
+        // load and DOMContentLoaded event handlers, etc.). Some of them are registered
+        // now and the others (like cache listener) in real initContext method.
         this.attachObservers(context);
 
         if (FBTrace.DBG_NET)
@@ -172,7 +175,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
         var tabId = Win.getWindowProxyIdForWindow(win);
         var tempContext = this.contexts[tabId];
 
-        // Put netProgress in to the right context now when it finally exist.
+        // Put netProgress in to the right context now when it finally exists.
         if (tempContext)
         {
             context.netProgress = tempContext.netProgress;
@@ -181,11 +184,12 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
 
             // Yet register the rest of the observers (e.g. tab cache)
             this.attachObservers(context);
-            return;
         }
-
-        // Temp context wasn't created so, use standard logic.
-        HttpMonitorModule.initContext.apply(this, arguments);
+        else
+        {
+            // Temp context wasn't created so, use the standard logic.
+            HttpMonitorModule.initContext.apply(this, arguments);
+        }
 
         //xxxHonza: needed by NetExport, should be probably somewhere else.
         // Set Page title and id into all document objects.
