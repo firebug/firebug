@@ -175,7 +175,8 @@
 }
 
 .cssProp.editGroup:hover {
-    background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    filter: none;
 }
 
 .cssProp.editGroup > span:first-child {
@@ -183,7 +184,8 @@
 }
 
 .cssProp.disabledStyle {
-    background: transparent url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
     color: #CCCCCC;
 }
 
