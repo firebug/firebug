@@ -111,6 +111,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
+        this.loaded = true;
+
         try
         {
             // This event is not supported in Fx11 so, catch the exception
@@ -271,7 +273,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     fontSizeAdjust: function(adjust)
     {
-        if (!this.editor || !this.editor._view)
+        if (!this.editor || !this.editor._view || !this.loaded)
             return;
 
         if (typeof(SourceEditor) != "undefined")
