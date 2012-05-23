@@ -279,7 +279,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             var doc = this.editor._view._frame.contentDocument;
 
             // See issue 5488
-            //doc.body.style.fontSizeAdjust = adjust;
+            doc.body.style.fontSizeAdjust = adjust;
         }
         else
         {
