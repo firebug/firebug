@@ -247,16 +247,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Go backward or forward one step in the list of completions.
-     * dir is the relative movement in the list; -1 means backward and 1 forward.
+     * Go backward or forward by some number of steps in the list of completions.
+     * dir is the relative movement in the list (negative for backwards movement).
      */
     this.cycle = function(dir)
     {
-        this.completions.index += dir;
-        if (this.completions.index >= this.completions.list.length)
-            this.completions.index = 0;
-        else if (this.completions.index < 0)
-            this.completions.index = this.completions.list.length - 1;
+        var ind = this.completions.index;
+        if (ind === this.completions.list.length - 1 && dir > 0)
+            ind = 0;
+        else if (ind === 0 && dir < 0)
+            ind = this.completions.list.length - 1;
+        else
+            ind += dir;
+        ind = Math.max(Math.min(ind, this.completions.list.length - 1), 0);
+        this.completions.index = ind;
         this.showCompletions(true);
     };
 
@@ -478,11 +482,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (!this.isPopupOpen())
         {
             // When no popup is open, cycle by a fixed amount and stop at edges.
-            selIndex += dir * 15;
-            selIndex = Math.max(selIndex, 0);
-            selIndex = Math.min(selIndex, list.length-1);
-            this.completions.index = selIndex;
-            this.showCompletions(true);
+            if (selIndex !== (dir === -1 ? 0 : list.length-1))
+                this.cycle(dir * 15);
             return;
         }
 
@@ -666,6 +667,15 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.completionBox.value = this.getCompletionBoxValue();
     };
 
+    this.popupScroll = function(event)
+    {
+        if (event.axis !== event.VERTICAL_AXIS)
+            return;
+        if (!this.getCompletionPopupElementFromEvent(event))
+            return;
+        this.cycle(event.detail);
+    };
+
     this.popupClick = function(event)
     {
         var el = this.getCompletionPopupElementFromEvent(event);
@@ -677,6 +687,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     this.popupMousedown = Obj.bind(this.popupMousedown, this);
+    this.popupScroll = Obj.bind(this.popupScroll, this);
     this.popupClick = Obj.bind(this.popupClick, this);
 
     /**
@@ -689,6 +700,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (this.completionPopup)
         {
             Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+            Events.removeEventListener(this.completionPopup, "DOMMouseScroll", this.popupScroll, true);
             Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
         }
     };
@@ -696,6 +708,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     if (this.completionPopup)
     {
         Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+        Events.addEventListener(this.completionPopup, "DOMMouseScroll", this.popupScroll, true);
         Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
     }
 };
