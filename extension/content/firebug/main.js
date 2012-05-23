@@ -38,6 +38,33 @@ catch (err)
 }
 
 // ********************************************************************************************* //
+// HTTP Monitor Setup
+
+require(config, [
+    "httpmonitor/lib/trace",
+    "httpmonitor/lib/options",
+    "httpmonitor/chrome/defaultPrefs",
+    "httpmonitor/lib/locale",
+    "httpmonitor/chrome/chrome",
+    "firebug/lib/trace",
+],
+function(Trace, Options, DefaultPrefs, Locale, Chrome, FBTrace)
+{
+    // Forward all tracing into FBTrace console service.
+    Trace.addListener(FBTrace);
+
+    // Set domain for preferences.
+    Options.initialize("extensions.firebug");
+    Options.registerDefaultPrefs(DefaultPrefs);
+
+    Locale.registerStringBundle("chrome://firebug/locale/httpmonitor.properties");
+
+    Chrome.config = {
+        skinBaseUrl: "chrome://firebug-httpmonitor/skin/"
+    }
+});
+
+// ********************************************************************************************* //
 
 // Backward compatibility (some modules changed location)
 // http://getfirebug.com/wiki/index.php/Extension_Migration
@@ -53,10 +80,6 @@ paths["firebug/firefox/xpcom"] = "firebug/lib/xpcom";
 paths["firebug/firefox/window"] = "firebug/chrome/window";
 paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
 paths["firebug/net/httpLib"] = "firebug/lib/http";
-
-// HTTP Monitor
-paths["httpmonitor/lib/trace"] = "firebug/lib/trace";
-paths["httpmonitor/lib/locale"] = "firebug/lib/locale";
 
 var originalLoad = require.load;
 require.load = function(context, fullName, url)
