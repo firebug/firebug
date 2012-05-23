@@ -10,7 +10,7 @@
 /* Custom Styles for Command Editor (Orion) */
 
 .viewContainer {
-    font-size: 11px;
+    /*font-size: 11px; see issue 5488*/
 }
 
 .view {

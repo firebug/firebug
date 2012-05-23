@@ -62,7 +62,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         {
             mode: MODE_JAVASCRIPT,
             showLineNumbers: false,
-            //theme: "chrome://firebug/skin/orion-firebug.css"
+            theme: "chrome://firebug/skin/orion-firebug.css"
         };
 
         // Custom shortcuts for Orion editor
@@ -116,13 +116,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             // This event is not supported in Fx11 so, catch the exception
             // which is thrown.
             this.editor.addEventListener("keypress", this.onKeyPress);
-
-            // Customize the default theme. Source Editor component doesn't have public
-            // API for customizing existing themes. So, use this construct, but be aware
-            // that _view and _frameDocument are private variables and could change.
-            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=757016
-            var editorDoc = this.editor._view._frameDocument;
-            Css.appendStylesheet(editorDoc, "chrome://firebug/skin/orion-firebug.css");
         }
         catch (err)
         {
@@ -284,7 +277,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (typeof(SourceEditor) != "undefined")
         {
             var doc = this.editor._view._frame.contentDocument;
-            doc.body.style.fontSizeAdjust = adjust;
+
+            // See issue 5488
+            //doc.body.style.fontSizeAdjust = adjust;
         }
         else
         {
