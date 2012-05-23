@@ -279,7 +279,30 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             var doc = this.editor._view._frame.contentDocument;
 
             // See issue 5488
-            doc.body.style.fontSizeAdjust = adjust;
+            //doc.body.style.fontSizeAdjust = adjust;
+
+            var textSize = Firebug.Options.get("textSize");
+            var zoom = Firebug.Options.getZoomByTextSize(textSize);
+            var zoomString = (zoom * 13) + "px";
+
+            FBTrace.sysout("zoomString " + zoomString);
+
+            try
+            {
+                this.editor._view.setOptions({
+                    stylesheet: [
+                        "chrome://firebug/skin/orion-firebug.css",
+                        "data:text/css,.viewContainer { font-size: " + zoomString + "}"
+                    ]
+                });
+            }
+            catch (err)
+            {
+                FBTrace.sysout("EXCEPTION " + err, err);
+            }
+
+            FBTrace.sysout("zoom " + zoom);
+
         }
         else
         {
