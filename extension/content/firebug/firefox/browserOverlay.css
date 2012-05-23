@@ -11,11 +11,12 @@
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+    list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
+    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
 }
 
-#firebug-button[firebugActive="true"] .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
+#firebug-button[firebugActive="true"] {
+    filter: none;
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
@@ -87,32 +88,6 @@
 
 #firebug-button .fb-toolbarbutton {
     padding: 0;
-}
-
-/*************************************************************************************************/
-/* Firebug Status Icon */
-
-#fbStatusBar {
-    min-width: 26px;
-    cursor: pointer;
-}
-
-#fbStatusText {
-    cursor: pointer;
-    color: red;
-    font-weight: bold;
-}
-
-#fbStatusBar[showErrors] #fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/error.svg);
-}
-
-#fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-#fbStatusIcon[firebugActive="true"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
 /*************************************************************************************************/

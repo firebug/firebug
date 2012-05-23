@@ -1052,7 +1052,7 @@ $toolbarButton("firebug-button", {
     command: "cmd_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
     observes: "firebugStatus",
-    style: "list-style-image:url(chrome://firebug/skin/firebug-gray-16.png)"
+    style: "list-style-image:url(chrome://firebug/skin/firebug16.png)"
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.
