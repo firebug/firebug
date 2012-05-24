@@ -24,6 +24,7 @@ define([
 
     "httpmonitor/net/netPanel",
     "httpmonitor/net/netFile",
+    "httpmonitor/net/netPanelSearch",
 
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
@@ -38,7 +39,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, HttpMonitorPanel, NetFile) {
+    Arr, System, Menu, NetUtils, HttpMonitorPanel, NetFile, NetPanelSearch) {
 
 with (Domplate) {
 
@@ -65,6 +66,9 @@ function NetPanel() {}
 NetPanel.prototype = Obj.extend(Firebug.ActivablePanel, HttpMonitorPanel.prototype,
 /** lends NetPanel */
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Panel
+
     show: function(state)
     {
         HttpMonitorPanel.prototype.show.apply(this, arguments);
@@ -144,6 +148,27 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel, HttpMonitorPanel.prototy
 
         return items;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BON
+
+    breakOnNext: function(breaking)
+    {
+        this.context.breakOnXHR = breaking;
+    },
+
+    shouldBreakOnNext: function()
+    {
+        return this.context.breakOnXHR;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? Locale.$STR("net.Disable Break On XHR") : Locale.$STR("net.Break On XHR"));
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // XHR Debugging
 
     breakOnRequest: function(file)
     {
@@ -233,19 +258,69 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel, HttpMonitorPanel.prototy
         }
     },
 
-    breakOnNext: function(breaking)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+
+    getSearchOptionsMenuItems: function()
     {
-        this.context.breakOnXHR = breaking;
+        return [
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
+            //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression"),
+            Firebug.Search.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody",
+                "search.net.tip.Response_Bodies")
+        ];
     },
 
-    shouldBreakOnNext: function()
+    search: function(text, reverse)
     {
-        return this.context.breakOnXHR;
-    },
+        if (!text)
+        {
+            delete this.currentSearch;
+            this.highlightNode(null);
+            return false;
+        }
 
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled ? Locale.$STR("net.Disable Break On XHR") : Locale.$STR("net.Break On XHR"));
+        var row;
+        if (this.currentSearch && text == this.currentSearch.text)
+        {
+            row = this.currentSearch.findNext(true, false, reverse,
+                Firebug.Search.isCaseSensitive(text));
+        }
+        else
+        {
+            this.currentSearch = new NetPanelSearch(this);
+            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
+        }
+
+        if (row)
+        {
+            var sel = this.document.defaultView.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this.currentSearch.range);
+
+            Dom.scrollIntoCenterView(row, this.panelNode);
+            if (this.currentSearch.shouldSearchResponses() &&
+                Dom.getAncestorByClass(row, "netInfoResponseText"))
+            {
+                this.highlightNode(row)
+            }
+            else
+            {
+                this.highlightNode(Dom.getAncestorByClass(row, "netRow"));
+            }
+
+            Events.dispatch(this.fbListeners, "onNetMatchFound", [this, text, row]);
+            return true;
+        }
+        else
+        {
+            Events.dispatch(this.fbListeners, "onNetMatchFound", [this, text, null]);
+            return false;
+        }
     },
 });
 
