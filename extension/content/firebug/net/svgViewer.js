@@ -12,6 +12,8 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 
+with (Domplate) {
+
 // ************************************************************************************************
 // Constants
 
@@ -29,10 +31,33 @@ var contentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
+Firebug.SVGViewerModel = domplate(Firebug.Module,
 /** lends Firebug.SVGViewerModel */
 {
     dispatchName: "svgViewer",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    table:
+        TABLE({"class": "netInfoPostSVGTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
+            TBODY({"role": "list", "aria-label": Locale.$STR("svgviewer.tab.SVG")},
+                TR({"class": "netInfoPostSVGTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            Locale.$STR("svgviewer.tab.SVG")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostSVGBody"})
+                )
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
 
     initialize: function()
     {
@@ -132,6 +157,22 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
 
         for (var i=0; i<originals.length; i++)
             templates[i].getHidden = originals[i];
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Post Body View
+
+    updatePostTabBody: function(parentNode, file, context)
+    {
+        var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
+        if (!this.isSVG(contentType))
+            return;
+
+        var text = NetUtils.getPostText(file, context);
+        var svgTable = this.table.append({}, parentNode);
+        var svgBody = svgTable.getElementsByClassName("netInfoPostSVGBody").item(0);
+
+        this.insertSVG(svgBody, text);
     }
 });
 
@@ -142,7 +183,6 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
  * @domplate Represents a template for displaying SVG parser errors. Used by
  * <code>Firebug.SVGViewerModel</code>.
  */
-with (Domplate) {
 Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 {
     tag:
@@ -169,7 +209,7 @@ Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-})};
+});
 
 // ************************************************************************************************
 // Registration
@@ -179,4 +219,4 @@ Firebug.registerModule(Firebug.SVGViewerModel);
 return Firebug.SVGViewerModel;
 
 // ************************************************************************************************
-});
+}});

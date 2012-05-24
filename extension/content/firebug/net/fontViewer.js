@@ -20,6 +20,8 @@ define([
 function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,
     NetUtils, Options) {
 
+with (Domplate) {
+
 // ********************************************************************************************* //
 
 // List of font content types
@@ -37,10 +39,31 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.FontViewerModel = Obj.extend(Firebug.Module,
+Firebug.FontViewerModel = domplate(Firebug.Module,
 {
     dispatchName: "fontViewer",
     contentTypes: contentTypes,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    table:
+        TABLE({"class": "netInfoPostFontTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
+            TBODY({"role": "list", "aria-label": Locale.$STR("fontviewer.tab.Font")},
+                TR({"class": "netInfoPostFontTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        Locale.$STR("fontviewer.tab.Font")
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostFontBody"})
+                )
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
 
     initialize: function()
     {
@@ -150,12 +173,27 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
             if (FBTrace.DBG_FONTS)
                 FBTrace.sysout("fontviewer.updateResponse", file);
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Post Body View
+
+    updatePostTabBody: function(parentNode, file, context)
+    {
+        var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
+        if (!FontViewer.isFont(contentType, file.href, text))
+            return;
+
+        var text = NetUtils.getPostText(file, context);
+        var fontTable = this.table.append({}, parentNode);
+        var fontBody = fontTable.getElementsByClassName("netInfoPostFontBody").item(0);
+
+        this.insertFont(fontBody, text);
     }
 });
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.FontViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -689,7 +727,7 @@ Firebug.FontViewerModel.Preview = domplate(
         if (fontObject.metadata != "")
             this.insertMetaDataFormatted(body, fontObject.metadata);
     }
-})};
+});
 
 // ********************************************************************************************* //
 // Registration
@@ -699,4 +737,4 @@ Firebug.registerModule(Firebug.FontViewerModel);
 return Firebug.FontViewerModel;
 
 // ********************************************************************************************* //
-});
+}});

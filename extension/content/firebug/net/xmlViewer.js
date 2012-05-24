@@ -12,6 +12,8 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 
+with (Domplate) {
+
 // ********************************************************************************************* //
 // Constants
 
@@ -36,10 +38,33 @@ var xmlContentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
+Firebug.XMLViewerModel = domplate(Firebug.Module,
 /** lends Firebug.XMLViewerModel */
 {
     dispatchName: "xmlViewer",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    table:
+        TABLE({"class": "netInfoPostXMLTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
+            TBODY({"role": "list", "aria-label": Locale.$STR("xmlviewer.tab.XML")},
+                TR({"class": "netInfoPostXMLTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            Locale.$STR("xmlviewer.tab.XML")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostXMLBody"})
+                )
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
 
     initialize: function()
     {
@@ -139,6 +164,23 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
 
         for (var i=0; i<originals.length; i++)
             templates[i].getHidden = originals[i];
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Post Body View
+
+    updatePostTabBody: function(parentNode, file, context)
+    {
+        var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
+        if (!this.isXML(contentType))
+            return;
+
+        var text = NetUtils.getPostText(file, context);
+
+        var jsonTable = this.table.append({}, parentNode);
+        var jsonBody = jsonTable.getElementsByClassName("netInfoPostXMLBody").item(0);
+
+        this.insertXML(jsonBody, text);
     }
 });
 
@@ -149,7 +191,6 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
  * @domplate Represents a template for displaying XML parser errors. Used by
  * <code>Firebug.XMLViewerModel</code>.
  */
-with (Domplate) {
 Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 {
     tag:
@@ -176,7 +217,7 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-})};
+});
 
 // ********************************************************************************************* //
 // Registration
@@ -186,4 +227,4 @@ Firebug.registerModule(Firebug.XMLViewerModel);
 return Firebug.XMLViewerModel;
 
 // ********************************************************************************************* //
-});
+}});

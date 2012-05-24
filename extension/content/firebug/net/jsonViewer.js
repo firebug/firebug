@@ -20,6 +20,8 @@ define([
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
     ToggleBranch, Arr, System) {
 
+with (Domplate) {
+
 // ********************************************************************************************* //
 
 // List of JSON content types.
@@ -40,10 +42,33 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
+Firebug.JSONViewerModel = domplate(Firebug.Module,
 {
     dispatchName: "jsonViewer",
     contentTypes: contentTypes,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    table:
+        TABLE({"class": "netInfoPostJSONTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
+            TBODY({"role": "list", "aria-label": Locale.$STR("jsonviewer.tab.JSON")},
+                TR({"class": "netInfoPostJSONTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            Locale.$STR("jsonviewer.tab.JSON")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostJSONBody"})
+                )
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
 
     initialize: function()
     {
@@ -155,11 +180,34 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
         var jsonString = new String(file.responseText);
         return Json.parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Post Body View
+
+    updatePostTabBody: function(parentNode, file, context)
+    {
+        var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
+        if (!this.isJSON(contentType, text))
+            return;
+
+        var text = NetUtils.getPostText(file, context);
+        var data = Json.parseJSONString(text, "http://" + file.request.originalURI.host);
+        if (!data)
+            return;
+
+        var jsonTable = this.table.append({}, parentNode);
+        var jsonBody = jsonTable.getElementsByClassName("netInfoPostJSONBody").item(0);
+
+        if (!this.toggles)
+            this.toggles = new ToggleBranch.ToggleBranch();
+
+        Firebug.DOMPanel.DirTable.tag.replace(
+            {object: data, toggles: this.toggles}, jsonBody);
+    }
 });
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.JSONViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -213,7 +261,7 @@ Firebug.JSONViewerModel.Preview = domplate(
 
         body.jsonTree.render(file.jsonObject, parentNode, context);
     }
-})};
+});
 
 // ********************************************************************************************* //
 
@@ -279,4 +327,4 @@ Firebug.registerModule(Firebug.JSONViewerModel);
 return Firebug.JSONViewerModel;
 
 // ********************************************************************************************* //
-});
+}});
