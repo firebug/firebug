@@ -6,6 +6,7 @@
 /* Inspector button */
 #inspector-button {
     list-style-image: url(chrome://firebug/skin/inspect.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
 /* Firebug Start Button */
@@ -98,7 +99,7 @@
 }
 
 #menu_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/Templarian_inspector.png);
+    list-style-image: url(chrome://firebug/skin/inspect.png);
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
