@@ -577,6 +577,16 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     {
                         self.togglePseudoClassLock(":active");
                     }
+                },
+                {
+                    label: "style.option.label.focus",
+                    type: "checkbox",
+                    checked: self.hasPseudoClassLock(":focus"),
+                    tooltiptext: "style.option.tip.focus",
+                    command: function()
+                    {
+                        self.togglePseudoClassLock(":focus");
+                    }
                 }
             );
         }
