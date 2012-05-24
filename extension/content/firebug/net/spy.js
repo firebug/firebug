@@ -17,8 +17,8 @@ define([
     "firebug/lib/url",
     "firebug/lib/array",
     "firebug/trace/debug",
-    "firebug/net/httpActivityObserver",
-    "firebug/net/netUtils",
+    "httpmonitor/net/httpActivityObserver",
+    "httpmonitor/net/netUtils",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/net/netPanel",
@@ -73,11 +73,17 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     {
         context.spies = [];
 
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+try {
+	        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, context.window);
 
         if (FBTrace.DBG_SPY)
             FBTrace.sysout("spy.initContext " + contexts.length + " ", context.getName());
+
+} catch (e) {
+    FBTrace.sysout("initContext " + e, e)
+}
+
     },
 
     destroyContext: function(context)
@@ -420,7 +426,7 @@ var SpyHttpObserver =
  * @class This observer is used to properly monitor even mulipart XHRs. It's based on
  * an activity-observer component that has been introduced in Firefox 3.6.
  */
-var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
+var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver.prototype,
 /** @lends SpyHttpActivityObserver */
 {
     dispatchName: "SpyHttpActivityObserver",

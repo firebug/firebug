@@ -14,7 +14,7 @@ define([
     "firebug/lib/fonts",
     "firebug/lib/url",
     "firebug/lib/http",
-    "firebug/net/netUtils",
+    "httpmonitor/net/netUtils",
     "firebug/lib/options"
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,

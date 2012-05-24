@@ -8,7 +8,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/css",
     "firebug/lib/http",
-    "firebug/net/netUtils"
+    "httpmonitor/net/netUtils",
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 

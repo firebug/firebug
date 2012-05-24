@@ -20,8 +20,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/system",
     "firebug/chrome/menu",
-    "firebug/net/netUtils",
-    "firebug/net/netProgress",
+    "httpmonitor/net/netUtils",
 
     "httpmonitor/net/netPanel",
     "httpmonitor/net/netFile",
@@ -36,11 +35,10 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
-    "firebug/net/netReps",
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, HttpMonitorPanel, NetFile) {
+    Arr, System, Menu, NetUtils, HttpMonitorPanel, NetFile) {
 
 with (Domplate) {
 

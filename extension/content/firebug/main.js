@@ -40,6 +40,10 @@ catch (err)
 // ********************************************************************************************* //
 // HTTP Monitor Setup
 
+/**
+ * This code represents the 'main' part for HTTPM component. All Firebug specific
+ * initializations steps for HTTPM should be performed here.
+ */
 require(config, [
     "httpmonitor/lib/trace",
     "httpmonitor/lib/options",

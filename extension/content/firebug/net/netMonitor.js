@@ -8,11 +8,10 @@ define([
     "firebug/chrome/window",
     "firebug/lib/string",
     "firebug/lib/persist",
-    "firebug/net/httpActivityObserver",
-    "firebug/net/requestObserver",
-    "firebug/net/netProgress",
+    "httpmonitor/net/httpActivityObserver",
+    "httpmonitor/net/requestObserver",
     "firebug/lib/http",
-    "firebug/net/netUtils",
+    "httpmonitor/net/netUtils",
     "firebug/net/netDebugger",
     "firebug/lib/events",
     "firebug/trace/traceListener",
@@ -21,7 +20,7 @@ define([
     "httpmonitor/net/netMonitor"
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events,
+    HttpRequestObserver, Http, NetUtils, NetDebugger, Events,
     TraceListener, TraceModule, HttpMonitorModule) {
 
 // ********************************************************************************************* //

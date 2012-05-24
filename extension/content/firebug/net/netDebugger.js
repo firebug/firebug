@@ -10,7 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/array",
-    "firebug/net/netUtils",
+    "httpmonitor/net/netUtils",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
 
