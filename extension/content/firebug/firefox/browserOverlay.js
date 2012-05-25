@@ -1041,7 +1041,8 @@ $toolbarButton("inspector-button", {
     label: "firebug.Inspect",
     tooltiptext: "firebug.InspectElement",
     observes: "cmd_toggleInspecting",
-    image: "chrome://firebug/skin/inspect.png"
+    style: "list-style-image: url(chrome://firebug/skin/inspect.png);" +
+        "-moz-image-region: rect(0, 16px, 16px, 0);"
 });
 
 // TODO: why contextmenu doesn't work without cloning
@@ -1052,7 +1053,7 @@ $toolbarButton("firebug-button", {
     command: "cmd_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
     observes: "firebugStatus",
-    style: "list-style-image:url(chrome://firebug/skin/firebug16.png)"
+    style: "list-style-image: url(chrome://firebug/skin/firebug16.png)"
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.
