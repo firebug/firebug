@@ -63,6 +63,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
         TraceModule.addListener(this.traceActivityListener);
 
         Firebug.connection.addListener(this.DebuggerListener);
+
+        this.addListener(BONHandler);
     },
 
     shutdown: function()
@@ -73,6 +75,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
         TraceModule.removeListener(this.traceActivityListener);
 
         Firebug.connection.removeListener(this.DebuggerListener);
+
+        this.removeListener(BONHandler);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -190,6 +194,14 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
             HttpMonitorModule.initContext.apply(this, arguments);
         }
 
+        // Load existing breakpoints
+        var persistedPanelState = Persist.getPersistedState(context, panelName);
+        if (persistedPanelState.breakpoints)
+            context.netProgress.breakpoints = persistedPanelState.breakpoints;
+
+        if (!context.netProgress.breakpoints)
+            context.netProgress.breakpoints = new NetDebugger.NetBreakpointGroup();
+
         //xxxHonza: needed by NetExport, should be probably somewhere else.
         // Set Page title and id into all document objects.
         /*var netProgress = context.netProgress;
@@ -199,6 +211,22 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule, HttpMonitorModule,
             doc.id = context.uid;
             doc.title = NetUtils.getPageTitle(context);
         }*/
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        HttpMonitorModule.destroyContext.apply(this, arguments);
+
+        if (context.netProgress)
+        {
+            // Remember existing breakpoints.
+            var persistedPanelState = Persist.getPersistedState(context, panelName);
+            persistedPanelState.breakpoints = context.netProgress.breakpoints;
+        }
+
+        //if (Firebug.NetMonitor.isAlwaysEnabled())
+        //    unmonitorContext(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -267,6 +295,59 @@ Firebug.NetMonitor.DebuggerListener =
     {
         if (context.netProgress && !context.netProgress.breakpoints.isEmpty())
             groups.push(context.netProgress.breakpoints);
+    },
+};
+
+// ********************************************************************************************* //
+// Break On XHR Listener
+
+var BONHandler =
+{
+    breakOnXHR: function breakOnXHR(context, file)
+    {
+        var halt = false;
+        var conditionIsFalse = false;
+
+        // If there is an enabled breakpoint with condition:
+        // 1) break if the condition is evaluated to true.
+        var breakpoints = context.netProgress.breakpoints;
+        if (!breakpoints)
+            return;
+
+        var bp = breakpoints.findBreakpoint(file.getFileURL());
+        if (bp && bp.checked)
+        {
+            halt = true;
+            if (bp.condition)
+            {
+                halt = bp.evaluateCondition(context, file);
+                conditionIsFalse = !halt;
+            }
+        }
+
+        // 2) If break on XHR flag is set and there is no condition evaluated to false,
+        // break with "break on next" breaking cause (this new breaking cause can override
+        // an existing one that is set when evaluating a breakpoint condition).
+        if (context.breakOnXHR && !conditionIsFalse)
+        {
+            context.breakingCause = {
+                title: Locale.$STR("net.Break On XHR"),
+                message: Str.cropString(file.href, 200),
+                copyAction: Obj.bindFixed(System.copyToClipboard, System, file.href)
+            };
+
+            halt = true;
+        }
+
+        // Ignore if there is no reason to break.
+        if (!halt)
+            return;
+
+        // Even if the execution was stopped at breakpoint reset the global
+        // breakOnXHR flag.
+        context.breakOnXHR = false;
+
+        Firebug.Breakpoint.breakNow(context.getPanel(panelName, true));
     },
 };
 
