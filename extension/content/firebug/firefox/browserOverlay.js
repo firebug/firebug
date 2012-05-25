@@ -142,11 +142,13 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for each(var child in children)
+    for (var i=0; i<children.length; i++)
     {
+        var child = children[i];
         var id = child.getAttribute("insertbefore"), beforeEl;
         if (id)
             beforeEl = parent.querySelector("#" + id);
+
         if (!beforeEl)
         {
             id = child.getAttribute("insertafter");
@@ -156,6 +158,7 @@ function $menupopupOverlay(parent, children)
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
+
         parent.insertBefore(child, beforeEl);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
