@@ -912,7 +912,8 @@ Css.cssInfo.html =
 
 // ::-moz-progress-bar  // FF6 TODO
 
-Css.cssInfo.svg = {
+Css.cssInfo.svg =
+{
     "alignment-baseline": ["svgAlignmentBaseline"],
     "baseline-shift": ["baselineShift"],
     "clip": ["auto"],
@@ -1024,6 +1025,20 @@ Css.multiValuedProperties =
     "margin": 1,
     "padding": 1,
     "-moz-animation": 1
+};
+
+Css.unitlessProperties =
+{
+    "counter-increment": 1,
+    "counter-reset": 1,
+    "font-size-adjust": 1,
+    "font-weight": 1,
+    "line-height": 1,
+    "opacity": 1,
+    "orphans": 1,
+    "widows": 1,
+    "z-index": 1,
+    "-moz-column-count": 1
 };
 
 Css.cssKeywords =

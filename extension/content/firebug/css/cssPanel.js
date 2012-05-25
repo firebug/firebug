@@ -1842,6 +1842,16 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 info = {minValue: 0, maxValue: 1};
                 amt /= 100;
             }
+
+            if (expr === "0" && value.lastIndexOf("(", offset) === -1 &&
+                !Css.unitlessProperties.hasOwnProperty(propName))
+            {
+                // 0 is a length, and incrementing it normally will result in an
+                // invalid value 1 or -1.  Thus, guess at a unit to add.
+                var unitM = /\d([a-z]{1,4})/.exec(value);
+                expr += (unitM ? unitM[1] : "px");
+            }
+
             var newValue = this.incrementExpr(expr, amt, info);
             if (newValue !== null)
             {
