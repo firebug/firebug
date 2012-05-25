@@ -211,16 +211,29 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var lowPrefix = prefix.toLowerCase();
         for (var i = 0; i < candidates.length; ++i)
         {
+            // Mark a candidate as matching if it matches the prefix case-
+            // insensitively, and shares its upper-case characters.
             var name = candidates[i];
-            if (Str.hasPrefix(name.toLowerCase(), lowPrefix))
-                ciValid.push(name);
-            if (Str.hasPrefix(name, prefix))
-                valid.push(name);
-        }
+            if (!Str.hasPrefix(name.toLowerCase(), lowPrefix))
+                continue;
 
-        // If the typed text isn't lower-case, match case-sensitively.
-        if (lowPrefix !== prefix)
-            ciValid = valid;
+            var fail = false;
+            for (var j = 0; j < prefix.length; ++j)
+            {
+                var ch = prefix.charAt(j);
+                if (ch !== ch.toLowerCase() && ch !== name.charAt(j))
+                {
+                    fail = true;
+                    break;
+                }
+            }
+            if (!fail)
+            {
+                ciValid.push(name);
+                if (Str.hasPrefix(name, prefix))
+                    valid.push(name);
+            }
+        }
 
         if (ciValid.length > 0)
         {
