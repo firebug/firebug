@@ -1687,9 +1687,24 @@ var highlighterCache =
 
     clear: function()
     {
-        var clearCache = function(arr) {
-            var i, highlighter;
+        try
+        {
+            this.doClear();
+        }
+        catch (err)
+        {
+            // The cache is not properly cleared and it sometimes throws:
+            // "TypeError: can't access dead object" (memory leaks)
+            // See Issue 5452
+            FBTrace.sysout("highlighterCache.clear; EXCEPTION " + err, err);
+        }
+    },
 
+    doClear: function()
+    {
+        var clearCache = function(arr)
+        {
+            var i, highlighter;
             for (i = arr.length - 1; i >= 0; i--)
             {
                 highlighter = arr[i];
@@ -1731,6 +1746,7 @@ var highlighterCache =
         };
 
         clearBoxModelCache(this.highlighters.boxModelArr);
+
         clearCache(this.highlighters.frameArr);
         clearCache(this.highlighters.proxyEltArr);
 
