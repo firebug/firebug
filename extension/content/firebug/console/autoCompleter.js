@@ -250,16 +250,15 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
      * Go backward or forward by some number of steps in the list of completions.
      * dir is the relative movement in the list (negative for backwards movement).
      */
-    this.cycle = function(dir)
+    this.cycle = function(dir, clamp)
     {
-        var ind = this.completions.index;
-        if (ind === this.completions.list.length - 1 && dir > 0)
+        var ind = this.completions.index + dir;
+        if (clamp)
+            ind = Math.max(Math.min(ind, this.completions.list.length - 1), 0);
+        else if (ind >= this.completions.list.length)
             ind = 0;
-        else if (ind === 0 && dir < 0)
+        else if (ind < 0)
             ind = this.completions.list.length - 1;
-        else
-            ind += dir;
-        ind = Math.max(Math.min(ind, this.completions.list.length - 1), 0);
         this.completions.index = ind;
         this.showCompletions(true);
     };
@@ -383,7 +382,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         {
             if (this.completions)
             {
-                this.cycle(event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1);
+                this.cycle(event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1, false);
                 Events.cancelEvent(event);
                 return true;
             }
@@ -482,8 +481,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (!this.isPopupOpen())
         {
             // When no popup is open, cycle by a fixed amount and stop at edges.
-            if (selIndex !== (dir === -1 ? 0 : list.length-1))
-                this.cycle(dir * 15);
+            this.cycle(dir * 15, true);
             return;
         }
 
@@ -673,7 +671,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return;
         if (!this.getCompletionPopupElementFromEvent(event))
             return;
-        this.cycle(event.detail);
+        this.cycle(event.detail, true);
     };
 
     this.popupClick = function(event)
