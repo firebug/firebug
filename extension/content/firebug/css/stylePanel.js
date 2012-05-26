@@ -577,18 +577,23 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     {
                         self.togglePseudoClassLock(":active");
                     }
-                },
-                {
-                    label: "style.option.label.focus",
-                    type: "checkbox",
-                    checked: self.hasPseudoClassLock(":focus"),
-                    tooltiptext: "style.option.tip.focus",
-                    command: function()
-                    {
-                        self.togglePseudoClassLock(":focus");
-                    }
                 }
             );
+            if (Dom.domUtils.hasPseudoClassLock)
+            {
+                ret.push(
+                    {
+                        label: "style.option.label.focus",
+                        type: "checkbox",
+                        checked: self.hasPseudoClassLock(":focus"),
+                        tooltiptext: "style.option.tip.focus",
+                        command: function()
+                        {
+                            self.togglePseudoClassLock(":focus");
+                        }
+                    }
+                );
+            }
         }
 
         return ret;
@@ -653,7 +658,23 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     hasPseudoClassLock: function(pseudoClass)
     {
-        return Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass);
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            return Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass);
+        }
+        else
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var state = safeGetContentState(this.selection);
+            switch(pseudoClass)
+            {
+                case ":active":
+                    return state & STATE_ACTIVE;
+
+                case ":hover":
+                    return state & STATE_HOVER;
+            }
+        }
     },
 
     togglePseudoClassLock: function(pseudoClass)
@@ -661,17 +682,41 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.togglePseudoClassLock; pseudo-class: " + pseudoClass);
 
-        if (Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass))
-            Dom.domUtils.removePseudoClassLock(this.selection, pseudoClass);
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            if (Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass))
+                Dom.domUtils.removePseudoClassLock(this.selection, pseudoClass);
+            else
+                Dom.domUtils.addPseudoClassLock(this.selection, pseudoClass);
+        }
         else
-            Dom.domUtils.addPseudoClassLock(this.selection, pseudoClass);
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var currentState = safeGetContentState(this.selection);
+            var remove = false;
+            switch(pseudoClass)
+            {
+                case ":active":
+                    state = STATE_ACTIVE;
+                    break;
+
+                case ":hover":
+                    state = STATE_HOVER;
+                    break;
+            }
+            remove = currentState & state;
+
+            Dom.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
+                this.selection, state);
+        }
 
         this.refresh();
     },
 
     clearPseudoClassLocks: function()
     {
-        Dom.domUtils.clearPseudoClassLocks(this.selection);
+        if (Dom.domUtils.clearPseudoClassLocks)
+            Dom.domUtils.clearPseudoClassLocks(this.selection);
     },
 
     addStateChangeHandlers: function(el)
