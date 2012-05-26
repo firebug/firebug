@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 3660: Implement pageUp/pageDown and mouseWheel for completion list</title>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+            function generate(to, size)
+            {
+                var obj = {}, size = (to-1 + "").length;
+                for (var i = 0; i < to; ++i)
+                {
+                    var s = i + "";
+                    while (s.length < size)
+                        s = "0" + s;
+                    obj["prop" + s] = i;
+                }
+                return obj;
+            }
+            a100 = generate(100);
+            a10 = generate(10);
+        </script>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3660">Issue 3660</a>: Implement pageUp/pageDown and mouseWheel for completion list</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ul>
+                    <li>See issue3660.js.</li>
+                </ul>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li><code class="key">Up</code>/<code class="key">Down</code>
+                    should move the selection one step up/down, and wrap at edges.</li>
+                    <li><code class="key">Page Up</code>/<code class="key">Page Down</code>
+                    should move the selection to the point in the completion popup where it is
+                    2 steps away from the edge, or right to the edge if it is the start/end.
+                    If ahead of (as can happen with mousedown) or at that point, it should
+                    move to the next one. It should never wrap at edges, though.</li>
+                    <li><code class="key">Home</code>/<code class="key">End</code>
+                    should move the selection to the start or end of the completion list.</li>
+                    <li>Scrolling with the mouse wheel should move the selection with standard
+                    number lines. It should not wrap at edges.</li>
+                    <li>Mousing down on a completion should select it, and a full click should
+                    complete.</li>
+                    <li>When the selection is set from anything but mousedown, the popup view
+                    area should adjust with as little as possible to show the selection and
+                    a padding of 2 completions around it.</li>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
