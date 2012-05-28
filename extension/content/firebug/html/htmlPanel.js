@@ -1897,18 +1897,19 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden",
-            _repObject: "$object", role :"presentation"},
+            _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                IMG({"class": "twisty", role: "presentation"}),
-                SPAN({"class": "nodeLabelBox repTarget", role: 'treeitem', 'aria-expanded': 'false'},
+                DIV({"class": "twisty", role: "presentation"}),
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem",
+                    "aria-expanded": "false"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
             ),
-            DIV({"class": "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
-            DIV({"class": "nodeCloseLabel", role : "presentation"},
+            DIV({"class": "nodeChildBox", role: "group"}), /* nodeChildBox is special signal in insideOutBox */
+            DIV({"class": "nodeCloseLabel", role: "presentation"},
                 SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
