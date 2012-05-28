@@ -543,9 +543,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return;
             }
 
-            nodeText.firstChild.firstChild.nodeValue = textValue;
+            // Rerender the entire parentNodeBox. Proper entity-display logic will
+            // be automatically applied according to the preferences.
+            var newParentNodeBox = parentTag.replace({object: parentNodeBox.repObject}, this.document);
+            if (parentNodeBox.parentNode)
+                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
-            this.highlightMutation(nodeText, parentNodeBox, "mutated");
+            // Reselect if the element was selected before.
+            if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                this.ioBox.select(parent, true);
+
+            this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
         }
         else
         {
@@ -1714,7 +1722,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return vars;
     },
 
-    setEntityDisplay: function(type) {
+    setEntityDisplay: function(type)
+    {
         Options.set("entityDisplay", type);
 
         var menuItem = Firebug.chrome.$("entityDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
