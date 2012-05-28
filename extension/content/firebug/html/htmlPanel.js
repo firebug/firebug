@@ -624,15 +624,25 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
                 else
                 {
-                    while ( nextSibling && (
-                       (!Firebug.showTextNodesWithWhitespace &&
-                       HTMLLib.isWhitespaceText(nextSibling)) ||
-                       (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
-                       ) )
+                    var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+
+                    var comments = Firebug.showCommentNodes;
+                    var whitespaces = Firebug.showTextNodesWithWhitespace;
+
+                    // Get the right next sibling that match following criteria:
+                    // 1) It's not a whitespace text node in case 'show whitespaces' is false.
+                    // 2) It's not a comment in case 'show comments' is false.
+                    // 3) There is a child box already created for it in the HTML panel UI so,
+                    //    the new one can be inserted before, otherwise it would be appended
+                    //    at the end (issue 5255)
+                    while (nextSibling && (
+                       (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
+                       (!comments && nextSibling instanceof window.Comment) ||
+                       (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
                     {
                        nextSibling = this.findNextSibling(nextSibling);
                     }
-                    
+
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
