@@ -262,9 +262,12 @@ FirebugLoader.defaultPrefs = {
     "onlyShowAppliedStyles": false,
     "showUserAgentCSS": false,
     "expandShorthandProps": false,
-    "showMozillaSpecificStyles": false,
-    "computedStylesDisplay": "grouped",
     "cssEditMode": "Source",
+    "colorDisplay": "hex",
+
+// Computed
+    "computedStylesDisplay": "grouped",
+    "showMozillaSpecificStyles": false,
 
 // Script
     "breakOnErrors": false,

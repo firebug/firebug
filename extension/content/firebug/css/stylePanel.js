@@ -446,6 +446,14 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         Firebug.chrome.select(rule, "stylesheet");
     },
 
+    setColorDisplay: function(type)
+    {
+        Options.set("colorDisplay", type);
+
+        var menuItem = Firebug.chrome.$("colorDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        menuItem.setAttribute("checked", "true");
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
@@ -534,11 +542,15 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps" ||
-            name == "onlyShowAppliedStyles")
-        {
+        var optionMap = {
+            showUserAgentCSS: 1,
+            expandShorthandProps: 1,
+            colorDisplay: 1,
+            showMozillaSpecificStyles: 1
+        };
+
+        if (name in optionMap)
             this.refresh();
-        }
     },
 
     getOptionsMenuItems: function()
@@ -549,7 +561,35 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
                 "style.option.tip.Show_User_Agent_CSS"),
             Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
-                "css.option.tip.Expand_Shorthand_Properties")
+                "css.option.tip.Expand_Shorthand_Properties"),
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hex"),
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: Obj.bindFixed(this.setColorDisplay, this, "rgb"),
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hsl"),
+                checked: Options.get("colorDisplay") == "hsl"
+            }
         ];
 
         if (Dom.domUtils && this.selection)

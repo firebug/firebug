@@ -700,8 +700,56 @@ Css.rgbToHex = function(value)
 {
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
-            return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
                 toString(16).substr(-6).toUpperCase();
+        });
+}
+
+Css.rgbToHSL = function(value)
+{
+    return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+))?\)/gi,
+        function(_, r, g, b, _, a) {
+            var h = 0;
+            var s = 0;
+            var l = 0;
+
+            r = r/255;
+            g = g/255;
+            b = b/255;
+
+            var v = Math.max(Math.max(r, g), b);
+            var m = Math.min(Math.min(r, g), b);
+
+            l = (m+v)/2;
+            if (l <= 0)
+                return value;
+
+            var vm = v - m;
+            s = vm;
+            if (s > 0)
+                s /= (l <= 0.5 ? v+m : 2-v-m);
+            else
+                return value;
+
+            r2 = (v-r)/vm;
+            g2 = (v-g)/vm;
+            b2 = (v-b)/vm;
+
+            if (r == v)
+                h = (g == m ? 5+b2 : 1-g2);
+            else if (g == v)
+                h = (b == m ? 1+r2 : 3-b2);
+            else
+                h = (r == m ? 3+g2 : 5-r2);
+
+            h = Math.round(h * 60);
+            s = Math.round(s * 100);
+            l = Math.round(l * 100);
+
+            if (a)
+                return "hsla("+h+", "+s+"%, "+l+"%, "+a+")";
+            else
+                return "hsl("+h+", "+s+"%, "+l+"%)";
         });
 }
 

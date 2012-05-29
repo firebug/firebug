@@ -21,6 +21,7 @@ define([
     "firebug/lib/persist",
     "firebug/lib/system",
     "firebug/chrome/menu",
+    "firebug/lib/options",
     "firebug/css/cssReps",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
@@ -29,7 +30,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
     SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu,
-    CSSInfoTip) {
+    Options, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -539,7 +540,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         name = this.translateName(name, value);
         if (name)
         {
-            value = Css.stripUnits(Css.rgbToHex(value));
+            if (Options.get("colorDisplay") == "hex")
+                value = Css.rgbToHex(value);
+            else if (Options.get("colorDisplay") == "hsl")
+                value = Css.rgbToHSL(value);
+            value = Css.stripUnits(value);
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -581,6 +586,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         // XXXjoe What about border!
         else
             return name;
+    },
+
+    setColorDisplay: function(type)
+    {
+        Options.set("colorDisplay", type);
+
+        var menuItem = Firebug.chrome.$("colorDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        menuItem.setAttribute("checked", "true");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -945,7 +958,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "expandShorthandProps")
+        if (name == "expandShorthandProps" || name == "colorDisplay")
             this.refresh();
     },
 
@@ -960,6 +973,34 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         return [
             Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
                 "css.option.tip.Expand_Shorthand_Properties"),
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hex"),
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: Obj.bindFixed(this.setColorDisplay, this, "rgb"),
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hsl"),
+                checked: Options.get("colorDisplay") == "hsl"
+            },
             "-",
             {
                 label: "Refresh",

@@ -12,12 +12,13 @@ define([
     "firebug/lib/url",
     "firebug/js/sourceLink",
     "firebug/chrome/menu",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/persist",
     "firebug/css/cssReps"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu,
-    Str, Persist, CSSInfoTip) {
+    Options, Str, Persist, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -95,7 +96,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                             TD({"class": "selectorName", role: "presentation"},
                                 "$selector.selector.text"),
                             TD({role: "presentation"},
-                                SPAN({"class": "stylePropValue"}, "$selector.value")),
+                                SPAN({"class": "stylePropValue"}, "$selector.value|formatValue")),
                             TD({"class": "styleSourceLink", role: "presentation"},
                                 TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
                             )
@@ -134,6 +135,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         formatValue: function(value)
         {
+            if (Options.get("colorDisplay") == "hex")
+                value = Css.rgbToHex(value);
+            else if (Options.get("colorDisplay") == "hsl")
+                value = Css.rgbToHSL(value);
+
             // Add a zero-width space after a comma to allow line breaking
             return value.replace(/,/g, ",\u200B");
         }
@@ -296,6 +302,14 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
     },
 
+    setColorDisplay: function(type)
+    {
+        Options.set("colorDisplay", type);
+
+        var menuItem = Firebug.chrome.$("colorDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        menuItem.setAttribute("checked", "true");
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
@@ -427,6 +441,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var optionMap = {
             showUserAgentCSS: 1,
             computedStylesDisplay: 1,
+            colorDisplay: 1,
             showMozillaSpecificStyles: 1
         };
 
@@ -456,7 +471,35 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             },
             Menu.optionMenu("Show_Mozilla_specific_styles",
                 "showMozillaSpecificStyles",
-                "computed.option.tip.Show_Mozilla_Specific_Styles")
+                "computed.option.tip.Show_Mozilla_Specific_Styles"),
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hex"),
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: Obj.bindFixed(this.setColorDisplay, this, "rgb"),
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: Obj.bindFixed(this.setColorDisplay, this, "hsl"),
+                checked: Options.get("colorDisplay") == "hsl"
+            }
         );
 
         return items;
@@ -535,7 +578,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     toggleDisplay: function()
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
-        Firebug.Options.set("computedStylesDisplay", display);
+        Options.set("computedStylesDisplay", display);
     },
 
     sortProperties: function(props)
