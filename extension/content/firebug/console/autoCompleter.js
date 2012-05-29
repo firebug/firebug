@@ -436,7 +436,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         else if (event.keyCode === KeyEvent.DOM_VK_HOME ||
             event.keyCode === KeyEvent.DOM_VK_END)
         {
-            if (this.completions)
+            if (this.isPopupOpen())
             {
                 this.topCycle(event.keyCode === KeyEvent.DOM_VK_HOME ? -1 : 1);
                 Events.cancelEvent(event);
