@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -17,11 +18,12 @@ define([
     "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
+    "firebug/css/cssModule",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
-function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
+function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -446,14 +448,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         Firebug.chrome.select(rule, "stylesheet");
     },
 
-    setColorDisplay: function(type)
-    {
-        Options.set("colorDisplay", type);
-
-        var menuItem = Firebug.chrome.$("colorDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
-        menuItem.setAttribute("checked", "true");
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
@@ -510,7 +504,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
         this.updateCascadeView(element);
 
@@ -555,48 +549,22 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     getOptionsMenuItems: function()
     {
-        var ret = [
+        var items = [
             Menu.optionMenu("Only_Show_Applied_Styles", "onlyShowAppliedStyles",
                 "style.option.tip.Only_Show_Applied_Styles"),
             Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
                 "style.option.tip.Show_User_Agent_CSS"),
             Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
-                "css.option.tip.Expand_Shorthand_Properties"),
-            "-",
-            {
-                label: "computed.option.label.Colors_As_Hex",
-                tooltiptext: "computed.option.tip.Colors_As_Hex",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayHex",
-                command: Obj.bindFixed(this.setColorDisplay, this, "hex"),
-                checked: Options.get("colorDisplay") == "hex"
-            },
-            {
-                label: "computed.option.label.Colors_As_RGB",
-                tooltiptext: "computed.option.tip.Colors_As_RGB",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayRGB",
-                command: Obj.bindFixed(this.setColorDisplay, this, "rgb"),
-                checked: Options.get("colorDisplay") == "rgb"
-            },
-            {
-                label: "computed.option.label.Colors_As_HSL",
-                tooltiptext: "computed.option.tip.Colors_As_HSL",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayHSL",
-                command: Obj.bindFixed(this.setColorDisplay, this, "hsl"),
-                checked: Options.get("colorDisplay") == "hsl"
-            }
+                "css.option.tip.Expand_Shorthand_Properties")
         ];
+
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
 
         if (Dom.domUtils && this.selection)
         {
             var self = this;
 
-            ret.push(
+            items.push(
                 "-",
                 {
                     label: "style.option.label.hover",
@@ -621,7 +589,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             );
             if (Dom.domUtils.hasPseudoClassLock)
             {
-                ret.push(
+                items.push(
                     {
                         label: "style.option.label.focus",
                         type: "checkbox",
@@ -636,7 +604,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return ret;
+        return items;
     },
 
     getContextMenuItems: function(style, target)

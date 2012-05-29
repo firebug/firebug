@@ -10,15 +10,17 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/persist",
+    "firebug/css/cssModule",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu,
-    Options, Str, Persist, CSSInfoTip) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
+    Options, Str, Persist, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -302,14 +304,6 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
     },
 
-    setColorDisplay: function(type)
-    {
-        Options.set("colorDisplay", type);
-
-        var menuItem = Firebug.chrome.$("colorDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
-        menuItem.setAttribute("checked", "true");
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
@@ -471,36 +465,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             },
             Menu.optionMenu("Show_Mozilla_specific_styles",
                 "showMozillaSpecificStyles",
-                "computed.option.tip.Show_Mozilla_Specific_Styles"),
-            "-",
-            {
-                label: "computed.option.label.Colors_As_Hex",
-                tooltiptext: "computed.option.tip.Colors_As_Hex",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayHex",
-                command: Obj.bindFixed(this.setColorDisplay, this, "hex"),
-                checked: Options.get("colorDisplay") == "hex"
-            },
-            {
-                label: "computed.option.label.Colors_As_RGB",
-                tooltiptext: "computed.option.tip.Colors_As_RGB",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayRGB",
-                command: Obj.bindFixed(this.setColorDisplay, this, "rgb"),
-                checked: Options.get("colorDisplay") == "rgb"
-            },
-            {
-                label: "computed.option.label.Colors_As_HSL",
-                tooltiptext: "computed.option.tip.Colors_As_HSL",
-                type: "radio",
-                name: "colorDisplay",
-                id: "colorDisplayHSL",
-                command: Obj.bindFixed(this.setColorDisplay, this, "hsl"),
-                checked: Options.get("colorDisplay") == "hsl"
-            }
+                "computed.option.tip.Show_Mozilla_Specific_Styles")
         );
+
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
 
         return items;
     },

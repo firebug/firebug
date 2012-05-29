@@ -707,40 +707,39 @@ Css.rgbToHex = function(value)
 
 Css.rgbToHSL = function(value)
 {
-    return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+))?\)/gi,
+    return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            var max = Math.max(r, g, b);
+            var min = Math.min(r, g, b);
+
             var h = 0;
             var s = 0;
-            var l = 0;
+            var l = (max+min)/2;
 
-            r = r/255;
-            g = g/255;
-            b = b/255;
+            if (max != min)
+            {
+                var delta = max - min;
+                s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);
 
-            var v = Math.max(Math.max(r, g), b);
-            var m = Math.min(Math.min(r, g), b);
+                switch (max)
+                {
+                    case r:
+                        h = (g-b)/delta + (g < b ? 6 : 0);
+                        break;
 
-            l = (m+v)/2;
-            if (l <= 0)
-                return value;
+                    case g:
+                        h = (b-r)/delta + 2;
+                        break;
 
-            var vm = v - m;
-            s = vm;
-            if (s > 0)
-                s /= (l <= 0.5 ? v+m : 2-v-m);
-            else
-                return value;
-
-            r2 = (v-r)/vm;
-            g2 = (v-g)/vm;
-            b2 = (v-b)/vm;
-
-            if (r == v)
-                h = (g == m ? 5+b2 : 1-g2);
-            else if (g == v)
-                h = (b == m ? 1+r2 : 3-b2);
-            else
-                h = (r == m ? 3+g2 : 5-r2);
+                    case b:
+                        h = (r-g)/delta + 4;
+                        break;
+                }
+            }
 
             h = Math.round(h * 60);
             s = Math.round(s * 100);
