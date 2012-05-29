@@ -532,17 +532,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
-            if (!nodeText.firstChild)
-            {
-                if (FBTrace.DBG_HTML)
-                {
-                    FBTrace.sysout("html.mutateText failed to update text, " +
-                        "TextElement firstChild does not exist");
-                }
-                return;
-            }
-
             // Rerender the entire parentNodeBox. Proper entity-display logic will
             // be automatically applied according to the preferences.
             var newParentNodeBox = parentTag.replace({object: parentNodeBox.repObject}, this.document);
@@ -553,7 +542,19 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (this.selection && (!this.selection.parentNode || parent == this.selection))
                 this.ioBox.select(parent, true);
 
-            this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
+            var nodeText = HTMLLib.getTextElementTextBox(newParentNodeBox);
+            if (!nodeText.firstChild)
+            {
+                if (FBTrace.DBG_HTML)
+                {
+                    FBTrace.sysout("html.mutateText failed to update text, " +
+                        "TextElement firstChild does not exist");
+                }
+                return;
+            }
+
+            // Highlight the text box only (not the entire parentNodeBox/element).
+            this.highlightMutation(nodeText, newParentNodeBox, "mutated");
         }
         else
         {
