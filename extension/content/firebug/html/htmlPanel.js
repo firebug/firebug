@@ -1528,7 +1528,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplaySymbols",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "symbols"),
+                command: Obj.bind(this.setEntityDisplay, this, "symbols"),
                 checked: Options.get("entityDisplay") == "symbols"
             },
             {
@@ -1537,7 +1537,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplayNames",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "names"),
+                command: Obj.bind(this.setEntityDisplay, this, "names"),
                 checked: Options.get("entityDisplay") == "names"
             },
             {
@@ -1546,7 +1546,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplayUnicode",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "unicode"),
+                command: Obj.bind(this.setEntityDisplay, this, "unicode"),
                 checked: Options.get("entityDisplay") == "unicode"
             },
             "-",
@@ -1738,11 +1738,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return vars;
     },
 
-    setEntityDisplay: function(type)
+    setEntityDisplay: function(event, type)
     {
         Options.set("entityDisplay", type);
 
-        var menuItem = Firebug.chrome.$("entityDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        var menuItem = event.target;
         menuItem.setAttribute("checked", "true");
     },
 

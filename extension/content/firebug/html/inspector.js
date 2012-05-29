@@ -13,21 +13,17 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/window",
     "firebug/lib/system",
+    "firebug/html/highlighterCache"
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
-    Win, System) {
+    Win, System, HighlighterCache) {
 
 // ********************************************************************************************* //
 // Constants
 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
-const ident = {
-    frame: 0,
-    boxModel: 1,
-    imageMap: 2,
-    proxyElt: 3
-};
+const ident = HighlighterCache.ident;
 
 // ********************************************************************************************* //
 // Globals
@@ -172,7 +168,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     clearAllHighlights: function()
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
     },
 
     /**
@@ -423,7 +419,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         }
         else if (!isMulti)
         {
-            var highlighterNode = highlighterCache.get(highlighter.ident);
+            var highlighterNode = HighlighterCache.get(highlighter.ident);
 
             if (highlighterNode && highlighter.ident === ident.boxModel)
                 highlighterNode = highlighterNode.offset;
@@ -1324,7 +1320,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         if (!isMulti)
         {
-            var div = highlighterCache.get(ident.frame);
+            var div = HighlighterCache.get(ident.frame);
             if (div)
                 return div;
         }
@@ -1340,7 +1336,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
         div.ident = ident.frame;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
         return div;
     }
 };
@@ -1530,7 +1526,7 @@ BoxModelHighlighter.prototype =
 
     unhighlight: function(context)
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
         quickInfoBox.hide();
     },
 
@@ -1547,7 +1543,7 @@ BoxModelHighlighter.prototype =
 
             if (!isMulti)
             {
-                var nodes = highlighterCache.get(ident.boxModel);
+                var nodes = HighlighterCache.get(ident.boxModel);
                 if (nodes)
                     return nodes;
             }
@@ -1597,7 +1593,7 @@ BoxModelHighlighter.prototype =
         }
 
         nodes.ident = ident.boxModel;
-        highlighterCache.add(nodes);
+        HighlighterCache.add(nodes);
         return nodes;
     },
 
@@ -1621,138 +1617,6 @@ BoxModelHighlighter.prototype =
             Css.setClass(nodes.parent, "overflowRulerY");
         else
             Css.removeClass(nodes.parent, "overflowRulerY");
-    }
-};
-
-// ********************************************************************************************* //
-
-var highlighterCache =
-{
-    highlighters:
-    {
-        frameArr: [],
-        boxModelArr: [],
-        proxyEltArr: []
-    },
-
-    get: function(type)
-    {
-        var node;
-        var hl = this.highlighters;
-
-        switch (type)
-        {
-            case ident.boxModel:
-                if (hl.boxModelArr.length === 1)
-                {
-                    node = hl.boxModelArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.frame:
-                if (hl.frameArr.length === 1)
-                {
-                    node = hl.frameArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.proxyElt:
-                if (hl.proxyEltArr.length === 1)
-                {
-                    node = hl.proxyEltArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-        }
-    },
-
-    add: function(node)
-    {
-        switch (node.ident)
-        {
-            case ident.boxModel:
-                this.highlighters.boxModelArr.push(node);
-            break;
-            case ident.frame:
-                this.highlighters.frameArr.push(node);
-            break;
-            case ident.proxyElt:
-                this.highlighters.proxyEltArr.push(node);
-            break;
-        }
-    },
-
-    clear: function()
-    {
-        try
-        {
-            this.doClear();
-        }
-        catch (err)
-        {
-            // The cache is not properly cleared and it sometimes throws:
-            // "TypeError: can't access dead object" (memory leaks)
-            // See Issue 5452
-            FBTrace.sysout("highlighterCache.clear; EXCEPTION " + err, err);
-        }
-    },
-
-    doClear: function()
-    {
-        var clearCache = function(arr)
-        {
-            var i, highlighter;
-            for (i = arr.length - 1; i >= 0; i--)
-            {
-                highlighter = arr[i];
-
-                if (highlighter && highlighter.parentNode)
-                    highlighter.parentNode.removeChild(highlighter);
-            }
-        };
-
-        var clearBoxModelCache = function(arr)
-        {
-            var node;
-            for (var i = arr.length - 1; i >= 0; i--)
-            {
-                var names = ["lines", "offset", "parent"];
-                for (var j=0; j<names.length; j++)
-                {
-                    var name = names[j];
-                    if (name === "lines")
-                    {
-                        var lineNames = ["bottom", "left", "top", "right"];
-                        for (var k=0; k<lineNames.length; k++)
-                        {
-                            var lineName = lineNames[k];
-                            node = arr[i].lines[lineName];
-
-                            if (node && node.parentNode)
-                                node.parentNode.removeChild(node);
-                        }
-                    }
-                    else
-                    {
-                        node = arr[i][name];
-                        if (node && node.parentNode)
-                            node.parentNode.removeChild(node);
-                    }
-                }
-            }
-        };
-
-        clearBoxModelCache(this.highlighters.boxModelArr);
-
-        clearCache(this.highlighters.frameArr);
-        clearCache(this.highlighters.proxyEltArr);
-
-        this.highlighters.boxModelArr=[];
-        this.highlighters.frameArr=[];
-        this.highlighters.proxyEltArr=[];
     }
 };
 
@@ -1814,7 +1678,7 @@ function createProxiesForDisabledElements(body)
 
         body.appendChild(div);
         div.ident = ident.proxyElt;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
     }
 }
 

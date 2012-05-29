@@ -9,8 +9,9 @@ define([
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/xml",
+    "firebug/lib/options"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -356,7 +357,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return m ? m[0] : "";
     },
 
-    getPropertyInfo: function(computedStyle, propName) {
+    getPropertyInfo: function(computedStyle, propName)
+    {
         var propInfo = {
             property: propName,
             value: computedStyle.getPropertyValue(propName),
@@ -365,6 +367,48 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         };
 
         return propInfo;
+    },
+
+    setColorDisplay: function(event, type)
+    {
+        Options.set("colorDisplay", type);
+
+        var menuItem = event.target;
+        menuItem.setAttribute("checked", "true");
+    },
+
+    getColorDisplayOptionMenuItems: function()
+    {
+        return [
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: Obj.bind(this.setColorDisplay, this, "hex"),
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: Obj.bind(this.setColorDisplay, this, "rgb"),
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: Obj.bind(this.setColorDisplay, this, "hsl"),
+                checked: Options.get("colorDisplay") == "hsl"
+            }
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

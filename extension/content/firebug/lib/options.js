@@ -54,6 +54,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showUserAgentCSS",
     "expandShorthandProps",
     "cssEditMode",
+    "colorDisplay",
 
     // Computed
     "computedStylesDisplay",

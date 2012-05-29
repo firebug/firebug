@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -17,11 +18,12 @@ define([
     "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
+    "firebug/css/cssModule",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
-function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
+function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -502,7 +504,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
         this.updateCascadeView(element);
 
@@ -534,16 +536,20 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps" ||
-            name == "onlyShowAppliedStyles")
-        {
+        var optionMap = {
+            showUserAgentCSS: 1,
+            expandShorthandProps: 1,
+            colorDisplay: 1,
+            showMozillaSpecificStyles: 1
+        };
+
+        if (name in optionMap)
             this.refresh();
-        }
     },
 
     getOptionsMenuItems: function()
     {
-        var ret = [
+        var items = [
             Menu.optionMenu("Only_Show_Applied_Styles", "onlyShowAppliedStyles",
                 "style.option.tip.Only_Show_Applied_Styles"),
             Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
@@ -552,11 +558,13 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 "css.option.tip.Expand_Shorthand_Properties")
         ];
 
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
+
         if (Dom.domUtils && this.selection)
         {
             var self = this;
 
-            ret.push(
+            items.push(
                 "-",
                 {
                     label: "style.option.label.hover",
@@ -581,7 +589,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             );
             if (Dom.domUtils.hasPseudoClassLock)
             {
-                ret.push(
+                items.push(
                     {
                         label: "style.option.label.focus",
                         type: "checkbox",
@@ -596,7 +604,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return ret;
+        return items;
     },
 
     getContextMenuItems: function(style, target)

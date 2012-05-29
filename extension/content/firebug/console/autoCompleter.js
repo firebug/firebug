@@ -106,7 +106,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (!this.completions)
             return true;
 
-        if (this.getCompletionBoxValue() === this.textBox.value)
+        if (this.getCompletionValue() === this.textBox.value)
         {
             // The user wouldn't see a difference if we completed. This can
             // happen for example if you type 'alert' and press enter,
@@ -193,35 +193,69 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     /**
      * From a valid completion base, create a list of completions (containing
-     * those completion candidates that share a prefix with the user's input)
-     * and a default completion.
+     * those completion candidates that share a (sometimes case-insensitive)
+     * prefix with the user's input) and a default completion.
      */
     this.createCompletions = function(prefix)
     {
         var candidates = this.completionBase.candidates;
-        var valid = [];
+        var valid = [], ciValid = [];
 
         if (!this.completionBase.expr && !prefix)
         {
             // Don't complete "".
+            this.completions = null;
+            return;
         }
-        else
+
+        var lowPrefix = prefix.toLowerCase();
+        for (var i = 0; i < candidates.length; ++i)
         {
-            for (var i = 0; i < candidates.length; ++i)
+            // Mark a candidate as matching if it matches the prefix case-
+            // insensitively, and shares its upper-case characters.
+            var name = candidates[i];
+            if (!Str.hasPrefix(name.toLowerCase(), lowPrefix))
+                continue;
+
+            var fail = false;
+            for (var j = 0; j < prefix.length; ++j)
             {
-                var name = candidates[i];
+                var ch = prefix.charAt(j);
+                if (ch !== ch.toLowerCase() && ch !== name.charAt(j))
+                {
+                    fail = true;
+                    break;
+                }
+            }
+            if (!fail)
+            {
+                ciValid.push(name);
                 if (Str.hasPrefix(name, prefix))
                     valid.push(name);
             }
         }
 
-        if (valid.length > 0)
+        if (ciValid.length > 0)
         {
+            // If possible, default to a candidate matching the case by picking
+            // a default from 'valid' and correcting its index.
+            var hasMatchingCase = (valid.length > 0);
+
             this.completions = {
-                list: valid,
+                list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix
             };
             this.pickDefaultCandidate();
+
+            if (hasMatchingCase)
+            {
+                var find = valid[this.completions.index];
+                this.completions = {
+                    list: ciValid,
+                    prefix: prefix,
+                    index: ciValid.indexOf(find)
+                };
+            }
         }
         else
         {
@@ -289,7 +323,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var completion = this.getCurrentCompletion();
         if (completion === null)
             return "";
-        return this.completionBase.pre + this.completionBase.expr + completion;
+        var userTyped = this.textBox.value;
+        var value = this.completionBase.pre + this.completionBase.expr + completion;
+        return userTyped + value.substr(userTyped.length);
     };
 
     /**
@@ -458,14 +494,44 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Accept the currently shown completion in the text box.
+     * Get what should be completed to; this is only vaguely related to what is
+     * shown in the completion box.
+     */
+    this.getCompletionValue = function()
+    {
+        var property = this.getCurrentCompletion();
+        var preParsed = this.completionBase.pre, preExpr = this.completionBase.expr;
+        var res = preParsed + preExpr + property;
+
+        // Don't adjust index completions.
+        if (/^\[['"]$/.test(preExpr.slice(-2)))
+            return res;
+
+        if (!isValidProperty(property))
+        {
+            // The property name is actually invalid in free form, so replace
+            // it with array syntax.
+
+            if (preExpr)
+            {
+                res = preParsed + preExpr.slice(0, -1);
+            }
+            else
+            {
+                // Global variable access - assume the variable is a member of 'window'.
+                res = preParsed + "window";
+            }
+            res += '["' + Str.escapeJS(property) + '"]';
+        }
+        return res;
+    };
+
+    /**
+     * Accept the current completion into the text box.
      */
     this.acceptCompletion = function()
     {
-        var completion = this.getCurrentCompletion();
-        completion = adjustCompletionOnAccept(this.completionBase.pre,
-                this.completionBase.expr, completion);
-
+        var completion = this.getCompletionValue();
         var originalValue = this.textBox.value;
         this.textBox.value = completion;
         setCursorToEOL(this.textBox);
@@ -495,7 +561,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var immediateTarget;
         if (dir === -1)
-            immediateTarget = (top === 0 ? 0 : top + 2);
+            immediateTarget = (top === 0 ? top : top + 2);
         else
             immediateTarget = (bottom === list.length ? bottom: bottom - 2) - 1;
         if ((selIndex - immediateTarget) * dir < 0)
@@ -541,8 +607,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         title.innerHTML = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
-
-        var escPrefix = Str.escapeForTextNode(this.textBox.value);
 
         var list = this.completions.list, selIndex = this.completions.index;
 
@@ -591,19 +655,25 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
+            var completion = list[i];
+            var prefixLen = this.completions.prefix.length;
+
             var hbox = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","div");
             hbox.completionIndex = i;
 
             var pre = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = escPrefix;
+            var preText = this.textBox.value;
+            if (prefixLen)
+                preText = preText.slice(0, -prefixLen) + completion.slice(0, prefixLen);
+            pre.innerHTML = Str.escapeForTextNode(preText);
             pre.classList.add("userTypedText");
 
-            var completion = this.completions.list[i].substr(this.completions.prefix.length);
             var post = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","span");
-            post.innerHTML = Str.escapeForTextNode(completion);
+            var postText = completion.substr(prefixLen);
+            post.innerHTML = Str.escapeForTextNode(postText);
             post.classList.add("completionText");
 
             if (i === selIndex)
@@ -1149,33 +1219,6 @@ function killCompletions(expr, origExpr)
         }
     }
     return false;
-}
-
-function adjustCompletionOnAccept(preParsed, preExpr, property)
-{
-    var res = preParsed + preExpr + property;
-
-    // Don't adjust index completions.
-    if (/^\[['"]$/.test(preExpr.slice(-2)))
-        return res;
-
-    if (!isValidProperty(property))
-    {
-        // The property name is actually invalid in free form, so replace
-        // it with array syntax.
-
-        if (preExpr)
-        {
-            res = preParsed + preExpr.slice(0, -1);
-        }
-        else
-        {
-            // Global variable access - assume the variable is a member of 'window'.
-            res = preParsed + "window";
-        }
-        res += '["' + Str.escapeJS(property) + '"]';
-    }
-    return res;
 }
 
 // Types the autocompletion knows about, some of their non-enumerable properties,
