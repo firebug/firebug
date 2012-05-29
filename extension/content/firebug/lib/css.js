@@ -709,6 +709,8 @@ Css.rgbToHSL = function(value)
 {
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a) {
+            var gray = (r == g && g == b);
+
             r /= 255;
             g /= 255;
             b /= 255;
@@ -720,7 +722,7 @@ Css.rgbToHSL = function(value)
             var s = 0;
             var l = (max+min)/2;
 
-            if (max != min)
+            if (!gray)
             {
                 var delta = max - min;
                 s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);

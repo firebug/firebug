@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5448: normalize() breaks display of text nodes with entities</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5448">Issue 5448</a>:
+    normalize() breaks display of text nodes with entities</h1>
+</header>
+<div>
+    <section id="content">a åäö b</section>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, enable the Console panel.</li>
+            <li>Inspect the text above (the text in grey area)</li>
+            <li>Turn on <i>Show Entities As Names</i> (HTML panel option)</li>
+            <li>Switch to the Console panel</li>
+            <li>Execute on the command line:
+            <pre>$0.appendChild(document.createTextNode(' tnode')); $0.normalize();</pre>
+            </li>
+            <li>Switch back to the HTML panel. <code>&lt;section id="content&gt;</code>
+            element must contain:<br/><br/>
+            <pre>a &amp;aring;&amp;auml;&amp;ouml; b</pre>
+            </li>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, odvarko@gmail.com</footer>
+</div>
+</body>
+</html>
