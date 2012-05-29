@@ -369,14 +369,6 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return propInfo;
     },
 
-    setColorDisplay: function(event, type)
-    {
-        Options.set("colorDisplay", type);
-
-        var menuItem = event.target;
-        menuItem.setAttribute("checked", "true");
-    },
-
     getColorDisplayOptionMenuItems: function()
     {
         return [
@@ -387,7 +379,9 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 type: "radio",
                 name: "colorDisplay",
                 id: "colorDisplayHex",
-                command: Obj.bind(this.setColorDisplay, this, "hex"),
+                command: function() {
+                    return Options.set("colorDisplay", "hex");
+                },
                 checked: Options.get("colorDisplay") == "hex"
             },
             {
@@ -396,7 +390,9 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 type: "radio",
                 name: "colorDisplay",
                 id: "colorDisplayRGB",
-                command: Obj.bind(this.setColorDisplay, this, "rgb"),
+                command: function() {
+                    return Options.set("colorDisplay", "rgb");
+                },
                 checked: Options.get("colorDisplay") == "rgb"
             },
             {
@@ -405,7 +401,9 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 type: "radio",
                 name: "colorDisplay",
                 id: "colorDisplayHSL",
-                command: Obj.bind(this.setColorDisplay, this, "hsl"),
+                command: function() {
+                    return Options.set("colorDisplay", "hsl");
+                },
                 checked: Options.get("colorDisplay") == "hsl"
             }
         ];
