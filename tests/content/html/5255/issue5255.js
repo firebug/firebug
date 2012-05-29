@@ -41,7 +41,7 @@ function runTest()
                     FBTest.compare(labels[i], buttons[i].label, "Label must match");
             }
 
-            FBTest.testDone("issue5058.DONE");
+            FBTest.testDone("issue5255.DONE");
         });
     });
 }
