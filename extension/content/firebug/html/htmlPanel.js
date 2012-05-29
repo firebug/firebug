@@ -2221,7 +2221,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     insertNewRow: function(target, insertWhere)
     {
-        var emptyAttr = {nodeName: "", nodeValue: ""};
+        var emptyAttr = {name: "", value: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
     }
