@@ -532,7 +532,20 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
+            // Rerender the entire parentNodeBox. Proper entity-display logic will
+            // be automatically applied according to the preferences.
+            var newParentNodeBox = parentTag.replace({object: parentNodeBox.repObject}, this.document);
+            if (parentNodeBox.parentNode)
+                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+
+            // Reselect if the element was selected before.
+            if (this.selection && (!this.selection.parentNode || parent == this.selection))
+            {
+                Firebug.chrome.clearStatusPath();
+                this.select(parent, true);
+            }
+
+            var nodeText = HTMLLib.getTextElementTextBox(newParentNodeBox);
             if (!nodeText.firstChild)
             {
                 if (FBTrace.DBG_HTML)
@@ -543,17 +556,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return;
             }
 
-            // Rerender the entire parentNodeBox. Proper entity-display logic will
-            // be automatically applied according to the preferences.
-            var newParentNodeBox = parentTag.replace({object: parentNodeBox.repObject}, this.document);
-            if (parentNodeBox.parentNode)
-                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
-
-            // Reselect if the element was selected before.
-            if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                this.ioBox.select(parent, true);
-
-            this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
+            // Highlight the text box only (not the entire parentNodeBox/element).
+            this.highlightMutation(nodeText, newParentNodeBox, "mutated");
         }
         else
         {
@@ -655,6 +659,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
 
+                    if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                    {
+                        Firebug.chrome.clearStatusPath();
+                        this.select(parent, true);
+                    }
+
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
             }
@@ -664,7 +674,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
                 if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                    this.ioBox.select(parent, true);
+                {
+                    Firebug.chrome.clearStatusPath();
+                    this.select(parent, true);
+                }
 
                 this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
@@ -685,7 +698,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 this.ioBox.toggleObjectBox(newParentNodeBox, true);
 
             if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                this.ioBox.select(parent, true);
+            {
+                Firebug.chrome.clearStatusPath();
+                this.select(parent, true);
+            }
 
             this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
