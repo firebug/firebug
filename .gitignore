@@ -4,6 +4,7 @@
 *.swp
 *.tmp
 .*.gz
+*.patch
 
 # Temporary files created by Eclipse
 .tmp*
@@ -19,6 +20,7 @@
 # Build Files
 /extension/build/
 /extension/release/
+/tests/FBTest/release/
 *.graphml
 
 # Files from NPM
