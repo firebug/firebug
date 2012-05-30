@@ -692,10 +692,20 @@ function waitForWindowLoad(browser, callback)
             //if (!win.wrappedJSObject)
             //    win.wrappedJSObject = win;
 
-            //xxxHonza: I have seen win == null once
-            FBTest.sysout("callback <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< "+win.location);
+            //xxxHonza: I have seen win == null once. It looks like the callback
+            // is executed for a window, which is already uloaded. Could this happen
+            // in case where the test is finished before the listeners are actually
+            // executed?
+            // xxxHonza: remove 'load' and 'MozAfterPaint' listeners when the test
+            // finishes before the window is actually loaded.
+            // Use refreshHaltedDebugger test as an example. (breaks during the page load
+            // and immediatelly calls testDone)
+            if (!win)
+                FBTrace.sysout("waitForWindowLoad: ERROR no window!");
+
             // The window is loaded, execute the callback now.
-            callback(win);
+            if (win)
+                callback(win);
         }
         catch (exc)
         {
@@ -727,7 +737,8 @@ function waitForWindowLoad(browser, callback)
             setTimeout(executeCallback, 100);
     }
 
-    FBTest.sysout("adding event listener <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    FBTest.sysout("waitForWindowLoad: adding event listener");
+
     browser.addEventListener("load", waitForEvents, true);
     browser.addEventListener("MozAfterPaint", waitForEvents, true);
 }
@@ -2166,6 +2177,12 @@ this.selectElementInHtmlPanel = function(element, callback)
     });
     */
 };
+
+this.getSelectedNodeBox = function()
+{
+    var panel = FBTest.getPanel("html");
+    return panel.panelNode.querySelector(".nodeBox.selected");
+}
 
 // ********************************************************************************************* //
 // Context menu
