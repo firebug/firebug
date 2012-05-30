@@ -1644,7 +1644,7 @@ var FirebugChrome =
         try
         {
             // Firefox 4.0+ implements a new AddonManager. In case of Firefox 3.6 the module
-            // is not avaialble and there is an exception.
+            // is not available and there is an exception.
             Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
         }
         catch (err)
@@ -1739,7 +1739,7 @@ function getBestPanelName(object, context, panelName)
     if (!panelName && context)
         panelName = context.panelName;
 
-    // Check, if the panel type of the suggested panel supports the object, and if so, go with it
+    // Check if the panel type of the suggested panel supports the object, and if so, go with it
     if (panelName)
     {
         var panelType = Firebug.getPanelType(panelName);

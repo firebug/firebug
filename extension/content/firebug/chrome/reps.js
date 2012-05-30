@@ -2278,7 +2278,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
-                    Events.dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
+                    Events.dispatch(panel.fbListeners, "modifyLogRow", [panel, traceBox]);
                 }
             }
             else

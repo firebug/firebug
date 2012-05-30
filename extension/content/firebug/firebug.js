@@ -965,7 +965,7 @@ window.Firebug =
         // Dispatch to non-module objects.
         Options.resetAllOptions(confirm);
 
-        // Dispatch to all modules so, additional settings can be reset.
+        // Dispatch to all modules so that additional settings can be reset.
         Events.dispatch(modules, "resetAllOptions", []);
     },
 
@@ -1372,10 +1372,10 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 // ********************************************************************************************* //
 
 /**
- * Support for listeners registration. This object also extended by Firebug.Module so,
- * all modules supports listening automatically. Notice that array of listeners
- * is created for each intance of a module within initialize method. Thus all derived
- * module classes must ensure that Firebug.Module.initialize method is called for the
+ * Support for listeners registration. This object is also extended by Firebug.Module,
+ * so all modules supports listening automatically. Note that an array of listeners is
+ * created for each intance of a module within the initialize method. Thus all derived
+ * module classes must ensure that the Firebug.Module.initialize method is called for the
  * super class.
  */
 Firebug.Listener = function()

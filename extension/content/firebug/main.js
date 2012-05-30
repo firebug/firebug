@@ -68,9 +68,9 @@ require.load = function(context, fullName, url)
 
 // ********************************************************************************************* //
 
-// For now extensions should use 'Firebug.require' to load it's modules so,
+// For now extensions should use 'Firebug.require' to load it's modules, so
 // initialize the field. It should be done now since overlays can be applied
-// yet before the core Firebug modules are (asynchronously) loaded.
+// before the core Firebug modules are (asynchronously) loaded.
 Firebug.require = require;
 
 // Load core Firebug modules.
@@ -123,7 +123,7 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 
 function onModulesLoaded(ChromeFactory, FBL, Firebug, Browser)
 {
-    // Extensions are using the same loader so, make sure to not
+    // Extensions are using the same loader, so make sure to not
     // initialize Firebug twice.
     if (Firebug.isInitialized)
         return;

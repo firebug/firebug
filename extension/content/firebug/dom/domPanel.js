@@ -657,7 +657,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (value)
         {
             var proto = Obj.getPrototype(value);
-            // Special case for functions with a protoype that has values
+            // Special case for functions with a prototype that has values
             if (valueType === "function" && proto)
             {
                 hasChildren = hasChildren || Obj.hasProperties(proto,

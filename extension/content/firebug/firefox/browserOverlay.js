@@ -304,8 +304,8 @@ Firebug.GlobalUI =
             })
         ], container);
 
-        // When Firebug is fully loaded and initialized it fires an "FirebugLoaded"
-        // event to the browser document (browser.xul scope) so, wait for it now.
+        // When Firebug is fully loaded and initialized it fires a "FirebugLoaded"
+        // event to the browser document (browser.xul scope). Wait for that to happen.
         document.addEventListener("FirebugLoaded", function onLoad()
         {
             document.removeEventListener("FirebugLoaded", onLoad, false);
@@ -652,11 +652,11 @@ $menupopupOverlay($("mainPopupSet"), [
  * and one in Firefox 4 (top-left orange button menu) -> Web Developer
  *
  * If extensions want to override the menu thay need to iterate all existing instance
- * using document.querySelectorAll(".fbFirebugMenuPopup") and appen new menu items to all
+ * using document.querySelectorAll(".fbFirebugMenuPopup") and append new menu items to all
  * of them. Iteration must be done in the global space (browser.xul)
  *
  * The same menu is also used for Firebug Icon Menu (Firebug's toolbar). This menu is cloned
- * and initialized as soon as Firebug UI is actually loaded. Sine it's cloned from the original
+ * and initialized as soon as Firebug UI is actually loaded. Since it's cloned from the original
  * (global scope) extensions don't have to extend it (possible new menu items are already there).
  */
 var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
@@ -1060,7 +1060,7 @@ $toolbarButton("firebug-button", {
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.
-// The button is appended only once so, if the user removes it, it isn't appended again.
+// The button is appended only once - if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
 // toolbarpalette check is for seamonkey, where it is in the document
 if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
@@ -1169,14 +1169,14 @@ var SessionObserver =
 
         setTimeout(function()
         {
-            // Open the page in the top most window so, the user can see it immediately.
+            // Open the page in the top most window, so the user can see it immediately.
             if (wm.getMostRecentWindow("navigator:browser") != window.top)
                 return;
 
             // Avoid opening of the page in another browser window.
             if (checkFirebugVersion(FirebugLoader.getPref("currentVersion")) > 0)
             {
-                // Don't forget to update the preference so, the page is not displayed again
+                // Don't forget to update the preference, so the page is not displayed again
                 FirebugLoader.setPref("currentVersion", version);
 
                 if (FirebugLoader.getPref("showFirstRunPage"))
@@ -1188,7 +1188,7 @@ var SessionObserver =
 
 var currentVersion = FirebugLoader.getPref("currentVersion");
 if (checkFirebugVersion(currentVersion) > 0)
-    observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
+    observerService.addObserver(SessionObserver, "sessionstore-windows-restored", false);
 
 // ********************************************************************************************* //
 // Context Menu Workaround

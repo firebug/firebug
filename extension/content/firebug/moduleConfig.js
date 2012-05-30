@@ -83,7 +83,7 @@ Firebug.registerExtension = function(extName, extConfig)
     var tempConfig = this.getExtensionConfig(extName);
     if (tempConfig)
     {
-        FBTrace.sysout("firebug.registerExtension; ERROR An extenstion with the same ID " +
+        FBTrace.sysout("firebug.registerExtension; ERROR An extension with the same ID " +
             "already exists! - " + extName, tempConfig);
         return;
     }

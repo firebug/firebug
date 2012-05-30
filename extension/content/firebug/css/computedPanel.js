@@ -550,7 +550,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     getStylesheetURL: function(rule, getBaseUri)
     {
-        // if the parentStyleSheet.href is null, CSS std says its inline style
+        // If parentStyleSheet.href is null, then per the CSS standard this is an inline style.
         if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
         else if (getBaseUri)

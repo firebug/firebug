@@ -270,7 +270,7 @@ Firebug.Profiler.ProfileTable = domplate(
                                 Locale.$STR("Function")
                             )
                         ),
-                        TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
+                        TH({"class": "headerCell a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox", title: Locale.$STR("CallsHeaderTooltip")},
                                 Locale.$STR("Calls")
                             )

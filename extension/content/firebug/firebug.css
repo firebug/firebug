@@ -265,7 +265,7 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     overflow-y: auto;
 }
 
-/* Evaluated scripts can take a lot of horizontal space on the toolbar so, this is the limit */
+/* Evaluated scripts can take a lot of horizontal space on the toolbar, so this is the limit */
 #fbLocationList {
     max-width: 250px;
 }

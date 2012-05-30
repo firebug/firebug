@@ -132,7 +132,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         //manage all key events in toolbox (including tablists)
         tmpElem = chrome.$("fbContentBox");
         if (tmpElem)
-            Events.addEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
+            Events.addEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress, true);
 
         //make focus stick to inspect button when clicked
         tmpElem = chrome.$("fbInspectButton");
@@ -175,7 +175,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
-            Events.removeEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
+            Events.removeEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress, true);
 
         tmpElem = chrome.$("fbInspectButton");
         if (tmpElem)
@@ -828,7 +828,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                     {
                         if (Css.hasClass(row, "opened"))
                         {
-                            this.focusSiblingRow(panel, target , false);
+                            this.focusSiblingRow(panel, target, false);
                         }
                         else if (toggleElem)
                         {
