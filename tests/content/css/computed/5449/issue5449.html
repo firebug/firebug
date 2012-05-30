@@ -8,13 +8,17 @@
       #element {
           width: 100px;
           height: 100px;
-          background-image: url(firebug.png), -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+          background-image: url(firebug.png);
           background-repeat: no-repeat;
           background-color: #8C8CFF;
           font-family: Arial,Helvetica,sans-serif;
           text-align: center;
           vertical-align: middle;
           line-height: 100px;
+      }
+
+      #element {
+          background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF)
       }
       </style>
     </head>
@@ -41,12 +45,22 @@
                         <span class="ok">&rArr; An infotip with a sample of the color should be shown</span>
                     </li>
                     <li>
-                        Hover the <code>url()</code> part of the value of the <code>background-image</code> property<br/>
-                        <span class="ok">&rArr; An infotip with a preview of the image should be shown</span>
+                        Click the twisty at the <code>background-image</code> property<br/>
+                        <span class="ok">
+                            &rArr; The property tree should get expanded and show two style definitions:
+                            <code>
+#element  -moz-linear-gradient(135deg,​ #788CFF,​ #B4C8FF)  issue5449.html (line 20)
+#element  url("firebug.png")  issue5449.html (line 8)
+                            </code>
+                        </span>
                     </li>
                     <li>
-                        Hover the <code>-moz-linear-gradient</code> part of the value of the <code>background-image</code> property<br/>
+                        Hover the <code>-moz-linear-gradient</code> part of the first <code>#element</code> style<br/>
                         <span class="ok">&rArr; An infotip with a preview of the color gradient should be shown</span>
+                    </li>
+                    <li>
+                        Hover the <code>url()</code> of the second <code>#element</code> style<br/>
+                        <span class="ok">&rArr; An infotip with a preview of the image should be shown</span>
                     </li>
                 </ol>
                 <h3>Expected Result</h3>
