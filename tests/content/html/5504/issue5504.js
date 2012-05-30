@@ -7,7 +7,7 @@ function runTest()
         FBTest.openFirebug();
         var panel = FBTest.selectPanel("html");
 
-        // Get the selected elemetn and execute "New Attribute" action on it.
+        // Get the selected element and execute "New Attribute" action on it.
         var nodeBox = getSelectedNodeBox();
         FBTest.executeContextMenuCommand(nodeBox, "htmlNewAttribute", function()
         {
@@ -18,7 +18,7 @@ function runTest()
     });
 }
 
-// xxxHonza: use the one from FBTest
+// xxxHonza: use the one from FBTest (should be in FBTest 1.10b5)
 function getSelectedNodeBox()
 {
     var panel = FBTest.getPanel("html");
