@@ -834,7 +834,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getAttrValue: function(attr)
     {
         var limit = Firebug.displayedAttributeValueLimit;
-        return (limit > 0) ? Str.cropString(attr.nodeValue, limit) : attr.nodeValue;
+        return (limit > 0) ? Str.cropString(attr.value, limit) : attr.value;
     },
 
     getVisible: function(elt)
@@ -2905,18 +2905,18 @@ FirebugReps.Attr = domplate(Firebug.Rep,
             SPAN(
                 SPAN({"class": "attrTitle"}, "$object|getTitle"),
                 SPAN({"class": "attrEqual"}, "="),
-                TAG("$object|getValueTag", {object: "$object.nodeValue"})
+                TAG("$object|getValueTag", {object: "$object.value"})
             )
         ),
 
     getTitle: function(attr)
     {
-        return attr.nodeName;
+        return attr.name;
     },
 
     getValueTag: function(object)
     {
-        return Firebug.getRep(object.nodeValue).tag;
+        return Firebug.getRep(object.value).tag;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5469: Add units when changing the length '0' with up/down keys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            #element1 {
+                width: 7em;
+                height: 7em;
+                background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5469">Issue 5469</a>: Add units when changing the length '0' with up/down keys</h1>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>Switch to the <em>Style</em> side panel</li>
+                    <li>Click on the value of the <code>width</code> property to start inline editing</li>
+                    <li>Verify the results of pressing <code class="key">Up Arrow</code> with the cursor at the 0 of various values:</li>
+                    <ul>
+                        <li>"-1.1em 0" <span class="ok">&rArr; "-1.1em 1em"</span></li>
+                        <li>"0" <span class="ok">&rArr; "1px"</span></li>
+                        <li>"'a 0 b'" <span class="ok">&rArr; "'a 1 b'"</span></li>
+                        <li>"-moz-calc(11px * 0)" <span class="ok">&rArr; "-moz-calc(11px * 1)"</span></li>
+                    </ul>
+                </ol>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>
+                        When '0' is known to be a length, a suitable unit should be added when increasing it
+                        with the <code class="key">Up Arrow</code> key.
+                    </li>
+                </ul>
+            </section>
+            <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+        </div>
+    </body>
+</html>

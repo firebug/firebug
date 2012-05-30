@@ -9,8 +9,9 @@ define([
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/xml",
+    "firebug/lib/options"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,7 +19,7 @@ function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
+const reSplitCSS = /(url\("?[^"\)]+"?\)?)|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
@@ -356,7 +357,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return m ? m[0] : "";
     },
 
-    getPropertyInfo: function(computedStyle, propName) {
+    getPropertyInfo: function(computedStyle, propName)
+    {
         var propInfo = {
             property: propName,
             value: computedStyle.getPropertyValue(propName),
@@ -365,6 +367,46 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         };
 
         return propInfo;
+    },
+
+    getColorDisplayOptionMenuItems: function()
+    {
+        return [
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: function() {
+                    return Options.set("colorDisplay", "hex");
+                },
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: function() {
+                    return Options.set("colorDisplay", "rgb");
+                },
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: function() {
+                    return Options.set("colorDisplay", "hsl");
+                },
+                checked: Options.get("colorDisplay") == "hsl"
+            }
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

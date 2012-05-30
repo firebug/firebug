@@ -39,7 +39,7 @@ var TraceCommandLine =
         {
             mode: SourceEditor.MODES.JAVASCRIPT,
             showLineNumbers: true,
-            placeholderText: commandLineIntro,
+            initialText: commandLineIntro,
         };
 
         var editorPlaceholder = document.getElementById("fbTrace-editor");

@@ -202,7 +202,7 @@ var HTMLLib =
                 var nodeBox = ioBox.openToObject(node.ownerElement);
                 if (nodeBox)
                 {
-                    var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
+                    var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.name);
                     return Dom.getChildByClass(attrNodeBox, isValue ? "nodeValue" : "nodeName");
                 }
             }
@@ -703,6 +703,7 @@ var HTMLLib =
     {
         if (node instanceof window.HTMLAppletElement)
             return false;
+
         return node.nodeType == window.Node.TEXT_NODE && Str.isWhitespace(node.nodeValue);
     },
 

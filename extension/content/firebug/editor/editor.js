@@ -125,7 +125,14 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: "+this.saveTimeout);
+        {
+            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: " +
+                this.saveTimeout);
+        }
+
+        // Make sure the content is save if there is a timeout in progress.
+        if (this.saveTimeout)
+            this.save();
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
@@ -151,8 +158,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         {
             if (cancel)
             {
-                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel,
-                    currentTarget, removeGroup && !originalValue]);
+                Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose",
+                    [currentPanel, currentTarget, removeGroup && !originalValue]);
 
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
@@ -180,10 +187,11 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentEditor.hide();
         currentPanel.editing = false;
 
-        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor,
+            currentTarget]);
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("Editor stop panel "+currentPanel.name);
+            FBTrace.sysout("Editor stop panel " + currentPanel.name);
 
         currentTarget = null;
         currentGroup = null;

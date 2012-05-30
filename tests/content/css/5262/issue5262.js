@@ -10,7 +10,8 @@ function runTest()
         FBTest.selectPanelLocationByName(panel, "issue5262.html");
 
         var rows = FW.FBL.getElementsByClass(panel.panelNode, "cssCharsetRule");
-        FBTest.compare(1, rows.length, "There must be one @charset rule");
+        if (FBTest.compare(1, rows.length, "There must be one @charset rule"))
+            FBTest.compare(/@charset\s\"UTF-8\";/, rows[0].textContent, "The @charset rule must be correct");
 
         FBTest.testDone("issue5262.DONE");
     });

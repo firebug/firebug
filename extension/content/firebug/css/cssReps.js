@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/object",
+    "firebug/chrome/infotip",
     "firebug/lib/domplate",
     "firebug/js/sourceLink",
     "firebug/lib/locale",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/fonts"
 ],
-function(Obj, Domplate, SourceLink, Locale, Dom, Css, Str, Fonts) {
+function(Obj, InfoTip, Domplate, SourceLink, Locale, Dom, Css, Str, Fonts) {
 
 with (Domplate) {
 
@@ -22,7 +23,7 @@ const maxHeight = 80;
 
 // ********************************************************************************************* //
 
-var CSSInfoTip = Obj.extend(Firebug.InfoTip,
+var CSSInfoTip = Obj.extend(InfoTip,
 {
     dispatchName: "cssInfoTip",
 

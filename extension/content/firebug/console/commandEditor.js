@@ -7,8 +7,9 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/dom",
     "firebug/lib/locale",
+    "firebug/lib/css",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -118,6 +119,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         }
         catch (err)
         {
+            if (FBTrace.DBG_ERROR)
+                FBTrace.sysout("commandEditor.onEditorLoad; EXCEPTION " + err, err);
         }
 
         // xxxHonza: Context menu support is going to change in SourceEditor
@@ -274,7 +277,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (typeof(SourceEditor) != "undefined")
         {
             var doc = this.editor._view._frame.contentDocument;
-            doc.body.style.fontSizeAdjust = adjust;
+
+            // See issue 5488
+            //doc.body.style.fontSizeAdjust = adjust;
         }
         else
         {

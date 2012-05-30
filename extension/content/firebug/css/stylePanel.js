@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -17,11 +18,12 @@ define([
     "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
+    "firebug/css/cssModule",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
-function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
+function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -502,7 +504,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
         this.updateCascadeView(element);
 
@@ -534,16 +536,20 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps" ||
-            name == "onlyShowAppliedStyles")
-        {
+        var optionMap = {
+            showUserAgentCSS: 1,
+            expandShorthandProps: 1,
+            colorDisplay: 1,
+            showMozillaSpecificStyles: 1
+        };
+
+        if (name in optionMap)
             this.refresh();
-        }
     },
 
     getOptionsMenuItems: function()
     {
-        var ret = [
+        var items = [
             Menu.optionMenu("Only_Show_Applied_Styles", "onlyShowAppliedStyles",
                 "style.option.tip.Only_Show_Applied_Styles"),
             Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
@@ -552,46 +558,75 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 "css.option.tip.Expand_Shorthand_Properties")
         ];
 
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
+
         if (Dom.domUtils && this.selection)
         {
-            var state = safeGetContentState(this.selection);
             var self = this;
 
-            ret.push("-");
-
-            ret.push(
-                {
-                    label: "style.option.label.active",
-                    type: "checkbox",
-                    checked: state & STATE_ACTIVE,
-                    tooltiptext: "style.option.tip.active",
-                    command: function()
-                    {
-                        self.updateContentState(STATE_ACTIVE, !this.getAttribute("checked"));
-                    }
-                }
-            );
-
-            ret.push(
+            items.push(
+                "-",
                 {
                     label: "style.option.label.hover",
                     type: "checkbox",
-                    checked: state & STATE_HOVER,
+                    checked: self.hasPseudoClassLock(":hover"),
                     tooltiptext: "style.option.tip.hover",
                     command: function()
                     {
-                        self.updateContentState(STATE_HOVER, !this.getAttribute("checked"));
+                        self.togglePseudoClassLock(":hover");
+                    }
+                },
+                {
+                    label: "style.option.label.active",
+                    type: "checkbox",
+                    checked: self.hasPseudoClassLock(":active"),
+                    tooltiptext: "style.option.tip.active",
+                    command: function()
+                    {
+                        self.togglePseudoClassLock(":active");
                     }
                 }
             );
+            if (Dom.domUtils.hasPseudoClassLock)
+            {
+                items.push(
+                    {
+                        label: "style.option.label.focus",
+                        type: "checkbox",
+                        checked: self.hasPseudoClassLock(":focus"),
+                        tooltiptext: "style.option.tip.focus",
+                        command: function()
+                        {
+                            self.togglePseudoClassLock(":focus");
+                        }
+                    }
+                );
+            }
         }
 
-        return ret;
+        return items;
     },
 
     getContextMenuItems: function(style, target)
     {
         var items = CSSStyleSheetPanel.prototype.getContextMenuItems(style, target);
+        var insertIndex = 0;
+
+        for (var i = 0; i < items.length; ++i)
+        {
+            if (items[i].id == "fbNewCSSRule")
+            {
+                items.splice(i, 1);
+                insertIndex = i;
+                break;
+            }
+        }
+
+        items.splice(insertIndex, 0, {
+            label: "EditStyle",
+            tooltiptext: "style.tip.Edit_Style",
+            command: Obj.bindFixed(this.editElementStyle, this)
+        });
 
         if (style instanceof Ci.nsIDOMFontFace && style.rule)
         {
@@ -629,15 +664,67 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
-    updateContentState: function(state, remove)
+    hasPseudoClassLock: function(pseudoClass)
+    {
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            return Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass);
+        }
+        else
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var state = safeGetContentState(this.selection);
+            switch(pseudoClass)
+            {
+                case ":active":
+                    return state & STATE_ACTIVE;
+
+                case ":hover":
+                    return state & STATE_HOVER;
+            }
+        }
+    },
+
+    togglePseudoClassLock: function(pseudoClass)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("css.updateContentState; state: " + state + ", remove: " + remove);
+            FBTrace.sysout("css.togglePseudoClassLock; pseudo-class: " + pseudoClass);
 
-        Dom.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
-            this.selection, state);
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            if (Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass))
+                Dom.domUtils.removePseudoClassLock(this.selection, pseudoClass);
+            else
+                Dom.domUtils.addPseudoClassLock(this.selection, pseudoClass);
+        }
+        else
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var currentState = safeGetContentState(this.selection);
+            var remove = false;
+            switch(pseudoClass)
+            {
+                case ":active":
+                    state = STATE_ACTIVE;
+                    break;
+
+                case ":hover":
+                    state = STATE_HOVER;
+                    break;
+            }
+            remove = currentState & state;
+
+            Dom.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
+                this.selection, state);
+        }
 
         this.refresh();
+    },
+
+    clearPseudoClassLocks: function()
+    {
+        if (Dom.domUtils.clearPseudoClassLocks)
+            Dom.domUtils.clearPseudoClassLocks(this.selection);
     },
 
     addStateChangeHandlers: function(el)

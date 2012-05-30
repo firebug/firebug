@@ -45,7 +45,7 @@ function $el(name, attributes, children, parent)
 {
     attributes = attributes || {};
 
-    if (!Array.isArray(children))
+    if (!Array.isArray(children) && !parent)
     {
         parent = children;
         children = null;
@@ -142,11 +142,13 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for each(var child in children)
+    for (var i=0; i<children.length; i++)
     {
+        var child = children[i];
         var id = child.getAttribute("insertbefore"), beforeEl;
         if (id)
             beforeEl = parent.querySelector("#" + id);
+
         if (!beforeEl)
         {
             id = child.getAttribute("insertafter");
@@ -156,6 +158,7 @@ function $menupopupOverlay(parent, children)
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
+
         parent.insertBefore(child, beforeEl);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
@@ -1041,7 +1044,8 @@ $toolbarButton("inspector-button", {
     label: "firebug.Inspect",
     tooltiptext: "firebug.InspectElement",
     observes: "cmd_toggleInspecting",
-    image: "chrome://firebug/skin/inspect.png"
+    style: "list-style-image: url(chrome://firebug/skin/inspect.png);" +
+        "-moz-image-region: rect(0, 16px, 16px, 0);"
 });
 
 // TODO: why contextmenu doesn't work without cloning
@@ -1052,7 +1056,7 @@ $toolbarButton("firebug-button", {
     command: "cmd_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
     observes: "firebugStatus",
-    style: "list-style-image:url(chrome://firebug/skin/firebug-gray-16.png)"
+    style: "list-style-image: url(chrome://firebug/skin/firebug16.png)"
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.

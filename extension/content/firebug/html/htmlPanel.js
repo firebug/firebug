@@ -19,9 +19,9 @@ define([
     "firebug/lib/persist",
     "firebug/chrome/menu",
     "firebug/lib/url",
+    "firebug/css/cssReps",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
-    "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
@@ -29,7 +29,9 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url) { with (Domplate) {
+    Url, CSSInfoTip) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -122,9 +124,33 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     toggleEditing: function()
     {
         if (this.editing)
-            Firebug.Editor.stopEditing();
+            this.stopEditing();
         else
             this.editNode(this.selection);
+    },
+
+    stopEditing: function()
+    {
+        Firebug.Editor.stopEditing();
+
+        if (!this.selection.parentNode)
+        {
+            Firebug.chrome.clearStatusPath();
+
+            // nextSelection is set in mutation handlers. When the editing mode stops
+            // this variable (if set) will be used as the next selected node, effectivelly
+            // replacing the old selected node that doesn't have to exit any more (after
+            // the editing).
+            // If nextSelection is not set a default node (e.g. body) will be selected.
+            this.select(this.nextSelection, true);
+            delete this.nextSelection;
+        }
+    },
+
+    isEditing: function()
+    {
+        var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
+        return (this.editing && editButton.getAttribute("checked") === "true");
     },
 
     resetSearch: function()
@@ -138,20 +164,24 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             object = this.getDefaultSelection();
 
         if (FBTrace.DBG_PANELS)
+        {
             FBTrace.sysout("firebug.select " + this.name + " forceUpdate: " + forceUpdate + " " +
                 object + ((object == this.selection) ? "==" : "!=") + this.selection);
+        }
 
         if (forceUpdate || object != this.selection)
         {
             this.selection = object;
             this.updateSelection(object);
+
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
-            if (this.editing &&
-                Firebug.chrome.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
-            {
+            // If the 'free text' edit mode is active change the current markup
+            // displayed in the editor (textarea) so, it corresponds to the current
+            // selection. This typically happens when the user click on object-status-path
+            // buttons in the toolbar.
+            if (this.isEditing())
                 this.editNode(object);
-            }
         }
     },
 
@@ -530,7 +560,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
+            // Rerender the entire parentNodeBox. Proper entity-display logic will
+            // be automatically applied according to the preferences.
+            var newParentNodeBox = parentTag.replace({object: parentNodeBox.repObject}, this.document);
+            if (parentNodeBox.parentNode)
+                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+
+            // Reselect if the element was selected before.
+            if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                this.ioBox.select(parent, true);
+
+            var nodeText = HTMLLib.getTextElementTextBox(newParentNodeBox);
             if (!nodeText.firstChild)
             {
                 if (FBTrace.DBG_HTML)
@@ -541,9 +581,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return;
             }
 
-            nodeText.firstChild.firstChild.nodeValue = textValue;
-
-            this.highlightMutation(nodeText, parentNodeBox, "mutated");
+            // Highlight the text box only (not the entire parentNodeBox/element).
+            this.highlightMutation(nodeText, newParentNodeBox, "mutated");
         }
         else
         {
@@ -622,18 +661,37 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
                 else
                 {
-                    while ( nextSibling && (
-                       (!Firebug.showTextNodesWithWhitespace &&
-                       HTMLLib.isWhitespaceText(nextSibling)) ||
-                       (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
-                       ) )
+                    var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+
+                    var comments = Firebug.showCommentNodes;
+                    var whitespaces = Firebug.showTextNodesWithWhitespace;
+
+                    // Get the right next sibling that match following criteria:
+                    // 1) It's not a whitespace text node in case 'show whitespaces' is false.
+                    // 2) It's not a comment in case 'show comments' is false.
+                    // 3) There is a child box already created for it in the HTML panel UI so,
+                    //    the new one can be inserted before, otherwise it would be appended
+                    //    at the end (issue 5255)
+                    while (nextSibling && (
+                       (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
+                       (!comments && nextSibling instanceof window.Comment) ||
+                       (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
                     {
                        nextSibling = this.findNextSibling(nextSibling);
                     }
-                    
+
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
+
+                    if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                    {
+                        // If the editing mode is currently active, remembe the target mutation.
+                        // The mutation is coming from user changes and will be selected as soon
+                        // as the editing mode is finished.
+                        if (this.isEditing())
+                            this.nextSelection = target;
+                    }
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
@@ -1321,8 +1379,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var ownerNode = stylesheet.ownerNode;
 
                 if (FBTrace.DBG_CSS)
-                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+
-                        stylesheet.ownerNode+" href:"+sourceLink.href);
+                {
+                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode=" +
+                        stylesheet.ownerNode + " href:" + sourceLink.href);
+                }
 
                 if (ownerNode)
                 {
@@ -1338,13 +1398,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     }
 
                     if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
-                            +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined"));
+                    {
+                        FBTrace.sysout("html panel updateSelection sourceLink.line=" +
+                            sourceLink.line + " sourceRow=" +
+                            (sourceRow ? sourceRow.innerHTML : "undefined"));
+                    }
 
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;
                         this.ioBox.sourceRow.setAttribute("exe_line", "true");
+
                         Dom.scrollIntoCenterView(sourceRow);
 
                         // sourceRow isn't an objectBox, but the function should work anyway...
@@ -1492,7 +1556,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplaySymbols",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "symbols"),
+                command: Obj.bind(this.setEntityDisplay, this, "symbols"),
                 checked: Options.get("entityDisplay") == "symbols"
             },
             {
@@ -1501,7 +1565,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplayNames",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "names"),
+                command: Obj.bind(this.setEntityDisplay, this, "names"),
                 checked: Options.get("entityDisplay") == "names"
             },
             {
@@ -1510,7 +1574,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 type: "radio",
                 name: "entityDisplay",
                 id: "entityDisplayUnicode",
-                command: Obj.bindFixed(this.setEntityDisplay, this, "unicode"),
+                command: Obj.bind(this.setEntityDisplay, this, "unicode"),
                 checked: Options.get("entityDisplay") == "unicode"
             },
             "-",
@@ -1541,6 +1605,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 "-",
                 {
                     label: "NewAttribute",
+                    id: "htmlNewAttribute",
                     tooltiptext: "html.tip.New_Attribute",
                     command: Obj.bindFixed(this.editNewAttribute, this, node)
                 }
@@ -1646,15 +1711,24 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!Css.hasClass(target, "nodeValue"))
             return;
 
-        var targetNode = Firebug.getRepObject(target);
-        if (targetNode && targetNode.nodeType == 1 && targetNode.localName.toUpperCase() == "IMG")
+        var node = Firebug.getRepObject(target);
+        if (node && node.nodeType == 1)
         {
-            var url = targetNode.src;
-            if (url == this.infoTipURL) // This state cleared in hide()
-                return true;
+            var nodeName = node.localName.toUpperCase();
+            var attribute = Dom.getAncestorByClass(target, "nodeAttr");
+            var attributeName = attribute.getElementsByClassName("nodeName").item(0).textContent;
 
-            this.infoTipURL = url;
-            return Firebug.InfoTip.populateImageInfoTip(infoTip, url);
+            if ((nodeName == "IMG" || nodeName == "INPUT") && attributeName == "src")
+            {
+                var url = node.src;
+
+                // This state cleared in hide()
+                if (url == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = url;
+                return CSSInfoTip.populateImageInfoTip(infoTip, url);
+            }
         }
     },
 
@@ -1693,10 +1767,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return vars;
     },
 
-    setEntityDisplay: function(type) {
+    setEntityDisplay: function(event, type)
+    {
         Options.set("entityDisplay", type);
 
-        var menuItem = Firebug.chrome.$("entityDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        var menuItem = event.target;
         menuItem.setAttribute("checked", "true");
     },
 
@@ -1724,7 +1799,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
 var AttrTag = Firebug.HTMLPanel.AttrTag =
     SPAN({"class": "nodeAttr editGroup"},
-        "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.nodeName"), "=&quot;",
+        "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.name"), "=&quot;",
         SPAN({"class": "nodeValue editable"}, "$attr|getAttrValue"), "&quot;"
     );
 
@@ -1815,18 +1890,19 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-    DIV({"class": "nodeBox containerNodeBox $object|getHidden", _repObject: "$object", role :"presentation"},
+    DIV({"class": "nodeBox containerNodeBox $object|getHidden", _repObject: "$object",
+            role: "presentation"},
         DIV({"class": "nodeLabel", role: "presentation"},
-            IMG({"class": "twisty", role: "presentation"}),
-            SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+            DIV({"class": "twisty", role: "presentation"}),
+            SPAN({"class": "nodeLabelBox repTarget", role: "treeitem", "aria-expanded": "false"},
                 "&lt;",
                 SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 FOR("attr", "$object|attrIterator", AttrTag),
                 SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
             )
         ),
-        DIV({"class": "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
-        DIV({"class": "nodeCloseLabel", role : "presentation"},
+        DIV({"class": "nodeChildBox", role: "group"}), /* nodeChildBox is special signal in insideOutBox */
+        DIV({"class": "nodeCloseLabel", role: "presentation"},
             SPAN({"class": "nodeCloseLabelBox repTarget"},
                 "&lt;/",
                 SPAN({"class": "nodeTag"}, "$object|getNodeName"),
@@ -1866,18 +1942,19 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden",
-            _repObject: "$object", role :"presentation"},
+            _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                IMG({"class": "twisty", role: "presentation"}),
-                SPAN({"class": "nodeLabelBox repTarget", role: 'treeitem', 'aria-expanded': 'false'},
+                DIV({"class": "twisty", role: "presentation"}),
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem",
+                    "aria-expanded": "false"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
             ),
-            DIV({"class": "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
-            DIV({"class": "nodeCloseLabel", role : "presentation"},
+            DIV({"class": "nodeChildBox", role: "group"}), /* nodeChildBox is special signal in insideOutBox */
+            DIV({"class": "nodeCloseLabel", role: "presentation"},
                 SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
@@ -2052,8 +2129,9 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!node)
             return;
 
-        value = Str.unescapeForTextNode(value || '');
+        value = Str.unescapeForTextNode(value || "");
         target.innerHTML = Str.escapeForTextNode(value);
+
         if (node instanceof window.Element)
         {
             if (Xml.isElementMathML(node) || Xml.isElementSVG(node))
@@ -2074,6 +2152,8 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (e)
             {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
             }
         }
     }
@@ -2173,7 +2253,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     insertNewRow: function(target, insertWhere)
     {
-        var emptyAttr = {nodeName: "", nodeValue: ""};
+        var emptyAttr = {name: "", value: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
     }

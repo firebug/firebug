@@ -97,18 +97,18 @@
 }
 
 .logRow-info {
-    background-image: url(chrome://firebug/skin/infoIcon.png);
+    background-image: url(chrome://firebug/skin/info.svg);
 }
 
 .logRow-warn,
 .logRow-warningMessage {
-    background-image: url(chrome://firebug/skin/warningIcon.png);
+    background-image: url(chrome://firebug/skin/warning.svg);
 }
 
 .logRow-error,
 .logRow-assert,
 .logRow-errorMessage {
-    background-image: url(chrome://firebug/skin/errorIcon.png);
+    background-image: url(chrome://firebug/skin/error.svg);
 }
 
 /*****************************************************************************************/

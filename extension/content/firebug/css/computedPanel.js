@@ -10,14 +10,17 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/chrome/menu",
+    "firebug/lib/options",
     "firebug/lib/string",
     "firebug/lib/persist",
+    "firebug/css/cssModule",
     "firebug/css/cssReps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, SourceLink, Menu,
-    Str, Persist, CSSInfoTip) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
+    Options, Str, Persist, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -56,7 +59,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list",
                         $hidden: "$group.props|hasNoStyles", _repObject: "$group"},
                     H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
-                        IMG({"class": "twisty", role: "presentation"}),
+                        DIV({"class": "twisty", role: "presentation"}),
                         SPAN({"class": "cssComputedLabel"}, "$group.title")
                     ),
                     TAG("$stylesTag", {props: "$group.props"})
@@ -95,7 +98,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                             TD({"class": "selectorName", role: "presentation"},
                                 "$selector.selector.text"),
                             TD({role: "presentation"},
-                                SPAN({"class": "stylePropValue"}, "$selector.value")),
+                                SPAN({"class": "stylePropValue"}, "$selector.value|formatValue")),
                             TD({"class": "styleSourceLink", role: "presentation"},
                                 TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
                             )
@@ -134,6 +137,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         formatValue: function(value)
         {
+            if (Options.get("colorDisplay") == "hex")
+                value = Css.rgbToHex(value);
+            else if (Options.get("colorDisplay") == "hsl")
+                value = Css.rgbToHSL(value);
+
             // Add a zero-width space after a comma to allow line breaking
             return value.replace(/,/g, ",\u200B");
         }
@@ -427,6 +435,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var optionMap = {
             showUserAgentCSS: 1,
             computedStylesDisplay: 1,
+            colorDisplay: 1,
             showMozillaSpecificStyles: 1
         };
 
@@ -456,14 +465,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             },
             Menu.optionMenu("Show_Mozilla_specific_styles",
                 "showMozillaSpecificStyles",
-                "computed.option.tip.Show_Mozilla_Specific_Styles"),
-            "-",
-            {
-                label: "Refresh",
-                command: Obj.bind(this.refresh, this),
-                tooltiptext: "panel.tip.Refresh"
-            }
+                "computed.option.tip.Show_Mozilla_Specific_Styles")
         );
+
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
 
         return items;
     },
@@ -507,15 +512,6 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        items.push(
-            "-",
-            {
-                label: "Refresh",
-                command: Obj.bind(this.refresh, this),
-                tooltiptext: "panel.tip.Refresh"
-            }
-        );
-
         return items;
     },
 
@@ -541,7 +537,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     toggleDisplay: function()
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
-        Firebug.Options.set("computedStylesDisplay", display);
+        Options.set("computedStylesDisplay", display);
     },
 
     sortProperties: function(props)

@@ -764,7 +764,7 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 }
 
 .netActivationLabel {
-    background: url(chrome://firebug/skin/infoIcon.png) no-repeat 3px 2px;
+    background: url(chrome://firebug/skin/info.svg) no-repeat 3px 2px;
     padding-left: 22px;
 }
 
