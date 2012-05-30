@@ -1577,6 +1577,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 "-",
                 {
                     label: "NewAttribute",
+                    id: "htmlNewAttribute",
                     tooltiptext: "html.tip.New_Attribute",
                     command: Obj.bindFixed(this.editNewAttribute, this, node)
                 }
