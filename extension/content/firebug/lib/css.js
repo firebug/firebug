@@ -708,7 +708,12 @@ Css.rgbToHex = function(value)
 Css.rgbToHSL = function(value)
 {
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
-        function(_, r, g, b, _, a) {
+        function(_, r, g, b, _, a)
+        {
+            r = parseInt(r);
+            g = parseInt(g);
+            b = parseInt(b);
+
             var gray = (r == g && g == b);
 
             r /= 255;
