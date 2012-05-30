@@ -124,9 +124,33 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     toggleEditing: function()
     {
         if (this.editing)
-            Firebug.Editor.stopEditing();
+            this.stopEditing();
         else
             this.editNode(this.selection);
+    },
+
+    stopEditing: function()
+    {
+        Firebug.Editor.stopEditing();
+
+        if (!this.selection.parentNode)
+        {
+            Firebug.chrome.clearStatusPath();
+
+            // nextSelection is set in mutation handlers. When the editing mode stops
+            // this variable (if set) will be used as the next selected node, effectivelly
+            // replacing the old selected node that doesn't have to exit any more (after
+            // the editing).
+            // If nextSelection is not set a default node (e.g. body) will be selected.
+            this.select(this.nextSelection, true);
+            delete this.nextSelection;
+        }
+    },
+
+    isEditing: function()
+    {
+        var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
+        return (this.editing && editButton.getAttribute("checked") === "true");
     },
 
     resetSearch: function()
@@ -140,20 +164,24 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             object = this.getDefaultSelection();
 
         if (FBTrace.DBG_PANELS)
+        {
             FBTrace.sysout("firebug.select " + this.name + " forceUpdate: " + forceUpdate + " " +
                 object + ((object == this.selection) ? "==" : "!=") + this.selection);
+        }
 
         if (forceUpdate || object != this.selection)
         {
             this.selection = object;
             this.updateSelection(object);
+
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
-            if (this.editing &&
-                Firebug.chrome.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
-            {
+            // If the 'free text' edit mode is active change the current markup
+            // displayed in the editor (textarea) so, it corresponds to the current
+            // selection. This typically happens when the user click on object-status-path
+            // buttons in the toolbar.
+            if (this.isEditing())
                 this.editNode(object);
-            }
         }
     },
 
@@ -540,10 +568,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
             // Reselect if the element was selected before.
             if (this.selection && (!this.selection.parentNode || parent == this.selection))
-            {
-                Firebug.chrome.clearStatusPath();
-                this.select(parent, true);
-            }
+                this.ioBox.select(parent, true);
 
             var nodeText = HTMLLib.getTextElementTextBox(newParentNodeBox);
             if (!nodeText.firstChild)
@@ -661,8 +686,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     if (this.selection && (!this.selection.parentNode || parent == this.selection))
                     {
-                        Firebug.chrome.clearStatusPath();
-                        this.select(parent, true);
+                        // If the editing mode is currently active, remembe the target mutation.
+                        // The mutation is coming from user changes and will be selected as soon
+                        // as the editing mode is finished.
+                        if (this.isEditing())
+                            this.nextSelection = target;
                     }
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
@@ -674,10 +702,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
                 if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                {
-                    Firebug.chrome.clearStatusPath();
-                    this.select(parent, true);
-                }
+                    this.ioBox.select(parent, true);
 
                 this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
@@ -698,10 +723,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 this.ioBox.toggleObjectBox(newParentNodeBox, true);
 
             if (this.selection && (!this.selection.parentNode || parent == this.selection))
-            {
-                Firebug.chrome.clearStatusPath();
-                this.select(parent, true);
-            }
+                this.ioBox.select(parent, true);
 
             this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
@@ -1357,8 +1379,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var ownerNode = stylesheet.ownerNode;
 
                 if (FBTrace.DBG_CSS)
-                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+
-                        stylesheet.ownerNode+" href:"+sourceLink.href);
+                {
+                    FBTrace.sysout("html panel updateSelection stylesheet.ownerNode=" +
+                        stylesheet.ownerNode + " href:" + sourceLink.href);
+                }
 
                 if (ownerNode)
                 {
@@ -1374,13 +1398,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     }
 
                     if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
-                            +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined"));
+                    {
+                        FBTrace.sysout("html panel updateSelection sourceLink.line=" +
+                            sourceLink.line + " sourceRow=" +
+                            (sourceRow ? sourceRow.innerHTML : "undefined"));
+                    }
 
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;
                         this.ioBox.sourceRow.setAttribute("exe_line", "true");
+
                         Dom.scrollIntoCenterView(sourceRow);
 
                         // sourceRow isn't an objectBox, but the function should work anyway...
