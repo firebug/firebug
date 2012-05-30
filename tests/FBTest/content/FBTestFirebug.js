@@ -2178,6 +2178,10 @@ this.selectElementInHtmlPanel = function(element, callback)
     */
 };
 
+/**
+ * Returns selected node box - a <div> element in the HTML panel. The element should have
+ * followin classes set: "nodeBox containerNodeBox selected"
+ */
 this.getSelectedNodeBox = function()
 {
     var panel = FBTest.getPanel("html");
