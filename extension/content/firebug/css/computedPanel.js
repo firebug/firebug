@@ -512,15 +512,6 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        items.push(
-            "-",
-            {
-                label: "Refresh",
-                command: Obj.bind(this.refresh, this),
-                tooltiptext: "panel.tip.Refresh"
-            }
-        );
-
         return items;
     },
 
