@@ -2129,8 +2129,9 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!node)
             return;
 
-        value = Str.unescapeForTextNode(value || '');
+        value = Str.unescapeForTextNode(value || "");
         target.innerHTML = Str.escapeForTextNode(value);
+
         if (node instanceof window.Element)
         {
             if (Xml.isElementMathML(node) || Xml.isElementSVG(node))
@@ -2151,6 +2152,8 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (e)
             {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
             }
         }
     }
