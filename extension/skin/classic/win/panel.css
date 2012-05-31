@@ -13,6 +13,7 @@
 .objectBox-stackFrame.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
 .cssComputedHeader > .twisty,
+.breakpointHeader > .twisty,
 .computedStyle.hasSelectors > .stylePropName {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
@@ -31,6 +32,7 @@
 .netPageRow.opened > .netCol > .netPageTitle,
 .objectBox-stackFrame.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
+.breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName {
     background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
