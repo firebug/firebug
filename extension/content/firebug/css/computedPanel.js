@@ -600,9 +600,11 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
                 case "url":
-                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)), prop))
+                    if (Css.isImageRule(Xml.getElementSimpleType(propInfo), prop))
                     {
-                        var baseURL = propInfo.href || propInfo.matchedSelectors[0].href;
+                        var baseURL = typeof propInfo.href == "object" ? propInfo.href.href : propInfo.href;
+                        if (!baseURL)
+                            baseURL = propInfo.matchedSelectors[0].href;
                         var relURL = Firebug.CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
                         var repeat = Firebug.CSSModule.parseRepeatValue(value);

@@ -1,5 +1,27 @@
 /* See license.txt for terms of usage */
 
+.breakpointHeader {
+    position: relative;
+    cursor: pointer;
+    -moz-user-select: none;
+}
+
+.breakpointHeader > .twisty {
+    background-position: 4px 4px !important;
+}
+
+.breakpointsHeaderLabel {
+    margin-left: 14px;
+} 
+
+.breakpointBlock > .breakpointsGroupListBox {
+    display: none;
+}
+
+.breakpointBlock.opened > .breakpointsGroupListBox {
+    display: block;
+}
+
 /************************************************************************************************/
 /* Breakpoint notifications */
 
