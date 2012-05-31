@@ -142,6 +142,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             // replacing the old selected node that doesn't have to exit any more (after
             // the editing).
             // If nextSelection is not set a default node (e.g. body) will be selected.
+            // See issue 5506
             this.select(this.nextSelection, true);
             delete this.nextSelection;
         }
@@ -175,7 +176,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.updateSelection(object);
 
             // The Edit button (in the toolbar) must be updated every time the selection
-            // changes. Some elements (such as <html>) can't be edited.
+            // changes. Some elements (such as <html>) can't be edited (see issue 5506).
             var edit = Firebug.chrome.$("fbToggleHTMLEditing");
             edit.disabled = object ? Css.nonEditableTags.hasOwnProperty(object.localName) : false;
 
@@ -696,6 +697,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                         // The mutation is coming from user changes and will be selected as soon
                         // as the editing mode is finished. Only HTMLElement can be selected
                         // (not a simple text node)
+                        // See issue 5506
                         if (this.isEditing() && (target instanceof window.HTMLElement))
                             this.nextSelection = target;
                     }
@@ -1526,6 +1528,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (element instanceof window.Document)
                 continue;
 
+            // Ignore elements without parent
+            if (!element.parentNode)
+                continue;
+
             path.push(element);
         }
         return path;
@@ -2069,6 +2075,7 @@ TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var node = Firebug.getRepObject(target);
         if (!node)
             return;
+
         target.data = value;
         node.data = value;
     }
@@ -2187,13 +2194,16 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             if (value != previousValue)
                 element.removeAttribute(previousValue);
+
             if (value)
             {
                 var attrValue = Dom.getNextByClass(target, "nodeValue").textContent;
                 element.setAttribute(value, attrValue);
             }
             else
+            {
                 element.removeAttribute(value);
+            }
         }
         else if (Css.hasClass(target, "nodeValue"))
         {
@@ -2347,6 +2357,14 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
             this.editingElements[0].innerHTML = value;
         else
             this.editingElements = Dom.setOuterHTML(this.editingElements[0], value);
+
+        var element = Firebug.getRepObject(target);
+        if (!element)
+            return;
+
+        // Make sure the object status path (in the toolbar) is updated.
+        var panel = Firebug.getElementPanel(target);
+        Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
     },
 
     endEditing: function()
