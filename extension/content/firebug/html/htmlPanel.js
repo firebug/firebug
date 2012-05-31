@@ -174,6 +174,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selection = object;
             this.updateSelection(object);
 
+            // The Edit button (in the toolbar) must be updated every time the selection
+            // changes. Some elements (such as <html>) can't be edited.
+            var edit = Firebug.chrome.$("fbToggleHTMLEditing");
+            edit.disabled = object ? Css.nonEditableTags.hasOwnProperty(object.localName) : false;
+
+            // Distribute selection change further to listeners.
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
             // If the 'free text' edit mode is active change the current markup
@@ -1097,10 +1103,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.noScrollIntoView = true;
             this.select(node);
 
-            Firebug.chrome.$('fbToggleHTMLEditing').disabled =
-                Css.nonEditableTags.hasOwnProperty(node.localName);
-
             delete this.noScrollIntoView;
+
             if (Css.hasClass(event.target, "twisty"))
                 this.toggleNode(event);
         }
