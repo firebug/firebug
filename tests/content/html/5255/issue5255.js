@@ -23,25 +23,28 @@ function runTest()
             // Type new text
             FBTest.sendString("<i>3</i><i>4</i><i>5</i>", textArea);
 
-            // Stop markup edit mode.
-            FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
-
-            // Verify page content
-            var content = win.document.getElementById("content");
-            FBTest.compare("1234567", content.textContent, "Page content must match.");
-
-            // Verify object-status-path in the toolbar
-            var panelStatus = FW.Firebug.chrome.window.document.getElementById("fbPanelStatus");
-            var buttons = panelStatus.querySelectorAll("toolbarbutton");
-
-            if (FBTest.compare(5, buttons.length, "There must be 5 buttons"))
+            FBTest.waitForHtmlMutation(null, "div", function()
             {
-                var labels = ["b#mid", "section#content", "div", "body", "html"];
-                for (var i=0; i<buttons.length; i++)
-                    FBTest.compare(labels[i], buttons[i].label, "Label must match");
-            }
+                // Stop markup edit mode.
+                FBTest.clickToolbarButton(null, "fbToggleHTMLEditing");
 
-            FBTest.testDone("issue5255.DONE");
+                // Verify page content
+                var content = win.document.getElementById("content");
+                FBTest.compare("1234567", content.textContent, "Page content must match.");
+
+                // Verify object-status-path in the toolbar
+                var panelStatus = FW.Firebug.chrome.window.document.getElementById("fbPanelStatus");
+                var buttons = panelStatus.querySelectorAll("toolbarbutton");
+
+                if (FBTest.compare(5, buttons.length, "There must be 5 buttons"))
+                {
+                    var labels = ["i", "section#content", "div", "body", "html"];
+                    for (var i=0; i<buttons.length; i++)
+                        FBTest.compare(labels[i], buttons[i].label, "Label must match");
+                }
+
+                FBTest.testDone("issue5255.DONE");
+            });
         });
     });
 }
