@@ -688,8 +688,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     {
                         // If the editing mode is currently active, remembe the target mutation.
                         // The mutation is coming from user changes and will be selected as soon
-                        // as the editing mode is finished.
-                        if (this.isEditing())
+                        // as the editing mode is finished. Only HTMLElement can be selected
+                        // (not a simple text node)
+                        if (this.isEditing() && (target instanceof window.HTMLElement))
                             this.nextSelection = target;
                     }
 
