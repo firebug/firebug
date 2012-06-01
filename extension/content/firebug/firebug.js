@@ -802,8 +802,8 @@ window.Firebug =
         }
         if (Firebug.isDetached()) { 
             // 'hasLostFocus' is initilized in chrome.js and has the value of 'true' if 
-            // window has lost the focus. 'forceOpen' 'forceOpen' is used for when the 
-            // user opens firebug in detached mode for the first time.
+            // window has lost the focus. 'forceOpen' is used for when the user opens 
+            // firebug in detached mode for the first time.
             if(window.hasLostFocus || forceOpen) {
                 Firebug.chrome.focus();
             } else {

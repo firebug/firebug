@@ -371,7 +371,7 @@ Firebug.GlobalUI =
             var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
             
             // If Firebug is detached, use "Focus Firebug Window" label 
-            // instead of "Hide Firebug" when the menu isn't opened fom 
+            // instead of "Hide Firebug" when the menu isn't opened from 
             // within the detached Firebug window. the 'placement' is used 
             // to ensure Firebug isn't closed with close button of detached window
             // and 'inDetachedWindow' variable is also used to ensure the menu is 
@@ -380,7 +380,6 @@ Firebug.GlobalUI =
             {
                 toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
                 toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
-                this.mustFocusUI = true;
             }
         }
 
