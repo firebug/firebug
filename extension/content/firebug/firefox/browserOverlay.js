@@ -1206,6 +1206,18 @@ if (typeof(nsContextMenu) != "undefined")
 }
 
 // ********************************************************************************************* //
+// All Pages Activation" is on
+
+// Load Firebug by default if activation is on for all pages (see issue 5522)
+if (FirebugLoader.getPref("allPagesActivation") == "on")
+{
+    Firebug.GlobalUI.startFirebug(function()
+    {
+        FBTrace.sysout("Firebug loaded by default since allPagesActivation is on");
+    });
+}
+
+// ********************************************************************************************* //
 
 if (FBTrace.DBG_INITIALIZE)
     FBTrace.sysout("Firebug global overlay applied");
