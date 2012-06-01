@@ -74,6 +74,8 @@ var FirebugChrome =
      */
     initialize: function()
     {
+        Events.addEventListener(win, "focus", onFocus, true);
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -234,6 +236,7 @@ var FirebugChrome =
 
     shutdown: function()
     {
+        Events.removeEventListener(win, "focus", onFocus, true);
         var doc1 = panelBar1.browser.contentDocument;
         Events.removeEventListener(doc1, "mouseover", onPanelMouseOver, false);
         Events.removeEventListener(doc1, "mouseout", onPanelMouseOut, false);
@@ -1842,6 +1845,22 @@ function onBlur(event)
     // XXXhh Is this really necessary? I disabled it for now as this was preventing me
     // to show highlights on focus
     //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
+
+    // hasLostFocus is used in togglebar func in Firebug namespace to 
+    // determine whether you have to focus or minimizing Firebug window.
+    // value of this variable is changed to false in onfocus event of window.
+    if (Firebug.isDetached()) {
+        // 'this' refer to window
+        this.hasLostFocus = true;
+    }
+}
+
+
+function onFocus(event) {
+    // hasLostFocus is used in togglebar func in Firebug namespace to   
+    // determine whether you have to focus or minimizing Firebug window.
+    // value of this variable is changed to true in onblur event of window.
+    this.hasLostFocus = false;
 }
 
 function onSelectLocation(event)
