@@ -11,7 +11,6 @@ Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
-FBTrace.sysout("hallo");
 // Firebug URLs used by the global menu.
 var firebugURLs =
 {
