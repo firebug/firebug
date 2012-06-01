@@ -11,6 +11,7 @@ Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
+FBTrace.sysout("hallo");
 // Firebug URLs used by the global menu.
 var firebugURLs =
 {
@@ -1203,6 +1204,18 @@ if (typeof(nsContextMenu) != "undefined")
         if (this.isTargetAFormControl(aNode))
             this.shouldDisplay = true;
     };
+}
+
+// ********************************************************************************************* //
+// All Pages Activation" is on
+
+// Load Firebug by default if activation is on for all pages (see issue 5522)
+if (FirebugLoader.getPref("allPagesActivation") == "on")
+{
+    Firebug.GlobalUI.startFirebug(function()
+    {
+        FBTrace.sysout("Firebug loaded by default since allPagesActivation is on");
+    });
 }
 
 // ********************************************************************************************* //
