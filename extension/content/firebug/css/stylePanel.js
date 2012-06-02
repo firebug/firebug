@@ -138,6 +138,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 this.removeSystemRules(rules, sections);
         }
 
+        // Reset the selection, so that clicking that starts before the view
+        // update still result in proper mouseup events (issue 5500).
+        this.document.defaultView.getSelection().removeAllRanges();
+
         if (rules.length || sections.length)
         {
             inheritLabel = Locale.$STR("InheritedFrom");
@@ -173,6 +177,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             Events.dispatch([Firebug.A11yModel], "onCSSRulesAdded", [this, result]);
         }
+
+        // Avoid a flickering "disable" icon by forcing a reflow (issue 5500).
+        this.panelNode.offsetHeight;
     },
 
     getStylesheetURL: function(rule, getBaseUri)
@@ -457,14 +464,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onClick = Obj.bind(this.onClick, this);
         this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
         this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
 
-        // We only need the basic panel initialize, not the intermeditate objects
-        Firebug.Panel.initialize.apply(this, arguments);
+        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
     },
 
     show: function(state)
@@ -527,9 +531,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             div.innerHTML = Locale.$STR("SothinkWarning");
             return;
         }
-
-        if (!element)
-            return;
 
         this.updateView(element);
     },
