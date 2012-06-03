@@ -1,0 +1,11 @@
+/* See license.txt for terms of usage */
+
+dateTimePicker {
+    -moz-binding: url("chrome://firecookie/content/dateTimePicker.xml#dateTimePicker");
+}
+
+.datetimepicker-input[disabled] {
+    cursor: default;
+    background-color: -moz-Dialog;
+    color: GrayText;
+}
