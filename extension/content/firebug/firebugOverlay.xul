@@ -2,7 +2,7 @@
 <!-- See license.txt for terms of usage -->
 
 <?xul-overlay href="firefox/firebugMenuOverlay.xul"?>
-<?xul-overlay href="chrome://firebug/content/cookies/fireCookie.xul"?>
+<?xul-overlay href="chrome://firebug/content/cookies/cookiePanel.xul"?>
 
 <?xml-stylesheet href="firebug.css"?>
 
