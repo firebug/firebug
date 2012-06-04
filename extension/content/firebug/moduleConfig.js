@@ -57,7 +57,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/js/tabCache",
         "firebug/chrome/activation",
         "firebug/css/stylePanel",
-        "firebug/css/computedPanel"
+        "firebug/css/computedPanel",
+        "firebug/cookies/fireCookie",
     ];
 
     return config;
