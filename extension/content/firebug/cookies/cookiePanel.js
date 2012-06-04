@@ -20,10 +20,11 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieModule",
+    "firebug/cookies/cookiePermissions",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     MenuUtils, Templates, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
-    FireCookieModel) {
+    FireCookieModel, CookiePermissions) {
 
 with (Domplate) {
 
@@ -249,7 +250,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     show: function(state)
     {
         // Update permission button in the toolbar.
-        Firebug.FireCookieModel.Perm.updatePermButton(this.context);
+        CookiePermissions.updatePermButton(this.context);
 
         // For backward compatibility with Firebug 1.1
         //
@@ -475,6 +476,61 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
     },
 }); 
+
+// ********************************************************************************************* //
+// Cookie Breakpoints
+
+/**
+ * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
+ * providing a list of cookie-breakpoints into the Breakpoints side-panel.
+ */
+Firebug.FireCookieModel.DebuggerListener =
+{
+    getBreakpoints: function(context, groups)
+    {
+        if (!context.cookies.breakpoints.isEmpty())
+            groups.push(context.cookies.breakpoints);
+    }
+};
+
+// ********************************************************************************************* //
+// Custom output in the Console panel for: document.cookie
+
+Firebug.FireCookieModel.ConsoleListener =
+{
+    tag:
+        DIV({_repObject: "$object"},
+            DIV({"class": "documentCookieBody"})
+        ),
+
+    log: function(context, object, className, sourceLink)
+    {
+        //xxxHonza: chromebug says it's null sometimes.
+        if (!context)
+            return;
+
+        if (object !== context.window.document.cookie)
+            return;
+
+        // Parse "document.cookie" string.
+        var cookies = CookieUtils.parseSentCookiesFromString(object);
+        if (!cookies || !cookies.length)
+            return;
+
+        // Create empty log row that serves as a container for list of cookies
+        // crated from the document.cookie property.
+        var appendObject = Firebug.ConsolePanel.prototype.appendObject;
+        var row = Firebug.ConsoleBase.logRow(appendObject, object, context,
+            "documentCookie", this, null, true);
+
+        var rowBody = Dom.getElementByClass(row, "documentCookieBody");
+        Templates.CookieTable.render(cookies, rowBody);
+    },
+
+    logFormatted: function(context, objects, className, sourceLink)
+    {
+    }
+};
 
 // ********************************************************************************************* //
 // Registration

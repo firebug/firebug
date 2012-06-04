@@ -8,8 +8,9 @@ define([
     "firebug/chrome/tabWatcher",
     "firebug/cookies/cookie",
     "firebug/lib/options",
+    "firebug/cookies/cookieUtils",
 ],
-function(Obj, Xpcom, BaseObserver, Http, TabWatcher, Cookie, Options) {
+function(Obj, Xpcom, BaseObserver, Http, TabWatcher, Cookie, Options, CookieUtils) {
 
 // ********************************************************************************************* //
 // Constants
@@ -200,7 +201,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         var cookies = setCookie.split("\n");
         for (var i=0; i<cookies.length; i++)
         {
-            var cookie = parseFromString(cookies[i]);
+            var cookie = CookieUtils.parseFromString(cookies[i]);
             cookie.originalURI = request.originalURI;
             if (!cookie.host)
                 cookie.host = host;
@@ -214,7 +215,7 @@ var HttpObserver = Obj.extend(BaseObserver,
                 activeCookies[cookie.host] = [];
 
             var activeCookiesForHost = activeCookies[cookie.host];
-            activeCookiesForHost[getCookieId(cookie)] = cookie;
+            activeCookiesForHost[CookieUtils.getCookieId(cookie)] = cookie;
 
             if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.Cookie received: " +

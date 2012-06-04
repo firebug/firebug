@@ -307,9 +307,6 @@ var CookieObserver = Obj.extend(BaseObserver,
         cookie.row = row;
         row.repObject = cookie;
 
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
-
         //xxxHonza the new cookie should respect current sorting.
     },
 
@@ -358,9 +355,6 @@ var CookieObserver = Obj.extend(BaseObserver,
         }
 
         rowTemplate.updateRow(repCookie, context);
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
     },
 
     onRemoveCookie: function(context, cookie)
@@ -381,9 +375,6 @@ var CookieObserver = Obj.extend(BaseObserver,
             return;
 
         parent.removeChild(repCookie.row);
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
     },
 
     logEvent: function(eventObject, context, className)

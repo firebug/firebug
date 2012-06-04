@@ -19,17 +19,35 @@ define([
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
     "firebug/cookies/cookieModule",
+    "firebug/cookies/cookiePermissions",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents, FireCookieModel) {
+    BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
+    FireCookieModel, CookiePermissions) {
 
 with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 const lastSortedColumn = "firecookie.lastSortedColumn";
 const hiddenColsPref = "firecookie.hiddenColumns";
+
+// Cookie status & policy
+var STATUS_UNKNOWN = Ci.nsICookie2.STATUS_UNKNOWN;
+var STATUS_ACCEPTED = Ci.nsICookie2.STATUS_ACCEPTED;
+var STATUS_DOWNGRADED = Ci.nsICookie2.STATUS_DOWNGRADED;
+var STATUS_FLAGGED = Ci.nsICookie2.STATUS_FLAGGED;
+var STATUS_REJECTED = Ci.nsICookie2.STATUS_REJECTED;
+
+var POLICY_UNKNOWN = Ci.nsICookie2.POLICY_UNKNOWN;
+var POLICY_NONE = Ci.nsICookie2.POLICY_NONE;
+var POLICY_NO_CONSENT = Ci.nsICookie2.POLICY_NO_CONSENT;
+var POLICY_IMPLICIT_CONSENT = Ci.nsICookie2.POLICY_IMPLICIT_CONSENT;
+var POLICY_NO_II = Ci.nsICookie2.POLICY_NO_II;
 
 // ********************************************************************************************* //
 // Templates Helpers
@@ -195,13 +213,16 @@ Templates.CookieRow = domplate(Templates.Rep,
         if (cookie.cookie.expires == 0)
             return " " + Locale.$STR("firecookie.Session");
 
-        try {
+        try
+        {
             // Format the expires date using the current locale.
             var date = new Date(cookie.cookie.expires * 1000);
             return date.toLocaleString();
         }
-        catch (err) {
-            ERROR(err);
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.CookieRow.getExpires; EXCEPTION " + err, err);
         }
 
         return "";
@@ -380,7 +401,7 @@ Templates.CookieRow = domplate(Templates.Rep,
         }
 
         // Permissions
-        var permItems = FireCookieModel.Perm.getContextMenuItems(cookie, target, context);
+        var permItems = CookiePermissions.getContextMenuItems(cookie, target, context);
         if (permItems)
             items = items.concat(permItems);
 
@@ -791,7 +812,7 @@ Templates.CookieChanged = domplate(Templates.Rep,
         if (!activeCookies)
             return strippedHost;
 
-        var activeCookie = activeCookies[getCookieId(cookie)];
+        var activeCookie = activeCookies[CookieUtils.getCookieId(cookie)];
 
         var originalURI;
         if (activeCookie)
@@ -804,7 +825,7 @@ Templates.CookieChanged = domplate(Templates.Rep,
             FBTrace.sysout("cookies.context.cookies.activeCookies[" + cookie.host + "]",
                 activeCookies);
 
-            FBTrace.sysout("cookies.Original URI for: " + getCookieId(cookie) + 
+            FBTrace.sysout("cookies.Original URI for: " + CookieUtils.getCookieId(cookie) + 
                 " is: " + originalURI, activeCookie);
         }
 
@@ -1302,6 +1323,37 @@ Templates.CookieRep = domplate(Templates.Rep,
         return cookie.cookie.value;
     }
 });
+
+// ********************************************************************************************* //
+// Debug helpers
+
+function checkList(panel)
+{
+    if (!FBTrace.DBG_COOKIES)
+        return;
+
+    if (!panel || !this.panelNode)
+        return; 
+
+    var row = Dom.getElementByClass(this.panelNode, "cookieRow");
+    while (row)
+    {
+        var rep = row.repObject;
+        if ((rep.cookie.name != row.firstChild.firstChild.innerHTML) ||
+            (rep.cookie.path != row.childNodes[3].firstChild.innerHTML))
+        {
+            FBTrace("---> Check failed!\n");
+            FBTrace("--->" + rep.rawHost + ", " + rep.cookie.name + ", " +
+                rep.cookie.path + "\n");
+            FBTrace("    " + row.firstChild.firstChild.innerHTML + ", " +
+                row.childNodes[3].firstChild.innerHTML + "\n");
+        }
+
+        row = row.nextSibling;
+    }
+
+    return null;
+}
 
 // ********************************************************************************************* //
 // Firebug Registration

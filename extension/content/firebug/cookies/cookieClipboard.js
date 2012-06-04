@@ -37,7 +37,8 @@ var CookieClipboard = Obj.extend(Object,
         }
         catch (err)
         {
-            ERROR(err);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.CookieClipboard.copyTo; EXCEPTION " + err, err);
         }
     },
 
@@ -54,7 +55,8 @@ var CookieClipboard = Obj.extend(Object,
         }
         catch (err)
         {
-            ERROR(err);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.CookieClipboard.getFrom; EXCEPTION " + err, err);
         }
 
         return null;

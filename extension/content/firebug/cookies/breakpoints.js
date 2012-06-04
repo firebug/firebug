@@ -3,9 +3,12 @@
 define([
     "firebug/lib/locale",
     "firebug/lib/string",
+    "firebug/lib/domplate",
     "firebug/cookies/cookieUtils",
 ],
-function(Locale, Str, CookieUtils) {
+function(Locale, Str, Domplate, CookieUtils) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 
@@ -214,8 +217,211 @@ var Breakpoints =
 }
 
 // ********************************************************************************************* //
+// Cookie Breakpoints
+
+Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
+{
+    inspectable: false,
+
+    tag:
+        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+            role: "option", "aria-checked": "$bp.checked"},
+            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
+                INPUT({"class": "breakpointCheckbox", type: "checkbox",
+                    _checked: "$bp.checked", tabindex : "-1"}),
+                SPAN("$bp|getTitle"),
+                DIV({"class": "breakpointMutationType"}, "$bp|getType"),
+                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+            ),
+            DIV({"class": "breakpointCode"},
+                SPAN("$bp|getValue")
+            )
+        ),
+
+    getTitle: function(bp)
+    {
+        return bp.name;
+    },
+
+    getValue: function(bp)
+    {
+        return bp.host + bp.path;
+    },
+
+    getType: function(bp)
+    {
+        return Locale.$STR("Break On Cookie Change");
+    },
+
+    onRemove: function(event)
+    {
+        Events.cancelEvent(event);
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+
+        if (!Css.hasClass(event.target, "closeButton"))
+            return;
+
+        // Remove from list of breakpoints.
+        var row = Dom.getAncestorByClass(event.target, "breakpointRow");
+        context.cookies.breakpoints.removeBreakpoint(row.repObject);
+
+        // Remove from the UI.
+        bpPanel.noRefresh = true;
+        bpPanel.removeRow(row);
+        bpPanel.noRefresh = false;
+
+        var cookiePanel = context.getPanel(panelName, true);
+        if (!cookiePanel)
+            return;
+
+        var cookie = cookiePanel.findRepObject(row.repObject);
+        if (cookie)
+        {
+            cookie.row.removeAttribute("breakpoint");
+            cookie.row.removeAttribute("disabledBreakpoint");
+        }
+    },
+
+    onEnable: function(event)
+    {
+        var checkBox = event.target;
+        if (!Css.hasClass(checkBox, "breakpointCheckbox"))
+            return;
+
+        var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
+        bp.checked = checkBox.checked;
+
+        var bpPanel = Firebug.getElementPanel(checkBox);
+        var cookiePanel = bpPanel.context.getPanel(panelName, true);
+        if (!cookiePanel)
+            return;
+
+        var cookie = cookiePanel.findRepObject(bp);
+        if (cookie)
+            cookie.row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
+    },
+
+    supportsObject: function(object)
+    {
+        return object instanceof Breakpoints.Breakpoint;
+    }
+});
+
+// ********************************************************************************************* //
+// Editor for Cookie breakpoint condition.
+
+Breakpoints.ConditionEditor = function(doc)
+{
+    Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
+}
+
+Breakpoints.ConditionEditor.prototype = Domplate.domplate(Firebug.Breakpoint.ConditionEditor.prototype,
+{
+    endEditing: function(target, value, cancel)
+    {
+        if (cancel)
+            return;
+
+        var cookie = target.repObject;
+        var panel = Firebug.getElementPanel(target);
+        var bp = panel.context.cookies.breakpoints.findBreakpoint(cookie.cookie);
+        if (bp)
+            bp.condition = value;
+    }
+});
+
+// ********************************************************************************************* //
+
+/**
+ * @domplate Template for cookie breakpoint displayed in the Breakpoints side
+ * panel.
+ */
+Breakpoints.Breakpoint = function(cookie)
+{
+    this.name = cookie.name;
+    this.host = cookie.host;
+    this.path = cookie.path;
+
+    this.condition = "";
+    this.checked = true;
+
+    this.onEvaluateFails = Obj.bind(this.onEvaluateFails, this);
+    this.onEvaluateSucceeds =  Obj.bind(this.onEvaluateSucceeds, this);
+};
+
+Breakpoints.Breakpoint.prototype =
+{
+    evaluateCondition: function(context, cookie)
+    {
+        try
+        {
+            var scope = {};
+            scope["value"] = cookie.value;
+            scope["cookie"] = CookieUtils.makeCookieObject(cookie);
+
+            // The callbacks will set this if the condition is true or if the eval faults.
+            delete context.breakingCause;
+
+            // Construct expression to evaluate. Native JSON support is available since
+            // Firefox 3.5 and breakpoints since Firebug 1.5, which supports min Fx 3.5
+            // So, all is good.
+            var expr = "(function (){var scope = " + JSON.stringify(scope) +
+                "; with (scope) { return " + this.condition + ";}})();"
+
+            // Evaluate condition using Firebug's command line.
+            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+                this.onEvaluateSucceeds, this.onEvaluateFails);
+
+            if (FBTrace.DBG_COOKIES)
+                FBTrace.sysout("cookies.evaluateCondition; rc " + rc, {expr: expr, scope: scope});
+
+            return !!context.breakingCause;
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_COOKIES)
+                FBTrace.sysout("cookies.evaluateCondition; EXCEPTION", err);
+        }
+
+        return false;
+    },
+
+    onEvaluateSucceeds: function(result, context)
+    {
+        if (FBTrace.DBG_COOKIES)
+            FBTrace.sysout("cookies.onEvaluateSucceeds; " + result, result);
+
+        // Don't set the breakingCause if the breakpoint condition is evaluated to false.
+        if (!result)
+            return;
+
+        context.breakingCause = {
+            title: Locale.$STR("firecookie.Break On Cookie"),
+            message: cropString(unescape(this.name + "; " + this.condition + "; "), 200)
+        };
+    },
+
+    onEvaluateFails: function(result, context)
+    {
+        if (FBTrace.DBG_COOKIES)
+            FBTrace.sysout("cookies.onEvaluateFails; " + result, result);
+
+        context.breakingCause = {
+            title: Locale.$STR("firecookie.Break On Cookie"),
+            message: Locale.$STR("firecookie.Breakpoint condition evaluation fails"),
+            prevValue: this.condition, newValue:result
+        };
+    }
+}
+
+// ********************************************************************************************* //
+// Registration
+
+Firebug.registerRep(Breakpoints.BreakpointTemplate);
 
 return Breakpoints;
 
 // ********************************************************************************************* //
-});
+}});

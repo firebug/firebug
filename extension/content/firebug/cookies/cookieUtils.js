@@ -9,6 +9,11 @@ function() {
 
 var CookieUtils = 
 {
+    getCookieId: function(cookie)
+    {
+        return cookie.host + cookie.path + cookie.name;
+    },
+
     makeStrippedHost: function(aHost)
     {
         if (!aHost)
@@ -42,6 +47,80 @@ var CookieUtils =
         };
 
         return c;
+    },
+
+    parseFromString: function(string)
+    {
+        var cookie = new Object();
+        var pairs = string.split("; ");
+
+        for (var i=0; i<pairs.length; i++)
+        {
+            var option = pairs[i].split("=");
+            if (i == 0)
+            {
+                cookie.name = option[0];
+                cookie.value = option[1];
+            } 
+            else
+            {
+                var name = option[0].toLowerCase();
+                name = (name == "domain") ? "host" : name;
+                if (name == "httponly")
+                {
+                    cookie.isHttpOnly = true;
+                }
+                else if (name == "expires")
+                {
+                    var value = option[1];
+                    value = value.replace(/-/g, " ");
+                    cookie[name] = Date.parse(value) / 1000;
+
+                    // Log error if the date isn't correctly parsed.
+                    if (FBTrace.DBG_COOKIES)
+                    {
+                        var tempDate = new Date(cookie[name] * 1000);
+                        if (value != tempDate.toGMTString())
+                        {
+                            FBTrace.sysout("cookies.parseFromString: ERROR, " + 
+                                "from: " + value + 
+                                ", to: " + tempDate.toGMTString() + 
+                                ", cookie: " + string + 
+                                "\n");
+                        }
+                    }
+                }
+                else
+                {
+                    cookie[name] = option[1];
+                }
+            }
+        }
+
+        return cookie;
+    },
+
+    parseSentCookiesFromString: function(header)
+    {
+        var cookies = [];
+
+        if (!header)
+            return cookies;
+
+        var pairs = header.split("; ");
+        for (var i=0; i<pairs.length; i++)
+        {
+            var pair = pairs[i];
+            var index = pair.indexOf("=");
+            if (index > 0) {
+                var name = pair.substring(0, index);
+                var value = pair.substr(index+1);
+                if (name.length && value.length)
+                    cookies.push(new Cookie(CookieUtils.makeCookieObject({name: name, value: value})));
+            }
+        }
+
+        return cookies;
     }
 };
 
