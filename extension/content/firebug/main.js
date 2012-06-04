@@ -162,9 +162,6 @@ function onModulesLoaded(ChromeFactory, FBL, Firebug, Browser)
         window.FBL.legacyPatch(FBL, Firebug);
     }
 
-    if (FBTrace.DBG_MODULES)
-        require.analyzeDependencyTree();
-
     if (!window.panelBarWaiter && FBTrace.DBG_ERRORS)
         FBTrace.sysout("main; ERROR window.panelBarWaiter is not available " +
             ", Firebug already initialized: " + Firebug.isInitialized);
