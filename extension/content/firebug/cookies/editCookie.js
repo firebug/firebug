@@ -1,18 +1,25 @@
 /* See license.txt for terms of usage */
 
+define([
+    "firebug/lib/locale",
+    "firebug/lib/xpcom",
+    "firebug/cookies/cookie",
+],
+function(Locale, Xpcom, Cookie) {
+
+// ********************************************************************************************* //
+// Constants
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const windowMediator = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
-var FBL = windowMediator.getMostRecentWindow("navigator:browser").FBL;
-
-with (FBL) {
 
 // ********************************************************************************************* //
 
-const ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-const appInfo = CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 
 // ********************************************************************************************* //
 
@@ -20,7 +27,12 @@ const appInfo = CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
  * @dialog Edit cookie dialog implementation. This dialog is used to create a new cookie
  * and edit an existing cookies.
  */
-var EditCookie = 
+function EditCookie(win)
+{
+    this.window = win;
+}
+
+EditCookie.prototype =
 {
     cookie: null,
 
@@ -28,18 +40,18 @@ var EditCookie =
     {
         this.createDateTimeField();
 
-        var params = window.arguments[0];
+        var params = this.window.arguments[0];
         this.params = params;
         this.cookie = params.cookie;
 
-        this.nameNode = $("fcName", document);
-        this.valueNode = $("fcValue", document);
-        this.domainNode = $("fcDomain", document);
-        this.pathNode = $("fcPath", document);
-        this.expireNode = $("fcExpire", document);
-        this.sessionNode = $("fcSession", document);
-        this.secureNode = $("fcSecure", document);
-        this.httpOnly = $("fcHttpOnly", document);
+        this.nameNode = $("fcName", this.window);
+        this.valueNode = $("fcValue", this.window);
+        this.domainNode = $("fcDomain", this.window);
+        this.pathNode = $("fcPath", this.window);
+        this.expireNode = $("fcExpire", this.window);
+        this.sessionNode = $("fcSession", this.window);
+        this.secureNode = $("fcSecure", this.window);
+        this.httpOnly = $("fcHttpOnly", this.window);
 
         // Fix for issue 39: decode cookie name and value for usage in the dialog.
         // It'll be encoded again when OK is pressed.
@@ -90,15 +102,15 @@ var EditCookie =
 
         for (var i=0; i<elements.length; i++)
         {
-            var element = $(elements[i], document);
+            var element = $(elements[i], this.window);
             if (element.hasAttribute("title"))
-                Firebug.FireCookieModel.fcInternationalize(element, "title");
+                Locale.internationalize(element, "title");
 
             if (element.hasAttribute("label"))
-                Firebug.FireCookieModel.fcInternationalize(element, "label");
+                Locale.internationalize(element, "label");
 
             if (element.hasAttribute("value"))
-                Firebug.FireCookieModel.fcInternationalize(element, "value");
+                Locale.internationalize(element, "value");
         }
     },
 
@@ -137,11 +149,11 @@ var EditCookie =
         }
 
         // Create/modify cookie.
-        var cookie = new Firebug.FireCookieModel.Cookie(values);
+        var cookie = new Cookie(values);
         Firebug.FireCookieModel.createCookie(cookie);
 
         // Close dialog.
-        window.close();
+        this.window.close();
     },
 
     /**
@@ -217,18 +229,18 @@ var EditCookie =
     createDateTimeField: function()
     {
         // Get the box element where the dateTime field should be located.
-        var expireBox = document.getElementById("fcExpireBox");
+        var expireBox = this.window.document.getElementById("fcExpireBox");
 
         var dateTimeField = null;
         if (versionChecker.compare(appInfo.version, "3.0*") >= 0)
         {
             // Use new <datepicker> and <timepicker> XUL elements (introduced in Firefox 3)
-            dateTimeField = document.createElement("dateTimePicker");
+            dateTimeField = this.window.document.createElement("dateTimePicker");
         }
         else
         {
             // Use simple text field with GMT time format.
-            dateTimeField = document.createElement("textbox");
+            dateTimeField = this.window.document.createElement("textbox");
             dateTimeField.setAttribute("cols", "12");
             dateTimeField.setAttribute("flex", "1");
         }
@@ -245,9 +257,17 @@ var EditCookie =
 }
 
 // ********************************************************************************************* //
+// Helpers
 
-// Some APIs from Firebug.FireCookieModel namespase are used here.
-var Firebug = EditCookie.getChromeWindow().Firebug;
+function $(id, win)
+{
+    return win.document.getElementById(id);
+}
 
 // ********************************************************************************************* //
-}
+// Registration
+
+return EditCookie;
+
+// ********************************************************************************************* //
+});

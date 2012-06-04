@@ -15,8 +15,11 @@
         minheight="300px"
         persist="width height screenX screenY">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/cookies/editCookie.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/cookies/json.js"/>
+    <script type="application/x-javascript">
+    var args = window.arguments[0];
+    EditCookie = new args.EditCookie(window);
+    Firebug = args.Firebug;
+    </script>
 
     <grid flex="1">
         <columns>
