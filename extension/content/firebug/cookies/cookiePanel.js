@@ -13,7 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/cookies/menuUtils",
-    "firebug/cookies/templates",
+    "firebug/cookies/cookieReps",
     "firebug/cookies/headerResizer",
     "firebug/cookies/cookieObserver",
     "firebug/cookies/cookieUtils",
@@ -23,7 +23,7 @@ define([
     "firebug/cookies/cookiePermissions",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    MenuUtils, Templates, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
+    MenuUtils, CookieReps, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
     FireCookieModel, CookiePermissions) {
 
 with (Domplate) {
@@ -100,7 +100,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return;
 
         // Create cookie list table.
-        this.table = Templates.CookieTable.createTable(this.panelNode);
+        this.table = CookieReps.CookieTable.createTable(this.panelNode);
 
         // Cookies are displayed only for web pages.
         var location = this.context.window.location;
@@ -161,7 +161,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (cookies.length)
         {
             var header = Dom.getElementByClass(this.table, "cookieHeaderRow");
-            var tag = Templates.CookieRow.cookieTag;
+            var tag = CookieReps.CookieRow.cookieTag;
             var row = tag.insertRows({cookies: cookies}, header)[0];
             for (var i=0; i<cookies.length; i++)
             {
@@ -182,7 +182,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var prefValue = Options.get(lastSortedColumn);
         if (prefValue) {
             var values = prefValue.split(" ");
-            Templates.CookieTable.sortColumn(this.table, values[0], values[1]);
+            CookieReps.CookieTable.sortColumn(this.table, values[0], values[1]);
         }
 
         // Update visibility of columns according to the preferences
@@ -320,7 +320,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return items;
 
         // Make sure default items (cmd_copy) is removed.
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
 
         // Create Paste menu-item so, a new cookie can be pasted even if the user
         // clicks within the panel area (not on a cookie row)
@@ -328,7 +328,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             label: $STR("firecookie.Paste"),
             nol10n: true,
             disabled: CookieClipboard.isCookieAvailable() ? false : true,
-            command: Obj.bindFixed(Templates.CookieRow.onPaste, Templates.CookieRow)
+            command: Obj.bindFixed(CookieReps.CookieRow.onPaste, CookieReps.CookieRow)
         });
 
         return items;
@@ -368,7 +368,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
         if (header)
-            return Templates.CookieTable;
+            return CookieReps.CookieTable;
 
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
@@ -403,7 +403,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!repCookie)
             return;
 
-        Templates.CookieRow.toggleRow(repCookie.row, true);
+        CookieReps.CookieRow.toggleRow(repCookie.row, true);
         Dom.scrollIntoCenterView(repCookie.row);
     },
 
@@ -524,7 +524,7 @@ Firebug.FireCookieModel.ConsoleListener =
             "documentCookie", this, null, true);
 
         var rowBody = Dom.getElementByClass(row, "documentCookieBody");
-        Templates.CookieTable.render(cookies, rowBody);
+        CookieReps.CookieTable.render(cookies, rowBody);
     },
 
     logFormatted: function(context, objects, className, sourceLink)

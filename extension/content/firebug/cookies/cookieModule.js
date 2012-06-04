@@ -14,7 +14,7 @@ define([
     "firebug/lib/events",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
-    "firebug/cookies/templates",
+    "firebug/cookies/cookieReps",
     "firebug/cookies/cookieUtils",
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
@@ -26,7 +26,7 @@ define([
     "firebug/cookies/cookie",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, MenuUtils, Templates, CookieUtils, Cookie, Breakpoints, CookieObserver,
+    BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, CookiePermissions) {
 
 with (Domplate) {
@@ -847,7 +847,7 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
         }
 
         for (var i=0; i<cookies.length; i++)
-            Templates.CookieRow.onRemove(cookies[i]);
+            CookieReps.CookieRow.onRemove(cookies[i]);
     },
 
     onRemoveAll: function(context)
@@ -1311,13 +1311,13 @@ Firebug.FireCookieModel.NetInfoBody = domplate(Firebug.Rep,
 
         // Generate UI for received cookies.
         if (receivedCookies.length) {
-            Templates.CookieTable.render(receivedCookies,
+            CookieReps.CookieTable.render(receivedCookies,
                 Dom.getElementByClass(tabBody, "netInfoReceivedCookies"));
         }
 
         // Generate UI for sent cookies.
         if (sentCookies.length) {
-            Templates.CookieTable.render(sentCookies,
+            CookieReps.CookieTable.render(sentCookies,
                 Dom.getElementByClass(tabBody, "netInfoSentCookies"));
         }
     },

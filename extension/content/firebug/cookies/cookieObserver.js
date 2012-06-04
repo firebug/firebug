@@ -15,7 +15,7 @@ define([
     "firebug/lib/events",
     "firebug/cookies/baseObserver",
     "firebug/chrome/tabWatcher",
-    "firebug/cookies/templates",
+    "firebug/cookies/cookieReps",
     "firebug/cookies/cookieUtils",
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
@@ -23,7 +23,7 @@ define([
     "firebug/cookies/cookieModule",
 ],
 function(FBL, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, TabWatcher, Templates, CookieUtils, Cookie, Breakpoints, CookieEvents,
+    BaseObserver, TabWatcher, CookieReps, CookieUtils, Cookie, Breakpoints, CookieEvents,
     FireCookieModel) {
 
 // ********************************************************************************************* //
@@ -280,7 +280,7 @@ var CookieObserver = Obj.extend(BaseObserver,
         Firebug.Console.closeGroup(context, true);
 
         // Create embedded table.
-        Templates.CookieTable.render(receivedCookies, groupRow.lastChild);
+        CookieReps.CookieTable.render(receivedCookies, groupRow.lastChild);
     },
 
     onAddCookie: function(context, cookie)
@@ -302,7 +302,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
         var tbody = panel.table.lastChild;
         var parent = tbody.lastChild ? tbody.lastChild : tbody;
-        var row = Templates.CookieRow.cookieTag.insertRows({cookies: [cookie]}, parent)[0];
+        var row = CookieReps.CookieRow.cookieTag.insertRows({cookies: [cookie]}, parent)[0];
 
         cookie.row = row;
         row.repObject = cookie;
@@ -337,7 +337,7 @@ var CookieObserver = Obj.extend(BaseObserver,
             FBTrace.sysout("cookies.onUpdateCookie: " + cookie.name, repCookie);
 
         var row = repCookie.row;
-        var rowTemplate = Templates.CookieRow;
+        var rowTemplate = CookieReps.CookieRow;
 
         if (Css.hasClass(row, "opened"))
         {
