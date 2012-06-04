@@ -20,9 +20,11 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
+    "firebug/cookies/cookieModule",
 ],
 function(FBL, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, TabWatcher, Templates, CookieUtils, Cookie, Breakpoints, CookieEvents) {
+    BaseObserver, TabWatcher, Templates, CookieUtils, Cookie, Breakpoints, CookieEvents,
+    FireCookieModel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -391,6 +393,14 @@ var CookieObserver = Obj.extend(BaseObserver,
         Firebug.Console.log(eventObject, context, className, null, true);
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function logEvents()
+{
+    return Options.get("firecookie.logEvents");
+}
 
 // ********************************************************************************************* //
 

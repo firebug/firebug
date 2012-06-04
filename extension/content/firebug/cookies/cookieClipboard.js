@@ -22,7 +22,7 @@ var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIV
  * @class This class implements clibpoard functionality.
  */
 var CookieClipboard = Obj.extend(Object,
-/** @lends Firebug.FireCookieModel.CookieClipboard */
+/** @lends CookieClipboard */
 {
     cookieFlavour: "text/firecookie-cookie",
     unicodeFlavour: "text/unicode",

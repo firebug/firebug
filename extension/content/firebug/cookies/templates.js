@@ -18,9 +18,10 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
+    "firebug/cookies/cookieModule",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents) {
+    BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents, FireCookieModel) {
 
 with (Domplate) {
 
@@ -378,15 +379,13 @@ Templates.CookieRow = domplate(Templates.Rep,
             }
         }
 
-        var Model = Firebug.FireCookieModel;
-
         // Permissions
-        var permItems = Model.Perm.getContextMenuItems(cookie, target, context);
+        var permItems = FireCookieModel.Perm.getContextMenuItems(cookie, target, context);
         if (permItems)
             items = items.concat(permItems);
 
         // Breakpoints
-        var breakOnItems = Model.Breakpoints.getContextMenuItems(cookie, target, context);
+        var breakOnItems = FireCookieModel.Breakpoints.getContextMenuItems(cookie, target, context);
         if (breakOnItems)
             items = items.concat(breakOnItems);
 
