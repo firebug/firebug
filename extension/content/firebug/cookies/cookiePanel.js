@@ -241,7 +241,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     clear: function()
     {
         if (this.panelNode)
-            clearNode(this.panelNode);
+            Dom.clearNode(this.panelNode);
 
         this.table = null;
     },
