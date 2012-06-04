@@ -18,12 +18,11 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
-    "firebug/cookies/cookieModule",
     "firebug/cookies/cookiePermissions",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
-    FireCookieModel, CookiePermissions) {
+    CookiePermissions) {
 
 with (Domplate) {
 
@@ -52,13 +51,13 @@ var POLICY_NO_II = Ci.nsICookie2.POLICY_NO_II;
 // ********************************************************************************************* //
 // Templates Helpers
 
-// Object with all rep templates.
-var Templates = {};
+// Object with all rep CookieReps.
+var CookieReps = {};
 
 /**
- * @domplate Basic template for all Firecookie templates.
+ * @domplate Basic template for all Firecookie CookieReps.
  */
-Templates.Rep = domplate(Firebug.Rep,
+CookieReps.Rep = domplate(Firebug.Rep,
 {
     getContextMenuItems: function(cookie, target, context)
     {
@@ -76,8 +75,8 @@ Templates.Rep = domplate(Firebug.Rep,
 /**
  * @domplate Represents a domplate template for cookie entry in the cookie list.
  */
-Templates.CookieRow = domplate(Templates.Rep,
-/** @lends Templates.CookieRow */
+CookieReps.CookieRow = domplate(CookieReps.Rep,
+/** @lends CookieReps.CookieRow */
 {
     inspectable: false,
 
@@ -337,7 +336,7 @@ Templates.CookieRow = domplate(Templates.Rep,
 
     getContextMenuItems: function(cookie, target, context)
     {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
 
         var items = [];
         var rejected = cookie.cookie.rejected;
@@ -406,7 +405,7 @@ Templates.CookieRow = domplate(Templates.Rep,
             items = items.concat(permItems);
 
         // Breakpoints
-        var breakOnItems = FireCookieModel.Breakpoints.getContextMenuItems(cookie, target, context);
+        var breakOnItems = Firebug.FireCookieModel.Breakpoints.getContextMenuItems(cookie, target, context);
         if (breakOnItems)
             items = items.concat(breakOnItems);
 
@@ -628,7 +627,7 @@ Templates.CookieRow = domplate(Templates.Rep,
         var nextSibling = cookie.row.nextSibling;
         parent.removeChild(cookie.row);
 
-        var row = Templates.CookieRow.cookieTag.insertRows({cookies: [cookie]}, 
+        var row = CookieReps.CookieRow.cookieTag.insertRows({cookies: [cookie]}, 
             panel.table.lastChild.lastChild)[0];
 
         var opened = Css.hasClass(cookie.row, "opened");
@@ -713,7 +712,7 @@ Templates.CookieRow = domplate(Templates.Rep,
         while (tab)
         {
             var view = tab.getAttribute("view");
-            var hideTabCallback = Templates.CookieRow["hide" + view + "Tab"];
+            var hideTabCallback = CookieReps.CookieRow["hide" + view + "Tab"];
             if (hideTabCallback)
             {
                 if (hideTabCallback(cookie))
@@ -746,7 +745,7 @@ Templates.CookieRow = domplate(Templates.Rep,
  * @domplate This template is used for displaying cookie-changed events
  * (except of "clear") in the Console tab.
  */
-Templates.CookieChanged = domplate(Templates.Rep,
+CookieReps.CookieChanged = domplate(CookieReps.Rep,
 {
     inspectable: false,
 
@@ -881,7 +880,7 @@ Templates.CookieChanged = domplate(Templates.Rep,
     // Context menu
     getContextMenuItems: function(cookieEvent, target, context)
     {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
     }
 });
 
@@ -890,8 +889,8 @@ Templates.CookieChanged = domplate(Templates.Rep,
 /**
  * @domplate Represents a domplate template for displaying rejected cookies.
  */
-Templates.CookieRejected = domplate(Templates.Rep,
-/** @lends Templates.CookieRejected */
+CookieReps.CookieRejected = domplate(CookieReps.Rep,
+/** @lends CookieReps.CookieRejected */
 {
     inspectable: false,
 
@@ -949,7 +948,7 @@ Templates.CookieRejected = domplate(Templates.Rep,
     // Context menu
     getContextMenuItems: function(cookie, target, context)
     {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
     }
 });
 
@@ -959,8 +958,8 @@ Templates.CookieRejected = domplate(Templates.Rep,
  * @domplate Represents a domplate template for cookie cleared event that is
  * visualised in Firebug Console panel.
  */
-Templates.CookieCleared = domplate(Templates.Rep,
-/** @lends Templates.CookieCleared */
+CookieReps.CookieCleared = domplate(CookieReps.Rep,
+/** @lends CookieReps.CookieCleared */
 {
     inspectable: false,
 
@@ -982,7 +981,7 @@ Templates.CookieCleared = domplate(Templates.Rep,
     // Context menu
     getContextMenuItems: function(cookie, target, context)
     {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
     }
 });
 
@@ -993,8 +992,8 @@ Templates.CookieCleared = domplate(Templates.Rep,
  * @domplate Represents a template for basic cookie list layout. This
  * template also includes a header and related functionality (such as sorting).
  */
-Templates.CookieTable = domplate(Templates.Rep,
-/** @lends Templates.CookieTable */
+CookieReps.CookieTable = domplate(CookieReps.Rep,
+/** @lends CookieReps.CookieTable */
 {
     inspectable: false,
 
@@ -1168,7 +1167,7 @@ Templates.CookieTable = domplate(Templates.Rep,
      */
     getContextMenuItems: function(object, target, context)
     {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
+        CookieReps.Rep.getContextMenuItems.apply(this, arguments);
 
         var items = [];
 
@@ -1289,7 +1288,7 @@ Templates.CookieTable = domplate(Templates.Rep,
         var table = this.createTable(parentNode);
         var header = Dom.getElementByClass(table, "cookieHeaderRow");
 
-        var tag = Templates.CookieRow.cookieTag;
+        var tag = CookieReps.CookieRow.cookieTag;
         return tag.insertRows({cookies: cookies}, header);
     }
 });
@@ -1299,7 +1298,7 @@ Templates.CookieTable = domplate(Templates.Rep,
 var OBJECTLINK = FirebugReps.OBJECTLINK;
 
 // xxxHonza: TODO
-Templates.CookieRep = domplate(Templates.Rep,
+CookieReps.CookieRep = domplate(CookieReps.Rep,
 {
     tag:
         OBJECTLINK(
@@ -1359,15 +1358,15 @@ function checkList(panel)
 // Firebug Registration
 
 Firebug.registerRep(
-    //Templates.CookieRep,          // Cookie
-    Templates.CookieTable,          // Cookie table with list of cookies
-    Templates.CookieRow,            // Entry in the cookie table
-    Templates.CookieChanged,        // Console: "cookie-changed" event
-    Templates.CookieRejected,       // Console: "cookie-rejected" event
-    Templates.CookieCleared         // Console: cookies "cleared" event
+    //CookieReps.CookieRep,          // Cookie
+    CookieReps.CookieTable,          // Cookie table with list of cookies
+    CookieReps.CookieRow,            // Entry in the cookie table
+    CookieReps.CookieChanged,        // Console: "cookie-changed" event
+    CookieReps.CookieRejected,       // Console: "cookie-rejected" event
+    CookieReps.CookieCleared         // Console: cookies "cleared" event
 );
 
-return Templates;
+return CookieReps;
 
 // ********************************************************************************************* //
 }});

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -20,16 +19,20 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
-    "firebug/cookies/cookieModule",
+    "firebug/lib/array",
 ],
-function(FBL, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
-    BaseObserver, TabWatcher, CookieReps, CookieUtils, Cookie, Breakpoints, CookieEvents,
-    FireCookieModel) {
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
+    BaseObserver, TabWatcher, CookieReps, CookieUtils, Cookie, Breakpoints, CookieEvents, Arr) {
 
 // ********************************************************************************************* //
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 const filterByPath = "firecookie.filterByPath";
+
+const panelName = "cookies";
 
 // ********************************************************************************************* //
 // Cookie observer
@@ -52,7 +55,7 @@ var CookieObserver = Obj.extend(BaseObserver,
         {
             if (aTopic == "cookie-changed")
             {
-                aSubject = aSubject ? aSubject.QueryInterface(nsICookie2) : null;
+                aSubject = aSubject ? aSubject.QueryInterface(Ci.nsICookie2) : null;
                 this.iterateContexts(this.onCookieChanged, aSubject, aData);
             }
             else if (aTopic == "cookie-rejected")
@@ -70,7 +73,7 @@ var CookieObserver = Obj.extend(BaseObserver,
     iterateContexts: function(fn)
     {
         var oThis = this;
-        var args = FBL.cloneArray(arguments);
+        var args = Arr.cloneArray(arguments);
         TabWatcher.iterateContexts(function(context)
         {
             args[0] = context;

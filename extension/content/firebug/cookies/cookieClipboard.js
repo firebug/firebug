@@ -25,7 +25,7 @@ var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var CookieClipboard = Obj.extend(Object,
 /** @lends CookieClipboard */
 {
-    cookieFlavour: "text/firecookie-cookie",
+    cookieFlavour: "text/firebug-cookie",
     unicodeFlavour: "text/unicode",
 
     copyTo: function(cookie)

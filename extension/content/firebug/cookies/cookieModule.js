@@ -24,10 +24,12 @@ define([
     "firebug/cookies/httpObserver",
     "firebug/lib/system",
     "firebug/cookies/cookie",
+    "firebug/cookies/cookiePermissions",
+    "firebug/cookies/editCookie",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
-    CookieClipboard, TabWatcher, HttpObserver, System, CookiePermissions) {
+    CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie) {
 
 with (Domplate) {
 
@@ -924,9 +926,11 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
         cookie.expires = this.getDefaultCookieExpireTime();
 
         var params = {
-          cookie: cookie,
-          action: "create",
-          window: context.window
+            cookie: cookie,
+            action: "create",
+            window: context.window,
+            EditCookie: EditCookie,
+            Firebug: Firebug
         };
 
         var parent = context.chrome.window;
@@ -1488,6 +1492,9 @@ Firebug.FireCookieModel.TraceListener =
 
 // ********************************************************************************************* //
 // Firebug Registration
+
+// Expose to XUL scope
+Firebug.FireCookieModel.Perm = CookiePermissions;
 
 Firebug.registerActivableModule(Firebug.FireCookieModel);
 

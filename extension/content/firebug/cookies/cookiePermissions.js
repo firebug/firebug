@@ -168,12 +168,11 @@ var CookiePermissions = Obj.extend(Object,
 
         // This is called through TabWatcher.iterateContexts and
         // "this" isn't passed along
-        var oThis = Firebug.FireCookieModel.Perm;
         var location = context.browser.currentURI;
-        var value = oThis.getPermission(location);
+        var value = this.getPermission(location);
 
         var button = Firebug.chrome.$("fcPerm");
-        button.label = oThis.getLabel(value, location);
+        button.label = this.getLabel(value, location);
         button.removeAttribute("disabled");
         button.setAttribute("value", value);
     },
@@ -222,9 +221,6 @@ var CookiePermissions = Obj.extend(Object,
 
 // ********************************************************************************************* //
 // Registration
-
-// Expose to XUL scope
-Firebug.FireCookieModel.Perm = CookiePermissions;
 
 return CookiePermissions;
 

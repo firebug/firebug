@@ -19,12 +19,11 @@ define([
     "firebug/cookies/cookieUtils",
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
-    "firebug/cookies/cookieModule",
     "firebug/cookies/cookiePermissions",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     MenuUtils, CookieReps, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
-    FireCookieModel, CookiePermissions) {
+    CookiePermissions) {
 
 with (Domplate) {
 
