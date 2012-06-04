@@ -22,7 +22,7 @@
 .logRow-cookiesRejected,
 .logRow-cookie:hover {
     padding: 2px 0px 1px 22px !important;
-    background-image: url(chrome://firecookie/skin/cookie14.png) !important;
+    background-image: url(cookie14.png) !important;
     background-repeat: no-repeat !important;
     background-position: 4px 2px !important;
 }
@@ -87,7 +87,7 @@
     border-bottom: 1px solid #9C9C9C;
     padding: 0 !important;
     font-weight: bold;
-    background: #BBBBBB url(chrome://firecookie/skin/tableHeader.gif) repeat-x;
+    background: #BBBBBB url(tableHeader.gif) repeat-x;
     white-space: nowrap;
 }
 
@@ -102,24 +102,24 @@
 }
 
 .cookieHeaderCell:hover:active {
-    background: #959595 url(chrome://firecookie/skin/tableHeaderActive.gif) repeat-x;
+    background: #959595 url(tableHeaderActive.gif) repeat-x;
 }
 
 .cookieHeaderSorted {
-    background: #7D93B2 url(chrome://firecookie/skin/tableHeaderSorted.gif) repeat-x;
+    background: #7D93B2 url(tableHeaderSorted.gif) repeat-x;
 }
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firecookie/skin/arrowDown.png) no-repeat right;    
+    background: url(arrowDown.png) no-repeat right;    
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
-    background-image: url(chrome://firecookie/skin/arrowUp.png);
+    background-image: url(arrowUp.png);
 }
 
 .cookieHeaderSorted:hover:active {
-    background: #536B90 url(chrome://firecookie/skin/tableHeaderSortedActive.gif) repeat-x;
+    background: #536B90 url(tableHeaderSortedActive.gif) repeat-x;
 }
 
 /************************************************************************************************/
@@ -449,7 +449,7 @@
 /************************************************************************************************/
 
 .disabledPanelBox .descImage-cookies {
-    background-image: url(chrome://firecookie/skin/activation-menu-cookies.png);
+    background-image: url(activation-menu-cookies.png);
 }
 
 /************************************************************************************************/
