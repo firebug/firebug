@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/cookies/cookie"
 ],
-function() {
+function(Cookie) {
 
 // ********************************************************************************************* //
 // Menu Utils
@@ -116,7 +117,7 @@ var CookieUtils =
                 var name = pair.substring(0, index);
                 var value = pair.substr(index+1);
                 if (name.length && value.length)
-                    cookies.push(new Cookie(CookieUtils.makeCookieObject({name: name, value: value})));
+                    cookies.push(new Cookie(this.makeCookieObject({name: name, value: value})));
             }
         }
 

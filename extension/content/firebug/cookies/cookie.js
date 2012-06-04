@@ -3,9 +3,8 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/json",
-    "firebug/cookies/cookieUtils"
 ],
-function(Xpcom, Json, CookieUtils) {
+function(Xpcom, Json) {
 
 // ********************************************************************************************* //
 // Constants
@@ -23,7 +22,7 @@ function Cookie(cookie, action)
 {
     this.cookie = cookie;
     this.action = action; 
-    this.rawHost = CookieUtils.makeStrippedHost(cookie.host);
+    this.rawHost = makeStrippedHost(cookie.host);
 }
 
 Cookie.prototype =
@@ -145,6 +144,19 @@ Cookie.prototype =
         return null;
     }
 };
+
+// ********************************************************************************************* //
+// Helpers
+
+// xxxHonza: duplicated in CookieUtils since cycle dep
+function makeStrippedHost(aHost)
+{
+    if (!aHost)
+        return aHost;
+
+    var formattedHost = aHost.charAt(0) == "." ? aHost.substring(1, aHost.length) : aHost;
+    return formattedHost.substring(0, 4) == "www." ? formattedHost.substring(4, formattedHost.length) : formattedHost;
+}
 
 // ********************************************************************************************* //
 
