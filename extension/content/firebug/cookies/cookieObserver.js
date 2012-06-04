@@ -48,7 +48,7 @@ var CookieObserver = Obj.extend(BaseObserver,
     // nsIObserver
     observe: function(aSubject, aTopic, aData) 
     {
-        if (!Firebug.FireCookieModel.isAlwaysEnabled())
+        if (!Firebug.CookieModule.isAlwaysEnabled())
             return;
 
         try

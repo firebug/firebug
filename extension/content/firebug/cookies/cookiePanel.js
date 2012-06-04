@@ -85,7 +85,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.initialize.apply(this, arguments);
 
         // Just after the initialization, so the this.document member is set.
-        Firebug.FireCookieModel.addStyleSheet(this);
+        Firebug.CookieModule.addStyleSheet(this);
 
         this.refresh();
     },
@@ -95,7 +95,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
      */
     refresh: function()
     {
-        if (!Firebug.FireCookieModel.isEnabled(this.context))
+        if (!Firebug.CookieModule.isEnabled(this.context))
             return;
 
         // Create cookie list table.
@@ -257,16 +257,16 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // and the following code is not necessary any more.
         if (Firebug.ActivableModule && Firebug.DisabledPanelPage)
         {
-            var shouldShow = Firebug.FireCookieModel.isEnabled(this.context);
+            var shouldShow = Firebug.CookieModule.isEnabled(this.context);
             this.showToolbarButtons("fbCookieButtons", shouldShow);
             if (!shouldShow)
             {
                 // The activation model has been changed in Firebug 1.4. This is 
                 // just to keep backward compatibility.
                 if (Firebug.DisabledPanelPage.show)
-                    Firebug.DisabledPanelPage.show(this, Firebug.FireCookieModel);
+                    Firebug.DisabledPanelPage.show(this, Firebug.CookieModule);
                 else
-                    Firebug.FireCookieModel.disabledPanelPage.show(this);
+                    Firebug.CookieModule.disabledPanelPage.show(this);
                 return;
             }
         }
@@ -426,7 +426,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getEditor: function(target, value)
     {
         if (!this.conditionEditor)
-            this.conditionEditor = new Firebug.FireCookieModel.ConditionEditor(this.document);
+            this.conditionEditor = new Firebug.CookieModule.ConditionEditor(this.document);
         return this.conditionEditor;
     },
 
@@ -463,15 +463,15 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (enable)
         {
-            Firebug.FireCookieModel.addObserver(this);
-            Firebug.Debugger.addListener(Firebug.FireCookieModel.DebuggerListener);
-            Firebug.Console.addListener(Firebug.FireCookieModel.ConsoleListener);
+            Firebug.CookieModule.addObserver(this);
+            Firebug.Debugger.addListener(Firebug.CookieModule.DebuggerListener);
+            Firebug.Console.addListener(Firebug.CookieModule.ConsoleListener);
         }
         else
         {
-            Firebug.FireCookieModel.removeObserver(this);
-            Firebug.Debugger.removeListener(Firebug.FireCookieModel.DebuggerListener);
-            Firebug.Console.removeListener(Firebug.FireCookieModel.ConsoleListener);
+            Firebug.CookieModule.removeObserver(this);
+            Firebug.Debugger.removeListener(Firebug.CookieModule.DebuggerListener);
+            Firebug.Console.removeListener(Firebug.CookieModule.ConsoleListener);
         }
     },
 }); 
@@ -483,7 +483,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
  * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
  * providing a list of cookie-breakpoints into the Breakpoints side-panel.
  */
-Firebug.FireCookieModel.DebuggerListener =
+Firebug.CookieModule.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
@@ -495,7 +495,7 @@ Firebug.FireCookieModel.DebuggerListener =
 // ********************************************************************************************* //
 // Custom output in the Console panel for: document.cookie
 
-Firebug.FireCookieModel.ConsoleListener =
+Firebug.CookieModule.ConsoleListener =
 {
     tag:
         DIV({_repObject: "$object"},

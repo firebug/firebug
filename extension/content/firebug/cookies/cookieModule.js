@@ -85,8 +85,8 @@ Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
  * to control activity of Firebug panels in order to avoid (performance) expensive
  * features.
  */
-Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
-/** @lends Firebug.FireCookieModel */
+Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
+/** @lends Firebug.CookieModule */
 {
     contexts: contexts,
 
@@ -102,7 +102,7 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
     initialize: function(prefDomain, prefNames)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookieModel.initialize;");
+            FBTrace.sysout("cookies.CookieModule.initialize;");
 
         // Support for trace-console customization in Firebug 1.3
         if (Firebug.TraceModule && Firebug.TraceModule.addListener)
@@ -692,9 +692,9 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
     onObserverChange: function(observer)
     {
         if (this.hasObservers())
-            TabWatcher.iterateContexts(Firebug.FireCookieModel.registerObservers);
+            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
         else
-            TabWatcher.iterateContexts(Firebug.FireCookieModel.unregisterObservers);
+            TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -713,8 +713,8 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
         {
             // Firebug 1.4 (context parameter doesn't exist since 1.4)
             // Suspend only if enabled.
-            if (Firebug.FireCookieModel.isAlwaysEnabled())
-                TabWatcher.iterateContexts(Firebug.FireCookieModel.unregisterObservers);
+            if (Firebug.CookieModule.isAlwaysEnabled())
+                TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
         }
 
         top.document.getElementById("firebugStatus").removeAttribute(panelName);
@@ -732,14 +732,14 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
             // Firebug 1.3
             this.registerObservers(context);
 
-            if (Firebug.FireCookieModel.isEnabled(context))
+            if (Firebug.CookieModule.isEnabled(context))
                 top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
         }
         else
         {
             // Firebug 1.4 (context parameter doesn't exist since 1.4)
-            if (Firebug.FireCookieModel.isAlwaysEnabled())
-                TabWatcher.iterateContexts(Firebug.FireCookieModel.registerObservers);
+            if (Firebug.CookieModule.isAlwaysEnabled())
+                TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
 
             top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
         }
@@ -867,7 +867,7 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
             Opttions.set(removeConfirmation, !check.value)
         }
 
-        Firebug.FireCookieModel.onRemoveAllShared(context, false);
+        Firebug.CookieModule.onRemoveAllShared(context, false);
     },
 
     onRemoveAllSession: function(context)
@@ -885,7 +885,7 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value)
         }
 
-        Firebug.FireCookieModel.onRemoveAllShared(context, true);
+        Firebug.CookieModule.onRemoveAllShared(context, true);
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)
@@ -1197,8 +1197,8 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
  * @domplate Represents domplate template for cookie body that is displayed if 
  * a cookie entry in the cookie list is expanded.
  */
-Firebug.FireCookieModel.NetInfoBody = domplate(Firebug.Rep,
-/** @lends Firebug.FireCookieModel.NetInfoBody */
+Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
+/** @lends Firebug.CookieModule.NetInfoBody */
 {
     tag:
         UL({"class": "netInfoCookiesList"},
@@ -1343,7 +1343,7 @@ CookieBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGr
 
     addBreakpoint: function(cookie)
     {
-        this.breakpoints.push(new Firebug.FireCookieModel.Breakpoint(cookie));
+        this.breakpoints.push(new Firebug.CookieModule.Breakpoint(cookie));
     },
 
     removeBreakpoint: function(cookie)
@@ -1463,7 +1463,7 @@ function cloneMap(map)
 // ********************************************************************************************* //
 // Support for FBTraceConsole in Firebug 1.3
 
-Firebug.FireCookieModel.TraceListener = 
+Firebug.CookieModule.TraceListener = 
 {
     // Called when console window is loaded.
     onLoadConsole: function(win, rootNode)
@@ -1494,9 +1494,9 @@ Firebug.FireCookieModel.TraceListener =
 // Firebug Registration
 
 // Expose to XUL scope
-Firebug.FireCookieModel.Perm = CookiePermissions;
+Firebug.CookieModule.Perm = CookiePermissions;
 
-Firebug.registerActivableModule(Firebug.FireCookieModel);
+Firebug.registerActivableModule(Firebug.CookieModule);
 
 // ********************************************************************************************* //
 }});

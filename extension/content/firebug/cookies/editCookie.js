@@ -82,7 +82,7 @@ EditCookie.prototype =
             // xxxHonza: the default time is always set to the current time.
             //if (!this.expireNode.value)
             {
-                var expireTime = Firebug.FireCookieModel.getDefaultCookieExpireTime();
+                var expireTime = Firebug.CookieModule.getDefaultCookieExpireTime();
                 var expires = new Date(expireTime * 1000);
                 this.expireNode.value = expires.toGMTString();
             }
@@ -150,7 +150,7 @@ EditCookie.prototype =
 
         // Create/modify cookie.
         var cookie = new Cookie(values);
-        Firebug.FireCookieModel.createCookie(cookie);
+        Firebug.CookieModule.createCookie(cookie);
 
         // Close dialog.
         this.window.close();
@@ -164,21 +164,21 @@ EditCookie.prototype =
         var name = this.nameNode.value;
         if (!name)
         {
-            alert(Firebug.FireCookieModel.$FC_STR("firecookie.edit.invalidname"));
+            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidname"));
             return false;
         }
 
         var domain = this.domainNode.value;
         if (!this.checkHost(domain))
         {
-            alert(Firebug.FireCookieModel.$FC_STR("firecookie.edit.invalidhost"));
+            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidhost"));
             return false;
         }
 
         var path = this.pathNode.value;
         if (!this.checkPath(domain, path))
         {
-            alert(Firebug.FireCookieModel.$FC_STR("firecookie.edit.invalidpath"));
+            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidpath"));
             return false;
         }
 

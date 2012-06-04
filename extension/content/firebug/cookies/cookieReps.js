@@ -405,7 +405,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             items = items.concat(permItems);
 
         // Breakpoints
-        var breakOnItems = Firebug.FireCookieModel.Breakpoints.getContextMenuItems(cookie, target, context);
+        var breakOnItems = Firebug.CookieModule.Breakpoints.getContextMenuItems(cookie, target, context);
         if (breakOnItems)
             items = items.concat(breakOnItems);
 
@@ -447,7 +447,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             FBTrace.sysout("cookies.Get cookie values from clipboard", values);
 
         // Change name so it's unique and use the current host.
-        values.name = Firebug.FireCookieModel.getDefaultCookieName(context, values.name);
+        values.name = Firebug.CookieModule.getDefaultCookieName(context, values.name);
         values.host = context.browser.currentURI.host;
 
         values.rawValue = values.value;
@@ -455,11 +455,11 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
         // If the expire time isn't set use the default value.
         if (values.expires == undefined)
-            values.expires = Firebug.FireCookieModel.getDefaultCookieExpireTime();
+            values.expires = Firebug.CookieModule.getDefaultCookieExpireTime();
 
         // Create/modify cookie.
         var cookie = new Cookie(values);
-        Firebug.FireCookieModel.createCookie(cookie);
+        Firebug.CookieModule.createCookie(cookie);
 
         if (FBTrace.DBG_COOKIES)
             checkList(context.getPanel(panelName, true));
@@ -470,7 +470,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         // Get the real XPCOM cookie object and remove it.
         var realCookie = cookie.cookie;
         if (!cookie.cookie.rejected)
-            Firebug.FireCookieModel.removeCookie(realCookie.host, realCookie.name, realCookie.path);
+            Firebug.CookieModule.removeCookie(realCookie.host, realCookie.name, realCookie.path);
     },
 
     onEdit: function(cookie)
@@ -492,9 +492,9 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onClearValue;", cookie);
 
-        var newCookie = new Firebug.FireCookieModel.Cookie(cookie.cookie);
+        var newCookie = new Firebug.CookieModule.Cookie(cookie.cookie);
         newCookie.cookie.rawValue = "";
-        Firebug.FireCookieModel.createCookie(newCookie);
+        Firebug.CookieModule.createCookie(newCookie);
     },
 
     // Event handlers

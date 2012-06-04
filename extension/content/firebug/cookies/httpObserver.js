@@ -80,25 +80,25 @@ var HttpObserver = Obj.extend(BaseObserver,
             (request.loadGroup && request.loadGroup.groupObserver) &&
             (name == origName) && (win && win == win.parent))
         {
-            if (FBTrace.DBG_COOKIES && Firebug.FireCookieModel.contexts[tabId])
+            if (FBTrace.DBG_COOKIES && Firebug.CookieModule.contexts[tabId])
                 FBTrace.sysout("cookies.!!! Temporary context exists for: " + tabId + "\n");
 
             // Create temporary context
-            if (!Firebug.FireCookieModel.contexts[tabId])
+            if (!Firebug.CookieModule.contexts[tabId])
             {
                 var tempContext = new TempContext(tabId);
-                Firebug.FireCookieModel.contexts[tabId] = tempContext;
+                Firebug.CookieModule.contexts[tabId] = tempContext;
 
                 if (FBTrace.DBG_COOKIES)
                     FBTrace.sysout("cookies.INIT temporary context for: " + tempContext.tabId);
 
-                Firebug.FireCookieModel.initTempContext(tempContext);
+                Firebug.CookieModule.initTempContext(tempContext);
             }
         }
 
         // Use the temporary context first, if it exists. There could be an old
         // context (associated with this tab) for the previous URL.
-        var context = Firebug.FireCookieModel.contexts[tabId];
+        var context = Firebug.CookieModule.contexts[tabId];
         context = context ? context : TabWatcher.getContextByWindow(win);
 
         // The context doesn't have to exist due to the activation support.
@@ -157,7 +157,7 @@ var HttpObserver = Obj.extend(BaseObserver,
 
         // Try to get the context from the contexts array first. The TabWatacher
         // could return context for the previous page in this tab.
-        var context = Firebug.FireCookieModel.contexts[tabId];
+        var context = Firebug.CookieModule.contexts[tabId];
         context = context ? context : TabWatcher.getContextByWindow(win);
 
         // The context doesn't have to exist due to the activation support.

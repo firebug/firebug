@@ -154,7 +154,7 @@ var CookiePermissions = Obj.extend(Object,
 
             case "default-deny":
                 if (Options.get(clearWhenDeny))
-                    Firebug.FireCookieModel.onRemoveAll(context);
+                    Firebug.CookieModule.onRemoveAll(context);
                 break;
         }
 
