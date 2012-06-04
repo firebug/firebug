@@ -196,11 +196,9 @@ var HeaderResizer =
         var colId = this.currColumn.getAttribute("id");
         if (colId)
         {
-            var prefName = Firebug.prefDomain + ".firecookie." + colId + ".width";
-
             // Use directly nsIPrefBranch interface as the pref
             // doesn't have to exist yet.
-            prefs.setIntPref(prefName, newWidth);
+            Options.setPref(Firebug.prefDomain, ".firecookie." + colId + ".width", newWidth);
         }
 
         if (FBTrace.DBG_COOKIES)

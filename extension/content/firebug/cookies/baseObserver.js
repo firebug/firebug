@@ -5,15 +5,21 @@ define([
 function() {
 
 // ********************************************************************************************* //
+// Constants
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+// ********************************************************************************************* //
 // Base observer
 
 var BaseObserver =
 {
     QueryInterface : function (aIID) 
     {
-        if (aIID.equals(nsIObserver) ||
-            aIID.equals(nsISupportsWeakReference) ||
-            aIID.equals(nsISupports))
+        if (aIID.equals(Ci.nsIObserver) ||
+            aIID.equals(Ci.nsISupportsWeakReference) ||
+            aIID.equals(Ci.nsISupports))
         {
             return this;
         }

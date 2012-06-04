@@ -29,8 +29,6 @@ function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Ev
     BaseObserver, MenuUtils, Templates, CookieUtils, Cookie, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, CookiePermissions) {
 
-// ********************************************************************************************* //
-
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -38,26 +36,6 @@ with (Domplate) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-
-// Interfaces
-const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
-const nsISupports = Ci.nsISupports;
-const nsICookieService = Ci.nsICookieService;
-const nsICookie2 = Ci.nsICookie2;
-const nsIObserver = Ci.nsIObserver;
-const nsICookiePermission = Ci.nsICookiePermission;
-const nsIURI = Ci.nsIURI;
-const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsISupportsString = Ci.nsISupportsString;
-const nsIPermissionManager = Ci.nsIPermissionManager;
-const nsIWebProgress = Ci.nsIWebProgress;
-const nsIDOMWindow = Ci.nsIDOMWindow;
-const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
-const nsIHttpChannel = Ci.nsIHttpChannel;
-const nsIPermission = Ci.nsIPermission;
-const nsIXULAppInfo = Ci.nsIXULAppInfo;
-const nsIVersionComparator = Ci.nsIVersionComparator;
-const nsIFilePicker = Ci.nsIFilePicker;
 
 // Firefox Preferences
 const networkPrefDomain = "network.cookie";
@@ -72,13 +50,7 @@ const removeSessionConfirmation = "firecookie.removeSessionConfirmation";
 
 // Services
 const cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
-const cookieService = Xpcom.CCSV("@mozilla.org/cookieService;1", "nsICookieService");
 const observerService = Xpcom.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
-const permissionManager = Xpcom.CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
-const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-const dateFormat = Xpcom.CCSV("@mozilla.org/intl/scriptabledateformat;1", "nsIScriptableDateFormat");
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // Preferences
@@ -1016,13 +988,13 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
         try 
         {
             var fp = CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
-            fp.init(window, null, nsIFilePicker.modeSave);
-            fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText);
+            fp.init(window, null, Ci.nsIFilePicker.modeSave);
+            fp.appendFilters(Ci.nsIFilePicker.filterAll | Ci.nsIFilePicker.filterText);
             fp.filterIndex = 1;
             fp.defaultString = "cookies.txt";
 
             var rv = fp.show();
-            if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace)
+            if (rv == Ci.nsIFilePicker.returnOK || rv == Ci.nsIFilePicker.returnReplace)
             {
                 var foStream = CCIN("@mozilla.org/network/file-output-stream;1", "nsIFileOutputStream");
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
@@ -1064,13 +1036,13 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
         try 
         {
             var fp = CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
-            fp.init(window, null, nsIFilePicker.modeSave);
-            fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText);
+            fp.init(window, null, Ci.nsIFilePicker.modeSave);
+            fp.appendFilters(Ci.nsIFilePicker.filterAll | Ci.nsIFilePicker.filterText);
             fp.filterIndex = 1;
             fp.defaultString = "cookies.txt";
 
             var rv = fp.show();
-            if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace)
+            if (rv == Ci.nsIFilePicker.returnOK || rv == Ci.nsIFilePicker.returnReplace)
             {
                 var foStream = CCIN("@mozilla.org/network/file-output-stream;1", "nsIFileOutputStream");
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
@@ -1478,7 +1450,7 @@ function unregisterCookieObserver(observer)
 var PrefObserver = Obj.extend(BaseObserver,
 /** @lends PrefObserver */
 {
-    observe: function(aSubject, aTopic, aData) 
+    observe: function(aSubject, aTopic, aData)
     {
         if (aTopic != "nsPref:changed")
             return;
