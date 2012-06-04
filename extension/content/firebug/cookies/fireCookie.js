@@ -539,7 +539,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
             // Make sure the stylesheet isn't appended twice.
             if (!Firebug.chrome.$("fcStyles", doc))
             {
-                var styleSheet = createStyleSheet(doc, "chrome://firebug/skin/cookies/firecookie.css");
+                var styleSheet = createStyleSheet(doc, "chrome://firebug/skin/cookies/cookies.css");
                 styleSheet.setAttribute("id", "fcStyles");
                 addStyleSheet(doc, styleSheet);
             }
@@ -5527,7 +5527,7 @@ Firebug.registerRep(Firebug.FireCookieModel.BreakpointTemplate);
 
 // Register stylesheet in Firebug. This method is introduced in Firebug 1.6
 if (Firebug.registerStylesheet)
-    Firebug.registerStylesheet("chrome://firebug/skin/cookies/firecookie.css");
+    Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
 
 // ********************************************************************************************* //
 
