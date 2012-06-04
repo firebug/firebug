@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -13,8 +12,18 @@ define([
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/cookies/baseObserver",
+    "firebug/cookies/menuUtils",
+    "firebug/cookies/templates",
+    "firebug/cookies/cookieUtils",
+    "firebug/cookies/cookie",
+    "firebug/cookies/breakpoints",
+    "firebug/cookies/cookieObserver",
+    "firebug/cookies/cookieClipboard",
 ],
-function(FBL, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events) {
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
+    BaseObserver, MenuUtils, Templates, CookieUtils, Cookie, Breakpoints, CookieObserver,
+    CookieClipboard) {
 
 // ********************************************************************************************* //
 
@@ -50,7 +59,6 @@ const nsIObserver = Ci.nsIObserver;
 const nsICookiePermission = Ci.nsICookiePermission;
 const nsIURI = Ci.nsIURI;
 const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsIClipboard = Ci.nsIClipboard;
 const nsISupportsString = Ci.nsISupportsString;
 const nsIPermissionManager = Ci.nsIPermissionManager;
 const nsIWebProgress = Ci.nsIWebProgress;
@@ -67,17 +75,9 @@ const networkPrefDomain = "network.cookie";
 const cookieBehaviorPref = "cookieBehavior";
 const cookieLifeTimePref = "lifetimePolicy";
 
-// FirebugPrefDomain is not defined in 1.05.
-const FirebugPrefDomain = "extensions.firebug";
-
 // Firecookie preferences
-const logEventsPref = "firecookie.logEvents";
 const clearWhenDeny = "firecookie.clearWhenDeny";
-const filterByPath = "firecookie.filterByPath";
-const showRejectedCookies = "firecookie.showRejectedCookies";
 const defaultExpireTime = "firecookie.defaultExpireTime";
-const lastSortedColumn = "firecookie.lastSortedColumn";
-const hiddenColsPref = "firecookie.hiddenColumns";
 const removeConfirmation = "firecookie.removeConfirmation";
 const removeSessionConfirmation = "firecookie.removeSessionConfirmation";
 
@@ -86,7 +86,6 @@ const cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManag
 const cookieService = Xpcom.CCSV("@mozilla.org/cookieService;1", "nsICookieService");
 const observerService = Xpcom.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 const permissionManager = Xpcom.CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
-const clipboard = Xpcom.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
@@ -202,7 +201,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
             Firebug.TraceModule.addListener(this.TraceListener);
 
         this.panelName = panelName;
-        this.description = $FC_STR("cookies.modulemanager.description");
+        this.description = Locale.$STR("cookies.modulemanager.description");
 
         BaseModule.initialize.apply(this, arguments);
 
@@ -861,17 +860,17 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
         // and system pages as there are no cookies associated.
         // These options shouldn't be available at all.
         if (isSystemURL(location.spec))
-            host = $FC_STR("firecookie.SystemPages");
+            host = Locale.$STR("firecookie.SystemPages");
         else if (!getURIHost(location))
-            host = $FC_STR("firecookie.LocalFiles");
+            host = Locale.$STR("firecookie.LocalFiles");
 
         // Translate these two options in panel activable menu from firecookie.properties
         switch (option)
         {
         case "disable-site":
-            return $FC_STRF("cookies.HostDisable", [host]);
+            return Locale.$STRF("cookies.HostDisable", [host]);
         case "enable-site":
-            return $FC_STRF("cookies.HostEnable", [host]);
+            return Locale.$STRF("cookies.HostEnable", [host]);
         }
 
         return BaseModule.getMenuLabel.apply(this, arguments);
@@ -888,8 +887,8 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
 
         var params = {
             permissionType: this.getPrefDomain(),
-            windowTitle: $FC_STR(this.panelName + ".Permissions"), // use FC_STR
-            introText: $FC_STR(this.panelName + ".PermissionsIntro"), // use FC_STR
+            windowTitle: Locale.$STR(this.panelName + ".Permissions"), // use FC_STR
+            introText: Locale.$STR(this.panelName + ".PermissionsIntro"), // use FC_STR
             blockVisible: true,
             sessionVisible: false,
             allowVisible: true,
@@ -903,13 +902,13 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
     // UI Commands
     onRemoveAllShowTooltip: function(tooltip, context)
     {
-        tooltip.label = $FC_STR("firecookie.removeall.tooltip");
+        tooltip.label = Locale.$STR("firecookie.removeall.tooltip");
         return true;
     },
 
     onRemoveAllSessionShowTooltip: function(tooltip, context)
     {
-        tooltip.label = $FC_STR("firecookie.removeallsession.tooltip");
+        tooltip.label = Locale.$STR("firecookie.removeallsession.tooltip");
         return true;
     },
 
@@ -956,17 +955,17 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
 
     onRemoveAll: function(context)
     {
-        if (getPref(FirebugPrefDomain, removeConfirmation))
+        if (Options.get(removeConfirmation))
         {
             var check = {value: false};
             if (!prompts.confirmCheck(context.chrome.window, "Firecookie",
-                $FC_STR("firecookie.confirm.removeall"),
-                $FC_STR("firecookie.msg.Do not show this message again"), check))
+                Locale.$STR("firecookie.confirm.removeall"),
+                Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
 
             // Update 'Remove Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
-            setPref(FirebugPrefDomain, removeConfirmation, !check.value)
+            Opttions.set(removeConfirmation, !check.value)
         }
 
         Firebug.FireCookieModel.onRemoveAllShared(context, false);
@@ -974,17 +973,17 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
 
     onRemoveAllSession: function(context)
     {
-        if (getPref(FirebugPrefDomain, removeSessionConfirmation))
+        if (Options.get(removeSessionConfirmation))
         {
             var check = {value: false};
             if (!prompts.confirmCheck(context.chrome.window, "Firecookie",
-                $FC_STR("firecookie.confirm.removeallsession"),
-                $FC_STR("firecookie.msg.Do not show this message again"), check))
+                Locale.$STR("firecookie.confirm.removeallsession"),
+                Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
 
             // Update 'Remove Session Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
-            setPref(FirebugPrefDomain, removeSessionConfirmation, !check.value)
+            Options.set(removeSessionConfirmation, !check.value)
         }
 
         Firebug.FireCookieModel.onRemoveAllShared(context, true);
@@ -993,7 +992,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
     onCreateCookieShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
-        tooltip.label = $FC_STRF("firecookie.createcookie.tooltip", [host]);
+        tooltip.label = Locale.$STRF("firecookie.createcookie.tooltip", [host]);
         return true;
     },
 
@@ -1008,7 +1007,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
             host = context.window.location.host
         }
         catch (err) {
-            alert($FC_STR("firecookie.message.There_is_no_active_page"));
+            alert(Locale.$STR("firecookie.message.There_is_no_active_page"));
             return;
         }
 
@@ -1018,7 +1017,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
         cookie.host = host;
 
         // The edit dialog uses raw value.
-        cookie.rawValue = $FC_STR("firecookie.createcookie.defaultvalue");
+        cookie.rawValue = Locale.$STR("firecookie.createcookie.defaultvalue");
 
         // Default path
         var path = context.window.location.pathname || "/";
@@ -1075,7 +1074,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
     {
         // Get default expire time interval (in seconds) and add it to the
         // current time.
-        var defaultInterval = getPref(FirebugPrefDomain, defaultExpireTime);
+        var defaultInterval = Options.get(defaultExpireTime);
         var now = new Date();
         now.setTime(now.getTime() + (defaultInterval * 1000));
 
@@ -1108,7 +1107,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
                 {
                     var cookie = e.getNext();
                     cookie = cookie.QueryInterface(nsICookie2);
-                    var cookieWrapper = new Cookie(makeCookieObject(cookie));
+                    var cookieWrapper = new Cookie(CookieUtils.makeCookieObject(cookie));
                     var cookieInfo = cookieWrapper.toText();
                     foStream.write(cookieInfo, cookieInfo.length);
                 }
@@ -1127,7 +1126,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
     onExportForSiteShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
-        tooltip.label = $FC_STRF("firecookie.export.Export_For_Site_Tooltip", [host]);
+        tooltip.label = Locale.$STRF("firecookie.export.Export_For_Site_Tooltip", [host]);
         return true;
     },
 
@@ -1175,10 +1174,11 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
 
     onFilter: function(context, pref)
     {
-        var value = getPref(FirebugPrefDomain, pref);
-        setPref(FirebugPrefDomain, pref, !value);
+        var value = Options.get(pref);
+        Options.set(pref, !value);
 
-        TabWatcher.iterateContexts(function(context) {
+        TabWatcher.iterateContexts(function(context)
+        {
             var panel = context.getPanel(panelName, true);
             if (panel)
                 panel.refresh();
@@ -1191,7 +1191,7 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
         for (var i=0; i<items.length; i++)
         {
             var item = items[i];
-            var prefValue = getPref(FirebugPrefDomain, item.value);
+            var prefValue = Options.get(item.value);
             if (prefValue)
                 item.setAttribute("checked", "true");
             else
@@ -1300,8 +1300,8 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
             allowVisible   : true,
             prefilledHost  : "",
             permissionType : "cookie",
-            windowTitle    : $FC_STR("firecookie.ExceptionsTitle"),
-            introText      : $FC_STR("firecookie.Intro")
+            windowTitle    : Locale.$STR("firecookie.ExceptionsTitle"),
+            introText      : Locale.$STR("firecookie.Intro")
         };
 
         parent.openDialog("chrome://browser/content/preferences/permissions.xul",
@@ -1327,63 +1327,6 @@ Firebug.FireCookieModel = Obj.extend(BaseModule,
 // ********************************************************************************************* //
 // Localization
 
-/**
- * Use this function to translate a string.
- * @param {String} name Specifies a string key within firecookie.properties file.
- */
-function $FC_STR(name)
-{
-    if (Firebug.registerStringBundle)
-        return Locale.$STR(name);
-
-    try
-    {
-        return document.getElementById("strings_firecookie").getString(name.replace(' ', '_', "g"));
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_COOKIES)
-        {
-            FBTrace.sysout("cookies.Missing translation for: " + name + "\n");
-            FBTrace.sysout("cookies.getString FAILS ", err);
-        }
-    }
-
-    // Use only the label after last dot.
-    var index = name.lastIndexOf(".");
-    if (index > 0)
-        name = name.substr(index + 1);
-
-    return name;
-}
-
-function $FC_STRF(name, args)
-{
-    // xxxHonza: https://bugzilla.mozilla.org/show_bug.cgi?id=485511
-    //if (Firebug.registerStringBundle)
-    //    return $STRF(name, args);
-        
-    try
-    {
-        return document.getElementById("strings_firecookie").getFormattedString(name.replace(' ', '_', "g"), args);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_COOKIES)
-        {
-            FBTrace.sysout("cookies.Missing translation for: " + name + "\n");
-            FBTrace.sysout("cookies.getString FAILS ", err);
-        }
-    }
-
-    // Use only the label after last dot.
-    var index = name.lastIndexOf(".");
-    if (index > 0)
-        name = name.substr(index + 1);
-
-    return name;
-}
-
 function $FC_STR_BRAND(name)
 {
     return document.getElementById("bundle_brand").getString(name);
@@ -1392,7 +1335,7 @@ function $FC_STR_BRAND(name)
 function fcInternationalize(element, attr, args)
 {
     var xulString = element.getAttribute(attr);
-    var localized = args ? $FC_STRF(xulString, args) : $FC_STR(xulString);
+    var localized = args ? Locale.$STRF(xulString, args) : Locale.$STR(xulString);
 
     // Set localized value of the attribute.
     element.setAttribute(attr, localized);
@@ -1400,485 +1343,6 @@ function fcInternationalize(element, attr, args)
 
 // To make it available also in the editCookie.js scope
 Firebug.FireCookieModel.fcInternationalize = fcInternationalize;
-
-// ********************************************************************************************* //
-// Panel Implementation
-
-/**
- * @panel This class represents the Cookies panel that is displayed within
- * Firebug UI.
- */
-function FireCookiePanel() {}
-
-// Firebug.AblePanel has been renamed in Firebug 1.4 to ActivablePanel.
-var BasePanel = Firebug.AblePanel ? Firebug.AblePanel : Firebug.Panel;
-BasePanel = Firebug.ActivablePanel ? Firebug.ActivablePanel : BasePanel;
-FireCookiePanel.prototype = Obj.extend(BasePanel,
-/** @lends FireCookiePanel */
-{
-    name: panelName,
-    title: $FC_STR("firecookie.Panel"),
-    searchable: true,
-    breakable: true,
-    order: 200, // Place just after the Net panel.
-
-    initialize: function(context, doc)
-    {
-        // xxxHonza
-        // This initialization is made as soon as the Cookies panel
-        // is opened the first time.
-        // This means that columns are *not* resizeable within the console
-        // (rejected cookies) till this activation isn't executed.
-
-        // Initialize event listeners before the ancestor is called.
-        var hcr = HeaderColumnResizer;
-        this.onMouseClick = Obj.bind(hcr.onMouseClick, hcr);
-        this.onMouseDown = Obj.bind(hcr.onMouseDown, hcr);
-        this.onMouseMove = Obj.bind(hcr.onMouseMove, hcr);
-        this.onMouseUp = Obj.bind(hcr.onMouseUp, hcr);
-        this.onMouseOut = Obj.bind(hcr.onMouseOut, hcr);
-
-        this.onContextMenu = Obj.bind(this.onContextMenu, this);
-
-        BasePanel.initialize.apply(this, arguments);
-
-        // Just after the initialization, so the this.document member is set.
-        Firebug.FireCookieModel.addStyleSheet(this);
-
-        this.refresh();
-    },
-
-    /**
-     * Renders list of cookies displayed within the Cookies panel.
-     */
-    refresh: function()
-    {
-        if (!Firebug.FireCookieModel.isEnabled(this.context))
-            return;
-
-        // Create cookie list table.
-        this.table = Templates.CookieTable.createTable(this.panelNode);
-
-        // Cookies are displayed only for web pages.
-        var location = this.context.window.location;
-        if (!location)
-            return;
-
-        var protocol = location.protocol;
-        if (protocol.indexOf("http") != 0)
-            return;
-
-        // Get list of cookies for the current page.
-        var cookies = [];
-        var iter = cookieManager.enumerator;
-        while (iter.hasMoreElements())
-        {
-            var cookie = iter.getNext();
-            if (!cookie)
-                break;
-
-            cookie = cookie.QueryInterface(nsICookie2);
-            if (!CookieObserver.isCookieFromContext(this.context, cookie))
-                continue;
-
-            var cookieWrapper = new Cookie(makeCookieObject(cookie));
-            cookies.push(cookieWrapper);
-        }
-
-        // If the filter allow it, display all rejected cookies as well.
-        if (getPref(FirebugPrefDomain, showRejectedCookies))
-        {
-            // xxxHonza the this.context.cookies is sometimes null, but
-            // this must be because FB isn't correctly initialized.
-            if (!this.context.cookies)
-            {
-                if (FBTrace.DBG_COOKIES) 
-                {
-                    FBTrace.sysout(
-                        "cookies.Cookie context isn't properly initialized - ERROR: " +
-                        this.context.getName());
-                }
-                return;
-            }
-
-            var activeHosts = this.context.cookies.activeHosts;
-            for (var hostName in activeHosts)
-            {
-                var host = activeHosts[hostName];
-                if (!host.rejected)
-                    continue;
-
-                var receivedCookies = host.receivedCookies;
-                if (receivedCookies)
-                    cookies = extendArray(cookies, receivedCookies);
-            }
-        }
-
-        // Generate HTML list of cookies using domplate.
-        if (cookies.length)
-        {
-            var header = Dom.getElementByClass(this.table, "cookieHeaderRow");
-            var tag = Templates.CookieRow.cookieTag;
-            var row = tag.insertRows({cookies: cookies}, header)[0];
-            for (var i=0; i<cookies.length; i++)
-            {
-                var cookie = cookies[i];
-                cookie.row = row;
-
-                Breakpoints.updateBreakpoint(this.context, cookie);
-                row = row.nextSibling;
-            }
-        }
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Cookie list refreshed.\n", cookies);
-
-        // Sort automaticaly the last sorted column. The preference stores
-        // two things: name of the sorted column and sort direction asc|desc.
-        // Example: colExpires asc
-        var prefValue = getPref(FirebugPrefDomain, lastSortedColumn);
-        if (prefValue) {
-            var values = prefValue.split(" ");
-            Templates.CookieTable.sortColumn(this.table, values[0], values[1]);
-        }
-
-        // Update visibility of columns according to the preferences
-        var hiddenCols = getPref(FirebugPrefDomain, hiddenColsPref);
-        if (hiddenCols)
-            this.table.setAttribute("hiddenCols", hiddenCols);
-    },
-
-    initializeNode: function(oldPanelNode)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.initializeNode\n");
-
-        // xxxHonza 
-        // This method isn't called when FB UI is detached. So, the columns
-        // are *not* resizable when FB is open in external window.
-
-        // Register event handlers for table column resizing.
-        this.document.addEventListener("click", this.onMouseClick, true);
-        this.document.addEventListener("mousedown", this.onMouseDown, true);
-        this.document.addEventListener("mousemove", this.onMouseMove, true);
-        this.document.addEventListener("mouseup", this.onMouseUp, true);
-        this.document.addEventListener("mouseout", this.onMouseOut, true);
-
-        this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
-    },
-
-    destroyNode: function()
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.destroyNode\n");
-
-        this.document.removeEventListener("mouseclick", this.onMouseClick, true);
-        this.document.removeEventListener("mousedown", this.onMouseDown, true);
-        this.document.removeEventListener("mousemove", this.onMouseMove, true);
-        this.document.removeEventListener("mouseup", this.onMouseUp, true);
-        this.document.removeEventListener("mouseout", this.onMouseOut, true);
-
-        this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
-    },
-
-    onContextMenu: function(event)
-    {
-        Breakpoints.onContextMenu(this.context, event);
-    },
-
-    detach: function(oldChrome, newChrome)
-    {
-        BasePanel.detach.apply(this, arguments);
-    },
-
-    reattach: function(doc)
-    {
-        BasePanel.reattach.apply(this, arguments);
-    },
-
-    clear: function()
-    {
-        if (this.panelNode)
-            clearNode(this.panelNode);
-
-        this.table = null;
-    },
-
-    show: function(state)
-    {
-        // Update permission button in the toolbar.
-        Firebug.FireCookieModel.Perm.updatePermButton(this.context);
-
-        // For backward compatibility with Firebug 1.1
-        //
-        // Firebug 1.6 removes Firebug.DisabledPanelPage, simplifies the activation
-        // and the following code is not necessary any more.
-        if (Firebug.ActivableModule && Firebug.DisabledPanelPage)
-        {
-            var shouldShow = Firebug.FireCookieModel.isEnabled(this.context);
-            this.showToolbarButtons("fbCookieButtons", shouldShow);
-            if (!shouldShow)
-            {
-                // The activation model has been changed in Firebug 1.4. This is 
-                // just to keep backward compatibility.
-                if (Firebug.DisabledPanelPage.show)
-                    Firebug.DisabledPanelPage.show(this, Firebug.FireCookieModel);
-                else
-                    Firebug.FireCookieModel.disabledPanelPage.show(this);
-                return;
-            }
-        }
-        else
-        {
-            this.showToolbarButtons("fbCookieButtons", true); 
-        }
-
-        if (Firebug.chrome.setGlobalAttribute)
-        {
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                Locale.$STR("firecookie.Break On Cookie"));
-        }
-    },
-
-    hide: function()
-    {
-        this.showToolbarButtons("fbCookieButtons", false);
-    },
-
-    // Options menu
-    getOptionsMenuItems: function(context)
-    {
-        return [
-            MenuUtils.optionAllowGlobally(context, "firecookie.AllowGlobally",
-                networkPrefDomain, cookieBehaviorPref),
-            /*MenuUtils.optionMenu(context, "firecookie.clearWhenDeny",
-                FirebugPrefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "firecookie.LogEvents",
-                FirebugPrefDomain, logEventsPref),
-            MenuUtils.optionMenu(context, "firecookie.Confirm cookie removal",
-                FirebugPrefDomain, removeConfirmation)
-        ];
-    },
-
-    getContextMenuItems: function(object, target)
-    {
-        var items = [];
-
-        // If the user clicked at a cookie row, the context menu is already
-        // initialized and so, bail out.
-        var cookieRow = Dom.getAncestorByClass(target, "cookieRow");
-        if (cookieRow)
-            return items;
-
-        // Also bail out if the user clicked on the header.
-        var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
-        if (header)
-            return items;
-
-        // Make sure default items (cmd_copy) is removed.
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-
-        // Create Paste menu-item so, a new cookie can be pasted even if the user
-        // clicks within the panel area (not on a cookie row)
-        items.push({
-            label: $FC_STR("firecookie.Paste"),
-            nol10n: true,
-            disabled: CookieClipboard.isCookieAvailable() ? false : true,
-            command: Obj.bindFixed(Templates.CookieRow.onPaste, Templates.CookieRow)
-        });
-
-        return items;
-    },
-
-    search: function(text)
-    {
-        if (!text)
-            return;
-
-        // Make previously visible nodes invisible again
-        if (this.matchSet)
-        {
-            for (var i in this.matchSet)
-                Css.removeClass(this.matchSet[i], "matched");
-        }
-
-        this.matchSet = [];
-
-        function findRow(node) { return Dom.getAncestorByClass(node, "cookieRow"); }
-        var search = new TextSearch(this.panelNode, findRow);
-
-        var cookieRow = search.find(text);
-        if (!cookieRow)
-            return false;
-
-        for (; cookieRow; cookieRow = search.findNext())
-        {
-            Css.setClass(cookieRow, "matched");
-            this.matchSet.push(cookieRow);
-        }
-
-        return true;
-    },
-
-    getPopupObject: function(target)
-    {
-        var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
-        if (header)
-            return Templates.CookieTable;
-
-        return BasePanel.getPopupObject.apply(this, arguments);
-    },
-
-    findRepObject: function(cookie)
-    {
-        var strippedHost = makeStrippedHost(cookie.host);
-
-        var result = null;
-        this.enumerateCookies(function(rep)
-        {
-            if (rep.rawHost == strippedHost &&
-                rep.cookie.name == cookie.name &&
-                rep.cookie.path == cookie.path)
-            {
-                result = rep;
-                return true; // break iteration
-            }
-        });
-
-        return result;
-    },
-
-    supportsObject: function(object)
-    {
-        return object instanceof Cookie;
-    },
-
-    updateSelection: function(cookie)
-    {
-        var repCookie = this.findRepObject(cookie.cookie);
-        if (!repCookie)
-            return;
-
-        Templates.CookieRow.toggleRow(repCookie.row, true);
-        Dom.scrollIntoCenterView(repCookie.row);
-    },
-
-    enumerateCookies: function(fn)
-    {
-        if (!this.table)
-            return;
-
-        var rows = Dom.getElementsByClass(this.table, "cookieRow");
-        for (var i=0; i<rows.length; i++)
-        {
-            var cookie = Firebug.getRepObject(rows[i]);
-            if (!cookie)
-                continue;
-            if (fn(cookie))
-                break;
-        }
-    },
-
-    getEditor: function(target, value)
-    {
-        if (!this.conditionEditor)
-            this.conditionEditor = new Firebug.FireCookieModel.ConditionEditor(this.document);
-        return this.conditionEditor;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Support for Break On Next
-
-    breakOnNext: function(breaking)
-    {
-        this.context.breakOnCookie = breaking;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.breakOnNext; " + context.breakOnCookie + ", " + context.getName());
-    },
-
-    shouldBreakOnNext: function()
-    {
-        return this.context.breakOnCookie;
-    },
-
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled ? Locale.$STR("firecookie.Disable Break On Cookie") :
-            Locale.$STR("firecookie.Break On Cookie"));
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Panel Activation
-
-    onActivationChanged: function(enable)
-    {
-        if (FBTrace.DBG_COOKIES || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firecookie.FireCookiePanel.onActivationChanged; " + enable);
-
-        if (enable)
-        {
-            Firebug.FireCookieModel.addObserver(this);
-            Firebug.Debugger.addListener(Firebug.FireCookieModel.DebuggerListener);
-            Firebug.Console.addListener(Firebug.FireCookieModel.ConsoleListener);
-        }
-        else
-        {
-            Firebug.FireCookieModel.removeObserver(this);
-            Firebug.Debugger.removeListener(Firebug.FireCookieModel.DebuggerListener);
-            Firebug.Console.removeListener(Firebug.FireCookieModel.ConsoleListener);
-        }
-    },
-}); 
-
-// ********************************************************************************************* //
-// Menu utility
-
-var MenuUtils = 
-{
-    optionMenu: function(context, label, domain, option)
-    {
-        var value = getPref(domain, option);
-        return { label: $FC_STR(label), nol10n: true, type: "checkbox", checked: value,
-            command: Obj.bindFixed(MenuUtils.setPref, this, domain, option, !value) };
-    },
-
-    optionAllowGlobally: function(context, label, domain, option)
-    {
-        var value = getPref(domain, option) == 0;
-        return { label: $FC_STR(label), nol10n: true, type: "checkbox",
-            checked: value,
-            command: Obj.bindFixed(this.onAllowCookie, this, domain, option)}
-    },
-
-    // Command handlers
-    onAllowCookie: function(domain, option)
-    {
-        var value = getPref(domain, option);
-        switch (value)
-        {
-            case 0: // accept all cookies by default
-            setPref(domain, option, 2);
-            return;
-
-            case 1: // only accept from the originating site (block third party cookies)
-            case 2: // block all cookies by default;
-            case 3: // use p3p settings
-            setPref(domain, option, 0);
-            return;
-        } 
-    },
-
-    onBlockCurrent: function()
-    {
-    },
-
-    setPref: function(prefDomain, name, value)
-    {
-        setPref(prefDomain, name, value);
-    }
-};
 
 // ********************************************************************************************* //
 // Cookie Permissions
@@ -1900,7 +1364,7 @@ Firebug.FireCookieModel.Perm = Obj.extend(Object,
         if (tooltip.fcEnabled)
         {
             var host = context.window.location.host;
-            tooltip.label = $FC_STRF("firecookie.perm.manage.tooltip", [host]);
+            tooltip.label = Locale.$STRF("firecookie.perm.manage.tooltip", [host]);
         }
 
         return tooltip.fcEnabled;
@@ -1999,7 +1463,7 @@ Firebug.FireCookieModel.Perm = Obj.extend(Object,
                 permissionManager.add(location, "cookie", permissionManager.DENY_ACTION);
 
             case "default-deny":
-                if (getPref(FirebugPrefDomain, clearWhenDeny))
+                if (Options.get(clearWhenDeny))
                     Firebug.FireCookieModel.onRemoveAll(context);
                 break;
         }
@@ -2031,9 +1495,9 @@ Firebug.FireCookieModel.Perm = Obj.extend(Object,
             return null;
 
         if (optionInfo[1])
-            return $FC_STRF(optionInfo[0], [location.host]);
+            return Locale.$STRF(optionInfo[0], [location.host]);
 
-        return $FC_STR(optionInfo[0]);
+        return Locale.$STR(optionInfo[0]);
     },
 
     getDefaultPref: function()
@@ -2067,1793 +1531,11 @@ Firebug.FireCookieModel.Perm = Obj.extend(Object,
 });
 
 // ********************************************************************************************* //
-// Templates Helpers
-
-// Object with all rep templates.
-var Templates = Firebug.FireCookieModel.Templates = {};
-
-/**
- * @domplate Basic template for all Firecookie templates.
- */
-Templates.Rep = domplate(Firebug.Rep,
-{
-    getContextMenuItems: function(cookie, target, context)
-    {
-        // xxxHonza not sure how to do this better if the default Firebug's "Copy"
-        // command (cmd_copy) shouldn't be there.
-        var popup = Firebug.chrome.$("fbContextMenu");
-        if (popup.firstChild && popup.firstChild.getAttribute("command") == "cmd_copy")
-            popup.removeChild(popup.firstChild);
-    }
-});
-
-// ********************************************************************************************* //
-// Cookie Template (domplate)
-
-/**
- * @domplate Represents a domplate template for cookie entry in the cookie list.
- */
-Templates.CookieRow = domplate(Templates.Rep,
-/** @lends Templates.CookieRow */
-{
-    inspectable: false,
-
-    cookieTag:
-        FOR("cookie", "$cookies",
-            TR({"class": "cookieRow", _repObject: "$cookie", onclick: "$onClickRow",
-                $sessionCookie: "$cookie|isSessionCookie",
-                $rejectedCookie: "$cookie|isRejected"},
-                TD({"class": "cookieDebugCol cookieCol"},
-                   DIV({"class": "sourceLine cookieRowHeader", onclick: "$onClickRowHeader"},
-                        "&nbsp;"
-                   )
-                ),
-                TD({"class": "cookieNameCol cookieCol"},
-                    DIV({"class": "cookieNameLabel cookieLabel"}, "$cookie|getName")
-                ),
-                TD({"class": "cookieValueCol cookieCol"},
-                    DIV({"class": "cookieValueLabel cookieLabel"}, 
-                        SPAN("$cookie|getValue"))
-                ),
-                TD({"class": "cookieDomainCol cookieCol"},
-                    SPAN({"class": "cookieDomainLabel cookieLabel", onclick: "$onClickDomain"}, 
-                        "$cookie|getDomain")
-                ),
-                TD({"class": "cookieSizeCol cookieCol"},
-                    DIV({"class": "cookieSizeLabel cookieLabel"}, "$cookie|getSize")
-                ),
-                TD({"class": "cookiePathCol cookieCol"},
-                    DIV({"class": "cookiePathLabel cookieLabel", "title": "$cookie|getPath"},
-                        SPAN("$cookie|getPath")
-                    )
-                ),
-                TD({"class": "cookieExpiresCol cookieCol"},
-                    DIV({"class": "cookieExpiresLabel cookieLabel"}, "$cookie|getExpires")
-                ),
-                TD({"class": "cookieHttpOnlyCol cookieCol"},
-                    DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
-                ),
-                TD({"class": "cookieSecurityCol cookieCol"},
-                    DIV({"class": "cookieLabel"}, "$cookie|isSecure")
-                ),
-                TD({"class": "cookieStatusCol cookieCol"},
-                    DIV({"class": "cookieLabel"}, "$cookie|getStatus")
-                )
-            )
-        ),
-
-    bodyRow:
-        TR({"class": "cookieInfoRow"},
-            TD({"class": "sourceLine cookieRowHeader"}),
-            TD({"class": "cookieInfoCol", colspan: 10})
-        ),
-
-    bodyTag:
-        DIV({"class": "cookieInfoBody", _repObject: "$cookie"},
-            DIV({"class": "cookieInfoTabs"},
-                A({"class": "cookieInfoValueTab cookieInfoTab", onclick: "$onClickTab",
-                    view: "Value"},
-                    $FC_STR("firecookie.info.valuetab.label")
-                ),
-                A({"class": "cookieInfoRawValueTab cookieInfoTab", onclick: "$onClickTab",
-                    view: "RawValue",
-                    $collapsed: "$cookie|hideRawValueTab"},
-                    $FC_STR("firecookie.info.rawdatatab.Raw Data")
-                ),
-                A({"class": "cookieInfoJsonTab cookieInfoTab", onclick: "$onClickTab",
-                    view: "Json",
-                    $collapsed: "$cookie|hideJsonTab"},
-                    $FC_STR("firecookie.info.jsontab.JSON")
-                ),
-                A({"class": "cookieInfoXmlTab cookieInfoTab", onclick: "$onClickTab",
-                    view: "Xml",
-                    $collapsed: "$cookie|hideXmlTab"},
-                    $FC_STR("firecookie.info.xmltab.XML")
-                )
-            ),
-            DIV({"class": "cookieInfoValueText cookieInfoText"}),
-            DIV({"class": "cookieInfoRawValueText cookieInfoText"}),
-            DIV({"class": "cookieInfoJsonText cookieInfoText"}),
-            DIV({"class": "cookieInfoXmlText cookieInfoText"})
-        ),
-
-    hideRawValueTab: function(cookie)
-    {
-        return (cookie.cookie.value == cookie.cookie.rawValue);
-    },
-
-    hideJsonTab: function(cookie)
-    {
-        return cookie.getJsonValue() ? false : true;
-    },
-
-    hideXmlTab: function(cookie)
-    {
-        return cookie.getXmlValue() ? false : true;
-    },
-
-    getAction: function(cookie)
-    {
-        return cookie.action;
-    },
-
-    getName: function(cookie)
-    {
-        return cookie.cookie.name;
-    },
-
-    getValue: function(cookie)
-    {
-        var limit = 200;
-        var value = cookie.cookie.value;
-        if (value.length > limit)
-            return Str.escapeNewLines(value.substr(0, limit) + "...");
-        else
-            return Str.escapeNewLines(value);
-    },
-
-    getDomain: function(cookie)
-    {
-        if (!cookie.cookie.host)
-            return "";
-
-        return cookie.cookie.host;
-    },
-
-    getExpires: function(cookie)
-    {
-        if (cookie.cookie.expires == undefined)
-            return "";
-
-        // The first character is space so, if the table is sorted according
-        // to this column, all "Session" cookies are displayed at the begining.
-        if (cookie.cookie.expires == 0)
-            return " " + $FC_STR("firecookie.Session");
-
-        try {
-            // Format the expires date using the current locale.
-            var date = new Date(cookie.cookie.expires * 1000);
-            return date.toLocaleString();
-        }
-        catch (err) {
-            ERROR(err);
-        }
-
-        return "";
-    },
-
-    isHttpOnly: function(cookie)
-    {
-        return cookie.cookie.isHttpOnly ? "HttpOnly" : "";
-    },
-
-    isSessionCookie: function(cookie)
-    {
-        return !cookie.cookie.expires;
-    },
-
-    isRejected: function(cookie)
-    {
-        return !!cookie.cookie.rejected;
-    },
-
-    getSize: function(cookie)
-    {
-        var size = cookie.cookie.name.length + cookie.cookie.value.length;
-        return this.formatSize(size);
-    },
-
-    formatSize: function(bytes)
-    {
-        if (bytes == -1 || bytes == undefined)
-            return "?";
-        else if (bytes < 1024)
-            return bytes + " B";
-        else if (bytes < 1024*1024)
-            return Math.ceil(bytes/1024) + " KB";
-        else
-            return (Math.ceil(bytes/1024)/1024) + " MB";    // OK, this is probable not necessary ;-)
-    },
-
-    getPath: function(cookie)
-    {
-        var path = cookie.cookie.path;
-        return path ? path : "";
-    },
-
-    isDomainCookie: function(cookie)
-    {
-        return cookie.cookie.isDomain ? $FC_STR("firecookie.domain.label") : "";
-    },
-
-    isSecure: function(cookie)
-    {
-        return cookie.cookie.isSecure ? $FC_STR("firecookie.secure.label") : "";
-    },
-
-    getStatus: function(cookie)
-    {
-        if (!cookie.cookie.status)
-            return "";
-
-        switch (cookie.cookie.status)
-        {
-            case STATUS_UNKNOWN:
-                return "";
-            case STATUS_ACCEPTED:
-                return $FC_STR("firecookie.status.accepted");
-            case STATUS_DOWNGRADED:
-                return $FC_STR("firecookie.status.downgraded");
-            case STATUS_FLAGGED:
-                return $FC_STR("firecookie.status.flagged");
-            case STATUS_REJECTED:
-                return $FC_STR("firecookie.status.rejected");
-        }
-
-        return "";
-    },
-
-    getPolicy: function(cookie)
-    {
-        switch (cookie.cookie.policy)
-        {
-            //xxxHonza localization
-            case POLICY_UNKNOWN:
-                return "POLICY_UNKNOWN";
-            case POLICY_NONE:
-                return "POLICY_NONE";
-            case POLICY_NO_CONSENT:
-                return "POLICY_NO_CONSENT";
-            case POLICY_IMPLICIT_CONSENT:
-                return "POLICY_IMPLICIT_CONSENT";
-            case POLICY_NO_II:
-                return "POLICY_NO_II";
-        }
-
-        return "";
-    },
-
-    // Firebug rep support
-    supportsObject: function(cookie)
-    {
-        return cookie instanceof Cookie;
-    },
-
-    browseObject: function(cookie, context)
-    {
-        return false;
-    },
-
-    getRealObject: function(cookie, context)
-    {
-        return cookie.cookie;
-    },
-
-    getContextMenuItems: function(cookie, target, context)
-    {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-
-        var items = [];
-        var rejected = cookie.cookie.rejected;
-
-        if (!rejected)
-        {
-            items.push({
-              label: $FC_STR("firecookie.Cut"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCut, this, cookie)
-            });
-        }
-
-        items.push({
-          label: $FC_STR("firecookie.Copy"),
-          nol10n: true,
-          command: Obj.bindFixed(this.onCopy, this, cookie)
-        });
-
-        if (!rejected)
-        {
-            items.push({
-              label: $FC_STR("firecookie.Paste"),
-              nol10n: true,
-              disabled: CookieClipboard.isCookieAvailable() ? false : true,
-              command: Obj.bindFixed(this.onPaste, this, cookie)
-            });
-            items.push("-");
-        }
-
-        items.push({
-          label: $FC_STR("firecookie.CopyAll"),
-          nol10n: true,
-          command: Obj.bindFixed(this.onCopyAll, this, cookie)
-        });
-
-        if (!rejected)
-        {
-            items.push("-");
-            items.push({
-              label: $FC_STR("firecookie.Delete"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onRemove, this, cookie)
-            });
-
-            items.push("-");
-            items.push({
-              label: $FC_STR("firecookie.Edit"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onEdit, this, cookie)
-            });
-
-            if (cookie.cookie.rawValue)
-            {
-                items.push({
-                  label: $FC_STR("firecookie.Clear Value"),
-                  nol10n: true,
-                  command: Obj.bindFixed(this.onClearValue, this, cookie)
-                });
-            }
-        }
-
-        var Model = Firebug.FireCookieModel;
-
-        // Permissions
-        var permItems = Model.Perm.getContextMenuItems(cookie, target, context);
-        if (permItems)
-            items = items.concat(permItems);
-
-        // Breakpoints
-        var breakOnItems = Model.Breakpoints.getContextMenuItems(cookie, target, context);
-        if (breakOnItems)
-            items = items.concat(breakOnItems);
-
-        return items;
-    },
-
-    // Context menu commands
-    onCut: function(clickedCookie)
-    {
-        this.onCopy(clickedCookie);
-        this.onRemove(clickedCookie);
-    },
-
-    onCopy: function(clickedCookie)
-    {
-        CookieClipboard.copyTo(clickedCookie);
-    },
-
-    onCopyAll: function(clickedCookie)
-    {
-        var text = "";
-        var tbody = Dom.getAncestorByClass(clickedCookie.row, "cookieTable").firstChild;
-        for (var row = tbody.firstChild; row; row = row.nextSibling) {
-            if (Css.hasClass(row, "cookieRow") && row.repObject)
-                text += row.repObject.toString() + "\n";
-        }
-
-        copyToClipboard(text);
-    },
-
-    onPaste: function(clickedCookie) // clickedCookie can be null if the user clicks within panel area.
-    {
-        var context = Firebug.currentContext;
-        var values = CookieClipboard.getFrom();
-        if (!values || !context)
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Get cookie values from clipboard", values);
-
-        // Change name so it's unique and use the current host.
-        values.name = Firebug.FireCookieModel.getDefaultCookieName(context, values.name);
-        values.host = context.browser.currentURI.host;
-
-        values.rawValue = values.value;
-        values.value = unescape(values.value);
-
-        // If the expire time isn't set use the default value.
-        if (values.expires == undefined)
-            values.expires = Firebug.FireCookieModel.getDefaultCookieExpireTime();
-
-        // Create/modify cookie.
-        var cookie = new Cookie(values);
-        Firebug.FireCookieModel.createCookie(cookie);
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(context.getPanel(panelName, true));
-    },
-
-    onRemove: function(cookie)
-    {
-        // Get the real XPCOM cookie object and remove it.
-        var realCookie = cookie.cookie;
-        if (!cookie.cookie.rejected)
-            Firebug.FireCookieModel.removeCookie(realCookie.host, realCookie.name, realCookie.path);
-    },
-
-    onEdit: function(cookie)
-    {
-        var params = {
-          cookie: cookie.cookie,
-          action: "edit",
-          window: null
-        };
-
-        var parent = Firebug.currentContext.chrome.window;
-        return parent.openDialog("chrome://firebug/content/cookies/editCookie.xul",
-            "_blank", "chrome,centerscreen,resizable=yes,modal=yes",
-            params);
-    },
-
-    onClearValue: function(cookie)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onClearValue;", cookie);
-
-        var newCookie = new Firebug.FireCookieModel.Cookie(cookie.cookie);
-        newCookie.cookie.rawValue = "";
-        Firebug.FireCookieModel.createCookie(newCookie);
-    },
-
-    // Event handlers
-    onClickDomain: function(event)
-    {
-        if (Events.isLeftClick(event))
-        {
-            var domain = event.target.innerHTML;
-            if (domain)
-            {
-                Events.cancelEvent(event);
-                event.cancelBubble = true;
-                //xxxHonza www.google.com (more windows are opened)
-                // openNewTab(domain);
-            }
-        }
-    },
-
-    onClickRowHeader: function(event)
-    {
-        Events.cancelEvent(event);
-
-        var rowHeader = event.target;
-        if (!Css.hasClass(rowHeader, "cookieRowHeader"))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "cookieRow");
-        if (!row)
-            return;
-
-        var context = Firebug.getElementPanel(row).context;
-        Breakpoints.onBreakOnCookie(context, row.repObject);
-    },
-
-    onClickRow: function(event)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Click on cookie row.\n", event);
-
-        if (Events.isLeftClick(event))
-        {
-            var row = Dom.getAncestorByClass(event.target, "cookieRow");
-            if (row)
-            {
-                this.toggleRow(row);
-                Events.cancelEvent(event);
-            }
-        }
-    },
-
-    toggleRow: function(row, forceOpen)
-    {
-        var opened = Css.hasClass(row, "opened");
-        if (opened && forceOpen)
-            return;
-
-        Css.toggleClass(row, "opened");
-
-        if (Css.hasClass(row, "opened"))
-        {
-            var bodyRow = this.bodyRow.insertRows({}, row)[0];
-            var bodyCol = Dom.getElementByClass(bodyRow, "cookieInfoCol");
-            var cookieInfo = this.bodyTag.replace({cookie: row.repObject}, bodyCol);
-
-            // If JSON or XML tabs are available select them by default.
-            if (this.selectTabByName(cookieInfo, "Json"))
-                return;
-
-            if (this.selectTabByName(cookieInfo, "Xml"))
-                return;
-
-            this.selectTabByName(cookieInfo, "Value");
-        }
-        else
-        {
-            row.parentNode.removeChild(row.nextSibling);
-        }
-    },
-
-    selectTabByName: function(cookieInfoBody, tabName)
-    {
-        var tab = Dom.getChildByClass(cookieInfoBody, "cookieInfoTabs",
-            "cookieInfo" + tabName + "Tab");
-
-        // Don't select collapsed tabs. 
-        if (tab && !Css.hasClass(tab, "collapsed"))
-            return this.selectTab(tab);
-
-        return false;
-    },
-
-    onClickTab: function(event)
-    {
-        this.selectTab(event.currentTarget);
-    },
-
-    selectTab: function(tab)
-    {
-        var cookieInfoBody = tab.parentNode.parentNode;
-
-        var view = tab.getAttribute("view");
-        if (cookieInfoBody.selectedTab)
-        {
-            cookieInfoBody.selectedTab.removeAttribute("selected");
-            cookieInfoBody.selectedText.removeAttribute("selected");
-        }
-
-        var textBodyName = "cookieInfo" + view + "Text";
-
-        cookieInfoBody.selectedTab = tab;
-        cookieInfoBody.selectedText = Dom.getChildByClass(cookieInfoBody, textBodyName);
-
-        cookieInfoBody.selectedTab.setAttribute("selected", "true");
-        cookieInfoBody.selectedText.setAttribute("selected", "true");
-
-        var cookie = Firebug.getRepObject(cookieInfoBody);
-        var context = Firebug.getElementPanel(cookieInfoBody).context;
-        this.updateInfo(cookieInfoBody, cookie, context);
-
-        return true;
-    },
-
-    updateRow: function(cookie, context)
-    {
-        var panel = context.getPanel(panelName, true);
-        if (!panel)
-            return;
-
-        var parent = cookie.row.parentNode;
-        var nextSibling = cookie.row.nextSibling;
-        parent.removeChild(cookie.row);
-
-        var row = Templates.CookieRow.cookieTag.insertRows({cookies: [cookie]}, 
-            panel.table.lastChild.lastChild)[0];
-
-        var opened = Css.hasClass(cookie.row, "opened");
-
-        cookie.row = row;
-        row.repObject = cookie;
-
-        if (nextSibling && row.nextSibling != nextSibling)
-        {
-            parent.removeChild(cookie.row);
-            parent.insertBefore(row, nextSibling);
-        }
-
-        if (opened)
-            Css.setClass(row, "opened");
-
-        Breakpoints.updateBreakpoint(context, cookie);
-    },
-
-    updateInfo: function(cookieInfoBody, cookie, context)
-    {
-        var tab = cookieInfoBody.selectedTab;
-        if (Css.hasClass(tab, "cookieInfoValueTab"))
-        {
-            var valueBox = Dom.getChildByClass(cookieInfoBody, "cookieInfoValueText");
-            if (!cookieInfoBody.valuePresented)
-            {
-                cookieInfoBody.valuePresented = true;
-
-                var text = cookie.cookie.value;
-                if (text != undefined)
-                    insertWrappedText(text, valueBox);
-            }
-        }
-        else if (Css.hasClass(tab, "cookieInfoRawValueTab"))
-        {
-            var valueBox = Dom.getChildByClass(cookieInfoBody, "cookieInfoRawValueText");
-            if (!cookieInfoBody.rawValuePresented)
-            {
-                cookieInfoBody.rawValuePresented = true;
-
-                var text = cookie.cookie.rawValue;
-                if (text != undefined)
-                    insertWrappedText(text, valueBox);
-            }
-        }
-        else if (Css.hasClass(tab, "cookieInfoJsonTab"))
-        {
-            var valueBox = Dom.getChildByClass(cookieInfoBody, "cookieInfoJsonText");
-            if (!cookieInfoBody.jsonPresented)
-            {
-                cookieInfoBody.jsonPresented = true;
-
-                var jsonObject = cookie.getJsonValue();
-                if (jsonObject) {
-                    Firebug.DOMPanel.DirTable.tag.replace(
-                        {object: jsonObject, toggles: this.toggles}, valueBox);
-                }
-            }
-        }
-        else if (Css.hasClass(tab, "cookieInfoXmlTab"))
-        {
-            var valueBox = Dom.getChildByClass(cookieInfoBody, "cookieInfoXmlText");
-            if (!cookieInfoBody.xmlPresented)
-            {
-                cookieInfoBody.xmlPresented = true;
-
-                var docElem = cookie.getXmlValue();
-                if (docElem) {
-                    var tag = Firebug.HTMLPanel.CompleteElement.getNodeTag(docElem);
-                    tag.replace({object: docElem}, valueBox);
-                }
-            }
-        }
-    },
-
-    updateTabs: function(cookieInfoBody, cookie, context)
-    {
-        // Iterate over all info-tabs and update visibility.
-        var cookieInfoTabs = Dom.getElementByClass(cookieInfoBody, "cookieInfoTabs");
-        var tab = cookieInfoTabs.firstChild;
-        while (tab)
-        {
-            var view = tab.getAttribute("view");
-            var hideTabCallback = Templates.CookieRow["hide" + view + "Tab"];
-            if (hideTabCallback)
-            {
-                if (hideTabCallback(cookie))
-                    Css.setClass(tab, "collapsed");
-                else
-                    Css.removeClass(tab, "collapsed");
-            }
-
-            tab = tab.nextSibling;
-        }
-
-        // If the selected tab was collapsed, make sure another one is selected.
-        if (Css.hasClass(cookieInfoBody.selectedTab, "collapsed"))
-        {
-            if (this.selectTabByName(cookieInfoBody, "Json"))
-                return;
-
-            if (this.selectTabByName(cookieInfoBody, "Xml"))
-                return;
-
-            this.selectTabByName(cookieInfoBody, "Value");
-        }
-    }
-});
-
-// ********************************************************************************************* //
-// Console Event Templates (domplate)
-
-/**
- * @domplate This template is used for displaying cookie-changed events
- * (except of "clear") in the Console tab.
- */
-Templates.CookieChanged = domplate(Templates.Rep,
-{
-    inspectable: false,
-
-    // Console
-    tag:
-        DIV({"class": "cookieEvent", _repObject: "$object"},
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY(
-                    TR(
-                        TD({width: "100%"},
-                            SPAN($FC_STR("firecookie.console.cookie"), " "),
-                            SPAN({"class": "cookieNameLabel", onclick: "$onClick"}, 
-                                "$object|getName", 
-                                " "),
-                            SPAN({"class": "cookieActionLabel"}, 
-                                "$object|getAction", 
-                                ".&nbsp;&nbsp;"),
-                            SPAN({"class": "cookieValueLabel"}, 
-                                "$object|getValue")
-                        ),
-                        TD(
-                            SPAN({"class": "cookieDomainLabel", onclick: "$onClickDomain",
-                                title: "$object|getOriginalURI"}, "$object|getDomain"),
-                            SPAN("&nbsp;") 
-                        )
-                    )
-                )
-            )
-        ),
-
-    // Event handlers
-    onClick: function(event)
-    {
-        if (!Events.isLeftClick(event))
-            return;
-
-        var target = event.target;
-
-        // Get associated nsICookie object.
-        var cookieEvent = Firebug.getRepObject(target);
-        if (!cookieEvent)
-            return;
-
-        var cookieWrapper = new Cookie(makeCookieObject(cookieEvent.cookie));
-        var context = Firebug.getElementPanel(target).context;
-        context.chrome.select(cookieWrapper, panelName);
-    },
-
-    onClickDomain: function(event)
-    {
-    },
-
-    getOriginalURI: function(cookieEvent)
-    {
-        var context = cookieEvent.context;
-        var strippedHost = cookieEvent.rawHost;
-
-        if (!context.cookies.activeCookies)
-            return strippedHost;
-
-        var cookie = cookieEvent.cookie;
-        var activeCookies = context.cookies.activeCookies[cookie.host];
-        if (!activeCookies)
-            return strippedHost;
-
-        var activeCookie = activeCookies[getCookieId(cookie)];
-
-        var originalURI;
-        if (activeCookie)
-            originalURI = activeCookie.originalURI.spec;
-        else 
-            originalURI = cookieEvent.rawHost;
-
-        if (FBTrace.DBG_COOKIES)
-        {
-            FBTrace.sysout("cookies.context.cookies.activeCookies[" + cookie.host + "]",
-                activeCookies);
-
-            FBTrace.sysout("cookies.Original URI for: " + getCookieId(cookie) + 
-                " is: " + originalURI, activeCookie);
-        }
-
-        return originalURI;
-    },
-
-    getAction: function(cookieEvent)
-    {
-        // Return properly localized action.
-        switch(cookieEvent.action)
-        {
-          case "deleted":
-              return $FC_STR("firecookie.console.deleted");
-          case "added":
-              return $FC_STR("firecookie.console.added");
-          case "changed":
-              return $FC_STR("firecookie.console.changed");
-          case "cleared":
-              return $FC_STR("firecookie.console.cleared");
-        }
-
-        return "";
-    },
-
-    getName: function(cookieEvent) {
-        return cookieEvent.cookie.name;
-    },
-
-    getValue: function(cookieEvent) {
-        return cropString(cookieEvent.cookie.value, 75);
-    },
-
-    getDomain: function(cookieEvent) {
-        return cookieEvent.cookie.host;
-    },
-
-    // Firebug rep support
-    supportsObject: function(cookieEvent)
-    {
-        return cookieEvent instanceof CookieChangedEvent;
-    },
-
-    browseObject: function(cookieEvent, context)
-    {
-        return false;
-    },
-
-    getRealObject: function(cookieEvent, context)
-    {
-        return cookieEvent;
-    },
-
-    // Context menu
-    getContextMenuItems: function(cookieEvent, target, context)
-    {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-    }
-});
-
-// ********************************************************************************************* //
-
-/**
- * @domplate Represents a domplate template for displaying rejected cookies.
- */
-Templates.CookieRejected = domplate(Templates.Rep,
-/** @lends Templates.CookieRejected */
-{
-    inspectable: false,
-
-    tag:
-        DIV({"class": "cookieEvent", _repObject: "$object"},
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY(
-                    TR(
-                        TD({width: "100%"},
-                            SPAN({"class": "cookieRejectedLabel"},
-                                $FC_STR("firecookie.console.cookiesrejected")),
-                            " ",
-                            SPAN({"class": "cookieRejectedList"},
-                                "$object|getCookieList")
-                        ),
-                        TD(
-                            SPAN({"class": "cookieDomainLabel", onclick: "$onClickDomain"}, 
-                                "$object|getDomain"),
-                            SPAN("&nbsp;") 
-                        )
-                    )
-                )
-            )
-        ),
-
-    supportsObject: function(object)
-    {
-        return object instanceof CookieRejectedEvent;
-    },
-
-    getDomain: function(cookieEvent)
-    {
-        return cookieEvent.uri.host;
-    },
-
-    getCookieList: function(cookieEvent)
-    {
-        var context = cookieEvent.context;
-        var activeHost = context.cookies.activeHosts[cookieEvent.uri.host];
-        var cookies = activeHost.receivedCookies;
-        if (!cookies)
-            return $FC_STR("firecookie.console.nocookiesreceived");
-
-        var label = "";
-        for (var i=0; i<cookies.length; i++)
-            label += cookies[i].cookie.name + ((i<cookies.length-1) ? ", " : "");
-
-        return cropString(label, 75);
-    },
-
-    onClickDomain: function(event)
-    {
-    },
-
-    // Context menu
-    getContextMenuItems: function(cookie, target, context)
-    {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-    }
-});
-
-// ********************************************************************************************* //
-
-/**
- * @domplate Represents a domplate template for cookie cleared event that is
- * visualised in Firebug Console panel.
- */
-Templates.CookieCleared = domplate(Templates.Rep,
-/** @lends Templates.CookieCleared */
-{
-    inspectable: false,
-
-    tag:
-        DIV({_repObject: "$object"},
-            DIV("$object|getLabel")
-        ),
-
-    supportsObject: function(object)
-    {
-        return object instanceof CookieClearedEvent;
-    },
-
-    getLabel: function()
-    {
-        return $FC_STR("firecookie.console.cookiescleared");
-    },
-
-    // Context menu
-    getContextMenuItems: function(cookie, target, context)
-    {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-    }
-});
-
-// ********************************************************************************************* //
-// Header Template (domplate)
-
-/**
- * @domplate Represents a template for basic cookie list layout. This
- * template also includes a header and related functionality (such as sorting).
- */
-Templates.CookieTable = domplate(Templates.Rep,
-/** @lends Templates.CookieTable */
-{
-    inspectable: false,
-
-    tableTag:
-        TABLE({"class": "cookieTable", cellpadding: 0, cellspacing: 0, hiddenCols: ""},
-            TBODY(
-                TR({"class": "cookieHeaderRow", onclick: "$onClickHeader"},
-                    TD({id: "cookieBreakpointBar", width: "1%", "class": "cookieHeaderCell"},
-                        "&nbsp;"
-                    ),
-                    TD({id: "colName", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.name.tooltip")}, 
-                        $FC_STR("firecookie.header.name"))
-                    ),
-                    TD({id: "colValue", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.value.tooltip")}, 
-                        $FC_STR("firecookie.header.value"))
-                    ),
-                    TD({id: "colDomain", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.domain.tooltip")}, 
-                        $FC_STR("firecookie.header.domain"))
-                    ),
-                    TD({id: "colSize", "class": "cookieHeaderCell"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.size.tooltip")}, 
-                        $FC_STR("firecookie.header.size"))
-                    ),
-                    TD({id: "colPath", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.path.tooltip")}, 
-                        $FC_STR("firecookie.header.path"))
-                    ),
-                    TD({id: "colExpires", "class": "cookieHeaderCell"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.expires.tooltip")}, 
-                        $FC_STR("firecookie.header.expires"))
-                    ),
-                    TD({id: "colHttpOnly", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.httponly.tooltip")}, 
-                        $FC_STR("firecookie.header.httponly"))
-                    ),
-                    TD({id: "colSecurity", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.security.tooltip")}, 
-                        $FC_STR("firecookie.header.security"))
-                    ),
-                    TD({id: "colStatus", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: $FC_STR("firecookie.header.status.tooltip")}, 
-                        $FC_STR("firecookie.header.status"))
-                    )
-                )
-            )
-        ),
-
-    onClickHeader: function(event)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onClickHeader\n");
-
-        if (!Events.isLeftClick(event))
-            return;
-
-        var table = Dom.getAncestorByClass(event.target, "cookieTable");
-        var column = Dom.getAncestorByClass(event.target, "cookieHeaderCell");
-        this.sortColumn(table, column);
-    },
-
-    sortColumn: function(table, col, direction)
-    {
-        if (!col)
-            return;
-
-        if (typeof(col) == "string")
-        {
-            var doc = table.ownerDocument;
-            col = doc.getElementById(col);
-        }
-
-        if (!col)
-            return;
-
-        var numerical = !Css.hasClass(col, "alphaValue");
-
-        var colIndex = 0;
-        for (col = col.previousSibling; col; col = col.previousSibling)
-            ++colIndex;
-
-        this.sort(table, colIndex, numerical, direction);
-    },
-
-    sort: function(table, colIndex, numerical, direction)
-    {
-        var tbody = table.lastChild;
-        var headerRow = tbody.firstChild;
-
-        // Remove class from the currently sorted column
-        var headerSorted = Dom.getChildByClass(headerRow, "cookieHeaderSorted");
-        Css.removeClass(headerSorted, "cookieHeaderSorted");
-
-        // Mark new column as sorted.
-        var header = headerRow.childNodes[colIndex];
-        Css.setClass(header, "cookieHeaderSorted");
-
-        // If the column is already using required sort direction, bubble out.
-        if ((direction == "desc" && header.sorted == 1) ||
-            (direction == "asc" && header.sorted == -1))
-            return;
-
-        var values = [];
-        for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
-        {
-            var cell = row.childNodes[colIndex];
-            var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
-
-            // Issue 43, expires date is formatted in the UI, so use the original cookie
-            // value instead.
-            if (Css.hasClass(cell, "cookieExpiresCol"))
-                value = row.repObject.cookie.expires;
-
-            if (Css.hasClass(row, "opened"))
-            {
-                var cookieInfoRow = row.nextSibling;
-                values.push({row: row, value: value, info: cookieInfoRow});
-                row = cookieInfoRow;
-            }
-            else
-            {
-                values.push({row: row, value: value});
-            }
-        }
-
-        values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
-
-        if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
-        {
-            Css.removeClass(header, "sortedDescending");
-            Css.setClass(header, "sortedAscending");
-
-            header.sorted = -1;
-
-            for (var i = 0; i < values.length; ++i)
-            {
-                tbody.appendChild(values[i].row);
-                if (values[i].info)
-                    tbody.appendChild(values[i].info);
-            }
-        }
-        else
-        {
-            Css.removeClass(header, "sortedAscending");
-            Css.setClass(header, "sortedDescending");
-
-            header.sorted = 1;
-
-            for (var i = values.length-1; i >= 0; --i)
-            {
-                tbody.appendChild(values[i].row);
-                if (values[i].info)
-                    tbody.appendChild(values[i].info);
-            }
-        }
-
-        // Remember last sorted column & direction in preferences.
-        var prefValue = header.getAttribute("id") + " " + (header.sorted > 0 ? "desc" : "asc");
-        setPref(FirebugPrefDomain, lastSortedColumn, prefValue);
-    },
-
-    supportsObject: function(object)
-    {
-        return (object == this);
-    },
-
-    /**
-     * Provides menu items for header context menu.
-     */
-    getContextMenuItems: function(object, target, context)
-    {
-        Templates.Rep.getContextMenuItems.apply(this, arguments);
-
-        var items = [];
-
-        // Iterate over all columns and create a menu item for each.
-        var table = context.getPanel(panelName, true).table;
-        var hiddenCols = table.getAttribute("hiddenCols");
-
-        var lastVisibleIndex;
-        var visibleColCount = 0;
-
-        var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
-
-        // Skip the first column for breakpoints.
-        var columns = cloneArray(header.childNodes);
-        columns.shift();
-
-        for (var i=0; i<columns.length; i++)
-        {
-            var column = columns[i];
-            var visible = (hiddenCols.indexOf(column.id) == -1);
-
-            items.push({
-                label: column.textContent,
-                type: "checkbox",
-                checked: visible,
-                nol10n: true,
-                command: Obj.bindFixed(this.onShowColumn, this, context, column.id)
-            });
-
-            if (visible)
-            {
-                lastVisibleIndex = i;
-                visibleColCount++;
-            }
-        }
-
-        // If the last column is visible, disable its menu item.
-        if (visibleColCount == 1)
-            items[lastVisibleIndex].disabled = true;
-
-        items.push("-");
-        items.push({
-            label: Locale.$STR("net.header.Reset Header"),
-            nol10n: true, 
-            command: Obj.bindFixed(this.onResetColumns, this, context)
-        });
-
-        return items;
-    },
-
-    onShowColumn: function(context, colId)
-    {
-        var table = context.getPanel(panelName, true).table;
-        var hiddenCols = table.getAttribute("hiddenCols");
-
-        // If the column is already presented in the list of hidden columns,
-        // remove it, otherwise append.
-        var index = hiddenCols.indexOf(colId);
-        if (index >= 0)
-        {
-            table.setAttribute("hiddenCols", hiddenCols.substr(0,index-1) +
-                hiddenCols.substr(index+colId.length));
-        }
-        else
-        {
-            table.setAttribute("hiddenCols", hiddenCols + " " + colId);
-        }
-
-        // Store current state into the preferences.
-        setPref(FirebugPrefDomain, hiddenColsPref, table.getAttribute("hiddenCols"));
-    },
-
-    onResetColumns: function(context)
-    {
-        var panel = context.getPanel(panelName, true);
-        var header = Dom.getElementByClass(panel.panelNode, "cookieHeaderRow");
-
-        // Reset widths
-        var columns = header.childNodes;
-        for (var i=0; i<columns.length; i++)
-        {
-            var col = columns[i];
-            if (col.style)
-                col.style.width = "";
-        }
-
-        // Reset visibility. Only the Status column is hidden by default.
-        panel.table.setAttribute("hiddenCols", "colStatus");
-        setPref(FirebugPrefDomain, hiddenColsPref, "colStatus");
-    },
-
-    createTable: function(parentNode)
-    {
-        // Create cookie table UI.
-        var table = this.tableTag.replace({}, parentNode, this);
-
-        // Update columns width according to the preferences.
-        var header = Dom.getElementByClass(table, "cookieHeaderRow");
-        var columns = header.getElementsByTagName("td");
-        for (var i=0; i<columns.length; i++)
-        {
-            var col = columns[i];
-            var colId = col.getAttribute("id");
-            if (!colId || !col.style)
-                continue;
-
-            var width = getPref(FirebugPrefDomain, "firecookie." + colId + ".width");
-            if (width)
-                col.style.width = width + "px";
-        }
-
-        return table;
-    },
-
-    render: function(cookies, parentNode)
-    {
-        // Create basic cookie-list structure.
-        var table = this.createTable(parentNode);
-        var header = Dom.getElementByClass(table, "cookieHeaderRow");
-
-        var tag = Templates.CookieRow.cookieTag;
-        return tag.insertRows({cookies: cookies}, header);
-    }
-});
-
-// ********************************************************************************************* //
-// Resizable column helper (helper for Templates.CookieTable)
-
-var HeaderColumnResizer =
-{
-    resizing: false,
-    currColumn: null,
-    startX: 0,
-    startWidth: 0,
-    lastMouseUp: 0,
-
-    onMouseClick: function(event)
-    {
-        if (!Events.isLeftClick(event))
-            return;
-
-        // Avoid click event for sorting, if the resizing has been just finished.
-        var rightNow = now();
-        if ((rightNow - this.lastMouseUp) < 1000)
-            Events.cancelEvent(event);
-    },
-
-    onMouseDown: function(event)
-    {
-        if (!Events.isLeftClick(event))
-            return;
-
-        var target = event.target;
-        if (!Css.hasClass(target, "cookieHeaderCellBox"))
-            return;
-
-        var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
-        if (!header)
-            return;
-
-        this.onStartResizing(event);
-
-        Events.cancelEvent(event);
-    },
-
-    onMouseMove: function(event)
-    {
-        if (this.resizing)
-        {
-            if (Css.hasClass(target, "cookieHeaderCellBox"))
-                target.style.cursor = "e-resize";
-
-            this.onResizing(event);
-            return;
-        }
-
-        var target = event.target;
-        if (!Css.hasClass(target, "cookieHeaderCellBox"))
-            return;
-
-        if (target)
-            target.style.cursor = "";
-
-        if (!this.isBetweenColumns(event))
-            return;
-
-        // Update cursor if the mouse is located between two columns.
-        target.style.cursor = "e-resize";
-    },
-
-    onMouseUp: function(event)
-    {
-        if (!this.resizing)
-            return;
-
-        this.lastMouseUp = now();
-
-        this.onEndResizing(event);
-        Events.cancelEvent(event);
-    },
-
-    onMouseOut: function(event)
-    {
-        if (!this.resizing)
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-        {
-            FBTrace.sysout("cookies.Mouse out, target: " + event.target.localName +
-                ", " + event.target.className + "\n");
-            FBTrace.sysout("      explicitOriginalTarget: " + event.explicitOriginalTarget.localName +
-                ", " + event.explicitOriginalTarget.className + "\n");
-        }
-
-        var target = event.target;
-        if (target == event.explicitOriginalTarget)
-            this.onEndResizing(event);
-
-        Events.cancelEvent(event);
-    },
-
-    isBetweenColumns: function(event)
-    {
-        var target = event.target;
-        var x = event.clientX;
-        var y = event.clientY;
-
-        var column = Dom.getAncestorByClass(target, "cookieHeaderCell");
-        var offset = Dom.getClientOffset(column);
-        var size = Dom.getOffsetSize(column);
-
-        if (column.previousSibling)
-        {
-            if (x < offset.x + 4)
-                return 1;   // Mouse is close to the left side of the column (target).
-        }
-
-        if (column.nextSibling)
-        {
-            if (x > offset.x + size.width - 6)
-                return 2;  // Mouse is close to the right side.
-        }
-
-        return 0;
-    },
-
-    onStartResizing: function(event)
-    {
-        var location = this.isBetweenColumns(event);
-        if (!location)
-            return;
-
-        var target = event.target;
-
-        this.resizing = true;
-        this.startX = event.clientX;
-
-        // Currently resizing column.
-        var column = Dom.getAncestorByClass(target, "cookieHeaderCell");
-        this.currColumn = (location == 1) ? column.previousSibling : column;
-
-        // Last column width.
-        var size = Dom.getOffsetSize(this.currColumn);
-        this.startWidth = size.width;
-
-        if (FBTrace.DBG_COOKIES)
-        {
-            var colId = this.currColumn.getAttribute("id");
-            FBTrace.sysout("cookies.Start resizing column (id): " + colId +
-                ", start width: " + this.startWidth + "\n");
-        }
-    },
-
-    onResizing: function(event)
-    {
-        if (!this.resizing)
-            return;
-
-        var newWidth = this.startWidth + (event.clientX - this.startX);
-        this.currColumn.style.width = newWidth + "px";
-
-        if (FBTrace.DBG_COOKIES)
-        {
-            var colId = this.currColumn.getAttribute("id");
-            FBTrace.sysout("cookies.Resizing column (id): " + colId +
-                ", new width: " + newWidth + "\n");
-        }
-    },
-
-    onEndResizing: function(event)
-    {
-        if (!this.resizing)
-            return;
-
-        this.resizing = false;
-
-        var newWidth = this.startWidth + (event.clientX - this.startX);
-        this.currColumn.style.width = newWidth + "px";
-
-        // Store width into the preferences.
-        var colId = this.currColumn.getAttribute("id");
-        if (colId)
-        {
-            var prefName = FirebugPrefDomain + ".firecookie." + colId + ".width";
-
-            // Use directly nsIPrefBranch interface as the pref
-            // doesn't have to exist yet.
-            prefs.setIntPref(prefName, newWidth);
-        }
-
-        if (FBTrace.DBG_COOKIES)
-        {
-            var colId = this.currColumn.getAttribute("id");
-            FBTrace.sysout("cookies.End resizing column (id): " + colId +
-                ", new width: " + newWidth + "\n");
-        }
-    }
-};
-
-// ********************************************************************************************* //
-// Clipboard helper
-
-/**
- * @class This class implements clibpoard functionality.
- */
-Firebug.FireCookieModel.CookieClipboard = Obj.extend(Object,
-/** @lends Firebug.FireCookieModel.CookieClipboard */
-{
-    cookieFlavour: "text/firecookie-cookie",
-    unicodeFlavour: "text/unicode",
-
-    copyTo: function(cookie)
-    {
-        try
-        {
-            var trans = this.createTransferData(cookie);
-            if (trans && clipboard)
-                clipboard.setData(trans, null, nsIClipboard.kGlobalClipboard);
-        }
-        catch (err)
-        {
-            ERROR(err);
-        }
-    },
-
-    getFrom: function()
-    {
-        try
-        {
-            var str = this.getTransferData();
-
-            if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.Get Cookie data from clipboard: " + str + "\n");
-
-            return parseFromJSON(str);
-        }
-        catch (err)
-        {
-            ERROR(err);
-        }
-
-        return null;
-    },
-
-    isCookieAvailable: function()
-    {
-        try
-        {
-            if (!clipboard)
-                return false;
-
-            // nsIClipboard interface has been changed in FF3.
-            if (versionChecker.compare(appInfo.version, "3.0*") >= 0)
-            {
-                // FF3
-                return clipboard.hasDataMatchingFlavors([this.cookieFlavour], 1,
-                    nsIClipboard.kGlobalClipboard);
-            }
-            else
-            {
-                // FF2
-                var array = CCIN("@mozilla.org/supports-array;1", "nsISupportsArray");
-                var element = CCIN("@mozilla.org/supports-cstring;1", "nsISupportsCString");
-                element.data = this.cookieFlavour;
-                array.AppendElement(element);
-                return clipboard.hasDataMatchingFlavors(array, nsIClipboard.kGlobalClipboard);
-            }
-        }
-        catch (err)
-        {
-            ERROR(err);
-        }
-
-        return false;
-    },
-
-    createTransferData: function(cookie)
-    {
-        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
-
-        var json = cookie.toJSON();
-        var wrapper1 = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
-        wrapper1.data = json;
-        trans.addDataFlavor(this.cookieFlavour);
-        trans.setTransferData(this.cookieFlavour, wrapper1, json.length * 2);
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Create JSON transfer data : " + json, cookie);
-
-        var str = cookie.toString();
-        var wrapper2 = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
-        wrapper2.data = str;
-        trans.addDataFlavor(this.unicodeFlavour);
-        trans.setTransferData(this.unicodeFlavour, wrapper2, str.length * 2);
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Create string transfer data : " + str, cookie);
-
-        return trans;
-    },
-
-    getTransferData: function()
-    {
-        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
-        trans.addDataFlavor(this.cookieFlavour);
-
-        clipboard.getData(trans, nsIClipboard.kGlobalClipboard);
-
-        var str = new Object();
-        var strLength = new Object();
-
-        trans.getTransferData(this.cookieFlavour, str, strLength);
-
-        if (!str.value) 
-            return null;
-
-        str = str.value.QueryInterface(nsISupportsString);
-        return str.data.substring(0, strLength.value / 2);
-    }
-});
-
-// Helper shortcut
-var CookieClipboard = Firebug.FireCookieModel.CookieClipboard;
-
-// ********************************************************************************************* //
-
-function insertWrappedText(text, textBox)
-{
-    var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
-
-    var html = [];
-    var wrapWidth = Firebug.textWrapWidth;
-
-    var lines = Str.splitLines(text);
-    for (var i = 0; i < lines.length; ++i)
-    {
-        var line = lines[i];
-        while (line.length > wrapWidth)
-        {
-            var m = reNonAlphaNumeric.exec(line.substr(wrapWidth, 100));
-            var wrapIndex = wrapWidth + (m ? m.index : 0);
-            var subLine = line.substr(0, wrapIndex);
-            line = line.substr(wrapIndex);
-
-            html.push("<pre>");
-            html.push(Str.escapeHTML(subLine));
-            html.push("</pre>");
-        }
-
-        html.push("<pre>");
-        html.push(Str.escapeHTML(line));
-        html.push("</pre>");
-    }
-
-    textBox.innerHTML = html.join("");
-}
-
-// ********************************************************************************************* //
-// Cookie object
-
-/**
- * @class Represents a cookie object that is created as a representation of
- * nsICookie component in the browser.
- */
-function Cookie(cookie, action)
-{
-    this.cookie = cookie;
-    this.action = action; 
-    this.rawHost = makeStrippedHost(cookie.host);
-}
-
-Cookie.prototype =
-/** @lends Cookie */
-{
-    cookie: null,
-    action: null,
-
-    toString: function(noDomain)
-    {
-        var expires = this.cookie.expires ? new Date(this.cookie.expires * 1000) : null;
-        return this.cookie.name + "=" + this.cookie.rawValue +
-            (expires ? "; expires=" + expires.toGMTString() : "") +
-            ((this.cookie.path) ? "; path=" + this.cookie.path : "; path=/") +
-            (noDomain ? "" : ((this.cookie.host) ? "; domain=" + this.cookie.host : "")) +
-            ((this.cookie.isSecure) ? "; Secure" : "") + 
-            ((this.cookie.isHttpOnly) ? "; HttpOnly" : "");
-    },
-
-    toJSON: function()
-    {
-        return JSON.stringify({
-            name: this.cookie.name,
-            value: this.cookie.rawValue,
-            expires: (this.cookie.expires ? this.cookie.expires : 0),
-            path: (this.cookie.path ? this.cookie.path : "/"),
-            host: this.cookie.host,
-            isHttpOnly: (this.cookie.isHttpOnly),
-            isSecure: (this.cookie.isSecure)
-        });
-    },
-
-    toText: function()
-    {
-        var expires = this.cookie.expires ? new Date(this.cookie.expires * 1000) : null;
-        return this.cookie.host + "\t" +
-            new String(this.cookie.isDomain).toUpperCase() + "\t" +
-            this.cookie.path + "\t" +
-            new String(this.cookie.isSecure).toUpperCase() + "\t" +
-            (expires ? expires.toGMTString()+ "\t" : "") +
-            this.cookie.name + "\t" +
-            this.cookie.rawValue + "\r\n";
-    },
-
-    getJsonValue: function()
-    {
-        if (this.json)
-            return this.json;
-
-        var jsonString = new String(this.cookie.value);
-        if (jsonString.indexOf("{") != 0)
-            return null;
-
-        // parseJSONString is introduced in Firebug 1.4
-        if (typeof(parseJSONString) == "undefined")
-            return null;
-
-        var currentURI = Firebug.chrome.getCurrentURI();
-        var jsonObject = parseJSONString(jsonString, currentURI.spec);
-        if (typeof (jsonObject) != "object")
-            return null;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.getJsonValue for: " + this.cookie.name, jsonObject);
-
-        return (this.json = jsonObject);
-    },
-
-    getXmlValue: function()
-    {
-        if (this.xml)
-            return this.xml;
-
-        try
-        {
-            var value = this.cookie.value;
-
-            // Simple test if the source is XML (to avoid errors in the Firefox Error console)
-            if (value.indexOf("<") != 0)
-                return null; 
-
-            var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
-            var doc = parser.parseFromString(value, "text/xml");
-            var docElem = doc.documentElement;
-
-            if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.getXmlValue for: " + this.cookie.name);
-
-            // Error handling
-            var nsURI = "http://www.mozilla.org/newlayout/xml/parsererror.xml";
-            if (docElem.namespaceURI == nsURI && docElem.nodeName == "parsererror")
-                return null; 
-
-            return (this.xml = docElem);
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cookies.getXmlValue ERROR " + this.cookie.name, e);
-        }
-
-        return null;
-    },
-
-    getURI: function()
-    {
-        try
-        {
-            var host = this.cookie.host;
-            var httpProtocol = this.cookie.isSecure ? "https://" : "http://";
-            return ioService.newURI(httpProtocol + host + this.cookie.path, null, null);
-        }
-        catch(exc)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.getURI FAILS for " + this.cookie.name);
-        }
-
-        return null;
-    }
-};
-
-// ********************************************************************************************* //
 // Cookie Helpers
 
 function getCookieId(cookie)
 {
     return cookie.host + cookie.path + cookie.name;
-}
-
-function makeStrippedHost(aHost)
-{
-    if (!aHost)
-        return aHost;
-
-    var formattedHost = aHost.charAt(0) == "." ? aHost.substring(1, aHost.length) : aHost;
-    return formattedHost.substring(0, 4) == "www." ? formattedHost.substring(4, formattedHost.length) : formattedHost;
-}
-
-function makeCookieObject(cookie)
-{
-    // Remember the raw value.
-    var rawValue = cookie.value;
-
-    // Unescape '+' characters that are used to encode a space.
-    // This isn't done by unescape method.
-    var value = cookie.value;
-    if (value)
-        value = value.replace(/\+/g, " ");
-
-    var c = { 
-        name        : cookie.name,
-        value       : unescape(value),
-        isDomain    : cookie.isDomain,
-        host        : cookie.host,
-        path        : cookie.path,
-        isSecure    : cookie.isSecure,
-        expires     : cookie.expires,
-        isHttpOnly  : cookie.isHttpOnly,
-        rawValue    : rawValue
-    };
-
-    return c;
-}
-
-function parseFromJSON(json)
-{
-    try
-    {
-        // Parse JSON string. In case of Firefox 3.5 the native support is used,
-        // otherwise the cookie clipboard doesn't work.
-        return JSON.parse(json);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS || FBTrace.DBG_COOKIES)
-            FBTrace.sysout("Failed to parse a cookie from JSON data: " + err, err);
-    }
-
-    return null;
 }
 
 function parseFromString(string)
@@ -3923,423 +1605,12 @@ function parseSentCookiesFromString(header)
             var name = pair.substring(0, index);
             var value = pair.substr(index+1);
             if (name.length && value.length)
-                cookies.push(new Cookie(makeCookieObject({name: name, value: value})));
+                cookies.push(new Cookie(CookieUtils.makeCookieObject({name: name, value: value})));
         }
     }
 
     return cookies;
 }
-
-// ********************************************************************************************* //
-// Cookie Event objects
-
-/**
- * This object represents a "cookie-changed" event (repObject). 
- * There are three types of cookie modify events: 
- * "changed", "added" and "deleted".
- * Appropriate type is specified by action parameter.
- */
-function CookieChangedEvent(context, cookie, action)
-{
-    this.context = context;
-    this.cookie = cookie;
-    this.action = action;     
-    this.rawHost = makeStrippedHost(cookie.host);
-}
-
-/**
- * This object represents "cleared" event, which is raised when the user
- * deletes all cookies (e.g. in the system cookies dialog).
- */
-function CookieClearedEvent()
-{
-}
-
-/**
- * This object represents "cookie-rejected" event, which is fired if cookies
- * from specific domain are rejected.
- */
-function CookieRejectedEvent(context, uri)
-{
-    this.context = context;
-    this.uri = uri;
-}
-
-// ********************************************************************************************* //
-// Base observer
-
-var BaseObserver =
-{
-    QueryInterface : function (aIID) 
-    {
-        if (aIID.equals(nsIObserver) ||
-            aIID.equals(nsISupportsWeakReference) ||
-            aIID.equals(nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    }
-};
-
-// ********************************************************************************************* //
-// Cookie observer
-
-/**
- * @class This class represents an observer (nsIObserver) for cookie-changed
- * and cookie-rejected events. These events are dispatche by Firefox
- * see https://developer.mozilla.org/En/Observer_Notifications.
- */
-var CookieObserver = Obj.extend(BaseObserver,
-/** @lends CookieObserver */
-{
-    // nsIObserver
-    observe: function(aSubject, aTopic, aData) 
-    {
-        if (!Firebug.FireCookieModel.isAlwaysEnabled())
-            return;
-
-        try {
-            if (aTopic == "cookie-changed") {
-                aSubject = aSubject ? aSubject.QueryInterface(nsICookie2) : null;
-                this.iterateContexts(this.onCookieChanged, aSubject, aData);
-            }
-            else if (aTopic == "cookie-rejected") {
-                aSubject = aSubject.QueryInterface(nsIURI);
-                this.iterateContexts(this.onCookieRejected, aSubject, aData);
-            }
-        }
-        catch (err) {
-            FBTrace.sysout("cookies.CookieObserver.observe ERROR " + aTopic, err);
-        }
-    },
-
-    iterateContexts: function(fn)
-    {
-        var oThis = this;
-        var args = FBL.cloneArray(arguments);
-        TabWatcher.iterateContexts(function(context) {
-            args[0] = context;
-            fn.apply(oThis, args);
-        });
-    },
-
-    /**
-     * @param {String} activeUri This object represents currently active host. Notice that there
-     *      can be more active hosts (activeHosts map) on one page in case 
-     *      of embedded iframes or/and previous redirects.
-     *      Properties:
-     *      host: www.example.com
-     *      path: /subdir/
-     *
-     * @param {String} host: Represents the host of a cookie for which
-     *      we are checking if it should be displayed for the active URI.
-     * 
-     * @param {String} path: Represents the path of a cookie for which
-     *      we are checking if it should be displayed for the active URI.
-     * 
-     * @returns {Boolean} If the method returns true the host/path belongs
-     *      to the activeUri.
-     */
-    isHostFromURI: function(activeUri, host, path)
-    {
-        var pathFilter = getPref(FirebugPrefDomain, filterByPath);
-
-        // Get directory path (without the file name)
-        var activePath = activeUri.path.substr(0, (activeUri.path.lastIndexOf("/") || 1));
-
-        // Append slash at the end of the active path, so it mach the cookie's path
-        // in the case that it has slash at the end.
-        var lastChar = activePath.charAt(activePath.length - 1);
-        if (lastChar != "/")
-            activePath += "/";
-
-        // If the path filter is on, only cookies that match given path should be displayed.
-        if (pathFilter && (activePath.indexOf(path) != 0))
-            return false;
-
-        // The cookie must belong to given URI from this context,
-        // otherwise it won't be displayed in this tab.
-        var uri = makeStrippedHost(activeUri.host);
-        if (uri == host)
-            return true;
-
-        if (uri.length < host.length)
-            return false;
-
-        var h = "." + host;
-        var u = "." + uri;
-        if (u.substr(u.length - h.length) == h)
-            return true;
-
-        return false;
-    },
-
-    isHostFromContext: function(context, host, path)
-    {
-        var location;
-
-        // Invalid in Chromebug.
-        try
-        {
-            location = context.window.location;
-            if (!location || !location.protocol)
-                return;
-        }
-        catch (err)
-        {
-            return false;
-        }
-
-        if (location.protocol.indexOf("http") != 0)
-            return false;
-
-        var rawHost = makeStrippedHost(host);
-
-        // Test the current main URI first.
-        // The location isn't nsIURI, so make a fake object (aka nsIURI). 
-        var fakeUri = {host: location.host, path: location.pathname};
-        if (this.isHostFromURI(fakeUri, rawHost, path))
-            return true;
-
-        // xxxHonza
-        // If the context.cookies is not initialized, it's bad. It means that
-        // neither temporary context no real context has been initialized
-        // One reason is that Sript model issues panel.show in onModuleActivate
-        // which consequently requests a file (double load prblem), which
-        // consequently rises this cookie event.
-        if (!context.cookies)
-            return false;
-
-        // Now test if the cookie doesn't belong to some of the
-        // activeHosts (redirects, frames).    
-        var activeHosts = context.cookies.activeHosts;
-        for (var activeHost in activeHosts)
-        {
-            if (this.isHostFromURI(activeHosts[activeHost], rawHost, path))
-                return true;
-        }
-
-        return false;
-    },
-
-    isCookieFromContext: function(context, cookie)
-    {
-        return this.isHostFromContext(context, cookie.host, cookie.path);
-    },
-
-    onCookieChanged: function(context, cookie, action)
-    {
-        // If the action == "cleared" the cookie is *not* set. This action is triggered
-        // when all cookies are removed (cookieManager.removeAll)
-        // In such a case let's displaye the event in all contexts.
-        if (cookie && !this.isCookieFromContext(context, cookie))
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onCookieChanged: '" + (cookie ? cookie.name : "null") +
-                "', " + action + "\n");
-
-        if (action != "cleared")
-        {
-            // If log into the Console tab is on, create "deleted", "added" and "changed" events.
-            if (logEvents())
-                this.logEvent(new CookieChangedEvent(context, makeCookieObject(cookie),
-                    action), context, "cookie");
-
-            // Break on cookie if "Break On" is activated or if a cookie breakpoint exist.
-            Breakpoints.breakOnCookie(context, cookie, action);
-        }
-
-        switch(action)
-        {
-          case "deleted":
-            this.onRemoveCookie(context, cookie);
-            break;
-          case "added":
-            this.onAddCookie(context, cookie);
-            break;
-          case "changed":
-            this.onUpdateCookie(context, cookie);
-            break;
-          case "cleared":
-            this.onClear(context);
-            return;
-        }
-    },
-
-    onClear: function(context)
-    {
-        var panel = context.getPanel(panelName);
-        panel.clear();
-
-        if (logEvents())
-            this.logEvent(new CookieClearedEvent(), context, "cookiesCleared");
-    },
-
-    onCookieRejected: function(context, uri)
-    {
-        var path = uri.path.substr(0, (uri.path.lastIndexOf("/") || 1));
-        if (!this.isHostFromContext(context, uri.host, path))
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onCookieRejected: " + uri.spec + "\n");
-
-        // Mark host and all its cookies as rejected.
-        // xxxHonza there was an exception "context.cookies is undefined".
-        var activeHost = context.cookies.activeHosts[uri.host];
-        if (activeHost)
-            activeHost.rejected = true;
-
-        var receivedCookies = activeHost ? activeHost.receivedCookies : null;
-        for (var i=0; receivedCookies && i<receivedCookies.length; i++)
-            receivedCookies[i].cookie.rejected = true;
-
-        // Refresh the panel asynchronously.
-        context.invalidatePanels(panelName);
-
-        // Bail out if events are not logged into the Console.
-        if (!logEvents())
-            return;
-
-        // The "cookies-rejected" event is sent even if no cookies
-        // from the blocked site have been actually received.
-        // So, the receivedCookies array can be null.
-        // Don't display anything in the console in that case,
-        // there could be a lot of "Cookie Rejected" events.
-        // There would be actually one for each embedded request.
-        if (!receivedCookies)
-            return;
-
-        // Create group log for list of rejected cookies.
-        var groupRow = Firebug.Console.openGroup(
-            [new CookieRejectedEvent(context, uri)], 
-            context, "cookiesRejected", null, true, null, true);
-
-        // The console can be disabled (since FB 1.2).
-        if (!groupRow)
-            return;
-
-        // It's closed by default.
-        Css.removeClass(groupRow, "opened");
-        Firebug.Console.closeGroup(context, true);
-
-        // Create embedded table.
-        Templates.CookieTable.render(receivedCookies, groupRow.lastChild);
-    },
-
-    onAddCookie: function(context, cookie)
-    {
-        var panel = context.getPanel(panelName, true);
-        var repCookie = panel ? panel.findRepObject(cookie) : null;
-        if (repCookie)
-        {
-            this.onUpdateCookie(context, cookie);
-            return;
-        }
-
-        if (!panel || !panel.table)
-            return;
-
-        var repCookie = panel ? panel.findRepObject(cookie) : null;
-
-        cookie = new Cookie(makeCookieObject(cookie));
-
-        var tbody = panel.table.lastChild;
-        var parent = tbody.lastChild ? tbody.lastChild : tbody;
-        var row = Templates.CookieRow.cookieTag.insertRows({cookies: [cookie]}, parent)[0];
-
-        cookie.row = row;
-        row.repObject = cookie;
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
-
-        //xxxHonza the new cookie should respect current sorting.
-    },
-
-    onUpdateCookie: function(context, cookie)
-    {
-        var panel = context.getPanel(panelName, true);
-
-        // The table doesn't have to be initialized yet.
-        if (!panel || !panel.table)
-            return;
-
-        var repCookie = panel ? panel.findRepObject(cookie) : null;
-        if (!repCookie)
-        {
-            this.onAddCookie(context, cookie);
-            return;
-        }
-
-        repCookie.cookie = makeCookieObject(cookie);
-        repCookie.rawHost = makeStrippedHost(cookie.host);
-
-        // These are helpers so, the XML and JSON cookies don't have to be parsed
-        // again and again. But we need to reset them if the value is changed.
-        repCookie.json = null;
-        repCookie.xml = null;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onUpdateCookie: " + cookie.name, repCookie);
-
-        var row = repCookie.row;
-        var rowTemplate = Templates.CookieRow;
-
-        if (Css.hasClass(row, "opened"))
-        {
-            var cookieInfoBody = Dom.getElementByClass(row.nextSibling, "cookieInfoBody");
-
-            // Invalidate content of all tabs.
-            cookieInfoBody.valuePresented = false;
-            cookieInfoBody.rawValuePresented = false;
-            cookieInfoBody.xmlPresented = false;
-            cookieInfoBody.jsonPresented = false;
-
-            // Update tabs visibility and content of the selected tab.
-            rowTemplate.updateTabs(cookieInfoBody, repCookie, context);
-            rowTemplate.updateInfo(cookieInfoBody, repCookie, context);
-        }
-
-        rowTemplate.updateRow(repCookie, context);
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
-    },
-
-    onRemoveCookie: function(context, cookie)
-    {
-        var panel = context.getPanel(panelName, true);
-        var repCookie = panel ? panel.findRepObject(cookie) : null;
-        if (!repCookie)
-            return;
-
-        // Remove cookie from UI.
-        var row = repCookie.row;
-        var parent = repCookie.row.parentNode;
-
-        if (Css.hasClass(repCookie.row, "opened"))
-            parent.removeChild(row.nextSibling);
-
-        if (!parent)
-            return;
-
-        parent.removeChild(repCookie.row);
-
-        if (FBTrace.DBG_COOKIES)
-            checkList(panel);
-    },
-
-    logEvent: function(eventObject, context, className)
-    {
-        // xxxHonza: if the cookie is changed befor initContext, the log in
-        // console is lost.
-        Firebug.Console.log(eventObject, context, className, null, true);
-    }
-});
 
 // ********************************************************************************************* //
 // Preference observer 
@@ -4600,7 +1871,7 @@ var HttpObserver = Obj.extend(BaseObserver,
                 cookie.host = host;
 
             // Push into activeHosts
-            var cookieWrapper = new Cookie(makeCookieObject(cookie));
+            var cookieWrapper = new Cookie(CookieUtils.makeCookieObject(cookie));
             activeHost.receivedCookies.push(cookieWrapper);
 
             // Push into activeCookies
@@ -4652,14 +1923,6 @@ function checkList(panel)
 }
 
 // ********************************************************************************************* //
-// Time Helpers
-
-function now()
-{
-    return (new Date()).getTime();
-}
-
-// ********************************************************************************************* //
 // Array Helpers
 
 function cloneMap(map)
@@ -4704,7 +1967,7 @@ function setPref(prefDomain, name, value)
 
 function logEvents()
 {
-    return getPref(FirebugPrefDomain, "firecookie.logEvents");
+    return Options.get("firecookie.logEvents");
 }
 
 // ********************************************************************************************* //
@@ -4771,13 +2034,6 @@ Firebug.FireCookieModel.TraceListener =
 };
 
 // ********************************************************************************************* //
-// Make following APIs accessible in editCookie.js
-
-Firebug.FireCookieModel.Cookie = Cookie;
-Firebug.FireCookieModel.$FC_STR = $FC_STR;
-Firebug.FireCookieModel.$FC_STRF = $FC_STRF;
-
-// ********************************************************************************************* //
 // Custom info tab within Net panel
 
 /**
@@ -4790,11 +2046,11 @@ Firebug.FireCookieModel.NetInfoBody = domplate(Firebug.Rep,
     tag:
         UL({"class": "netInfoCookiesList"},
             LI({"class": "netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"}, 
-                DIV($FC_STR("firecookie.netinfo.Received Cookies")),
+                DIV(Locale.$STR("firecookie.netinfo.Received Cookies")),
                 DIV({"class": "netInfoReceivedCookies netInfoCookies"})
             ),
             LI({"class": "netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"}, 
-                DIV($FC_STR("firecookie.netinfo.Sent Cookies")),
+                DIV(Locale.$STR("firecookie.netinfo.Sent Cookies")),
                 DIV({"class": "netInfoSentCookies netInfoCookies"})
             )
         ),
@@ -4818,7 +2074,7 @@ Firebug.FireCookieModel.NetInfoBody = domplate(Firebug.Rep,
         // Create tab only if there are some cookies.
         if (sentCookiesHeader || receivedCookiesHeader)
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "Cookies",
-                $FC_STR("firecookie.Panel"));
+                Locale.$STR("firecookie.Panel"));
     },
 
     destroyTabBody: function(infoBox, file)
@@ -4851,7 +2107,7 @@ Firebug.FireCookieModel.NetInfoBody = domplate(Firebug.Rep,
                 var cookie = parseFromString(cookies[i]);
                 if (!cookie.host)
                     cookie.host = file.request.URI.host;
-                receivedCookies.push(new Cookie(makeCookieObject(cookie)));
+                receivedCookies.push(new Cookie(CookieUtils.makeCookieObject(cookie)));
             }
         }
 
@@ -4979,7 +2235,7 @@ Firebug.FireCookieModel.BreakpointTemplate = domplate(Firebug.Rep,
 
     getType: function(bp)
     {
-        return $FC_STR("Break On Cookie Change");
+        return Locale.$STR("Break On Cookie Change");
     },
 
     onRemove: function(event)
@@ -5037,212 +2293,6 @@ Firebug.FireCookieModel.BreakpointTemplate = domplate(Firebug.Rep,
         return object instanceof Firebug.FireCookieModel.Breakpoint;
     }
 });
-
-Firebug.FireCookieModel.Breakpoints =
-{
-    breakOnCookie: function(context, cookie, action)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.breakOnCookie; " + action);
-
-        var halt = false;
-        var conditionIsFalse = false;
-
-        // If there is an enabled breakpoint with condition:
-        // 1) break if the condition is evaluated to true.
-        var bp = context.cookies.breakpoints.findBreakpoint(makeCookieObject(cookie));
-        if (bp && bp.checked)
-        {
-            halt = true;
-            if (bp.condition)
-            {
-                halt = bp.evaluateCondition(context, cookie);
-                conditionIsFalse = !halt;
-            }
-        }
-
-        // 2) If break on next flag is set and there is no condition evaluated to false,
-        // break with "break on next" breaking cause (this new breaking cause can override
-        // an existing one that is set when evaluating a breakpoint condition).
-        if (context.breakOnCookie && !conditionIsFalse)
-        {
-            context.breakingCause = {
-                title: Locale.$STR("firecookie.Break On Cookie"),
-                message: cropString(unescape(cookie.name + "; " + cookie.value), 200)
-            };
-            halt = true;
-        }
-
-        // Ignore if there is no reason to break.
-        if (!halt)
-            return;
-
-        // Even if the execution was stopped at breakpoint reset the global
-        // breakOnCookie flag.
-        context.breakOnCookie = false;
-
-        this.breakNow(context);
-
-        // Clear breakpoint associated with removed cookie.
-        if (action == "deleted")
-        {
-            breakpoints.removeBreakpoint(bp);
-            context.invalidatePanels("breakpoints");
-        }
-    },
-
-    breakNow: function(context)
-    {
-        if (Firebug.Breakpoint && Firebug.Breakpoint.updatePanelTab)
-        {
-            var panel = context.getPanel(panelName, true);
-            Firebug.Breakpoint.updatePanelTab(panel, false);
-
-            // Don't utilize Firebug.Breakpoint.breakNow since the code doesn't
-            // exclude firecookie files from the stack (chrome://firecookie/)
-            // Firebug.Debugger.breakNowURLPrefix must be changed to: "chrome://",
-            //Firebug.Breakpoint.breakNow(context.getPanel(panelName, true));
-            //return;
-        }
-
-        Firebug.Debugger.halt(function(frame)
-        {
-            if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.breakNow; debugger halted");
-
-            for (; frame && frame.isValid; frame = frame.callingFrame)
-            {
-                var fileName = frame.script.fileName;
-                if (fileName &&
-                    fileName.indexOf("chrome://firebug/") != 0 &&
-                    fileName.indexOf("chrome://firecookie/") != 0 &&
-                    fileName.indexOf("/components/firebug-") == -1 &&
-                    fileName.indexOf("/modules/firebug-") == -1)
-                    break;
-            }
-
-            if (frame)
-            {
-                Firebug.Debugger.breakContext = context;
-                Firebug.Debugger.onBreak(frame, 3);
-            }
-            else
-            {
-                if (FBTrace.DBG_COOKIES)
-                    FBTrace.sysout("cookies.breakNow; NO FRAME");
-            }
-        });
-    },
-
-    getContextMenuItems: function(cookie, target, context)
-    {
-        // Firebug 1.5 is needed for breakpoint support.
-        if (!Firebug.Breakpoint)
-            return;
-
-        var items = [];
-        items.push("-");
-
-        var cookieName = cropString(cookie.cookie.name, 40);
-        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie);
-
-        items.push({
-            nol10n: true,
-            tooltiptext: $FC_STRF("firecookie.menu.tooltip.Break On Cookie", [cookieName]),
-            label: $FC_STRF("firecookie.menu.Break On Cookie", [cookieName]),
-            type: "checkbox",
-            checked: bp != null,
-            command: Obj.bindFixed(this.onBreakOnCookie, this, context, cookie),
-        });
-
-        if (bp)
-        {
-            items.push(
-                {label: "firecookie.menu.Edit Breakpoint Condition",
-                    command: Obj.bindFixed(this.editBreakpointCondition, this, context, cookie) }
-            );
-        }
-
-        return items;
-    },
-
-    onBreakOnCookie: function(context, cookie)
-    {
-        // Support for breakpoints needs Firebug 1.5
-        if (!Firebug.Breakpoint)
-        {
-            if (FBTrace.DBG_COOKIES || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cookies.breakOnCookie; You need Firebug 1.5 to create a breakpoint");
-            return;
-        }
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.breakOnCookie; ", context);
-
-        var breakpoints = context.cookies.breakpoints;
-
-        // Remove an existing or create a new breakpoint.
-        var row = cookie.row;
-        cookie = cookie.cookie;
-        var bp = breakpoints.findBreakpoint(cookie);
-        if (bp)
-        {
-            breakpoints.removeBreakpoint(cookie);
-            row.removeAttribute("breakpoint");
-            row.removeAttribute("disabledBreakpoint");
-        }
-        else
-        {
-            breakpoints.addBreakpoint(cookie);
-            row.setAttribute("breakpoint", "true");
-        }
-    },
-
-    updateBreakpoint: function(context, cookie)
-    {
-        // Make sure a breakpoint is displayed.
-        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie)
-        if (!bp)
-            return;
-
-        var row = cookie.row;
-        row.setAttribute("breakpoint", "true");
-        row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
-    },
-
-    onContextMenu: function(context, event)
-    {
-        if (!Css.hasClass(event.target, "sourceLine"))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "cookieRow");
-        if (!row)
-            return;
-
-        var cookie = row.repObject;
-        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie);
-        if (!bp)
-            return;
-
-        this.editBreakpointCondition(context, cookie);
-        Events.cancelEvent(event);
-    },
-
-    editBreakpointCondition: function(context, cookie)
-    {
-        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie);
-        if (!bp)
-            return;
-
-        var condition = bp ? bp.condition : "";
-
-        var panel = context.getPanel(panelName);
-        panel.selectedSourceBox = cookie.row;
-        Firebug.Editor.startEditing(cookie.row, condition);
-    },
-}
-
-var Breakpoints = Firebug.FireCookieModel.Breakpoints;
 
 // ********************************************************************************************* //
 // Backward compatibility with Firebug 1.4
@@ -5352,7 +2402,7 @@ Firebug.FireCookieModel.Breakpoint.prototype =
         {
             var scope = {};
             scope["value"] = cookie.value;
-            scope["cookie"] = makeCookieObject(cookie);
+            scope["cookie"] = CookieUtils.makeCookieObject(cookie);
 
             // The callbacks will set this if the condition is true or if the eval faults.
             delete context.breakingCause;
@@ -5408,36 +2458,6 @@ Firebug.FireCookieModel.Breakpoint.prototype =
         };
     }
 }
-
-// ********************************************************************************************* //
-
-var OBJECTLINK = FirebugReps.OBJECTLINK;
-
-// xxxHonza: TODO
-Templates.CookieRep = domplate(Templates.Rep,
-{
-    tag:
-        OBJECTLINK(
-            SPAN({"class": "objectTitle"}, "$object|getTitle")
-        ),
-
-    className: "cookie",
-
-    supportsObject: function(cookie)
-    {
-        return cookie instanceof Cookie;
-    },
-
-    getTitle: function(cookie)
-    {
-        return cookie.cookie.name;
-    },
-
-    getTooltip: function(cookie)
-    {
-        return cookie.cookie.value;
-    }
-});
 
 // ********************************************************************************************* //
 // Firebug Compatibility
@@ -5511,27 +2531,12 @@ if (Firebug.ActivableModule)
 else
     Firebug.registerModule(Firebug.FireCookieModel);
 
-Firebug.registerPanel(FireCookiePanel);
-
-Firebug.registerRep(
-    //Templates.CookieRep,          // Cookie
-    Templates.CookieTable,          // Cookie table with list of cookies
-    Templates.CookieRow,            // Entry in the cookie table
-    Templates.CookieChanged,        // Console: "cookie-changed" event
-    Templates.CookieRejected,       // Console: "cookie-rejected" event
-    Templates.CookieCleared         // Console: cookies "cleared" event
-);
-
-// Register breakpoint template.
-Firebug.registerRep(Firebug.FireCookieModel.BreakpointTemplate);
-
 // Register stylesheet in Firebug. This method is introduced in Firebug 1.6
 if (Firebug.registerStylesheet)
     Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
 
-// ********************************************************************************************* //
-
-FBTrace.DBG_COOKIES = Options.getPref(FirebugPrefDomain, "DBG_COOKIES");
+// Register breakpoint template.
+Firebug.registerRep(Firebug.FireCookieModel.BreakpointTemplate);
 
 // ********************************************************************************************* //
 }});

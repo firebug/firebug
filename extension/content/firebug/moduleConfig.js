@@ -59,6 +59,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/css/stylePanel",
         "firebug/css/computedPanel",
         "firebug/cookies/fireCookie",
+        "firebug/cookies/cookiePanel",
     ];
 
     return config;
