@@ -48,6 +48,8 @@ var POLICY_NO_CONSENT = Ci.nsICookie2.POLICY_NO_CONSENT;
 var POLICY_IMPLICIT_CONSENT = Ci.nsICookie2.POLICY_IMPLICIT_CONSENT;
 var POLICY_NO_II = Ci.nsICookie2.POLICY_NO_II;
 
+const panelName = "cookies";
+
 // ********************************************************************************************* //
 // Templates Helpers
 
@@ -854,7 +856,7 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
     },
 
     getValue: function(cookieEvent) {
-        return cropString(cookieEvent.cookie.value, 75);
+        return Str.cropString(cookieEvent.cookie.value, 75);
     },
 
     getDomain: function(cookieEvent) {
@@ -938,7 +940,7 @@ CookieReps.CookieRejected = domplate(CookieReps.Rep,
         for (var i=0; i<cookies.length; i++)
             label += cookies[i].cookie.name + ((i<cookies.length-1) ? ", " : "");
 
-        return cropString(label, 75);
+        return Str.cropString(label, 75);
     },
 
     onClickDomain: function(event)

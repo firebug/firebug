@@ -400,7 +400,7 @@ Breakpoints.Breakpoint.prototype =
 
         context.breakingCause = {
             title: Locale.$STR("firecookie.Break On Cookie"),
-            message: cropString(unescape(this.name + "; " + this.condition + "; "), 200)
+            message: Str.cropString(unescape(this.name + "; " + this.condition + "; "), 200)
         };
     },
 
