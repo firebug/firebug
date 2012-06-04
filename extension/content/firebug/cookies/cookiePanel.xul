@@ -12,8 +12,6 @@
         <command id="cmd_cookieCreate" oncommand="Firebug.FireCookieModel.onCreateCookie(Firebug.currentContext)"/>
         <command id="cmd_cookieViewAll" oncommand="Firebug.FireCookieModel.onViewAll(Firebug.currentContext)"/>
         <command id="cmd_cookieViewExceptions" oncommand="Firebug.FireCookieModel.onViewExceptions(Firebug.currentContext)"/>
-        <command id="cmd_cookieHelp" oncommand="Firebug.FireCookieModel.onHelp(Firebug.currentContext)"/>
-        <command id="cmd_cookieAbout" oncommand="Firebug.FireCookieModel.onAbout(Firebug.currentContext)"/>
         <command id="cmd_cookieFilterByPath" oncommand="Firebug.FireCookieModel.onFilter(Firebug.currentContext, 'firecookie.filterByPath')"/>
         <command id="cmd_cookieShowRejectedCookies" oncommand="Firebug.FireCookieModel.onFilter(Firebug.currentContext, 'firecookie.showRejectedCookies')"/>
         <command id="cmd_cookieExportAll" oncommand="Firebug.FireCookieModel.onExportAll(Firebug.currentContext)"/>
@@ -142,16 +140,6 @@
                             command="cmd_cookieViewExceptions"
                             label="firecookie.ViewExceptions"
                             tooltiptext="firecookie.ViewExceptionsTooltip"/>
-                        <menuseparator/>
-                        <menuitem id="fcCookieHelp"
-                            command="cmd_cookieHelp"
-                            label="firecookie.Help"
-                            tooltiptext="firecookie.HelpTooltip"/>
-                        <menuseparator/>
-                        <menuitem id="fcCookieAbout"
-                            command="cmd_cookieAbout"
-                            label="firecookie.About"
-                            tooltiptext="firecookie.AboutTooltip"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>

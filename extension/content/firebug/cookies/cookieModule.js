@@ -184,7 +184,7 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
     {
         var elements = ["fcCookiesMenu", "fcExportAll", "fcExportForSite", "fcRemoveAllSession",
             "fcRemoveAll", "fcCreate", "fcCookieViewAll", "fcCookieViewExceptions",
-            "fcCookieHelp", "fcCookieAbout", "fcToolsMenu", "fcFilterMenu", "fcFilterByPath",
+            "fcToolsMenu", "fcFilterMenu", "fcFilterByPath",
             "fcShowRejectedCookies", "fbConsoleFilter-cookies"];
 
         for (var i=0; i<elements.length; i++)
@@ -1146,41 +1146,6 @@ Firebug.FireCookieModel = Obj.extend(Firebug.ActivableModule,
 
         // Close menu.
         parentMenu.hidePopup();
-    },
-
-    onHelp: function(context) 
-    {
-        openNewTab("http://www.janodvarko.cz/firecookie");
-    },
-
-    onAbout: function(context) 
-    {
-        try
-        {
-            // Firefox 4.0 implements new AddonManager. In case of Firefox 3.6 the module
-            // is not avaialble and there is an exception.
-            Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
-        }
-        catch (err)
-        {
-        }
-
-        if (typeof(AddonManager) != "undefined")
-        {
-            AddonManager.getAddonByID("firecookie@janodvarko.cz", function(addon) {
-                openDialog("chrome://mozapps/content/extensions/about.xul", "",
-                "chrome,centerscreen,modal", addon);
-            });
-        }
-        else
-        {
-            var extensionManager = Xpcom.CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
-
-            var parent = context.chrome.window;
-            parent.openDialog("chrome://mozapps/content/extensions/about.xul", "",
-                "chrome,centerscreen,modal", "urn:mozilla:item:firecookie@janodvarko.cz",
-                extensionManager.datasource);
-        }
     },
 
     onViewAll: function(context) 
