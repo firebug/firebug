@@ -12,6 +12,7 @@ define([
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/array",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieReps",
@@ -27,7 +28,7 @@ define([
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/editCookie",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie) {
 
@@ -1343,13 +1344,13 @@ CookieBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGr
 
     addBreakpoint: function(cookie)
     {
-        this.breakpoints.push(new Firebug.CookieModule.Breakpoint(cookie));
+        this.breakpoints.push(new Breakpoints.Breakpoint(cookie));
     },
 
     removeBreakpoint: function(cookie)
     {
         var bp = this.findBreakpoint(cookie);
-        remove(this.breakpoints, bp);
+        Arr.remove(this.breakpoints, bp);
     },
 
     matchBreakpoint: function(bp, args)

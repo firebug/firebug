@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
     "firebug/cookies/cookieUtils",
 ],
-function(Locale, Str, Domplate, CookieUtils) {
+function(Obj, Locale, Str, Domplate, CookieUtils) {
 
 with (Domplate) {
 
