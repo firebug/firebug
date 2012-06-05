@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 dateTimePicker {
-    -moz-binding: url("chrome://firecookie/content/dateTimePicker.xml#dateTimePicker");
+    -moz-binding: url("chrome://firebug/content/cookies/dateTimePicker.xml#dateTimePicker");
 }
 
 .datetimepicker-input[disabled] {

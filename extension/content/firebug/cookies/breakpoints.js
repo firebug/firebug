@@ -74,6 +74,7 @@ var Breakpoints =
             var panel = context.getPanel(panelName, true);
             Firebug.Breakpoint.updatePanelTab(panel, false);
 
+            // xxxHonza: fix this
             // Don't utilize Firebug.Breakpoint.breakNow since the code doesn't
             // exclude firecookie files from the stack (chrome://firecookie/)
             // Firebug.Debugger.breakNowURLPrefix must be changed to: "chrome://",

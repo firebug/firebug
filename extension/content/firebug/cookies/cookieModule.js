@@ -27,10 +27,13 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/editCookie",
+    "firebug/trace/traceListener",
+    "firebug/trace/traceModule",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
-    CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie) {
+    CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
+    TraceListener, TraceModule) {
 
 with (Domplate) {
 
@@ -58,10 +61,8 @@ const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPrompt
 
 // Preferences
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const nsIPrefService = Ci.nsIPrefService;
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const prefService = PrefService.getService(nsIPrefService);
-const prefs = PrefService.getService(nsIPrefBranch2);
+const prefService = PrefService.getService(Ci.nsIPrefService);
+const prefs = PrefService.getService(Ci.nsIPrefBranch2);
 
 // Cookie panel ID.
 const panelName = "cookies";
@@ -103,11 +104,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     initialize: function(prefDomain, prefNames)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.CookieModule.initialize;");
+            FBTrace.sysout("cookies.CookieModule.initialize; ");
 
-        // Support for trace-console customization in Firebug 1.3
-        if (Firebug.TraceModule && Firebug.TraceModule.addListener)
-            Firebug.TraceModule.addListener(this.TraceListener);
+        this.traceListener = new TraceListener("cookies.", "DBG_COOKIES", true,
+            "chrome://firebug/skin/cookies/firecookieTrace.css");
+
+        TraceModule.addListener(this.traceListener);
 
         this.panelName = panelName;
         this.description = Locale.$STR("cookies.modulemanager.description");
@@ -158,9 +160,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // Append the styleesheet to a new console popup panel introduced in Firebug 1.6
         this.addStyleSheet(null);
 
-        // Console filter is available since Firebug 1.6
-        if (System.checkFirebugVersion("1.6") >= 0)
-            Dom.collapse(Firebug.chrome.$("fbConsoleFilter-cookies"), false);
+        Dom.collapse(Firebug.chrome.$("fbConsoleFilter-cookies"), false);
     },
 
     /**
@@ -172,8 +172,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         this.unregisterObservers(null);
 
         // Support for trace-console customization in Firebug 1.3
-        if (Firebug.TraceModule && Firebug.TraceModule.removeListener)
-            Firebug.TraceModule.removeListener(this.TraceListener);
+        TraceModule.removeListener(this.traceListener);
 
         var netInfoBody = Firebug.NetMonitor.NetInfoBody;
         if ("removeListener" in netInfoBody)
@@ -1175,21 +1174,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         parent.openDialog("chrome://browser/content/preferences/permissions.xul",
             "_blank","chrome,resizable=yes", params);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // FBTest
-
-    // Expose our test list to the FBTest console for automated testing.
-    onGetTestList: function(testLists)
-    {
-        testLists.push({
-            extension: "Firecookie",
-            testListURL: "chrome://firecookie/content/testList.html"
-        });
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onGetTestList; ");
-    }
 }); 
 
 // ********************************************************************************************* //
@@ -1461,36 +1445,6 @@ function cloneMap(map)
 
     return newMap;
 }
-
-// ********************************************************************************************* //
-// Support for FBTraceConsole in Firebug 1.3
-
-Firebug.CookieModule.TraceListener = 
-{
-    // Called when console window is loaded.
-    onLoadConsole: function(win, rootNode)
-    {
-        var doc = rootNode.ownerDocument;
-        var styleSheet = createStyleSheet(doc, 
-            "chrome://firebug/skin/cookies/firecookieTrace.css");
-        styleSheet.setAttribute("id", "fcCookieLogs");
-        addStyleSheet(doc, styleSheet);
-    },
-
-    // Called when a new message is logged in to the trace-console window.
-    onDump: function(message)
-    {
-        // Set type of the log message so, custom CSS style can be applied
-        // in order to distinguishe it from other messages.
-        var index = message.text.indexOf("cookies.");
-        if (index == 0)
-        {
-            message.text = message.text.substr("cookies.".length);
-            message.text = trimLeft(message.text);
-            message.type = "DBG_COOKIES";
-        }
-    }
-};
 
 // ********************************************************************************************* //
 // Firebug Registration
