@@ -931,7 +931,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             action: "create",
             window: context.window,
             EditCookie: EditCookie,
-            Firebug: Firebug
+            Firebug: Firebug,
+            FBTrace: FBTrace,
         };
 
         var parent = context.chrome.window;
@@ -1496,6 +1497,9 @@ Firebug.CookieModule.TraceListener =
 
 // Expose to XUL scope
 Firebug.CookieModule.Perm = CookiePermissions;
+
+// Expose for tests
+Firebug.CookieModule.CookieReps = CookieReps;
 
 Firebug.registerActivableModule(Firebug.CookieModule);
 

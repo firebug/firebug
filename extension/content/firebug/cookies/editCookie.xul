@@ -17,6 +17,7 @@
 
     <script type="application/x-javascript">
     var args = window.arguments[0];
+    FBTrace = args.FBTrace;
     EditCookie = new args.EditCookie(window);
     Firebug = args.Firebug;
     </script>

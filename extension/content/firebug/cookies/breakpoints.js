@@ -5,9 +5,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
+    "firebug/lib/css",
     "firebug/cookies/cookieUtils",
 ],
-function(Obj, Locale, Str, Domplate, CookieUtils) {
+function(Obj, Locale, Str, Domplate, Css, CookieUtils) {
 
 with (Domplate) {
 
@@ -111,10 +112,6 @@ var Breakpoints =
 
     getContextMenuItems: function(cookie, target, context)
     {
-        // Firebug 1.5 is needed for breakpoint support.
-        if (!Firebug.Breakpoint)
-            return;
-
         var items = [];
         items.push("-");
 
@@ -143,14 +140,6 @@ var Breakpoints =
 
     onBreakOnCookie: function(context, cookie)
     {
-        // Support for breakpoints needs Firebug 1.5
-        if (!Firebug.Breakpoint)
-        {
-            if (FBTrace.DBG_COOKIES || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cookies.breakOnCookie; You need Firebug 1.5 to create a breakpoint");
-            return;
-        }
-
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.breakOnCookie; ", context);
 

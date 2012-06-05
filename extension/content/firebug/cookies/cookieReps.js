@@ -19,10 +19,13 @@ define([
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookieEvents",
     "firebug/cookies/cookiePermissions",
+    "firebug/cookies/editCookie",
+    "firebug/cookies/cookieClipboard",
+    "firebug/cookies/breakpoints",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
-    CookiePermissions) {
+    CookiePermissions, EditCookie, CookieClipboard, Breakpoints) {
 
 with (Domplate) {
 
@@ -407,7 +410,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             items = items.concat(permItems);
 
         // Breakpoints
-        var breakOnItems = Firebug.CookieModule.Breakpoints.getContextMenuItems(cookie, target, context);
+        var breakOnItems = Breakpoints.getContextMenuItems(cookie, target, context);
         if (breakOnItems)
             items = items.concat(breakOnItems);
 
@@ -478,9 +481,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     onEdit: function(cookie)
     {
         var params = {
-          cookie: cookie.cookie,
-          action: "edit",
-          window: null
+            cookie: cookie.cookie,
+            action: "edit",
+            window: null,
+            EditCookie: EditCookie,
+            Firebug: Firebug,
+            FBTrace: FBTrace,
         };
 
         var parent = Firebug.currentContext.chrome.window;
