@@ -275,6 +275,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var offset = Dom.getClientOffset(node);
             var titleAtTop = offset.y < this.panelNode.scrollTop;
+
             Dom.scrollTo(groupNode, this.panelNode, null,
                 groupNode.offsetHeight > this.panelNode.clientHeight || titleAtTop ? "top" : "bottom");
         }
@@ -291,17 +292,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
             var isOpened = Css.hasClass(computedStyles[i], "opened");
             if ((expand && !isOpened) || (!expand && isOpened))
-                this.toggleStyle(computedStyles[i]);
+                this.toggleStyle(computedStyles[i], false);
         }
     },
 
-    toggleStyle: function(node)
+    toggleStyle: function(node, scroll)
     {
         var styleNode = Dom.getAncestorByClass(node, "computedStyle");
         var style = Firebug.getRepObject(styleNode);
 
         Css.toggleClass(styleNode, "opened");
+        var opened = Css.hasClass(styleNode, "opened");
         this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
+
+        if (opened && scroll)
+        {
+            var selectorsNode = styleNode.nextSibling;
+            var offset = Dom.getClientOffset(styleNode);
+            var titleAtTop = offset.y < this.panelNode.scrollTop;
+            var totalHeight = styleNode.offsetHeight + selectorsNode.offsetHeight;
+            var alignAtTop = totalHeight > this.panelNode.clientHeight || titleAtTop;
+
+            Dom.scrollTo(alignAtTop ? styleNode : selectorsNode, this.panelNode, null,
+                alignAtTop ? "top" : "bottom", alignAtTop);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -322,7 +336,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var computedStyle = Dom.getAncestorByClass(event.target, "computedStyle");
         if (computedStyle && Css.hasClass(computedStyle, "hasSelectors"))
         {
-            this.toggleStyle(event.target);
+            this.toggleStyle(event.target, true);
             return;
         }
     },

@@ -535,7 +535,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     }
 };
 
-Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
+Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVisible)
 {
     if (!element)
         return;
@@ -560,8 +560,8 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
         var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight) -
             (offset.y + element.offsetHeight);
 
-        // Element is vertically not completely visible
-        if (topSpace < 0 || bottomSpace < 0)
+        // Element is vertically not completely visible or scrolling is enforced
+        if (topSpace < 0 || bottomSpace < 0 || scrollWhenVisible)
         {
             switch (alignmentY)
             {
@@ -592,8 +592,8 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
         var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth) -
             (offset.x + element.clientWidth);
 
-        // Element is horizontally not completely visible
-        if (leftSpace < 0 || rightSpace < 0)
+        // Element is horizontally not completely visible or scrolling is enforced
+        if (leftSpace < 0 || rightSpace < 0 || scrollWhenVisible)
         {
             switch (alignmentY)
             {
