@@ -20,10 +20,11 @@ define([
     "firebug/cookies/cookie",
     "firebug/cookies/breakpoints",
     "firebug/cookies/cookiePermissions",
+    "firebug/cookies/cookieClipboard",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
     MenuUtils, CookieReps, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
-    CookiePermissions) {
+    CookiePermissions, CookieClipboard) {
 
 with (Domplate) {
 
@@ -324,7 +325,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Create Paste menu-item so, a new cookie can be pasted even if the user
         // clicks within the panel area (not on a cookie row)
         items.push({
-            label: $STR("firecookie.Paste"),
+            label: Locale.$STR("firecookie.Paste"),
             nol10n: true,
             disabled: CookieClipboard.isCookieAvailable() ? false : true,
             command: Obj.bindFixed(CookieReps.CookieRow.onPaste, CookieReps.CookieRow)
