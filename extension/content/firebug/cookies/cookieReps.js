@@ -12,6 +12,7 @@ define([
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/array",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieUtils",
@@ -21,11 +22,10 @@ define([
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/editCookie",
     "firebug/cookies/cookieClipboard",
-    "firebug/cookies/breakpoints",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
-    CookiePermissions, EditCookie, CookieClipboard, Breakpoints) {
+    CookiePermissions, EditCookie, CookieClipboard) {
 
 with (Domplate) {
 
@@ -1189,7 +1189,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         var header = Dom.getAncestorByClass(target, "cookieHeaderRow");
 
         // Skip the first column for breakpoints.
-        var columns = cloneArray(header.childNodes);
+        var columns = Arr.cloneArray(header.childNodes);
         columns.shift();
 
         for (var i=0; i<columns.length; i++)

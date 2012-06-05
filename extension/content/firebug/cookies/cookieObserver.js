@@ -46,13 +46,13 @@ var CookieObserver = Obj.extend(BaseObserver,
 /** @lends CookieObserver */
 {
     // nsIObserver
-    observe: function(aSubject, aTopic, aData) 
+    observe: function(aSubject, aTopic, aData)
     {
-        if (!Firebug.CookieModule.isAlwaysEnabled())
-            return;
-
         try
         {
+            if (!Firebug.CookieModule.isAlwaysEnabled())
+                return;
+
             if (aTopic == "cookie-changed")
             {
                 aSubject = aSubject ? aSubject.QueryInterface(Ci.nsICookie2) : null;
@@ -66,7 +66,8 @@ var CookieObserver = Obj.extend(BaseObserver,
         }
         catch (err)
         {
-            FBTrace.sysout("cookies.CookieObserver.observe ERROR " + aTopic, err);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.CookieObserver.observe ERROR " + aTopic, err);
         }
     },
 

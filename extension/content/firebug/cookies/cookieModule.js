@@ -585,6 +585,13 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.createCookie: set cookie string: " + cookieString, cookie);
+
+            // xxxHonza: this shouldn't be necessary, but sometimes the CookieObserver
+            // is not triggered.
+            TabWatcher.iterateContexts(function(context)
+            {
+                context.getPanel("cookies").refresh();
+            });
         }
         catch (e)
         {
