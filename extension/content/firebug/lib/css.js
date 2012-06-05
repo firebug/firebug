@@ -810,10 +810,10 @@ Css.cssInfo.html =
     "clear": ["clear", "none"],
     "clip": ["auto"],
     "color": ["color"],
-    "content": ["content", "none"],
+    "content": ["content", "none", "normal"],
     "counter-increment": ["none"],
     "counter-reset": ["none"],
-    "cursor": ["cursor", "none"],
+    "cursor": ["cursor", "url()", "none"],
     "direction": ["direction"],
     "display": ["display", "none"],
     "empty-cells": ["-moz-show-background"],
@@ -836,7 +836,7 @@ Css.cssInfo.html =
     "line-height": [],
 
     "list-style": ["listStyleType", "listStylePosition", "none"],
-    "list-style-image": ["none"],
+    "list-style-image": ["url()", "none"],
     "list-style-position": ["listStylePosition"],
     "list-style-type": ["listStyleType", "none"],
 
@@ -893,12 +893,12 @@ Css.cssInfo.html =
 
     "-moz-appearance": ["mozAppearance"],
     "-moz-backface-visibility": ["mozBackfaceVisibility"], // FF 10.0
-    "-moz-border-image": ["mozBorderImageRepeat", "thickness", "none"],
-    "-moz-border-image-outset": [],
-    "-moz-border-image-repeat": ["mozBorderImageRepeat"],
-    "-moz-border-image-slice": [],
-    "-moz-border-image-source": [],
-    "-moz-border-image-width": [],
+    "-moz-border-image": ["mozBorderImageRepeat", "thickness", "url()", "none"],
+    // "-moz-border-image-outset": [], // unimplemented
+    // "-moz-border-image-repeat": ["mozBorderImageRepeat"],
+    // "-moz-border-image-slice": [],
+    // "-moz-border-image-source": ["url()"],
+    // "-moz-border-image-width": [],
     "-moz-border-top-colors": ["color"],
     "-moz-border-right-colors": ["color"],
     "-moz-border-bottom-colors": ["color"],
@@ -978,7 +978,7 @@ Css.cssInfo.svg =
     "color-interpolation-filters": ["colorInterpolation"],
     "color-profile": ["colorProfile"],
     "color-rendering": ["colorRendering"],
-    "cursor": ["cursor"],
+    "cursor": ["cursor", "url()", "none"],
     "direction": ["direction"],
     "display": ["display"],
     "dominant-baseline": ["dominantBaseline"],
@@ -1638,7 +1638,11 @@ Css.cssKeywords =
         "open-quote",
         "close-quote",
         "no-open-quote",
-        "no-close-quote"
+        "no-close-quote",
+        "url()",
+        "attr()",
+        "counter()",
+        "counters()"
     ],
 
     "fontStyle":
@@ -1911,26 +1915,26 @@ Css.cssKeywords =
 
     "bgImage":
     [
-        "-moz-linear-gradient", // FF4.0
-        "-moz-radial-gradient", // FF4.0
-        "-moz-element", // FF4.0
-        "-moz-image-rect", // FF4.0
+        "-moz-linear-gradient()", // FF4.0
+        "-moz-radial-gradient()", // FF4.0
+        "-moz-element()", // FF4.0
+        "-moz-image-rect()", // FF4.0
+        "url()",
         "none"
     ],
 
     "mozTransformFunction":
     [
-        "matrix",
-        "rotate",
-        "scale",
-        "scaleX",
-        "scaleY",
-        "skew",
-        "skewX",
-        "skewY",
-        "translate",
-        "translateX",
-        "translateY"
+        "matrix()",
+        "rotate()",
+        "scale()",
+        "scaleX()",
+        "scaleY()",
+        "skewX()",
+        "skewY()",
+        "translate()",
+        "translateX()",
+        "translateY()"
     ],
 
     "mozTransformStyle": // FF 10.0
@@ -2007,7 +2011,7 @@ Css.cssKeywords =
 
     "mozTransitionTimingFunction": // FF 4.0
     [
-        "cubic-bezier",
+        "cubic-bezier()",
         "ease",
         "ease-in",
         "ease-in-out",
@@ -2015,7 +2019,7 @@ Css.cssKeywords =
         "linear",
         "step-start",
         "step-end",
-        "steps"
+        "steps()"
     ],
 
     "mozTextDecorationLine": // FF 6.0
