@@ -3,7 +3,9 @@
 // ********************************************************************************************* //
 // Constants
 
-var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 // List of firebug modules that must be loaded at startup and unloaded on shutdown.
 // !important every new module loaded with Cu.import must be added here
@@ -45,9 +47,14 @@ function startup(params, reason)
     // Add our chrome registration. not needed for 10+
     Components.manager.addBootstrappedManifestLocation(params.installPath);
 
+    // Register default preferences
+    var loadDefaultPrefs = Cu.import("resource://firebug/prefLoader.js").loadDefaultPrefs;
+    loadDefaultPrefs(params.installPath, "cookies.js");
+
     // Load the overlay manager
     Cu.import("resource://firebug/loader.js");
 
+    // xxxHonza: prefLoader should be used instead.
     // register default values
     FirebugLoader.registerDefaultPrefs();
 
