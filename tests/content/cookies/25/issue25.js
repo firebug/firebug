@@ -24,7 +24,9 @@ function runTest()
 
             editCookie(cookie, false);
 
-            FBTest.ok(cookie.cookie.expires, "Must not be Session cookie now.");
+            cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie25");
+            FBTest.ok(cookie.cookie.expires, "Must not be Session cookie now. " +
+                cookie.cookie.expires);
 
             cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie25");
             if (!verifyCookie(cookie))

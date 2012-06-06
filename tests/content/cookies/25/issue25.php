@@ -12,7 +12,6 @@
 <body>
 
 <div class="topBar">
-    <a href="../index.html">Test List</a> |
     <a href="http://code.google.com/p/firecookie/issues/detail?id=25">Issue 25</a>
 </div>
 <h1>Issue 25: Changing expire time to Session deletes cookie</h1>

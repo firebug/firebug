@@ -5,14 +5,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-    <title>Issue 45: </title>
+    <title>Issue 45: When I copy and paste or edit a cookie contents + (plus) signs get converted to spaces.</title>
     <link rel="stylesheet" href="../tests.css" type="text/css"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
 
 <div class="topBar">
-    <a href="../index.html">Test List</a> |
     <a href="http://code.google.com/p/firecookie/issues/detail?id=45">Issue 45</a>
 </div>
 <h1>Issue 45: When I copy and paste or edit a cookie contents + (plus) signs get converted to spaces.</h1>

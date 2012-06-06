@@ -12,9 +12,6 @@
 </head>
 <body>
 
-<div class="topBar">
-    <a href="../index.html">Test List</a>
-</div>
 <h1>Break on cookie change</h1>
 <i>Jan Odvarko, odvarko@gmail.com</i>
 
@@ -32,7 +29,7 @@ the propert source code line must be displayed.</li>
 <button id="changeCookie" onclick="onChangeCookie()">Change Cookie</button>
 
 <script type="text/javascript">
-var domain = ".janodvarko.cz";
+var domain = "";
 
 function onAddCookie()
 {
@@ -55,13 +52,15 @@ function onRemoveCookie()
 
 function onChangeCookie()
 {
+    var time = (new Date()).getTime();
+
     if (!Get_Cookie("TestCookie50"))
     {
-        alert("The cookie has been deleted. Refresh the page to get it from the server.");
+        Set_Cookie("TestCookie50", "Some Value", time + 3600 * 1000,
+            "/", domain, false);
         return;
     }
 
-    var time = (new Date()).getTime();
     Set_Cookie("TestCookie50", "New Value: " + time, time + 3600 * 1000,
         "/", domain, false);
 }

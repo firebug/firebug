@@ -12,7 +12,6 @@
 <body>
 
 <div class="topBar">
-    <a href="../index.html">Test List</a> |
     <a href="http://code.google.com/p/firecookie/issues/detail?id=34">Issue 34</a>
 </div>
 <h1>Issue 34: firecookie 0.8 cookies with .domain.com the first period gets erased on editing any attribute</h1>
