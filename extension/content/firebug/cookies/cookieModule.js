@@ -49,10 +49,10 @@ const cookieBehaviorPref = "cookieBehavior";
 const cookieLifeTimePref = "lifetimePolicy";
 
 // Firecookie preferences
-const clearWhenDeny = "firecookie.clearWhenDeny";
-const defaultExpireTime = "firecookie.defaultExpireTime";
-const removeConfirmation = "firecookie.removeConfirmation";
-const removeSessionConfirmation = "firecookie.removeSessionConfirmation";
+const clearWhenDeny = "cookies.clearWhenDeny";
+const defaultExpireTime = "cookies.defaultExpireTime";
+const removeConfirmation = "cookies.removeConfirmation";
+const removeSessionConfirmation = "cookies.removeSessionConfirmation";
 
 // Services
 const cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
@@ -455,10 +455,10 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     updateOption: function(name, value)
     {
-        if (name == "firecookie.clearWhenDeny")
+        if (name == "cookies.clearWhenDeny")
         {
         }
-        else if (name == "firecookie.LogEvents")
+        else if (name == "cookies.LogEvents")
         {
         }
         else if (name == "consoleFilterTypes")

@@ -35,8 +35,8 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const lastSortedColumn = "firecookie.lastSortedColumn";
-const hiddenColsPref = "firecookie.hiddenColumns";
+const lastSortedColumn = "cookies.lastSortedColumn";
+const hiddenColsPref = "cookies.hiddenColumns";
 
 // Cookie status & policy
 var STATUS_UNKNOWN = Ci.nsICookie2.STATUS_UNKNOWN;

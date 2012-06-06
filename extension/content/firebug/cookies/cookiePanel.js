@@ -35,11 +35,11 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // Firecookie preferences
-const logEventsPref = "firecookie.logEvents";
-const showRejectedCookies = "firecookie.showRejectedCookies";
-const lastSortedColumn = "firecookie.lastSortedColumn";
-const hiddenColsPref = "firecookie.hiddenColumns";
-const removeConfirmation = "firecookie.removeConfirmation";
+const logEventsPref = "cookies.logEvents";
+const showRejectedCookies = "cookies.showRejectedCookies";
+const lastSortedColumn = "cookies.lastSortedColumn";
+const hiddenColsPref = "cookies.hiddenColumns";
+const removeConfirmation = "cookies.removeConfirmation";
 
 // Services
 var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
@@ -295,9 +295,9 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         return [
             MenuUtils.optionAllowGlobally(context, "firecookie.AllowGlobally",
                 networkPrefDomain, cookieBehaviorPref),
-            /*MenuUtils.optionMenu(context, "firecookie.clearWhenDeny",
+            /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
                 Firebug.prefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "firecookie.LogEvents",
+            MenuUtils.optionMenu(context, "cookies.LogEvents",
                 Firebug.prefDomain, logEventsPref),
             MenuUtils.optionMenu(context, "firecookie.Confirm cookie removal",
                 Firebug.prefDomain, removeConfirmation)

@@ -138,7 +138,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onExamineResponse: " + request.name);
 
-        if (!Options.get("firecookie.logEvents"))
+        if (!Options.get("cookies.logEvents"))
             return;
 
         // If logging to console is on, remember the set-cookie string, so

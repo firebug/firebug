@@ -12,8 +12,8 @@
         <command id="cmd_cookieCreate" oncommand="Firebug.CookieModule.onCreateCookie(Firebug.currentContext)"/>
         <command id="cmd_cookieViewAll" oncommand="Firebug.CookieModule.onViewAll(Firebug.currentContext)"/>
         <command id="cmd_cookieViewExceptions" oncommand="Firebug.CookieModule.onViewExceptions(Firebug.currentContext)"/>
-        <command id="cmd_cookieFilterByPath" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'firecookie.filterByPath')"/>
-        <command id="cmd_cookieShowRejectedCookies" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'firecookie.showRejectedCookies')"/>
+        <command id="cmd_cookieFilterByPath" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.filterByPath')"/>
+        <command id="cmd_cookieShowRejectedCookies" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.showRejectedCookies')"/>
         <command id="cmd_cookieExportAll" oncommand="Firebug.CookieModule.onExportAll(Firebug.currentContext)"/>
         <command id="cmd_cookieExportForSite" oncommand="Firebug.CookieModule.onExportForSite(Firebug.currentContext)"/>
     </commandset>
@@ -90,12 +90,12 @@
                     <menupopup id="fcFilterMenuPopup"
                             onpopupshowing="return Firebug.CookieModule.onFilterPopupShowing(this)">
                         <menuitem id="fcFilterByPath" type="checkbox"
-                            value="firecookie.filterByPath"
+                            value="cookies.filterByPath"
                             label="firecookie.filter.byPath"
                             tooltiptext="firecookie.filter.byPathTooltip"
                             command="cmd_cookieFilterByPath"/>
                         <menuitem id="fcShowRejectedCookies" type="checkbox"
-                            value="firecookie.showRejectedCookies"
+                            value="cookies.showRejectedCookies"
                             label="firecookie.filter.showRejectedCookies"
                             tooltiptext="firecookie.filter.showRejectedCookiesTooltip"
                             command="cmd_cookieShowRejectedCookies"/>

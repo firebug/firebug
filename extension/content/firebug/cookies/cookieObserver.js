@@ -30,7 +30,7 @@ function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Ev
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const filterByPath = "firecookie.filterByPath";
+const filterByPath = "cookies.filterByPath";
 
 const panelName = "cookies";
 
@@ -394,7 +394,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
 function logEvents()
 {
-    return Options.get("firecookie.logEvents");
+    return Options.get("cookies.logEvents");
 }
 
 // ********************************************************************************************* //
