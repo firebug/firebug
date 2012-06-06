@@ -1486,20 +1486,6 @@ function getTypeExtractionExpression(command)
     return ret;
 }
 
-function sortUnique(ar)
-{
-    ar = ar.slice();
-    ar.sort();
-    var ret = [];
-    for (var i = 0; i < ar.length; ++i)
-    {
-        if (i && ar[i-1] === ar[i])
-            continue;
-        ret.push(ar[i]);
-    }
-    return ret;
-}
-
 function propChainBuildComplete(out, context, tempExpr, result)
 {
     var complete = null, command = null;
@@ -1540,7 +1526,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
         }
 
         // Properties may be taken from several sources, so filter out duplicates.
-        out.complete = sortUnique(complete);
+        out.complete = Arr.sortUnique(complete);
     };
 
     if (command === null)
@@ -1927,7 +1913,7 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             }
 
             // Sort the completions, and avoid duplicates.
-            out.complete = sortUnique(out.complete);
+            out.complete = Arr.sortUnique(out.complete);
         }
     }
     catch (exc)
