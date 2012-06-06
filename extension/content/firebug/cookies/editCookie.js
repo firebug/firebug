@@ -121,7 +121,9 @@ EditCookie.prototype =
 
         var isSession = this.sessionNode.checked;
         var host = this.domainNode.value;
+
         var cookieName = this.nameNode.value;
+        var cookieValue = this.valueNode.value;
 
         // Fix for issue 39: Can't create cookies with ';' in the name
         // But do not escape all,see issue 60: "[" and "]" characters get badly encoded
@@ -129,7 +131,11 @@ EditCookie.prototype =
         cookieName = cookieName.replace(/\;/g, "%3B");
 
         // According to the spec cookie value must be escaped
-        var cookieValue = escape(this.valueNode.value);
+        var cookieValue = escape(cookieValue);
+
+        // Issue 45: When I copy and paste or edit a cookie contents + (plus) signs
+        // get converted to spaces.
+        cookieValue = cookieValue.replace(/\+/g, "%2B");
 
         // Create a helper cookie object from the provided data.
         var values = {
