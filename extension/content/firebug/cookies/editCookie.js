@@ -121,10 +121,14 @@ EditCookie.prototype =
 
         var isSession = this.sessionNode.checked;
         var host = this.domainNode.value;
+        var cookieName = this.nameNode.value;
 
         // Fix for issue 39: Can't create cookies with ';' in the name
-        // According to the spec cookie name and cookie value must be escaped.
-        var cookieName = escape(this.nameNode.value);
+        // But do not escape all,see issue 60: "[" and "]" characters get badly encoded
+        // on cookie name upon editing
+        cookieName = cookieName.replace(/\;/g, "%3B");
+
+        // According to the spec cookie value must be escaped
         var cookieValue = escape(this.valueNode.value);
 
         // Create a helper cookie object from the provided data.
