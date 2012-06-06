@@ -13,6 +13,12 @@ function(Obj, Locale, Str, Domplate, Css, CookieUtils) {
 with (Domplate) {
 
 // ********************************************************************************************* //
+// Constants
+
+const panelName = "cookies";
+
+// ********************************************************************************************* //
+// Implementation
 
 var Breakpoints =
 {
