@@ -604,6 +604,13 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     removeCookie: function(host, name, path)
     {
         cookieManager.remove(host, name, path, false);
+
+        // xxxHonza: this shouldn't be necessary, but sometimes the CookieObserver
+        // is not triggered.
+        TabWatcher.iterateContexts(function(context)
+        {
+            context.getPanel("cookies").refresh();
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1015,7 +1022,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
                 while(e.hasMoreElements())
                 {
                     var cookie = e.getNext();
-                    cookie = cookie.QueryInterface(nsICookie2);
+                    cookie = cookie.QueryInterface(Ci.nsICookie2);
                     var cookieWrapper = new Cookie(CookieUtils.makeCookieObject(cookie));
                     var cookieInfo = cookieWrapper.toText();
                     foStream.write(cookieInfo, cookieInfo.length);

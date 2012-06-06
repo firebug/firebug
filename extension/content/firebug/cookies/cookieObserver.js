@@ -60,7 +60,7 @@ var CookieObserver = Obj.extend(BaseObserver,
             }
             else if (aTopic == "cookie-rejected")
             {
-                aSubject = aSubject.QueryInterface(nsIURI);
+                aSubject = aSubject.QueryInterface(Ci.nsIURI);
                 this.iterateContexts(this.onCookieRejected, aSubject, aData);
             }
         }

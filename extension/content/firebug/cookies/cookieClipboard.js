@@ -136,7 +136,7 @@ var CookieClipboard = Obj.extend(Object,
         if (!str.value) 
             return null;
 
-        str = str.value.QueryInterface(nsISupportsString);
+        str = str.value.QueryInterface(Ci.nsISupportsString);
         return str.data.substring(0, strLength.value / 2);
     }
 });
