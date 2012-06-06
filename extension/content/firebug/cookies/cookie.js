@@ -76,10 +76,6 @@ Cookie.prototype =
         if (jsonString.indexOf("{") != 0)
             return null;
 
-        // parseJSONString is introduced in Firebug 1.4
-        if (typeof(parseJSONString) == "undefined")
-            return null;
-
         var currentURI = Firebug.chrome.getCurrentURI();
         var jsonObject = Json.parseJSONString(jsonString, currentURI.spec);
         if (typeof (jsonObject) != "object")
