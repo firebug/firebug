@@ -1471,6 +1471,8 @@ Firebug.CookieModule.CookieReps = CookieReps;
 
 Firebug.registerActivableModule(Firebug.CookieModule);
 
+return Firebug.CookieModule;
+
 // ********************************************************************************************* //
 }});
 
