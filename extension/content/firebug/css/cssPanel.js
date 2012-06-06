@@ -289,7 +289,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.editing)
         {
             this.stopEditing();
-            Events.dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
+            Events.dispatch(this.fbListeners, "onStopCSSEditing", [this.context]);
         }
         else
         {
@@ -304,7 +304,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context, this);
-                Events.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
+                Events.dispatch(this.fbListeners, "onStartCSSEditing", [styleSheet, this.context]);
             }
             catch(exc)
             {
@@ -676,7 +676,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         if (this.name == "stylesheet")
-            Events.dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
+            Events.dispatch(this.fbListeners, "onInlineEditorClose", [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -1577,7 +1577,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             parsedValue.priority);
                     }
   
-                    Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
                         previousValue, baseText]);
                 }
                 else if (!value)
