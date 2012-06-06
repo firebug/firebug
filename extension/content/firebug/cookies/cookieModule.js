@@ -878,7 +878,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             // Update 'Remove Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
-            Opttions.set(removeConfirmation, !check.value)
+            Options.set(removeConfirmation, !check.value)
         }
 
         Firebug.CookieModule.onRemoveAllShared(context, false);
