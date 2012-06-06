@@ -102,9 +102,9 @@ var HeaderResizer =
         if (FBTrace.DBG_COOKIES)
         {
             FBTrace.sysout("cookies.Mouse out, target: " + event.target.localName +
-                ", " + event.target.className + "\n");
+                ", " + event.target.className);
             FBTrace.sysout("      explicitOriginalTarget: " + event.explicitOriginalTarget.localName +
-                ", " + event.explicitOriginalTarget.className + "\n");
+                ", " + event.explicitOriginalTarget.className);
         }
 
         var target = event.target;
@@ -162,7 +162,7 @@ var HeaderResizer =
         {
             var colId = this.currColumn.getAttribute("id");
             FBTrace.sysout("cookies.Start resizing column (id): " + colId +
-                ", start width: " + this.startWidth + "\n");
+                ", start width: " + this.startWidth);
         }
     },
 
@@ -178,7 +178,7 @@ var HeaderResizer =
         {
             var colId = this.currColumn.getAttribute("id");
             FBTrace.sysout("cookies.Resizing column (id): " + colId +
-                ", new width: " + newWidth + "\n");
+                ", new width: " + newWidth);
         }
     },
 
@@ -205,7 +205,7 @@ var HeaderResizer =
         {
             var colId = this.currColumn.getAttribute("id");
             FBTrace.sysout("cookies.End resizing column (id): " + colId +
-                ", new width: " + newWidth + "\n");
+                ", new width: " + newWidth);
         }
     }
 };

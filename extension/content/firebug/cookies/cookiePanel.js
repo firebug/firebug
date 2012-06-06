@@ -174,7 +174,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Cookie list refreshed.\n", cookies);
+            FBTrace.sysout("cookies.Cookie list refreshed.", cookies);
 
         // Sort automaticaly the last sorted column. The preference stores
         // two things: name of the sorted column and sort direction asc|desc.
@@ -194,7 +194,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     initializeNode: function(oldPanelNode)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.initializeNode\n");
+            FBTrace.sysout("cookies.FireCookiePanel.initializeNode");
 
         // xxxHonza 
         // This method isn't called when FB UI is detached. So, the columns
@@ -213,7 +213,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     destroyNode: function()
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.destroyNode\n");
+            FBTrace.sysout("cookies.FireCookiePanel.destroyNode");
 
         this.document.removeEventListener("mouseclick", this.onMouseClick, true);
         this.document.removeEventListener("mousedown", this.onMouseDown, true);

@@ -68,7 +68,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         {
             FBTrace.sysout("cookies.onModifyRequest: " + request.name);
             FBTrace.sysout("cookies.Cookies sent: " +
-                cookieService.getCookieString(request.URI, request) + "\n");
+                cookieService.getCookieString(request.URI, request));
         }
 
         // At this moment (specified by all the conditions) FB context doesn't exists yet.
@@ -81,7 +81,7 @@ var HttpObserver = Obj.extend(BaseObserver,
             (name == origName) && (win && win == win.parent))
         {
             if (FBTrace.DBG_COOKIES && Firebug.CookieModule.contexts[tabId])
-                FBTrace.sysout("cookies.!!! Temporary context exists for: " + tabId + "\n");
+                FBTrace.sysout("cookies.!!! Temporary context exists for: " + tabId);
 
             // Create temporary context
             if (!Firebug.CookieModule.contexts[tabId])
@@ -106,7 +106,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         {
             if (FBTrace.DBG_COOKIES) 
                 FBTrace.sysout("cookies.onModifyRequest: context is NOT available for:" +
-                    request.URI.host + ", tabId: " + tabId + "\n");
+                    request.URI.host + ", tabId: " + tabId);
             return;
         }
 
@@ -165,7 +165,7 @@ var HttpObserver = Obj.extend(BaseObserver,
         {
             if (FBTrace.DBG_COOKIES) 
                 FBTrace.sysout("cookies.onExamineResponse: context is NOT available for:" +
-                    request.URI.host + ", tabId: " + tabId + "\n");
+                    request.URI.host + ", tabId: " + tabId);
             return;
         }
 
@@ -219,11 +219,11 @@ var HttpObserver = Obj.extend(BaseObserver,
 
             if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.Cookie received: " +
-                    cookie.host + ", cookie: " + cookie.name + "\n", cookie);
+                    cookie.host + ", cookie: " + cookie.name, cookie);
         }
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Set-Cookie: " + setCookie + "\n", activeCookies);
+            FBTrace.sysout("cookies.Set-Cookie: " + setCookie, activeCookies);
     }
 });
 

@@ -196,7 +196,7 @@ var CookieObserver = Obj.extend(BaseObserver,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onCookieChanged: '" + (cookie ? cookie.name : "null") +
-                "', " + action + "\n");
+                "', " + action);
 
         if (action != "cleared")
         {
@@ -242,7 +242,7 @@ var CookieObserver = Obj.extend(BaseObserver,
             return;
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onCookieRejected: " + uri.spec + "\n");
+            FBTrace.sysout("cookies.onCookieRejected: " + uri.spec);
 
         // Mark host and all its cookies as rejected.
         // xxxHonza there was an exception "context.cookies is undefined".

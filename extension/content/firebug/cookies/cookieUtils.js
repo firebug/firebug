@@ -86,8 +86,7 @@ var CookieUtils =
                             FBTrace.sysout("cookies.parseFromString: ERROR, " + 
                                 "from: " + value + 
                                 ", to: " + tempDate.toGMTString() + 
-                                ", cookie: " + string + 
-                                "\n");
+                                ", cookie: " + string);
                         }
                     }
                 }

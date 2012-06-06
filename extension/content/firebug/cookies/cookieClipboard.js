@@ -50,7 +50,7 @@ var CookieClipboard = Obj.extend(Object,
             var str = this.getTransferData();
 
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.Get Cookie data from clipboard: " + str + "\n");
+                FBTrace.sysout("cookies.Get Cookie data from clipboard: " + str);
 
             return parseFromJSON(str);
         }

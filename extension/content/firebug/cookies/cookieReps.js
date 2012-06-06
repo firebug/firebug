@@ -540,7 +540,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     onClickRow: function(event)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.Click on cookie row.\n", event);
+            FBTrace.sysout("cookies.Click on cookie row.", event);
 
         if (Events.isLeftClick(event))
         {
@@ -1055,7 +1055,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
     onClickHeader: function(event)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onClickHeader\n");
+            FBTrace.sysout("cookies.onClickHeader");
 
         if (!Events.isLeftClick(event))
             return;
@@ -1349,11 +1349,11 @@ function checkList(panel)
         if ((rep.cookie.name != row.firstChild.firstChild.innerHTML) ||
             (rep.cookie.path != row.childNodes[3].firstChild.innerHTML))
         {
-            FBTrace("---> Check failed!\n");
+            FBTrace("---> Check failed!");
             FBTrace("--->" + rep.rawHost + ", " + rep.cookie.name + ", " +
-                rep.cookie.path + "\n");
+                rep.cookie.path);
             FBTrace("    " + row.firstChild.firstChild.innerHTML + ", " +
-                row.childNodes[3].firstChild.innerHTML + "\n");
+                row.childNodes[3].firstChild.innerHTML);
         }
 
         row = row.nextSibling;

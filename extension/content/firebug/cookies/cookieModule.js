@@ -220,7 +220,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.ENABLE Cookies monitoring for: " +
-                (context ? context.getName() : "") + "\n");
+                (context ? context.getName() : ""));
     },
 
     unregisterObservers: function(context)
@@ -243,7 +243,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.DISABLE Cookies monitoring for: " +
-                (context ? context.getName() : "") + "\n");
+                (context ? context.getName() : ""));
     },
 
     // Helper context
@@ -264,13 +264,13 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_COOKIES)
         {
             FBTrace.sysout("cookies.Copy " + tempContext.events.length +
-                " events to real-context." + "\n");
+                " events to real-context.");
 
             var message = "cookies.Copy active hosts (";
             for (var host in tempContext.cookies.activeHosts)
                 message += host + ", ";
             message = message.substring(0, message.length - 2);
-            message += ") from temp context into the real context.\n";
+            message += ") from temp context into the real context.";
             FBTrace.sysout(message, tempContext);
         }
 
@@ -313,7 +313,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.INIT real context for: " + tabId + ", " +
-                context.getName() + "\n");
+                context.getName());
 
         // Create sub-context for cookies. 
         // xxxHonza: the cookies object exists within the context even if 
@@ -336,7 +336,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             delete contexts[tabId];
 
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.DESTROY temporary context, tabId: " + tempContext.tabId + "\n");
+                FBTrace.sysout("cookies.DESTROY temporary context, tabId: " + tempContext.tabId);
         }
 
         // The base class must be called after the context for Cookies panel is 
@@ -535,10 +535,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_COOKIES || FBTrace.DBG_ERRORS)
         {
             var tabId = Firebug.getTabIdForWindow(view);
-            FBTrace.sysout("cookies.On before unload tab:  " + tabId + "\n");
+
+            if (FBTrace.DBG_COOKIES)
+                FBTrace.sysout("cookies.On before unload tab:  " + tabId);
 
             if (contexts[tabId] && FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cookies.!!! There is a temp context leak!\n");
+                FBTrace.sysout("cookies.!!! There is a temp context leak!");
         }
     },
 
@@ -623,7 +625,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onPanelActivate: " + activatedPanelName + "," +
-                init + "\n");
+                init);
 
         this.registerObservers(context);
 
@@ -648,7 +650,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onPanelDeactivate: " + activatedPanelName + "," +
-                destroy + "\n");
+                destroy);
     },
 
     onLastPanelDeactivate: function(context, destroy)
@@ -1322,7 +1324,7 @@ var PermissionObserver = Obj.extend(BaseObserver,
             return;
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData + "\n");
+            FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData);
 
         var fn = CookiePermissions.updatePermButton;
         TabWatcher.iterateContexts(fn);
@@ -1425,7 +1427,7 @@ var PrefObserver = Obj.extend(BaseObserver,
             return;
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData + "\n");
+            FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData);
 
         if (aData == networkPrefDomain + "." + cookieBehaviorPref || 
             aData == networkPrefDomain + "." + cookieLifeTimePref) {
