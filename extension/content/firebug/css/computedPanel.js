@@ -446,14 +446,15 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserAgentCSS: 1,
-            computedStylesDisplay: 1,
-            colorDisplay: 1,
-            showMozillaSpecificStyles: 1
-        };
+        var options = [
+            "showUserAgentCSS",
+            "computedStylesDisplay",
+            "colorDisplay",
+            "showMozillaSpecificStyles"
+        ];
 
-        if (name in optionMap)
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.refresh();
     },
 
