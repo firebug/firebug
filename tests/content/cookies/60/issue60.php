@@ -5,14 +5,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-    <title>Issue 60: </title>
+    <title>Issue 60: "[" and "]" characters get badly encoded on cookie name upon editing</title>
     <link rel="stylesheet" href="../tests.css" type="text/css"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
 
 <div class="topBar">
-    <a href="../index.html">Test List</a> |
     <a href="http://code.google.com/p/firecookie/issues/detail?id=60">Issue 60</a>
 </div>
 <h1>Issue 60: "[" and "]" characters get badly encoded on cookie name upon editing</h1>

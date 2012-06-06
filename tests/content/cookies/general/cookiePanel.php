@@ -7,9 +7,6 @@
 </head>
 <body>
 
-<div class="topBar">
-    <a href="../index.html">Test List</a>
-</div>
 <h1>Cookie Panel</h1>
 <i>Jan Odvarko, odvarko@gmail.com</i>
 

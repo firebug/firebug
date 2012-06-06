@@ -12,7 +12,6 @@
 <body>
 
 <div class="topBar">
-    <a href="../index.html">Test List</a> |
     <a href="http://code.google.com/p/firecookie/issues/detail?id=23">Issue 23</a>
 </div>
 <h1>Issue 23: httpOnly cookies</h1>
