@@ -536,14 +536,16 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserAgentCSS: 1,
-            expandShorthandProps: 1,
-            colorDisplay: 1,
-            showMozillaSpecificStyles: 1
-        };
+        var options = [
+            "onlyShowAppliedStyles",
+            "showUserAgentCSS",
+            "expandShorthandProps",
+            "colorDisplay",
+            "showMozillaSpecificStyles"
+        ];
 
-        if (name in optionMap)
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.refresh();
     },
 
