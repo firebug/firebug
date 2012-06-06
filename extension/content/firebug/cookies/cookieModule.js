@@ -539,8 +539,13 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.On before unload tab:  " + tabId);
 
-            if (contexts[tabId] && FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cookies.!!! There is a temp context leak!");
+            if (contexts[tabId])
+            {
+                delete contexts[tabId];
+
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("cookies.!!! There is a temp context leak!");
+            }
         }
     },
 

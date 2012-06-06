@@ -9,8 +9,10 @@ define([
     "firebug/cookies/cookie",
     "firebug/lib/options",
     "firebug/cookies/cookieUtils",
+    "firebug/lib/array",
+    "firebug/chrome/firefox",
 ],
-function(Obj, Xpcom, BaseObserver, Http, TabWatcher, Cookie, Options, CookieUtils) {
+function(Obj, Xpcom, BaseObserver, Http, TabWatcher, Cookie, Options, CookieUtils, Arr, Firefox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -80,6 +82,16 @@ var HttpObserver = Obj.extend(BaseObserver,
             (request.loadGroup && request.loadGroup.groupObserver) &&
             (name == origName) && (win && win == win.parent))
         {
+            var browser = Firefox.getBrowserForWindow(win);
+
+            if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
+            {
+                if (FBTrace.DBG_COOKIES)
+                    FBTrace.sysout("cookies.onModifyRequest; Activation logic says don't create " +
+                        "temp context for: " + name);
+                return;
+            }
+
             if (FBTrace.DBG_COOKIES && Firebug.CookieModule.contexts[tabId])
                 FBTrace.sysout("cookies.!!! Temporary context exists for: " + tabId);
 
@@ -92,6 +104,7 @@ var HttpObserver = Obj.extend(BaseObserver,
                 if (FBTrace.DBG_COOKIES)
                     FBTrace.sysout("cookies.INIT temporary context for: " + tempContext.tabId);
 
+                tempContext.href = name;
                 Firebug.CookieModule.initTempContext(tempContext);
             }
         }
