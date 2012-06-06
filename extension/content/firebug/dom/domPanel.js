@@ -1452,18 +1452,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserProps: 1,
-            showUserFuncs: 1,
-            showDOMProps: 1,
-            showDOMFuncs: 1,
-            showDOMConstants: 1,
-            showInlineEventHandlers: 1,
-            showOwnProperties: 1,
-            showEnumerableProperties: 1,
-        };
+        var options = [
+            "showUserProps",
+            "showUserFuncs",
+            "showDOMProps",
+            "showDOMFuncs",
+            "showDOMConstants",
+            "showInlineEventHandlers",
+            "showOwnProperties",
+            "showEnumerableProperties"
+        ];
 
-        if (optionMap.hasOwnProperty(name))
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.rebuild(true);
     },
 
