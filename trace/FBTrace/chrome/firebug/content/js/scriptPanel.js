@@ -1595,13 +1595,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         [
             chrome.keyCodeListen("F8", Events.isShift, Obj.bind(this.rerun, this, context), true),
             chrome.keyCodeListen("F8", null, Obj.bind(this.resume, this, context), true),
-            chrome.keyListen("/", Events.isControl, Obj.bind(this.resume, this, context)),
             chrome.keyCodeListen("F10", null, Obj.bind(this.stepOver, this, context), true),
-            chrome.keyListen("'", Events.isControl, Obj.bind(this.stepOver, this, context)),
             chrome.keyCodeListen("F11", null, Obj.bind(this.stepInto, this, context)),
-            chrome.keyListen(";", Events.isControl, Obj.bind(this.stepInto, this, context)),
-            chrome.keyCodeListen("F11", Events.isShift, Obj.bind(this.stepOut, this, context)),
-            chrome.keyListen(",", Events.isControlShift, Obj.bind(this.stepOut, this, context))
+            chrome.keyCodeListen("F11", Events.isShift, Obj.bind(this.stepOut, this, context))
         ];
     },
 
@@ -1694,7 +1690,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         try
         {
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext",
+            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn",
                 "breakable");
 
             if (FBTrace.DBG_BP)
@@ -1706,7 +1702,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             // If currentBreakable is false, then we are armed, but we broke
             if (currentBreakable == "false")
-                Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+                Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", "true");
 
             // If Firebug is minimized, open the UI to show we are stopped
             if (Firebug.isMinimized())

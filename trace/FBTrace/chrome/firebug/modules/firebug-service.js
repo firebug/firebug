@@ -98,7 +98,10 @@ const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 const reTooMuchRecursion = /too\smuch\srecursion/;
 
-const getPref = Components.utils.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
+Cu.import("resource://firebug/prefLoader.js");
+
+var getPref = PrefLoader.getPref;
+
 // ********************************************************************************************* //
 // Globals
 
@@ -3696,7 +3699,7 @@ var fbs =
                 var bp = urlBreakpoints[i];
 
                 // Do not store breakpoins for "Run until this line". These are not
-                // visible in Firebug UI and so, it isn't possible to remove them
+                // visible in Firebug UI and so, it is not possible to remove them.
                 // Note that there can be cases where such breakpoint is not removed
                 // by RunUntil (e.g. crash).
                 if (bp.type == BP_UNTIL)
@@ -3927,7 +3930,7 @@ var fbs =
             ERROR("fbs.step ERROR unknown mode "+mode);
 
         // The actual stepping starts after we resume the debuggger. Stepping is always
-        // done when the execution/debugger is paused so, we need to resum and break e.g.
+        // done when the execution/debugger is paused, so we need to resume and break e.g.
         // on the next line.
     },
 
@@ -4571,7 +4574,7 @@ function shiftCallType(type)
 // ********************************************************************************************* //
 // Chromebug Tracing
 
-// xxxJJB, shouldn't the followin code be part of Chromebug (could be done as part of splitting
+// xxxJJB, shouldn't the following code be part of Chromebug (could be done as part of splitting
 // this file into more modules?)
 // xxxhonza, yes
 

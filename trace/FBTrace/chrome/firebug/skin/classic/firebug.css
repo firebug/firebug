@@ -26,7 +26,7 @@
 }
 
 #menu_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/Templarian_inspector.png);
+    list-style-image: url(chrome://firebug/skin/inspect.png);
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
@@ -258,7 +258,7 @@ textbox[type="fbSearchBox"] > panel {
 /* Firebug toolbar buttons */
 
 #fbInspectButton {
-    list-style-image: url("chrome://firebug/skin/Templarian_inspector.png");
+    list-style-image: url("chrome://firebug/skin/inspect.png");
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 

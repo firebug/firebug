@@ -136,8 +136,8 @@ Http.readPostTextFromRequest = function(request, context)
             var charset = (context && context.window) ? context.window.document.characterSet : null;
             var text = Http.readFromStream(is, charset, true);
 
-            // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
-            // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
+            // Seek locks the file, so seek to the beginning only if necko hasn't read it yet,
+            // since necko doesn't seek to 0 before reading (at least not till 459384 is fixed).
             if (ss && prevOffset == 0)
                 ss.seek(NS_SEEK_SET, 0);
 

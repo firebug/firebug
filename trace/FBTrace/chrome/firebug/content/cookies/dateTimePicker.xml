@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<binding id="dateTimePicker">
+    <content>
+        <xul:hbox anonid="dateTimeBox">
+            <xul:datepicker anonid="datePicker" type="popup"/>
+            <xul:timepicker anonid="timePicker"/>
+        </xul:hbox>
+    </content>
+
+    <implementation>
+        <constructor><![CDATA[
+            this.datePicker = document.getAnonymousElementByAttribute(this, "anonid", "datePicker");
+            this.timePicker = document.getAnonymousElementByAttribute(this, "anonid", "timePicker");
+        ]]></constructor>
+
+        <!-- Sets date and time as a GMT string -->
+        <property name="value">
+            <getter><![CDATA[
+                var dateTime = new Date(this.datePicker.year, this.datePicker.month,
+                    this.datePicker.date, this.timePicker.hour, this.timePicker.minute,
+                    this.timePicker.second);
+                return dateTime.toGMTString();
+            ]]></getter>
+            <setter><![CDATA[
+                var dateTime = new Date();
+                dateTime.setTime(Date.parse(val));
+                this.datePicker.dateValue = dateTime;
+                this.timePicker.dateValue = dateTime;
+            ]]></setter>
+        </property>
+        
+        <!-- Disables entire box -->
+        <property name="disabled">
+            <getter><![CDATA[
+                return this.datePicker.disabled;
+            ]]></getter>
+            <setter><![CDATA[
+                this.datePicker.disabled = val;
+                this.timePicker.disabled = val;
+            ]]></setter>
+        </property>
+        
+    </implementation>
+</binding>
+
+</bindings>

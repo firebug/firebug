@@ -959,7 +959,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             panelHeight = this.panelNode.ownerDocument.documentElement.clientHeight;
 
         // Set minimum height of the panel (in case Firebug UI is set to minimum using
-        // using the splitter) so, the source box can be properly created (issue 4417).
+        // the splitter) such that the source box can be properly created (issue 4417).
         panelHeight = (panelHeight < 100) ? 100 : panelHeight;
 
         // see getViewRangeFromTargetLine

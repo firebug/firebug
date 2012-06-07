@@ -39,18 +39,17 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Event Monitor
 
-    toggleMonitorEvents: function(object, type, state, context)
+    toggleMonitorEvents: function(object, types, state, context)
     {
         if (state)
-            this.unmonitorEvents(object, type, context);
+            this.unmonitorEvents(object, types, context);
         else
-            this.monitorEvents(object, type, context);
+            this.monitorEvents(object, types, context);
     },
 
-    monitorEvents: function(object, type, context)
+    monitorEvents: function(object, types, context)
     {
-        if (!this.areEventsMonitored(object, type, context) && object &&
-            object.addEventListener)
+        if (object && object.addEventListener)
         {
             if (!context.onMonitorEvent)
                 context.onMonitorEvent = function(event) { Firebug.Console.log(event, context); };
@@ -58,49 +57,127 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
             if (!context.eventsMonitored)
                 context.eventsMonitored = [];
 
-            context.eventsMonitored.push({object: object, type: type});
+            var eventTypes = getMonitoredEventTypes(types);
 
-            if (!type)
-                Events.attachAllListeners(object, context.onMonitorEvent, context);
+            if (FBTrace.DBG_EVENTS)
+                FBTrace.sysout("EventMonitor.monitorEvents", eventTypes);
+
+            for (var i = 0; i < eventTypes.length; ++i)
+            {
+                if (!this.areEventsMonitored(object, eventTypes[i], context))
+                {
+                    Events.addEventListener(object, eventTypes[i], context.onMonitorEvent, false);
+                    context.eventsMonitored.push({object: object, type: eventTypes[i]});
+                }
+            }
+        }
+    },
+
+    unmonitorEvents: function(object, types, context)
+    {
+        var eventsMonitored = context.eventsMonitored;
+        var eventTypes = getMonitoredEventTypes(types);
+
+        if (FBTrace.DBG_EVENTS)
+            FBTrace.sysout("EventMonitor.unmonitorEvents", eventTypes);
+
+        for (var i = 0; i < eventTypes.length; ++i)
+        {
+            for (var j = 0; j < eventsMonitored.length; ++j)
+            {
+                if (eventsMonitored[j].object == object && eventsMonitored[j].type == eventTypes[i])
+                {
+                    eventsMonitored.splice(j, 1);
+    
+                    Events.removeEventListener(object, eventTypes[i], context.onMonitorEvent, false);
+                    break;
+                }
+            }
+        }
+    },
+
+    areEventsMonitored: function(object, types, context)
+    {
+        var eventsMonitored = context.eventsMonitored;
+        if (!eventsMonitored)
+        {
+            if (FBTrace.DBG_EVENTS)
+                FBTrace.sysout("EventMonitor.areEventsMonitored - No events monitored", object);
+
+            return false;
+        }
+
+        if (!types)
+            var eventTypes = Events.getEventTypes();
+        else
+            var eventTypes = typeof types == "string" ? [types] : types;
+
+        for (var i = 0; i < eventTypes.length; ++i)
+        {
+            var monitored = false;
+            for (var j = 0; j < eventsMonitored.length; ++j)
+            {
+                if (eventsMonitored[j].object == object && eventsMonitored[j].type == eventTypes[i])
+                {
+                    monitored = true;
+                    break;
+                }
+            }
+
+            if (!monitored)
+            {
+                if (FBTrace.DBG_EVENTS)
+                    FBTrace.sysout("EventMonitor.areEventsMonitored - Events not monitored for '"+eventTypes[i]+"'");
+                
+                return false;
+            }
             else
-                Events.addEventListener(object, type, context.onMonitorEvent, false);
-        }
-    },
-
-    unmonitorEvents: function(object, type, context)
-    {
-        var eventsMonitored = context.eventsMonitored;
-
-        for (var i=0; i<eventsMonitored.length; ++i)
-        {
-            if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
             {
-                eventsMonitored.splice(i, 1);
-
-                if (!type)
-                    Events.detachAllListeners(object, context.onMonitorEvent, context);
-                else
-                    Events.removeEventListener(object, type, context.onMonitorEvent, false);
-                break;
-            }
-        }
-    },
-
-    areEventsMonitored: function(object, type, context)
-    {
-        var eventsMonitored = context.eventsMonitored;
-        if (eventsMonitored)
-        {
-            for (var i = 0; i < eventsMonitored.length; ++i)
-            {
-                if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
-                    return true;
+                if (FBTrace.DBG_EVENTS)
+                    FBTrace.sysout("EventMonitor.areEventsMonitored - Events monitored for '"+eventTypes[i]+"'");
             }
         }
 
-        return false;
+        return true;
     }
 });
+
+//********************************************************************************************* //
+// Helpers
+
+function getMonitoredEventTypes(types)
+{
+    var eventTypes = [];
+    if (!types)
+    {
+        eventTypes = Events.getEventTypes();
+    }
+    else
+    {
+        if (typeof types == "string")
+        {
+            eventTypes = Events.isEventFamily(types) ? Events.getEventTypes(types) : [types];
+        }
+        else
+        {
+            for (var i = 0; i < types.length; ++i)
+            {
+                if (Events.isEventFamily(types[i]))
+                {
+                    var familyEventTypes = Events.getEventTypes(types[i]);
+                    for (var j = 0; j < familyEventTypes.length; ++j)
+                        eventTypes.push(familyEventTypes[j]);
+                }
+                else
+                {
+                    eventTypes.push(types[i]);
+                }
+            }
+        }
+    }
+
+    return eventTypes;
+}
 
 // ********************************************************************************************* //
 // Registration & Export

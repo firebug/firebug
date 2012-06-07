@@ -30,11 +30,23 @@ Fonts.getFonts = function(node)
         return [];
 
     var range = node.ownerDocument.createRange();
-    range.selectNode(node);
+    try
+    {
+        range.selectNode(node);
+    }
+    catch(err)
+    {
+        if (FBTrace.DBG_FONTS || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Fonts.getFonts; node couldn't be selected", err);
+    }
+
     var fontFaces = Dom.domUtils.getUsedFontFaces(range);
     var fonts = [];
     for (var i=0; i<fontFaces.length; i++)
         fonts.push(fontFaces.item(i));
+
+    if (FBTrace.DBG_FONTS)
+        FBTrace.sysout("Fonts.getFonts; used fonts", fonts);
 
     return fonts;
 }

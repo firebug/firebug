@@ -38,7 +38,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.sourceFileByTag = {}; // mozilla only
 
     // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible
-    // to re-implement source-cache so, it solves the double-load problem.
+    // to re-implement source-cache so that it solves the double-load problem.
     // Anyway, keep the previous cache implementation for backward compatibility
     // (with Firefox 3.0.3 and lower)
     if (Components.interfaces.nsITraceableChannel)
@@ -110,6 +110,12 @@ Firebug.TabContext.prototype =
 
     addSourceFile: function(sourceFile)
     {
+        if (!this.sourceFileMap)
+        {
+            FBTrace.sysout("tabContext.addSourceFile; ERROR no source map!");
+            return;
+        }
+
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
 
@@ -204,7 +210,12 @@ Firebug.TabContext.prototype =
         if (this.throttleTimeout)
             clearTimeout(this.throttleTimeout);
 
-        // All existing DOM listeners need to be cleared
+        // All existing DOM listeners need to be cleared. Note that context is destroyed
+        // when the top level window is unloaded. However, some listeners can be registered
+        // to iframes (documents), which can be already unloaded at this point.
+        // Removing listeners from such 'unloaded' documents (or window) can throw
+        // "TypeError: can't access dead object"
+        // We should avoid these exceptions (event if they are not representing mem leaks)
         this.unregisterAllListeners();
 
         state.panelState = {};
@@ -615,7 +626,19 @@ Firebug.TabContext.prototype =
         for (var i=0; i<this.listeners.length; i++)
         {
             var l = this.listeners[i];
-            l.parent.removeEventListener(l.eventId, l.listener, l.capturing);
+
+            try
+            {
+                l.parent.removeEventListener(l.eventId, l.listener, l.capturing);
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("tabContext.unregisterAllListeners; (" + l.eventId +
+                        ") " + e, e);
+                }
+            }
         }
 
         this.listeners = null;

@@ -410,6 +410,11 @@ Str.escapeSingleQuoteJS = function(value)
                 .replace(/\n/gm, "\\n").replace("'", "\\'", "g");
 };
 
+Str.reverseString = function(value)
+{
+    return value.split("").reverse().join("");
+};
+
 Str.escapeJS = function(value)
 {
     return value.replace("\\", "\\\\", "g").replace(/\r/gm, "\\r")

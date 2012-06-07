@@ -17,8 +17,19 @@
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
     <script type="application/x-javascript">
-       window.Firebug = top.Firebug;
-       window.goDoCommand = top.goDoCommand;
+        window.Firebug = top.Firebug;
+        window.goDoCommand = function(aCommand) {
+            try
+            {
+                var controller = document.commandDispatcher.getControllerForCommand(aCommand);
+                if (controller &amp;&amp; controller.isCommandEnabled(aCommand))
+                    controller.doCommand(aCommand);
+            }
+            catch (e)
+            {
+                Components.utils.reportError("An error occurred executing the " + aCommand + ": " + e);
+            }
+        };
     </script>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
 

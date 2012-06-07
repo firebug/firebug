@@ -140,7 +140,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (!Firebug.CommandLine.isAttached(context, win))
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
-                "its too early for command line "+Win.getWindowId(win)+" location:"+
+                "it's too early for command line "+Win.getWindowId(win)+" location:"+
                 Win.safeGetWindowLocation(win), document);
 
             if (Xml.isXMLPrettyPrint(context, win))
@@ -164,7 +164,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
-                    "document.getUserData , its too early for command line",
+                    "through document.getUserData, it is too early for command line",
                      win], context, "error", true);
             }
             return;
@@ -195,7 +195,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (result === ignoreReturnValue)
                     return;
 
-                // result will be pass thru this function
                 successConsoleFunction(result, context);
             });
         }
@@ -272,7 +271,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             result = Firebug.Debugger.evaluate(expr, context, scope);
 
-            // result will be pass thru this function
             successConsoleFunction(result, context);
         }
         catch (e)
@@ -320,7 +318,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (result === ignoreReturnValue)
                     return;
 
-                // result will be pass thru this function
                 successConsoleFunction(result, context);
             });
         }
@@ -381,7 +378,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluateInSandbox success for sandbox ", scriptToEval);
 
-            // result will be pass thru this function
             successConsoleFunction(result, context);
         }
         catch (e)
@@ -655,7 +651,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             var completionBox = this.getCompletionBox();
 
             var options = {
-                completionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
                 tabWarnings: true,
                 includeCurrentScope: true
             };

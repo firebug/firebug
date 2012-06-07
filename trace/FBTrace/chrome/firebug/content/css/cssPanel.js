@@ -21,14 +21,16 @@ define([
     "firebug/lib/persist",
     "firebug/lib/system",
     "firebug/chrome/menu",
+    "firebug/lib/options",
+    "firebug/css/cssModule",
+    "firebug/css/cssReps",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
-    "firebug/chrome/infotip",
-    "firebug/chrome/searchBox",
-    "firebug/css/cssModule"
+    "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu) {
+    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu,
+    Options, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -61,13 +63,13 @@ var CSSPropTag = domplate(CSSDomplateBase,
             $cssOverridden: "$prop.overridden",
             role: "option"},
 
-            // Use spaces for indent so, copy to clipboard is nice.
+            // Use spaces for indent to make "copy to clipboard" nice.
             SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"),
             SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
                 "$prop.name"
             ),
 
-            // Use space here so, copy to clipboard has it (3266).
+            // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
                 "$prop.value$prop.important"
@@ -108,6 +110,24 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
             SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
             "&quot;;"
         )
+});
+
+var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssNamespaceRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@namespace"),
+            SPAN({"class": "separator"}, "$rule.prefix|getSeparator"),
+            SPAN({"class": "cssNamespacePrefix", $editable: "$rule|isEditable"}, "$rule.prefix"),
+            "&nbsp;&quot;",
+            SPAN({"class": "cssNamespaceName", $editable: "$rule|isEditable"}, "$rule.name"),
+            "&quot;;"
+        ),
+
+    getSeparator: function(prefix)
+    {
+        return prefix == "" ? "" : " ";
+    }
 });
 
 var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
@@ -168,6 +188,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
+const reSelectorChar = /[-_0-9a-zA-Z]/;
 
 // ********************************************************************************************* //
 // CSS Module
@@ -268,7 +289,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.editing)
         {
             this.stopEditing();
-            Events.dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
+            Events.dispatch(this.fbListeners, "onStopCSSEditing", [this.context]);
         }
         else
         {
@@ -279,19 +300,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 ? this.location.editStyleSheet.sheet
                 : this.location;
 
-            this.currentCSSEditor = Firebug.CSSModule.getCurrentEditor();
+            this.currentCSSEditor = CSSModule.getCurrentEditor();
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context, this);
-                Events.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
+                Events.dispatch(this.fbListeners, "onStartCSSEditing", [styleSheet, this.context]);
             }
             catch(exc)
             {
-                var mode = Firebug.CSSModule.getCurrentEditorName();
+                var mode = CSSModule.getCurrentEditorName();
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("editor.startEditing ERROR "+exc, {exc: exc, name: mode,
                         currentEditor: this.currentCSSEditor, styleSheet: styleSheet,
-                        CSSModule:Firebug.CSSModule});
+                        CSSModule: CSSModule});
             }
         }
     },
@@ -395,9 +416,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
+                  rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSMediaRule)
+                else if (rule instanceof window.CSSMediaRule ||
+                    rule instanceof window.CSSMozDocumentRule)
                 {
                     appendRules.apply(this, [Css.safeGetCSSRules(rule)]);
                 }
@@ -410,6 +432,22 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         props: props, isSystemSheet: isSystemSheet,
                         isNotEditable: true
                     });
+                }
+                else if (rule instanceof window.CSSNameSpaceRule &&
+                    !(rule instanceof window.MozCSSKeyframesRule ||
+                        rule instanceof window.MozCSSKeyframeRule))
+                {
+                    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
+                    // MozCSSKeyframesRules and MozCSSKeyframeRules are recognized as
+                    // CSSNameSpaceRules, so explicitly check whether the rule is not a
+                    // MozCSSKeyframesRule or a MozCSSKeyframeRule
+
+                    var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
+                    var namespace = rule.cssText.match(reNamespace);
+                    var prefix = namespace[2] || "";
+                    var name = namespace[3];
+                    rules.push({tag: CSSNamespaceRuleTag.tag, rule: rule, prefix: prefix,
+                        name: name, isNotEditable: true});
                 }
                 else
                 {
@@ -502,7 +540,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         name = this.translateName(name, value);
         if (name)
         {
-            value = Css.stripUnits(Css.rgbToHex(value));
+            if (Options.get("colorDisplay") == "hex")
+                value = Css.rgbToHex(value);
+            else if (Options.get("colorDisplay") == "hsl")
+                value = Css.rgbToHSL(value);
+            value = Css.stripUnits(value);
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -616,7 +658,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var rule = Firebug.getRepObject(row);
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-        Firebug.CSSModule.deleteProperty(rule, propName, this.context);
+        CSSModule.deleteProperty(rule, propName, this.context);
 
         // Remove the property from the selector map, if it was disabled
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
@@ -634,7 +676,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         if (this.name == "stylesheet")
-            Events.dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
+            Events.dispatch(this.fbListeners, "onInlineEditorClose", [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -659,7 +701,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
-        Firebug.CSSModule.disableProperty(Css.hasClass(row, "disabledStyle"), rule,
+        CSSModule.disableProperty(Css.hasClass(row, "disabledStyle"), rule,
             propName, parsedValue, map, this.context);
 
         this.markChange(this.name == "stylesheet");
@@ -679,7 +721,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         // XXjoe Hack to only allow clicking on the checkbox
-        if ((event.clientX <= 20) && (event.detail == 1))
+        if ((event.clientX <= 20) && Events.isSingleClick(event))
         {
             if (Css.hasClass(event.target, "textEditor inlineExpander"))
                 return;
@@ -691,7 +733,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 Events.cancelEvent(event);
             }
         }
-        else if ((event.clientX >= 20) && (event.detail == 2))
+        else if ((event.clientX >= 20) && Events.isDoubleClick(event))
         {
             row = Dom.getAncestorByClass(event.target, "cssRule");
             if (row && !Dom.getAncestorByClass(event.target, "cssPropName")
@@ -755,7 +797,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         this.showToolbarButtons("fbCSSButtons", true);
 
-        Firebug.CSSModule.updateEditButton();
+        CSSModule.updateEditButton();
 
         // wait for loadedContext to restore the panel
         if (this.context.loaded && !this.location)
@@ -908,7 +950,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "expandShorthandProps")
+        if (name == "expandShorthandProps" || name == "colorDisplay")
             this.refresh();
     },
 
@@ -920,16 +962,23 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        return [
-            Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
-                "css.option.tip.Expand_Shorthand_Properties"),
+        items = [
+             Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
+             "css.option.tip.Expand_Shorthand_Properties")
+        ];
+
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
+
+        items.push(
             "-",
             {
                 label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
                 command: Obj.bind(this.refresh, this)
             }
-        ];
+        );
+
+        return items;
     },
 
     getContextMenuItems: function(style, target)
@@ -994,27 +1043,17 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        if (this.selection instanceof window.Element)
+        if (!Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                 "-",
                 {
-                    label: "EditStyle",
-                    tooltiptext: "style.tip.Edit_Style",
-                    command: Obj.bindFixed(this.editElementStyle, this)
+                    label: "NewRule",
+                    tooltiptext: "css.tip.New_Rule",
+                    id: "fbNewCSSRule",
+                    command: Obj.bindFixed(this.insertRule, this, target)
                 }
             );
-        }
-        else if (!Url.isSystemStyleSheet(this.selection))
-        {
-            items.push(
-                    "-",
-                    {
-                        label: "NewRule",
-                        tooltiptext: "css.tip.New_Rule",
-                        command: Obj.bindFixed(this.insertRule, this, target)
-                    }
-                );
         }
 
         if (Css.hasClass(target, "cssSelector"))
@@ -1114,65 +1153,68 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-
         if (propValue)
         {
             var text = propValue.textContent;
-            if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
-                propNameNode.textContent.toLowerCase() == "font-family"))
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
+            var propName = propNameNode.textContent.toLowerCase();
+            var cssValue;
+
+            if (propName == "font" || propName == "font-family")
             {
-                var cssValue = parseCssFontFamilyValue(text, rangeOffset);
+                if (text.charAt(rangeOffset) == ",")
+                    return;
+
+                cssValue = CSSModule.parseCSSFontFamilyValue(text, rangeOffset, propName);
             }
             else
             {
-                var cssValue = parseCSSValue(text, rangeOffset);
+                cssValue = CSSModule.parseCSSValue(text, rangeOffset);
             }
 
-            if (cssValue)
+            if (!cssValue)
+                return false;
+
+            if (cssValue.value == this.infoTipValue)
+                return true;
+
+            this.infoTipValue = cssValue.value;
+
+            switch (cssValue.type)
             {
-                if (cssValue.value == this.infoTipValue)
-                    return true;
-
-                this.infoTipValue = cssValue.value;
-
-                if (cssValue.type == "rgb" || cssValue.type == "hsl" ||
-                    cssValue.type == "gradient" ||
-                    (!cssValue.type && Css.isColorKeyword(cssValue.value)))
-                {
+                case "rgb":
+                case "hsl":
+                case "gradient":
+                case "colorKeyword":
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
+                    return CSSInfoTip.populateColorInfoTip(infoTip, cssValue.value);
 
-                    return Firebug.InfoTip.populateColorInfoTip(infoTip, cssValue.value);
-                }
-                else if (cssValue.type == "url")
-                {
-                    var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-                    if (propNameNode && Css.isImageRule(Xml.getElementSimpleType(
-                        Firebug.getRepObject(target)),propNameNode.textContent))
+                case "url":
+                    if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
+                        propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
                         var baseURL = this.getStylesheetURL(rule, true);
-                        var relURL = parseURLValue(cssValue.value);
+                        var relURL = CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
-                        var repeat = parseRepeatValue(text);
+                        var repeat = CSSModule.parseRepeatValue(text);
 
                         this.infoTipType = "image";
                         this.infoTipObject = absURL;
 
-                        return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
-                }
-                else if (cssValue.type == "fontFamily")
-                {
-                    return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
-                }
-            }
-        }
 
-        delete this.infoTipType;
-        delete this.infoTipValue;
-        delete this.infoTipObject;
+                case "fontFamily":
+                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
+            }
+
+            delete this.infoTipType;
+            delete this.infoTipValue;
+            delete this.infoTipObject;
+        }
     },
 
     getEditor: function(target, value)
@@ -1429,7 +1471,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {styleSheet: styleSheet, ruleIndex: ruleIndex});
         }
 
-        Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
+        CSSModule.deleteRule(styleSheet, ruleIndex);
 
         if (this.context.panelName == "stylesheet")
         {
@@ -1504,7 +1546,92 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
+        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
+        {
+            if (Css.hasClass(target, "cssPropName"))
+            {
+  
+                if (value && previousValue != value)  // name of property has changed.
+                {
+                    // Record the original CSS text for the inline case so we can reconstruct at a later
+                    // point for diffing purposes
+                    var baseText = rule.style ? rule.style.cssText : rule.cssText;
+  
+                    propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
+                    parsedValue = parsePriority(propValue);
+  
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
+                            " = " + propValue);
+  
+                    if (propValue && propValue != "undefined")
+                    {
+                        if (FBTrace.DBG_CSS)
+                            FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
+                                " = " + propValue);
+  
+                        if (previousValue)
+                            CSSModule.removeProperty(rule, previousValue);
+  
+                        CSSModule.setProperty(rule, value, parsedValue.value,
+                            parsedValue.priority);
+                    }
+  
+                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                        previousValue, baseText]);
+                }
+                else if (!value)
+                {
+                    // name of the property has been deleted, so remove the property.
+                    CSSModule.removeProperty(rule, previousValue);
+                }
+            }
+            else if (Dom.getAncestorByClass(target, "cssPropValue"))
+            {
+                propName = Dom.getChildByClass(row, "cssPropName").textContent;
+                propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
+  
+                if (FBTrace.DBG_CSS)
+                {
+                    FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
+                        " = "+propValue+"\n");
+                   // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
+                }
+  
+                if (value && value != "null")
+                {
+                    parsedValue = parsePriority(value);
+                    CSSModule.setProperty(rule, propName, parsedValue.value,
+                        parsedValue.priority);
+                }
+                else if (previousValue && previousValue != "null")
+                {
+                    CSSModule.removeProperty(rule, propName);
+                }
+            }
+  
+            if (value)
+            {
+                var saveSuccess = !!rule.style.getPropertyValue(propName || value);
+                if(!saveSuccess && !propName)
+                {
+                    propName = value.replace(/-./g, function(match)
+                    {
+                        return match[1].toUpperCase()
+                    });
+    
+                    if (propName in rule.style || propName == "float")
+                        saveSuccess = "almost";
+                }
+    
+                this.box.setAttribute("saveSuccess", saveSuccess);
+            }
+            else
+            {
+                this.box.removeAttribute("saveSuccess");
+            }
+        }
+        else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
         {
             if (FBTrace.DBG_CSS)
             {
@@ -1529,88 +1656,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             rule.encoding = value;
         }
-        else if (Css.hasClass(target, "cssPropName"))
-        {
-
-            if (value && previousValue != value)  // name of property has changed.
-            {
-                // Record the original CSS text for the inline case so we can reconstruct at a later
-                // point for diffing purposes
-                var baseText = rule.style ? rule.style.cssText : rule.cssText;
-
-                propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-                parsedValue = parsePriority(propValue);
-
-                if (FBTrace.DBG_CSS)
-                    FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                        " = " + propValue);
-
-                if (propValue && propValue != "undefined")
-                {
-                    if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                            " = " + propValue);
-
-                    if (previousValue)
-                        Firebug.CSSModule.removeProperty(rule, previousValue);
-
-                    Firebug.CSSModule.setProperty(rule, value, parsedValue.value,
-                        parsedValue.priority);
-                }
-
-                Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
-                    previousValue, baseText]);
-            }
-            else if (!value)
-            {
-                // name of the property has been deleted, so remove the property.
-                Firebug.CSSModule.removeProperty(rule, previousValue);
-            }
-        }
-        else if (Dom.getAncestorByClass(target, "cssPropValue"))
-        {
-            propName = Dom.getChildByClass(row, "cssPropName").textContent;
-            propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-
-            if (FBTrace.DBG_CSS)
-            {
-                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
-                    " = "+propValue+"\n");
-               // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
-            }
-
-            if (value && value != "null")
-            {
-                parsedValue = parsePriority(value);
-                Firebug.CSSModule.setProperty(rule, propName, parsedValue.value,
-                    parsedValue.priority);
-            }
-            else if (previousValue && previousValue != "null")
-            {
-                Firebug.CSSModule.removeProperty(rule, propName);
-            }
-        }
-
-        if (value)
-        {
-            var saveSuccess = !!rule.style.getPropertyValue(propName || value);
-            if(!saveSuccess && !propName)
-            {
-                propName = value.replace(/-./g, function(match)
-                {
-                    return match[1].toUpperCase()
-                });
-
-                if(propName in rule.style || propName == "float")
-                    saveSuccess = "almost";
-            }
-
-            this.box.setAttribute("saveSuccess",saveSuccess);
-        }
-        else
-        {
-            this.box.removeAttribute("saveSuccess");
-        }
 
         Firebug.Inspector.repaint();
 
@@ -1628,7 +1673,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (charCode == 59 /*";"*/ && Css.hasClass(target, "cssPropValue"))
         {
-            var cssValue = parseCSSValue(this.input.value, this.input.selectionStart);
+            var cssValue = CSSModule.parseCSSValue(this.input.value, this.input.selectionStart);
             // Simple test, if we are inside a string (see issue 4543)
             var isValueInString = (cssValue.value.indexOf("\"") != -1);
 
@@ -1640,19 +1685,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteRange: function(value, offset)
     {
-        if (Css.hasClass(this.target, "cssPropName"))
+        if (!Css.hasClass(this.target, "cssPropValue"))
             return {start: 0, end: value.length};
+
+        var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+        if (propName == "font" || propName == "font-family")
+            return CSSModule.parseCSSFontFamilyValue(value, offset, propName);
         else
-            return parseCSSValue(value, offset);
+            return CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
     {
-        if (expr.charAt(0) === "!")
-        {
-            return ["!important"];
-        }
-        else if (Dom.getAncestorByClass(this.target, "importRule"))
+        if (Dom.getAncestorByClass(this.target, "importRule"))
         {
             return [];
         }
@@ -1667,13 +1713,22 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
+            if (expr.charAt(0) === "!")
+                return ["!important"];
+
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
 
-            if (propName === "font" || propName === "font-family")
+            var keywords;
+            if (range.type === "url")
             {
+                // We can't complete urls yet.
+                return [];
+            }
+            else if (range.type === "fontFamily")
+            {
+                keywords = Css.cssKeywords["fontFamily"].slice();
                 if (this.panel && this.panel.context)
                 {
                     // Add the fonts used in this context (they might be inaccessible
@@ -1681,25 +1736,101 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
                     for (var i = 0; i < fonts.length; i++)
                         ar.push(fonts[i].CSSFamilyName);
-                    keywords = Arr.merge(keywords, ar);
+                    keywords = Arr.sortUnique(keywords.concat(ar));
                 }
 
-                var q = expr.charAt(0);
-                if (expr.length > 1 && (q === '"' || q === "'"))
+                var q = expr.charAt(0), isQuoted = (q === '"' || q === "'");
+                if (!isQuoted)
                 {
-                    keywords = keywords.slice();
-                    for (var i = 0; i < keywords.length; ++i)
-                    {
-                        // Treat values starting with capital letters as font names
-                        // that can be quoted.
-                        var k = keywords[i];
-                        if (k.charAt(0).toLowerCase() !== k.charAt(0))
-                            keywords[i] = q + k + q;
-                    }
+                    // Default to ' quotes, unless " occurs somewhere.
+                    q = (/"/.test(preExpr + postExpr) ? '"' : "'");
+                }
+
+                // Don't complete '.
+                if (expr.length <= 1 && isQuoted)
+                    return [];
+
+                // When completing, quote fonts if the input is quoted; when
+                // cycling, quote them instead in the way the user seems to
+                // expect to have them quoted.
+                var reSimple = /^[a-z][a-z0-9-]*$/i;
+                var isComplex = !reSimple.test(expr.replace(/^['"]?|['"]?$/g, ""));
+                var quote = function(str)
+                {
+                    if (!cycle || isComplex !== isQuoted)
+                        return (isQuoted ? q + str + q : str);
+                    else
+                        return (reSimple.test(str) ? str : q + str + q);
+                };
+
+                keywords = keywords.slice();
+                for (var i = 0; i < keywords.length; ++i)
+                {
+                    // Treat values starting with capital letters as font names
+                    // that can be quoted.
+                    var k = keywords[i];
+                    if (k.charAt(0).toLowerCase() !== k.charAt(0))
+                        keywords[i] = quote(k);
                 }
             }
+            else
+            {
+                var lowerProp = propName.toLowerCase(), avoid;
+                if (["background", "border", "font"].indexOf(lowerProp) !== -1)
+                {
+                    if (cycle)
+                    {
+                        // Cycle only within the same category, if possible.
+                        var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, expr);
+                        if (cat)
+                            return (cat in Css.cssKeywords ? Css.cssKeywords[cat] : [cat]);
+                    }
+                    else
+                    {
+                        // Avoid repeated properties. We assume the values to be solely
+                        // space-separated tokens, within a comma-separated part (like
+                        // for CSS3 multiple backgrounds). This is absolutely wrong, but
+                        // good enough in practice because non-tokens for which it fails
+                        // likely aren't in any category.
+                        // "background-position" and "background-repeat" values can occur
+                        // twice, so they are special-cased.
+                        avoid = [];
+                        var preTokens = preExpr.split(",").reverse()[0].split(" ");
+                        var postTokens = postExpr.split(",")[0].split(" ");
+                        var tokens = preTokens.concat(postTokens);
+                        for (var i = 0; i < tokens.length; ++i)
+                        {
+                            var cat = Css.getCSSShorthandCategory(nodeType, lowerProp, tokens[i]);
+                            if (cat && cat !== "position" && cat !== "bgRepeat")
+                                avoid.push(cat);
+                        }
+                    }
+                }
+                keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
+            }
+
+            // Add the magic inherit property, if it's sufficiently alone.
+            if (!preExpr)
+                keywords = keywords.concat(["inherit"]);
             return keywords;
         }
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssPropValue"))
+            return null;
+
+        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
+        // into 'no-repeat' should work).
+        var row = Dom.getAncestorByClass(this.target, "cssProp");
+        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        if (!Css.multiValuedProperties.hasOwnProperty(propName))
+            return null;
+
+        if (range.type === "fontFamily")
+            return ",";
+        return " ";
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
@@ -1711,7 +1842,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
         }
 
-        var range = parseCSSValue(value, offset);
+        var range = CSSModule.parseCSSValue(value, offset);
         var type = (range && range.type) || "";
         var expr = (range ? value.substring(range.start, range.end) : "");
 
@@ -1723,6 +1854,16 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 info = {minValue: 0, maxValue: 1};
                 amt /= 100;
             }
+
+            if (expr === "0" && value.lastIndexOf("(", offset) === -1 &&
+                !Css.unitlessProperties.hasOwnProperty(propName))
+            {
+                // 0 is a length, and incrementing it normally will result in an
+                // invalid value 1 or -1.  Thus, guess at a unit to add.
+                var unitM = /\d([a-z]{1,4})/.exec(value);
+                expr += (unitM ? unitM[1] : "px");
+            }
+
             var newValue = this.incrementExpr(expr, amt, info);
             if (newValue !== null)
             {
@@ -1876,7 +2017,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 function CSSRuleEditor(doc)
 {
     this.initializeInline(doc);
-    this.completeAsYouType = false;
 }
 
 CSSRuleEditor.uniquifier = 0;
@@ -1962,7 +2102,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // We want to do this before the insert to ease change tracking
         if (oldRule)
         {
-            Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
+            CSSModule.deleteRule(styleSheet, ruleIndex);
         }
 
         // Firefox does not follow the spec for the update selector text case.
@@ -1992,7 +2132,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             try
             {
-                var insertLoc = Firebug.CSSModule.insertRule(styleSheet, cssText, ruleIndex);
+                var insertLoc = CSSModule.insertRule(styleSheet, cssText, ruleIndex);
                 rule = cssRules[insertLoc];
                 ruleIndex++;
 
@@ -2010,7 +2150,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
                 target.innerHTML = Str.escapeForCss(previousValue);
                 // create dummy rule to be able to recover from error
-                var insertLoc = Firebug.CSSModule.insertRule(styleSheet,
+                var insertLoc = CSSModule.insertRule(styleSheet,
                     'selectorSavingError{}', ruleIndex);
                 rule = cssRules[insertLoc];
 
@@ -2037,6 +2177,196 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
 
         this.panel.markChange(this.panel.name == "stylesheet");
+    },
+
+    getAutoCompleteRange: function(value, offset)
+    {
+        if (!Css.hasClass(this.target, "cssSelector"))
+            return;
+
+        // Find the word part of an identifier.
+        var reIdent = /[-_a-zA-Z0-9]*/;
+        var rbefore = Str.reverseString(value.substr(0, offset));
+        var after = value.substr(offset);
+        var start = offset - reIdent.exec(rbefore)[0].length;
+        var end = offset + reIdent.exec(after)[0].length;
+
+        // Expand it to include '.', '#', ':', or '::'.
+        if (start > 0 && ".#:".indexOf(value.charAt(start-1)) !== -1)
+        {
+            --start;
+            if (start > 0 && value.substr(start-1, 2) === "::")
+                --start;
+        }
+        return {start: start, end: end};
+    },
+
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
+    {
+        if (!Css.hasClass(this.target, "cssSelector"))
+            return [];
+
+        // Don't support attribute selectors, for now.
+        if (preExpr.lastIndexOf('[') > preExpr.lastIndexOf(']'))
+            return [];
+
+        var includeTagNames = true;
+        var includeIds = true;
+        var includeClasses = true;
+        var includePseudoClasses = true;
+        var includePseudoElements = true;
+
+        if (expr.length > 0)
+        {
+            includeTagNames = includeClasses = includeIds =
+                includePseudoClasses = includePseudoElements = false;
+            if (Str.hasPrefix(expr, "::"))
+                includePseudoElements = true;
+            else if (expr.charAt(0) === ":")
+                includePseudoClasses = true;
+            else if (expr.charAt(0) === "#")
+                includeIds = true;
+            else if (expr.charAt(0) === ".")
+                includeClasses = true;
+            else
+                includeTagNames = true;
+        }
+        if (preExpr.length > 0 && reSelectorChar.test(preExpr.slice(-1)))
+            includeTagNames = false;
+
+        var ret = [];
+
+        if (includeTagNames || includeIds || includeClasses)
+        {
+            // Traverse the DOM to get the used ids/classes/tag names that
+            // are relevant as continuations.
+            // (Tag names could be hard-coded, but finding which ones are
+            // actually used hides annoying things like 'b'/'i' when they
+            // are not used, and works in other contexts than HTML.)
+            // This isn't actually that bad, performance-wise.
+            var doc = context.window.document, els;
+            if (preExpr && " >+~".indexOf(preExpr.slice(-1)) === -1)
+            {
+                try
+                {
+                    var preSelector = preExpr.split(",").reverse()[0];
+                    els = doc.querySelectorAll(preSelector);
+                }
+                catch (exc)
+                {
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("Invalid previous selector part \"" + preSelector + "\"", exc);
+                }
+            }
+            if (!els)
+                els = doc.getElementsByTagName("*");
+            els = [].slice.call(els);
+
+            if (includeTagNames)
+            {
+                var tagMap = {};
+                els.forEach(function(e)
+                {
+                    tagMap[e.localName] = 1;
+                });
+                ret.push.apply(ret, Object.keys(tagMap));
+            }
+
+            if (includeIds)
+            {
+                var ids = [];
+                els.forEach(function(e)
+                {
+                    if (e.id)
+                        ids.push(e.id);
+                });
+                ids = Arr.sortUnique(ids);
+                ret.push.apply(ret, ids.map(function(cl)
+                {
+                    return "#" + cl;
+                }));
+            }
+
+            if (includeClasses)
+            {
+                var clCombinationMap = {}, classes = [];
+                els.forEach(function(e)
+                {
+                    var cl = e.className;
+                    if (cl && !((","+cl) in clCombinationMap))
+                    {
+                        clCombinationMap[","+cl] = 1;
+                        classes.push.apply(classes, e.classList);
+                    }
+                });
+                classes = Arr.sortUnique(classes);
+                ret.push.apply(ret, classes.map(function(cl)
+                {
+                    return "." + cl;
+                }));
+            }
+        }
+
+        if (includePseudoClasses)
+        {
+            // Add the pseudo-class-looking :before, :after.
+            ret.push(
+                ":after",
+                ":before"
+            );
+
+            ret.push.apply(ret, Css.pseudoClasses);
+        }
+
+        if (includePseudoElements)
+        {
+            ret.push.apply(ret, Css.pseudoElements);
+        }
+
+        // Don't suggest things that are already included (by way of totally-
+        // incorrect-but-probably-good-enough logic).
+        var rev = Str.reverseString(preExpr);
+        var partInd = rev.search(/[, >+~]/);
+        var lastPart = (partInd === -1 ? rev : rev.substr(0, partInd));
+        lastPart = Str.reverseString(lastPart);
+        if (lastPart !== "")
+        {
+            ret = ret.filter(function(str)
+            {
+                var ind = lastPart.indexOf(str);
+                if (ind === -1)
+                    return true;
+                var before = ind-1, after = ind+str.length;
+                var re = reSelectorChar;
+                if (before >= 0 && re.test(str.charAt(0)) && re.test(lastPart.charAt(before)))
+                    return true;
+                if (after < lastPart.length && re.test(lastPart.charAt(after)))
+                    return true;
+                return false;
+            });
+        }
+
+        // Don't suggest internal Firebug things.
+        var reInternal = /^[.#]firebug[A-Z]/;
+        ret = ret.filter(function(str)
+        {
+            return !reInternal.test(str);
+        });
+
+        if (ret.indexOf(":hover") !== -1)
+            out.suggestion = ":hover";
+
+        return ret.sort();
+    },
+
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        if (!Css.hasClass(this.target, "cssSelector"))
+            return null;
+
+        // For e.g. 'd|span', expand to a descendant selector; otherwise assume
+        // that this is part of the same selector part.
+        return (reSelectorChar.test(prefixOf.charAt(0)) ? " " : "");
     },
 
     advanceToNext: function(target, charCode)
@@ -2114,7 +2444,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("StyleSheetEditor.saveEdit", arguments);
 
-        Firebug.CSSModule.freeEdit(this.styleSheet, value);
+        CSSModule.freeEdit(this.styleSheet, value);
     },
 
     beginEditing: function()
@@ -2215,95 +2545,6 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
-}
-
-function parseURLValue(value)
-{
-    var m = reURL.exec(value);
-    return m ? m[1] : "";
-}
-
-function parseRepeatValue(value)
-{
-    var m = reRepeat.exec(value);
-    return m ? m[0] : "";
-}
-
-function parseCssFontFamilyValue(value, offset)
-{
-    if (value.charAt(offset) == ",")
-        return "";
-
-    var reFonts = /^(.*\d\S*\s)?(.*?)(\s?!important)?$/;
-    var m = reFonts.exec(value);
-    if (!m)
-        return "";
-
-    var fonts = m[2].split(",");
-    var fontsLength = fonts.length;
-    var totalLength = m[1] ? m[1].length : 0;
-
-    // offset begins at 0
-    offset += 1;
-    if (m[1] && offset <= m[1].length)
-        return "";
-
-    for (var i = 0; i < fontsLength; ++i)
-    {
-        // +1 because we add the length of ","
-        totalLength += fonts[i].length + 1;
-        if (totalLength >= offset)
-        {
-            return {
-                value: fonts[i],
-                type: "fontFamily"
-            };
-        }
-    }
-}
-
-function parseCSSValue(value, offset)
-{
-    var start = 0;
-    var m;
-    while (true)
-    {
-        m = reSplitCSS.exec(value);
-        if (m && m.index+m[0].length < offset)
-        {
-            value = value.substr(m.index+m[0].length);
-            start += m.index+m[0].length;
-            offset -= m.index+m[0].length;
-        }
-        else
-            break;
-    }
-
-    if (!m)
-        return;
-
-    var type;
-    if (m[1])
-        type = "url";
-    else if (m[2] || m[4])
-        type = "rgb";
-    else if (m[3])
-        type = "hsl";
-    else if (m[5])
-        type = "int";
-
-    var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
-
-    if (!type && m[10] && m[10].indexOf("gradient") != -1)
-    {
-        var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
-        if (!arg)
-            return;
-
-        cssValue.value += arg[0];
-        cssValue.type = "gradient";
-    }
-    return cssValue;
 }
 
 function getRuleLine(rule)

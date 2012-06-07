@@ -7,8 +7,9 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/dom",
     "firebug/lib/locale",
+    "firebug/lib/css",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -19,6 +20,7 @@ var Cu = Components.utils;
 
 var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
+var TEXT_CHANGED = "";
 
 try
 {
@@ -27,6 +29,7 @@ try
 
     MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
     CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
+    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
 }
 catch (err)
 {
@@ -87,8 +90,16 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        this.editor.removeEventListener("keypress", this.onKeyPress);
+        try
+        {
+            this.editor.removeEventListener("keypress", this.onKeyPress);
+        }
+        catch (err)
+        {
+        }
+
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
+        this.editor.removeEventListener(TEXT_CHANGED, this.onTextChanged);
 
         this.editor.destroy();
         this.editor = null;
@@ -100,10 +111,21 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
-        this.editor.addEventListener("keypress", this.onKeyPress);
+        try
+        {
+            // This event is not supported in Fx11, so catch the exception
+            // which is thrown.
+            this.editor.addEventListener("keypress", this.onKeyPress);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERROR)
+                FBTrace.sysout("commandEditor.onEditorLoad; EXCEPTION " + err, err);
+        }
 
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
+        this.editor.addEventListener(TEXT_CHANGED, this.onTextChanged);
 
         this.editor.setCaretOffset(this.editor.getCharCount());
 
@@ -151,6 +173,18 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Other Events
+
+    onTextChanged: function(event)
+    {
+        // Ignore changes that are triggered by Firebug's restore logic.
+        if (Firebug.CommandEditor.ignoreChanges)
+            return;
+
+        Firebug.CommandLine.onCommandLineInput(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Contex Menu
 
     onContextMenu: function(event)
@@ -188,8 +222,22 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     setText: function(text)
     {
-        if (this.editor)
-            this.editor.setText(text);
+        try
+        {
+            // When manually setting the text, ignore the TEXT_CHANGED event.
+            this.ignoreChanges = true;
+
+            if (this.editor)
+                this.editor.setText(text);
+        }
+        catch (err)
+        {
+            // No exception is really expected, we just need the finally clause.
+        }
+        finally
+        {
+            this.ignoreChanges = false;
+        }
     },
 
     getText: function()
@@ -229,7 +277,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (typeof(SourceEditor) != "undefined")
         {
             var doc = this.editor._view._frame.contentDocument;
-            doc.body.style.fontSizeAdjust = adjust;
+
+            // See issue 5488
+            //doc.body.style.fontSizeAdjust = adjust;
         }
         else
         {

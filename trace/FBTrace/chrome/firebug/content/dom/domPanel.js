@@ -169,7 +169,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 Firebug.chrome.select(object, "script");
                 Events.cancelEvent(event);
             }
-            else if (event.detail == 2 && !object)
+            else if (Events.isDoubleClick(event) && !object)
             {
                 var panel = row.parentNode.parentNode.domPanel;
                 if (panel)
@@ -384,7 +384,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     // Object properties
 
     /**
-     * Returns list of properties for the passed object.
+     * Returns a list of properties available on an object, filtered on enumerability and prototype
+     * chain position. Due to prototype traversal, some property names may appear several times.
      *
      * @param {Object} object The object we want to get the list of properties for.
      * @param {Boolean} enumerableOnly If set to true, only enumerable properties are returned.
@@ -405,13 +406,15 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (ownOnly)
             return props;
 
-        // Climb prototype chain.
+        // Climb the prototype chain.
         var inheritedProps = [];
         var parent = Object.getPrototypeOf(object);
         if (parent)
             inheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
 
-        return Arr.merge(props, inheritedProps);
+        // Push everything onto the returned array, to avoid O(nm) runtime behavior.
+        inheritedProps.push.apply(inheritedProps, props);
+        return inheritedProps;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -447,6 +450,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 var contentView = this.getObjectView(object);
                 var properties = this.getObjectProperties(contentView,
                     Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                properties = Arr.sortUnique(properties);
 
                 if (contentView.hasOwnProperty("constructor") &&
                     properties.indexOf("constructor") == -1)
@@ -657,7 +661,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (value)
         {
             var proto = Obj.getPrototype(value);
-            // Special case for functions with a protoype that has values
+            // Special case for functions with a prototype that has values
             if (valueType === "function" && proto)
             {
                 hasChildren = hasChildren || Obj.hasProperties(proto,
@@ -1452,18 +1456,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserProps: 1,
-            showUserFuncs: 1,
-            showDOMProps: 1,
-            showDOMFuncs: 1,
-            showDOMConstants: 1,
-            showInlineEventHandlers: 1,
-            showOwnProperties: 1,
-            showEnumerableProperties: 1,
-        };
+        var options = [
+            "showUserProps",
+            "showUserFuncs",
+            "showDOMProps",
+            "showDOMFuncs",
+            "showDOMConstants",
+            "showInlineEventHandlers",
+            "showOwnProperties",
+            "showEnumerableProperties"
+        ];
 
-        if (optionMap.hasOwnProperty(name))
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.rebuild(true);
     },
 
@@ -1507,6 +1512,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var rowName = getRowName(row);
             var rowObject = this.getRowObject(row);
             var rowValue = this.getRowPropertyValue(row);
+            var member = row.domObject;
 
             var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof StackFrame.StackFrame;
@@ -1554,14 +1560,18 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 tooltiptext = "dom.tip.Edit_Property";
             }
 
-            items.push(
-                "-",
-                {
-                    label: label,
-                    tooltiptext: tooltiptext,
-                    command: Obj.bindFixed(this.editProperty, this, row)
-                }
-            );
+            var readOnly = (!isWatch && !isStackFrame && member && member.readOnly);
+            if (!readOnly)
+            {
+                items.push(
+                    "-",
+                    {
+                        label: label,
+                        tooltiptext: tooltiptext,
+                        command: Obj.bindFixed(this.editProperty, this, row)
+                    }
+                );
+            }
 
             if (isWatch || (!isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
             {
@@ -1575,7 +1585,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            var member = row ? row.domObject : null;
             if (!Dom.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(

@@ -195,7 +195,7 @@
 
 .domTable .objectBox-errorMessage {
     padding: 0 0 0 18px;
-    background: url(chrome://firebug/skin/errorIcon-sm.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/errorSmall.svg) no-repeat 0 0;
     color: red;
 }
 

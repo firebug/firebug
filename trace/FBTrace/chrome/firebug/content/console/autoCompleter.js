@@ -31,10 +31,13 @@ const reLiteralExpr = /^[ "0-9,]*$/;
 
 Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 {
+    var popupSize = 40;
+
     this.textBox = textBox;
-    this.completionBox = completionBox;
     this.options = options;
-    this.showCompletionPopup = options.completionPopup;
+
+    this.completionBox = completionBox;
+    this.popupTop = this.popupBottom = null;
 
     this.completionBase = {
         pre: null,
@@ -45,7 +48,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     this.revertValue = null;
 
-    this.completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
+    this.showCompletionPopup = options.showCompletionPopup;
+    this.completionPopup = options.completionPopup;
     this.selectedPopupElement = null;
 
     /**
@@ -77,7 +81,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         };
         this.completions = null;
 
-        this.showCompletions();
+        this.showCompletions(false);
     };
 
     /**
@@ -90,7 +94,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.completionBase.candidates = [];
         this.completions = null;
 
-        this.showCompletions();
+        this.showCompletions(false);
     };
 
     /**
@@ -102,7 +106,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (!this.completions)
             return true;
 
-        if (this.getCompletionBoxValue() === this.textBox.value)
+        if (this.getCompletionValue() === this.textBox.value)
         {
             // The user wouldn't see a difference if we completed. This can
             // happen for example if you type 'alert' and press enter,
@@ -121,7 +125,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     {
         this.revertValue = null;
         this.createCandidates(context);
-        this.showCompletions();
+        this.showCompletions(false);
     };
 
     /**
@@ -189,35 +193,69 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     /**
      * From a valid completion base, create a list of completions (containing
-     * those completion candidates that share a prefix with the user's input)
-     * and a default completion.
+     * those completion candidates that share a (sometimes case-insensitive)
+     * prefix with the user's input) and a default completion.
      */
     this.createCompletions = function(prefix)
     {
         var candidates = this.completionBase.candidates;
-        var valid = [];
+        var valid = [], ciValid = [];
 
         if (!this.completionBase.expr && !prefix)
         {
             // Don't complete "".
+            this.completions = null;
+            return;
         }
-        else
+
+        var lowPrefix = prefix.toLowerCase();
+        for (var i = 0; i < candidates.length; ++i)
         {
-            for (var i = 0; i < candidates.length; ++i)
+            // Mark a candidate as matching if it matches the prefix case-
+            // insensitively, and shares its upper-case characters.
+            var name = candidates[i];
+            if (!Str.hasPrefix(name.toLowerCase(), lowPrefix))
+                continue;
+
+            var fail = false;
+            for (var j = 0; j < prefix.length; ++j)
             {
-                var name = candidates[i];
+                var ch = prefix.charAt(j);
+                if (ch !== ch.toLowerCase() && ch !== name.charAt(j))
+                {
+                    fail = true;
+                    break;
+                }
+            }
+            if (!fail)
+            {
+                ciValid.push(name);
                 if (Str.hasPrefix(name, prefix))
                     valid.push(name);
             }
         }
 
-        if (valid.length > 0)
+        if (ciValid.length > 0)
         {
+            // If possible, default to a candidate matching the case by picking
+            // a default from 'valid' and correcting its index.
+            var hasMatchingCase = (valid.length > 0);
+
             this.completions = {
-                list: valid,
+                list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix
             };
             this.pickDefaultCandidate();
+
+            if (hasMatchingCase)
+            {
+                var find = valid[this.completions.index];
+                this.completions = {
+                    list: ciValid,
+                    prefix: prefix,
+                    index: ciValid.indexOf(find)
+                };
+            }
         }
         else
         {
@@ -243,17 +281,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Go backward or forward one step in the list of completions.
-     * dir is the relative movement in the list; -1 means backward and 1 forward.
+     * Go backward or forward by some number of steps in the list of completions.
+     * dir is the relative movement in the list (negative for backwards movement).
      */
-    this.cycle = function(dir)
+    this.cycle = function(dir, clamp)
     {
-        this.completions.index += dir;
-        if (this.completions.index >= this.completions.list.length)
-            this.completions.index = 0;
-        else if (this.completions.index < 0)
-            this.completions.index = this.completions.list.length - 1;
-        this.showCompletions();
+        var ind = this.completions.index + dir;
+        if (clamp)
+            ind = Math.max(Math.min(ind, this.completions.list.length - 1), 0);
+        else if (ind >= this.completions.list.length)
+            ind = 0;
+        else if (ind < 0)
+            ind = this.completions.list.length - 1;
+        this.completions.index = ind;
+        this.showCompletions(true);
     };
 
     /**
@@ -282,19 +323,24 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var completion = this.getCurrentCompletion();
         if (completion === null)
             return "";
-        return this.completionBase.pre + this.completionBase.expr + completion;
+        var userTyped = this.textBox.value;
+        var value = this.completionBase.pre + this.completionBase.expr + completion;
+        return userTyped + value.substr(userTyped.length);
     };
 
     /**
      * Update the completion box and popup to be consistent with the current
-     * state of the auto-completer.
+     * state of the auto-completer. If just cycling, the old scolling state
+     * for the popup is preserved.
      */
-    this.showCompletions = function()
+    this.showCompletions = function(cycling)
     {
         this.completionBox.value = this.getCompletionBoxValue();
 
-        if (this.showCompletionPopup && this.completions && this.completions.list.length > 1)
-            this.popupCandidates();
+        var show = this.showCompletionPopup ||
+            (this.completionPopup && this.completionPopup.state === "open");
+        if (show && this.completions && this.completions.list.length > 1)
+            this.popupCandidates(cycling);
         else
             this.closePopup();
     };
@@ -311,7 +357,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return false;
 
         if (event.keyCode === KeyEvent.DOM_VK_TAB &&
-            !Events.isControl(event) && this.textBox.value !== "")
+            !Events.isControl(event) && !Events.isControlShift(event) &&
+            this.textBox.value !== "")
         {
             if (this.completions)
             {
@@ -366,11 +413,32 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 }
             }
         }
-        else if (event.keyCode === KeyEvent.DOM_VK_UP || event.keyCode === KeyEvent.DOM_VK_DOWN)
+        else if (event.keyCode === KeyEvent.DOM_VK_UP ||
+            event.keyCode === KeyEvent.DOM_VK_DOWN)
         {
             if (this.completions)
             {
-                this.cycle((event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1));
+                this.cycle(event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1, false);
+                Events.cancelEvent(event);
+                return true;
+            }
+        }
+        else if (event.keyCode === KeyEvent.DOM_VK_PAGE_UP ||
+            event.keyCode === KeyEvent.DOM_VK_PAGE_DOWN)
+        {
+            if (this.completions)
+            {
+                this.pageCycle(event.keyCode === KeyEvent.DOM_VK_PAGE_UP ? -1 : 1);
+                Events.cancelEvent(event);
+                return true;
+            }
+        }
+        else if (event.keyCode === KeyEvent.DOM_VK_HOME ||
+            event.keyCode === KeyEvent.DOM_VK_END)
+        {
+            if (this.isPopupOpen())
+            {
+                this.topCycle(event.keyCode === KeyEvent.DOM_VK_HOME ? -1 : 1);
                 Events.cancelEvent(event);
                 return true;
             }
@@ -387,7 +455,22 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         {
             // Close the completion popup on escape in keydown, so that the popup
             // does not close itself and prevent event propagation on keypress.
-            this.closePopup();
+            // (Unless the popup is only open due to Ctrl+Space, in which case
+            // that's precisely what we want.)
+            if (this.showCompletionPopup)
+                this.closePopup();
+        }
+        else if (event.keyCode === KeyEvent.DOM_VK_SPACE && Events.isControl(event))
+        {
+            // Force-show the completion popup.
+            if (!this.completions)
+            {
+                // If completions have been hidden, show them again.
+                this.hide();
+                this.complete(context);
+            }
+            if (this.completionPopup && this.completions)
+                this.popupCandidates(false);
         }
     };
 
@@ -411,14 +494,44 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Accept the currently shown completion in the text box.
+     * Get what should be completed to; this is only vaguely related to what is
+     * shown in the completion box.
+     */
+    this.getCompletionValue = function()
+    {
+        var property = this.getCurrentCompletion();
+        var preParsed = this.completionBase.pre, preExpr = this.completionBase.expr;
+        var res = preParsed + preExpr + property;
+
+        // Don't adjust index completions.
+        if (/^\[['"]$/.test(preExpr.slice(-2)))
+            return res;
+
+        if (!isValidProperty(property))
+        {
+            // The property name is actually invalid in free form, so replace
+            // it with array syntax.
+
+            if (preExpr)
+            {
+                res = preParsed + preExpr.slice(0, -1);
+            }
+            else
+            {
+                // Global variable access - assume the variable is a member of 'window'.
+                res = preParsed + "window";
+            }
+            res += '["' + Str.escapeJS(property) + '"]';
+        }
+        return res;
+    };
+
+    /**
+     * Accept the current completion into the text box.
      */
     this.acceptCompletion = function()
     {
-        var completion = this.getCurrentCompletion();
-        completion = adjustCompletionOnAccept(this.completionBase.pre,
-                this.completionBase.expr, completion);
-
+        var completion = this.getCompletionValue();
         var originalValue = this.textBox.value;
         this.textBox.value = completion;
         setCursorToEOL(this.textBox);
@@ -427,10 +540,61 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.revertValue = originalValue;
     };
 
-    this.popupCandidates = function()
+    this.pageCycle = function(dir)
     {
-        var commandCompletionLineLimit = 40;
+        var list = this.completions.list, selIndex = this.completions.index;
 
+        if (!this.isPopupOpen())
+        {
+            // When no popup is open, cycle by a fixed amount and stop at edges.
+            this.cycle(dir * 15, true);
+            return;
+        }
+
+        var top = this.popupTop, bottom = this.popupBottom;
+        if (top === 0 && bottom === list.length)
+        {
+            // For a single scroll page, act like home/end.
+            this.topCycle(dir);
+            return;
+        }
+
+        var immediateTarget;
+        if (dir === -1)
+            immediateTarget = (top === 0 ? top : top + 2);
+        else
+            immediateTarget = (bottom === list.length ? bottom: bottom - 2) - 1;
+        if ((selIndex - immediateTarget) * dir < 0)
+        {
+            // The selection has not yet reached the edge target, so jump to it.
+            selIndex = immediateTarget;
+        }
+        else
+        {
+            // Show the next page.
+            if (dir === -1 && top - popupSize <= 0)
+                selIndex = 0;
+            else if (dir === 1 && bottom + popupSize >= list.length)
+                selIndex = list.length - 1;
+            else
+                selIndex = immediateTarget + dir*popupSize;
+        }
+
+        this.completions.index = selIndex;
+        this.showCompletions(true);
+    };
+
+    this.topCycle = function(dir)
+    {
+        if (dir === -1)
+            this.completions.index = 0;
+        else
+            this.completions.index = this.completions.list.length - 1;
+        this.showCompletions(true);
+    };
+
+    this.popupCandidates = function(cycling)
+    {
         Dom.eraseNode(this.completionPopup);
         this.selectedPopupElement = null;
 
@@ -440,51 +604,79 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var title = this.completionPopup.ownerDocument.
             createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = Locale.$STR("console.Use Arrow keys or Enter");
+        title.innerHTML = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
 
-        var escPrefix = Str.escapeForTextNode(this.textBox.value);
+        var list = this.completions.list, selIndex = this.completions.index;
 
-        var showTop = 0;
-        var showBottom = this.completions.list.length;
-        if (this.completions.list.length > commandCompletionLineLimit)
+        if (this.completions.list.length <= popupSize)
         {
-            if (this.completions.index <= (commandCompletionLineLimit - 3))
+            this.popupTop = 0;
+            this.popupBottom = list.length;
+        }
+        else
+        {
+            var self = this;
+            var setTop = function(val)
             {
-                // We are in the top part of the list.
-                showBottom = commandCompletionLineLimit;
+                if (val < 0)
+                    val = 0;
+                self.popupTop = val;
+                self.popupBottom = val + popupSize;
+                if (self.popupBottom > list.length)
+                    setBottom(list.length);
+            };
+            var setBottom = function(val)
+            {
+                if (val > list.length)
+                    val = list.length;
+                self.popupBottom = val;
+                self.popupTop = val - popupSize;
+                if (self.popupTop < 0)
+                    setTop(0);
+            };
+
+            if (!cycling)
+            {
+                // Show the selection at nearly the bottom of the popup, where
+                // it is more local.
+                setBottom(selIndex + 3);
             }
             else
             {
-                // Implement manual scrolling.
-                if (this.completions.index > (this.completions.list.length - 3))
-                    showBottom = this.completions.list.length;
-                else
-                    showBottom = this.completions.index + 3;
+                // Scroll the popup such that selIndex fits.
+                if (selIndex - 2 < this.popupTop)
+                    setTop(selIndex - 2);
+                else if (selIndex + 3 > this.popupBottom)
+                    setBottom(selIndex + 3);
             }
-
-            showTop = showBottom - commandCompletionLineLimit;
         }
 
-        for (var i = showTop; i < showBottom; i++)
+        for (var i = this.popupTop; i < this.popupBottom; i++)
         {
+            var completion = list[i];
+            var prefixLen = this.completions.prefix.length;
+
             var hbox = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","div");
             hbox.completionIndex = i;
 
             var pre = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = escPrefix;
+            var preText = this.textBox.value;
+            if (prefixLen)
+                preText = preText.slice(0, -prefixLen) + completion.slice(0, prefixLen);
+            pre.innerHTML = Str.escapeForTextNode(preText);
             pre.classList.add("userTypedText");
 
-            var completion = this.completions.list[i].substr(this.completions.prefix.length);
             var post = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml","span");
-            post.innerHTML = Str.escapeForTextNode(completion);
+            var postText = completion.substr(prefixLen);
+            post.innerHTML = Str.escapeForTextNode(postText);
             post.classList.add("completionText");
 
-            if (i === this.completions.index)
+            if (i === selIndex)
                 this.selectedPopupElement = hbox;
 
             hbox.appendChild(pre);
@@ -498,9 +690,14 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.completionPopup.openPopup(this.textBox, "before_start", 0, 0, false, false);
     };
 
+    this.isPopupOpen = function()
+    {
+        return (this.completionPopup && this.completionPopup.state !== "closed");
+    };
+
     this.closePopup = function()
     {
-        if (this.completionPopup.state == "closed")
+        if (!this.isPopupOpen())
             return;
 
         try
@@ -538,6 +735,15 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.completionBox.value = this.getCompletionBoxValue();
     };
 
+    this.popupScroll = function(event)
+    {
+        if (event.axis !== event.VERTICAL_AXIS)
+            return;
+        if (!this.getCompletionPopupElementFromEvent(event))
+            return;
+        this.cycle(event.detail, true);
+    };
+
     this.popupClick = function(event)
     {
         var el = this.getCompletionPopupElementFromEvent(event);
@@ -549,6 +755,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     this.popupMousedown = Obj.bind(this.popupMousedown, this);
+    this.popupScroll = Obj.bind(this.popupScroll, this);
     this.popupClick = Obj.bind(this.popupClick, this);
 
     /**
@@ -558,12 +765,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     {
         this.completionBox.value = "";
 
-        Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
-        Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
+        if (this.completionPopup)
+        {
+            Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+            Events.removeEventListener(this.completionPopup, "DOMMouseScroll", this.popupScroll, true);
+            Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
+        }
     };
 
-    Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
-    Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
+    if (this.completionPopup)
+    {
+        Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+        Events.addEventListener(this.completionPopup, "DOMMouseScroll", this.popupScroll, true);
+        Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
+    }
 };
 
 // ********************************************************************************************* //
@@ -631,7 +846,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (event.keyCode === KeyEvent.DOM_VK_TAB ||
             event.keyCode === KeyEvent.DOM_VK_RETURN)
         {
-            this.stopEditing();
+            Firebug.Editor.stopEditing();
             Events.cancelEvent(event);
         }
     },
@@ -1006,33 +1221,6 @@ function killCompletions(expr, origExpr)
     return false;
 }
 
-function adjustCompletionOnAccept(preParsed, preExpr, property)
-{
-    var res = preParsed + preExpr + property;
-
-    // Don't adjust index completions.
-    if (/^\[['"]$/.test(preExpr.slice(-2)))
-        return res;
-
-    if (!isValidProperty(property))
-    {
-        // The property name is actually invalid in free form, so replace
-        // it with array syntax.
-
-        if (preExpr)
-        {
-            res = preParsed + preExpr.slice(0, -1);
-        }
-        else
-        {
-            // Global variable access - assume the variable is a member of 'window'.
-            res = preParsed + "window";
-        }
-        res += '["' + Str.escapeJS(property) + '"]';
-    }
-    return res;
-}
-
 // Types the autocompletion knows about, some of their non-enumerable properties,
 // and the return types of some member functions, included in the Firebug.CommandLine
 // object to make it more easily extensible.
@@ -1298,20 +1486,6 @@ function getTypeExtractionExpression(command)
     return ret;
 }
 
-function sortUnique(ar)
-{
-    ar = ar.slice();
-    ar.sort();
-    var ret = [];
-    for (var i = 0; i < ar.length; ++i)
-    {
-        if (i && ar[i-1] === ar[i])
-            continue;
-        ret.push(ar[i]);
-    }
-    return ret;
-}
-
 function propChainBuildComplete(out, context, tempExpr, result)
 {
     var complete = null, command = null;
@@ -1352,7 +1526,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
         }
 
         // Properties may be taken from several sources, so filter out duplicates.
-        out.complete = sortUnique(complete);
+        out.complete = Arr.sortUnique(complete);
     };
 
     if (command === null)
@@ -1739,7 +1913,7 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             }
 
             // Sort the completions, and avoid duplicates.
-            out.complete = sortUnique(out.complete);
+            out.complete = Arr.sortUnique(out.complete);
         }
     }
     catch (exc)

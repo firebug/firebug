@@ -9,6 +9,8 @@ var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
+
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
 // Firebug URLs used by the global menu.
@@ -45,7 +47,7 @@ function $el(name, attributes, children, parent)
 {
     attributes = attributes || {};
 
-    if (!Array.isArray(children))
+    if (!Array.isArray(children) && !parent)
     {
         parent = children;
         children = null;
@@ -97,15 +99,19 @@ function $command(id, oncommand, arg)
     }, $("mainCommandSet"))
 }
 
-function $key(id, keycode, modifiers, command, position)
+function $key(id, key, modifiers, command, position)
 {
-    return $el("key", {
+    var attributes = 
+    {
         id: id,
-        keycode: keycode,
         modifiers: modifiers,
         command: command,
         position: position
-    }, $("mainKeyset"))
+    };
+
+    attributes[KeyEvent["DOM_"+key] ? "keycode" : "key"] = key;
+
+    return $el("key", attributes, $("mainKeyset"));
 }
 
 function $menupopup(attributes, children, parent)
@@ -138,11 +144,13 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for each(var child in children)
+    for (var i=0; i<children.length; i++)
     {
+        var child = children[i];
         var id = child.getAttribute("insertbefore"), beforeEl;
         if (id)
             beforeEl = parent.querySelector("#" + id);
+
         if (!beforeEl)
         {
             id = child.getAttribute("insertafter");
@@ -152,6 +160,7 @@ function $menupopupOverlay(parent, children)
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
+
         parent.insertBefore(child, beforeEl);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
@@ -297,14 +306,14 @@ Firebug.GlobalUI =
             })
         ], container);
 
-        // When Firebug is fully loaded and initialized it fires an "FirebugLoaded"
-        // event to the browser document (browser.xul scope) so, wait for it now.
+        // When Firebug is fully loaded and initialized it fires a "FirebugLoaded"
+        // event to the browser document (browser.xul scope). Wait for that to happen.
         document.addEventListener("FirebugLoaded", function onLoad()
         {
             document.removeEventListener("FirebugLoaded", onLoad, false);
             Firebug.waitingForFirstLoad = false;
 
-            // TODO find a better place for notifying extensions
+            // xxxHonza: TODO find a better place for notifying extensions
             FirebugLoader.dispatchToScopes("firebugFrameLoad", [Firebug]);
             callback && callback(Firebug);
         }, false);
@@ -319,7 +328,7 @@ Firebug.GlobalUI =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = FirebugLoader.getPref(option);
+                    var checked = PrefLoader.getPref(option);
 
                     // xxxHonza: I belive that allPagesActivation could be simple boolean option.
                     if (option == "allPagesActivation")
@@ -336,7 +345,7 @@ Firebug.GlobalUI =
         var option = menuItem.getAttribute("option");
         var checked = menuItem.getAttribute("checked") == "true";
 
-        FirebugLoader.setPref(option, checked);
+        PrefLoader.setPref(option, checked);
     },
 
     onMenuShowing: function(popup)
@@ -348,7 +357,7 @@ Firebug.GlobalUI =
             collapsed = fbContentBox.getAttribute("collapsed");
         }
 
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
 
         // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
@@ -395,7 +404,7 @@ Firebug.GlobalUI =
             "Firebug.chrome.setPosition('%pos%')" + "})";
 
         var items = [];
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         for each (var pos in ["detached", "top", "bottom", "left", "right"])
         {
             var label = pos.charAt(0).toUpperCase() + pos.slice(1);
@@ -509,6 +518,7 @@ $command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar
 $command("cmd_toggleFirebug", "Firebug.toggleBar()");
 $command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg)", "document.popupNode");
+$command("cmd_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event)");
 $command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
 $command("cmd_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
@@ -536,7 +546,7 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 
     globalShortcuts.forEach(function(id)
     {
-        var shortcut = FirebugLoader.getPref("key.shortcut." + id);
+        var shortcut = PrefLoader.getPref("key.shortcut." + id);
         var tokens = shortcut.split(" ");
         var key = tokens.pop();
 
@@ -557,7 +567,7 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 
     keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
 })(["toggleFirebug", "toggleInspecting", "focusCommandLine",
-    "detachFirebug", "closeFirebug"]);
+    "detachFirebug", "closeFirebug", "toggleBreakOn"]);
 
 
 /* Used by the global menu, but should be really global shortcuts?
@@ -644,11 +654,11 @@ $menupopupOverlay($("mainPopupSet"), [
  * and one in Firefox 4 (top-left orange button menu) -> Web Developer
  *
  * If extensions want to override the menu thay need to iterate all existing instance
- * using document.querySelectorAll(".fbFirebugMenuPopup") and appen new menu items to all
+ * using document.querySelectorAll(".fbFirebugMenuPopup") and append new menu items to all
  * of them. Iteration must be done in the global space (browser.xul)
  *
  * The same menu is also used for Firebug Icon Menu (Firebug's toolbar). This menu is cloned
- * and initialized as soon as Firebug UI is actually loaded. Sine it's cloned from the original
+ * and initialized as soon as Firebug UI is actually loaded. Since it's cloned from the original
  * (global scope) extensions don't have to extend it (possible new menu items are already there).
  */
 var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
@@ -1036,7 +1046,8 @@ $toolbarButton("inspector-button", {
     label: "firebug.Inspect",
     tooltiptext: "firebug.InspectElement",
     observes: "cmd_toggleInspecting",
-    image: "chrome://firebug/skin/inspect.png"
+    style: "list-style-image: url(chrome://firebug/skin/inspect.png);" +
+        "-moz-image-region: rect(0, 16px, 16px, 0);"
 });
 
 // TODO: why contextmenu doesn't work without cloning
@@ -1047,17 +1058,17 @@ $toolbarButton("firebug-button", {
     command: "cmd_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
     observes: "firebugStatus",
-    style: "list-style-image:url(chrome://firebug/skin/firebug-gray-16.png)"
+    style: "list-style-image: url(chrome://firebug/skin/firebug16.png)"
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.
-// The button is appended only once so, if the user removes it, it isn't appended again.
+// The button is appended only once - if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
 // toolbarpalette check is for seamonkey, where it is in the document
 if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
-    && !FirebugLoader.getPref("toolbarCustomizationDone"))
+    && !PrefLoader.getPref("toolbarCustomizationDone"))
 {
-    FirebugLoader.setPref("toolbarCustomizationDone", true);
+    PrefLoader.setPref("toolbarCustomizationDone", true);
 
     // Get the current navigation bar button set (a string of button IDs) and append
     // ID of the Firebug start button into it.
@@ -1160,26 +1171,26 @@ var SessionObserver =
 
         setTimeout(function()
         {
-            // Open the page in the top most window so, the user can see it immediately.
+            // Open the page in the top most window, so the user can see it immediately.
             if (wm.getMostRecentWindow("navigator:browser") != window.top)
                 return;
 
             // Avoid opening of the page in another browser window.
-            if (checkFirebugVersion(FirebugLoader.getPref("currentVersion")) > 0)
+            if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
             {
-                // Don't forget to update the preference so, the page is not displayed again
-                FirebugLoader.setPref("currentVersion", version);
+                // Don't forget to update the preference, so the page is not displayed again
+                PrefLoader.setPref("currentVersion", version);
 
-                if (FirebugLoader.getPref("showFirstRunPage"))
+                if (PrefLoader.getPref("showFirstRunPage"))
                     Firebug.GlobalUI.visitWebsite("firstRunPage",  version);
             }
         }, 500);
     }
 }
 
-var currentVersion = FirebugLoader.getPref("currentVersion");
+var currentVersion = PrefLoader.getPref("currentVersion");
 if (checkFirebugVersion(currentVersion) > 0)
-    observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
+    observerService.addObserver(SessionObserver, "sessionstore-windows-restored", false);
 
 // ********************************************************************************************* //
 // Context Menu Workaround
@@ -1194,6 +1205,18 @@ if (typeof(nsContextMenu) != "undefined")
         if (this.isTargetAFormControl(aNode))
             this.shouldDisplay = true;
     };
+}
+
+// ********************************************************************************************* //
+// All Pages Activation" is on
+
+// Load Firebug by default if activation is on for all pages (see issue 5522)
+if (PrefLoader.getPref("allPagesActivation") == "on")
+{
+    Firebug.GlobalUI.startFirebug(function()
+    {
+        FBTrace.sysout("Firebug loaded by default since allPagesActivation is on");
+    });
 }
 
 // ********************************************************************************************* //

@@ -91,7 +91,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
         // Make sure that all Spies in progress are detached at this moment.
         // Clone the array beforehand since the spy object is removed from the
-        // original arrya within detach.
+        // original array within detach.
         var spies = Arr.cloneArray(context.spies);
         for (var i=0; i<spies.length; i++)
             spies[i].detach(true);
@@ -417,7 +417,7 @@ var SpyHttpObserver =
 // Activity Observer
 
 /**
- * @class This observer is used to properly monitor even mulipart XHRs. It's based on
+ * @class This observer is used to properly monitor even multipart XHRs. It's based on
  * an activity-observer component that has been introduced in Firefox 3.6.
  */
 var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
@@ -462,7 +462,7 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
 
     observeXHRActivity: function(win, spy, request, activitySubtype, timestamp)
     {
-        // Activity observer has precise time info so, use it.
+        // Activity observer has precise time info; use it.
         var time = new Date();
         time.setTime(timestamp/1000);
 
@@ -617,11 +617,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // transaction is closed. Since, in case of multipart XHRs the onLoad method
         // (readyState == 4) can be called mutliple times.
         // Keep in mind:
-        // 1) It can happen that that the TRANSACTION_CLOSE event comes before
-        // the onLoad (if the XHR is made as part of the page load) so, detach if
-        // it's already closed.
+        // 1) It can happen that the TRANSACTION_CLOSE event comes before onload (if
+        // the XHR is made as part of the page load), so detach if it's already closed.
         // 2) In case of immediate cache responses, the transaction doesn't have to
-        // be started at all (or the activity observer is no available in Firefox 3.5).
+        // be started at all (or the activity observer is not available in Firefox 3.5).
         // So, also detach in this case.
         // Make sure spy will detach if force is true.
         if (!force && this.transactionStarted && !this.transactionClosed)
@@ -705,7 +704,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // XHR would be aborted in the original onReadyStateChange handler.
     if (spy.xhrRequest.readyState == 4)
     {
-        // Cumulate response so, multipart response content is properly displayed.
+        // Cumulate response so that multipart response content is properly displayed.
         if (SpyHttpActivityObserver.getActivityDistributor())
         {
             spy.responseText += Http.safeGetXHRResponseText(spy.xhrRequest);
@@ -724,7 +723,7 @@ function onHTTPSpyReadyStateChange(spy, event)
         updateLogRow(spy);
         updateHttpSpyInfo(spy);
 
-        // Notify Net pane about a request beeing loaded.
+        // Notify the Net panel about a request being loaded.
         // xxxHonza: I don't think this is necessary.
         var netProgress = spy.context.netProgress;
         if (netProgress)

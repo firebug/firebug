@@ -97,18 +97,18 @@
 }
 
 .logRow-info {
-    background-image: url(chrome://firebug/skin/infoIcon.png);
+    background-image: url(chrome://firebug/skin/info.svg);
 }
 
 .logRow-warn,
 .logRow-warningMessage {
-    background-image: url(chrome://firebug/skin/warningIcon.png);
+    background-image: url(chrome://firebug/skin/warning.svg);
 }
 
 .logRow-error,
 .logRow-assert,
 .logRow-errorMessage {
-    background-image: url(chrome://firebug/skin/errorIcon.png);
+    background-image: url(chrome://firebug/skin/error.svg);
 }
 
 /*****************************************************************************************/
@@ -286,8 +286,8 @@
     padding-left: 22px !important;
 }
 
-/* Remove left border for the log body. It'll be applied to the profile table so, there
-   can be a little padding at the bottom when the profile-log is exapanded */
+/* Remove left border for the log body. It will be applied to the profile table, so there
+   can be a little padding at the bottom when the profile-log is expanded */
 .logRow-profile .logGroupBody {
     border-left: 0;
 }
@@ -600,7 +600,7 @@
     right: 0;
 }
 
-/* padding-right should be zero for .logRow-spy so, declare after the previus selector */
+/* padding-right should be zero for .logRow-spy, so declare after the previous selector */
 .logRow-spy {
     padding: 0px 0 1px 0;
 }

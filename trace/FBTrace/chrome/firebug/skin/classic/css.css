@@ -23,6 +23,10 @@
     position: relative;
 }
 
+.cssElementRuleContainer > .objectLink {
+    -moz-user-select: none;
+}
+
 .cssHead {
     padding-right: 150px;
 }
@@ -37,47 +41,69 @@
 }
 
 .cssPropName {
-    color: DarkGreen;
+    color: darkgreen;
 }
 
-.cssPropValue {
-    color: DarkBlue;
+.cssPropValue,
+.cssFontPropValue {
+    color: darkblue;
+}
+
+.cssPropValueUnused,
+.cssFontPropSeparator,
+.cssParentMatch {
+    color: #787878;
 }
 
 .cssOverridden > .cssPropName,
-.cssOverridden > .cssPropValue {
+.cssOverridden > .cssPropValue,
+.cssOverridden > .selectorName,
+.cssOverridden > td > .stylePropValue {
     text-decoration: line-through;
 }
 
-.computedStylesGroup table {
-  display: none;
+.computedStyleTable,
+.matchedSelectorsTable {
+    width: 100%;
+    border-spacing: 0;
 }
 
-.computedStylesGroup.opened table {
-  display: block;
+.computedStylesGroup > .computedStyleTable {
+    display: none;
+}
+
+.computedStylesGroup.opened > .computedStyleTable {
+    display: table;
 }
 
 .cssInheritHeader, .cssComputedHeader {
-  position: relative;
+    position: relative;
+    -moz-user-select: none;
 }
 
-.cssComputedHeader {
-  cursor: pointer;
+.cssComputedHeader,
+.computedStyle.hasSelectors {
+    cursor: pointer;
+}
+
+.computedStyle.hasSelectors > .stylePropName {
+    background-position: 4px 4px !important;
+}
+
+.computedStylesGroup > .computedStyleTable > tbody > .computedStyle.hasSelectors > .stylePropName {
+    background-position: 10px 4px !important;
 }
 
 .computedStylesGroup > .cssComputedHeader {
-  margin: 0;
+    margin: 0;
 }
 
-.computedStylesGroup.opened > .cssComputedHeader {
-  margin: 0 0 4px;
+.computedStylesGroup.hidden {
+    display: none;
 }
 
 .cssComputedHeader > .twisty {
-  background-position: 4px 3px !important;
-}
-
-.cssInheritedRule {
+    background-position: 4px 4px !important;
 }
 
 .cssInheritLabel,
@@ -90,12 +116,67 @@
     margin-left: 14px;
 }
 
+.computedStyle:not(:nth-last-child(2)) > td,
+.computedStyle:nth-last-child(2).opened > td,
+.computedStyle:not(:nth-last-child(2)) + .matchedSelectors .styleSelector > td,
+.computedStyle:nth-last-child(2) + .matchedSelectors .styleSelector:not(:last-child) > td {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+.computedStyleRow > td {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.computedStyleRow > td:first-child {
+    width: 160px;
+}
+
+.selectorName {
+    -moz-padding-start: 24px;
+}
+
+.stylePropName {
+    vertical-align: top;
+    font-weight: bold;
+    padding: 0 4px 0 24px;
+}
+
+.styleSelector > td > .stylePropValue {
+    padding-left: 3px;
+}
+
+.styleSelector > td:first-child {
+    width: 160px;
+}
+
+.styleSelector > td:n-th-child(2) {
+    width: 140px;
+}
+
+.matchedSelectors {
+    display: none;
+}
+
+.computedStyle.opened + .matchedSelectors {
+    display: table-row;
+}
+
+.styleSourceLink > .objectLink-sourceLink {
+    position: relative;
+    top: 0;
+    left: 0;
+    padding: 0;
+    text-align: right;
+}
+
 .cssRule .objectLink-sourceLink {
     top: 0;
 }
 
 .cssProp.editGroup:hover {
-    background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    filter: none;
 }
 
 .cssProp.editGroup > span:first-child {
@@ -103,13 +184,14 @@
 }
 
 .cssProp.disabledStyle {
-    background: transparent url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
-    opacity: 1;
+    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
     color: #CCCCCC;
 }
 
 .cssProp.disabledStyle > .cssPropName,
-.cssProp.disabledStyle > .cssPropValue {
+.cssProp.disabledStyle > .cssPropValue,
+.cssProp.disabledStyle > .cssPropValue span {
     color: inherit;
 }
 
@@ -123,16 +205,6 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-.stylePropName {
-    font-weight: bold;
-    padding: 0 4px 4px 4px;
-    width: 50%;
-}
-
-.stylePropValue {
-    width: 50%;
-}
 
 .useA11y .a11yCSSView .focusRow:focus {
     outline: none;
