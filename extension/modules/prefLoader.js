@@ -9,7 +9,7 @@ var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
-var EXPORTED_SYMBOLS = [];
+var EXPORTED_SYMBOLS = ["PrefLoader"];
 
 // ********************************************************************************************* //
 // Implementation
@@ -45,6 +45,26 @@ function loadDefaultPrefs(path, fileName)
 // ********************************************************************************************* //
 
 /**
+ * Clear preferences that are not modified by the user. This is requirement
+ * (or recommendation?) from AMO reviewers.
+ *
+ * @param {Object} domain
+ */
+function clearDefaultPrefs(domain)
+{
+    var pb = Services.prefs.getDefaultBranch(domain);
+
+    var names = pb.getChildList("");
+    for each (var name in names)
+    {
+        if (!pb.prefHasUserValue(name))
+            pb.deleteBranch(name);
+    }
+}
+
+// ********************************************************************************************* //
+
+/**
  * Implement function that is used to define preferences in preference files. These
  * are usually stored within 'defaults/preferences' directory.
  *
@@ -53,24 +73,40 @@ function loadDefaultPrefs(path, fileName)
  */
 function pref(name, value)
 {
-    var branch = Services.prefs.getDefaultBranch("");
-
-    switch (typeof value)
+    try
     {
-        case "boolean":
-            branch.setBoolPref(name, value);
-            break;
+        var branch = Services.prefs.getDefaultBranch("");
 
-        case "number":
-            branch.setIntPref(name, value);
-            break;
+        switch (typeof value)
+        {
+            case "boolean":
+                branch.setBoolPref(name, value);
+                break;
 
-        case "string":
-            var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-            str.data = value;
-            branch.setComplexValue(name, Ci.nsISupportsString, str);
-            break;
+            case "number":
+                branch.setIntPref(name, value);
+                break;
+
+            case "string":
+                var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                str.data = value;
+                branch.setComplexValue(name, Ci.nsISupportsString, str);
+                break;
+        }
     }
+    catch (e)
+    {
+        Cu.reportError("prefLoader.pref; Firebug can't set default pref value for: " + name);
+    }
+}
+
+// ********************************************************************************************* //
+// Registration
+
+var PrefLoader =
+{
+    loadDefaultPrefs: loadDefaultPrefs,
+    clearDefaultPrefs: clearDefaultPrefs,
 }
 
 // ********************************************************************************************* //

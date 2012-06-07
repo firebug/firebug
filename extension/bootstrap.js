@@ -47,16 +47,15 @@ function startup(params, reason)
     // Add our chrome registration. not needed for 10+
     Components.manager.addBootstrappedManifestLocation(params.installPath);
 
+    Cu.import("resource://firebug/prefLoader.js");
+
     // Register default preferences
-    var loadDefaultPrefs = Cu.import("resource://firebug/prefLoader.js").loadDefaultPrefs;
-    loadDefaultPrefs(params.installPath, "cookies.js");
+    PrefLoader.loadDefaultPrefs(params.installPath, "firebug.js");
+    PrefLoader.loadDefaultPrefs(params.installPath, "cookies.js");
+    PrefLoader.loadDefaultPrefs(params.installPath, "tracingConsole.js");
 
     // Load the overlay manager
     Cu.import("resource://firebug/loader.js");
-
-    // xxxHonza: prefLoader should be used instead.
-    // register default values
-    FirebugLoader.registerDefaultPrefs();
 
     //register extensions
     FirebugLoader.startup();
@@ -96,7 +95,7 @@ function shutdown(params, reason)
     fbs.shutdown();
 
     // remove default preferences
-    FirebugLoader.clearDefaultPrefs();
+    PrefLoader.clearDefaultPrefs();
 
     // Unload all Firebug modules added with Cu.import
     FIREBUG_MODULES.forEach(Cu.unload, Cu);

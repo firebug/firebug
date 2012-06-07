@@ -57,11 +57,12 @@ pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.tabularLogMaxHeight", 200);
 pref("extensions.firebug.consoleFilterTypes", "all");
 pref("extensions.firebug.memoryProfilerEnable", false);
+pref("extensions.firebug.preferJSDSourceLinks", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
 pref("extensions.firebug.showTextNodesWithWhitespace", false);
-pref("extensions.firebug.showTextNodesWithEntities", true);
+pref("extensions.firebug.entityDisplay", "names");
 pref("extensions.firebug.showFullTextNodes", true);
 pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);
@@ -75,13 +76,15 @@ pref("extensions.firebug.multiHighlightLimit", 250);
 pref("extensions.firebug.onlyShowAppliedStyles", false);
 pref("extensions.firebug.showUserAgentCSS", false);
 pref("extensions.firebug.expandShorthandProps", false);
-pref("extensions.firebug.showMozillaSpecificStyles", false);
-pref("extensions.firebug.computedStylesDisplay", "grouped");
 pref("extensions.firebug.cssEditMode", "Source");
+pref("extensions.firebug.colorDisplay", "hex");
+
+// Computed
+pref("extensions.firebug.computedStylesDisplay", "grouped");
+pref("extensions.firebug.showMozillaSpecificStyles", false);
 
 // Script
 pref("extensions.firebug.breakOnErrors", false);
-pref("extensions.firebug.showAllSourceFiles", false);
 pref("extensions.firebug.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.scriptsFilter", "all");
@@ -142,6 +145,7 @@ pref("extensions.firebug.key.shortcut.focusLocation", "control shift VK_SPACE");
 pref("extensions.firebug.key.shortcut.nextObject", "control .");
 pref("extensions.firebug.key.shortcut.previousObject", "control ,");
 pref("extensions.firebug.key.shortcut.toggleFirebug", "VK_F12");
+pref("extensions.firebug.key.shortcut.closeFirebug", "shift VK_F12");
 pref("extensions.firebug.key.shortcut.detachFirebug", "accel VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel shift VK_PAGE_UP");
 pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel shift VK_PAGE_DOWN");
@@ -152,6 +156,8 @@ pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");
 pref("extensions.firebug.key.shortcut.increaseTextSize", "accel +");
 pref("extensions.firebug.key.shortcut.decreaseTextSize", "accel -");
 pref("extensions.firebug.key.shortcut.normalTextSize", "accel 0");
+pref("extensions.firebug.key.shortcut.help", "VK_F1");
+pref("extensions.firebug.key.shortcut.toggleBreakOn", "accel alt b");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);
