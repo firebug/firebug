@@ -151,6 +151,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateComputedView: function(element)
     {
+        var doc = element.ownerDocument;
+        var win = doc.defaultView;
+
+        // Update now if the document is loaded, otherwise wait for "load" event.
+        if (doc.readyState == "complete")
+            return this.doUpdateComputedView(element);
+
+        if (this.updateInProgress)
+            return;
+
+        var self = this;
+        var onWindowLoadHandler = function()
+        {
+            self.context.removeEventListener(win, "load", onWindowLoadHandler, true);
+            self.updateInProgress = false;
+            self.doUpdateComputedView(element);
+        }
+
+        this.context.addEventListener(win, "load", onWindowLoadHandler, true);
+        this.updateInProgress = true;
+    },
+
+    doUpdateComputedView: function(element)
+    {
         function isUnwantedProp(propName)
         {
             return !Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz")
@@ -159,8 +183,18 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var win = element.ownerDocument.defaultView;
         var computedStyle = win.getComputedStyle(element);
 
-        if (this.cssLogic)
-            this.cssLogic.highlight(element);
+        try
+        {
+            if (this.cssLogic)
+                this.cssLogic.highlight(element);
+        }
+        catch (e)
+        {
+            // An exception is thrown if the document is not fully loaded yet
+            // The cssLogic API needs to be used after "load" has been fired.
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("computedPanel.doUpdateComputedView; EXCEPTION " + e, e);
+        }
 
         var props = [];
         for (var i = 0; i < computedStyle.length; ++i)

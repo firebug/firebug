@@ -384,7 +384,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     // Object properties
 
     /**
-     * Returns list of properties for the passed object.
+     * Returns a list of properties available on an object, filtered on enumerability and prototype
+     * chain position. Due to prototype traversal, some property names may appear several times.
      *
      * @param {Object} object The object we want to get the list of properties for.
      * @param {Boolean} enumerableOnly If set to true, only enumerable properties are returned.
@@ -405,13 +406,15 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (ownOnly)
             return props;
 
-        // Climb prototype chain.
+        // Climb the prototype chain.
         var inheritedProps = [];
         var parent = Object.getPrototypeOf(object);
         if (parent)
             inheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
 
-        return Arr.merge(props, inheritedProps);
+        // Push everything onto the returned array, to avoid O(nm) runtime behavior.
+        inheritedProps.push.apply(inheritedProps, props);
+        return inheritedProps;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -447,6 +450,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 var contentView = this.getObjectView(object);
                 var properties = this.getObjectProperties(contentView,
                     Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                properties = Arr.sortUnique(properties);
 
                 if (contentView.hasOwnProperty("constructor") &&
                     properties.indexOf("constructor") == -1)

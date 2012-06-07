@@ -1736,7 +1736,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
                     for (var i = 0; i < fonts.length; i++)
                         ar.push(fonts[i].CSSFamilyName);
-                    keywords = Arr.merge(keywords, ar);
+                    keywords = Arr.sortUnique(keywords.concat(ar));
                 }
 
                 var q = expr.charAt(0), isQuoted = (q === '"' || q === "'");
@@ -2280,7 +2280,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     if (e.id)
                         ids.push(e.id);
                 });
-                ids = Arr.merge(ids, []);
+                ids = Arr.sortUnique(ids);
                 ret.push.apply(ret, ids.map(function(cl)
                 {
                     return "#" + cl;
@@ -2299,7 +2299,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         classes.push.apply(classes, e.classList);
                     }
                 });
-                classes = Arr.merge(classes, []);
+                classes = Arr.sortUnique(classes);
                 ret.push.apply(ret, classes.map(function(cl)
                 {
                     return "." + cl;
