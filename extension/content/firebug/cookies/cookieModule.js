@@ -125,7 +125,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // All will be unregistered again in the initContext (if necessary).
         // There is no big overhead, the initContext is called just after the
         // first document request.
-        this.registerObservers(null);
+        //this.registerObservers();
 
         // Register listener for NetInfoBody (if the API is available) so,
         // a new tab (Cookies) can be appended into the Net panel request info.
@@ -169,7 +169,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     shutdown: function() 
     {
-        this.unregisterObservers(null);
+        this.unregisterObservers();
 
         // Support for trace-console customization in Firebug 1.3
         TraceModule.removeListener(this.traceListener);
@@ -200,13 +200,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    registerObservers: function(context)
+    registerObservers: function()
     {
         if (this.observersRegistered)
         {
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.registerObservers; Observers ALREADY registered for: " +
-                    (context ? context.getName() : ""));
+                FBTrace.sysout("cookies.cookieModule.registerObservers; Observers ALREADY registered");
             return;
         }
 
@@ -219,8 +218,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         this.observersRegistered = true;
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.ENABLE Cookies monitoring for: " +
-                (context ? context.getName() : ""));
+            FBTrace.sysout("cookies.cookieModule.registerObservers;");
     },
 
     unregisterObservers: function(context)
@@ -228,8 +226,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (!this.observersRegistered)
         {
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.registerObservers; Observers ALREADY un-registered for: " +
-                    (context ? context.getName() : ""));
+                FBTrace.sysout("cookies.cookieModule.registerObservers; " +
+                    "Observers ALREADY un-registered");
             return;
         }
 
@@ -242,8 +240,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         this.observersRegistered = false;
 
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.DISABLE Cookies monitoring for: " +
-                (context ? context.getName() : ""));
+            FBTrace.sysout("cookies.cookieModule.unregisterObservers;");
     },
 
     // Helper context
@@ -349,51 +346,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // Unregister all observers if the panel is disabled.
         if (!this.isEnabled(context))
             this.unregisterObservers(context);
-    },
-
-    reattachContext: function(browser, context)
-    {
-        Firebug.ActivableModule.reattachContext.apply(this, arguments);
-
-        var chrome = context ? context.chrome : Firebug.chrome;
-
-        // The context isn't available if FB is disabled.
-        if (!context)
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.reattachContext: " + context.getName());
-
-        this.Perm.updatePermButton(context, chrome);
-
-        // xxxHonza the panel is created here, it's overhead.
-        // however the stylesheet must be appended here and the list of cookies
-        // mus be refreshed otherwise, the event handlers doesn't work
-        // not sure where exactly is the bug.
-        var panel = context.getPanel(panelName);
-
-        // Add styles into the panel HTML document.
-        // browser.detached is not set now.
-        // Issue 64: Firecookie table format breaks when switching to detatched window mode
-        //if (browser.detached)
-            this.addStyleSheet(panel);
-
-        // From some reason, Firebug doesn't set the ownerPanel to the panel
-        // node element. (it's properly set once the page is reloaded, but no the first time)
-        // The Firebug.getElementPanel method doesn't work then. 
-        // This is fixed in Firebug 1.2 (the ownerPanel is set in Initialize & reattach methods)
-        if (panel)
-            panel.panelNode.ownerPanel = panel;
-
-        // Refresh panel. From some reason, if FB UI is detached, all event 
-        // listeners (e.g. onClick handlers registered in domplate template) 
-        // are somehow damaged and not called. 
-        // Workaround - if the panel is refreshed event handlers work.
-        //
-        // See bug http://code.google.com/p/fbug/issues/detail?id=724, console
-        // has the same problem. However it can't be simply refreshed.
-        // OK, this bug should be fixed (R735) since FB 1.2b4
-        //panel.refresh();
     },
 
     destroyContext: function(context) 
@@ -621,76 +573,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Support for ActivableModule 1.3 - 1.5
-
-    onPanelActivate: function(context, init, activatedPanelName)
-    {
-        if (activatedPanelName != panelName)
-            return;
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onPanelActivate: " + activatedPanelName + "," +
-                init);
-
-        this.registerObservers(context);
-
-        top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
-
-        // Make sure the panel is refreshed (no page reload) and the cookie
-        // list is displayed instead of the Panel Activation Manager.
-        context.invalidatePanels(panelName);
-
-        // Make sure the toolbar is updated.
-        // xxxHonza: This should be done automatically by calling "panel.show mehtod",
-        // where the visibility of the toolbar is already managed.
-        // Why Firebug doesn't call show within Firebug.panelActivate?
-        var panel = context.getPanel(panelName, true);
-        if (panel)
-            panel.showToolbarButtons("fbCookieButtons", true);
-    },
-
-    onPanelDeactivate: function(context, destroy, activatedPanelName)
-    {
-        this.unregisterObservers(context);
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onPanelDeactivate: " + activatedPanelName + "," +
-                destroy);
-    },
-
-    onLastPanelDeactivate: function(context, destroy)
-    {
-        top.document.getElementById("firebugStatus").removeAttribute(panelName);
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onLastPanelDeactivate");
-    },
-
-    onEnabled: function(context)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onEnabled; " + context.getName());
-
-        this.registerObservers(context);
-    },
-
-    onDisabled: function(context)
-    {
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onDisabled; " + context.getName());
-
-        this.unregisterObservers(context);
-    },
-
-    onEnablePrefChange: function(pref)
-    {
-        Firebug.ActivableModule.onEnablePrefChange.apply(this, arguments);
-
-        if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.onEnablePrefChange; " + this.isAlwaysEnabled());
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Support for ActivableModule 1.6
 
     /**
@@ -698,11 +580,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     isEnabled: function(context)
     {
-        // For backward compatibility with Firebug 1.1. ActivableModule has been
-        // introduced in Firebug 1.2.
-        if (!Firebug.ActivableModule)
-            return true;
-
         return Firebug.ActivableModule.isEnabled.apply(this, arguments);
     },
 
@@ -721,22 +598,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Firebug suspend and resume
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
-        // The context parameter is there again in Firebug 1.6
-        // see Firebug.resumeFirebug()
-        if (context && System.checkFirebugVersion("1.6") < 0)
-        {
-            // Firebug 1.3
-            this.unregisterObservers(context);
-        }
-        else
-        {
-            // Firebug 1.4 (context parameter doesn't exist since 1.4)
-            // Suspend only if enabled.
-            if (Firebug.CookieModule.isAlwaysEnabled())
-                TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
-        }
+        TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
 
         top.document.getElementById("firebugStatus").removeAttribute(panelName);
 
@@ -746,24 +610,10 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     onResumeFirebug: function(context)
     {
-        // The context parameter is there again in Firebug 1.6
-        // see Firebug.resumeFirebug()
-        if (context && System.checkFirebugVersion("1.6") < 0)
-        {
-            // Firebug 1.3
-            this.registerObservers(context);
+        if (Firebug.CookieModule.isAlwaysEnabled())
+            TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
 
-            if (Firebug.CookieModule.isEnabled(context))
-                top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
-        }
-        else
-        {
-            // Firebug 1.4 (context parameter doesn't exist since 1.4)
-            if (Firebug.CookieModule.isAlwaysEnabled())
-                TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
-
-            top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
-        }
+        top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onResumeFirebug");
@@ -807,8 +657,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         var params = {
             permissionType: this.getPrefDomain(),
-            windowTitle: Locale.$STR(this.panelName + ".Permissions"), // use FC_STR
-            introText: Locale.$STR(this.panelName + ".PermissionsIntro"), // use FC_STR
+            windowTitle: Locale.$STR(this.panelName + ".Permissions"),
+            introText: Locale.$STR(this.panelName + ".PermissionsIntro"),
             blockVisible: true,
             sessionVisible: false,
             allowVisible: true,
