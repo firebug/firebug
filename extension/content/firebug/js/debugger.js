@@ -1064,7 +1064,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return !!context;
     },
 
-    // This is call from fbs for almost all fbs operations
+    // This is called from fbs for almost all fbs operations
     supportsGlobal: function(frameWin)
     {
         var context = ( (frameWin && Firebug.TabWatcher) ?
@@ -2729,7 +2729,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
 
-        // JSD activation is not per browser-tab so, FBS.pause can return 'not-paused' when
+        // JSD activation is not per browser-tab, so FBS.pause can return 'not-paused' when
         // Firebug is activated on another tab.
         // The start-button should somehow reflect that JSD can be still active (even if
         // Firebug is suspended for the current tab).

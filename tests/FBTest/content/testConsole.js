@@ -312,8 +312,8 @@ FBTestApp.TestConsole =
             // Remember successfully loaded test within test history.
             self.appendToHistory(self.testListPath, self.testCasePath, self.driverBaseURI);
 
-            // In case the test list path is "fbtest:all" update the self.testListPath
-            // sine it has been changed as individual test lists have been loaded.
+            // In case the test list path is "fbtest:all" update the testListPath
+            // since it has been changed as individual test lists have been loaded.
             self.testListPath = testListPath;
 
             self.updateURLBars();

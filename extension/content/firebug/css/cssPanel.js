@@ -63,13 +63,13 @@ var CSSPropTag = domplate(CSSDomplateBase,
             $cssOverridden: "$prop.overridden",
             role: "option"},
 
-            // Use spaces for indent so, copy to clipboard is nice.
+            // Use spaces for indent to make "copy to clipboard" nice.
             SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"),
             SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
                 "$prop.name"
             ),
 
-            // Use space here so, copy to clipboard has it (3266).
+            // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
                 "$prop.value$prop.important"
@@ -289,7 +289,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.editing)
         {
             this.stopEditing();
-            Events.dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
+            Events.dispatch(this.fbListeners, "onStopCSSEditing", [this.context]);
         }
         else
         {
@@ -304,7 +304,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context, this);
-                Events.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
+                Events.dispatch(this.fbListeners, "onStartCSSEditing", [styleSheet, this.context]);
             }
             catch(exc)
             {
@@ -676,7 +676,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         if (this.name == "stylesheet")
-            Events.dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
+            Events.dispatch(this.fbListeners, "onInlineEditorClose", [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -1577,7 +1577,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             parsedValue.priority);
                     }
   
-                    Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
                         previousValue, baseText]);
                 }
                 else if (!value)
@@ -1736,7 +1736,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     var fonts = Fonts.getFontsUsedInContext(this.panel.context), ar = [];
                     for (var i = 0; i < fonts.length; i++)
                         ar.push(fonts[i].CSSFamilyName);
-                    keywords = Arr.merge(keywords, ar);
+                    keywords = Arr.sortUnique(keywords.concat(ar));
                 }
 
                 var q = expr.charAt(0), isQuoted = (q === '"' || q === "'");
@@ -2280,7 +2280,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     if (e.id)
                         ids.push(e.id);
                 });
-                ids = Arr.merge(ids, []);
+                ids = Arr.sortUnique(ids);
                 ret.push.apply(ret, ids.map(function(cl)
                 {
                     return "#" + cl;
@@ -2299,7 +2299,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         classes.push.apply(classes, e.classList);
                     }
                 });
-                classes = Arr.merge(classes, []);
+                classes = Arr.sortUnique(classes);
                 ret.push.apply(ret, classes.map(function(cl)
                 {
                     return "." + cl;

@@ -134,6 +134,7 @@
                <include name="**/*.dtd"/>
                <include name="**/*.png"/>
                <include name="**/*.gif"/>
+               <include name="**/*.svg"/>
                <include name="**/*.ico"/>
                <include name="**/*.manifest"/>
                <include name="**/*.txt"/>

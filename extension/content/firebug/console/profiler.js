@@ -8,7 +8,6 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/console/console",
     "firebug/js/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -16,8 +15,8 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, Console,
-    StackFrame, Events, Css, Dom, Str, FBS) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
+    Css, Dom, Str, FBS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -270,7 +269,7 @@ Firebug.Profiler.ProfileTable = domplate(
                                 Locale.$STR("Function")
                             )
                         ),
-                        TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
+                        TH({"class": "headerCell a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox", title: Locale.$STR("CallsHeaderTooltip")},
                                 Locale.$STR("Calls")
                             )

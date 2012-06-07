@@ -677,7 +677,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         this.refresh();
 
         // Remove the rest of all the other kinds of breakpoints (after refresh).
-        // These can come from various modules and perhaps extensions so, use
+        // These can come from various modules and perhaps extensions, so use
         // the appropriate remove buttons.
         var buttons = this.panelNode.getElementsByClassName("closeButton");
         while (buttons.length)

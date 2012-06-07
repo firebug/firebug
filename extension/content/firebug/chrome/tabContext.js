@@ -38,7 +38,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.sourceFileByTag = {}; // mozilla only
 
     // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible
-    // to re-implement source-cache so, it solves the double-load problem.
+    // to re-implement source-cache so that it solves the double-load problem.
     // Anyway, keep the previous cache implementation for backward compatibility
     // (with Firefox 3.0.3 and lower)
     if (Components.interfaces.nsITraceableChannel)

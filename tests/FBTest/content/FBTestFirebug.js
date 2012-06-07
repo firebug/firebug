@@ -693,7 +693,7 @@ function waitForWindowLoad(browser, callback)
             //    win.wrappedJSObject = win;
 
             //xxxHonza: I have seen win == null once. It looks like the callback
-            // is executed for a window, which is already uloaded. Could this happen
+            // is executed for a window, which is already unloaded. Could this happen
             // in case where the test is finished before the listeners are actually
             // executed?
             // xxxHonza: remove 'load' and 'MozAfterPaint' listeners when the test
@@ -2180,7 +2180,7 @@ this.selectElementInHtmlPanel = function(element, callback)
 
 /**
  * Returns selected node box - a <div> element in the HTML panel. The element should have
- * followin classes set: "nodeBox containerNodeBox selected"
+ * following classes set: "nodeBox containerNodeBox selected"
  */
 this.getSelectedNodeBox = function()
 {

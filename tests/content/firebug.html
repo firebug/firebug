@@ -140,6 +140,7 @@ var testList = [
     {group: "console/completion", uri: "console/completion/3660/issue3660.js",    desc: "Issue 3660: Implement pageUp/pageDown and mouseWheel for completion list", testPage: "console/completion/3660/issue3660.html" },
     {group: "console/completion", uri: "console/completion/4233/issue4233.js",    desc: "Issue 4233: [Large patch] Better auto-completion", testPage: "console/completion/4233/issue4233.html"},
     {group: "console/completion", uri: "console/completion/5006/issue5006.js",    desc: "Issue 5006: Switching panels does not correctly set the command line auto-completer", testPage: "console/completion/5006/issue5006.html"},
+    {group: "console/completion", uri: "console/completion/5493/issue5493.js",    desc: "Issue 5493: Case-insensitive auto-completion", testPage: "console/completion/5493/issue5493.html"},
     {group: "commandLine",        uri: "commandLine/api.js",                      desc: "Verify command line APIs.", testPage: "commandLine/api.html" },
     {group: "commandLine",        uri: "commandLine/cd.js",                       desc: "Verify command line cd() method.", testPage: "commandLine/cd.html" },
     {group: "commandLine",        uri: "commandLine/debug.js",                    desc: "Verify command line debug API.", testPage: "commandLine/debug.html" },
@@ -294,7 +295,22 @@ var testList = [
     {group: "net",                uri: "net/4805/issue4805.js",                   desc: "Distinguish or Highlight HTTPS protocol requests in Net panel", testPage: "net/4805/issue4805.html" },
     {group: "net",                uri: "net/4905/issue4905.js",                   desc: "Show the \"Connection\" header in the network/headers part", testPage: "net/4905/issue4905.html" },
     {group: "net",                uri: "net/5004/issue5004.js",                   desc: "Only raw http post request parameters view", testPage: "net/5004/issue5004.html" },
-    {group: "net",                uri: "net/5007/issue5007.js",                   desc: "Headers from POST request body are not displayed anymore", testPage: "net/5007/issue5007.html" }
+    {group: "net",                uri: "net/5007/issue5007.js",                   desc: "Headers from POST request body are not displayed anymore", testPage: "net/5007/issue5007.html" },
+    {group: "cookies",            uri: "cookies/general/cookiePanel.js",          desc: "Existence of cookie panel", testPage: "cookies/general/cookiePanel.php" },
+    {group: "cookies",            uri: "cookies/general/cookieEntry.js",          desc: "Existence of cookie entry", testPage: "cookies/general/cookieEntry.php" },
+    {group: "cookies",            uri: "cookies/general/cookieValues.js",         desc: "Check displayed cookie values", testPage: "cookies/general/cookieValues.php" },
+    {group: "cookies",            uri: "cookies/general/cookieClipboard.js",      desc: "Clipboard (copy and paste)", testPage: "cookies/general/cookieClipboard.php" },
+    {group: "cookies",            uri: "cookies/general/cookieBreakOnNext.js",    desc: "Break on Cookie change", testPage: "cookies/general/breakOnNext.php" },
+    {group: "cookies",            uri: "cookies/general/editCookies.js",          desc: "Edit Cookie", testPage: "cookies/general/editCookies.php" },
+    {group: "cookies",            uri: "cookies/18/issue18.js",                   desc: "Unescape cookie values", testPage: "cookies/18/issue18.php" },
+    {group: "cookies",            uri: "cookies/23/issue23.js",                   desc: "httpOnly cookies", testPage: "cookies/23/issue23.php" },
+    {group: "cookies",            uri: "cookies/25/issue25.js",                   desc: "Changing expire time to Session deletes cookie", testPage: "cookies/25/issue25.php" },
+    {group: "cookies",            uri: "cookies/34/issue34.js",                   desc: "firecookie 0.8 cookies with .domain.com the first period gets erased on editing any attribute", testPage: "cookies/34/issue34.php" },
+    {group: "cookies",            uri: "cookies/39/issue39.js",                   desc: "Can't create cookies with ';' in it", testPage: "cookies/39/issue39.php" },
+    {group: "cookies",            uri: "cookies/44/issue44.js",                   desc: "JSON Cookies view", testPage: "cookies/44/issue44.php" },
+    {group: "cookies",            uri: "cookies/45/issue45.js",                   desc: "When I copy and paste or edit a cookie contents + (plus) signs get converted to spaces.", testPage: "cookies/45/issue45.php" },
+    {group: "cookies",            uri: "cookies/54/issue54.js",                   desc: "urlencoding of cookies value", testPage: "cookies/54/issue54.php" },
+    {group: "cookies",            uri: "cookies/60/issue60.js",                   desc: "'[' and ']' characters get badly encoded on cookie name upon editing", testPage: "cookies/60/issue60.php" },
 ];
 </script>
 

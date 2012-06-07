@@ -177,7 +177,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     getStylesheetURL: function(rule, getBaseUri)
     {
-        // if the parentStyleSheet.href is null, CSS std says its inline style
+        // If parentStyleSheet.href is null, then per the CSS standard this is an inline style.
         if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
         else if (getBaseUri)
@@ -536,14 +536,16 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserAgentCSS: 1,
-            expandShorthandProps: 1,
-            colorDisplay: 1,
-            showMozillaSpecificStyles: 1
-        };
+        var options = [
+            "onlyShowAppliedStyles",
+            "showUserAgentCSS",
+            "expandShorthandProps",
+            "colorDisplay",
+            "showMozillaSpecificStyles"
+        ];
 
-        if (name in optionMap)
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.refresh();
     },
 

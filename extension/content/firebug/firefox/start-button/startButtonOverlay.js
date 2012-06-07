@@ -66,8 +66,8 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             {
                 firebugButton.removeAttribute("showErrors");
 
-                // Use '0' so, the horizontal space for the number is still allocated.
-                // The button will cause re-layout if there is more than 9 errors.
+                // Use '0', so the horizontal space for the number is still allocated.
+                // The button will cause re-layout if there are more than 9 errors.
                 firebugButton.setAttribute("errorCount", "0");
             }
         }

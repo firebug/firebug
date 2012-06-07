@@ -31,8 +31,8 @@ Deprecated.deprecated = function(msg, fnc)
             {
                 FBTrace.sysout(explain, getStackDump());
 
-                if (exc.stack)
-                    exc.stack = exc.stack.split("\n");
+                //if (exc.stack)
+                //    exc.stack = exc.stack.split("\n");
 
                 FBTrace.sysout(explain + " " + caller.toString());
             }

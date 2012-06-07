@@ -113,7 +113,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     {
         try
         {
-            // This event is not supported in Fx11 so, catch the exception
+            // This event is not supported in Fx11, so catch the exception
             // which is thrown.
             this.editor.addEventListener("keypress", this.onKeyPress);
         }

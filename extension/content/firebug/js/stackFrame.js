@@ -259,7 +259,7 @@ StackFrame.StackFrame.prototype =
 
     clearScopes: function(viewChrome)
     {
-        // Clears cached scope chain and so, it can be regenerated the next time
+        // Clears cached scope chain, so that it regenerates the next time
         // getScopes() is executed.
         this.scope = null;
     },

@@ -191,7 +191,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         if (win instanceof Ci.nsIDOMWindow && win.parent == win && context)
         {
-            // xxxHonza: This place can be called multiple times for one window so,
+            // xxxHonza: This place can be called multiple times for one window, so
             // make sure event listeners are not registered twice.
             // There should be a better way to find out whether the listeneres are actually
             // registered for the window.
@@ -330,7 +330,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("-> shouldCreateContext FBLISTENERS" , this.fbListeners);
+            FBTrace.sysout("-> shouldCreateContext FBLISTENERS", this.fbListeners);
 
         // Create if any listener says true to showCreateContext
         if (Events.dispatch2(this.fbListeners, "shouldCreateContext",
@@ -1030,7 +1030,7 @@ var TabWatcherHttpObserver = Obj.extend(Object,
 
             if (win == win.parent)
             {
-                // Make sure the frame listener is registered for top level window so,
+                // Make sure the frame listener is registered for top level window, so
                 // we can get all onStateChange events and init context for all opened tabs.
                 var browser = Firebug.TabWatcher.getBrowserByWindow(win);
 

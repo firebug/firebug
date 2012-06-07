@@ -138,8 +138,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Firebug.chrome.clearStatusPath();
 
             // nextSelection is set in mutation handlers. When the editing mode stops
-            // this variable (if set) will be used as the next selected node, effectivelly
-            // replacing the old selected node that doesn't have to exit any more (after
+            // this variable (if set) will be used as the next selected node, effectively
+            // replacing the old selected node that doesn't have to exist any more (after
             // the editing).
             // If nextSelection is not set a default node (e.g. body) will be selected.
             // See issue 5506
@@ -184,8 +184,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
             // If the 'free text' edit mode is active change the current markup
-            // displayed in the editor (textarea) so, it corresponds to the current
-            // selection. This typically happens when the user click on object-status-path
+            // displayed in the editor (textarea) so that it corresponds to the current
+            // selection. This typically happens when the user clicks on object-status-path
             // buttons in the toolbar.
             if (this.isEditing())
                 this.editNode(object);
@@ -403,7 +403,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var doc = win.document;
 
-            // xxxHonza: an iframe doesn't have to be loaded yet so, do not
+            // xxxHonza: an iframe doesn't have to be loaded yet, so do not
             // register mutation elements in such cases since they wouldn't
             // be removed.
             // The listeners can be registered later in watchWindowDelayed,
@@ -676,9 +676,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     // Get the right next sibling that match following criteria:
                     // 1) It's not a whitespace text node in case 'show whitespaces' is false.
                     // 2) It's not a comment in case 'show comments' is false.
-                    // 3) There is a child box already created for it in the HTML panel UI so,
-                    //    the new one can be inserted before, otherwise it would be appended
-                    //    at the end (issue 5255)
+                    // 3) There is a child box already created for it in the HTML panel UI.
+                    // The new node will then be inserted before that sibling's child box, or
+                    // appended at the end (issue 5255).
                     while (nextSibling && (
                        (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
                        (!comments && nextSibling instanceof window.Comment) ||
@@ -693,10 +693,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     if (this.selection && (!this.selection.parentNode || parent == this.selection))
                     {
-                        // If the editing mode is currently active, remembe the target mutation.
+                        // If the editing mode is currently active, remember the target mutation.
                         // The mutation is coming from user changes and will be selected as soon
-                        // as the editing mode is finished. Only HTMLElement can be selected
-                        // (not a simple text node)
+                        // as editing is finished. Only HTMLElement can be selected (not a simple
+                        // text node).
                         // See issue 5506
                         if (this.isEditing() && (target instanceof window.HTMLElement))
                             this.nextSelection = target;
@@ -1349,14 +1349,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     updateOption: function(name, value)
     {
-        var viewOptionNames = {
-            showCommentNodes: 1,
-            entityDisplay: 1,
-            showTextNodesWithWhitespace: 1,
-            showFullTextNodes: 1
-        };
+        var options = [
+            "showCommentNodes",
+            "entityDisplay",
+            "showTextNodesWithWhitespace",
+            "showFullTextNodes"
+        ];
 
-        if (name in viewOptionNames)
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
         {
             this.resetSearch();
             Dom.clearNode(this.panelNode);
@@ -2101,9 +2102,9 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     getInitialValue: function(target, value)
     {
-        // The text displayed within the HTML panel can be shortened (in case 'Show Full Text'
-        // option is false) so, get the original textContent from the associated page element
-        // (see issue 2183)
+        // The text displayed within the HTML panel can be shortened if the 'Show Full Text'
+        // option is false, so get the original textContent from the associated page element
+        // (issue 2183).
         var repObject = Firebug.getRepObject(target);
         if (repObject)
             return repObject.textContent;

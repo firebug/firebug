@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 5493: Case-insensitive auto-completion</title>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+            var obj = {
+                AbcD: 1,
+                aBcde: 1
+            };
+        </script>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5493">Issue 5493</a>: Case-insensitive auto-completion</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ul>
+                    <li>Open Firebug and enable the Console panel.</li>
+                    <li>Verify the following completions by typing the prefix and pressing <span class="key">TAB</span>:</li>
+                    <ul>
+                        <li>"obj.A" <span class="ok">&rArr; "obj.AbcD"</span></li>
+                        <li>"obj.a" <span class="ok">&rArr; "obj.aBcde"</span></li>
+                        <li>"obj.AB" <span class="ok">&rArr; "obj.AB"</span></li>
+                        <li>"obj.ab" <span class="ok">&rArr; "obj.AbcD"</span></li>
+                        <li>"obj.Abcd" <span class="ok">&rArr; "obj.AbcD"</span></li>
+                    </ul>
+                    <li>Verify that when typing " obj.ab", the completion text starts
+                    with that, but the popup has the correct case.</li>
+                </ul>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>Case-insensitive matches should appear as completions.</li>
+                    <li>Typed capital letters should force case at those points.</li>
+                    <li>Completions that match case should be preferred as defaults.</li>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
+

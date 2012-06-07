@@ -204,7 +204,7 @@ Locale.internationalizeElements = function(doc, elements, attributes)
         if (!element)
             continue;
 
-        // Remove fbInternational class so, the label is not translated again later.
+        // Remove fbInternational class, so that the label is not translated again later.
         element.classList.remove("fbInternational");
 
         for (var j=0; j<attributes.length; j++)

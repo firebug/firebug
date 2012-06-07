@@ -17,7 +17,7 @@ html, body {
 }
 
 body {
-    background: #FFFFFF -moz-linear-gradient(center top , #EAF1FB, #FFFFFF 450px) no-repeat;
+    background: #FFFFFF -moz-linear-gradient(center top, #EAF1FB, #FFFFFF 450px) no-repeat;
     font-family: "Trebuchet MS", Helvetica, sans-serif;
     font-size: 0.9em;
 }

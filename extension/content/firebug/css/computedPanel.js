@@ -151,6 +151,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateComputedView: function(element)
     {
+        var doc = element.ownerDocument;
+        var win = doc.defaultView;
+
+        // Update now if the document is loaded, otherwise wait for "load" event.
+        if (doc.readyState == "complete")
+            return this.doUpdateComputedView(element);
+
+        if (this.updateInProgress)
+            return;
+
+        var self = this;
+        var onWindowLoadHandler = function()
+        {
+            self.context.removeEventListener(win, "load", onWindowLoadHandler, true);
+            self.updateInProgress = false;
+            self.doUpdateComputedView(element);
+        }
+
+        this.context.addEventListener(win, "load", onWindowLoadHandler, true);
+        this.updateInProgress = true;
+    },
+
+    doUpdateComputedView: function(element)
+    {
         function isUnwantedProp(propName)
         {
             return !Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz")
@@ -159,8 +183,18 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var win = element.ownerDocument.defaultView;
         var computedStyle = win.getComputedStyle(element);
 
-        if (this.cssLogic)
-            this.cssLogic.highlight(element);
+        try
+        {
+            if (this.cssLogic)
+                this.cssLogic.highlight(element);
+        }
+        catch (e)
+        {
+            // An exception is thrown if the document is not fully loaded yet
+            // The cssLogic API needs to be used after "load" has been fired.
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("computedPanel.doUpdateComputedView; EXCEPTION " + e, e);
+        }
 
         var props = [];
         for (var i = 0; i < computedStyle.length; ++i)
@@ -275,6 +309,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var offset = Dom.getClientOffset(node);
             var titleAtTop = offset.y < this.panelNode.scrollTop;
+
             Dom.scrollTo(groupNode, this.panelNode, null,
                 groupNode.offsetHeight > this.panelNode.clientHeight || titleAtTop ? "top" : "bottom");
         }
@@ -291,17 +326,30 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
             var isOpened = Css.hasClass(computedStyles[i], "opened");
             if ((expand && !isOpened) || (!expand && isOpened))
-                this.toggleStyle(computedStyles[i]);
+                this.toggleStyle(computedStyles[i], false);
         }
     },
 
-    toggleStyle: function(node)
+    toggleStyle: function(node, scroll)
     {
         var styleNode = Dom.getAncestorByClass(node, "computedStyle");
         var style = Firebug.getRepObject(styleNode);
 
         Css.toggleClass(styleNode, "opened");
+        var opened = Css.hasClass(styleNode, "opened");
         this.styleOpened[style.property] = Css.hasClass(styleNode, "opened");
+
+        if (opened && scroll)
+        {
+            var selectorsNode = styleNode.nextSibling;
+            var offset = Dom.getClientOffset(styleNode);
+            var titleAtTop = offset.y < this.panelNode.scrollTop;
+            var totalHeight = styleNode.offsetHeight + selectorsNode.offsetHeight;
+            var alignAtTop = totalHeight > this.panelNode.clientHeight || titleAtTop;
+
+            Dom.scrollTo(alignAtTop ? styleNode : selectorsNode, this.panelNode, null,
+                alignAtTop ? "top" : "bottom", alignAtTop);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -322,7 +370,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         var computedStyle = Dom.getAncestorByClass(event.target, "computedStyle");
         if (computedStyle && Css.hasClass(computedStyle, "hasSelectors"))
         {
-            this.toggleStyle(event.target);
+            this.toggleStyle(event.target, true);
             return;
         }
     },
@@ -432,14 +480,15 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var optionMap = {
-            showUserAgentCSS: 1,
-            computedStylesDisplay: 1,
-            colorDisplay: 1,
-            showMozillaSpecificStyles: 1
-        };
+        var options = [
+            "showUserAgentCSS",
+            "computedStylesDisplay",
+            "colorDisplay",
+            "showMozillaSpecificStyles"
+        ];
 
-        if (name in optionMap)
+        var isRefreshOption = function(element) { return element == name; };
+        if (options.some(isRefreshOption))
             this.refresh();
     },
 
@@ -550,7 +599,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     getStylesheetURL: function(rule, getBaseUri)
     {
-        // if the parentStyleSheet.href is null, CSS std says its inline style
+        // If parentStyleSheet.href is null, then per the CSS standard this is an inline style.
         if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
         else if (getBaseUri)

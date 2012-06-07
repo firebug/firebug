@@ -184,13 +184,13 @@ function createConsoleHandler(context, win)
     var handler = {};
     handler.console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
 
-    // xxxHonza: these two functions should be automatically overrided, check this out
+    // xxxHonza: these two functions should be automatically overridden, check this out
     // can be probably removed (evaluated and evaluateError).
     console.evaluated = function(result, context)
     {
         if (FBTrace.DBG_CONSOLE)
         {
-            FBTrace.sysout("consoleInjector.FirebugConsoleHandler evalutated default called",
+            FBTrace.sysout("consoleInjector.FirebugConsoleHandler evaluated default called",
                 result);
         }
 
