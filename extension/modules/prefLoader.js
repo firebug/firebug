@@ -11,6 +11,9 @@ Cu.import("resource://gre/modules/Services.jsm");
 
 var EXPORTED_SYMBOLS = ["PrefLoader"];
 
+var PrefLoader = {};
+PrefLoader.prefDomain = "extensions.firebug.";
+
 // ********************************************************************************************* //
 // Implementation
 
@@ -101,12 +104,51 @@ function pref(name, value)
 }
 
 // ********************************************************************************************* //
+// Duplicates firebug/lib/options
+
+var prefTypeMap = (function()
+{
+    var map = {}, br = Ci.nsIPrefBranch;
+    map["string"] = map[br.PREF_STRING] = "CharPref";
+    map["boolean"] = map[br.PREF_BOOL] = "BoolPref";
+    map["number"] = map[br.PREF_INT] = "IntPref";
+    return map;
+})();
+
+function getPref(prefDomain, name)
+{
+    var prefName;
+    if (name == undefined)
+        prefName = PrefLoader.prefDomain + prefDomain;
+    else
+        prefName = prefDomain + "." + name;
+
+    var prefs = Services.prefs;
+    var type = prefTypeMap[prefs.getPrefType(prefName)];
+    if (type)
+        var value = prefs["get" + type](prefName);
+
+    return value;
+}
+
+function setPref(name, value)
+{
+    var prefName = PrefLoader.prefDomain + name;
+    var prefs = Services.prefs;
+
+    var type = prefTypeMap[typeof value];
+    if (type)
+        value = prefs["set" + type](prefName, value);
+
+    return value;
+}
+
+// ********************************************************************************************* //
 // Registration
 
-var PrefLoader =
-{
-    loadDefaultPrefs: loadDefaultPrefs,
-    clearDefaultPrefs: clearDefaultPrefs,
-}
+PrefLoader.loadDefaultPrefs = loadDefaultPrefs;
+PrefLoader.clearDefaultPrefs = clearDefaultPrefs;
+PrefLoader.getPref = getPref;
+PrefLoader.setPref = setPref;
 
 // ********************************************************************************************* //

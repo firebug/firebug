@@ -14,7 +14,7 @@ var EXPORTED_SYMBOLS = [];
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
 
 // Import of PluralForm object.
 Cu.import("resource://gre/modules/PluralForm.jsm");
@@ -63,7 +63,7 @@ Locale.$STR = function(name, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {
@@ -104,7 +104,7 @@ Locale.$STRF = function(name, args, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {

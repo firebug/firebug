@@ -98,7 +98,10 @@ const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 const reTooMuchRecursion = /too\smuch\srecursion/;
 
-const getPref = Components.utils.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
+Cu.import("resource://firebug/prefLoader.js");
+
+var getPref = PrefLoader.getPref;
+
 // ********************************************************************************************* //
 // Globals
 

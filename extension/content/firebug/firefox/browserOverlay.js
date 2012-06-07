@@ -9,6 +9,8 @@ var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
+
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
 // Firebug URLs used by the global menu.
@@ -311,7 +313,7 @@ Firebug.GlobalUI =
             document.removeEventListener("FirebugLoaded", onLoad, false);
             Firebug.waitingForFirstLoad = false;
 
-            // TODO find a better place for notifying extensions
+            // xxxHonza: TODO find a better place for notifying extensions
             FirebugLoader.dispatchToScopes("firebugFrameLoad", [Firebug]);
             callback && callback(Firebug);
         }, false);
@@ -326,7 +328,7 @@ Firebug.GlobalUI =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = FirebugLoader.getPref(option);
+                    var checked = PrefLoader.getPref(option);
 
                     // xxxHonza: I belive that allPagesActivation could be simple boolean option.
                     if (option == "allPagesActivation")
@@ -343,7 +345,7 @@ Firebug.GlobalUI =
         var option = menuItem.getAttribute("option");
         var checked = menuItem.getAttribute("checked") == "true";
 
-        FirebugLoader.setPref(option, checked);
+        PrefLoader.setPref(option, checked);
     },
 
     onMenuShowing: function(popup)
@@ -355,7 +357,7 @@ Firebug.GlobalUI =
             collapsed = fbContentBox.getAttribute("collapsed");
         }
 
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
 
         // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
@@ -402,7 +404,7 @@ Firebug.GlobalUI =
             "Firebug.chrome.setPosition('%pos%')" + "})";
 
         var items = [];
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         for each (var pos in ["detached", "top", "bottom", "left", "right"])
         {
             var label = pos.charAt(0).toUpperCase() + pos.slice(1);
@@ -544,7 +546,7 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 
     globalShortcuts.forEach(function(id)
     {
-        var shortcut = FirebugLoader.getPref("key.shortcut." + id);
+        var shortcut = PrefLoader.getPref("key.shortcut." + id);
         var tokens = shortcut.split(" ");
         var key = tokens.pop();
 
@@ -1064,9 +1066,9 @@ $toolbarButton("firebug-button", {
 // TODO: merge into $toolbarButton?
 // toolbarpalette check is for seamonkey, where it is in the document
 if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
-    && !FirebugLoader.getPref("toolbarCustomizationDone"))
+    && !PrefLoader.getPref("toolbarCustomizationDone"))
 {
-    FirebugLoader.setPref("toolbarCustomizationDone", true);
+    PrefLoader.setPref("toolbarCustomizationDone", true);
 
     // Get the current navigation bar button set (a string of button IDs) and append
     // ID of the Firebug start button into it.
@@ -1174,19 +1176,19 @@ var SessionObserver =
                 return;
 
             // Avoid opening of the page in another browser window.
-            if (checkFirebugVersion(FirebugLoader.getPref("currentVersion")) > 0)
+            if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
             {
                 // Don't forget to update the preference, so the page is not displayed again
-                FirebugLoader.setPref("currentVersion", version);
+                PrefLoader.setPref("currentVersion", version);
 
-                if (FirebugLoader.getPref("showFirstRunPage"))
+                if (PrefLoader.getPref("showFirstRunPage"))
                     Firebug.GlobalUI.visitWebsite("firstRunPage",  version);
             }
         }, 500);
     }
 }
 
-var currentVersion = FirebugLoader.getPref("currentVersion");
+var currentVersion = PrefLoader.getPref("currentVersion");
 if (checkFirebugVersion(currentVersion) > 0)
     observerService.addObserver(SessionObserver, "sessionstore-windows-restored", false);
 
@@ -1209,7 +1211,7 @@ if (typeof(nsContextMenu) != "undefined")
 // All Pages Activation" is on
 
 // Load Firebug by default if activation is on for all pages (see issue 5522)
-if (FirebugLoader.getPref("allPagesActivation") == "on")
+if (PrefLoader.getPref("allPagesActivation") == "on")
 {
     Firebug.GlobalUI.startFirebug(function()
     {
