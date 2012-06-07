@@ -297,7 +297,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 networkPrefDomain, cookieBehaviorPref),
             /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
                 Firebug.prefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "cookies.LogEvents",
+            MenuUtils.optionMenu(context, "firecookie.LogEvents",
                 Firebug.prefDomain, logEventsPref),
             MenuUtils.optionMenu(context, "firecookie.Confirm cookie removal",
                 Firebug.prefDomain, removeConfirmation)
