@@ -297,11 +297,11 @@ var FirebugChrome =
     /**
      * Checking first window in back order, (Most recent window). is itself firebug ?
      */
-    hasLostFocus: function() 
+    hasFocus: function() 
     {
         try 
         {
-            return !(wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
         } 
         catch(ex)
         {

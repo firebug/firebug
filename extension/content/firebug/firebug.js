@@ -802,7 +802,7 @@ window.Firebug =
         }
         
         if (Firebug.isDetached()) {     
-            if( Firebug.chrome.hasLostFocus() || forceOpen) {
+            if( !Firebug.chrome.hasFocus() || forceOpen) {
                 Firebug.chrome.focus();
             } else {
                 Firebug.minimizeBar();
