@@ -1,5 +1,5 @@
 // Global
-pref("extensions.firebug.cookies.logEvents", true);
+pref("extensions.firebug.cookies.logEvents", false);
 pref("extensions.firebug.cookies.clearWhenDeny", true);
 pref("extensions.firebug.cookies.filterByPath", false);
 pref("extensions.firebug.cookies.showRejectedCookies", true);
