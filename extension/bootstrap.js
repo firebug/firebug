@@ -20,7 +20,8 @@ var FIREBUG_MODULES = [
     "resource://firebug/observer-service.js",
     "resource://firebug/require-debug.js",
     "resource://firebug/require.js",
-    "resource://firebug/storageService.js"
+    "resource://firebug/storageService.js",
+    "resource://firebug/prefLoader.js"
 ];
 
 Cu.import("resource://gre/modules/Services.jsm");
