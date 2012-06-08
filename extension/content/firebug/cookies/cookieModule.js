@@ -70,10 +70,6 @@ const panelName = "cookies";
 // Helper array for prematurely created contexts
 var contexts = new Array();
 
-// Extend string bundle with new strings for this extension.
-// This must be done yet before domplate definitions.
-Firebug.registerStringBundle("chrome://firebug/locale/cookies.properties");
-
 // Register stylesheet in Firebug. This method is introduced in Firebug 1.6
 Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
 

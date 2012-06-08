@@ -27,8 +27,15 @@ var firebugURLs =
     firstRunPage: "http://getfirebug.com/firstrun#Firebug "
 };
 
+// ********************************************************************************************* //
+// String Bundles
+
 // Register bundle yet before any Locale.$STR* API is used.
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
+
+// xxxHonza: this needs to be done befor firebug/cookies modules are loaded
+// and it should be part of the cookies directory.
+Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 
 // ********************************************************************************************* //
 // Overlay Helpers

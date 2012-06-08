@@ -75,18 +75,6 @@ var defaultFuncRep = null;
 var menuItemControllers = [];
 var panelTypeMap = {};
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-try
-{
-    // Register default Firebug string bundle (yet before domplate templates).
-    Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
-}
-catch (exc)
-{
-    dump("Register default string bundle FAILS: "+exc+"\n");
-}
-
 // ********************************************************************************************* //
 
 if (window.Firebug)
