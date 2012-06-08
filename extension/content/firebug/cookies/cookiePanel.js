@@ -44,9 +44,6 @@ const removeConfirmation = "cookies.removeConfirmation";
 // Services
 var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
 
-const networkPrefDomain = "network.cookie";
-const cookieBehaviorPref = "cookieBehavior";
-
 // ********************************************************************************************* //
 // Panel Implementation
 
@@ -294,13 +291,13 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         return [
             MenuUtils.optionAllowGlobally(context, "firecookie.AllowGlobally",
-                networkPrefDomain, cookieBehaviorPref),
+                "firecookie.tip.AllowGlobally", "network.cookie", "cookieBehavior"),
             /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
-                Firebug.prefDomain, clearWhenDeny),*/
+                "cookies.tip.clearWhenDeny", Firebug.prefDomain, clearWhenDeny),*/
             MenuUtils.optionMenu(context, "firecookie.LogEvents",
-                Firebug.prefDomain, logEventsPref),
+                "firecookie.tip.LogEvents", Firebug.prefDomain, logEventsPref),
             MenuUtils.optionMenu(context, "firecookie.Confirm cookie removal",
-                Firebug.prefDomain, removeConfirmation)
+                "firecookie.tip.Confirm cookie removal", Firebug.prefDomain, removeConfirmation)
         ];
     },
 
