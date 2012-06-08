@@ -360,7 +360,7 @@ Firebug.GlobalUI =
         var currPos = PrefLoader.getPref("framePosition");
         var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
 
-        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
+        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu.
         var toggleFirebug = popup.querySelector("#menu_toggleFirebug");
         if (toggleFirebug)
         {
@@ -372,18 +372,22 @@ Firebug.GlobalUI =
                 Locale.$STR("firebug.menu.tip.Open_Firebug") :
                 Locale.$STR("firebug.menu.tip.Minimize_Firebug")));
 
-            // If Firebug is detached, use "Focus Firebug Window" label
-            if (currPos == "detached" && Firebug.currentContext)
-            {
-                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
-                toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
-            }
-
-            // Hide "Focus Firebug Window" item if the menu is opened from within
-            // the detached Firebug window.
             var currentLocation = toggleFirebug.ownerDocument.defaultView.top.location.href;
             var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
-            toggleFirebug.setAttribute("collapsed", (inDetachedWindow ? "true" : "false"));
+
+            // If Firebug is detached, use "Focus Firebug Window" label
+            // instead of "Hide Firebug" when the menu isn't opened from
+            // within the detached Firebug window. the 'placement' is used
+            // to ensure Firebug isn't closed with close button of detached window
+            // and 'inDetachedWindow' variable is also used to ensure the menu is
+            // opened from within the detached window.
+            if (currPos == "detached" && Firebug.currentContext &&
+                placement != "minimized" && !inDetachedWindow)
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
+                toggleFirebug.setAttribute("tooltiptext",
+                    Locale.$STR("firebug.menu.tip.Focus_Firebug"));
+            }
         }
 
         // Hide "Deactivate Firebug" menu if Firebug is not active.

@@ -788,7 +788,6 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
-
         var webApp = Firebug.connection.getCurrentSelectedWebApp();
         var context = Firebug.connection.getContextByWebApp(webApp);
         if (!context)  // then we are not debugging the selected tab
@@ -798,18 +797,32 @@ window.Firebug =
         }
         else  // we were debugging
         {
-
         }
 
-        if (Firebug.isDetached()) // if we are out of the browser focus the window
-            Firebug.chrome.focus();
+        if (Firebug.isDetached())
+        {
+            if( !Firebug.chrome.hasFocus() || forceOpen)
+            {
+                Firebug.chrome.focus();
+            } else
+            {
+                Firebug.minimizeBar();
+            }
+        }
         else if (Firebug.framePosition == "detached")
+        {
             this.detachBar();
-        else if (Firebug.isMinimized()) // toggle minimize
+        }
+        // toggle minimize
+        else if (Firebug.isMinimized())
+        {
             Firebug.unMinimize();
-        else if (!forceOpen)  // else isInBrowser
+        }
+        // else isInBrowser
+        else if (!forceOpen)
+        {
             Firebug.minimizeBar();
-
+        }
         return true;
     },
 
