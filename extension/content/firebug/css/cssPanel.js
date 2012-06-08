@@ -709,33 +709,70 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    // When handling disable button clicks, we cannot simply use a 'click'
+    // event, because refresh() may be (and often is) called in between
+    // mousedown and mouseup, replacing the DOM structure. Instead, a
+    // description of the moused-down disable button's property is saved
+    // and explicitly checked on mouseup (issue 5500).
+    clickedPropTag: null,
+
+    getPropTag: function(event)
+    {
+        var row = Dom.getAncestorByClass(event.target, "cssProp");
+        var rule = Firebug.getRepObject(row);
+        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        return {
+            a: rule, b: propName,
+            equals: function(other)
+            {
+                return (other && this.a === other.a && this.b === other.b);
+            }
+        };
+    },
+
+    clickedDisableButton: function(event)
+    {
+        // XXX hack
+        if (event.clientX > 20)
+            return false;
+        if (Css.hasClass(event.target, "textEditor inlineExpander"))
+            return false;
+        var row = Dom.getAncestorByClass(event.target, "cssProp");
+        return (row && Css.hasClass(row, "editGroup"));
+    },
+
     onMouseDown: function(event)
     {
+        this.clickedPropTag = null;
+        if (Events.isLeftClick(event) && this.clickedDisableButton(event))
+        {
+            this.clickedPropTag = this.getPropTag(event);
+
+            // Don't select text when double-clicking the disable button.
+            Events.cancelEvent(event);
+        }
+    },
+
+    onMouseUp: function(event)
+    {
+        if (Events.isLeftClick(event) && this.clickedDisableButton(event) &&
+            this.getPropTag(event).equals(this.clickedPropTag))
+        {
+            var row = Dom.getAncestorByClass(event.target, "cssProp");
+            this.disablePropertyRow(row);
+            Events.cancelEvent(event);
+        }
+        this.clickedPropTag = null;
     },
 
     onClick: function(event)
     {
-        var row;
-
         if (!Events.isLeftClick(event))
             return;
 
-        // XXjoe Hack to only allow clicking on the checkbox
-        if ((event.clientX <= 20) && Events.isSingleClick(event))
+        if (Events.isDoubleClick(event) && !this.clickedDisableButton(event))
         {
-            if (Css.hasClass(event.target, "textEditor inlineExpander"))
-                return;
-
-            row = Dom.getAncestorByClass(event.target, "cssProp");
-            if (row && Css.hasClass(row, "editGroup"))
-            {
-                this.disablePropertyRow(row);
-                Events.cancelEvent(event);
-            }
-        }
-        else if ((event.clientX >= 20) && Events.isDoubleClick(event))
-        {
-            row = Dom.getAncestorByClass(event.target, "cssRule");
+            var row = Dom.getAncestorByClass(event.target, "cssRule");
             if (row && !Dom.getAncestorByClass(event.target, "cssPropName")
                 && !Dom.getAncestorByClass(event.target, "cssPropValue"))
             {
@@ -759,6 +796,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     initialize: function()
     {
         this.onMouseDown = Obj.bind(this.onMouseDown, this);
+        this.onMouseUp = Obj.bind(this.onMouseUp, this);
         this.onClick = Obj.bind(this.onClick, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
@@ -778,6 +816,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     initializeNode: function(oldPanelNode)
     {
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.addEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.Panel.initializeNode.apply(this, arguments);
@@ -786,6 +825,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     destroyNode: function()
     {
         Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.removeEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
