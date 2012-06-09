@@ -5,10 +5,12 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
+    "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/cookies/cookieUtils",
+    "firebug/lib/events",
+    "firebug/cookies/cookieUtils"
 ],
-function(Obj, Locale, Str, Domplate, Css, CookieUtils) {
+function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
 
 with (Domplate) {
 
@@ -264,10 +266,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
         var row = Dom.getAncestorByClass(event.target, "breakpointRow");
         context.cookies.breakpoints.removeBreakpoint(row.repObject);
 
-        // Remove from the UI.
-        bpPanel.noRefresh = true;
-        bpPanel.removeRow(row);
-        bpPanel.noRefresh = false;
+        bpPanel.refresh();
 
         var cookiePanel = context.getPanel(panelName, true);
         if (!cookiePanel)
