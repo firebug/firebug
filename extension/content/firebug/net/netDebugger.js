@@ -141,7 +141,7 @@ var BreakpointRep = domplate(Firebug.Rep,
     inspectable: false,
 
     tag:
-        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+        DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", _repObject: "$bp",
             role: "option", "aria-checked": "$bp.checked"},
             DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
@@ -162,6 +162,11 @@ var BreakpointRep = domplate(Firebug.Rep,
     getName: function(bp)
     {
         return Url.getFileName(bp.href);
+    },
+
+    isDisabled: function(bp)
+    {
+        return !bp.checked;
     },
 
     onRemove: function(event)
@@ -201,20 +206,22 @@ var BreakpointRep = domplate(Firebug.Rep,
         if (!Css.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
+        var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+        if (checkBox.checked)
+            Css.removeClass(bpRow, "disabled");
+        else
+            Css.setClass(bpRow, "disabled");
+
+        var bp = bpRow.repObject;
+        bp.checked = checkBox.checked;
+
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
-
-        var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
-        bp.checked = checkBox.checked;
 
         var panel = context.getPanel(panelName, true);
         if (!panel)
             return;
-
-        // xxxsz: Needs a better way to update display of breakpoint than invalidate
-        // the whole panel's display
-        // xxxHonza
-        panel.context.invalidatePanels("breakpoints");
 
         panel.enumerateRequests(function(file)
         {
