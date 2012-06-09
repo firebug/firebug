@@ -53,6 +53,9 @@ var HeaderResizer =
         if (!header)
             return;
 
+        if (!this.isBetweenColumns(event))
+            return;
+
         this.onStartResizing(event);
 
         Events.cancelEvent(event);

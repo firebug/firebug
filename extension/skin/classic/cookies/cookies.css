@@ -22,7 +22,7 @@
 .logRow-cookiesRejected,
 .logRow-cookie:hover {
     padding: 2px 0px 1px 22px !important;
-    background-image: url(cookie14.png) !important;
+    background-image: url(chrome://firebug/skin/cookies/cookie.svg) !important;
     background-repeat: no-repeat !important;
     background-position: 4px 2px !important;
 }
@@ -87,7 +87,7 @@
     border-bottom: 1px solid #9C9C9C;
     padding: 0 !important;
     font-weight: bold;
-    background: #BBBBBB url(tableHeader.gif) repeat-x;
+    background: #C8C8C8 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2)) repeat-x;
     white-space: nowrap;
 }
 
@@ -102,24 +102,24 @@
 }
 
 .cookieHeaderCell:hover:active {
-    background: #959595 url(tableHeaderActive.gif) repeat-x;
+    background-color: #B4B4B4;
 }
 
 .cookieHeaderSorted {
-    background: #7D93B2 url(tableHeaderSorted.gif) repeat-x;
+    background-color: #8CA0BE;
 }
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(arrowDown.png) no-repeat right;    
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
-    background-image: url(arrowUp.png);
+    background-image: url(chrome://firebug/skin/arrowUp.png);
 }
 
 .cookieHeaderSorted:hover:active {
-    background: #536B90 url(tableHeaderSortedActive.gif) repeat-x;
+    background-color: #6E87AA;
 }
 
 /************************************************************************************************/
