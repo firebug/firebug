@@ -290,6 +290,13 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
         bp.checked = checkBox.checked;
 
         var bpPanel = Firebug.getElementPanel(checkBox);
+        if (bpPanel)
+        {
+            // xxxsz: Needs a better way to update display of breakpoint than invalidate
+            // the whole panel's display
+            bpPanel.context.invalidatePanels("breakpoints");
+        }
+
         var cookiePanel = bpPanel.context.getPanel(panelName, true);
         if (!cookiePanel)
             return;
