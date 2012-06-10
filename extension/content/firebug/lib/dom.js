@@ -645,7 +645,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
         // Element is horizontally not completely visible or scrolling is enforced
         if (leftSpace < 0 || rightSpace < 0 || scrollWhenVisible)
         {
-            switch (alignmentY)
+            switch (alignmentX)
             {
                 case "left":
                     scrollBox.scrollLeft = offset.x;
@@ -657,7 +657,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
                     var x = elementFitsIntoScrollBox || alignmentX != "centerOrLeft" ?
                         offset.x - (scrollBox.clientWidth - element.offsetWidth) / 2 :
                         offset.x;
-                    scrollBox.scrollLeft = y;
+                    scrollBox.scrollLeft = x;
                     break;
 
                 case "right":
