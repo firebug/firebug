@@ -6,7 +6,26 @@ function runTest()
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
         {
-            var panel = FW.Firebug.chrome.selectPanel("console");
+            FW.Firebug.chrome.selectPanel("console");
+            var doc = FW.Firebug.chrome.window.document;
+            var cmdLine = doc.getElementById("fbCommandLine");
+            var completionBox = doc.getElementById("fbCommandLineCompletion");
+
+            // xxxHonza: This should be polished and moved into FBTest namespace.
+            function testExpression(callback, expr, shouldComplete)
+            {
+                // To save on time, only send the last character as a key press.
+                cmdLine.focus();
+                cmdLine.value = expr.slice(0, -1);
+                FBTest.synthesizeKey(expr.slice(-1), null, win);
+
+                var hasCompletion = (completionBox.value.length > cmdLine.value.length);
+                FBTest.compare(shouldComplete, hasCompletion,
+                    "Completions should " + (shouldComplete ? "" : "not ") +
+                    "appear for: " + expr);
+
+                callback();
+            }
 
             var tests = [
                 ["i", true],
@@ -29,9 +48,8 @@ function runTest()
                 ["id(1)/i", true],
                 ["(1)/i", true],
                 ["/a/.t", true],
-                ["(1)/i", true],
                 ["if(1)/i", false],
-                ["if(1)/i", false],
+                ["if(0);else/i", false],
                 ["(function()/i", false],
                 ["/[/; i", false],
                 ["1+/i", false],
@@ -44,16 +62,23 @@ function runTest()
                 ["var a, i", false],
                 ["if(1){i", true],
                 ["a=0;{i", true],
+                ["a=0; try {i", true],
+                ["if(0) ; else { i", true],
+                ["throw {i", false],
+                ["throw f(i", true],
                 ["({a: i", true],
                 ["({ i", false],
                 ["({a: window, i", false],
                 ["{i", true],
                 ["{a: window, i", true],
                 ["function(i", false],
+                ["function  (i", false],
                 ["function f(i", false],
                 ["f=function(i", false],
                 ["function i", false],
                 ["function([i", false],
+                ["[{set a([i", false],
+                ["id.get+(i", true],
 
                 ["date().g", true],
                 ["mk4().c", true],
@@ -72,37 +97,14 @@ function runTest()
             var tasks = new FBTest.TaskList();
             for (var i = 0; i < tests.length; ++i) {
                 var test = tests[i];
-                tasks.push(testExpression, win, test[0], test[1]);
+                tasks.push(testExpression, test[0], test[1]);
             }
 
             tasks.run(function()
             {
-                var doc = FW.Firebug.chrome.window.document;
-                var cmdLine = doc.getElementById("fbCommandLine");
                 cmdLine.value = "";
-
                 FBTest.testDone("issue4233.DONE");
-            });
+            }, 0);
         });
     });
-}
-
-// ************************************************************************************************
-// xxxHonza: This should be polished and moved into FBTest namespace.
-
-function testExpression(callback, win, expr, shouldComplete)
-{
-    var doc = FW.Firebug.chrome.window.document;
-    var cmdLine = doc.getElementById("fbCommandLine");
-
-    cmdLine.value = "";
-    FBTest.typeCommand(expr);
-    FBTest.synthesizeKey("VK_TAB", null, win);
-
-    var changed = (cmdLine.value !== expr);
-    FBTest.compare(shouldComplete, changed,
-        "Completions should " + (shouldComplete ? "" : "not ") +
-        "appear for: " + expr);
-
-    setTimeout(callback);
 }

@@ -5,10 +5,12 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
+    "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/cookies/cookieUtils",
+    "firebug/lib/events",
+    "firebug/cookies/cookieUtils"
 ],
-function(Obj, Locale, Str, Domplate, Css, CookieUtils) {
+function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
 
 with (Domplate) {
 
@@ -221,7 +223,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
     inspectable: false,
 
     tag:
-        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+        DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", _repObject: "$bp",
             role: "option", "aria-checked": "$bp.checked"},
             DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
@@ -250,6 +252,11 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
         return Locale.$STR("Break On Cookie Change");
     },
 
+    isDisabled: function(bp)
+    {
+        return !bp.checked;
+    },
+
     onRemove: function(event)
     {
         Events.cancelEvent(event);
@@ -264,10 +271,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
         var row = Dom.getAncestorByClass(event.target, "breakpointRow");
         context.cookies.breakpoints.removeBreakpoint(row.repObject);
 
-        // Remove from the UI.
-        bpPanel.noRefresh = true;
-        bpPanel.removeRow(row);
-        bpPanel.noRefresh = false;
+        bpPanel.refresh();
 
         var cookiePanel = context.getPanel(panelName, true);
         if (!cookiePanel)
@@ -287,10 +291,18 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
         if (!Css.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
-        var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
+        var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+        if (checkBox.checked)
+            Css.removeClass(bpRow, "disabled");
+        else
+            Css.setClass(bpRow, "disabled");
+
+        var bp = bpRow.repObject;
         bp.checked = checkBox.checked;
 
         var bpPanel = Firebug.getElementPanel(checkBox);
+
         var cookiePanel = bpPanel.context.getPanel(panelName, true);
         if (!cookiePanel)
             return;

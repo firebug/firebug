@@ -38,13 +38,16 @@ and verify that the autocompletion popup window<br/> appears for:</li>
     <li><code style="color:green">id(1)/i</code></li>
     <li><code style="color:green">(1)/i</code></li>
     <li><code style="color:green">/a/.t</code></li>
-    <li><code style="color:green">(1)/i</code></li>
     <li><code style="color:green">var a = i</code></li>
     <li><code style="color:green">if(1){i</code></li>
     <li><code style="color:green">a=0;{i</code></li>
+    <li><code style="color:green">a=0;try{i</code></li>
+    <li><code style="color:green">if(0) ; else { i</code></li>
+    <li><code style="color:green">throw f(i</code></li>
     <li><code style="color:green">({a: i</code></li>
     <li><code style="color:green">{i</code></li>
     <li><code style="color:green">{a: window, i</code></li>
+    <li><code style="color:green">id.get+(i</code></li>
     <li><code style="color:green">date().g</code></li>
     <li><code style="color:green">mk4().c</code></li>
     <li><code style="color:green">mk4().chain().c</code></li>
@@ -57,7 +60,7 @@ and verify that the autocompletion popup window<br/> appears for:</li>
 and doesn't appear for:
 <ul>
     <li><code style="color:green">if(1)/i</code></li>
-    <li><code style="color:green">if(1)/i</code></li>
+    <li><code style="color:green">if(0);else/i</code></li>
     <li><code style="color:green">(function()/i</code></li>
     <li><code style="color:green">/[/; i</code></li>
     <li><code style="color:green">1+/i</code></li>
@@ -66,13 +69,16 @@ and doesn't appear for:
     <li><code style="color:green">var i</code></li>
     <li><code style="color:green">var a = 0, i</code></li>
     <li><code style="color:green">var a, i</code></li>
+    <li><code style="color:green">throw {i</code></li>
     <li><code style="color:green">({ i</code></li>
     <li><code style="color:green">({a: window, i</code></li>
     <li><code style="color:green">function(i</code></li>
+    <li><code style="color:green">function &nbsp;(i</code></li>
     <li><code style="color:green">function f(i</code></li>
     <li><code style="color:green">f=function(i</code></li>
     <li><code style="color:green">function i</code></li>
     <li><code style="color:green">function([i</code></li>
+    <li><code style="color:green">[{set a([i</code></li>
     <li><code style="color:green">id(eval('window')).i</code></li>
     <li><code style="color:green">(window).i</code></li>
     <li><code style="color:green">q='';q.s</code></li>

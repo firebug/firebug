@@ -253,8 +253,8 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
     tag:
-        DIV({"class": "breakpointRow focusRow", role: "option", "aria-checked": "$bp.checked",
-                _repObject: "$bp", onclick: "$onClick"},
+        DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", role: "option",
+                "aria-checked": "$bp.checked", _repObject: "$bp", onclick: "$onClick"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp.checked", tabindex : '-1'}),
@@ -288,6 +288,11 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     disableBreakpoint: function(href, lineNumber)
     {
         FBS.disableBreakpoint(href, lineNumber);
+    },
+
+    isDisabled: function(bp)
+    {
+        return !bp.checked;
     },
 
     getContextMenuItems: function(breakpoint, target)
