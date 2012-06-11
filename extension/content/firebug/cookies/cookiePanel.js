@@ -12,6 +12,7 @@ define([
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/array",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieReps",
     "firebug/cookies/headerResizer",
@@ -22,7 +23,7 @@ define([
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     MenuUtils, CookieReps, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
     CookiePermissions, CookieClipboard) {
 
@@ -150,7 +151,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
                 var receivedCookies = host.receivedCookies;
                 if (receivedCookies)
-                    cookies = extendArray(cookies, receivedCookies);
+                    cookies = Arr.extendArray(cookies, receivedCookies);
             }
         }
 
