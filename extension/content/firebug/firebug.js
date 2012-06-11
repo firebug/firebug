@@ -789,7 +789,7 @@ window.Firebug =
 
         if (Firebug.isDetached())
         {
-            if( !Firebug.chrome.hasFocus() || forceOpen)
+            if ( !Firebug.chrome.hasFocus() || forceOpen)
             {
                 Firebug.chrome.focus();
             } else
@@ -803,7 +803,7 @@ window.Firebug =
             // be careful, unMinimize func always sets placement to
             // inbrowser first then unminimizes. when we want to
             // unminimize in detached mode must call detachBar func.
-            if(Firebug.framePosition == "detached")
+            if (Firebug.framePosition == "detached")
                 this.detachBar();
             else
                 Firebug.unMinimize();
@@ -847,7 +847,7 @@ window.Firebug =
             // TODO reattach
 
             // window is closing in detached mode
-            if(Firebug.chrome.window.top)
+            if (Firebug.chrome.window.top)
             {
                 topWindow = Firebug.chrome.window.top;
                 topWindow.exportFirebug();
@@ -933,7 +933,7 @@ window.Firebug =
             return null;
         }
 
-        if(Firebug.chrome.waitingForDetach)
+        if (Firebug.chrome.waitingForDetach)
             return null;
         Firebug.chrome.waitingForDetach = true;
 
