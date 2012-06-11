@@ -706,7 +706,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeConfirmation))
         {
             var check = {value: false};
-            if (!prompts.confirmCheck(context.chrome.window, "Firebug",
+            if (!prompts.confirmCheck(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("firecookie.confirm.removeall"),
                 Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
@@ -724,7 +724,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeSessionConfirmation))
         {
             var check = {value: false};
-            if (!prompts.confirmCheck(context.chrome.window, "Firebug",
+            if (!prompts.confirmCheck(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("firecookie.confirm.removeallsession"),
                 Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
