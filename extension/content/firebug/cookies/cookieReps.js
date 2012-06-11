@@ -13,6 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/array",
+    "firebug/lib/system",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieUtils",
@@ -23,7 +24,7 @@ define([
     "firebug/cookies/editCookie",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr, System,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
     CookiePermissions, EditCookie, CookieClipboard) {
 
@@ -438,7 +439,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 text += row.repObject.toString() + "\n";
         }
 
-        copyToClipboard(text);
+        System.copyToClipboard(text);
     },
 
     onPaste: function(clickedCookie) // clickedCookie can be null if the user clicks within panel area.
