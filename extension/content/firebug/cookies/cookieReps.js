@@ -858,15 +858,18 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
         return "";
     },
 
-    getName: function(cookieEvent) {
+    getName: function(cookieEvent)
+    {
         return cookieEvent.cookie.name;
     },
 
-    getValue: function(cookieEvent) {
+    getValue: function(cookieEvent)
+    {
         return Str.cropString(cookieEvent.cookie.value, 75);
     },
 
-    getDomain: function(cookieEvent) {
+    getDomain: function(cookieEvent)
+    {
         return cookieEvent.cookie.host;
     },
 
