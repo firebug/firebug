@@ -116,31 +116,26 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     getEnablementStatus: function()
     {
+        // TODO: Panel names should be fetched dynamically
+        const panels = ["console", "script", "net"];
+
         var strOn = Locale.$STR("enablement.on");
         var strOff = Locale.$STR("enablement.off");
 
+        var statuses = [];
         var status = "";
         var firebugStatus = Firefox.getElementById("firebugStatus");
 
         if (!firebugStatus)
             return;
 
-        if (firebugStatus.getAttribute("console") == "on")
-            status += "Console: " + strOn + ",";
-        else
-            status += "Console: " + strOff + ",";
+        for (var i = 0; i < panels.length; ++i)
+        {
+            status = firebugStatus.getAttribute(panels[i]) == "on" ? strOn : strOff;
+            statuses.push(Locale.$STRF("panel.status", [Locale.$STR("Panel-"+panels[i]), status]));
+        }
 
-        if (firebugStatus.getAttribute("script") == "on")
-            status += " Script: " + strOn;
-        else
-            status += " Script: " + strOff + "";
-
-        if (firebugStatus.getAttribute("net") == "on")
-            status += " Net: " + strOn + ",";
-        else
-            status += " Net: " + strOff + ",";
-
-        return status;
+        return statuses.join(", ");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
