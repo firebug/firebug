@@ -789,7 +789,7 @@ window.Firebug =
 
         if (Firebug.isDetached())
         {
-            if( !Firebug.chrome.hasFocus() || forceOpen)
+            if ( !Firebug.chrome.hasFocus() || forceOpen)
             {
                 Firebug.chrome.focus();
             } else
@@ -797,14 +797,16 @@ window.Firebug =
                 Firebug.minimizeBar();
             }
         }
-        else if (Firebug.framePosition == "detached")
-        {
-            this.detachBar();
-        }
         // toggle minimize
         else if (Firebug.isMinimized())
         {
-            Firebug.unMinimize();
+            // be careful, unMinimize func always sets placement to
+            // inbrowser first then unminimizes. when we want to
+            // unminimize in detached mode must call detachBar func.
+            if (Firebug.framePosition == "detached")
+                this.detachBar();
+            else
+                Firebug.unMinimize();
         }
         // else isInBrowser
         else if (!forceOpen)
@@ -840,10 +842,20 @@ window.Firebug =
 
     minimizeBar: function()  // just pull down the UI, but don't deactivate the context
     {
-        if (Firebug.isDetached())  // TODO disable minimize on externalMode
+        if (Firebug.isDetached())
         {
             // TODO reattach
-            Firebug.toggleDetachBar(false, false);
+
+            // window is closing in detached mode
+            if (Firebug.chrome.window.top)
+            {
+                topWindow = Firebug.chrome.window.top;
+                topWindow.exportFirebug();
+                topWindow.close();
+            }
+
+            Firebug.setPlacement("minimized");
+            this.showBar(false);
             Firebug.chrome.focus();
         }
         else // inBrowser -> minimized
@@ -873,7 +885,8 @@ window.Firebug =
     // detached -> closed; inBrowser -> detached TODO reattach
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
-        if (!forceOpen && Firebug.isDetached())  // detached -> minimized
+        //detached -> inbrowser
+        if (!forceOpen && Firebug.isDetached())
         {
             var topWin = Firebug.chrome.window.top;
             topWin.exportFirebug();
@@ -885,6 +898,14 @@ window.Firebug =
                 Firebug.minimizeBar();
             Firebug.chrome.syncPositionPref();
         }
+        // is minimized now but the last time that has been closed, was in detached mode,
+        // so it should be returned to in browser mode because the user has pressed CTRL+F12.
+        else if (Firebug.framePosition == "detached" && Firebug.isMinimized())
+        {
+            Firebug.unMinimize();
+            Firebug.chrome.syncPositionPref();
+        }
+        // else is in browser mode, then switch to detached mode
         else
         {
             this.detachBar();
@@ -912,7 +933,7 @@ window.Firebug =
             return null;
         }
 
-        if(Firebug.chrome.waitingForDetach)
+        if (Firebug.chrome.waitingForDetach)
             return null;
         Firebug.chrome.waitingForDetach = true;
 
