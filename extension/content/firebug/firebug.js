@@ -1095,6 +1095,22 @@ window.Firebug =
     },
 
     /**
+     * Returns all panel types, whose activation can be toggled
+     * @returns {Object} Activable panel types
+     */
+    getActivablePanelTypes: function()
+    {
+        var activablePanelTypes = [];
+        for (var i = 0; i < panelTypes.length; ++i)
+        {
+            if (this.PanelActivation.isPanelActivable(panelTypes[i]))
+                activablePanelTypes.push(panelTypes[i]);
+        }
+
+        return activablePanelTypes;
+    },
+
+    /**
      * Gets an object containing the state of the panel from the last time
      * it was displayed before one or more page reloads.
      * The 'null' return here is a too-subtle signal to the panel code in bindings.xml.
