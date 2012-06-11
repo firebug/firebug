@@ -1300,7 +1300,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
             if (!colId || !col.style)
                 continue;
 
-            var width = Options.get("firecookie." + colId + ".width");
+            var width = Options.get("cookies." + colId + ".width");
             if (width)
                 col.style.width = width + "px";
         }
