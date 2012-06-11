@@ -311,7 +311,7 @@ window.Firebug =
 
     shutdownUI: function()  // TODO chrome.js
     {
-        window.removeEventListener('unload', shutdownFirebug, false);
+        window.removeEventListener("unload", shutdownFirebug, false);
 
         Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
@@ -365,7 +365,7 @@ window.Firebug =
     // dispatch suspendFirebug to all windows
     suspend: function()
     {
-        if(Firebug.rerun)
+        if (Firebug.rerun)
             return;
 
         Firebug.suspendFirebug();
@@ -730,7 +730,7 @@ window.Firebug =
 
         Firebug.chrome.toggleOpen(show);
 
-        if(!show)
+        if (!show)
             Firebug.Inspector.inspectNode(null);
 
         //xxxHonza: should be removed.
@@ -776,26 +776,29 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
+
         var webApp = Firebug.connection.getCurrentSelectedWebApp();
         var context = Firebug.connection.getContextByWebApp(webApp);
-        if (!context)  // then we are not debugging the selected tab
+
+        // then we are not debugging the selected tab
+        if (!context)
         {
             context = Firebug.connection.getOrCreateContextByWebApp(webApp);
-            forceOpen = true;  // Be sure the UI is open for a newly created context
+
+            // Be sure the UI is open for a newly created context
+            forceOpen = true;
         }
-        else  // we were debugging
+        // we were debugging
+        else
         {
         }
 
         if (Firebug.isDetached())
         {
             if ( !Firebug.chrome.hasFocus() || forceOpen)
-            {
                 Firebug.chrome.focus();
-            } else
-            {
+            else
                 Firebug.minimizeBar();
-            }
         }
         // toggle minimize
         else if (Firebug.isMinimized())
@@ -813,6 +816,7 @@ window.Firebug =
         {
             Firebug.minimizeBar();
         }
+
         return true;
     },
 
@@ -896,7 +900,11 @@ window.Firebug =
                 Firebug.unMinimize();
             else
                 Firebug.minimizeBar();
+
             Firebug.chrome.syncPositionPref();
+
+            // To enable minimize button in detached mode
+            Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","false");
         }
         // is minimized now but the last time that has been closed, was in detached mode,
         // so it should be returned to in browser mode because the user has pressed CTRL+F12.
@@ -946,6 +954,9 @@ window.Firebug =
         }
 
         Firebug.chrome.syncPositionPref("detached");
+
+        // To disable minimize button in detached mode
+        Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","true");
 
         return Firefox.openWindow("Firebug",
             "chrome://firebug/content/firefox/firebug.xul",
@@ -1384,9 +1395,9 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
                 global, global);
     }
-    catch(exc)
+    catch (exc)
     {
-        if(FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
 }
@@ -1951,19 +1962,21 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         // to simply generate the sorted list within the module, rather than
         // sorting within the UI.
         var self = this;
-        function compare(a, b) {
+        function compare(a, b)
+        {
             var locA = self.getObjectDescription(a);
             var locB = self.getObjectDescription(b);
-            if(locA.path > locB.path)
+            if (locA.path > locB.path)
                 return 1;
-            if(locA.path < locB.path)
+            if (locA.path < locB.path)
                 return -1;
-            if(locA.name > locB.name)
+            if (locA.name > locB.name)
                 return 1;
-            if(locA.name < locB.name)
+            if (locA.name < locB.name)
                 return -1;
             return 0;
         }
+
         var allLocs = this.getLocationList().sort(compare);
         for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
 
