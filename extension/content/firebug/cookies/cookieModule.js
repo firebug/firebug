@@ -612,7 +612,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         else if (!getURIHost(location))
             host = Locale.$STR("firecookie.LocalFiles");
 
-        // Translate these two options in panel activable menu from firecookie.properties
+        // Translate these two options in panel activable menu from cookies.properties
         switch (option)
         {
         case "disable-site":

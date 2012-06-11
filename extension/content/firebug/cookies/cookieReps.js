@@ -1263,7 +1263,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         }
 
         // Store current state into the preferences.
-        Option.set(hiddenColsPref, table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
     },
 
     onResetColumns: function(context)
