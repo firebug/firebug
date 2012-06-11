@@ -572,16 +572,15 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
         else
             TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
-    },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug suspend and resume
+        this.setStatus();
+    },
 
     onSuspendFirebug: function()
     {
         TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
 
-        Firefox.getElementById("firebugStatus").removeAttribute(panelName);
+        this.setStatus();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onSuspendFirebug");
@@ -592,13 +591,30 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Firebug.CookieModule.isAlwaysEnabled())
             TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
 
-        Firefox.getElementById("firebugStatus").setAttribute(panelName, "on");
+        this.setStatus();
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onResumeFirebug");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    setStatus: function()
+    {
+        var fbStatus = Firefox.getElementById("firebugStatus");
+        if (fbStatus)
+        {
+            if (this.hasObservers())
+                fbStatus.setAttribute(panelName, "on");
+            else
+                fbStatus.removeAttribute(panelName);
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.setStatus ERROR no firebugStatus element");
+        }
+    },
 
     getMenuLabel: function(option, location)
     {
