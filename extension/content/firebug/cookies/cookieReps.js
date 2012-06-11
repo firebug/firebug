@@ -60,7 +60,7 @@ const panelName = "cookies";
 var CookieReps = {};
 
 /**
- * @domplate Basic template for all Firecookie CookieReps.
+ * @domplate Basic template for Cookies panel UI.
  */
 CookieReps.Rep = domplate(Firebug.Rep,
 {

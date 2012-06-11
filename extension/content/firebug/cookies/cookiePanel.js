@@ -34,7 +34,7 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// Firecookie preferences
+// Cookies preferences
 const logEventsPref = "cookies.logEvents";
 const showRejectedCookies = "cookies.showRejectedCookies";
 const lastSortedColumn = "cookies.lastSortedColumn";
@@ -51,10 +51,10 @@ var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager
  * @panel This class represents the Cookies panel that is displayed within
  * Firebug UI.
  */
-function FireCookiePanel() {}
+function CookiePanel() {}
 
-FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
-/** @lends FireCookiePanel */
+CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
+/** @lends CookiePanel */
 {
     name: "cookies",
     title: Locale.$STR("firecookie.Panel"),
@@ -191,7 +191,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     initializeNode: function(oldPanelNode)
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.initializeNode");
+            FBTrace.sysout("cookies.CookiePanel.initializeNode");
 
         // xxxHonza 
         // This method isn't called when FB UI is detached. So, the columns
@@ -210,7 +210,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     destroyNode: function()
     {
         if (FBTrace.DBG_COOKIES)
-            FBTrace.sysout("cookies.FireCookiePanel.destroyNode");
+            FBTrace.sysout("cookies.CookiePanel.destroyNode");
 
         this.document.removeEventListener("mouseclick", this.onMouseClick, true);
         this.document.removeEventListener("mousedown", this.onMouseDown, true);
@@ -457,7 +457,7 @@ FireCookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     onActivationChanged: function(enable)
     {
         if (FBTrace.DBG_COOKIES || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firecookie.FireCookiePanel.onActivationChanged; " + enable);
+            FBTrace.sysout("firecookie.CookiePanel.onActivationChanged; " + enable);
 
         if (enable)
         {
@@ -532,9 +532,9 @@ Firebug.CookieModule.ConsoleListener =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(FireCookiePanel);
+Firebug.registerPanel(CookiePanel);
 
-return FireCookiePanel;
+return CookiePanel;
 
 // ********************************************************************************************* //
 }});
