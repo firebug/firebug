@@ -9,7 +9,7 @@
         windowtype="Browser:CookieEditor"
         title="firecookie.edit.title"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        ondialogaccept="EditCookie.onOK()"
+        ondialogaccept="return EditCookie.onOK()"
         onload="EditCookie.onLoad()"
         minwidth="360px"
         minheight="300px"
