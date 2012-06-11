@@ -118,7 +118,7 @@ EditCookie.prototype =
     onOK: function()
     {
         if (!this.checkValues())
-            return;
+            return false;
 
         var isSession = this.sessionNode.checked;
         var host = this.domainNode.value;
@@ -165,6 +165,8 @@ EditCookie.prototype =
 
         // Close dialog.
         this.window.close();
+
+        return true;
     },
 
     /**
