@@ -29,11 +29,12 @@ define([
     "firebug/cookies/editCookie",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
+    "firebug/chrome/firefox",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
-    TraceListener, TraceModule) {
+    TraceListener, TraceModule, Firefox) {
 
 with (Domplate) {
 
@@ -580,7 +581,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     {
         TabWatcher.iterateContexts(Firebug.CookieModule.unregisterObservers);
 
-        top.document.getElementById("firebugStatus").removeAttribute(panelName);
+        Firefox.getElementById("firebugStatus").removeAttribute(panelName);
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onSuspendFirebug");
@@ -591,7 +592,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Firebug.CookieModule.isAlwaysEnabled())
             TabWatcher.iterateContexts(Firebug.CookieModule.registerObservers);
 
-        top.document.getElementById("firebugStatus").setAttribute(panelName, "on");
+        Firefox.getElementById("firebugStatus").setAttribute(panelName, "on");
 
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onResumeFirebug");
