@@ -201,7 +201,7 @@ var HeaderResizer =
         {
             // Use directly nsIPrefBranch interface as the pref
             // doesn't have to exist yet.
-            Options.setPref(Firebug.prefDomain, ".firecookie." + colId + ".width", newWidth);
+            Options.setPref(Firebug.prefDomain, ".cookies." + colId + ".width", newWidth);
         }
 
         if (FBTrace.DBG_COOKIES)

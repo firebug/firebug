@@ -13,6 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/array",
+    "firebug/lib/system",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieUtils",
@@ -23,7 +24,7 @@ define([
     "firebug/cookies/editCookie",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr, System,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
     CookiePermissions, EditCookie, CookieClipboard) {
 
@@ -60,7 +61,7 @@ const panelName = "cookies";
 var CookieReps = {};
 
 /**
- * @domplate Basic template for all Firecookie CookieReps.
+ * @domplate Basic template for Cookies panel UI.
  */
 CookieReps.Rep = domplate(Firebug.Rep,
 {
@@ -438,7 +439,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 text += row.repObject.toString() + "\n";
         }
 
-        copyToClipboard(text);
+        System.copyToClipboard(text);
     },
 
     onPaste: function(clickedCookie) // clickedCookie can be null if the user clicks within panel area.
@@ -1263,7 +1264,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         }
 
         // Store current state into the preferences.
-        Option.set(hiddenColsPref, table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
     },
 
     onResetColumns: function(context)
@@ -1300,7 +1301,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
             if (!colId || !col.style)
                 continue;
 
-            var width = Options.get("firecookie." + colId + ".width");
+            var width = Options.get("cookies." + colId + ".width");
             if (width)
                 col.style.width = width + "px";
         }

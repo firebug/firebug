@@ -48,7 +48,7 @@ const networkPrefDomain = "network.cookie";
 const cookieBehaviorPref = "cookieBehavior";
 const cookieLifeTimePref = "lifetimePolicy";
 
-// Firecookie preferences
+// Cookies preferences
 const clearWhenDeny = "cookies.clearWhenDeny";
 const defaultExpireTime = "cookies.defaultExpireTime";
 const removeConfirmation = "cookies.removeConfirmation";
@@ -77,7 +77,7 @@ Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
 // Module Implementation
 
 /**
- * @module This class represents a <i>module</i> for Firecookie extension.
+ * @module This class represents a <i>module</i> for Cookies panel.
  * The module supports activation (enable/disable of the Cookies panel).
  * This functionality has been introduced in Firebug 1.2 and makes possible
  * to control activity of Firebug panels in order to avoid (performance) expensive
@@ -317,8 +317,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // The base class must be called after the context for Cookies panel is 
         // properly initialized. The panel can be created inside this function
         // (within Firebug.ActivableModule.enablePanel), which can result in
-        // calling FireCookiePanel.initialize method. This method directly calls
-        // FireCookiePanel.refresh, which needs the context.cookies object ready.
+        // calling CookiePanel.initialize method. This method directly calls
+        // CookiePanel.refresh, which needs the context.cookies object ready.
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
         // Unregister all observers if the panel is disabled.
@@ -612,7 +612,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         else if (!getURIHost(location))
             host = Locale.$STR("firecookie.LocalFiles");
 
-        // Translate these two options in panel activable menu from firecookie.properties
+        // Translate these two options in panel activable menu from cookies.properties
         switch (option)
         {
         case "disable-site":
@@ -624,8 +624,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return Firebug.ActivableModule.getMenuLabel.apply(this, arguments);
     },
 
-    // xxxHonza: This method is overriden just to provide translated strings from 
-    // firecookie.properties file.
+    // xxxHonza: This method is overriden just to provide translated strings from
+    // cookies.properties file.
     openPermissions: function(event, context)
     {
         Events.cancelEvent(event);
@@ -706,7 +706,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeConfirmation))
         {
             var check = {value: false};
-            if (!prompts.confirmCheck(context.chrome.window, "Firecookie",
+            if (!prompts.confirmCheck(context.chrome.window, "Firebug",
                 Locale.$STR("firecookie.confirm.removeall"),
                 Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
@@ -724,7 +724,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeSessionConfirmation))
         {
             var check = {value: false};
-            if (!prompts.confirmCheck(context.chrome.window, "Firecookie",
+            if (!prompts.confirmCheck(context.chrome.window, "Firebug",
                 Locale.$STR("firecookie.confirm.removeallsession"),
                 Locale.$STR("firecookie.msg.Do not show this message again"), check))
                 return;
@@ -869,8 +869,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         catch (err)
         {
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("firecookie.onExportAll EXCEPTION", err);
-            alert(err.toString());
+                FBTrace.sysout("cookies.onExportAll EXCEPTION", err);
         }
     },
 
@@ -919,8 +918,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         catch (err)
         {
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("firecookie.onExportForSite EXCEPTION", err);
-            alert(err.toString());
+                FBTrace.sysout("cookies.onExportForSite EXCEPTION", err);
         }
     },
 
