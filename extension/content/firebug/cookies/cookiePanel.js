@@ -13,6 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/array",
+    "firebug/lib/search",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieReps",
     "firebug/cookies/headerResizer",
@@ -23,7 +24,7 @@ define([
     "firebug/cookies/cookiePermissions",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr, Search,
     MenuUtils, CookieReps, HeaderResizer, CookieObserver, CookieUtils, Cookie, Breakpoints,
     CookiePermissions, CookieClipboard) {
 
@@ -338,7 +339,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.matchSet = [];
 
         function findRow(node) { return Dom.getAncestorByClass(node, "cookieRow"); }
-        var search = new TextSearch(this.panelNode, findRow);
+        var search = new Search.TextSearch(this.panelNode, findRow);
 
         var cookieRow = search.find(text);
         if (!cookieRow)
