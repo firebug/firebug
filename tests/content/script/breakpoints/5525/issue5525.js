@@ -25,7 +25,7 @@ function runTest()
 
             // Check content of the Breakpoints panel
             var panelNode = panel.panelNode;
-            var rows = panelNode..getElementsByClassName("breakpointRow");
+            var rows = panelNode.getElementsByClassName("breakpointRow");
             FBTest.compare(rows.length, 1, "There must be one breakpoint");
 
             // Finish test
