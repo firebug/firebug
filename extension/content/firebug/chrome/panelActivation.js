@@ -208,6 +208,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
         panelType.prototype.onActivationChanged(enable);
 
+        Firebug.chrome.$("fbPanelBar1").updateTab(panelType);
         Firebug.chrome.syncPanel();
     },
 
