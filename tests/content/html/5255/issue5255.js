@@ -36,7 +36,8 @@ function runTest()
                 var panelStatus = FW.Firebug.chrome.window.document.getElementById("fbPanelStatus");
                 var buttons = panelStatus.querySelectorAll("toolbarbutton");
 
-                if (FBTest.compare(5, buttons.length, "There must be 5 buttons"))
+                var length = buttons.length;
+                if (FBTest.compare(5, length, "There must be 5 buttons: " + length))
                 {
                     var labels = ["i", "section#content", "div", "body", "html"];
                     for (var i=0; i<buttons.length; i++)
