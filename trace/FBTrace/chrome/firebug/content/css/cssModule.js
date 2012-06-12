@@ -9,14 +9,19 @@ define([
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/xml",
+    "firebug/lib/options"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options) {
 
 // ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+const reSplitCSS = /(url\("?[^"\)]+"?\)?)|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
+const reURL = /url\("?([^"\)]+)?"?\)/;
+const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
 // CSS Module
@@ -51,9 +56,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 url.directory);
 
             if (ownerNode.hasAttribute("media"))
-            {
                 editStyleSheet.setAttribute("media", ownerNode.getAttribute("media"));
-            }
 
             // Insert the edited stylesheet directly after the old one to ensure the styles
             // cascade properly.
@@ -235,6 +238,177 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         }
     },
 
+    parseCSSValue: function(value, offset)
+    {
+        var start = 0;
+        var m;
+        while (true)
+        {
+            m = reSplitCSS.exec(value);
+            if (m && m.index+m[0].length < offset)
+            {
+                value = value.substr(m.index+m[0].length);
+                start += m.index+m[0].length;
+                offset -= m.index+m[0].length;
+            }
+            else
+                break;
+        }
+
+        if (!m)
+            return;
+
+        var type;
+        if (m[1])
+            type = "url";
+        else if (m[2] || m[4])
+            type = "rgb";
+        else if (m[3])
+            type = "hsl";
+        else if (m[5])
+            type = "int";
+
+        var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
+
+        if (!type)
+        {
+            if (m[10] && m[10].indexOf("gradient") != -1)
+            {
+                var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
+                if (!arg)
+                  return;
+
+                cssValue.value += arg[0];
+                cssValue.type = "gradient";
+            }
+            else if (Css.isColorKeyword(cssValue.value))
+            {
+                cssValue.type = "colorKeyword";
+            }
+        }
+
+        return cssValue;
+    },
+
+    parseCSSFontFamilyValue: function(value, offset, propName)
+    {
+        var skipped = 0;
+        if (propName === "font")
+        {
+            var rePreFont = new RegExp(
+                "^.*" + // anything, then
+                "(" +
+                    "\\d+(\\.\\d+)?([a-z]*|%)|" + // a number (with possible unit)
+                    "(x{1,2}-)?(small|large)|medium|larger|smaller" + // or an named size description
+                ") "
+            );
+            var m = rePreFont.exec(value);
+            if (!m || offset < m[0].length)
+                return this.parseCSSValue(value, offset);
+            skipped = m[0].length;
+            value = value.substr(skipped);
+            offset -= skipped;
+        }
+
+        var matches = /^(.*?)(\s*!.*)?$/.exec(value);
+        var fonts = matches[1].split(",");
+
+        var totalLength = 0;
+        for (var i = 0; i < fonts.length; ++i)
+        {
+            totalLength += fonts[i].length;
+            if (offset <= totalLength)
+            {
+                // Give back the value and location of this font, whitespace-trimmed.
+                var font = fonts[i].replace(/^\s+/, "");
+                var end = totalLength;
+                var start = end - font.length;
+                return {
+                    value: font,
+                    start: start + skipped,
+                    end: end + skipped,
+                    type: "fontFamily"
+                };
+            }
+
+            // include ","
+            ++totalLength;
+        }
+
+        // Parse !important.
+        var ret = this.parseCSSValue(value, offset);
+        if (ret)
+        {
+            ret.start += skipped;
+            ret.end += skipped;
+        }
+        return ret;
+    },
+
+    parseURLValue: function(value)
+    {
+        var m = reURL.exec(value);
+        return m ? m[1] : "";
+    },
+
+    parseRepeatValue: function(value)
+    {
+        var m = reRepeat.exec(value);
+        return m ? m[0] : "";
+    },
+
+    getPropertyInfo: function(computedStyle, propName)
+    {
+        var propInfo = {
+            property: propName,
+            value: computedStyle.getPropertyValue(propName),
+            matchedSelectors: [],
+            matchedRuleCount: 0
+        };
+
+        return propInfo;
+    },
+
+    getColorDisplayOptionMenuItems: function()
+    {
+        return [
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: function() {
+                    return Options.set("colorDisplay", "hex");
+                },
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: function() {
+                    return Options.set("colorDisplay", "rgb");
+                },
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: function() {
+                    return Options.set("colorDisplay", "hsl");
+                },
+                checked: Options.get("colorDisplay") == "hsl"
+            }
+        ];
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module functions
 
@@ -304,7 +478,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     destroyContext: function(context)
     {
         this.removeListener(context.dirtyListener);
-    },
+    }
 });
 
 // ********************************************************************************************* //

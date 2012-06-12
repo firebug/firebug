@@ -17,9 +17,10 @@ define([
     "firebug/lib/events",
     "firebug/js/fbs",
     "firebug/chrome/window",
+    "firebug/lib/options",
 ],
 function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
-    Events, FBS, Win) {
+    Events, FBS, Win, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -319,8 +320,12 @@ var FirebugChrome =
 
         if (name == "textSize")
             this.applyTextSize(value);
-        if (name =="omitObjectPathStack")
+
+        if (name == "omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
+
+        if (name == "viewPanelOrient")
+            this.updateOrient(value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1023,14 +1028,21 @@ var FirebugChrome =
 
     toggleOrient: function(preferredValue)
     {
-        var panelPane = FirebugChrome.$("fbPanelPane");
-        if(panelPane.orient == preferredValue)
+        var value = Options.get("viewPanelOrient");
+        if (value == preferredValue)
             return;
-        var newValue = panelPane.orient == "vertical" ? "horizontal" : "vertical";
-        panelSplitter.orient = panelPane.orient = newValue;
 
-        var option = FirebugChrome.$("menu_toggleOrient").getAttribute("option");
-        Firebug.Options.set(option, newValue == "vertical");
+        Options.togglePref("viewPanelOrient");
+    },
+
+    updateOrient: function(value)
+    {
+        var panelPane = FirebugChrome.$("fbPanelPane");
+        var newOrient = value ? "vertical" : "horizontal";
+        if (panelPane.orient == newOrient)
+            return;
+
+        panelSplitter.orient = panelPane.orient = newOrient;
     },
 
     setPosition: function(pos)
@@ -1632,7 +1644,7 @@ var FirebugChrome =
         try
         {
             // Firefox 4.0+ implements a new AddonManager. In case of Firefox 3.6 the module
-            // is not avaialble and there is an exception.
+            // is not available and there is an exception.
             Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
         }
         catch (err)
@@ -1661,7 +1673,7 @@ var FirebugChrome =
     breakOnNext: function(context, event)
     {
         // Avoid bubbling from associated options.
-        if (event.target.id != "cmd_breakOnNext")
+        if (event.target.id != "cmd_toggleBreakOn")
             return;
 
         if (!context)
@@ -1727,7 +1739,7 @@ function getBestPanelName(object, context, panelName)
     if (!panelName && context)
         panelName = context.panelName;
 
-    // Check, if the panel type of the suggested panel supports the object, and if so, go with it
+    // Check if the panel type of the suggested panel supports the object, and if so, go with it
     if (panelName)
     {
         var panelType = Firebug.getPanelType(panelName);

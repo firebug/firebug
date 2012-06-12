@@ -48,7 +48,7 @@ function createFirebugCommandLine(context, win)
         var command = commands[i];
 
         // If the method is already defined, don't override it.
-        if (contentView[command])
+        if (command in contentView)
             continue;
 
         function createCommandHandler(cmd) {
@@ -68,7 +68,7 @@ function createFirebugCommandLine(context, win)
         var command = consoleShortcuts[i];
 
         // If the method is already defined, don't override it.
-        if (contentView[command])
+        if (command in contentView)
             continue;
 
         function createShortcutHandler(cmd) {
@@ -86,7 +86,7 @@ function createFirebugCommandLine(context, win)
     for (var i=0; i<props.length; i++)
     {
         var prop = props[i];
-        if (contentView[prop])
+        if (prop in contentView)
             continue;
 
         function createVariableHandler(prop) {
@@ -147,7 +147,11 @@ function createFirebugCommandLine(context, win)
     {
         try
         {
-            var result = FirebugEvaluate(expr, contentView);
+            var line = Components.stack.lineNumber;
+            var result = contentView.eval(expr);
+
+            // See Issue 5221
+            //var result = FirebugEvaluate(expr, contentView);
             notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
         catch(exc)
@@ -155,9 +159,9 @@ function createFirebugCommandLine(context, win)
             // change source and line number of exeptions from commandline code
             // create new error since properties of nsIXPCException are not modifiable
             var shouldModify, isXPCException;
-            if (exc.filename == evalFileSrc)
+            if (exc.filename == Components.stack.filename)
                 shouldModify = isXPCException = true;
-            else if (exc.fileName == evalFileSrc)
+            else if (exc.fileName == Components.stack.filename)
                 shouldModify = true;
 
             if (shouldModify)
@@ -166,7 +170,7 @@ function createFirebugCommandLine(context, win)
                 result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
-                result.lineNumber = exc.lineNumber;
+                result.lineNumber = exc.lineNumber - line;
                 result.fileName = "data:," + encodeURIComponent(expr);
                 if(!isXPCException)
                     result.name = exc.name;
@@ -213,14 +217,14 @@ function createFirebugCommandLine(context, win)
     return commandLine;
 };
 
-
+/* see Issue 5221
 // chrome: urls are filtered out by debugger, so we create script with a data url
 // to get eval sequences in location list and 0 error ofsets
 const evalFileSrc = "data:text/javascript,FirebugEvaluate=function(t,w)w.eval(t)";
 var script = document.createElementNS("http://www.w3.org/1999/xhtml", "script")
 script.src = evalFileSrc;
 document.documentElement.appendChild(script);
-
+*/
 
 // ********************************************************************************************* //
 // Registration

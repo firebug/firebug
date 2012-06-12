@@ -132,7 +132,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         //manage all key events in toolbox (including tablists)
         tmpElem = chrome.$("fbContentBox");
         if (tmpElem)
-            Events.addEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
+            Events.addEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress, true);
 
         //make focus stick to inspect button when clicked
         tmpElem = chrome.$("fbInspectButton");
@@ -175,7 +175,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
-            Events.removeEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
+            Events.removeEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress, true);
 
         tmpElem = chrome.$("fbInspectButton");
         if (tmpElem)
@@ -788,7 +788,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         var newTarget = target
         if (!this.isOuterFocusRow(target))
         {
-            if (event.ctrlKey)
+            if (Events.isControl(event))
             {
                 newTarget = this.getAncestorRow(target);
                 if (newTarget)
@@ -828,7 +828,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                     {
                         if (Css.hasClass(row, "opened"))
                         {
-                            this.focusSiblingRow(panel, target , false);
+                            this.focusSiblingRow(panel, target, false);
                         }
                         else if (toggleElem)
                         {
@@ -920,7 +920,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                         var focusItems = this.getFocusObjects(target);
                         if (focusItems.length > 0)
                         {
-                            this.focus(event.ctrlKey ?
+                            this.focus(Events.isControl(event) ?
                                 focusItems[focusItems.length -1] : focusItems[0]);
                         }
                     }
@@ -929,7 +929,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 {
                     var parentRow = this.getAncestorRow(target, true);
                     var focusObjects = this.getFocusObjects(parentRow);
-                    if (!event.ctrlKey)
+                    if (!Events.isControl(event))
                     {
                         var focusIndex = Array.indexOf(focusObjects, target);
                         var newIndex = goLeft ? --focusIndex : ++focusIndex;
@@ -1278,7 +1278,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             case Node.ATTRIBUTE_NODE:
                 elem = node.ownerElement;
                 matchFeedback += Locale.$STRF("a11y.updates.match found in attribute",
-                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName,
+                    [match.match[0], node.name, node.value, elem.nodeName,
                         Xpath.getElementTreeXPath(elem)]);
                 break;
 
@@ -1402,7 +1402,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             case KeyEvent.DOM_VK_UP:
             case KeyEvent.DOM_VK_DOWN:
                 var goUp = keyCode == 38;
-                if (event.ctrlKey)
+                if (Events.isControl(event))
                 {
                     if (event.shiftKey)
                     {
@@ -1422,7 +1422,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
             case KeyEvent.DOM_VK_END:
             case KeyEvent.DOM_VK_HOME:
-                if (event.ctrlKey)
+                if (Events.isControl(event))
                     this.focusEdgeHeadRow(panel, target, keyCode == 36);
                 else
                     this.focusEdgeCSSRow(panel, target, keyCode == 36);
@@ -1430,7 +1430,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
             case KeyEvent.DOM_VK_PAGE_UP:
             case KeyEvent.DOM_VK_PAGE_DOWN:
-                if (event.ctrlKey)
+                if (Events.isControl(event))
                     this.focusPageSiblingHeadRow(panel, target, keyCode == 33);
                 else
                     this.focusPageSiblingCSSRow(panel, target, keyCode == 33);
@@ -2059,7 +2059,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             case KeyEvent.DOM_VK_DOWN:
                 goUp = (keyCode == KeyEvent.DOM_VK_UP);
                 linesToScroll = goUp ? -1 : 1;
-                if (!event.ctrlKey)
+                if (!Events.isControl(event))
                 {
                     if ((goUp && lineNo > firstLineNo + 1) ||
                         (!goUp && lineNo < lastLineNo - 1))
@@ -2093,7 +2093,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             case KeyEvent.DOM_VK_HOME:
             case KeyEvent.DOM_VK_END:
                 goUp = (keyCode == KeyEvent.DOM_VK_HOME);
-                if (event.ctrlKey)
+                if (Events.isControl(event))
                 {
                     box.a11yCaretLine = goUp ? 0 : box.totalMax;
                     box.a11yCaretOffset = 0;

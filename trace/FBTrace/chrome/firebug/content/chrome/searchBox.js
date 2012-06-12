@@ -99,7 +99,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
     update: function(context, immediate, reverse)
     {
         var panel = Firebug.chrome.getSelectedPanel();
-        if (!panel.searchable)
+        if (!panel || !panel.searchable)
             return;
 
         var searchBox = Firebug.chrome.$("fbSearchBox");

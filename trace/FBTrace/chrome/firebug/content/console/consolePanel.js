@@ -451,7 +451,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!rep)
             rep = Firebug.getRep(object, this.context);
 
-        // Don't forget to pass the template itself as the 'self' parameter so, it's used
+        // Don't forget to pass the template itself as the 'self' parameter so that it's used
         // by domplate as the 'subject' for the generation. Note that the primary purpose
         // of the subject is to provide a context object ('with (subject) {...}') for data that
         // are dynamically consumed during the rendering process.

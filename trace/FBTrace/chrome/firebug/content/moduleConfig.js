@@ -56,7 +56,10 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/net/spy",
         "firebug/js/tabCache",
         "firebug/chrome/activation",
-        "firebug/css/cssComputedElementPanel",
+        "firebug/css/stylePanel",
+        "firebug/css/computedPanel",
+        "firebug/cookies/cookieModule",
+        "firebug/cookies/cookiePanel",
     ];
 
     return config;
@@ -82,7 +85,7 @@ Firebug.registerExtension = function(extName, extConfig)
     var tempConfig = this.getExtensionConfig(extName);
     if (tempConfig)
     {
-        FBTrace.sysout("firebug.registerExtension; ERROR An extenstion with the same ID " +
+        FBTrace.sysout("firebug.registerExtension; ERROR An extension with the same ID " +
             "already exists! - " + extName, tempConfig);
         return;
     }

@@ -20,8 +20,6 @@ const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 const prefs = PrefService.getService(nsIPrefBranch2);
 
-const getPref = Components.utils.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
-
 const prefNames =  // XXXjjb TODO distribute to modules
 [
     // Global
@@ -53,9 +51,12 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "onlyShowAppliedStyles",
     "showUserAgentCSS",
     "expandShorthandProps",
+    "cssEditMode",
+    "colorDisplay",
+
+    // Computed
     "computedStylesDisplay",
     "showMozillaSpecificStyles",
-    "cssEditMode",
 
     // Script
     "decompileEvals", "replaceTabs", "maxScriptLineLength",
@@ -237,7 +238,26 @@ var Options =
         return Options.getPref(this.prefDomain, name);
     },
 
-    getPref: getPref,
+    getPref: function(prefDomain, name)
+    {
+        var prefName = prefDomain + "." + name;
+
+        var type = prefs.getPrefType(prefName);
+
+        var value;
+        if (type == nsIPrefBranch.PREF_STRING)
+            value = prefs.getCharPref(prefName);
+        else if (type == nsIPrefBranch.PREF_INT)
+            value = prefs.getIntPref(prefName);
+        else if (type == nsIPrefBranch.PREF_BOOL)
+            value = prefs.getBoolPref(prefName);
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("options.getPref "+prefName+" has type "+
+                this.getPreferenceTypeName(type)+" and value "+value);
+
+        return value;
+    },
 
     set: function(name, value)
     {

@@ -259,7 +259,7 @@ StackFrame.StackFrame.prototype =
 
     clearScopes: function(viewChrome)
     {
-        // Clears cached scope chain and so, it can be regenerated the next time
+        // Clears cached scope chain, so that it regenerates the next time
         // getScopes() is executed.
         this.scope = null;
     },
@@ -350,6 +350,13 @@ StackFrame.parseToStackFrame = function(line, context) // function name (arg, ar
             //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
             //var params = JSON.parse("["+m2[2]+"]");
             return new StackFrame.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
+        }
+        else
+        {
+            // Firefox 14 removes arguments from <exception-object>.stack.toString()
+            // That's why the m2 reg doesn't match
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=744842
+            return new StackFrame.StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
         }
     }
 }

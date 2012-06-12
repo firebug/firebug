@@ -22,7 +22,8 @@ var cmdLineHandler = Cc["@mozilla.org/commandlinehandler/general-startup;1?type=
 
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
-var getPref = Cu.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
+Cu.import("resource://firebug/prefLoader.js");
+var getPref = PrefLoader.getPref;
 
 Cu.import("resource://firebug/fbtrace.js");
 

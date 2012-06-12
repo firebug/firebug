@@ -366,7 +366,17 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
-            error.correctWithStackTrace(Firebug.errorStackTrace);
+            // Firebug.errorStackTrace is set in onError (JSD hook).
+            // However it can happen that the stack trace doesn't belong to the error
+            // happening here (e.g. onError is not executed for throws).
+            // So, use the url and line number to check whether the remembered stack
+            // corresponds to what the current error says (see issue 5400).
+            // Note that this can exclude come stacks:
+            // see https://bugzilla.mozilla.org/show_bug.cgi?id=703519
+            var trace = Firebug.errorStackTrace;
+            var frame = (trace.frames && trace.frames[0]) ? trace.frames[0] : null;
+            if (frame && frame.href == error.href && frame.line == error.lineNo)
+                error.correctWithStackTrace(trace);
         }
         else if (checkForUncaughtException(context, object))
         {
@@ -442,7 +452,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return false;
 
-                // If the error's parent widow is available, check if it
+                // If the error's parent window is available, check if it
                 // corresponds to the context.window. If not bail out to avoid
                 // error reporting in a wrong window.
                 var errorWindow = getErrorWindow(object);
@@ -853,7 +863,7 @@ function checkForUncaughtException(context, object)
 
 /**
  * Returns a parent window (outer window) for given error object (an object
- * that is passed int a consoleListener).
+ * that is passed to a consoleListener).
  * This method should be the primary way how to find the parent window for any
  * error object.
  *
@@ -864,7 +874,7 @@ function getErrorWindow(object)
     try
     {
         // nsIScriptError2 is merged into nsIScriptError in Firefox 12 (bug
-        // 711721), so check the two interfaces in order.
+        // 711721), so check for the one that is relevant.
         var why;
         if (object instanceof (Ci["nsIScriptError2"] || Ci["nsIScriptError"]))
         {

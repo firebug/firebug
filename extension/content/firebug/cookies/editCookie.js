@@ -20,6 +20,7 @@ const windowMediator = Cc["@mozilla.org/appshell/window-mediator;1"].getService(
 const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // ********************************************************************************************* //
 
@@ -117,7 +118,7 @@ EditCookie.prototype =
     onOK: function()
     {
         if (!this.checkValues())
-            return;
+            return false;
 
         var isSession = this.sessionNode.checked;
         var host = this.domainNode.value;
@@ -164,6 +165,8 @@ EditCookie.prototype =
 
         // Close dialog.
         this.window.close();
+
+        return true;
     },
 
     /**
@@ -174,21 +177,24 @@ EditCookie.prototype =
         var name = this.nameNode.value;
         if (!name)
         {
-            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidname"));
+            prompts.alert(this.window, Locale.$STR("Firebug"),
+                Locale.$STR("firecookie.edit.invalidname"));
             return false;
         }
 
         var domain = this.domainNode.value;
         if (!this.checkHost(domain))
         {
-            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidhost"));
+            prompts.alert(this.window, Locale.$STR("Firebug"),
+                Locale.$STR("firecookie.edit.invalidhost"));
             return false;
         }
 
         var path = this.pathNode.value;
         if (!this.checkPath(domain, path))
         {
-            alert(Firebug.CookieModule.$FC_STR("firecookie.edit.invalidpath"));
+            prompts.alert(this.window, Locale.$STR("Firebug"),
+                Locale.$STR("firecookie.edit.invalidpath"));
             return false;
         }
 

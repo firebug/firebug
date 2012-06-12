@@ -75,6 +75,7 @@ var FirebugChrome =
      */
     initialize: function()
     {
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -292,6 +293,21 @@ var FirebugChrome =
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.shutdown; Done for " + win.location);
+    },
+
+    /**
+     * Checking first window in back order, (Most recent window). is itself firebug ?
+     */
+    hasFocus: function()
+    {
+        try
+        {
+            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+        }
+        catch(ex)
+        {
+            return false;
+        }
     },
 
     appendStylesheet: function(uri)
@@ -1854,6 +1870,7 @@ function onBlur(event)
     // XXXhh Is this really necessary? I disabled it for now as this was preventing me
     // to show highlights on focus
     //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
+
 }
 
 function onSelectLocation(event)

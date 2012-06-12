@@ -89,7 +89,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                     " for "+uri.spec+" in "+browser.contentWindow.location +
                     " using activateSameOrigin: "+Firebug.activateSameOrigin);
 
-            // Annotated so, return the value.
+            // Annotated, so return the value.
             if (hasAnnotation)
                 return this.checkAnnotation(browser, uri);
 
@@ -221,12 +221,13 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 var host = shortURI.host;
                 if (host)
                 {
-                    // Slice the subdomain (if any) from the URL so, activateSameOrigin works for
-                    // domains (including TLD domains). So we want:
+                    // Slice the subdomain (if any) from the URL so that activateSameOrigin works
+                    // for domains (including TLD domains). So we want:
                     // 1) www.google.com -> google.com
                     // 2) www.stuff.co.nz -> stuff.co.nz
                     // 3) getfirebug.com -> getfirebug.com
-                    // 4) xxxHonza: what about: mail.cn.mozilla.com -> mozilla.com ?
+                    // (XXX: This makes a.co.uk -> co.uk and mail.cn.mozilla.com -> cn.mozilla.com,
+                    // which is wrong. See issue 2202.)
                     var levels = host.split('.');
                     if (levels.length > 2)
                         levels = levels.slice(1);

@@ -2,6 +2,7 @@
 <!-- See license.txt for terms of usage -->
 
 <?xul-overlay href="firefox/firebugMenuOverlay.xul"?>
+<?xul-overlay href="chrome://firebug/content/cookies/cookiePanel.xul"?>
 
 <?xml-stylesheet href="firebug.css"?>
 
@@ -139,7 +140,7 @@
                                     <!-- Break On Next -->
                                     <hbox id="fbBonButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbBreakOnNextButton"
-                                            command="cmd_breakOnNext"
+                                            command="cmd_toggleBreakOn"
                                             tooltiptext="script.Break On Next" breakable="disabled"
                                             class="fbInternational">
                                             <stack id="fbBreakOnNextButtonStack">

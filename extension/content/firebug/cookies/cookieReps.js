@@ -13,6 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/lib/array",
+    "firebug/lib/system",
     "firebug/cookies/baseObserver",
     "firebug/cookies/menuUtils",
     "firebug/cookies/cookieUtils",
@@ -23,7 +24,7 @@ define([
     "firebug/cookies/editCookie",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
+function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr, System,
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
     CookiePermissions, EditCookie, CookieClipboard) {
 
@@ -60,7 +61,7 @@ const panelName = "cookies";
 var CookieReps = {};
 
 /**
- * @domplate Basic template for all Firecookie CookieReps.
+ * @domplate Basic template for Cookies panel UI.
  */
 CookieReps.Rep = domplate(Firebug.Rep,
 {
@@ -438,7 +439,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 text += row.repObject.toString() + "\n";
         }
 
-        copyToClipboard(text);
+        System.copyToClipboard(text);
     },
 
     onPaste: function(clickedCookie) // clickedCookie can be null if the user clicks within panel area.
@@ -500,7 +501,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onClearValue;", cookie);
 
-        var newCookie = new Firebug.CookieModule.Cookie(cookie.cookie);
+        var newCookie = new Cookie(cookie.cookie);
         newCookie.cookie.rawValue = "";
         Firebug.CookieModule.createCookie(newCookie);
     },
@@ -857,15 +858,18 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
         return "";
     },
 
-    getName: function(cookieEvent) {
+    getName: function(cookieEvent)
+    {
         return cookieEvent.cookie.name;
     },
 
-    getValue: function(cookieEvent) {
+    getValue: function(cookieEvent)
+    {
         return Str.cropString(cookieEvent.cookie.value, 75);
     },
 
-    getDomain: function(cookieEvent) {
+    getDomain: function(cookieEvent)
+    {
         return cookieEvent.cookie.host;
     },
 
@@ -1012,40 +1016,58 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                     TD({id: "cookieBreakpointBar", width: "1%", "class": "cookieHeaderCell"},
                         "&nbsp;"
                     ),
-                    TD({id: "colName", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.name.tooltip")}, 
+                    TD({id: "colName", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.name.tooltip")},
                         Locale.$STR("firecookie.header.name"))
                     ),
-                    TD({id: "colValue", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.value.tooltip")}, 
+                    TD({id: "colValue", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.value.tooltip")}, 
                         Locale.$STR("firecookie.header.value"))
                     ),
-                    TD({id: "colDomain", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.domain.tooltip")}, 
+                    TD({id: "colDomain", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.domain.tooltip")}, 
                         Locale.$STR("firecookie.header.domain"))
                     ),
-                    TD({id: "colSize", "class": "cookieHeaderCell"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.size.tooltip")}, 
+                    TD({id: "colSize", role: "columnheader",
+                        "class": "cookieHeaderCell a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.size.tooltip")}, 
                         Locale.$STR("firecookie.header.size"))
                     ),
-                    TD({id: "colPath", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.path.tooltip")}, 
+                    TD({id: "colPath", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.path.tooltip")}, 
                         Locale.$STR("firecookie.header.path"))
                     ),
-                    TD({id: "colExpires", "class": "cookieHeaderCell"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.expires.tooltip")}, 
+                    TD({id: "colExpires", role: "columnheader",
+                        "class": "cookieHeaderCell a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.expires.tooltip")}, 
                         Locale.$STR("firecookie.header.expires"))
                     ),
-                    TD({id: "colHttpOnly", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.httponly.tooltip")}, 
+                    TD({id: "colHttpOnly", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.httponly.tooltip")}, 
                         Locale.$STR("firecookie.header.httponly"))
                     ),
-                    TD({id: "colSecurity", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.security.tooltip")}, 
+                    TD({id: "colSecurity", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.security.tooltip")}, 
                         Locale.$STR("firecookie.header.security"))
                     ),
-                    TD({id: "colStatus", "class": "cookieHeaderCell alphaValue"},
-                        DIV({"class": "cookieHeaderCellBox", title: Locale.$STR("firecookie.header.status.tooltip")}, 
+                    TD({id: "colStatus", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("firecookie.header.status.tooltip")}, 
                         Locale.$STR("firecookie.header.status"))
                     )
                 )
@@ -1245,7 +1267,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         }
 
         // Store current state into the preferences.
-        Option.set(hiddenColsPref, table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
     },
 
     onResetColumns: function(context)
@@ -1282,7 +1304,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
             if (!colId || !col.style)
                 continue;
 
-            var width = Options.get("firecookie." + colId + ".width");
+            var width = Options.get("cookies." + colId + ".width");
             if (width)
                 col.style.width = width + "px";
         }

@@ -9,7 +9,10 @@ var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
-var EXPORTED_SYMBOLS = [];
+var EXPORTED_SYMBOLS = ["PrefLoader"];
+
+var PrefLoader = {};
+PrefLoader.prefDomain = "extensions.firebug.";
 
 // ********************************************************************************************* //
 // Implementation
@@ -31,7 +34,7 @@ function loadDefaultPrefs(path, fileName)
         if (path.isDirectory())
             uri = Services.io.newURI("defaults/preferences/" + fileName, null, baseURI).spec;
         else
-            uri = "jar:" + baseURI.spec + "!/defaults/preferences/prefs.js";
+            uri = "jar:" + baseURI.spec + "!/defaults/preferences/" + fileName;
 
         // Load preference file and use 'pref' function to define all prefs.
         Services.scriptloader.loadSubScript(uri, {pref: pref});
@@ -39,6 +42,26 @@ function loadDefaultPrefs(path, fileName)
     catch (err)
     {
         Cu.reportError(err);
+    }
+}
+
+// ********************************************************************************************* //
+
+/**
+ * Clear preferences that are not modified by the user. This is requirement
+ * (or recommendation?) from AMO reviewers.
+ *
+ * @param {Object} domain
+ */
+function clearDefaultPrefs(domain)
+{
+    var pb = Services.prefs.getDefaultBranch(domain);
+
+    var names = pb.getChildList("");
+    for each (var name in names)
+    {
+        if (!pb.prefHasUserValue(name))
+            pb.deleteBranch(name);
     }
 }
 
@@ -53,24 +76,79 @@ function loadDefaultPrefs(path, fileName)
  */
 function pref(name, value)
 {
-    var branch = Services.prefs.getDefaultBranch("");
-
-    switch (typeof value)
+    try
     {
-        case "boolean":
-            branch.setBoolPref(name, value);
-            break;
+        var branch = Services.prefs.getDefaultBranch("");
 
-        case "number":
-            branch.setIntPref(name, value);
-            break;
+        switch (typeof value)
+        {
+            case "boolean":
+                branch.setBoolPref(name, value);
+                break;
 
-        case "string":
-            var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-            str.data = value;
-            branch.setComplexValue(name, Ci.nsISupportsString, str);
-            break;
+            case "number":
+                branch.setIntPref(name, value);
+                break;
+
+            case "string":
+                var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                str.data = value;
+                branch.setComplexValue(name, Ci.nsISupportsString, str);
+                break;
+        }
+    }
+    catch (e)
+    {
+        Cu.reportError("prefLoader.pref; Firebug can't set default pref value for: " + name);
     }
 }
+
+// ********************************************************************************************* //
+// Duplicates firebug/lib/options
+
+var prefTypeMap = (function()
+{
+    var map = {}, br = Ci.nsIPrefBranch;
+    map["string"] = map[br.PREF_STRING] = "CharPref";
+    map["boolean"] = map[br.PREF_BOOL] = "BoolPref";
+    map["number"] = map[br.PREF_INT] = "IntPref";
+    return map;
+})();
+
+function getPref(prefDomain, name)
+{
+    var prefName;
+    if (name == undefined)
+        prefName = PrefLoader.prefDomain + prefDomain;
+    else
+        prefName = prefDomain + "." + name;
+
+    var prefs = Services.prefs;
+    var type = prefTypeMap[prefs.getPrefType(prefName)];
+    if (type)
+        var value = prefs["get" + type](prefName);
+
+    return value;
+}
+
+function setPref(name, value)
+{
+    var prefName = PrefLoader.prefDomain + name;
+    var prefs = Services.prefs;
+
+    var type = prefTypeMap[typeof value];
+    if (type)
+        value = prefs["set" + type](prefName, value);
+
+    return value;
+}
+
+// ********************************************************************************************* //
+// Registration
+
+PrefLoader.loadDefaultPrefs = loadDefaultPrefs;
+PrefLoader.clearDefaultPrefs = clearDefaultPrefs;
+PrefLoader.getPref = getPref;
+PrefLoader.setPref = setPref;
 
 // ********************************************************************************************* //

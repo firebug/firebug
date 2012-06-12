@@ -11,7 +11,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/lib/dom",
-    "firebug/chrome/menu",
+    "firebug/chrome/menu"
 ],
 function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Menu) {
@@ -203,21 +203,25 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
         Css.setClass(this.panelNode, "objectBox-stackTrace");
 
-        if (!trace)
-            return;
+        if (trace && trace.frames.length != 0)
+        {
+            var rep = Firebug.getRep(trace, this.context);
 
-        var rep = Firebug.getRep(trace, this.context);
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("callstack showStackFrame with "+trace.frames.length+" frames using "
+                    +rep+" into "+this.panelNode, {trace: trace, rep:rep, node:this.panelNode});
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack showStackFrame with "+trace.frames.length+" frames using "
-                +rep+" into "+this.panelNode, {trace: trace, rep:rep, node:this.panelNode});
+            rep.tag.replace({object:trace}, this.panelNode);
 
-        rep.tag.replace({object:trace}, this.panelNode);
+            if (trace.currentFrameIndex)
+                this.select(trace[trace.currentFrameIndex]);
 
-        if (trace.currentFrameIndex)
-            this.select(trace[trace.currentFrameIndex]);
-
-        Events.dispatch(this.fbListeners, "onStackCreated", [this]);
+            Events.dispatch(this.fbListeners, "onStackCreated", [this]);
+        }
+        else
+        {
+            FirebugReps.Warning.tag.replace({object: "callstack.Execution_not_stopped"}, this.panelNode);
+        }
     },
 
     selectFrame: function(frameIndex)

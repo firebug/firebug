@@ -83,7 +83,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
+                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
                 return row;
             }
         }
@@ -115,7 +115,7 @@ Firebug.ConsoleBase =
 
         if (context)
         {
-            // There could be some logs waiting in the throttle queue so,
+            // There could be some logs waiting in the throttle queue, so
             // clear asynchronously after the queue is flushed.
             context.throttle(this.clearPanel, this, [context]);
 
@@ -199,8 +199,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initialize: function()
     {
-        Firebug.consoleFilterTypes = "";
-
         // Initialize log limit.
         this.updateMaxLimit();
 

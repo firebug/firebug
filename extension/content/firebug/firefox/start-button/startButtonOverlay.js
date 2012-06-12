@@ -7,7 +7,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
-    "firebug/lib/options",
+    "firebug/lib/options"
 ],
 function(Obj, Firebug, Firefox, Locale, Events, Dom, Options) {
 
@@ -116,31 +116,25 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     getEnablementStatus: function()
     {
-        var strOn = Locale.$STR("enablement.on");
-        var strOff = Locale.$STR("enablement.off");
-
-        var status = "";
         var firebugStatus = Firefox.getElementById("firebugStatus");
 
         if (!firebugStatus)
             return;
 
-        if (firebugStatus.getAttribute("console") == "on")
-            status += "Console: " + strOn + ",";
-        else
-            status += "Console: " + strOff + ",";
+        var panels = Firebug.getActivablePanelTypes();
+        var statuses = [];
+        var status = "";
 
-        if (firebugStatus.getAttribute("script") == "on")
-            status += " Script: " + strOn;
-        else
-            status += " Script: " + strOff + "";
+        var strOn = Locale.$STR("enablement.on");
+        var strOff = Locale.$STR("enablement.off");
 
-        if (firebugStatus.getAttribute("net") == "on")
-            status += " Net: " + strOn + ",";
-        else
-            status += " Net: " + strOff + ",";
+        for (var i = 0; i < panels.length; ++i)
+        {
+            status = firebugStatus.getAttribute(panels[i].prototype.name) == "on" ? strOn : strOff;
+            statuses.push(Locale.$STRF("panel.status", [Firebug.getPanelTitle(panels[i]), status]));
+        }
 
-        return status;
+        return statuses.join(", ");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1360,7 +1360,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         TR({"role": "presentation"},
             TD({colspan: 2, "role": "presentation"},
                 FOR("line", "$param|getParamValueIterator",
-                    CODE({"class":"focusRow subFocusRow" , "role": "listitem"}, "$line")
+                    CODE({"class":"focusRow subFocusRow", "role": "listitem"}, "$line")
                 )
             )
         ),
