@@ -16,7 +16,7 @@ function runTest()
             FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
             // Create error breakpoint
-            var br = row.querySelector(".errorBreak");
+            var br = row.getElementsByClassName("errorBreak")[0];
             FBTest.click(br);
 
             // Switch to the Script and Breakpoints panels.
@@ -25,7 +25,7 @@ function runTest()
 
             // Check content of the Breakpoints panel
             var panelNode = panel.panelNode;
-            var rows = panelNode.querySelectorAll(".breakpointRow");
+            var rows = panelNode..getElementsByClassName("breakpointRow");
             FBTest.compare(rows.length, 1, "There must be one breakpoint");
 
             // Finish test
