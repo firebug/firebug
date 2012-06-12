@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5525: Setting error breakpoints causes error in Breakpoints side panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="text/javascript">
+var test = undefinedVariable;
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5525">Issue 5525</a>:
+        Setting error breakpoints causes error in Breakpoints side panel</h1>
+</header>
+<div>
+<section id="description">
+    <h3>Steps to reproduce</h3>
+    <ol>
+        <li>Open Firebug</li>
+        <li>Enable the <em>Script</em> and the <em>Console</em> panel, reload the page
+            and switch to the <em>Console</em> panel</li>
+        <li><span>The console should display a syntax error:
+            <code>undefinedVariable is not defined</code></span>
+        </li>
+        <li>Click the breakpoint besides the code sample</li>
+        <li>Switch to the <em>Script</em> panel and there to the <em>Breakpoints</em>
+        side panel</li>
+        <li>The <em>Breakpoints</em> side panel should show one breakpoint entry.</li>
+    </ol>
+</section>
+<footer>Jan Odvarko, odvarko@gmail.com</footer>
+</div>
+</body>
+</html>
