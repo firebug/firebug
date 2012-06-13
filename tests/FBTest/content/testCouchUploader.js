@@ -233,7 +233,7 @@ FBTestApp.TestCouchUploader =
 /** @namespace */
 var CouchDB =
 {
-    uri: "http://brasstacks.mozilla.com/couchdb/firebug/",
+    uri: Firebug.getPref("extensions.fbtest", "databaseURL"),
 
     saveDoc: function(doc, options)
     {
@@ -328,7 +328,15 @@ function toJSON(obj)
 
 function parseJSON(data)
 {
-    return JSON.parse(data);
+    try
+    {
+        return JSON.parse(data);
+    }
+    catch (e)
+    {
+        FBTrace.sysout("testCouchUploader.parseJSON; EXCEPTION " + e, e);
+        FBTrace.sysout("testCouchUploader.parseJSON; Data ", data);
+    }
 }
 
 // ************************************************************************************************
