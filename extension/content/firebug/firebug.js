@@ -776,15 +776,12 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
-        var webApp = Firebug.connection.getCurrentSelectedWebApp();
-        var context = Firebug.connection.getContextByWebApp(webApp);
-        if (!context)  // then we are not debugging the selected tab
+
+        if (!Firebug.currentContext)
         {
-            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
-            forceOpen = true;  // Be sure the UI is open for a newly created context
-        }
-        else  // we were debugging
-        {
+            var context = Firebug.getContext();
+            // Be sure the UI is open for a newly created context.
+            forceOpen = true;
         }
 
         if (Firebug.isDetached())
@@ -814,6 +811,21 @@ window.Firebug =
             Firebug.minimizeBar();
         }
         return true;
+    },
+
+    /**
+     * Get context for the current website
+     */
+    getContext: function()
+    {
+        var webApp = Firebug.connection.getCurrentSelectedWebApp();
+        var context = Firebug.connection.getContextByWebApp(webApp);
+        // we are not debugging the selected tab.
+        if (!context)
+        {
+            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
+        }
+        return context;
     },
 
     /**
@@ -885,6 +897,7 @@ window.Firebug =
     // detached -> closed; inBrowser -> detached TODO reattach
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
+    
         //detached -> inbrowser
         if (!forceOpen && Firebug.isDetached())
         {
@@ -893,9 +906,20 @@ window.Firebug =
             topWin.close();
 
             if (reopenInBrowser)
+            {
+                // Is Firebug deactivated ? if yes, should be
+                // activated first, then unminimize.
+                if (!Firebug.currentContext)
+                {
+                    var context = Firebug.getContext();
+                }
                 Firebug.unMinimize();
+            }
             else
+            {
                 Firebug.minimizeBar();
+            }
+                
             Firebug.chrome.syncPositionPref();
         }
         // is minimized now but the last time that has been closed, was in detached mode,
