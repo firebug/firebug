@@ -33,7 +33,7 @@ FBTestApp.TestCouchUploader =
             return;
 
         // Crop the message (1K max)
-        header.message = cropString(params.message, 1024);
+        header["User Message"] = cropString(params.message, 1024);
 
         // Since Gecko 2.0 installed extensions must be collected asynchronously
         var self = this;
