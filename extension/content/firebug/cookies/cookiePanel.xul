@@ -127,9 +127,9 @@
                         <menuitem type="radio" name="fcPerm" value="host-allow-session"/>
                     </menupopup>
                 </toolbarbutton>
-                <toolbarseparator/>
 
                 <!-- Tools xxxHonza: remove this for now and wait for user feedback.
+                <toolbarseparator/>
                 <toolbarbutton id="fcToolsMenu" type="menu" class="fbInternational"
                     label="firecookie.Tools"
                     tooltiptext="firecookie.ToolsTooltip">
