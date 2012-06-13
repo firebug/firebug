@@ -360,10 +360,19 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             var sourceLink = node.repObject;
 
             panel.noRefresh = true;
-            if (event.target.checked)
+            var checkBox = event.target;
+            var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+            if (checkBox.checked)
+            {
                 this.enableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "true");
+            }
             else
+            {
                 this.disableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "false");
+            }
             panel.noRefresh = false;
         }
         else if (Dom.getAncestorByClass(event.target, "closeButton"))
