@@ -1062,15 +1062,15 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
 /** @lends Firebug.CookieModule.NetInfoBody */
 {
     tag:
-        UL({"class": "netInfoCookiesList"},
-            LI({"class": "netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"}, 
-                DIV(Locale.$STR("firecookie.netinfo.Received Cookies")),
-                DIV({"class": "netInfoReceivedCookies netInfoCookies"})
+        DIV({"class": "netInfoCookiesList"},
+            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"}, 
+                SPAN(Locale.$STR("firecookie.netinfo.Received Cookies"))
             ),
-            LI({"class": "netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"}, 
-                DIV(Locale.$STR("firecookie.netinfo.Sent Cookies")),
-                DIV({"class": "netInfoSentCookies netInfoCookies"})
-            )
+            DIV({"class": "netInfoReceivedCookies netInfoCookies"}),
+            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"}, 
+                SPAN(Locale.$STR("firecookie.netinfo.Sent Cookies"))
+            ),
+            DIV({"class": "netInfoSentCookies netInfoCookies"})
         ),
 
     hideReceivedCookies: function(cookiesInfo)
@@ -1336,4 +1336,3 @@ return Firebug.CookieModule;
 
 // ********************************************************************************************* //
 }});
-

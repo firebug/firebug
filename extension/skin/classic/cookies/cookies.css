@@ -397,23 +397,13 @@
 
 /* Support for Net panel */
 .netInfoCookiesText {
-    padding: 0 !important;
-}
-
-.netInfoCookiesList {
-    padding: 5px 0 5px 20px;
-    margin: 0px; 
-}
-
-.netInfoCookiesGroup {
-    font-family: Lucida Grande, Tahoma, sans-serif;
-    font-weight: bold;
-    color: #565656;
-    list-style-type: disc;
+    padding-top: 0;
+    font-family: inherit;
 }
 
 .netInfoCookies {
-    margin: 5px 0 5px 0;
+    margin: 5px 0;
+    color: inherit;
 }
 
 .netInfoCookies > .cookieTable {
