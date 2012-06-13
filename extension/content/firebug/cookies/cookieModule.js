@@ -1185,7 +1185,7 @@ var PermissionObserver = Obj.extend(BaseObserver,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData);
 
-        var fn = CookiePermissions.updatePermButton;
+        var fn = Obj.bind(CookiePermissions.updatePermButton, CookiePermissions);
         TabWatcher.iterateContexts(fn);
     }
 });
