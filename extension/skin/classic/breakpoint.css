@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-.breakpointHeader {
+.breakpointBlock > .breakpointHeader {
     position: relative;
     cursor: pointer;
     -moz-user-select: none;
@@ -8,8 +8,8 @@
     border-top: none;
 }
 
-.breakpointHeader > .twisty {
-    background-position: 4px 4px !important;
+.breakpointBlock > .breakpointHeader > .twisty {
+    background-position: 4px 4px;
 }
 
 .breakpointsHeaderLabel {
