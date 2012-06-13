@@ -71,11 +71,11 @@
                             tooltip="fcRemoveAllSessionTooltip" command="cmd_cookieRemoveAllSession"/>
                         <menuseparator/>
 
-                        <!-- Export cookies -->
+                        <!-- Export cookies xxxHonza: remove this for now and wait for user feedback
                         <menuitem id="fcExportAll" class="fbInternational"
                             label="firecookie.export.Export All Cookies"
                             tooltiptext="firecookie.export.Export All Cookies Tooltip"
-                            command="cmd_cookieExportAll"/>
+                            command="cmd_cookieExportAll"/> -->
                         <tooltip id="fcExportForSiteTooltip"
                             onpopupshowing="return Firebug.CookieModule.onExportForSiteShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcExportForSite" class="fbInternational"
@@ -129,7 +129,7 @@
                 </toolbarbutton>
                 <toolbarseparator/>
 
-                <!-- Tools -->
+                <!-- Tools xxxHonza: remove this for now and wait for user feedback.
                 <toolbarbutton id="fcToolsMenu" type="menu" class="fbInternational"
                     label="firecookie.Tools"
                     tooltiptext="firecookie.ToolsTooltip">
@@ -143,7 +143,7 @@
                             label="firecookie.ViewExceptions"
                             tooltiptext="firecookie.ViewExceptionsTooltip"/>
                     </menupopup>
-                </toolbarbutton>
+                </toolbarbutton> -->
             </hbox>
         </hbox>
     </toolbar>

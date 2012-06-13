@@ -30,3 +30,6 @@ pref("extensions.firebug.DBG_TESTCASE_MUTATION", false); // Tracing from unit-te
 
 // Support for shortcuts
 pref("extensions.firebug.key.shortcut.openTestConsole", "shift t");
+
+// Database URL for manual test result upload
+pref("extensions.fbtest.databaseURL", "http://firebug.couchone.com/firebug/");
