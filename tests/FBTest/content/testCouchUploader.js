@@ -28,6 +28,12 @@ FBTestApp.TestCouchUploader =
 
         // Get header document...
         var header = this.getHeaderDoc();
+        var params = this.getUserMessage();
+        if (params.cancel)
+            return;
+
+        // Crop the message (1K max)
+        header.message = cropString(params.message, 1024);
 
         // Since Gecko 2.0 installed extensions must be collected asynchronously
         var self = this;
@@ -141,6 +147,20 @@ FBTestApp.TestCouchUploader =
         header["Total Tests"] = this.getTotalTests().toString();
 
         return header;
+    },
+
+    getUserMessage: function()
+    {
+        var params = {
+            message: "",
+            cancel: false,
+        };
+
+        var dialog = parent.openDialog("chrome://fbtest/content/userMessage.xul",
+            "_blank", "chrome,centerscreen,resizable=yes,modal=yes",
+            params);
+
+        return params;
     },
 
     getExtensions: function(callback)

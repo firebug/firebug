@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<dialog id="fbTestUserMessage"
+        windowtype="FBTest:UserMessage"
+        title="User Message"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        ondialogaccept="return UserMessage.onOK()"
+        ondialogcancel="return UserMessage.onCancel()"
+        onload="UserMessage.onLoad()"
+        minwidth="360px"
+        minheight="300px"
+        persist="width height screenX screenY">
+
+    <script type="application/x-javascript" src="userMessage.js"></script>
+
+    <label value="Optional message associated with the report (1024 characters limit):"/>
+    <textbox id="message" flex="1" multiline="true" rows="3"/>
+</dialog>
