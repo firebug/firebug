@@ -141,22 +141,22 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             DIV({"class": "cookieInfoTabs"},
                 A({"class": "cookieInfoValueTab cookieInfoTab", onclick: "$onClickTab",
                     view: "Value"},
-                    Locale.$STR("firecookie.info.valuetab.label")
+                    Locale.$STR("cookies.info.valuetab.label")
                 ),
                 A({"class": "cookieInfoRawValueTab cookieInfoTab", onclick: "$onClickTab",
                     view: "RawValue",
                     $collapsed: "$cookie|hideRawValueTab"},
-                    Locale.$STR("firecookie.info.rawdatatab.Raw Data")
+                    Locale.$STR("cookies.info.rawdatatab.Raw Data")
                 ),
                 A({"class": "cookieInfoJsonTab cookieInfoTab", onclick: "$onClickTab",
                     view: "Json",
                     $collapsed: "$cookie|hideJsonTab"},
-                    Locale.$STR("firecookie.info.jsontab.JSON")
+                    Locale.$STR("cookies.info.jsontab.JSON")
                 ),
                 A({"class": "cookieInfoXmlTab cookieInfoTab", onclick: "$onClickTab",
                     view: "Xml",
                     $collapsed: "$cookie|hideXmlTab"},
-                    Locale.$STR("firecookie.info.xmltab.XML")
+                    Locale.$STR("cookies.info.xmltab.XML")
                 )
             ),
             DIV({"class": "cookieInfoValueText cookieInfoText"}),
@@ -216,7 +216,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         // The first character is space so, if the table is sorted according
         // to this column, all "Session" cookies are displayed at the begining.
         if (cookie.cookie.expires == 0)
-            return " " + Locale.$STR("firecookie.Session");
+            return " " + Locale.$STR("cookies.Session");
 
         try
         {
@@ -274,12 +274,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     isDomainCookie: function(cookie)
     {
-        return cookie.cookie.isDomain ? Locale.$STR("firecookie.domain.label") : "";
+        return cookie.cookie.isDomain ? Locale.$STR("cookies.domain.label") : "";
     },
 
     isSecure: function(cookie)
     {
-        return cookie.cookie.isSecure ? Locale.$STR("firecookie.secure.label") : "";
+        return cookie.cookie.isSecure ? Locale.$STR("cookies.secure.label") : "";
     },
 
     getStatus: function(cookie)
@@ -292,13 +292,13 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             case STATUS_UNKNOWN:
                 return "";
             case STATUS_ACCEPTED:
-                return Locale.$STR("firecookie.status.accepted");
+                return Locale.$STR("cookies.status.accepted");
             case STATUS_DOWNGRADED:
-                return Locale.$STR("firecookie.status.downgraded");
+                return Locale.$STR("cookies.status.downgraded");
             case STATUS_FLAGGED:
-                return Locale.$STR("firecookie.status.flagged");
+                return Locale.$STR("cookies.status.flagged");
             case STATUS_REJECTED:
-                return Locale.$STR("firecookie.status.rejected");
+                return Locale.$STR("cookies.status.rejected");
         }
 
         return "";
@@ -350,14 +350,14 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         if (!rejected)
         {
             items.push({
-              label: Locale.$STR("firecookie.Cut"),
+              label: Locale.$STR("cookies.Cut"),
               nol10n: true,
               command: Obj.bindFixed(this.onCut, this, cookie)
             });
         }
 
         items.push({
-          label: Locale.$STR("firecookie.Copy"),
+          label: Locale.$STR("cookies.Copy"),
           nol10n: true,
           command: Obj.bindFixed(this.onCopy, this, cookie)
         });
@@ -365,7 +365,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         if (!rejected)
         {
             items.push({
-              label: Locale.$STR("firecookie.Paste"),
+              label: Locale.$STR("cookies.Paste"),
               nol10n: true,
               disabled: CookieClipboard.isCookieAvailable() ? false : true,
               command: Obj.bindFixed(this.onPaste, this, cookie)
@@ -374,7 +374,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         }
 
         items.push({
-          label: Locale.$STR("firecookie.CopyAll"),
+          label: Locale.$STR("cookies.CopyAll"),
           nol10n: true,
           command: Obj.bindFixed(this.onCopyAll, this, cookie)
         });
@@ -383,14 +383,14 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         {
             items.push("-");
             items.push({
-              label: Locale.$STR("firecookie.Delete"),
+              label: Locale.$STR("cookies.Delete"),
               nol10n: true,
               command: Obj.bindFixed(this.onRemove, this, cookie)
             });
 
             items.push("-");
             items.push({
-              label: Locale.$STR("firecookie.Edit"),
+              label: Locale.$STR("cookies.Edit"),
               nol10n: true,
               command: Obj.bindFixed(this.onEdit, this, cookie)
             });
@@ -398,7 +398,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             if (cookie.cookie.rawValue)
             {
                 items.push({
-                  label: Locale.$STR("firecookie.Clear Value"),
+                  label: Locale.$STR("cookies.Clear Value"),
                   nol10n: true,
                   command: Obj.bindFixed(this.onClearValue, this, cookie)
                 });
@@ -765,7 +765,7 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
                 TBODY(
                     TR(
                         TD({width: "100%"},
-                            SPAN(Locale.$STR("firecookie.console.cookie"), " "),
+                            SPAN(Locale.$STR("cookies.console.cookie"), " "),
                             SPAN({"class": "cookieNameLabel", onclick: "$onClick"}, 
                                 "$object|getName", 
                                 " "),
@@ -846,13 +846,13 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
         switch(cookieEvent.action)
         {
           case "deleted":
-              return Locale.$STR("firecookie.console.deleted");
+              return Locale.$STR("cookies.console.deleted");
           case "added":
-              return Locale.$STR("firecookie.console.added");
+              return Locale.$STR("cookies.console.added");
           case "changed":
-              return Locale.$STR("firecookie.console.changed");
+              return Locale.$STR("cookies.console.changed");
           case "cleared":
-              return Locale.$STR("firecookie.console.cleared");
+              return Locale.$STR("cookies.console.cleared");
         }
 
         return "";
@@ -913,7 +913,7 @@ CookieReps.CookieRejected = domplate(CookieReps.Rep,
                     TR(
                         TD({width: "100%"},
                             SPAN({"class": "cookieRejectedLabel"},
-                                Locale.$STR("firecookie.console.cookiesrejected")),
+                                Locale.$STR("cookies.console.cookiesrejected")),
                             " ",
                             SPAN({"class": "cookieRejectedList"},
                                 "$object|getCookieList")
@@ -944,7 +944,7 @@ CookieReps.CookieRejected = domplate(CookieReps.Rep,
         var activeHost = context.cookies.activeHosts[cookieEvent.uri.host];
         var cookies = activeHost.receivedCookies;
         if (!cookies)
-            return Locale.$STR("firecookie.console.nocookiesreceived");
+            return Locale.$STR("cookies.console.nocookiesreceived");
 
         var label = "";
         for (var i=0; i<cookies.length; i++)
@@ -987,7 +987,7 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
 
     getLabel: function()
     {
-        return Locale.$STR("firecookie.console.cookiescleared");
+        return Locale.$STR("cookies.console.cookiescleared");
     },
 
     // Context menu
@@ -1019,56 +1019,56 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                     TD({id: "colName", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.name.tooltip")},
-                        Locale.$STR("firecookie.header.name"))
+                            title: Locale.$STR("cookies.header.name.tooltip")},
+                        Locale.$STR("cookies.header.name"))
                     ),
                     TD({id: "colValue", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.value.tooltip")}, 
-                        Locale.$STR("firecookie.header.value"))
+                            title: Locale.$STR("cookies.header.value.tooltip")}, 
+                        Locale.$STR("cookies.header.value"))
                     ),
                     TD({id: "colDomain", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.domain.tooltip")}, 
-                        Locale.$STR("firecookie.header.domain"))
+                            title: Locale.$STR("cookies.header.domain.tooltip")}, 
+                        Locale.$STR("cookies.header.domain"))
                     ),
                     TD({id: "colSize", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.size.tooltip")}, 
-                        Locale.$STR("firecookie.header.size"))
+                            title: Locale.$STR("cookies.header.size.tooltip")}, 
+                        Locale.$STR("cookies.header.size"))
                     ),
                     TD({id: "colPath", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.path.tooltip")}, 
-                        Locale.$STR("firecookie.header.path"))
+                            title: Locale.$STR("cookies.header.path.tooltip")}, 
+                        Locale.$STR("cookies.header.path"))
                     ),
                     TD({id: "colExpires", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.expires.tooltip")}, 
-                        Locale.$STR("firecookie.header.expires"))
+                            title: Locale.$STR("cookies.header.expires.tooltip")}, 
+                        Locale.$STR("cookies.header.expires"))
                     ),
                     TD({id: "colHttpOnly", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.httponly.tooltip")}, 
-                        Locale.$STR("firecookie.header.httponly"))
+                            title: Locale.$STR("cookies.header.httponly.tooltip")}, 
+                        Locale.$STR("cookies.header.httponly"))
                     ),
                     TD({id: "colSecurity", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.security.tooltip")}, 
-                        Locale.$STR("firecookie.header.security"))
+                            title: Locale.$STR("cookies.header.security.tooltip")}, 
+                        Locale.$STR("cookies.header.security"))
                     ),
                     TD({id: "colStatus", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("firecookie.header.status.tooltip")}, 
-                        Locale.$STR("firecookie.header.status"))
+                            title: Locale.$STR("cookies.header.status.tooltip")}, 
+                        Locale.$STR("cookies.header.status"))
                     )
                 )
             )

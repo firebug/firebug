@@ -625,9 +625,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // and system pages as there are no cookies associated.
         // These options shouldn't be available at all.
         if (isSystemURL(location.spec))
-            host = Locale.$STR("firecookie.SystemPages");
+            host = Locale.$STR("cookies.SystemPages");
         else if (!getURIHost(location))
-            host = Locale.$STR("firecookie.LocalFiles");
+            host = Locale.$STR("cookies.LocalFiles");
 
         // Translate these two options in panel activable menu from cookies.properties
         switch (option)
@@ -667,13 +667,13 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     // UI Commands
     onRemoveAllShowTooltip: function(tooltip, context)
     {
-        tooltip.label = Locale.$STR("firecookie.removeall.tooltip");
+        tooltip.label = Locale.$STR("cookies.removeall.tooltip");
         return true;
     },
 
     onRemoveAllSessionShowTooltip: function(tooltip, context)
     {
-        tooltip.label = Locale.$STR("firecookie.removeallsession.tooltip");
+        tooltip.label = Locale.$STR("cookies.removeallsession.tooltip");
         return true;
     },
 
@@ -727,8 +727,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
                 prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
-                Locale.$STR("firecookie.confirm.removeall"), flags, "", "", "",
-                Locale.$STR("firecookie.msg.Do_not_show_this_message_again"), check) == 0)
+                Locale.$STR("cookies.confirm.removeall"), flags, "", "", "",
+                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
@@ -750,8 +750,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
                 prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
-                Locale.$STR("firecookie.confirm.removeallsession"), flags, "", "", "",
-                Locale.$STR("firecookie.msg.Do_not_show_this_message_again"), check) == 0)
+                Locale.$STR("cookies.confirm.removeallsession"), flags, "", "", "",
+                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
@@ -767,7 +767,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     onCreateCookieShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
-        tooltip.label = Locale.$STRF("firecookie.createcookie.tooltip", [host]);
+        tooltip.label = Locale.$STRF("cookies.createcookie.tooltip", [host]);
         return true;
     },
 
@@ -782,7 +782,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             host = context.window.location.host
         }
         catch (err) {
-            alert(Locale.$STR("firecookie.message.There_is_no_active_page"));
+            alert(Locale.$STR("cookies.message.There_is_no_active_page"));
             return;
         }
 
@@ -792,7 +792,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         cookie.host = host;
 
         // The edit dialog uses raw value.
-        cookie.rawValue = Locale.$STR("firecookie.createcookie.defaultvalue");
+        cookie.rawValue = Locale.$STR("cookies.createcookie.defaultvalue");
 
         // Default path
         var path = context.window.location.pathname || "/";
@@ -903,7 +903,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     onExportForSiteShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
-        tooltip.label = Locale.$STRF("firecookie.export.Export_For_Site_Tooltip", [host]);
+        tooltip.label = Locale.$STRF("cookies.export.Export_For_Site_Tooltip", [host]);
         return true;
     },
 
@@ -1042,8 +1042,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             allowVisible   : true,
             prefilledHost  : "",
             permissionType : "cookie",
-            windowTitle    : Locale.$STR("firecookie.ExceptionsTitle"),
-            introText      : Locale.$STR("firecookie.Intro")
+            windowTitle    : Locale.$STR("cookies.ExceptionsTitle"),
+            introText      : Locale.$STR("cookies.Intro")
         };
 
         parent.openDialog("chrome://browser/content/preferences/permissions.xul",
@@ -1064,11 +1064,11 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
     tag:
         DIV({"class": "netInfoCookiesList"},
             DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"}, 
-                SPAN(Locale.$STR("firecookie.netinfo.Received Cookies"))
+                SPAN(Locale.$STR("cookies.netinfo.Received Cookies"))
             ),
             DIV({"class": "netInfoReceivedCookies netInfoCookies"}),
             DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"}, 
-                SPAN(Locale.$STR("firecookie.netinfo.Sent Cookies"))
+                SPAN(Locale.$STR("cookies.netinfo.Sent Cookies"))
             ),
             DIV({"class": "netInfoSentCookies netInfoCookies"})
         ),
@@ -1092,7 +1092,7 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
         // Create tab only if there are some cookies.
         if (sentCookiesHeader || receivedCookiesHeader)
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "Cookies",
-                Locale.$STR("firecookie.Panel"));
+                Locale.$STR("cookies.Panel"));
     },
 
     destroyTabBody: function(infoBox, file)
@@ -1200,7 +1200,7 @@ function CookieBreakpointGroup()
 CookieBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "cookieBreakpoints",
-    title: Locale.$STR("firecookie.Cookie Breakpoints"),
+    title: Locale.$STR("cookies.Cookie Breakpoints"),
 
     addBreakpoint: function(cookie)
     {

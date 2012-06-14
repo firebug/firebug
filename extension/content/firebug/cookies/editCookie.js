@@ -178,7 +178,7 @@ EditCookie.prototype =
         if (!name)
         {
             prompts.alert(this.window, Locale.$STR("Firebug"),
-                Locale.$STR("firecookie.edit.invalidname"));
+                Locale.$STR("cookies.edit.invalidname"));
             return false;
         }
 
@@ -186,7 +186,7 @@ EditCookie.prototype =
         if (!this.checkHost(domain))
         {
             prompts.alert(this.window, Locale.$STR("Firebug"),
-                Locale.$STR("firecookie.edit.invalidhost"));
+                Locale.$STR("cookies.edit.invalidhost"));
             return false;
         }
 
@@ -194,7 +194,7 @@ EditCookie.prototype =
         if (!this.checkPath(domain, path))
         {
             prompts.alert(this.window, Locale.$STR("Firebug"),
-                Locale.$STR("firecookie.edit.invalidpath"));
+                Locale.$STR("cookies.edit.invalidpath"));
             return false;
         }
 

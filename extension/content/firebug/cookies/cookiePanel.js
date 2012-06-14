@@ -59,7 +59,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 /** @lends CookiePanel */
 {
     name: "cookies",
-    title: Locale.$STR("firecookie.Panel"),
+    title: Locale.$STR("cookies.Panel"),
     searchable: true,
     breakable: true,
     order: 200, // Place just after the Net panel.
@@ -279,7 +279,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
             Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                Locale.$STR("firecookie.Break On Cookie"));
+                Locale.$STR("cookies.Break On Cookie"));
         }
     },
 
@@ -292,14 +292,14 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getOptionsMenuItems: function(context)
     {
         return [
-            MenuUtils.optionAllowGlobally(context, "firecookie.AllowGlobally",
-                "firecookie.tip.AllowGlobally", "network.cookie", "cookieBehavior"),
+            MenuUtils.optionAllowGlobally(context, "cookies.AllowGlobally",
+                "cookies.tip.AllowGlobally", "network.cookie", "cookieBehavior"),
             /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
                 "cookies.tip.clearWhenDeny", Firebug.prefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "firecookie.LogEvents",
-                "firecookie.tip.LogEvents", Firebug.prefDomain, logEventsPref),
-            MenuUtils.optionMenu(context, "firecookie.Confirm cookie removal",
-                "firecookie.tip.Confirm cookie removal", Firebug.prefDomain, removeConfirmation)
+            MenuUtils.optionMenu(context, "cookies.LogEvents",
+                "cookies.tip.LogEvents", Firebug.prefDomain, logEventsPref),
+            MenuUtils.optionMenu(context, "cookies.Confirm cookie removal",
+                "cookies.tip.Confirm cookie removal", Firebug.prefDomain, removeConfirmation)
         ];
     },
 
@@ -440,8 +440,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? Locale.$STR("firecookie.Disable Break On Cookie") :
-            Locale.$STR("firecookie.Break On Cookie"));
+        return (enabled ? Locale.$STR("cookies.Disable Break On Cookie") :
+            Locale.$STR("cookies.Break On Cookie"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -450,7 +450,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     onActivationChanged: function(enable)
     {
         if (FBTrace.DBG_COOKIES || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firecookie.CookiePanel.onActivationChanged; " + enable);
+            FBTrace.sysout("cookies.CookiePanel.onActivationChanged; " + enable);
 
         if (enable)
         {

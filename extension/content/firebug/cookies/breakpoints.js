@@ -51,7 +51,7 @@ var Breakpoints =
         if (context.breakOnCookie && !conditionIsFalse)
         {
             context.breakingCause = {
-                title: Locale.$STR("firecookie.Break On Cookie"),
+                title: Locale.$STR("cookies.Break On Cookie"),
                 message: Str.cropString(unescape(cookie.name + "; " + cookie.value), 200)
             };
             halt = true;
@@ -129,8 +129,8 @@ var Breakpoints =
 
         items.push({
             nol10n: true,
-            tooltiptext: Locale.$STRF("firecookie.menu.tooltip.Break On Cookie", [cookieName]),
-            label: Locale.$STRF("firecookie.menu.Break On Cookie", [cookieName]),
+            tooltiptext: Locale.$STRF("cookies.menu.tooltip.Break On Cookie", [cookieName]),
+            label: Locale.$STRF("cookies.menu.Break On Cookie", [cookieName]),
             type: "checkbox",
             checked: bp != null,
             command: Obj.bindFixed(this.onBreakOnCookie, this, context, cookie),
@@ -139,7 +139,7 @@ var Breakpoints =
         if (bp)
         {
             items.push(
-                {label: "firecookie.menu.Edit Breakpoint Condition",
+                {label: "cookies.menu.Edit Breakpoint Condition",
                     command: Obj.bindFixed(this.editBreakpointCondition, this, context, cookie) }
             );
         }
@@ -410,7 +410,7 @@ Breakpoints.Breakpoint.prototype =
             return;
 
         context.breakingCause = {
-            title: Locale.$STR("firecookie.Break On Cookie"),
+            title: Locale.$STR("cookies.Break On Cookie"),
             message: Str.cropString(unescape(this.name + "; " + this.condition + "; "), 200)
         };
     },
@@ -421,8 +421,8 @@ Breakpoints.Breakpoint.prototype =
             FBTrace.sysout("cookies.onEvaluateFails; " + result, result);
 
         context.breakingCause = {
-            title: Locale.$STR("firecookie.Break On Cookie"),
-            message: Locale.$STR("firecookie.Breakpoint condition evaluation fails"),
+            title: Locale.$STR("cookies.Break On Cookie"),
+            message: Locale.$STR("cookies.Breakpoint condition evaluation fails"),
             prevValue: this.condition, newValue:result
         };
     }
