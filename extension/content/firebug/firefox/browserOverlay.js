@@ -1204,7 +1204,7 @@ if (checkFirebugVersion(currentVersion) > 0)
     observerService.addObserver(SessionObserver, "sessionstore-windows-restored", false);
 
 // ********************************************************************************************* //
-// Context Menu Workaround
+// Firefox Page Context Menu
 
 if (typeof(nsContextMenu) != "undefined")
 {
@@ -1216,6 +1216,17 @@ if (typeof(nsContextMenu) != "undefined")
         if (this.isTargetAFormControl(aNode))
             this.shouldDisplay = true;
     };
+
+    // Hide built-in inspector if the pref says so.
+    var initItemsOriginal = nsContextMenu.prototype.initItems;
+    nsContextMenu.prototype.initItems = function()
+    {
+        initItemsOriginal.apply(this, arguments);
+
+        var showInspect = !PrefLoader.getPref("hideDefaultInspector");
+        this.showItem("inspect-separator", showInspect);
+        this.showItem("context-inspect", showInspect);
+    }
 }
 
 // ********************************************************************************************* //
