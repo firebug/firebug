@@ -104,7 +104,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("cookies.CookieModule.initialize; ");
 
         this.traceListener = new TraceListener("cookies.", "DBG_COOKIES", true,
-            "chrome://firebug/skin/cookies/firecookieTrace.css");
+            "chrome://firebug/skin/cookies/trace.css");
 
         TraceModule.addListener(this.traceListener);
 
