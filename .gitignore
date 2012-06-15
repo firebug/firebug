@@ -22,9 +22,11 @@
 /extension/release/
 /tests/FBTest/release/
 *.graphml
+/extension/bz-locale/
 
 # Files from NPM
 /extension/node_modules/
 
 # Extensions
 /extension/firebug@software.joehewitt.com
+
