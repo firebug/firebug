@@ -84,10 +84,17 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
 
+        Firebug.ConsolePanel.prototype.addListener(this);
+
         // Just after the initialization, so the this.document member is set.
         Firebug.CookieModule.addStyleSheet(this);
 
         this.refresh();
+    },
+
+    shutdown: function()
+    {
+        Firebug.ConsolePanel.prototype.removeListener(this);
     },
 
     /**
@@ -442,6 +449,13 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         return (enabled ? Locale.$STR("cookies.Disable Break On Cookie") :
             Locale.$STR("cookies.Break On Cookie"));
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Console Panel Listeners
+    onFilterSet: function(logTypes)
+    {
+        logTypes.cookies = 1;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

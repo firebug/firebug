@@ -298,6 +298,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     setFilter: function(filterTypes)
     {
         var panelNode = this.panelNode;
+
+        Events.dispatch(this.fbListeners, "onFilterSet", [logTypes]);
+
         for (var type in logTypes)
         {
             // Different types of errors and warnings are combined for filtering
