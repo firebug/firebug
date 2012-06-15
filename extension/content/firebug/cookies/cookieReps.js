@@ -101,12 +101,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 ),
                 TD({"class": "cookieValueCol cookieCol"},
                     DIV({"class": "cookieValueLabel cookieLabel"}, 
-                        SPAN("$cookie|getValue")
+                        SPAN("$cookie.cookie.value|getValue")
                     )
                 ),
                 TD({"class": "cookieRawValueCol cookieCol"},
                     DIV({"class": "cookieRawValueLabel cookieLabel"}, 
-                        SPAN("$cookie|getRawValue")
+                        SPAN("$cookie.cookie.rawValue|getValue")
                     )
                 ),
                 TD({"class": "cookieDomainCol cookieCol"},
@@ -196,22 +196,11 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.name;
     },
 
-    getValue: function(cookie)
+    getValue: function(value)
     {
-        var limit = 100;
-        var value = cookie.cookie.value;
-
-        return Str.escapeNewLines(value.length > limit ? value.substr(0, limit) + "..." : value);
+        return Str.escapeNewLines(Str.cropString(value));
     },
 
-    getRawValue: function(cookie)
-    {
-        var limit = 100;
-        var value = cookie.cookie.rawValue;
-
-        return Str.escapeNewLines(value.length > limit ? value.substr(0, limit) + "..." : value);
-    },
-    
     getDomain: function(cookie)
     {
         if (!cookie.cookie.host)
