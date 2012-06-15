@@ -44,6 +44,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const hiddenColsPref = "net.hiddenColumns";
+
 var panelName = "net";
 
 // ********************************************************************************************* //
@@ -363,7 +365,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Store current state into the preferences.
-        Options.set("net.hiddenColumns", table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
 
         panel.updateHRefLabelWidth();
     },
@@ -383,8 +385,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Reset visibility. Only the Status column is hidden by default.
-        panel.table.setAttribute("hiddenCols", "colStatus");
-        Options.set("net.hiddenColumns", "colStatus");
+        Options.clear(hiddenColsPref);
+        panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
     },
 });
 

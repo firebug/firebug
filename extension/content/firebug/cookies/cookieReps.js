@@ -1292,8 +1292,8 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         }
 
         // Reset visibility.
-        panel.table.setAttribute("hiddenCols", "colRawValue colStatus");
-        Options.set(hiddenColsPref, "colRawValue colStatus");
+        Options.clear(hiddenColsPref);
+        panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
     },
 
     createTable: function(parentNode)
