@@ -68,6 +68,9 @@ function startup(params, reason)
 
     // Listen for new windows, Firebug must be loaded into them too.
     Services.ww.registerNotification(windowWatcher);
+
+    // GCLI commands
+    Cu.import("resource://firebug/gcli.js");
 }
 
 function shutdown(params, reason)
