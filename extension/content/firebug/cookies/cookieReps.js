@@ -101,7 +101,13 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 ),
                 TD({"class": "cookieValueCol cookieCol"},
                     DIV({"class": "cookieValueLabel cookieLabel"}, 
-                        SPAN("$cookie|getValue"))
+                        SPAN("$cookie.cookie.value|getValue")
+                    )
+                ),
+                TD({"class": "cookieRawValueCol cookieCol"},
+                    DIV({"class": "cookieRawValueLabel cookieLabel"}, 
+                        SPAN("$cookie.cookie.rawValue|getValue")
+                    )
                 ),
                 TD({"class": "cookieDomainCol cookieCol"},
                     SPAN({"class": "cookieDomainLabel cookieLabel", onclick: "$onClickDomain"}, 
@@ -190,14 +196,9 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.name;
     },
 
-    getValue: function(cookie)
+    getValue: function(value)
     {
-        var limit = 200;
-        var value = cookie.cookie.value;
-        if (value.length > limit)
-            return Str.escapeNewLines(value.substr(0, limit) + "...");
-        else
-            return Str.escapeNewLines(value);
+        return Str.escapeNewLines(Str.cropString(value));
     },
 
     getDomain: function(cookie)
@@ -1028,6 +1029,12 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                             title: Locale.$STR("cookies.header.value.tooltip")}, 
                         Locale.$STR("cookies.header.value"))
                     ),
+                    TD({id: "colRawValue", role: "columnheader",
+                        "class": "cookieHeaderCell alphaValue a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("cookies.header.rawValue.tooltip")}, 
+                            Locale.$STR("cookies.header.rawValue"))
+                    ),
                     TD({id: "colDomain", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
@@ -1284,9 +1291,9 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                 col.style.width = "";
         }
 
-        // Reset visibility. Only the Status column is hidden by default.
-        panel.table.setAttribute("hiddenCols", "colStatus");
-        Options.set(hiddenColsPref, "colStatus");
+        // Reset visibility.
+        Options.clear(hiddenColsPref);
+        panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
     },
 
     createTable: function(parentNode)

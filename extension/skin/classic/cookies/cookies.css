@@ -132,15 +132,26 @@
  * If a column is hidden, it's presented in a 'hiddenCols' attribute of the .cookieTable
  * element. Value of the attribute is a whitespace separated list of columns IDs.
  */
-.cookieTable[hiddenCols~=colName] TD[id="colName"], .cookieTable[hiddenCols~=colName] TD.cookieNameCol,
-.cookieTable[hiddenCols~=colValue] TD[id="colValue"], .cookieTable[hiddenCols~=colValue] TD.cookieValueCol,
-.cookieTable[hiddenCols~=colDomain] TD[id="colDomain"], .cookieTable[hiddenCols~=colDomain] TD.cookieDomainCol,
-.cookieTable[hiddenCols~=colSize] TD[id="colSize"], .cookieTable[hiddenCols~=colSize] TD.cookieSizeCol,
-.cookieTable[hiddenCols~=colPath] TD[id="colPath"], .cookieTable[hiddenCols~=colPath] TD.cookiePathCol,
-.cookieTable[hiddenCols~=colExpires] TD[id="colExpires"], .cookieTable[hiddenCols~=colExpires] TD.cookieExpiresCol,
-.cookieTable[hiddenCols~=colHttpOnly] TD[id="colHttpOnly"], .cookieTable[hiddenCols~=colHttpOnly] TD.cookieHttpOnlyCol,
-.cookieTable[hiddenCols~=colSecurity] TD[id="colSecurity"], .cookieTable[hiddenCols~=colSecurity] TD.cookieSecurityCol,
-.cookieTable[hiddenCols~=colStatus] TD[id="colStatus"], .cookieTable[hiddenCols~=colStatus] TD.cookieStatusCol {
+.cookieTable[hiddenCols~=colName] #colName,
+.cookieTable[hiddenCols~=colName] .cookieNameCol,
+.cookieTable[hiddenCols~=colValue] #colValue,
+.cookieTable[hiddenCols~=colValue] .cookieValueCol,
+.cookieTable[hiddenCols~=colRawValue] #colRawValue,
+.cookieTable[hiddenCols~=colRawValue] .cookieRawValueCol,
+.cookieTable[hiddenCols~=colDomain] #colDomain,
+.cookieTable[hiddenCols~=colDomain] .cookieDomainCol,
+.cookieTable[hiddenCols~=colSize] #colSize,
+.cookieTable[hiddenCols~=colSize] .cookieSizeCol,
+.cookieTable[hiddenCols~=colPath] #colPath,
+.cookieTable[hiddenCols~=colPath] .cookiePathCol,
+.cookieTable[hiddenCols~=colExpires] #colExpires,
+.cookieTable[hiddenCols~=colExpires] .cookieExpiresCol,
+.cookieTable[hiddenCols~=colHttpOnly] #colHttpOnly,
+.cookieTable[hiddenCols~=colHttpOnly] .cookieHttpOnlyCol,
+.cookieTable[hiddenCols~=colSecurity] #colSecurity,
+.cookieTable[hiddenCols~=colSecurity] .cookieSecurityCol,
+.cookieTable[hiddenCols~=colStatus] #colStatus,
+.cookieTable[hiddenCols~=colStatus] .cookieStatusCol {
     display: none;
 }
 
