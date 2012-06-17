@@ -442,6 +442,15 @@ Css.isValidStylesheet = function(styleSheet)
 // ********************************************************************************************* //
 // Stylesheet API
 
+Css.shouldIgnoreSheet = function(sheet)
+{
+    // Ignore by the regular method, except for default stylesheets that are
+    // used in case there is no other stylesheet.
+    if (sheet.defaultStylesheet)
+        return false;
+    return (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode));
+};
+
 Css.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
@@ -576,7 +585,7 @@ Css.getAllStyleSheets = function(context)
         if (!showUACSS && Url.isSystemURL(sheetLocation))
             return;
 
-        if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
+        if (Css.shouldIgnoreSheet(sheet))
             return;
 
         styleSheets.push(sheet);
@@ -649,7 +658,7 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
                 (curSheet.ownerNode && Xpath.getElementXPath(curSheet.ownerNode)));
         }
 
-        if (Firebug.shouldIgnore(curSheet.ownerNode))
+        if (Css.shouldIgnoreSheet(curSheet))
             break;
 
         if (curSheet == styleSheet)

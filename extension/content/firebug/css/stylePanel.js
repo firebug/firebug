@@ -53,7 +53,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
-                DIV({role: "list", "aria-label": Locale.$STR("aria.labels.style rules") },
+                DIV({"class": "cssNonInherited", role: "list",
+                        "aria-label": Locale.$STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
@@ -77,6 +78,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             DIV({"class": "cssElementRuleContainer"},
                 TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            ),
+
+        newRuleTag:
+            DIV({"class": "cssElementRuleContainer"},
+                DIV({"class": "cssRule insertBefore", style: "display: none"}, "")
             ),
 
         CSSFontPropValueTag:
@@ -207,7 +213,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getElementRules(parent, rules, usedProps, true);
 
             if (rules.length)
-                sections.splice(0, 0, {element: parent, rules: rules});
+                sections.unshift({element: parent, rules: rules});
         }
     },
 
@@ -252,7 +258,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     this.markOverriddenProps(element, props, usedProps, inheritMode);
 
                 var ruleId = this.getRuleId(rule);
-                rules.splice(0, 0, {rule: rule, id: ruleId,
+                rules.unshift({rule: rule, id: ruleId,
                     // Show universal selectors with pseudo-class
                     // (http://code.google.com/p/fbug/issues/detail?id=3683)
                     selector: rule.selectorText.replace(/ :/g, " *:"),
@@ -269,7 +275,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+            FBTrace.sysout("getElementRules " + rules.length + " rules for " +
                 Xpath.getElementXPath(element), rules);
     },
 
@@ -444,8 +450,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         if (props.length)
         {
-            rules.splice(0, 0,
-                {rule: element, id: Xpath.getElementXPath(element),
+            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
                     selector: "element.style", props: props, inherited: inheritMode});
         }
     },
@@ -629,6 +634,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             label: "EditStyle",
             tooltiptext: "style.tip.Edit_Style",
             command: Obj.bindFixed(this.editElementStyle, this)
+        },
+        {
+            label: "AddRule",
+            tooltiptext: "style.tip.Add_Rule",
+            command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
         if (style instanceof Ci.nsIDOMFontFace && style.rule)
