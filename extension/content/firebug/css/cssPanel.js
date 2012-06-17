@@ -1911,7 +1911,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // Add the magic inherit property, if it's sufficiently alone.
             if (!preExpr)
                 keywords = keywords.concat(["inherit"]);
-            return keywords;
+
+            return stripCompletedParens(keywords, postExpr);
         }
     },
 
@@ -1930,6 +1931,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (range.type === "fontFamily")
             return ",";
         return " ";
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
@@ -2309,8 +2317,21 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return [];
 
         // Don't support attribute selectors, for now.
-        if (preExpr.lastIndexOf('[') > preExpr.lastIndexOf(']'))
+        if (preExpr.lastIndexOf("[") > preExpr.lastIndexOf("]"))
             return [];
+
+        if (preExpr.lastIndexOf("(") > preExpr.lastIndexOf(")"))
+        {
+            // We are in an parenthesized expression, where we can only complete
+            // for a few particular pseudo-classes that take selector-like arguments.
+            var par = preExpr.lastIndexOf("("), colon = preExpr.lastIndexOf(":", par);
+            if (colon === -1)
+                return;
+            var allowed = ["-moz-any", "not", "-moz-empty-except-children-with-localname"];
+            var name = preExpr.substring(colon+1, par);
+            if (allowed.indexOf(name) === -1)
+                return [];
+        }
 
         var includeTagNames = true;
         var includeIds = true;
@@ -2417,7 +2438,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 ":before"
             );
 
-            ret.push.apply(ret, Css.pseudoClasses);
+            ret.push.apply(ret, stripCompletedParens(Css.pseudoClasses, postExpr));
         }
 
         if (includePseudoElements)
@@ -2469,6 +2490,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // For e.g. 'd|span', expand to a descendant selector; otherwise assume
         // that this is part of the same selector part.
         return (reSelectorChar.test(prefixOf.charAt(0)) ? " " : "");
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
     },
 
     advanceToNext: function(target, charCode)
@@ -2641,6 +2669,23 @@ Firebug.CSSDirtyListener.prototype =
 
 // ********************************************************************************************* //
 // Local Helpers
+
+// Transform completions so that they don't add additional parentheses when
+// ones already exist.
+function stripCompletedParens(list, postExpr)
+{
+    var c = postExpr.charAt(0), rem = 0;
+    if (c === "(")
+        rem = 2;
+    else if (c === ")")
+        rem = 1;
+    else
+        return list;
+    return list.map(function(cl)
+    {
+        return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
+    });
+}
 
 function parsePriority(value)
 {

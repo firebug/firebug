@@ -768,6 +768,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return null;
     },
 
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        return null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleter: function()
@@ -777,7 +782,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.autoCompleter = new Firebug.AutoCompleter(false,
                 Obj.bind(this.getAutoCompleteRange, this),
                 Obj.bind(this.getAutoCompleteList, this),
-                Obj.bind(this.getAutoCompletePropSeparator, this));
+                Obj.bind(this.getAutoCompletePropSeparator, this),
+                Obj.bind(this.autoCompleteAdjustSelection, this));
         }
 
         return this.autoCompleter;
@@ -905,6 +911,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             var reverted = this.getAutoCompleter().revert(this.input);
             if (reverted)
+                Events.cancelEvent(event);
+        }
+        else if (event.keyCode == KeyEvent.DOM_VK_RIGHT && this.completeAsYouType)
+        {
+            if (this.getAutoCompleter().acceptCompletion(this.input))
                 Events.cancelEvent(event);
         }
         else if (event.charCode && this.advanceToNext(this.target, event.charCode))
@@ -1060,7 +1071,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ********************************************************************************************* //
 // Autocompletion
 
-Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator)
+Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator,
+    adjustSelectionOnAccept)
 {
     var candidates = null;
     var suggestedDefault = null;
@@ -1101,6 +1113,25 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
         lastOffset = 0;
         exprOffset = 0;
         lastIndex = null;
+    };
+
+    this.acceptCompletion = function(textBox)
+    {
+        if (!adjustSelectionOnAccept)
+            return false;
+
+        var value = textBox.value;
+        var offset = textBox.selectionStart;
+        var offsetEnd = textBox.selectionEnd;
+        if (!candidates || value !== lastValue || offset !== lastOffset || offset >= offsetEnd)
+            return false;
+
+        var ind = adjustSelectionOnAccept(value, offsetEnd);
+        if (ind === null)
+            return false;
+
+        textBox.setSelectionRange(ind, ind);
+        return true;
     };
 
     this.complete = function(context, textBox, cycle)
