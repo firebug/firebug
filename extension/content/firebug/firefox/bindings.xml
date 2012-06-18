@@ -238,7 +238,7 @@
 
                 // If the panel says it needs refresh then it must be refreshed.
                 // So, ignore the noRefresh argument in such cases (see issue 5576).
-                if (panel && /*!noRefresh && */panel.needsRefresh)
+                if (panel && (panel.needsRefresh || !noRefresh))
                 {
                     delete panel.needsRefresh;
                     panel.refresh();
