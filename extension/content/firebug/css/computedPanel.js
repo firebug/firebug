@@ -151,6 +151,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateComputedView: function(element)
     {
+        // The current selection can be null.
+        if (!element)
+            return;
+
         var doc = element.ownerDocument;
         var win = doc.defaultView;
 
