@@ -1373,11 +1373,11 @@ var fbs =
             if (!url)
                 continue;
 
-            FBS.enumerateErrorBreakpoints(url,
+            fbs.enumerateErrorBreakpoints(url,
             {
                 call: function(url, lineNo)
                 {
-                    FBS.clearErrorBreakpoint(url, lineNo, debuggr);
+                    fbs.clearErrorBreakpoint(url, lineNo, debuggr);
                 }
             });
         }
