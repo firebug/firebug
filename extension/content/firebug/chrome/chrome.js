@@ -646,7 +646,9 @@ var FirebugChrome =
                 " sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
 
         var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
-        var panel = this.selectPanel(bestPanelName, sidePanelName, true);
+
+        // Allow refresh if needed (the last argument).
+        var panel = this.selectPanel(bestPanelName, sidePanelName/*, true*/);
         if (panel)
             panel.select(object, forceUpdate);
 
