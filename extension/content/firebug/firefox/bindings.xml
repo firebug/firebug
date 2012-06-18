@@ -189,11 +189,14 @@
                 // Make sure the panel is visible.
                 this.togglePanel(panelName, true);
 
-                if (panel && (panel == this.selectedPanel) && !forceUpdate)
+                // Optimization is done only if the panel really doesn't need to be refreshed.
+                if (panel && (panel == this.selectedPanel) && !forceUpdate && !panel.needsRefresh)
                     return panel;
 
                 if (FBTrace.DBG_PANELS)
-                    FBTrace.sysout("selectPanel " + panelName + " panel: " + panel);
+                    FBTrace.sysout("selectPanel " + panelName + " panel: " + panel +
+                        ", forceUpdate: " + forceUpdate + ", noRefresh: " + noRefresh +
+                        ", needsUpdate: " + (panel ? panel.needsRefresh : ""));
 
                 this.hideSelectedPanel();
 
@@ -233,7 +236,9 @@
 
                 this.showSelectedPanel(panelName); // sets active attribute true
 
-                if (panel && !noRefresh && panel.needsRefresh)
+                // If the panel says it needs refresh then it must be refreshed.
+                // So, ignore the noRefresh argument in such cases (see issue 5576).
+                if (panel && /*!noRefresh && */panel.needsRefresh)
                 {
                     delete panel.needsRefresh;
                     panel.refresh();
