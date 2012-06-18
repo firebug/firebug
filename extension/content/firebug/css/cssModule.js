@@ -9,9 +9,10 @@ define([
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/xml",
-    "firebug/lib/options"
+    "firebug/lib/options",
+    "firebug/lib/array"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -460,20 +461,23 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     watchWindow: function(context, win)
     {
         var doc = win.document;
-        this.cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
+        var cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
 
-        context.addEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
-        context.addEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+        context.addEventListener(doc, "DOMAttrModified", cleanupSheetListener, false);
+        context.addEventListener(doc, "DOMNodeInserted", cleanupSheetListener, false);
+
+        CleanupSheetListeners.add(context, win, cleanupSheetListener);
     },
 
     unwatchWindow: function(context, win)
     {
         var doc = win.document;
 
-        if (this.cleanupSheetListener)
+        var cleanupSheetListener = CleanupSheetListeners.remove(context, win);
+        if (cleanupSheetListener)
         {
-            context.removeEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
-            context.removeEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+            context.removeEventListener(doc, "DOMAttrModified", cleanupSheetListener, false);
+            context.removeEventListener(doc, "DOMNodeInserted", cleanupSheetListener, false);
         }
     },
 
@@ -497,6 +501,49 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         this.removeListener(context.dirtyListener);
     }
 });
+
+// ********************************************************************************************* //
+// Clean up Sheet Listeners
+
+var CleanupSheetListeners =
+{
+    add: function(context, win, listener)
+    {
+        if (!context.cleanupSheetListeners)
+            context.cleanupSheetListeners = [];
+
+        if (this.get(context, win))
+            return;
+
+        context.cleanupSheetListeners.push({
+            win: win,
+            listener: listener
+        });
+    },
+
+    remove: function(context, win)
+    {
+        if (!context.cleanupSheetListeners)
+            return;
+
+        var entry = this.get(context, win);
+        if (!entry)
+            return;
+
+        Arr.remove(context.cleanupSheetListeners, entry);
+
+        return entry.listener;
+    },
+
+    get: function(context, win)
+    {
+        for (var i=0; i<context.cleanupSheetListeners.length; i++)
+        {
+            if (context.cleanupSheetListeners[i].win == win)
+                return context.cleanupSheetListeners[i];
+        }
+    }
+}
 
 // ********************************************************************************************* //
 // Helpers
