@@ -83,7 +83,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
         if (Firebug.getSuspended())
         {
-            tooltip += "\n" + this.getSuspended();
+            tooltip += "\n" + Locale.$STR("startbutton.tip.deactivated");
         }
         else
         {
