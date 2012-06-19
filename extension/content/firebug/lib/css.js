@@ -1198,7 +1198,28 @@ Css.cssKeywords =
         "treeline",
         "treetwisty",
         "treetwistyopen",
-        "treeview"
+        "treeview",
+
+        "-moz-mac-unified-toolbar",
+        "-moz-win-borderless-glass", // FF 4.0
+        "-moz-win-browsertabbar-toolbox",
+        "-moz-win-communicationstext",
+        "-moz-win-communications-toolbox",
+        "-moz-win-exclude-glass", // FF 6.0
+        "-moz-win-glass",
+        "-moz-win-mediatext",
+        "-moz-win-media-toolbox",
+        "-moz-window-button-box",
+        "-moz-window-button-box-maximized",
+        "-moz-window-button-close",
+        "-moz-window-button-maximize",
+        "-moz-window-button-minimize",
+        "-moz-window-button-restore",
+        "-moz-window-frame-bottom",
+        "-moz-window-frame-left",
+        "-moz-window-frame-right",
+        "-moz-window-titlebar",
+        "-moz-window-titlebar-maximized"
     ],
 
     "mozBackfaceVisibility":
