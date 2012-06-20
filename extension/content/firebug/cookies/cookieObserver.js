@@ -122,22 +122,28 @@ var CookieObserver = Obj.extend(BaseObserver,
      * @returns {Boolean} If the method returns true the host/path belongs
      *      to the activeUri.
      */
-    isHostFromURI: function(activeUri, host, path)
+    isHostFromURI: function(activeUri, host, cookiePath)
     {
         var pathFilter = Options.get(filterByPath);
 
         // Get directory path (without the file name)
-        var activePath = activeUri.path.substr(0, (activeUri.path.lastIndexOf("/") || 1));
+        var queryStringPos = activeUri.path.lastIndexOf("?");
+        var activePath = queryStringPos != -1 ?
+            activeUri.path.substr(0, queryStringPos) : activeUri.path;
 
-        // Append slash at the end of the active path, so it mach the cookie's path
-        // in the case that it has slash at the end.
+        // Remove slash at the end of the active path according to step 4 of RFC 6265 section 5.1.4
         var lastChar = activePath.charAt(activePath.length - 1);
-        if (lastChar != "/")
-            activePath += "/";
+        if (lastChar == "/")
+            activePath = activePath.substr(0, activePath.length - 1);
 
-        // If the path filter is on, only cookies that match given path should be displayed.
-        if (pathFilter && (activePath.indexOf(path) != 0))
+        // If the path filter is on, only cookies that match given path
+        // according to RFC 6265 section 5.1.4 will be displayed.
+        if (pathFilter && (activePath != cookiePath && !(Str.hasPrefix(activePath, cookiePath) &&
+            (cookiePath.charAt(cookiePath.length - 1) == "/" ||
+                activePath.substr(cookiePath.length, 1) == "/"))))
+        {
             return false;
+        }
 
         // The cookie must belong to given URI from this context,
         // otherwise it won't be displayed in this tab.
