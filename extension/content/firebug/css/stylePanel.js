@@ -488,22 +488,19 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         {
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
-            var doc = win.document;
-            context.addEventListener(doc, "mouseover", this.onHoverChange, false);
-            context.addEventListener(doc, "mousedown", this.onActiveChange, false);
+            context.addEventListener(win, "mouseover", this.onHoverChange, false);
+            context.addEventListener(win, "mousedown", this.onActiveChange, false);
         }
     },
 
     unwatchWindow: function(context, win)
     {
-        var doc = win.document;
-        context.removeEventListener(doc, "mouseover", this.onHoverChange, false);
-        context.removeEventListener(doc, "mousedown", this.onActiveChange, false);
+        context.removeEventListener(win, "mouseover", this.onHoverChange, false);
+        context.removeEventListener(win, "mousedown", this.onActiveChange, false);
 
+        var doc = win.document;
         if (Dom.isAncestor(this.stateChangeEl, doc))
-        {
             this.removeStateChangeHandlers();
-        }
     },
 
     supportsObject: function(object, type)
