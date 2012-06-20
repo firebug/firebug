@@ -7,7 +7,7 @@
         <script>
             var obj = {
                 AbcD: 1,
-                aBcde: 1
+                aBcdE: 1
             };
         </script>
     </head>
@@ -23,9 +23,10 @@
                     <li>Verify the following completions by typing the prefix and pressing <span class="key">TAB</span>:</li>
                     <ul>
                         <li>"obj.A" <span class="ok">&rArr; "obj.AbcD"</span></li>
-                        <li>"obj.a" <span class="ok">&rArr; "obj.aBcde"</span></li>
+                        <li>"obj.a" <span class="ok">&rArr; "obj.aBcdE"</span></li>
                         <li>"obj.AB" <span class="ok">&rArr; "obj.AB"</span></li>
-                        <li>"obj.ab" <span class="ok">&rArr; "obj.AbcD"</span></li>
+                        <li>"obj.ab" <span class="ok">&rArr; "obj.aBdeE"</span></li>
+                        <li>"obj.abx&lt;backspace&gt;" <span class="ok">&rArr; "obj.AbcD"</span></li>
                         <li>"obj.Abcd" <span class="ok">&rArr; "obj.AbcD"</span></li>
                     </ul>
                     <li>Verify that when typing " obj.ab", the completion text starts
@@ -36,6 +37,8 @@
                     <li>Case-insensitive matches should appear as completions.</li>
                     <li>Typed capital letters should force case at those points.</li>
                     <li>Completions that match case should be preferred as defaults.</li>
+                    <li>When typing another letter, the completion should remain unless
+                    another completion suddenly appears better at matching case.</li>
                 </ul>
             </section>
             <footer>
