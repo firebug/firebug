@@ -77,6 +77,10 @@ textbox#fbCommandEditor {
     color: #666666;
 }
 
+.completionLine.apiCompletion {
+    font-style: italic;
+}
+
 .completionText {
     color: #666666;
     margin-right: 1px;
