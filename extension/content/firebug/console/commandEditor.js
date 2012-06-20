@@ -158,12 +158,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onExecute: function()
     {
-        var context = Firebug.currentContext, text;
+        var context = Firebug.currentContext;
         Firebug.CommandLine.update(context);
-    	if(this.isCollapse === true)
-			Firebug.CommandLine.enter(context);
-		else
-			Firebug.CommandLine.enter(context, this.getSelection());
+        if (this.isCollapsed())
+            Firebug.CommandLine.enter(context);
+        else
+            Firebug.CommandLine.enter(context, this.getSelection());
         return true;
     },
 
@@ -259,24 +259,27 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     {
         // TODO xxxHonza
     },
-	
-	getSelection: function()
-	{
-		var selection;
-		if(this.editor){
-			selection = this.editor.getSelection();
-			return this.getText().substring(selection.start, selection.end);
-		}
-	},
-	isCollapse: function(){
-		var selection, ret = true;
-		if(this.editor){
-			selection = this.editor.getSelection(); 
-			ret = (selection.start === selection.end);
-		}
-		return ret;
-	},
-	
+
+    getSelection: function()
+    {
+        var selection;
+        if (this.editor)
+        {
+            selection = this.editor.getSelection();
+            return this.getText().substring(selection.start, selection.end);
+        }
+    },
+
+    isCollapsed: function(){
+        var selection;
+        if (this.editor)
+        {
+            selection = this.editor.getSelection(); 
+            return selection.start === selection.end;
+        }
+        return true;
+    },
+
     hasFocus: function()
     {
         try
