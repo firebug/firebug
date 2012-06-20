@@ -1,6 +1,6 @@
 <?php
-    setcookie("TestCookie44-JSON", "{person: {firstName: 'Jan', secondName: 'Honza', lastName: 'Odvarko'}}", mktime() + 86400, "/firecookie/tests/issue44", "", false, false);
-    setcookie("TestCookie44-XML", "<person><firstname>Jan</firstname><secondname>Honza</secondname><lastname>Odvarko</lastname></person>", mktime() + 86400, "/firecookie/tests/issue44", "", false, false);
+    setcookie("TestCookie44-JSON", "{person: {firstName: 'Jan', secondName: 'Honza', lastName: 'Odvarko'}}", time() + 86400, "/firecookie/tests/issue44", "", false, false);
+    setcookie("TestCookie44-XML", "<person><firstname>Jan</firstname><secondname>Honza</secondname><lastname>Odvarko</lastname></person>", time() + 86400, "/firecookie/tests/issue44", "", false, false);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">

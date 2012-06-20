@@ -2,11 +2,11 @@ function runTest()
 {
     FBTest.sysout("cookies.test.issue54; START");
 
-    FBTestFirebug.openNewTab(basePath + "cookies/54/issue54.php", function(win)
+    FBTest.openNewTab(basePath + "cookies/54/issue54.php", function(win)
     {
         FBTestFireCookie.enableCookiePanel(function(win)
         {
-            var panelNode = FBTestFirebug.selectPanel("cookies").panelNode;
+            var panelNode = FBTest.selectPanel("cookies").panelNode;
 
             var cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie54");
 
@@ -19,7 +19,7 @@ function runTest()
             FBTestFireCookie.verifyInfoTabContent(panelNode, "TestCookie54", "Value", "-!-");
             FBTestFireCookie.verifyInfoTabContent(panelNode, "TestCookie54", "RawValue", "-%21-");
 
-            FBTestFirebug.testDone("cookies.test.issue54; DONE");
+            FBTest.testDone("cookies.test.issue54; DONE");
         });
     });
 };

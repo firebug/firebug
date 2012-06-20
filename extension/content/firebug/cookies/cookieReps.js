@@ -128,7 +128,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                     DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
                 ),
                 TD({"class": "cookieSecurityCol cookieCol"},
-                    DIV({"class": "cookieLabel"}, "$cookie|isSecure")
+                    DIV({"class": "cookieSecurityLabel cookieLabel"}, "$cookie|isSecure")
                 ),
                 TD({"class": "cookieStatusCol cookieCol"},
                     DIV({"class": "cookieLabel"}, "$cookie|getStatus")

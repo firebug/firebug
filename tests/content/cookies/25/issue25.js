@@ -2,12 +2,12 @@ function runTest()
 {
     FBTest.sysout("cookies.test.issue25; START");
 
-    FBTestFirebug.openNewTab(basePath + "cookies/25/issue25.php", function(win)
+    FBTest.openNewTab(basePath + "cookies/25/issue25.php", function(win)
     {
         FBTestFireCookie.enableCookiePanel(function(win) 
         {
             var cookie = null;
-            var panelNode = FBTestFirebug.selectPanel("cookies").panelNode;
+            var panelNode = FBTest.selectPanel("cookies").panelNode;
 
             cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie25");
             if (!verifyCookie(cookie))
@@ -53,5 +53,5 @@ function editCookie(cookie, session)
 
 function testDone(message)
 {
-    return FBTestFirebug.testDone(message);
+    return FBTest.testDone(message);
 }

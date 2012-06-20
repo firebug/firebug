@@ -1,5 +1,5 @@
 <?php
-    setcookie("TestCookie34", "ValueCookie34", mktime() + 86400, "/firecookie", "", false, false);
+    setcookie("TestCookie34", "ValueCookie34", time() + 86400, "/firecookie", "", false, false);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -23,6 +23,6 @@
 <li>Use the dialog to change cookie's value.</li>
 <li>The value should be properly changed.</li>
 </ol>
-  
+
 </body>
 </html>
