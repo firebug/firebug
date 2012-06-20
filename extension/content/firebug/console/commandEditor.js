@@ -158,9 +158,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onExecute: function()
     {
-        var context = Firebug.currentContext;
+        var context = Firebug.currentContext, text;
         Firebug.CommandLine.update(context);
-        Firebug.CommandLine.enter(context);
+    	if(this.isCollapse === true)
+			Firebug.CommandLine.enter(context);
+		else
+			Firebug.CommandLine.enter(context, this.getSelection());
         return true;
     },
 
@@ -256,7 +259,24 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     {
         // TODO xxxHonza
     },
-
+	
+	getSelection: function()
+	{
+		var selection;
+		if(this.editor){
+			selection = this.editor.getSelection();
+			return this.getText().substring(selection.start, selection.end);
+		}
+	},
+	isCollapse: function(){
+		var selection, ret = true;
+		if(this.editor){
+			selection = this.editor.getSelection(); 
+			ret = (selection.start === selection.end);
+		}
+		return ret;
+	},
+	
     hasFocus: function()
     {
         try
