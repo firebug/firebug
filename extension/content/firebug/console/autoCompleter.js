@@ -11,9 +11,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/console/closureInspector",
+    "firebug/console/commandLineExposed",
     "firebug/editor/editor"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector, Editor) {
+function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector,
+    CommandLineExposed, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -207,7 +209,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completionBase.expr = preExpr;
             this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                preParsed, spreParsed, this.options.includeCurrentScope);
+                preParsed, spreParsed, this.options);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
@@ -2227,7 +2229,7 @@ function evalPropChain(out, preExpr, origExpr, context)
     return true;
 }
 
-function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, includeCurrentScope)
+function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, options)
 {
     var out = {
         spreExpr: spreExpr,
@@ -2280,7 +2282,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(out.window);
-            if (context.stopped && includeCurrentScope)
+            if (context.stopped && options.includeCurrentScope)
             {
                 out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
             }
@@ -2295,7 +2297,15 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
                 setCompletionsFromObject(out, context.global, context);
             }
 
-            // Also add names of variables declared previously in the typed code.
+            // Add things from the Command Line API, if we are signalled to,
+            // and it is not unavailable due to being stopped in the debugger
+            // (issue 5321).
+            if (options.includeCommandLineAPI && !context.stopped)
+            {
+                out.hiddenCompletions.push.apply(out.hiddenCompletions, CommandLineExposed.completionList);
+            }
+
+            // Add names of variables declared previously in the typed code.
             var previousDeclarations = getNewlyDeclaredNames(spreParsed);
             out.completions.push.apply(out.completions, previousDeclarations);
         }
