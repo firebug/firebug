@@ -247,13 +247,11 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     cleanupSheetHandler: function(event, context)
     {
-        var target = event.target,
-            tagName = (target.tagName || "").toLowerCase();
+        var target = event.target;
+        var tagName = (target.tagName || "").toLowerCase();
 
         if (tagName == "link")
-        {
             this.cleanupSheets(target.ownerDocument, context);
-        }
     },
 
     parseCSSValue: function(value, offset)
@@ -460,23 +458,19 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     watchWindow: function(context, win)
     {
-        var doc = win.document;
-
         if (!context.cleanupSheetListener)
             context.cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
 
-        context.addEventListener(doc, "DOMAttrModified", context.cleanupSheetListener, false);
-        context.addEventListener(doc, "DOMNodeInserted", context.cleanupSheetListener, false);
+        context.addEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
+        context.addEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
     },
 
     unwatchWindow: function(context, win)
     {
-        var doc = win.document;
-
         if (context.cleanupSheetListener)
         {
-            context.removeEventListener(doc, "DOMAttrModified", context.cleanupSheetListener, false);
-            context.removeEventListener(doc, "DOMNodeInserted", context.cleanupSheetListener, false);
+            context.removeEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
+            context.removeEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
         }
     },
 
