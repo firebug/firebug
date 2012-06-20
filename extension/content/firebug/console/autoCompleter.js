@@ -272,7 +272,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     /**
      * Choose a default candidate from the list of completions. The first of all
-     * shortest completions is current used for this.
+     * shortest completions is current used for this, except in some very hacky,
+     * but useful, special cases (issue 5593).
      */
     this.pickDefaultCandidate = function(prevCompletions)
     {
@@ -285,6 +286,30 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             ind = list.indexOf(lastCompletion);
             if (ind !== -1)
                 return ind;
+        }
+
+        // Special-case certain expressions.
+        var special = {
+            "": ["document", "console", "window", "parseInt", "undefined"],
+            "window.": ["console"],
+            "location.": ["href"],
+            "document.": ["getElementById", "addEventListener", "createElement",
+                "documentElement"]
+        };
+        if (special.hasOwnProperty(this.completionBase.expr))
+        {
+            var ar = special[this.completionBase.expr];
+            for (var i = 0; i < ar.length; ++i)
+            {
+                var prop = ar[i];
+                if (Str.hasPrefix(prop, this.completions.prefix))
+                {
+                    // Use 'prop' as a completion, if it exists.
+                    ind = list.indexOf(prop);
+                    if (ind !== -1)
+                        return ind;
+                }
+            }
         }
 
         ind = 0;
