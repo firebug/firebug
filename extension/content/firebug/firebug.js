@@ -75,6 +75,18 @@ var defaultFuncRep = null;
 var menuItemControllers = [];
 var panelTypeMap = {};
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+try
+{
+    // Register default Firebug string bundle (yet before domplate templates).
+    Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
+}
+catch (exc)
+{
+    dump("Register default string bundle FAILS: "+exc+"\n");
+}
+
 // ********************************************************************************************* //
 
 if (window.Firebug)
@@ -777,55 +789,28 @@ window.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (!Firebug.currentContext)
-        {
-            var context = Firebug.getContext();
-            // Be sure the UI is open for a newly created context.
-            forceOpen = true;
-        }
-
-        if (Firebug.isDetached())
-        {
-            if ( !Firebug.chrome.hasFocus() || forceOpen)
-            {
-                Firebug.chrome.focus();
-            } else
-            {
-                Firebug.minimizeBar();
-            }
-        }
-        // toggle minimize
-        else if (Firebug.isMinimized())
-        {
-            // be careful, unMinimize func always sets placement to
-            // inbrowser first then unminimizes. when we want to
-            // unminimize in detached mode must call detachBar func.
-            if (Firebug.framePosition == "detached")
-                this.detachBar();
-            else
-                Firebug.unMinimize();
-        }
-        // else isInBrowser
-        else if (!forceOpen)
-        {
-            Firebug.minimizeBar();
-        }
-        return true;
-    },
-
-    /**
-     * Get context for the current website
-     */
-    getContext: function()
-    {
         var webApp = Firebug.connection.getCurrentSelectedWebApp();
         var context = Firebug.connection.getContextByWebApp(webApp);
-        // we are not debugging the selected tab.
-        if (!context)
+        if (!context)  // then we are not debugging the selected tab
         {
             context = Firebug.connection.getOrCreateContextByWebApp(webApp);
+            forceOpen = true;  // Be sure the UI is open for a newly created context
         }
-        return context;
+        else  // we were debugging
+        {
+
+        }
+
+        if (Firebug.isDetached()) // if we are out of the browser focus the window
+            Firebug.chrome.focus();
+        else if (Firebug.framePosition == "detached")
+            this.detachBar();
+        else if (Firebug.isMinimized()) // toggle minimize
+            Firebug.unMinimize();
+        else if (!forceOpen)  // else isInBrowser
+            Firebug.minimizeBar();
+
+        return true;
     },
 
     /**
@@ -854,20 +839,10 @@ window.Firebug =
 
     minimizeBar: function()  // just pull down the UI, but don't deactivate the context
     {
-        if (Firebug.isDetached())
+        if (Firebug.isDetached())  // TODO disable minimize on externalMode
         {
             // TODO reattach
-
-            // window is closing in detached mode
-            if (Firebug.chrome.window.top)
-            {
-                topWindow = Firebug.chrome.window.top;
-                topWindow.exportFirebug();
-                topWindow.close();
-            }
-
-            Firebug.setPlacement("minimized");
-            this.showBar(false);
+            Firebug.toggleDetachBar(false, false);
             Firebug.chrome.focus();
         }
         else // inBrowser -> minimized
@@ -897,39 +872,24 @@ window.Firebug =
     // detached -> closed; inBrowser -> detached TODO reattach
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
-    
-        //detached -> inbrowser
-        if (!forceOpen && Firebug.isDetached())
+        if(Firebug.isDetached()) {
+            Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","false");
+        } else {
+            Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","true");
+        }
+
+        if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
             var topWin = Firebug.chrome.window.top;
             topWin.exportFirebug();
             topWin.close();
 
             if (reopenInBrowser)
-            {
-                // Is Firebug deactivated ? if yes, should be
-                // activated first, then unminimize.
-                if (!Firebug.currentContext)
-                {
-                    var context = Firebug.getContext();
-                }
                 Firebug.unMinimize();
-            }
             else
-            {
                 Firebug.minimizeBar();
-            }
-                
             Firebug.chrome.syncPositionPref();
         }
-        // is minimized now but the last time that has been closed, was in detached mode,
-        // so it should be returned to in browser mode because the user has pressed CTRL+F12.
-        else if (Firebug.framePosition == "detached" && Firebug.isMinimized())
-        {
-            Firebug.unMinimize();
-            Firebug.chrome.syncPositionPref();
-        }
-        // else is in browser mode, then switch to detached mode
         else
         {
             this.detachBar();
@@ -957,7 +917,7 @@ window.Firebug =
             return null;
         }
 
-        if (Firebug.chrome.waitingForDetach)
+        if(Firebug.chrome.waitingForDetach)
             return null;
         Firebug.chrome.waitingForDetach = true;
 
@@ -1011,7 +971,7 @@ window.Firebug =
         // Dispatch to non-module objects.
         Options.resetAllOptions(confirm);
 
-        // Dispatch to all modules so that additional settings can be reset.
+        // Dispatch to all modules so, additional settings can be reset.
         Events.dispatch(modules, "resetAllOptions", []);
     },
 
@@ -1371,7 +1331,7 @@ window.Firebug =
     {
         testLists.push({
             extension: "Firebug",
-            testListURL: "http://getfirebug.com/tests/head/firebug.html"
+            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.10.html"
         });
     }
 };
@@ -1418,10 +1378,10 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 // ********************************************************************************************* //
 
 /**
- * Support for listeners registration. This object is also extended by Firebug.Module,
- * so all modules supports listening automatically. Note that an array of listeners is
- * created for each intance of a module within the initialize method. Thus all derived
- * module classes must ensure that the Firebug.Module.initialize method is called for the
+ * Support for listeners registration. This object also extended by Firebug.Module so,
+ * all modules supports listening automatically. Notice that array of listeners
+ * is created for each intance of a module within initialize method. Thus all derived
+ * module classes must ensure that Firebug.Module.initialize method is called for the
  * super class.
  */
 Firebug.Listener = function()
