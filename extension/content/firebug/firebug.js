@@ -776,25 +776,18 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
-
-        var webApp = Firebug.connection.getCurrentSelectedWebApp();
-        var context = Firebug.connection.getContextByWebApp(webApp);
-
-        // then we are not debugging the selected tab
-        if (!context)
+        // if is deactivated.
+        if (!Firebug.currentContext)
         {
-            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
-
-            // Be sure the UI is open for a newly created context
+            var context = Firebug.getContext();
+            // Be sure the UI is open for a newly created context.
             forceOpen = true;
-        }
-        // we were debugging
-        else
-        {
         }
 
         if (Firebug.isDetached())
         {
+            //in detached mode, two possibilities exist, the firebug windows is 
+            // the active window of the user or no.
             if ( !Firebug.chrome.hasFocus() || forceOpen)
                 Firebug.chrome.focus();
             else
@@ -818,6 +811,21 @@ window.Firebug =
         }
 
         return true;
+    },
+
+    /**
+     * Get context for the current website
+     */
+    getContext: function()
+    {
+        var webApp = Firebug.connection.getCurrentSelectedWebApp();
+        var context = Firebug.connection.getContextByWebApp(webApp);
+        // we are not debugging the selected tab.
+        if (!context)
+        {
+            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
+        }
+        return context;
     },
 
     /**
@@ -886,7 +894,11 @@ window.Firebug =
         return true;
     },
 
-    // detached -> closed; inBrowser -> detached TODO reattach
+    /**
+     * function to switch between detached and inbrowser modes.
+     * @param forceOpen: should not be closed, stay open if open or open it.
+     * @param reopenInBrowser: switch from detahced to inbrowser mode.
+     */
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
         //detached -> inbrowser
@@ -897,9 +909,19 @@ window.Firebug =
             topWin.close();
 
             if (reopenInBrowser)
+            {
+                // Is Firebug deactivated ? if yes, should be
+                // activated at first, then unminimize.
+                if (!Firebug.currentContext)
+                {
+                    var context = Firebug.getContext();
+                }
                 Firebug.unMinimize();
+            }
             else
+            {
                 Firebug.minimizeBar();
+            }
 
             Firebug.chrome.syncPositionPref();
         }
@@ -910,7 +932,7 @@ window.Firebug =
             Firebug.unMinimize();
             Firebug.chrome.syncPositionPref();
         }
-        // else is in browser mode, then switch to detached mode
+        // else is in browser mode, then switch to detached mode.
         else
         {
             this.detachBar();
