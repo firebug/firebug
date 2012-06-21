@@ -38,7 +38,8 @@ function onMutateText(callback, win, id, inline)
     FBTest.progress("onMutateTest " + id);
 
     var mutateId = win.document.getElementById(id);
-    waitForHtmlMutation(null, inline ? "span" : "div", mutateId, callback);
+    waitForHtmlMutation(null, inline ? "span" : "div",
+        inline ? mutateId.parentNode : mutateId, callback);
 
     FBTest.click(win.document.getElementById(id + "Button"));
 }
@@ -48,8 +49,7 @@ function onMutateAttr(callback, win, id, attr, value)
     FBTest.progress("onMutateAttr " + id);
 
     var mutateId = win.document.getElementById(id);
-    waitForHtmlMutation(null, value ? "span" : "div",
-        value ? mutateId.firstChild : mutateId, callback);
+    waitForHtmlMutation(null, value ? "span" : "div", mutateId, callback);
 
     if (value)
         mutateId.firstChild.setAttribute(attr, value);
@@ -71,7 +71,7 @@ function onMutateNode(callback, win, id)
     }
 
     var mutateId = win.document.getElementById(id);
-    waitForHtmlMutation(null, "div", mutateId, done);
+    waitForHtmlMutation(null, "div", mutateId.parentNode, done);
     waitForHtmlMutation(null, "div", null, done);
 
     FBTest.click(win.document.getElementById(id + "Button"));
@@ -116,9 +116,9 @@ function waitForHtmlMutation(chrome, tagName, object, callback)
             if (!repObj)
                 repObj = FW.Firebug.getRepObject(node.getElementsByClassName("repTarget")[0]);
 
-            FBTest.compare(object.parentNode.innerHTML, repObj.parentNode.innerHTML, "Element matches");
-            FBTest.compare(object.innerHTML, repObj.innerHTML, "Content matches");
-            FBTest.compare(object, repObj, "Objects matches");
+            FBTest.compare(object.innerHTML, repObj.parentNode.innerHTML, "Element matches");
+            FBTest.compare(object.innerHTML, repObj.parentNode.innerHTML, "Content matches");
+            FBTest.compare(object, repObj.parentNode, "Objects matches");
         }
 
         callback(node);
