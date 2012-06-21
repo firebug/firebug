@@ -15,13 +15,15 @@ var FIREBUG_MODULES = [
     "resource://firebug/firebug-http-observer.js",
     "resource://firebug/firebug-service.js",
     "resource://firebug/firebug-trace-service.js",
+    "resource://firebug/gcli.js",
     "resource://firebug/loader.js",
     "resource://firebug/locale.js",
+    "resource://firebug/mini-require.js",
     "resource://firebug/observer-service.js",
+    "resource://firebug/prefLoader.js",
     "resource://firebug/require-debug.js",
     "resource://firebug/require.js",
-    "resource://firebug/storageService.js",
-    "resource://firebug/prefLoader.js"
+    "resource://firebug/storageService.js"
 ];
 
 Cu.import("resource://gre/modules/Services.jsm");
@@ -68,6 +70,9 @@ function startup(params, reason)
 
     // Listen for new windows, Firebug must be loaded into them too.
     Services.ww.registerNotification(windowWatcher);
+
+    // GCLI commands
+    Cu.import("resource://firebug/gcli.js");
 }
 
 function shutdown(params, reason)

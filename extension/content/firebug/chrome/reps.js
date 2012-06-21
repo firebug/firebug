@@ -3026,8 +3026,8 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         for (var i=0; i<object.length && i<max; i++)
         {
             var item = object.item(i);
-            var name = item.nodeName;
-            var value = item.nodeValue;
+            var name = item.name;
+            var value = item.value;
 
             var rep = Firebug.getRep(value);
             var tag = rep.tag;

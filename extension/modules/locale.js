@@ -12,7 +12,14 @@ var EXPORTED_SYMBOLS = [];
 // ********************************************************************************************* //
 // Services
 
-Cu.import("resource://firebug/fbtrace.js");
+// xxxHonza: FBTrace console doesn't have to exist at this point (Firebug is bootstrapped).
+// In such case an empty object is created and all consequent logs are not visible in the
+// console window.
+// Cu.import("resource://firebug/fbtrace.js");
+
+// Just workaround for this module.
+var FBTrace = {sysout: function(){}};
+
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://firebug/prefLoader.js");
 

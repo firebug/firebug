@@ -23,6 +23,11 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Persist, Menu, FBS) {
 
 // ********************************************************************************************* //
+// Constants
+
+const animationDuration = 0.8;
+
+ // ********************************************************************************************* //
 // Breakpoints
 
 Firebug.Breakpoint = Obj.extend(Firebug.Module,
@@ -107,6 +112,26 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
             Menu.createMenuItem(menuPopup, menuItems[i]);
     },
 
+    toggleTabHighlighting: function(event)
+    {
+        // Don't continue if it's the wrong animation phase
+        if (Math.floor(event.elapsedTime * 10) % (animationDuration * 20) != 0)
+            return;
+
+        Events.removeEventListener(event.target, "animationiteration",
+            Firebug.Breakpoint.toggleTabHighlighting, true);
+
+        var panel = Firebug.currentContext.getPanel(event.target.panelType.prototype.name);
+        if (!panel)
+            return;
+
+        if (!panel.context.delayedArmedTab)
+            return;
+
+        panel.context.delayedArmedTab.setAttribute("breakOnNextArmed", "true");
+        delete panel.context.delayedArmedTab;
+    },
+
     updateBreakOnNextTooltips: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn", "breakable");
@@ -145,7 +170,34 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(panel.name);
         if (tab)
-            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
+        {
+            if (armed)
+            {
+                // If there is already a panel armed synchronize highlighting of the panel tabs
+                var tabPanel = tab.parentNode;
+                var otherTabIsArmed = false;
+                for (var i = 0; i < tabPanel.children.length; ++i)
+                {
+                    var panelTab = tabPanel.children[i];
+                    if (panelTab !== tab && panelTab.getAttribute("breakOnNextArmed") == "true")
+                    {
+                        panel.context.delayedArmedTab = tab;
+                        Events.addEventListener(panelTab, "animationiteration",
+                            this.toggleTabHighlighting, true);
+                        otherTabIsArmed = true;
+                        break;
+                    }
+                }
+
+                if (!otherTabIsArmed)
+                    tab.setAttribute("breakOnNextArmed", "true");
+            }
+            else
+            {
+                delete panel.context.delayedArmedTab;
+                tab.setAttribute("breakOnNextArmed", "false");
+            }
+        }
     },
 
     updatePanelTabs: function(context)
@@ -360,10 +412,19 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             var sourceLink = node.repObject;
 
             panel.noRefresh = true;
-            if (event.target.checked)
+            var checkBox = event.target;
+            var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+            if (checkBox.checked)
+            {
                 this.enableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "true");
+            }
             else
+            {
                 this.disableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "false");
+            }
             panel.noRefresh = false;
         }
         else if (Dom.getAncestorByClass(event.target, "closeButton"))

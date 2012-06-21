@@ -1,5 +1,5 @@
 <?php
-    setcookie("TestCookie18", "1 + 2 = 3", mktime() + 86400, "/");
+    setcookie("TestCookie18", "1 + 2 = 3", time() + 86400, "/");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">

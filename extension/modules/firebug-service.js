@@ -1257,14 +1257,20 @@ var fbs =
             if (!url)
                 continue;
 
-            var urlBreakpoints = fbs.getBreakpoints(url);
+            var urlBreakpointsTemp = fbs.getBreakpoints(url);
 
             if (FBTrace.DBG_FBS_BP)
+            {
                 FBTrace.sysout("fbs.clearAllBreakpoints " + url + " urlBreakpoints: " +
-                    (urlBreakpoints ? urlBreakpoints.length : "null"));
+                    (urlBreakpointsTemp ? urlBreakpointsTemp.length : "null"));
+            }
 
-            if (!urlBreakpoints)
+            if (!urlBreakpointsTemp)
                 continue;
+
+            // Clone before iteration the array is modified within the loop.
+            var urlBreakpoints = [];
+            urlBreakpoints.push.apply(urlBreakpoints, urlBreakpointsTemp);
 
             for (var ibp=0; ibp<urlBreakpoints.length; ibp++)
             {
@@ -1279,9 +1285,13 @@ var fbs =
     {
         if (url)
         {
-            var urlBreakpoints = fbs.getBreakpoints(url);
-            if (urlBreakpoints)
+            var urlBreakpointsTemp = fbs.getBreakpoints(url);
+            if (urlBreakpointsTemp)
             {
+                // Clone before iteration (the array can be modified in the callback).
+                var urlBreakpoints = [];
+                urlBreakpoints.push.apply(urlBreakpoints, urlBreakpointsTemp);
+
                 for (var i = 0; i < urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
@@ -1349,7 +1359,27 @@ var fbs =
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
-            fbs.saveBreakpoints(url);  // after every call to onToggleBreakpoint
+
+            // after every call to onToggleBreakpoint
+            fbs.saveBreakpoints(url);
+        }
+    },
+
+    clearErrorBreakpoints: function(sourceFiles, debuggr)
+    {
+        for (var i=0; i<sourceFiles.length; ++i)
+        {
+            var url = sourceFiles[i].href;
+            if (!url)
+                continue;
+
+            fbs.enumerateErrorBreakpoints(url,
+            {
+                call: function(url, lineNo)
+                {
+                    fbs.clearErrorBreakpoint(url, lineNo, debuggr);
+                }
+            });
         }
     },
 
@@ -1360,20 +1390,24 @@ var fbs =
 
     enumerateErrorBreakpoints: function(url, cb)
     {
+        // Clone breakpoints array before iteration. The callback could modify it.
+        var copyBreakpoints = [];
+        copyBreakpoints.push.apply(copyBreakpoints, errorBreakpoints);
+
         if (url)
         {
-            for (var i = 0; i < errorBreakpoints.length; ++i)
+            for (var i=0; i<copyBreakpoints.length; ++i)
             {
-                var bp = errorBreakpoints[i];
+                var bp = copyBreakpoints[i];
                 if (bp.href == url)
                     cb.call(bp.href, bp.lineNo, bp);
             }
         }
         else
         {
-            for (var i = 0; i < errorBreakpoints.length; ++i)
+            for (var i=0; i<copyBreakpoints.length; ++i)
             {
-                var bp = errorBreakpoints[i];
+                var bp = copyBreakpoints[i];
                 cb.call(bp.href, bp.lineNo, bp);
             }
         }

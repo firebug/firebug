@@ -51,7 +51,7 @@ var Breakpoints =
         if (context.breakOnCookie && !conditionIsFalse)
         {
             context.breakingCause = {
-                title: Locale.$STR("firecookie.Break On Cookie"),
+                title: Locale.$STR("cookies.Break On Cookie"),
                 message: Str.cropString(unescape(cookie.name + "; " + cookie.value), 200)
             };
             halt = true;
@@ -81,42 +81,8 @@ var Breakpoints =
         {
             var panel = context.getPanel(panelName, true);
             Firebug.Breakpoint.updatePanelTab(panel, false);
-
-            // xxxHonza: fix this
-            // Don't utilize Firebug.Breakpoint.breakNow since the code doesn't
-            // exclude firecookie files from the stack (chrome://firecookie/)
-            // Firebug.Debugger.breakNowURLPrefix must be changed to: "chrome://",
-            //Firebug.Breakpoint.breakNow(context.getPanel(panelName, true));
-            //return;
+            Firebug.Breakpoint.breakNow(context.getPanel(panelName, true));
         }
-
-        Firebug.Debugger.halt(function(frame)
-        {
-            if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.breakNow; debugger halted");
-
-            for (; frame && frame.isValid; frame = frame.callingFrame)
-            {
-                var fileName = frame.script.fileName;
-                if (fileName &&
-                    fileName.indexOf("chrome://firebug/") != 0 &&
-                    fileName.indexOf("chrome://firecookie/") != 0 &&
-                    fileName.indexOf("/components/firebug-") == -1 &&
-                    fileName.indexOf("/modules/firebug-") == -1)
-                    break;
-            }
-
-            if (frame)
-            {
-                Firebug.Debugger.breakContext = context;
-                Firebug.Debugger.onBreak(frame, 3);
-            }
-            else
-            {
-                if (FBTrace.DBG_COOKIES)
-                    FBTrace.sysout("cookies.breakNow; NO FRAME");
-            }
-        });
     },
 
     getContextMenuItems: function(cookie, target, context)
@@ -129,8 +95,8 @@ var Breakpoints =
 
         items.push({
             nol10n: true,
-            tooltiptext: Locale.$STRF("firecookie.menu.tooltip.Break On Cookie", [cookieName]),
-            label: Locale.$STRF("firecookie.menu.Break On Cookie", [cookieName]),
+            tooltiptext: Locale.$STRF("cookies.menu.tooltip.Break On Cookie", [cookieName]),
+            label: Locale.$STRF("cookies.menu.Break On Cookie", [cookieName]),
             type: "checkbox",
             checked: bp != null,
             command: Obj.bindFixed(this.onBreakOnCookie, this, context, cookie),
@@ -139,7 +105,7 @@ var Breakpoints =
         if (bp)
         {
             items.push(
-                {label: "firecookie.menu.Edit Breakpoint Condition",
+                {label: "cookies.menu.Edit Breakpoint Condition",
                     command: Obj.bindFixed(this.editBreakpointCondition, this, context, cookie) }
             );
         }
@@ -225,9 +191,9 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
     tag:
         DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", _repObject: "$bp",
             role: "option", "aria-checked": "$bp.checked"},
-            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
+            DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : "-1"}),
+                    _checked: "$bp.checked", tabindex: "-1", onclick: "$onEnable"}),
                 SPAN("$bp|getTitle"),
                 DIV({"class": "breakpointMutationType"}, "$bp|getType"),
                 IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
@@ -288,15 +254,18 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!Css.hasClass(checkBox, "breakpointCheckbox"))
-            return;
-
         var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
 
         if (checkBox.checked)
+        {
             Css.removeClass(bpRow, "disabled");
+            bpRow.setAttribute("aria-checked", "true");
+        }
         else
+        {
             Css.setClass(bpRow, "disabled");
+            bpRow.setAttribute("aria-checked", "false");
+        }
 
         var bp = bpRow.repObject;
         bp.checked = checkBox.checked;
@@ -407,7 +376,7 @@ Breakpoints.Breakpoint.prototype =
             return;
 
         context.breakingCause = {
-            title: Locale.$STR("firecookie.Break On Cookie"),
+            title: Locale.$STR("cookies.Break On Cookie"),
             message: Str.cropString(unescape(this.name + "; " + this.condition + "; "), 200)
         };
     },
@@ -418,8 +387,8 @@ Breakpoints.Breakpoint.prototype =
             FBTrace.sysout("cookies.onEvaluateFails; " + result, result);
 
         context.breakingCause = {
-            title: Locale.$STR("firecookie.Break On Cookie"),
-            message: Locale.$STR("firecookie.Breakpoint condition evaluation fails"),
+            title: Locale.$STR("cookies.Break On Cookie"),
+            message: Locale.$STR("cookies.Breakpoint condition evaluation fails"),
             prevValue: this.condition, newValue:result
         };
     }

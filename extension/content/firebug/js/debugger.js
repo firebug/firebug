@@ -756,6 +756,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             var units = context.getAllCompilationUnits();
             FBS.clearAllBreakpoints(units, Firebug.Debugger);
+            FBS.clearErrorBreakpoints(units, Firebug.Debugger);
         }
         else
         {
@@ -766,12 +767,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 if (bp.debuggerName !== Firebug.Debugger.debuggerName)
                     return;
 
-                // then we want to clear only one context,
-                // so skip URLs in other contexts
-                if (context && !context.getCompilationUnit(url))
-                    return;
-
                 FBS.clearBreakpoint(url, lineNo);
+            }});
+
+            // and also error breakpoints
+            FBS.enumerateErrorBreakpoints(null, {call: function(url, lineNo)
+            {
+                FBS.clearErrorBreakpoint(url, lineNo, Firebug.Debugger);
             }});
         }
     },

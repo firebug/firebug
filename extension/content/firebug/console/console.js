@@ -389,7 +389,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     setStatus: function()
     {
-        var fbStatus = Firefox.getElementById('firebugStatus');
+        var fbStatus = Firefox.getElementById("firebugStatus");
         if (fbStatus)
         {
             if (Firebug.Errors.watchForErrors)

@@ -1153,7 +1153,6 @@ if (version)
 // ********************************************************************************************* //
 // First Run Page
 
-var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 function checkFirebugVersion(currentVersion)
@@ -1169,42 +1168,26 @@ function checkFirebugVersion(currentVersion)
     return versionChecker.compare(version, currentVersion);
 }
 
-var SessionObserver =
+if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
 {
-    observe: function(subjet, topic, data)
+    // Open the page in the top most window, so the user can see it immediately.
+    if (wm.getMostRecentWindow("navigator:browser") == window.top)
     {
-        if (topic != "sessionstore-windows-restored")
-            return;
+        // Don't forget to update the preference, so the page is not displayed again
+        PrefLoader.setPref("currentVersion", version);
 
-        //xxxHonza: Removing observer at this moment is risky. What if the registration
-        // is done too late and the even never come?
-        observerService.removeObserver(SessionObserver, "sessionstore-windows-restored");
-
-        setTimeout(function()
+        if (PrefLoader.getPref("showFirstRunPage"))
         {
-            // Open the page in the top most window, so the user can see it immediately.
-            if (wm.getMostRecentWindow("navigator:browser") != window.top)
-                return;
-
-            // Avoid opening of the page in another browser window.
-            if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
-            {
-                // Don't forget to update the preference, so the page is not displayed again
-                PrefLoader.setPref("currentVersion", version);
-
-                if (PrefLoader.getPref("showFirstRunPage"))
-                    Firebug.GlobalUI.visitWebsite("firstRunPage",  version);
-            }
-        }, 500);
+            setTimeout(function() {
+                var version = Firebug.GlobalUI.getVersion();
+                Firebug.GlobalUI.visitWebsite("firstRunPage", version);
+            }, 100);
+        }
     }
 }
 
-var currentVersion = PrefLoader.getPref("currentVersion");
-if (checkFirebugVersion(currentVersion) > 0)
-    observerService.addObserver(SessionObserver, "sessionstore-windows-restored", false);
-
 // ********************************************************************************************* //
-// Context Menu Workaround
+// Firefox Page Context Menu
 
 if (typeof(nsContextMenu) != "undefined")
 {
@@ -1216,6 +1199,17 @@ if (typeof(nsContextMenu) != "undefined")
         if (this.isTargetAFormControl(aNode))
             this.shouldDisplay = true;
     };
+
+    // Hide built-in inspector if the pref says so.
+    var initItemsOriginal = nsContextMenu.prototype.initItems;
+    nsContextMenu.prototype.initItems = function()
+    {
+        initItemsOriginal.apply(this, arguments);
+
+        var showInspect = !PrefLoader.getPref("hideDefaultInspector");
+        this.showItem("inspect-separator", showInspect);
+        this.showItem("context-inspect", showInspect);
+    }
 }
 
 // ********************************************************************************************* //

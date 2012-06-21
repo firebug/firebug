@@ -55,6 +55,7 @@ function loadDefaultPrefs(path, fileName)
  */
 function clearDefaultPrefs(domain)
 {
+    domain = domain || PrefLoader.prefDomain;
     var pb = Services.prefs.getDefaultBranch(domain);
 
     var names = pb.getChildList("");

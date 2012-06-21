@@ -7,7 +7,6 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/js/sourceLink",
     "firebug/lib/css",
@@ -28,9 +27,8 @@ define([
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu,
-    Options, CSSModule, CSSInfoTip) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
+    Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -384,7 +382,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         var isSystemSheet = Url.isSystemStyleSheet(styleSheet);
 
-        function appendRules(cssRules)
+        var rules = [];
+        var appendRules = function(cssRules)
         {
             var i, props, ruleId;
 
@@ -416,12 +415,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 }
                 else if (rule instanceof window.CSSCharsetRule)
                 {
-                  rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
+                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSMediaRule ||
                     rule instanceof window.CSSMozDocumentRule)
                 {
-                    appendRules.apply(this, [Css.safeGetCSSRules(rule)]);
+                    appendRules(Css.safeGetCSSRules(rule));
                 }
                 else if (rule instanceof window.CSSFontFaceRule)
                 {
@@ -455,10 +454,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
                 }
             }
-        }
+        }.bind(this);
 
-        var rules = [];
-        appendRules.apply(this, [Css.safeGetCSSRules(styleSheet)]);
+        appendRules(Css.safeGetCSSRules(styleSheet));
         return rules;
     },
 
@@ -614,6 +612,71 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         Firebug.Editor.insertRowForObject(styleRuleBox);
+    },
+
+    addRelatedRule: function()
+    {
+        if (!this.panelNode.getElementsByClassName("cssElementRuleContainer")[0])
+        {
+            // The element did not have any displayed styles - create the whole
+            // tree and remove the no styles message.
+            this.template.cascadedTag.replace({
+                rules: [], inherited: [],
+                inheritLabel: Locale.$STR("InheritedFrom")
+            }, this.panelNode);
+        }
+
+        // Insert the new rule at the top, or after the style rules if there
+        // are any.
+        var container = this.panelNode.getElementsByClassName("cssNonInherited")[0];
+        var ruleBox = container.getElementsByClassName("cssElementRuleContainer")[0];
+        var styleRuleBox = ruleBox && Firebug.getElementByRepObject(ruleBox, this.selection);
+        if (styleRuleBox)
+            ruleBox = this.template.newRuleTag.insertAfter({}, ruleBox);
+        else if (ruleBox)
+            ruleBox = this.template.newRuleTag.insertBefore({}, ruleBox);
+        else
+            ruleBox = this.template.newRuleTag.append({}, container);
+
+        var before = ruleBox.getElementsByClassName("insertBefore")[0];
+        Firebug.Editor.insertRow(before, "before");
+
+        // Auto-fill the selector field with something reasonable, like
+        // ".some-class" or "#table td".
+        var el = this.selection, doc = el.ownerDocument;
+        var base = Xml.getNodeName(el), autofill;
+        if (el.className)
+        {
+            autofill = "." + Arr.cloneArray(el.classList).join(".");
+        }
+        else
+        {
+            var level = 0;
+            el = el.parentNode;
+            while (!autofill && el !== doc)
+            {
+                ++level;
+                if (el.id !== "")
+                    autofill = "#" + el.id;
+                else if (el.className !== "")
+                    autofill = "." + Arr.cloneArray(el.classList).join(".");
+                el = el.parentNode;
+            }
+            if (autofill)
+            {
+                if (level === 1)
+                    autofill += " >";
+                autofill += " " + base;
+            }
+        }
+        if (!autofill ||
+            doc.querySelectorAll(autofill).length === doc.querySelectorAll(base).length)
+        {
+            autofill = base;
+        }
+        this.ruleEditor.setValue(autofill);
+        this.ruleEditor.input.select();
+        Firebug.Editor.update(true);
     },
 
     editMediaQuery: function(target)
@@ -884,13 +947,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var rules = [];
         if (styleSheet)
         {
-            // Skip ignored stylesheets, but don't skip the
-            // default stylesheet that is used in case there is no other stylesheet
-            // on the page.
-            var shouldIgnore = Firebug.shouldIgnore(styleSheet.ownerNode);
-            var contentView = Wrapper.getContentView(styleSheet);
-            var isDefault = contentView && contentView.defaultStylesheet;
-            if (!shouldIgnore || isDefault)
+            if (!Css.shouldIgnoreSheet(styleSheet))
             {
                 if (styleSheet.editStyleSheet)
                     styleSheet = styleSheet.editStyleSheet.sheet;
@@ -1279,6 +1336,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     getDefaultLocation: function()
     {
+        // Note: We can't do makeDefaultStyleSheet here, because that could be
+        // damaging for special pages (see e.g. issues 2440, 3688).
         try
         {
             var styleSheets = this.context.window.document.styleSheets;
@@ -1852,7 +1911,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // Add the magic inherit property, if it's sufficiently alone.
             if (!preExpr)
                 keywords = keywords.concat(["inherit"]);
-            return keywords;
+
+            return stripCompletedParens(keywords, postExpr);
         }
     },
 
@@ -1871,6 +1931,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (range.type === "fontFamily")
             return ",";
         return " ";
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
@@ -2098,7 +2165,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             // take care of media rules
             var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;
-            if(!styleSheet)
+            if (!styleSheet)
                 return;
 
             var cssRules = styleSheet.cssRules;
@@ -2114,23 +2181,24 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            if (this.panel.name != "stylesheet")
-                return;
-
-            var styleSheet = this.panel.location;//this must be stylesheet panel
-            if (!styleSheet)
+            var styleSheet;
+            if (this.panel.name === "stylesheet")
             {
-                // If there is no stylesheet on the page we need to create a temporary one,
-                // in order to make a place where to put (custom) user provided rules.
-                // If this code would be in this.getDefaultLocation the default stylesheet
-                // would be created automatically for all pages with not styles, which
-                // could be damaging for special pages (see eg issue 2440)
-                // At this moment the user edits the styles so some CSS changes on the page
-                // are expected.
-                var doc = this.panel.context.window.document;
-                var style = Css.appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-                Wrapper.getContentView(style).defaultStylesheet = true;
-                this.panel.location = styleSheet = style.sheet;
+                styleSheet = this.panel.location;
+                if (!styleSheet)
+                {
+                    var doc = this.panel.context.window.document;
+                    this.panel.location = styleSheet =
+                        CSSModule.getDefaultStyleSheet(doc);
+                }
+            }
+            else
+            {
+                if (this.panel.name !== "css")
+                    return;
+
+                var doc = this.panel.selection.ownerDocument.defaultView.document;
+                styleSheet = CSSModule.getDefaultStyleSheet(doc);
             }
 
             styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
@@ -2153,7 +2221,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // changes.
         if (value)
         {
-            var cssText = [ value, "{", ];
+            var cssText = [ value, "{" ];
             var props = row.getElementsByClassName("cssProp");
             for (var i = 0; i < props.length; i++)
             {
@@ -2176,12 +2244,14 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 rule = cssRules[insertLoc];
                 ruleIndex++;
 
-                var saveSuccess = this.panel.name != "css";
+                var saveSuccess = (this.panel.name != "css");
                 if (!saveSuccess)
-                    saveSuccess =(this.panel.selection &&
-                        this.panel.selection.mozMatchesSelector(value))? true: 'almost';
+                {
+                    saveSuccess = (this.panel.selection &&
+                        this.panel.selection.mozMatchesSelector(value)) ? true : 'almost';
+                }
 
-                this.box.setAttribute('saveSuccess',saveSuccess);
+                this.box.setAttribute('saveSuccess', saveSuccess);
             }
             catch (err)
             {
@@ -2194,7 +2264,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     'selectorSavingError{}', ruleIndex);
                 rule = cssRules[insertLoc];
 
-                this.box.setAttribute('saveSuccess',false);
+                this.box.setAttribute('saveSuccess', false);
 
                 row.repObject = rule;
                 return;
@@ -2247,8 +2317,21 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return [];
 
         // Don't support attribute selectors, for now.
-        if (preExpr.lastIndexOf('[') > preExpr.lastIndexOf(']'))
+        if (preExpr.lastIndexOf("[") > preExpr.lastIndexOf("]"))
             return [];
+
+        if (preExpr.lastIndexOf("(") > preExpr.lastIndexOf(")"))
+        {
+            // We are in an parenthesized expression, where we can only complete
+            // for a few particular pseudo-classes that take selector-like arguments.
+            var par = preExpr.lastIndexOf("("), colon = preExpr.lastIndexOf(":", par);
+            if (colon === -1)
+                return;
+            var allowed = ["-moz-any", "not", "-moz-empty-except-children-with-localname"];
+            var name = preExpr.substring(colon+1, par);
+            if (allowed.indexOf(name) === -1)
+                return [];
+        }
 
         var includeTagNames = true;
         var includeIds = true;
@@ -2355,7 +2438,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 ":before"
             );
 
-            ret.push.apply(ret, Css.pseudoClasses);
+            ret.push.apply(ret, stripCompletedParens(Css.pseudoClasses, postExpr));
         }
 
         if (includePseudoElements)
@@ -2407,6 +2490,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // For e.g. 'd|span', expand to a descendant selector; otherwise assume
         // that this is part of the same selector part.
         return (reSelectorChar.test(prefixOf.charAt(0)) ? " " : "");
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
     },
 
     advanceToNext: function(target, charCode)
@@ -2565,18 +2655,37 @@ Firebug.CSSDirtyListener.prototype =
         prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
-        this.markSheetDirty(styleSheet);
+        if (styleSheet)
+            this.markSheetDirty(styleSheet);
     },
 
     onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
-        this.markSheetDirty(styleSheet);
+        if (styleSheet)
+            this.markSheetDirty(styleSheet);
     }
 };
 
 // ********************************************************************************************* //
 // Local Helpers
+
+// Transform completions so that they don't add additional parentheses when
+// ones already exist.
+function stripCompletedParens(list, postExpr)
+{
+    var c = postExpr.charAt(0), rem = 0;
+    if (c === "(")
+        rem = 2;
+    else if (c === ")")
+        rem = 1;
+    else
+        return list;
+    return list.map(function(cl)
+    {
+        return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
+    });
+}
 
 function parsePriority(value)
 {

@@ -180,6 +180,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             FBTrace.sysout("Completing: " + this.completionBase.pre + sep + preExpr + sep + prop);
         }
 
+        var prevCompletions = this.completions;
+
         // We only need to calculate a new candidate list if the expression has
         // changed (we can ignore this.completionBase.pre since completions do not
         // depend upon that).
@@ -188,17 +190,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completionBase.expr = preExpr;
             this.completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr,
                 this.options.includeCurrentScope);
+            prevCompletions = null;
         }
 
-        this.createCompletions(prop);
+        this.createCompletions(prop, prevCompletions);
     };
 
     /**
      * From a valid completion base, create a list of completions (containing
      * those completion candidates that share a (sometimes case-insensitive)
-     * prefix with the user's input) and a default completion.
+     * prefix with the user's input) and a default completion. The completions
+     * for the previous expression (null if none) are used to help with the
+     * latter.
      */
-    this.createCompletions = function(prefix)
+    this.createCompletions = function(prefix, prevCompletions)
     {
         var candidates = this.completionBase.candidates;
         var valid = [], ciValid = [];
@@ -247,7 +252,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix
             };
-            this.pickDefaultCandidate();
+            this.completions.index = this.pickDefaultCandidate(prevCompletions);
 
             if (hasMatchingCase)
             {
@@ -266,20 +271,54 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Chose a default candidate from the list of completions. This is currently
-     * selected as the shortest completion, to make completions disappear when
-     * typing a variable name that is also the prefix of another.
+     * Choose a default candidate from the list of completions. The first of all
+     * shortest completions is current used for this, except in some very hacky,
+     * but useful, special cases (issue 5593).
      */
-    this.pickDefaultCandidate = function()
+    this.pickDefaultCandidate = function(prevCompletions)
     {
-        var pick = 0;
-        var ar = this.completions.list;
-        for (var i = 1; i < ar.length; i++)
+        var list = this.completions.list, ind;
+
+        // If the typed expression is an extension of the previous completion, keep it.
+        if (prevCompletions && Str.hasPrefix(this.completions.prefix, prevCompletions.prefix))
         {
-            if (ar[i].length < ar[pick].length)
-                pick = i;
+            var lastCompletion = prevCompletions.list[prevCompletions.index];
+            ind = list.indexOf(lastCompletion);
+            if (ind !== -1)
+                return ind;
         }
-        this.completions.index = pick;
+
+        // Special-case certain expressions.
+        var special = {
+            "": ["document", "console", "window", "parseInt", "undefined"],
+            "window.": ["console"],
+            "location.": ["href"],
+            "document.": ["getElementById", "addEventListener", "createElement",
+                "documentElement"]
+        };
+        if (special.hasOwnProperty(this.completionBase.expr))
+        {
+            var ar = special[this.completionBase.expr];
+            for (var i = 0; i < ar.length; ++i)
+            {
+                var prop = ar[i];
+                if (Str.hasPrefix(prop, this.completions.prefix))
+                {
+                    // Use 'prop' as a completion, if it exists.
+                    ind = list.indexOf(prop);
+                    if (ind !== -1)
+                        return ind;
+                }
+            }
+        }
+
+        ind = 0;
+        for (var i = 1; i < list.length; ++i)
+        {
+            if (list[i].length < list[ind].length)
+                ind = i;
+        }
+        return ind;
     };
 
     /**
