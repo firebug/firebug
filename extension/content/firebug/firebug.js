@@ -902,9 +902,6 @@ window.Firebug =
                 Firebug.minimizeBar();
 
             Firebug.chrome.syncPositionPref();
-
-            // To enable minimize button in detached mode
-            Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","false");
         }
         // is minimized now but the last time that has been closed, was in detached mode,
         // so it should be returned to in browser mode because the user has pressed CTRL+F12.
@@ -954,9 +951,6 @@ window.Firebug =
         }
 
         Firebug.chrome.syncPositionPref("detached");
-
-        // To disable minimize button in detached mode
-        Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","true");
 
         return Firefox.openWindow("Firebug",
             "chrome://firebug/content/firefox/firebug.xul",
