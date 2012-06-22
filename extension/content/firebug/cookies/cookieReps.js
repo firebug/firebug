@@ -39,19 +39,6 @@ const Ci = Components.interfaces;
 const lastSortedColumn = "cookies.lastSortedColumn";
 const hiddenColsPref = "cookies.hiddenColumns";
 
-// Cookie status & policy
-var STATUS_UNKNOWN = Ci.nsICookie2.STATUS_UNKNOWN;
-var STATUS_ACCEPTED = Ci.nsICookie2.STATUS_ACCEPTED;
-var STATUS_DOWNGRADED = Ci.nsICookie2.STATUS_DOWNGRADED;
-var STATUS_FLAGGED = Ci.nsICookie2.STATUS_FLAGGED;
-var STATUS_REJECTED = Ci.nsICookie2.STATUS_REJECTED;
-
-var POLICY_UNKNOWN = Ci.nsICookie2.POLICY_UNKNOWN;
-var POLICY_NONE = Ci.nsICookie2.POLICY_NONE;
-var POLICY_NO_CONSENT = Ci.nsICookie2.POLICY_NO_CONSENT;
-var POLICY_IMPLICIT_CONSENT = Ci.nsICookie2.POLICY_IMPLICIT_CONSENT;
-var POLICY_NO_II = Ci.nsICookie2.POLICY_NO_II;
-
 const panelName = "cookies";
 
 // ********************************************************************************************* //
@@ -129,9 +116,6 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 ),
                 TD({"class": "cookieSecurityCol cookieCol"},
                     DIV({"class": "cookieSecurityLabel cookieLabel"}, "$cookie|isSecure")
-                ),
-                TD({"class": "cookieStatusCol cookieCol"},
-                    DIV({"class": "cookieLabel"}, "$cookie|getStatus")
                 )
             )
         ),
@@ -281,48 +265,6 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     isSecure: function(cookie)
     {
         return cookie.cookie.isSecure ? Locale.$STR("cookies.secure.label") : "";
-    },
-
-    getStatus: function(cookie)
-    {
-        if (!cookie.cookie.status)
-            return "";
-
-        switch (cookie.cookie.status)
-        {
-            case STATUS_UNKNOWN:
-                return "";
-            case STATUS_ACCEPTED:
-                return Locale.$STR("cookies.status.accepted");
-            case STATUS_DOWNGRADED:
-                return Locale.$STR("cookies.status.downgraded");
-            case STATUS_FLAGGED:
-                return Locale.$STR("cookies.status.flagged");
-            case STATUS_REJECTED:
-                return Locale.$STR("cookies.status.rejected");
-        }
-
-        return "";
-    },
-
-    getPolicy: function(cookie)
-    {
-        switch (cookie.cookie.policy)
-        {
-            //xxxHonza localization
-            case POLICY_UNKNOWN:
-                return "POLICY_UNKNOWN";
-            case POLICY_NONE:
-                return "POLICY_NONE";
-            case POLICY_NO_CONSENT:
-                return "POLICY_NO_CONSENT";
-            case POLICY_IMPLICIT_CONSENT:
-                return "POLICY_IMPLICIT_CONSENT";
-            case POLICY_NO_II:
-                return "POLICY_NO_II";
-        }
-
-        return "";
     },
 
     // Firebug rep support
@@ -1070,12 +1012,6 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                         DIV({"class": "cookieHeaderCellBox",
                             title: Locale.$STR("cookies.header.security.tooltip")}, 
                         Locale.$STR("cookies.header.security"))
-                    ),
-                    TD({id: "colStatus", role: "columnheader",
-                        "class": "cookieHeaderCell alphaValue a11yFocus"},
-                        DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.status.tooltip")}, 
-                        Locale.$STR("cookies.header.status"))
                     )
                 )
             )
