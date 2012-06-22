@@ -1789,6 +1789,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+
         if (propName == "font" || propName == "font-family")
             return CSSModule.parseCSSFontFamilyValue(value, offset, propName);
         else
@@ -1906,6 +1907,18 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     }
                 }
                 keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
+            }
+
+            // Don't complete minus signs into -moz-calc (issue 5603). (Unless we
+            // have other specialized values as completions, like '-moz-available',
+            // in which case completion is still interesting.)
+            var isMoz = function(x)
+            {
+                return (x.charAt(0) === "-");
+            };
+            if (expr === "-" && keywords.filter(isMoz).join(",") === "-moz-calc()")
+            {
+                keywords = [];
             }
 
             // Add the magic inherit property, if it's sufficiently alone.
