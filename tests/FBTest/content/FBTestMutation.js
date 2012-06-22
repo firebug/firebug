@@ -215,7 +215,7 @@ MutationRecognizer.prototype.matches = function(elt, event)
 
 function removeWhitespaces(value)
 {
-    return value.replace(/[\r\n\s*]/gm, "");
+    return value.replace(/[\r\n\s]+/g, "");
 }
 
 // ********************************************************************************************* //
