@@ -2128,7 +2128,7 @@ this.waitForHtmlMutation = function(chrome, tagName, callback)
     // corresponding element.
     var mutated = new MutationRecognizer(view, tagName, attributes);
     mutated.matches = matches;
-    mutated.onRecognizeAsync(function onMutate(node)
+    mutated.onRecognize(function onMutate(node)
     {
         // Now wait till the HTML panel unhighlight the element (removes the mutate class)
         var unmutated = new MutationRecognizer(view, tagName, null, null, attributes);

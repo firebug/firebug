@@ -14,6 +14,8 @@
    // now fire a UI event
  */
 
+// ********************************************************************************************* //
+
 /**
  * This object is intended for handling HTML changes that can occur on a page.
  * This is useful e.g. in cases when a test expects specific element to be created and
@@ -31,12 +33,10 @@ var MutationRecognizer = function(win, tagName, attributes, text, changedAttribu
 {
    this.win = win;
    this.tagName = tagName;
-   this.attributes = attributes;
+   this.attributes = attributes || {};
    this.characterData = text;
-   if (changedAttributes)
-       this.changedAttributes = changedAttributes;
-   else
-       this.changedAttributes = attributes;
+
+   this.changedAttributes = changedAttributes;
 };
 
 MutationRecognizer.prototype.getDescription = function()
@@ -86,13 +86,13 @@ MutationRecognizer.prototype.getWindow = function()
     return this.win;
 };
 
-MutationRecognizer.prototype.matches = function(elt)
+MutationRecognizer.prototype.matches = function(elt, event)
 {
     // Note Text nodes have no tagName
     if (this.tagName == "Text")
     {
         // The content must be exactly the same to avoid coincidental matches.
-        // Yet better way is to specify classes of the parent element (changedAttributes).
+        // Yet better way is to specify classes of the parent element (attributes).
         if (elt.data && elt.data == this.characterData)
         {
             if (FBTrace.DBG_TESTCASE_MUTATION)
@@ -102,13 +102,13 @@ MutationRecognizer.prototype.matches = function(elt)
             var parentNode = elt.parentNode;
 
             // If a class is specified the parent of the text node must match.
-            if (this.changedAttributes && this.changedAttributes["class"] &&
-                !FW.FBL.hasClass.apply(FW.FBL, [parentNode, this.changedAttributes["class"]]))
+            if (this.attributes && this.attributes["class"] &&
+                !FW.FBL.hasClass.apply(FW.FBL, [parentNode, this.attributes["class"]]))
             {
                 if (FBTrace.DBG_TESTCASE_MUTATION)
                     FBTrace.sysout("MutationRecognizer no match for class " +
                         this.attributes[p]+" vs "+eltP+" p==class: "+(p=='class') +
-                        " indexOf: "+eltP.indexOf(this.changedAttributes[p]));
+                        " indexOf: "+eltP.indexOf(this.attributes[p]));
                 return null;
             }
 
@@ -186,10 +186,39 @@ MutationRecognizer.prototype.matches = function(elt)
         }
     }
 
+    // If the attribute name is 'class' and the value is specified, check
+    // that value has been removed
+    if (this.changedAttributes)
+    {
+        if (!this.changedAttributes[event.attrName])
+            return null;
+
+        var watchValue = this.changedAttributes[event.attrName];
+        if (!watchValue)
+            return null;
+
+        if (event.attrName != "class")
+            return null;
+
+        var result = diffString(event.prevValue, event.newValue);
+        result = removeWhitespaces(result);
+
+        var value = "<del>" + watchValue + "</del>";
+        if (result.indexOf(value) == -1)
+            return null;
+    }
+
     // tagName and all attributes match
     FBTest.sysout("MutationRecognizer tagName and all attributes match "+elt, elt);
     return elt;
 };
+
+function removeWhitespaces(value)
+{
+    return value.replace(/[\r\n\s]+/g, "");
+}
+
+// ********************************************************************************************* //
 
 /** @class */
 function MutationEventFilter(recognizer, handler)
@@ -204,15 +233,20 @@ function MutationEventFilter(recognizer, handler)
             throw "WINDOW CLOSED watching:: "+(filter.recognizer.win.closed?
                 "closed":filter.recognizer.win.location)+" closed window: "+filter.winName;
 
-        if (!recognizer.changedAttributes)
-            return; // we don't care about attribute mutation
-
         if (FBTrace.DBG_TESTCASE_MUTATION)
-            FBTrace.sysout("onMutateAttr "+event.attrName+"=>"+event.newValue+" on "+event.target+
-                " in "+event.target.ownerDocument.location, event.target);
+        {
+            FBTrace.sysout("onMutateAttr " + event.attrName + "=>" + event.newValue +
+                " (" + event.prevValue + ") " +
+                " on " + event.target + " in " + event.target.ownerDocument.location,
+                event.target);
+        }
+
+        var attrs = recognizer.attributes;
+        var changed = recognizer.changedAttributes;
 
         // We care about some attribute mutation.
-        if (!recognizer.changedAttributes.hasOwnProperty(event.attrName))
+        if (!attrs.hasOwnProperty(event.attrName) &&
+            !(changed && changed.hasOwnProperty(event.attrName)))
         {
             if (FBTrace.DBG_TESTCASE_MUTATION)
                 FBTrace.sysout("onMutateAttr not interested in "+event.attrName+"=>"+event.newValue+
@@ -222,10 +256,10 @@ function MutationEventFilter(recognizer, handler)
 
         try
         {
-            if (filter.checkElement(event.target))
+            if (filter.checkElement(event.target, event))
                 handler(event.target);
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_TESTCASE_MUTATION)
                 FBTrace.sysout("onMutateNode FAILS "+exc, exc);
@@ -243,7 +277,7 @@ function MutationEventFilter(recognizer, handler)
 
         try
         {
-            var child = filter.checkElementDeep(event.target);
+            var child = filter.checkElementDeep(event.target, event);
             if (child)
                 handler(child);
         }
@@ -280,9 +314,9 @@ function MutationEventFilter(recognizer, handler)
 
     // TODO: xxxpedro
     //filter.checkElement = function(elt)
-    this.checkElement = function(elt)
+    this.checkElement = function(elt, event)
     {
-        var element = recognizer.matches(elt);
+        var element = recognizer.matches(elt, event);
         if (element)
         {
             filter.unwatchWindow(recognizer.getWindow());
@@ -293,9 +327,9 @@ function MutationEventFilter(recognizer, handler)
 
     // TODO: xxxpedro
     //filter.checkElementDeep = function(elt)
-    this.checkElementDeep = function(elt)
+    this.checkElementDeep = function(elt, event)
     {
-        var element = filter.checkElement(elt);
+        var element = filter.checkElement(elt, event);
         if (element)
         {
             return element;
@@ -305,7 +339,7 @@ function MutationEventFilter(recognizer, handler)
             var child = elt.firstChild;
             for (; child; child = child.nextSibling)
             {
-                var element = this.checkElementDeep(child);
+                var element = this.checkElementDeep(child, event);
                 if (element)
                     return element;
             }
