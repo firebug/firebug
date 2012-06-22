@@ -838,7 +838,7 @@ Css.cssInfo.html =
     "float": ["float"],
 
     // specification of font families in "font" is special-cased
-    "font": ["fontStyle", "fontVariant", "fontWeight", "fontSize", "lineHeight", "mozFont", "length"],
+    "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize", "length"],
     "font-size-adjust": ["none"],
@@ -904,7 +904,7 @@ Css.cssInfo.html =
     "vertical-align": ["verticalAlign", "length"],
     "visibility": ["visibility"],
     "white-space": ["whiteSpace"],
-    "width": ["width", "auto"],
+    "width": ["width", "length", "auto"],
     "word-spacing": ["normal", "length"],
     "word-wrap": ["wordWrap"], // FF 3.5
     "z-index": ["auto"],
@@ -1003,7 +1003,7 @@ Css.cssInfo.svg =
     "filter": ["url()", "none"],
     "flood-color": ["currentColor"],
     "flood-opacity": [],
-    "font": ["fontStyle", "fontSize", "fontVariant", "fontWeight"],
+    "font": ["fontStyle", "fontSize", "fontVariant", "namedFontWeight"],
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
     "font-size-adjust": [],
@@ -1702,6 +1702,18 @@ Css.cssKeywords =
     [
         "normal",
         "small-caps"
+    ],
+
+    // Named font-weight values, worth completing in "font"
+    "namedFontWeight":
+    [
+        // Absolute keywords
+        "normal",
+        "bold",
+
+        // Relative keywords
+        "bolder",
+        "lighter"
     ],
 
     "fontWeight":
