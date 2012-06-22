@@ -563,6 +563,16 @@ this.isDetached = function()
     return FW.Firebug.isDetached();
 };
 
+this.isMinimized = function()
+{
+    return FW.Firebug.isMinimized();
+};
+
+this.isInBrowser = function()
+{
+    return FW.Firebug.isInBrowser();
+};
+
 /**
  * Detach Firebug into a new separate window.
  */
