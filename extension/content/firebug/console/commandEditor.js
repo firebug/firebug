@@ -90,14 +90,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        try
-        {
-            this.editor.removeEventListener("keypress", this.onKeyPress);
-        }
-        catch (err)
-        {
-        }
-
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.removeEventListener(TEXT_CHANGED, this.onTextChanged);
 
@@ -111,18 +103,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
-        try
-        {
-            // This event is not supported in Fx11, so catch the exception
-            // which is thrown.
-            this.editor.addEventListener("keypress", this.onKeyPress);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERROR)
-                FBTrace.sysout("commandEditor.onEditorLoad; EXCEPTION " + err, err);
-        }
-
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.addEventListener(TEXT_CHANGED, this.onTextChanged);
@@ -138,32 +118,11 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Keyboard shortcuts
 
-    onKeyPress: function(event)
-    {
-        Firebug.CommandLine.update(Firebug.currentContext);
-
-        switch (event.keyCode)
-        {
-            case KeyEvent.DOM_VK_RETURN:
-                if (Events.isControl(event))
-                    this.onExecute();
-            break;
-
-            case KeyEvent.DOM_VK_ESCAPE:
-                this.onEscape();
-                event.preventDefault();
-            break;
-        }
-    },
-
     onExecute: function()
     {
         var context = Firebug.currentContext;
         Firebug.CommandLine.update(context);
-        if (this.isCollapsed())
-            Firebug.CommandLine.enter(context);
-        else
-            Firebug.CommandLine.enter(context, this.getSelection());
+        Firebug.CommandLine.enter(context);
         return true;
     },
 
@@ -188,7 +147,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Contex Menu
+    // Context Menu
 
     onContextMenu: function(event)
     {
@@ -260,13 +219,15 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         // TODO xxxHonza
     },
 
-    getSelection: function()
+    // returns the applicable commands
+    getCommands: function()
     {
-        var selection;
         if (this.editor)
         {
-            selection = this.editor.getSelection();
-            return this.getText().substring(selection.start, selection.end);
+            if(this.isCollapsed())
+                return this.getText();
+            else
+                return this.editor.getSelectedText();
         }
     },
 
@@ -316,7 +277,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
 Firebug.CommandEditor.__defineGetter__("value", function()
 {
-    return this.getText();
+    return this.getText(); 
 });
 
 Firebug.CommandEditor.__defineSetter__("value", function(val)
@@ -395,10 +356,26 @@ TextEditor.prototype =
         this.textBox.setSelection(start, end);
     },
 
+    getSelection: function()
+    {
+        return {
+            start: this.textBox.selectionStart,
+            end: this.textBox.selectionEnd
+        };
+    },
+
     hasFocus: function()
     {
         return this.textBox.getAttribute("focused") == "true";
-    }
+    },
+
+    getSelectedText: function()
+    {
+        var start = this.textBox.selectionStart;
+        var end = this.textBox.selectionEnd;
+
+        return this.textBox.value.substring(start, end);
+    } 
 }
 
 // ********************************************************************************************* //

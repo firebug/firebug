@@ -405,7 +405,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enter: function(context, command)
     {
-        var expr = command ? command : this.getCommandLine(context).value;
+        var expr = command ? command : this.getCommandLine(context).getCommands();
         if (expr == "")
             return;
 
@@ -532,7 +532,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     update: function(context)
     {
         var commandLine = this.getCommandLine(context);
-        context.commandLineText = commandLine.value;
+        context.commandLineText = commandLine.getCommands();
+        if(FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.update; commandLineText: "+context.commandLineText);
     },
 
     // xxxsz: setMultiLine should just be called when switching between Command Line
@@ -972,6 +974,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     getCommandEditor: function()
     {
         return Firebug.CommandEditor;
+    },
+
+    // returns the applicable commands
+    getCommands: function()
+    {
+        // for CommandLine, we return its whole content
+        return this.value;
     }
 });
 
