@@ -388,7 +388,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
         if (criteria(node.parentNode))
             return node.parentNode;
 
-        return Dom.findPrevious(node.parentNode, criteria, true);
+        return Dom.findPrevious(node.parentNode, criteria, true, maxRoot);
     }
 };
 
