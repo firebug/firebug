@@ -405,7 +405,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enter: function(context, command)
     {
-        var expr = command ? command : this.getCommandLine(context).getCommands();
+        var expr = command ? command : this.getCommands(context);
         if (expr == "")
             return;
 
@@ -532,9 +532,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     update: function(context)
     {
         var commandLine = this.getCommandLine(context);
-        context.commandLineText = commandLine.getCommands();
-        if(FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.update; commandLineText: "+context.commandLineText);
+        context.commandLineText = commandLine.value;
     },
 
     // xxxsz: setMultiLine should just be called when switching between Command Line
@@ -951,14 +949,23 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getCommandLine: function(context)
     {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor():
+                this.getSingleRowCommandLine();
+    },
+
+    isInOtherPanel: function(context)
+    {
         // Command line on other panels is never multiline.
         var visible = Firebug.CommandLine.Popup.isVisible();
-        if (visible && context.panelName != "console")
-            return this.getSingleRowCommandLine();
+        return visible && context.panelName != "console";
+    },
 
-        return Firebug.commandEditor
-            ? this.getCommandEditor()
-            : this.getSingleRowCommandLine();
+    getCommands: function(context)
+    {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor().getCommands() :
+                this.getSingleRowCommandLine().value;
     },
 
     getCompletionBox: function()
@@ -974,14 +981,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     getCommandEditor: function()
     {
         return Firebug.CommandEditor;
-    },
-
-    // returns the applicable commands
-    getCommands: function()
-    {
-        // for CommandLine, we return its whole content
-        return this.value;
     }
+
 });
 
 // ********************************************************************************************* //

@@ -277,7 +277,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
 Firebug.CommandEditor.__defineGetter__("value", function()
 {
-    return this.getText(); 
+    return this.getText();
 });
 
 Firebug.CommandEditor.__defineSetter__("value", function(val)
