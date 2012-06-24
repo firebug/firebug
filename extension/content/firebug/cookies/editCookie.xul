@@ -63,6 +63,9 @@
                 <textbox id="fcValue" flex="1" multiline="true" rows="3"/>
             </row>
             <hbox>
+                <checkbox id="fbURLEncodeValue" label="cookies.edit.urlEncode.label"/>
+            </hbox>
+            <hbox>
                 <checkbox id="fcSecure" label="cookies.edit.secure.label"/>
                 <checkbox id="fcHttpOnly" label="cookies.edit.httponly.label"/>
             </hbox>
