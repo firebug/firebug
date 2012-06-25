@@ -173,12 +173,12 @@ Dom.addScript = function(doc, id, src)
 
 Dom.setOuterHTML = function(element, html)
 {
-    var doc = element.ownerDocument;
-    var range = doc.createRange();
-    range.selectNode(element || doc.documentElement);
-
     try
     {
+        var doc = element.ownerDocument;
+        var range = doc.createRange();
+        range.selectNode(element || doc.documentElement);
+
         var fragment = range.createContextualFragment(html);
         var first = fragment.firstChild;
         var last = fragment.lastChild;
@@ -187,7 +187,7 @@ Dom.setOuterHTML = function(element, html)
     }
     catch (e)
     {
-        return [element, element]
+        return [element, element];
     }
 };
 

@@ -2308,7 +2308,16 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     {
         this.target = target;
         this.panel = panel;
-        this.editingElements = [target.repObject, null];
+        var el = target.repObject;
+        if (this.innerEditMode)
+        {
+            this.editingParent = el;
+        }
+        else
+        {
+            this.editingRange = el.ownerDocument.createRange();
+            this.editingRange.selectNode(el);
+        }
 
         this.panel.panelNode.appendChild(this.box);
 
@@ -2326,38 +2335,33 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 
         this.panel.panelNode.removeChild(this.box);
 
-        delete this.editingElements;
+        delete this.editingParent;
+        delete this.editingRange;
         delete this.target;
         delete this.panel;
     },
 
     saveEdit: function(target, value, previousValue)
     {
-        // Remove all of the nodes in the last range we created, except for
-        // the first one, because setOuterHTML will replace it
-        var first = this.editingElements[0], last = this.editingElements[1];
-        if (last && last != first)
-        {
-            for (var child = first.nextSibling; child;)
-            {
-                var next = child.nextSibling;
-                child.parentNode.removeChild(child);
-                if (child == last)
-                    break;
-                else
-                    child = next;
-            }
-        }
-
-        // Make sure that we create at least one node here, even if it's just
-        // an empty space, because this code depends on having something to replace
-        if (!value)
-            value = " ";
-
         if (this.innerEditMode)
-            this.editingElements[0].innerHTML = value;
+        {
+            this.editingParent.innerHTML = value;
+        }
         else
-            this.editingElements = Dom.setOuterHTML(this.editingElements[0], value);
+        {
+            try
+            {
+                var range = this.editingRange;
+                var fragment = range.createContextualFragment(value);
+
+                var cnl = fragment.childNodes.length;
+                range.deleteContents();
+                range.insertNode(fragment);
+                var sc = range.startContainer, so = range.startOffset;
+                range.setEnd(sc, so + cnl);
+            }
+            catch (e) {}
+        }
 
         var element = Firebug.getRepObject(target);
         if (!element)
