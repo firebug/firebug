@@ -541,9 +541,7 @@ $command("cmd_disablePanels", "Firebug.PanelActivation.disableAllPanels()");
 $command("cmd_clearActivationList", "Firebug.PanelActivation.clearAnnotations()");
 $command("cmd_clearConsole", "Firebug.Console.clear(Firebug.currentContext)");
 $command("cmd_allOn", "Firebug.PanelActivation.toggleAll('on')");
-$command("cmd_toggleOrient", ""); //todo
-$command("cmd_toggleOrient", ""); //todo
-$command("cmd_toggleOrient", ""); //todo
+$command("cmd_toggleOrient", "Firebug.chrome.toggleOrient()");
 $command("cmd_toggleProfiling", ""); //todo
 
 $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event)");
