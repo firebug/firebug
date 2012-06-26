@@ -8,7 +8,7 @@ function runTest()
         FBTest.sysout("cookieInfo; Check cookie entry in the Cookies panel");
 
         // Open Firebug UI and enable Net panel.
-        FBTestFireCookie.enableCookiePanel(function(win) 
+        FBTestFireCookie.enableCookiePanel(function(win)
         {
             // Make sure the Cookie panel's UI is there.
             FBTest.openFirebug(true);
@@ -25,11 +25,14 @@ function runTest()
                 FBTest.compare("Test Cookie Value", value.textContent, "Value of the cookie validation");
 
                 var uri = FW.FBL.makeURI(basePath);
+                var expectedDomain = uri.host;
                 var domain = cookieRow.getElementsByClassName("cookieDomainLabel").item(0);
-                // Unguarded to find out what parts of the URI can be used for comparison
-                // Will be removed after the test
-                FBTrace.sysout("uri", uri);
-                FBTest.compare(uri.host, domain.textContent, "Domain of the cookie validation");
+
+                // Add a dot to the domain name in case of a public domain like 'getfirebug.com'
+                if (domain.textContent != uri.host && uri.host.indexOf(".") != -1)
+                    expectedDomain = "." + expectedDomain;
+
+                FBTest.compare(expectedDomain, domain.textContent, "Domain of the cookie validation");
 
                 var size = cookieRow.getElementsByClassName("cookieSizeLabel").item(0);
                 FBTest.compare("31 B", size.textContent, "Size of the cookie validation");

@@ -3,7 +3,7 @@
     $value = 'Test Cookie Value';
     $expire = time() + 86400;
     $path = '/';
-    $domain = $_SERVER['HTTP_HOST'];
+    $domain = strpos($_SERVER['HTTP_HOST'], '.') === false ? $_SERVER['HTTP_HOST'] : '.'.$_SERVER['HTTP_HOST'];
     $secure = true;
     $httpOnly = true;
 
