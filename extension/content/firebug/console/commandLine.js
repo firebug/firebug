@@ -405,7 +405,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enter: function(context, command)
     {
-        var expr = command ? command : this.getCommands(context);
+        var expr = command ? command : this.getExpression(context);
         if (expr == "")
             return;
 
@@ -961,10 +961,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         return visible && context.panelName != "console";
     },
 
-    getCommands: function(context)
+    getExpression: function(context)
     {
         return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
-                this.getCommandEditor().getCommands() :
+                this.getCommandEditor().getExpression() :
                 this.getSingleRowCommandLine().value;
     },
 

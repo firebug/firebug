@@ -220,18 +220,19 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     },
 
     // returns the applicable commands
-    getCommands: function()
+    getExpression: function()
     {
         if (this.editor)
         {
-            if(this.isCollapsed())
+            if (this.isCollapsed())
                 return this.getText();
             else
                 return this.editor.getSelectedText();
         }
     },
 
-    isCollapsed: function(){
+    isCollapsed: function()
+    {
         var selection;
         if (this.editor)
         {
