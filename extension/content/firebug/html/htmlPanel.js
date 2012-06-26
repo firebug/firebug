@@ -133,20 +133,19 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     stopEditing: function()
     {
         Firebug.Editor.stopEditing();
+
+        // After mutation listeners have made the element appear in the panel,
+        // re-select it (and also update the disable state of the "Edit" button).
+        this.context.delay(function()
+        {
+            this.select(this.selection, true);
+        }.bind(this));
     },
 
     isEditing: function()
     {
         var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
         return (this.editing && editButton.getAttribute("checked") === "true");
-    },
-
-    // Update the Edit button to reflect editability of the selection
-    setEditEnableState: function(ignoreEditing)
-    {
-        var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
-        editButton.disabled = (this.selection && (!this.isEditing() || ignoreEditing) &&
-            Css.nonEditableTags.hasOwnProperty(this.selection.localName));
     },
 
     resetSearch: function()
@@ -170,7 +169,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selection = object;
             this.updateSelection(object);
 
-            this.setEditEnableState();
+            // Update the Edit button to reflect editability of the selection.
+            // (Except during editing, when it should always be possible to click it.)
+            var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
+            editButton.disabled = (this.selection && !this.isEditing() &&
+                Css.nonEditableTags.hasOwnProperty(this.selection.localName));
 
             // Distribute selection change further to listeners.
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
@@ -2386,7 +2389,6 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     endEditing: function()
     {
         //this.panel.markChange();
-        this.panel.setEditEnableState(true);
         return true;
     },
 
