@@ -26,6 +26,9 @@ function runTest()
 
                 var uri = FW.FBL.makeURI(basePath);
                 var domain = cookieRow.getElementsByClassName("cookieDomainLabel").item(0);
+                // Unguarded to find out what parts of the URI can be used for comparison
+                // Will be removed after the test
+                FBTrace.sysout("uri", uri);
                 FBTest.compare(uri.host, domain.textContent, "Domain of the cookie validation");
 
                 var size = cookieRow.getElementsByClassName("cookieSizeLabel").item(0);
