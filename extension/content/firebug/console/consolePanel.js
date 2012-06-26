@@ -467,6 +467,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         function logText(text, row)
         {
+            Css.setClass(row, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
             row.appendChild(node);
         }
