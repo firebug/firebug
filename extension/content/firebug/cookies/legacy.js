@@ -35,27 +35,40 @@ var CookieLegacy = Obj.extend(Firebug.Module,
     {
         // Detect whether Firecookie is installed. This extension has been integrated
         // with Firebug and so, should not be installed together with Firebug 1.10+
-        if (Firebug.FireCookieModel)
-        {
-            if (prompts.confirm(null, Locale.$STR("Firebug"),
-                Locale.$STR("cookies.legacy.firecookie_detected")))
-            {
-                this.uninstallAddon();
-            }
-        }
+        if (!Firebug.FireCookieModel)
+            return;
+
+        // See https://developer.mozilla.org/en/nsIPromptService#confirmEx%28%29
+        // for configuration details.
+        var check = {value: false};
+        var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_IS_STRING +
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_IS_STRING +
+            prompts.BUTTON_POS_2 * prompts.BUTTON_TITLE_CANCEL +
+            prompts.BUTTON_POS_0_DEFAULT;
+
+        var index = prompts.confirmEx(null, Locale.$STR("Firebug"),
+            Locale.$STR("cookies.legacy.firecookie_detected"), flags,
+            Locale.$STR("cookies.legacy.uninstall_and_restart"),
+            Locale.$STR("cookies.legacy.uninstall"),
+            "", null, check);
+
+        // Bail out if the user presses Cancel.
+        if (index == 2)
+            return;
+
+        // Let's uninstall, restart will follow if button #0 has been clicked.
+        this.uninstallAddon(index == 0);
     },
 
-    uninstallAddon: function()
+    uninstallAddon: function(restart)
     {
         AddonManager.getAddonByID("firecookie@janodvarko.cz", function(addon)
         {
+            // Uninstall is synchronous.
             addon.uninstall();
 
-            if (prompts.confirm(null, Locale.$STR("Firebug"),
-                Locale.$STR("cookies.legacy.restart_firefox")))
-            {
+            if (restart)
                 app.quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
-            }
         });
     }
 });
