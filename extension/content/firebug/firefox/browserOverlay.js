@@ -1176,10 +1176,19 @@ if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
 
         if (PrefLoader.getPref("showFirstRunPage"))
         {
-            setTimeout(function() {
+            var timeout = setTimeout(function()
+            {
+                if (window.closed)
+                    return;
+
                 var version = Firebug.GlobalUI.getVersion();
                 Firebug.GlobalUI.visitWebsite("firstRunPage", version);
-            }, 100);
+            }, 1000);
+
+            window.addEventListener("unload", function()
+            {
+                clearTimeout(timeout);
+            }, false);
         }
     }
 }
