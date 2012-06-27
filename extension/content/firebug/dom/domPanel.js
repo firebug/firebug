@@ -641,6 +641,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     addMember: function(object, type, props, name, value, level, order, context)
     {
+        try
+        {
+            this.addMemberInternal.apply(this, arguments);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domPanel.addMember; EXCEPTION " + err, err);
+        }
+    },
+
+    addMemberInternal: function(object, type, props, name, value, level, order, context)
+    {
         // do this first in case a call to instanceof reveals contents
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
