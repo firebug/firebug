@@ -1,7 +1,7 @@
 // Global
 pref("extensions.firebug.cookies.logEvents", false);
 pref("extensions.firebug.cookies.clearWhenDeny", true);
-pref("extensions.firebug.cookies.filterByPath", false);
+pref("extensions.firebug.cookies.filterByPath", true);
 pref("extensions.firebug.cookies.showRejectedCookies", false);
 pref("extensions.firebug.cookies.defaultExpireTime", 3600);
 pref("extensions.firebug.cookies.lastSortedColumn", "");

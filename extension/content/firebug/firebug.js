@@ -508,6 +508,20 @@ window.Firebug =
 
     registerPanel: function()
     {
+        for (var i=0; i<arguments.length; ++i)
+        {
+            var panelName = arguments[i].prototype.name;
+            var panel = panelTypeMap[panelName];
+            if (panel)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("firebug.registerPanel; ERROR a panel with the same " +
+                        "ID already registered! " + panelName);
+                }
+            }
+        }
+
         // In order to keep built in panels (like Console, Script...) be the first one
         // and insert all panels coming from extension at the end, catch any early registered
         // panel (i.e. before FBL.initialize is called, such as YSlow) in a temp array
@@ -517,13 +531,13 @@ window.Firebug =
         else
             panelTypes.push.apply(panelTypes, arguments);
 
-        for (var i = 0; i < arguments.length; ++i)
+        for (var i=0; i<arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
 
         if (FBTrace.DBG_REGISTRATION)
         {
-            for (var i = 0; i < arguments.length; ++i)
-                FBTrace.sysout("registerPanel "+arguments[i].prototype.name);
+            for (var i=0; i<arguments.length; ++i)
+                FBTrace.sysout("registerPanel " + arguments[i].prototype.name);
         }
 
         // If Firebug is not initialized yet the UI will be updated automatically soon.
@@ -776,25 +790,18 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
-
-        var webApp = Firebug.connection.getCurrentSelectedWebApp();
-        var context = Firebug.connection.getContextByWebApp(webApp);
-
-        // then we are not debugging the selected tab
-        if (!context)
+        // if is deactivated.
+        if (!Firebug.currentContext)
         {
-            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
-
-            // Be sure the UI is open for a newly created context
+            var context = Firebug.getContext();
+            // Be sure the UI is open for a newly created context.
             forceOpen = true;
-        }
-        // we were debugging
-        else
-        {
         }
 
         if (Firebug.isDetached())
         {
+            //in detached mode, two possibilities exist, the firebug windows is 
+            // the active window of the user or no.
             if ( !Firebug.chrome.hasFocus() || forceOpen)
                 Firebug.chrome.focus();
             else
@@ -818,6 +825,21 @@ window.Firebug =
         }
 
         return true;
+    },
+
+    /**
+     * Get context for the current website
+     */
+    getContext: function()
+    {
+        var webApp = Firebug.connection.getCurrentSelectedWebApp();
+        var context = Firebug.connection.getContextByWebApp(webApp);
+        // we are not debugging the selected tab.
+        if (!context)
+        {
+            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
+        }
+        return context;
     },
 
     /**
@@ -886,7 +908,11 @@ window.Firebug =
         return true;
     },
 
-    // detached -> closed; inBrowser -> detached TODO reattach
+    /**
+     * function to switch between detached and inbrowser modes.
+     * @param forceOpen: should not be closed, stay open if open or open it.
+     * @param reopenInBrowser: switch from detahced to inbrowser mode.
+     */
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
         //detached -> inbrowser
@@ -897,14 +923,21 @@ window.Firebug =
             topWin.close();
 
             if (reopenInBrowser)
+            {
+                // Is Firebug deactivated ? if yes, should be
+                // activated at first, then unminimize.
+                if (!Firebug.currentContext)
+                {
+                    var context = Firebug.getContext();
+                }
                 Firebug.unMinimize();
+            }
             else
+            {
                 Firebug.minimizeBar();
+            }
 
             Firebug.chrome.syncPositionPref();
-
-            // To enable minimize button in detached mode
-            Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","false");
         }
         // is minimized now but the last time that has been closed, was in detached mode,
         // so it should be returned to in browser mode because the user has pressed CTRL+F12.
@@ -913,7 +946,7 @@ window.Firebug =
             Firebug.unMinimize();
             Firebug.chrome.syncPositionPref();
         }
-        // else is in browser mode, then switch to detached mode
+        // else is in browser mode, then switch to detached mode.
         else
         {
             this.detachBar();
@@ -954,9 +987,6 @@ window.Firebug =
         }
 
         Firebug.chrome.syncPositionPref("detached");
-
-        // To disable minimize button in detached mode
-        Firebug.chrome.$("fbMinimizeButton").setAttribute("disabled","true");
 
         return Firefox.openWindow("Firebug",
             "chrome://firebug/content/firefox/firebug.xul",

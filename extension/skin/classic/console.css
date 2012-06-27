@@ -155,7 +155,8 @@
 }
 
 .objectBox-null,
-.objectBox-undefined {
+.objectBox-undefined,
+.logRowHint {
     font-style: italic;
     color: #787878;
 }

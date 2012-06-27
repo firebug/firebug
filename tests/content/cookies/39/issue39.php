@@ -1,5 +1,5 @@
 <?php
-    setcookie("TestCookie39", "CookieValue;39", mktime() + 86400, "/firecookie/tests/issue39");
+    setcookie("TestCookie39", "CookieValue;39", time() + 86400, "/firecookie/tests/issue39");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -19,7 +19,6 @@
 
 <ol>
 <li>Open Firebug and enable the <b>Cookies</b> panel.</li>
-<li></li>
 </ol>
 
 <button onclick="onExecuteTest()">Execute Test</button>

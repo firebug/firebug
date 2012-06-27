@@ -1,5 +1,5 @@
 <?php
-    setcookie("TestCookie50", "CookieValue50", mktime() + 86400, "/", ".janodvarko.cz", false, false);
+    setcookie("TestCookie50", "CookieValue50", time() + 86400, "/", ".janodvarko.cz", false, false);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">

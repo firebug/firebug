@@ -53,6 +53,7 @@ EditCookie.prototype =
         this.sessionNode = $("fcSession", this.window);
         this.secureNode = $("fcSecure", this.window);
         this.httpOnly = $("fcHttpOnly", this.window);
+        this.URLEncodeValue = $("fbURLEncodeValue", this.window);
 
         // Fix for issue 39: decode cookie name and value for usage in the dialog.
         // It'll be encoded again when OK is pressed.
@@ -66,6 +67,7 @@ EditCookie.prototype =
         this.pathNode.value = this.cookie.path;
         this.secureNode.checked = this.cookie.isSecure;
         this.httpOnly.checked = this.cookie.isHttpOnly;
+        this.URLEncodeValue.checked = this.cookie.rawValue != unescape(this.cookie.rawValue);
 
         if (this.cookie.expires)
         {
@@ -99,7 +101,8 @@ EditCookie.prototype =
     fcInternationalizeUI: function()
     {
         var elements = ["fcEditCookieDlg", "fcNameLabel", "fcIsDomainLabel", "fcPathLabel",
-            "fcExpireLabel", "fcSession", "fcValueLabel", "fcSecure", "fcHttpOnly"];
+            "fcExpireLabel", "fcSession", "fcValueLabel", "fcSecure", "fcHttpOnly",
+            "fbURLEncodeValue"];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -132,7 +135,8 @@ EditCookie.prototype =
         cookieName = cookieName.replace(/\;/g, "%3B");
 
         // According to the spec cookie value must be escaped
-        var cookieValue = escape(cookieValue);
+        if (this.URLEncodeValue.checked)
+            cookieValue = escape(cookieValue);
 
         // Issue 45: When I copy and paste or edit a cookie contents + (plus) signs
         // get converted to spaces.

@@ -1,5 +1,5 @@
 <?php
-    setcookie("TestCookie45", "aaa+bbb", mktime() + 86400, "/firecookie/tests/issue45");
+    setcookie("TestCookie45", "aaa+bbb", time() + 86400, "/firecookie/tests/issue45");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">

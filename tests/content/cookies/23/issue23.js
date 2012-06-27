@@ -6,20 +6,20 @@ function runTest()
 
     currentBaseURI = FW.FBL.makeURI(basePath);
 
-    FBTestFirebug.clearCache();
+    FBTest.clearCache();
 
-    FBTestFirebug.openNewTab(basePath + "cookies/23/issue23.php", function(win)
+    FBTest.openNewTab(basePath + "cookies/23/issue23.php", function(win)
     {
         FBTestFireCookie.enableCookiePanel(function(win) 
         {
-            var panelNode = FBTestFirebug.selectPanel("cookies").panelNode;
+            var panelNode = FBTest.selectPanel("cookies").panelNode;
             var cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie23");
 
             editCookie(cookie);
 
             cookie = FBTestFireCookie.getCookieByName(panelNode, "TestCookie23");
             FBTest.compare("ValueCookie23-modified", cookie.cookie.value, "Check new cookie value");
-            FBTestFirebug.testDone("cookies.test.issue23; DONE");
+            FBTest.testDone("cookies.test.issue23; DONE");
         });
     });
 };
