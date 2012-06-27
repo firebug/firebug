@@ -1223,7 +1223,7 @@ if (typeof(nsContextMenu) != "undefined")
 // All Pages Activation" is on
 
 // Load Firebug by default if activation is on for all pages (see issue 5522)
-if (PrefLoader.getPref("allPagesActivation") == "on")
+if (PrefLoader.getPref("allPagesActivation") == "on" || !PrefLoader.getPref("delayLoad"))
 {
     Firebug.GlobalUI.startFirebug(function()
     {
