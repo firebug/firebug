@@ -46,6 +46,8 @@ const removeConfirmation = "cookies.removeConfirmation";
 // Services
 var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
 
+const panelName = "cookies";
+
 // ********************************************************************************************* //
 // Panel Implementation
 
@@ -58,7 +60,7 @@ function CookiePanel() {}
 CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 /** @lends CookiePanel */
 {
-    name: "cookies",
+    name: panelName,
     title: Locale.$STR("cookies.Panel"),
     searchable: true,
     breakable: true,
