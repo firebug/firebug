@@ -1227,7 +1227,8 @@ if (PrefLoader.getPref("allPagesActivation") == "on" || !PrefLoader.getPref("del
 {
     Firebug.GlobalUI.startFirebug(function()
     {
-        FBTrace.sysout("Firebug loaded by default since allPagesActivation is on");
+        FBTrace.sysout("Firebug loaded by default since 'allPagesActivation' is on " +
+            "or 'delayLoad' is false");
     });
 }
 
