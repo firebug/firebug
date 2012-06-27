@@ -643,7 +643,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         try
         {
-            this.addMemberInternal.apply(this, arguments);
+            return this.addMemberInternal.apply(this, arguments);
         }
         catch (err)
         {
