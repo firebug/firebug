@@ -2608,7 +2608,8 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return Locale.$STRP("firebug.storage.totalItems", [storage.length]);
+        var object = this.objectView(storage);
+        return Locale.$STRP("firebug.storage.totalItems", [Object.keys(object).length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2633,67 +2634,75 @@ FirebugReps.Storage = domplate(Firebug.Rep,
         return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
-    propIterator: function(object, max)
+    propIterator: function(storage, max)
     {
-        // we can't utilize the existing function due to:
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=573875
-        //return FirebugReps.Obj.propIterator(object, max);
+        var object = this.objectView(storage);
+        return FirebugReps.Obj.propIterator(object, max);
+    },
 
-        max = max || 3;
-        if (!object)
-            return [];
+    objectView: function(storage)
+    {
+        var object = this.makeObject(storage);
+        for (var any in object)
+            return object;
 
-        var props = [];
-        var len = 0, count = 0;
+        // We might have hit upon an https site (bug 709238).
+        // As a hack, we'll check if the current context's window
+        // contains the object as localStorage or sessionStorage.
+        try {
+            var context = Firebug.currentContext;
+            var win = context && context.window;
+            if (win && win.location.protocol === "https:")
+            {
+                var names = ["localStorage", "sessionStorage"], done = false;
+                for (var i = 0; i < 2; ++i)
+                {
+                    if (win[names[i]] !== storage)
+                        continue;
+                    Firebug.CommandLine.evaluate(
+                        "((" + this.makeObject + ")(" + names[i] + "))",
+                        context,
+                        null, null,
+                        function(result) {
+                            object = result;
+                            done = true;
+                        },
+                        function() {},
+                        true
+                    );
+                    if (done)
+                        break;
+                }
+            }
+        }
+        catch(e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.Storage.objectView; EXCEPTION " + e, e);
+        }
 
+        return object;
+    },
+
+    makeObject: function(storage)
+    {
+        // Create a raw object, free from getItem etc., from a storage.
+        // May be serialized and run in page scope.
+        var object = {};
         try
         {
-            for (var i=0; i<object.length; i++)
+            for (var name in storage)
             {
-                var value;
-                var name;
-                try
-                {
-                    name = object.key(i);
-                    value = object.getItem(name);
-                    if (value instanceof window.StorageItem)
-                        value = value.value;
-                }
-                catch (exc)
-                {
-                    continue;
-                }
-
-                var rep = Firebug.getRep(value);
-                var tag = rep.shortTag || rep.tag;
-
-                count++;
-                if (count <= max)
-                    props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
-                else
-                    break;
-            }
-
-            if (count > max)
-            {
-                props[Math.max(1,max-1)] = {
-                    object: Locale.$STR("firebug.reps.more") + "...",
-                    tag: FirebugReps.Caption.tag,
-                    name: "",
-                    equal:"",
-                    delim:""
-                };
-            }
-            else if (props.length > 0)
-            {
-                props[props.length-1].delim = '';
+                var value = storage.getItem(name);
+                Object.defineProperty(object, name, {value: value, enumerable: true});
             }
         }
-        catch (exc)
+        catch(e)
         {
+            // We can't log an error in page scope.
         }
-        return props;
-    },
+        return object;
+    }
 });
 
 // ********************************************************************************************* //
