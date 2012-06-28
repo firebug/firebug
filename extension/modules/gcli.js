@@ -32,6 +32,10 @@ var Locale = Cu.import("resource://firebug/locale.js").Locale;
 // ********************************************************************************************* //
 // Command Implementation
 
+/**
+ * Read https://developer.mozilla.org/en/Tools/GCLI/Writing_GCLI_Commands
+ * about how to implement GCLI comands.
+ */
 var FirebugController =
 {
     openFirebug: function(args, context)
