@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5400: Firebug shows wrong (previous) stacktrace</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function onExecuteTest()
+{
+    function a(x)
+    {
+        try
+        {
+            x.toLowerCase();
+        }
+        catch(e)
+        {
+        }
+    }
+
+    function b()
+    {
+        throw new Error("b");
+    }
+
+    function c()
+    {
+        throw new Error("c");
+    }
+
+    function d()
+    {
+        b();
+    }
+
+    a();
+    d();
+    c();
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5400">Issue 5400</a>:
+        Firebug shows wrong (previous) stacktrace</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Enable the Console panel and reload the page</li>
+            <li>Check <i>Show Stack Trace with Errors</i> option</li>
+            <li>Click the test button
+                <button id="testButton" onclick="onExecuteTest()">Execute</button>
+            </li>
+            <li>There should be one error log in the Console panel: <code>Error: b</code><br/>
+            Expand it and check the stack trace. It should be:<br/>
+<code>
+b()
+d()
+onExecuteTest()
+onclick()
+</code>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

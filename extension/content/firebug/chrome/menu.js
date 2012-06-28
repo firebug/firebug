@@ -147,7 +147,7 @@ Menu.optionMenu = function(label, option, tooltiptext)
         option: option,
         tooltiptext: tooltiptext,
         command: function() {
-            return Options.set(option, !Firebug[option]);
+            return Options.togglePref(option);
         }
     };
 };

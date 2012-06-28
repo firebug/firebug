@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5544: Can't set error breakpoint for shallow error</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5544">Issue 5544</a>:
+        Can't set error breakpoint for shallow error</h1>
+</header>
+<div>
+    <section id="content">
+    </section>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Enable the Console panel and reload the page</li>
+            <li>Check <i>Show Stack Trace with Errors</i> option</li>
+            <li>Click the test button
+                <button id="testButton" onclick="foops()">Execute</button>
+            </li>
+            <li>There should be one error log in the Console panel: <code>ReferenceError: foops is not defined</code><br/>
+            Expand it and check the stack trace. It should be:<br/>
+<code>
+onclick()
+</code>
+<br/>
+            You should be also able to see gray circle for placing a breakpoint with text
+            <code>foops();</code>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>
