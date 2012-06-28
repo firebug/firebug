@@ -1164,16 +1164,18 @@ this.clearAndTypeCommand = function(string, useCommandEditor)
 this.typeCommand = function(string, useCommandEditor)
 {
     var doc = FW.Firebug.chrome.window.document;
-    var cmdLine = doc.getElementById(useCommandEditor ? "fbCommandEditor": "fbCommandLine");
+    var cmdLine = useCommandEditor ? 
+                  FW.Firebug.CommandEditor.editor : 
+                  FW.Firebug.CommandLine.getCommandLine();
     var panelBar1 = doc.getElementById("fbPanelBar1");
     var win = panelBar1.browser.contentWindow;
 
     if (useCommandEditor)
-        FBTest.setPref("largeCommandLine", useCommandEditor);
+        FBTest.setPref("commandEditor", useCommandEditor);
 
     FW.Firebug.chrome.window.focus();
     panelBar1.browser.contentWindow.focus();
-    FBTest.focus(cmdLine);
+    cmdLine.focus();
 
     FBTest.sysout("typing "+string+" in to "+cmdLine+" focused on "+
         FW.FBL.getElementCSSSelector(doc.commandDispatcher.focusedElement)+
