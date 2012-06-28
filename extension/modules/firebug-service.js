@@ -747,7 +747,6 @@ var fbs =
         fbs.restoreBreakpoints();
 
         this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
-        fbs._lastErrorDebuggr = null;
 
 
         if (FBTrace.DBG_FBS_ERRORS)
@@ -2213,7 +2212,7 @@ var fbs =
             delete fbs._lastErrorCaller; // throw is not recursion either
         }
 
-        if (fbs.trackThrowCatch)
+        if (fbs.showStackTrace)
         {
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.onThrow from tag:" + frame.script.tag + ":" +
