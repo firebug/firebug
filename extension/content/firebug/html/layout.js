@@ -313,16 +313,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         return maxWidth;
     },
 
-    updateOption: function(name, value)
-    {
-        /*
-        if (name == "newOptionHere")
-        {
-            this.updateSelection(this.selection);
-        }
-        */
-    },
-
     getOptionsMenuItems: function()
     {
         return [
