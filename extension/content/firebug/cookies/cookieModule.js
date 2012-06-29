@@ -387,13 +387,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     updateOption: function(name, value)
     {
-        if (name == "cookies.clearWhenDeny")
-        {
-        }
-        else if (name == "cookies.LogEvents")
-        {
-        }
-        else if (name == "consoleFilterTypes")
+        if (name == "consoleFilterTypes")
         {
             this.updateConsoleFilter();
         }

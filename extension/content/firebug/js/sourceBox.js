@@ -784,7 +784,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         Dom.collapse(sourceBox, false); // the elements must be visible for the offset values
         this.setViewportPadding(sourceBox, viewRange);
 
-        sourceBox.centralLine = Math.floor( (viewRange.lastLine + viewRange.firstLine)/2 );
+        sourceBox.centralLine = Math.ceil((viewRange.lastLine + viewRange.firstLine)/2);
 
         this.applyDecorator(sourceBox);
 

@@ -167,7 +167,16 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
                 return;  // did not create a context
             }
-            // else we should show
+
+            // Special case for about:blank (see issue 5120)
+            // HTML panel's edit mode can cause onStateChange changes and context
+            // recreation.
+            if (context.loaded && context == Firebug.currentContext &&
+                context.getName() == "about:blank")
+            {
+                FBTrace.sysout("tabWatcher.watchTopWindow; page already watched");
+                return;
+            }
         }
         else // then we've not looked this window in this session
         {
