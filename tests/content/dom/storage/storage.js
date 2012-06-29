@@ -106,7 +106,7 @@ function testLocalStorageData(callback, win)
     FBTest.waitForDOMProperty("localStorage", function(row)
     {
         var expected = Fx13 ?
-            "\\s*item6=\\\"6\\\",\\s*item7=\\\"7\\\",\\s*" + FW.FBL.$STR("firebug.reps.more") + "...\\s*" :
+            "\\s*item6=\\\"6\\\",\\s*item7=\\\"7\\\",\\s*item0=\\\"0\\\",\\s*" + FW.FBL.$STR("firebug.reps.more") + "...\\s*" :
             "\\s*item6=\\\"6\\\",\\s*item3=\\\"3\\\",\\s*" + FW.FBL.$STR("firebug.reps.more") + "...\\s*";
 
         FBTest.compare(

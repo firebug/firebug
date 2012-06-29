@@ -1337,14 +1337,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     updateOption: function(name, value)
     {
-        var options = [
-            "showCommentNodes",
-            "entityDisplay",
-            "showTextNodesWithWhitespace",
-            "showFullTextNodes"
-        ];
+        var options = new Set();
+        options.add("showCommentNodes");
+        options.add("entityDisplay");
+        options.add("showTextNodesWithWhitespace");
+        options.add("showFullTextNodes");
 
-        if (options.indexOf(name) !== -1)
+        if (options.has(name))
         {
             this.resetSearch();
             Dom.clearNode(this.panelNode);
