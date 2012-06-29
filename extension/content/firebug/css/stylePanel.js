@@ -539,16 +539,14 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        var options = [
-            "onlyShowAppliedStyles",
-            "showUserAgentCSS",
-            "expandShorthandProps",
-            "colorDisplay",
-            "showMozillaSpecificStyles"
-        ];
+        var options = new Set();
+        options.add("onlyShowAppliedStyles");
+        options.add("showUserAgentCSS");
+        options.add("expandShorthandProps");
+        options.add("colorDisplay");
+        options.add("showMozillaSpecificStyles");
 
-        var isRefreshOption = function(element) { return element == name; };
-        if (options.some(isRefreshOption))
+        if (options.has(name))
             this.refresh();
     },
 
