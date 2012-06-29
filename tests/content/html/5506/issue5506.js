@@ -46,7 +46,7 @@ function runTest()
                 {
                     buttons[ind].click();
                     callback();
-                });
+                }, 500);
             }
 
             function verifyHtml(html)
