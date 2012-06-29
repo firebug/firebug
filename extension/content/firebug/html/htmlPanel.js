@@ -407,8 +407,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             // but it's also risky. Mutation listeners should be registered
             // at the moment when it's clear that the window/frame has been
             // loaded.
-            if (doc.location == "about:blank")
-                return;
+
+            // This break HTML panel for about:blank pages (see issue 5120).
+            //if (doc.location == "about:blank")
+            //    return;
 
             Events.addEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
             Events.addEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
@@ -2355,7 +2357,15 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     {
         if (this.innerEditMode)
         {
-            this.editingParent.innerHTML = value;
+            try
+            {
+                // xxxHonza: Catch "can't access dead object" exception.
+                this.editingParent.innerHTML = value;
+            }
+            catch (e)
+            {
+                FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
+            }
         }
         else
         {
