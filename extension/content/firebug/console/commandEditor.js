@@ -370,6 +370,11 @@ TextEditor.prototype =
         return this.textBox.getAttribute("focused") == "true";
     },
 
+    focus: function()
+    {
+        this.textBox.focus();
+    },
+
     getSelectedText: function()
     {
         var start = this.textBox.selectionStart;
