@@ -1166,7 +1166,7 @@ this.typeCommand = function(string, useCommandEditor)
     var doc = FW.Firebug.chrome.window.document;
     var cmdLine = useCommandEditor ? 
                   FW.Firebug.CommandEditor.editor : 
-                  FW.Firebug.CommandLine.getCommandLine();
+                  FW.Firebug.CommandLine.getCommandLine(FW.Firebug.currentContext);
     var panelBar1 = doc.getElementById("fbPanelBar1");
     var win = panelBar1.browser.contentWindow;
 
