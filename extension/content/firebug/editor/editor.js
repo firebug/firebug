@@ -1204,10 +1204,25 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
                     // Try to parse the typed character as the start of a new
                     // property, moving the rest of lastExpr over into postExpr
                     // (possibly with a separator added). If there is no support
-                    // for prefix-completions, fail.
+                    // for prefix-completions, fail. If the character could
+                    // plausibly be part of a leftwards expansion, fail.
                     // Note that this does not show unless there is a completion.
                     var moveOver = lastExpr.substr(1);
                     lastExpr = lastExpr.charAt(0);
+                    range.start = offset - 1;
+                    range.end = offset;
+
+                    var cand = evaluator(preExpr, lastExpr, postExpr, range, false, context, {});
+                    var imov = (caseSensitive ? moveOver : moveOver.toLowerCase());
+                    for (var i = 0; i < cand.length; ++i)
+                    {
+                        var c = cand[i];
+                        if (c.length <= imov.length || c.charAt(0) !== lastExpr)
+                            continue;
+                        c = (caseSensitive ? c : c.toLowerCase());
+                        if (c.substr(-imov.length) === imov)
+                            return false;
+                    }
 
                     var sep = getNewPropSeparator(range, lastExpr, moveOver);
                     if (sep === null)
@@ -1216,8 +1231,6 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
                         moveOver = sep + moveOver;
 
                     postExpr = moveOver + postExpr;
-                    range.end = range.start;
-                    range.start = offset;
                 }
             }
 

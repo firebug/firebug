@@ -1948,8 +1948,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!Css.hasClass(this.target, "cssPropValue"))
             return null;
 
-        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
-        // into 'no-repeat' should work).
+        // For non-multi-valued properties, fail (pre-completions don't make sense,
+        // and it's less risky).
         var row = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
         if (!Css.multiValuedProperties.hasOwnProperty(propName))
