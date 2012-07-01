@@ -456,9 +456,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             if (msgId && msgId == previousMsgId)
             {
-                FBTrace.sysout("consolePanel.append; Increase log counter for: " + previousMsgId,
-                    objects);
-
                 this.increaseRowCount(container.lastChild);
 
                 row = container.lastChild;
