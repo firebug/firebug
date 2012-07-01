@@ -20,11 +20,12 @@
         <title>Execute Command Selection</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/>
-        <!<script src="executeSelection.js" type="text/javascript" ></script>-->
         <script type="text/javascript">
             window.addEventListener("load", function(){
                 var email = document.getElementById("email");
-                email.textContent = email.textContent.replace("__AT__", "@").replace("__DOT__", ".");
+                email.textContent = email.textContent
+                    .replace("__AT__", String.fromCharCode(64))
+                    .replace("__DOT__", ".");
             }, false);
         </script>
     </head>
@@ -37,29 +38,30 @@
                 <button id="executeTest" onclick="executeTest();">Execute Test</button>
             </section>-->
             <section id="description">
-                <p>This test case is intended for <em>command editor</em><br/>Florent FAYOLLE, <span id="email">florent.fayolle69__AT__gmail__DOT__com</span></p>
+                <p>This test case is intended for <em>command editor</em></p>
                 <ol>
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>Console</em> panel</li>
                     <li>Switch to the editor mode</li>
                     <li>Type the following commands : <br/>
-                        <code color="green">var a = "no selection";<br/>
-                            var b = a || "selection";<br/>
+                        <code style="color:green; white-space: normal;">var a = "no selection";<br/>
+                            var b = window.a || "selection";<br/>
                             console.log(b);<br/></code></li>
-                    <li>Select the second and the third line</li>
+                    <li>Select the 2<sup>nd</sup> and the 3<sup>rd</sup> line</li>
                     <li>Click on "Run".</li>
-                    <li>The Console panel should display : <br/>
-                        <code style="blue">>>> selection</code>
+                    <li>The console panel should display : <br/>
+                        <code style="color: red"> selection</code>
                     </li>
                     <li>Collapse the selection</li>
                     <li>Click on "Run"</li>
                     <li>The Console panel should display : <br/>
-                        <code style="blue">>>> no selection</code>
+                        <code style="color: red"> no selection</code>
                     </li>
                     <li>Switch back to Command Line</li>
-                    <li>Select <code color="green">var b = a || "selection"; console.log(b);</code></li>
+                    <li>Select <code style="color: green">var b = a || "selection"; console.log(b);</code></li>
+                    <li>Press <i>Enter</i></li>
                     <li>The Console panel should display : <br/>
-                        <code style="blue">>>> no selection</code>
+                        <code style="color: red"> no selection</code>
                     </li>
                 </ol>
             </section>
@@ -68,7 +70,7 @@
                     Your name and your email address (or other contact information) should be placed here.
                     This is important in the case we need to contact you for further reference. 
                  -->
-                &lt;Author name&gt;, &lt;email address&gt;
+                Florent FAYOLLE, &lt;<span id="email">florent.fayolle69__AT__gmail__DOT__com</span>&gt;
             </footer>
         </div>
     </body>

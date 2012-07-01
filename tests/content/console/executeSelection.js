@@ -1,121 +1,75 @@
 var testPageURL = basePath + "console/executeSelection.html";
 var fileName = "index.js";
-var lineNo = 5;
-var detachedWindow;
+
 function runTest()
 {
     FBTest.sysout("executeSelection.START");
-    FBTest.openNewTab(testPageURL, function(win){
-        FBTest.openFirebug();
-        var tasks = new FBTest.TaskList();
-        alert('ok');
-        FBTest.testDone("ok");
-    });
-}
-/*
-var fileName = "index.js";
-var lineNo = 5;
-var testPageURL = basePath + "script/1483/issue1483.html";
-var detachedWindow;
-
-function runTest()
-{
-    FBTest.sysout("changeUILocation.START");
     FBTest.openNewTab(testPageURL, function(win)
     {
-        // TODO: open detached firebug via statusicon contextmenu
         FBTest.openFirebug();
-
-        var tasks = new FBTest.TaskList();
-        tasks.push(waitForDetachedFirebug);
-
-        var chrome = FW.Firebug.chrome;
-        var fbMenu = chrome.$("fbFirebugMenu");
-        var locMenu = fbMenu.querySelector("menu");
-        var menupopup = locMenu.querySelector("menupopup");
-
-        // test if right item is checked in ui location menu
-        tasks.push(click, fbMenu);
-        tasks.push(click, locMenu);
-        tasks.push(testMenuItem, menupopup, 0);
-
-        // set position to "top"
-        tasks.push(click, function()
+        FBTest.enableConsolePanel(function()
         {
-            FBTest.progress("setting Firebug to the top");
-            return menupopup.children[1];
-        })
+            var tasks = new FBTest.TaskList();
+            FBTest.selectPanel("console");
+            // we create the instructions we will play with            
+            var instructions = "var a = \"no selection\";";
+            instructions += "var b = window.a || \"selection\";";
+            instructions += "console.log(b);";
 
-        // Top menu-item must be checked
-        tasks.push(testMenuItem, menupopup, 1);
+            var selectionStart = instructions.indexOf(";")+1;
 
-        tasks.push(function(callback)
-        {
-            var frame = FW.Firebug.Firefox.getElementById("fbMainFrame");
-            FBTest.ok(frame.parentNode.firstChild == frame, "positioned at the top");
-            callback();
-        });
+            // expected results :
+            var RES_NO_SELECTION = 'no selection';
+            var RES_SELECTION = 'selection';
 
-        var buttons = chrome.$("fbWindowButtons");
-        var contextPopup = buttons.querySelector("menupopup");
-        tasks.push(click, buttons, {type:"contextmenu", button: 2});
-
-        // return to the bottom
-        tasks.push(click, function()
-        {
-            FBTest.progress("returning Firebug to the bottom");
-            return contextPopup.children[2];
-        });
-
-        // Bottom menu-item must be checked.
-        tasks.push(testMenuItem, contextPopup, 2);
-
-        tasks.push(function(callback)
-        {
-            var frame = FW.Firebug.Firefox.getElementById("fbMainFrame");
-            FBTest.ok(frame.parentNode.lastChild == frame, "positioned at the bottom");
-            callback();
-        });
-
-        tasks.run(function()
-        {
-            FBTest.testDone("changeUILocation.DONE");
+            tasks.push(executeAndVerifySelection, instructions, RES_SELECTION, 
+                true, selectionStart);
+            
+            tasks.push(executeAndVerifyNoSelection, instructions, RES_NO_SELECTION, true);
+            
+            tasks.push(executeAndVerifySelection, instructions, RES_NO_SELECTION, 
+                false, selectionStart);
+            
+            tasks.run(function()
+            {
+                FBTest.testDone("executeSelection.DONE");
+            });
         });
     });
-};
+}
 
-function waitForDetachedFirebug(callback)
+function executeAndVerifyNoSelection(callback, instructions, expected, useCommandEditor)
 {
-    detachedWindow = FBTest.detachFirebug();
-    if (!FBTest.ok(detachedWindow, "Firebug is detaching..."))
+    executeAndVerifySelection(callback, instructions, expected, useCommandEditor);
+}
+
+function executeAndVerifySelection(callback, instructions, expected, useCommandEditor, 
+                                   selectionStart, selectionEnd)
+{
+    FBTrace.sysout("executeSelection executeAndVerifySelection : instructions : \"" + 
+                    instructions + "\"; useCommandEditor : " + 
+                    useCommandEditor + "; expect : "+expected);
+    FBTest.clearConsole();
+    FBTest.clearAndTypeCommand(instructions, useCommandEditor);
+
+    if(selectionStart !== undefined)
     {
-        FBTest.testDone("openInNewWindow.FAILED");
-        return;
+        var cmdLine = FW.Firebug.CommandLine.getCommandLine(FW.Firebug.currentContext);
+        cmdLine.setSelectionRange(selectionStart, selectionEnd || cmdLine.value.length);
     }
 
-    FBTest.OneShotHandler(detachedWindow, "load", function(event)
+    var config = {tagName: "div", classes: "logRow logRow-command"};
+    FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        FBTest.progress("Firebug detached in a new window.");
+        var panelNode = FBTest.getPanel("console").panelNode;
+        var rows = panelNode.querySelectorAll(".logRow .objectBox-text");
+        if (FBTest.compare(2, rows.length, "There must be two logs"))
+        {
+            FBTest.compare(expected, rows[1].textContent, "\"" + expected + "\" must be shown");
+        }
         callback();
     });
+
+    FW.Firebug.CommandLine.enter(FW.Firebug.currentContext);
 }
 
-function click(callback, node, event)
-{
-    if (typeof node == "function")
-        node = node();
-
-    FBTest.synthesizeMouse(node, 1, 1, event);
-    callback();
-}
-
-function testMenuItem(callback, menupopup, index)
-{
-    var checked = menupopup.querySelectorAll("[checked=true]");
-
-    FBTest.ok(checked.length == 1, "Just one menu-item must be checked");
-    FBTest.compare(menupopup.children[index].label, checked[0].label,
-        "\"" + checked[0].label + "\" is checked");
-
-    callback();
-}*/

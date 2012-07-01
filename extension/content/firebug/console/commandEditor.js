@@ -360,7 +360,7 @@ TextEditor.prototype =
 
     setSelection: function(start, end)
     {
-        this.textBox.setSelection(start, end);
+        this.textBox.setSelectionRange(start, end);
     },
 
     getSelection: function()
