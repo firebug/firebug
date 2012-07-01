@@ -690,7 +690,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // has been already expanded and the response tab selected).
     if (spy.logRow && spy.xhrRequest.readyState >= 3)
     {
-        var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+        var netInfoBox = getInfoBox(spy);
         if (netInfoBox)
         {
             netInfoBox.htmlPresented = false;
@@ -920,7 +920,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             Css.toggleClass(logRow, "opened");
 
-            var spy = Dom.getChildByClass(logRow, "spyHead").repObject;
+            var spy = logRow.getElementsByClassName("spyHead")[0].repObject;
             var spyHeadTable = Dom.getAncestorByClass(target, "spyHeadTable");
 
             if (Css.hasClass(logRow, "opened"))
@@ -932,7 +932,9 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             }
             else
             {
-                var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                // Notify all listeners about closing XHR entry and destroying the body.
+                // Any custom tabs should be removed now.
+                var netInfoBox = getInfoBox(spy);
                 Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody",
                     [netInfoBox, spy]);
 
@@ -1143,7 +1145,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
         spy.responseHeaders = getResponseHeaders(spy);
 
     var template = Firebug.NetMonitor.NetInfoBody;
-    var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+    var netInfoBox = getInfoBox(spy);
 
     var defaultTab;
 
@@ -1162,7 +1164,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
 
     if (!netInfoBox)
     {
-        var head = Dom.getChildByClass(spy.logRow, "spyHead");
+        var head = spy.logRow.getElementsByClassName("spyHead")[0];
         netInfoBox = template.tag.append({"file": spy}, head);
 
         // Notify listeners so, custom info tabs can be appended
@@ -1177,6 +1179,11 @@ function updateHttpSpyInfo(spy, updateInfoBody)
     {
         template.updateInfo(netInfoBox, spy, spy.context);
     }
+}
+
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
 }
 
 // ********************************************************************************************* //
