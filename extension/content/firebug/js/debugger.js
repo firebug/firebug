@@ -1895,14 +1895,19 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
                 for (var row = panel.panelNode.firstChild; row; row = row.nextSibling)
                 {
-                    var error = row.firstChild.repObject;
+                    var errorMessage = row.getElementsByClassName("objectBox-errorMessage");
+                    if (!errorMessage.length)
+                        continue;
+
+                    errorMessage = errorMessage[0];
+                    var error = errorMessage.repObject;
                     if (error instanceof FirebugReps.ErrorMessageObj && error.href == url &&
                         error.lineNo == lineNo)
                     {
                         if (isSet)
-                            Css.setClass(row.firstChild, "breakForError");
+                            Css.setClass(errorMessage, "breakForError");
                         else
-                            Css.removeClass(row.firstChild, "breakForError");
+                            Css.removeClass(errorMessage, "breakForError");
 
                         Firebug.connection.dispatch( "onToggleErrorBreakpoint",
                             [context, url, lineNo, isSet]);
