@@ -872,7 +872,7 @@
 
 
 /************************************************************************************************/
-/* include */
+/* include() command */
 .tableCommandLineInclude td{
     height: 17px;
 }
@@ -883,14 +883,17 @@
 .tableCommandLineInclude tr:hover .closeButton{
     display: block;
 }
-.tableCommandLineInclude .url{ float: left; }
 
-.tableCommandLineInclude .commands{ 
+.tableCommandLineInclude .url {
+    float: left;
+}
+
+.tableCommandLineInclude .commands { 
     float: right;
     height:100%;
 }
-.tableCommandLineInclude td:last-child
-{
+
+.tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 
 }

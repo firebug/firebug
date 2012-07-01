@@ -17,7 +17,11 @@ define([
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
 ],
+<<<<<<< HEAD
 function(Obj, Domplate, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+=======
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+>>>>>>> Initial implementation by Sebastian
     Wrapper, Xpcom) {
 
 with (Domplate) {
@@ -438,6 +442,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var msgId = this.getMessageId(objects, sourceLink);
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
+<<<<<<< HEAD
 
             if (msgId && msgId == previousMsgId)
             {
@@ -451,6 +456,21 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 var logContent = row.getElementsByClassName("logContent").item(0);
                 appender.apply(this, [objects, logContent, rep]);
 
+=======
+
+            if (msgId && msgId == previousMsgId)
+            {
+                this.increaseRowCount(container.lastChild);
+
+                row = container.lastChild;
+            }
+            else
+            {
+                row = this.createRow("logRow", className);
+                var logContent = row.getElementsByClassName("logContent").item(0);
+                appender.apply(this, [objects, logContent, rep]);
+
+>>>>>>> Initial implementation by Sebastian
                 if (!sourceLink && objects && objects.getSourceLink)
                     sourceLink = objects.getSourceLink();
 
@@ -694,7 +714,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
-            else 
+            else
                 this.appendObject(object, row);
         }
     },
