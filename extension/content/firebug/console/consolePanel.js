@@ -386,18 +386,29 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+<<<<<<< HEAD
     getMessageId: function(object, sourceLink)
+=======
+    getMessageId: function(object)
+>>>>>>> Fix XHR spy logs
     {
         // The object could provide it's own custom ID.
         if (object instanceof Object && typeof(object.getId) == "function")
             return object.getId();
 
         // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
+<<<<<<< HEAD
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         if (object instanceof Object && typeof object[0] != "undefined")
             return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+=======
+        //else if (typeof object == "string")
+        //    return object;
+        //else if (object instanceof Object && typeof object[0] != "undefined")
+        //    return object[0];
+>>>>>>> Fix XHR spy logs
 
         // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
@@ -435,12 +446,20 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
+<<<<<<< HEAD
             var msgId = this.getMessageId(objects, sourceLink);
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
+=======
+            var msgId = this.getMessageId(objects);
+            var previousMsgId = this.getMessageId(this.lastLogObjects);
+>>>>>>> Fix XHR spy logs
 
             if (msgId && msgId == previousMsgId)
             {
+                FBTrace.sysout("consolePanel.append; Increase log counter for: " + previousMsgId,
+                    objects);
+
                 this.increaseRowCount(container.lastChild);
 
                 row = container.lastChild;
