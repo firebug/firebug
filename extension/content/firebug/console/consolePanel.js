@@ -20,6 +20,8 @@ define([
 function(Obj, Domplate, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
     Wrapper, Xpcom) {
 
+with (Domplate) {
+
 // ********************************************************************************************* //
 // Constants
 
@@ -436,8 +438,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var msgId = this.getMessageId(objects, sourceLink);
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
-
-FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
 
             if (msgId && msgId == previousMsgId)
             {
