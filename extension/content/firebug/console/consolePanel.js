@@ -384,14 +384,21 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageIdentifier: function(objects)
+    getMessageId: function(object)
     {
-        if (typeof objects == "string")
-            return objects;
-        else if (objects instanceof Object && typeof objects[0] != "undefined")
-            return objects[0];
-        else if (objects instanceof Object)
-            return objects.message + objects.href + ":" + objects.lineNo;
+        // The object could provide it's own custom ID.
+        if (object instanceof Object && typeof(object.getId) == "function")
+            return object.getId();
+
+        // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
+        //else if (typeof object == "string")
+        //    return object;
+        //else if (object instanceof Object && typeof object[0] != "undefined")
+        //    return object[0];
+
+        // Group messages coming from the same location.
+        if (object instanceof Object && object.href && object.lineNo && object.message)
+            return object.message + object.href + ":" + object.lineNo;
     },
 
     increaseRowCount: function(row)
@@ -411,6 +418,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
+        var row;
         var container = this.getTopContainer();
 
         if (noRow)
@@ -419,16 +427,21 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageIdentifier(objects);
-            var previousMsgId = this.getMessageIdentifier(this.lastLogObjects);
+            var msgId = this.getMessageId(objects);
+            var previousMsgId = this.getMessageId(this.lastLogObjects);
 
-            if (msgId == previousMsgId)
+            if (msgId && msgId == previousMsgId)
             {
+                FBTrace.sysout("consolePanel.append; Increase log counter for: " + previousMsgId,
+                    objects);
+
                 this.increaseRowCount(container.lastChild);
+
+                row = container.lastChild;
             }
             else
             {
-                var row = this.createRow("logRow", className);
+                row = this.createRow("logRow", className);
                 var logContent = row.getElementsByClassName("logContent").item(0);
                 appender.apply(this, [objects, logContent, rep]);
 
