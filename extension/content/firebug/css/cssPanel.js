@@ -1796,7 +1796,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1924,6 +1924,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // Add the magic inherit property, if it's sufficiently alone.
             if (!preExpr)
                 keywords = keywords.concat(["inherit"]);
+
+            if (!cycle)
+            {
+                // Make some good default suggestions.
+                var list = ["white", "black", "solid", "outset", "repeat"];
+                for (var i = 0; i < list.length; ++i)
+                {
+                    if (Str.hasPrefix(list[i], expr) && keywords.indexOf(list[i]) !== -1)
+                    {
+                        out.suggestion = list[i];
+                        break;
+                    }
+                }
+            }
 
             return stripCompletedParens(keywords, postExpr);
         }
