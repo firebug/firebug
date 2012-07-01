@@ -396,22 +396,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
-        // Group messages coming from the same location
+        if (object instanceof Object && typeof object[0] != "undefined")
+            return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+
+        // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
             return object.message + object.href + ":" + object.lineNo;
-
-        // object may be NaN
-        if (object !== object)
-            return "NotANumber";
-
-        // Use all direct properties of the object
-        if (object instanceof Object)
-        {
-            var id = Obj.getObjHash(object);
-            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-        }
-
-        return "";
     },
 
     increaseRowCount: function(row)
@@ -663,28 +653,36 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
+        // Last CSS style defined using "%c" that should be applied on
+        // created log-row parts (elements). See issue 6064.
+        // Example: console.log('%cred-text %cgreen-text', 'color:red', 'color:green');
+        var lastStyle;
+
         for (var i = 0; i < parts.length; ++i)
         {
+            var node;
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex++];
+                var object = objects[objIndex];
                 if (part.type == "%c")
-                    row.setAttribute("style", object.toString());
-                else if (typeof(object) != "undefined")
-                    this.appendObject(object, row, part.rep);
+                    lastStyle = object.toString();
+                else if (objIndex < objects.length)
+                    node = this.appendObject(object, row, part.rep);
                 else
-                    this.appendObject(part.type, row, FirebugReps.Text);
+                    node = this.appendObject(part.type, row, FirebugReps.Text);
+                objIndex++;
             }
             else
             {
-<<<<<<< HEAD
-                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
-                node = tag.append({object: part}, row);
-=======
-                FirebugReps.Text.tag.append({object: part}, row);
->>>>>>> Issue 4979: reset lastLogObjects member when clean up
+                node = FirebugReps.Text.tag.append({object: part}, row);
             }
+
+            // Apply custom style if available.
+            if (lastStyle && node)
+                node.setAttribute("style", lastStyle);
+
+            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
@@ -854,6 +852,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var object = Firebug.getRepObject(target);
+        var rep = Firebug.getRep(object, this.context);
+        if (!rep)
+            return false;
+
+        return rep.showInfoTip(infoTip, target, x, y);
+    }
 });
 
 // ********************************************************************************************* //
