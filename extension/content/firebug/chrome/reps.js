@@ -2338,7 +2338,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
             DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
-                SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
@@ -2360,8 +2359,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                                 A({"class": "errorSource a11yFocus"},
                                     PRE({"class": "errorSourceCode",
                                         title: "$object|getSourceTitle"}, "$object|getSource")
-                                ),
-                                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                                )
                             )
                         ),
                         TR({$collapsed: "$object|hideErrorCaret"},
@@ -2406,11 +2404,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     hasErrorBreak: function(error)
     {
         return FBS.fbs.hasErrorBreakpoint(Url.normalizeURL(error.href), error.lineNo);
-    },
-
-    getDuplication: function(msgId)
-    {
-        return ""; // filled in later
     },
 
     getSource: function(error, noCrop)
@@ -2503,13 +2496,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     {
         var source = this.getSource(error, true);
         return source ? Str.trim(source) : "";
-    },
-
-    getSourceLink: function(error)
-    {
-        var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext,
-            null, null, error.colNumber) : null;
     },
 
     getSourceType: function(error)
@@ -3242,7 +3228,7 @@ FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, 
     this.category = category;
     this.context = context;
     this.trace = trace;
-    this.msgId = msgId;
+    this.msgId = msgId || this.createMsgID();
     this.colNumber = colNumber;
 };
 
@@ -3258,6 +3244,13 @@ FirebugReps.ErrorMessageObj.prototype =
         }
 
         return this.context.sourceCache.getLine(this.href, this.lineNo);
+    },
+
+    getSourceLink: function()
+    {
+        var ext = this.category == "css" ? "css" : "js";
+        return this.lineNo ? new SourceLink.SourceLink(this.href, this.lineNo, ext,
+            null, null, this.colNumber) : null;
     },
 
     resetSource: function()
@@ -3282,6 +3275,11 @@ FirebugReps.ErrorMessageObj.prototype =
         this.href = sourceName;
         this.lineNo = lineNumber;
     },
+
+    createMsgID: function()
+    {
+        return this.href + ":" + this.message + ":" + this.lineNo;
+    }
 };
 
 // ********************************************************************************************* //

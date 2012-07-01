@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -16,8 +17,10 @@ define([
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
     Wrapper, Xpcom) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -54,6 +57,19 @@ Firebug.ConsolePanel = function () {};
 
 Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
+    template: domplate(
+    {
+        logRowTag:
+            DIV({"class": "$className", role: "listitem"},
+                DIV(
+                    DIV({"class": "logContent"}),
+                    DIV({"class": "logCounter"},
+                        SPAN({"class": "logCounterValue"})
+                    )
+                )
+            )
+    }),
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
@@ -370,8 +386,47 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getMessageId: function(object, sourceLink)
+    {
+        // The object could provide it's own custom ID.
+        if (object instanceof Object && typeof(object.getId) == "function")
+            return object.getId();
+
+        // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
+        if (typeof object == "string")
+            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+
+        if (object instanceof Object && typeof object[0] != "undefined")
+            return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+
+        // Group messages coming from the same location.
+        if (object instanceof Object && object.href && object.lineNo && object.message)
+            return object.message + object.href + ":" + object.lineNo;
+    },
+
+    increaseRowCount: function(row)
+    {
+        var counter = row.getElementsByClassName("logCounter").item(0);
+        if (!counter)
+            return;
+        var value = counter.getElementsByClassName("logCounterValue");
+        if (!value)
+            return;
+
+        value = value.item(0);
+
+        var count = parseInt(value.textContent);
+        if (isNaN(count))
+            count = 1;
+
+        count++;
+        counter.setAttribute("count", count);
+        value.textContent = count;
+    },
+
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
+        var row;
         var container = this.getTopContainer();
 
         if (noRow)
@@ -380,14 +435,32 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var row = this.createRow("logRow", className);
+            var msgId = this.getMessageId(objects, sourceLink);
+            var previousMsgId = this.lastLogRow ?
+                this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
 
-            appender.apply(this, [objects, row, rep]);
+            if (msgId && msgId == previousMsgId)
+            {
+                this.increaseRowCount(container.lastChild);
 
-            if (sourceLink)
-                FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
+                row = container.lastChild;
+            }
+            else
+            {
+                row = this.createRow("logRow", className);
+                var logContent = row.getElementsByClassName("logContent").item(0);
+                appender.apply(this, [objects, logContent, rep]);
 
-            container.appendChild(row);
+                if (!sourceLink && objects && objects.getSourceLink)
+                    sourceLink = objects.getSourceLink();
+
+                if (sourceLink)
+                    FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
+
+                container.appendChild(row);
+            }
+
+            this.lastLogRow = {objects: objects, sourceLink: sourceLink};
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -416,6 +489,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Don't forget to clear opened groups, if any.
             this.groups = null;
+
+            this.lastLogRow = null;
         }
     },
 
@@ -616,7 +691,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
-            else 
+            else
                 this.appendObject(object, row);
         }
     },
@@ -645,12 +720,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        Events.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        Events.dispatch(this.fbListeners, "onLogRowCreated", [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-        groupBody.setAttribute('role', 'group');
+        groupBody.setAttribute("role", "group");
         this.groups.push(groupBody);
 
         // Expand/collapse logic.
@@ -662,12 +737,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 if (Css.hasClass(groupRow, "opened"))
                 {
                     Css.removeClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'false');
+                    event.target.setAttribute("aria-expanded", "false");
                 }
                 else
                 {
                     Css.setClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'true');
+                    event.target.setAttribute("aria-expanded", "true");
                 }
             }
         }, false);
@@ -685,8 +760,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     createRow: function(rowName, className)
     {
         var elt = this.document.createElement("div");
-        elt.className = rowName + (className ? " " + rowName + "-" + className : "");
-        return elt;
+        var row = this.template.logRowTag.append({className: rowName +
+            (className ? " " + rowName + "-" + className : "")}, elt);
+        return row;
     },
 
     getTopContainer: function()
@@ -846,4 +922,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-});
+}});
