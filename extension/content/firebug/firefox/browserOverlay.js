@@ -523,25 +523,26 @@ $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet
 // ********************************************************************************************* //
 // Global Commands
 
-$command("cmd_closeFirebug", "Firebug.closeFirebug(true)");
-$command("cmd_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)");
-$command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)");
-$command("cmd_toggleFirebug", "Firebug.toggleBar()");
-$command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
-$command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg)", "document.popupNode");
-$command("cmd_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event)");
-$command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
+$command("cmd_closeFirebug", "Firebug.closeFirebug(true);");
+$command("cmd_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext);");
+$command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext);");
+$command("cmd_toggleFirebug", "Firebug.toggleBar();");
+$command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true);");
+$command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg);", "document.popupNode");
+$command("cmd_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event);");
+$command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true);");
 $command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
 $command("cmd_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
 $command("cmd_normalTextSize", "Firebug.Options.setTextSize(0);");
 $command("cmd_focusFirebugSearch", "if (Firebug.currentContext) Firebug.Search.onSearchCommand(document);");
-$command("cmd_customizeFBKeys", "Firebug.ShortcutsModel.customizeShortcuts()");
-$command("cmd_enablePanels", "Firebug.PanelActivation.enableAllPanels()");
-$command("cmd_disablePanels", "Firebug.PanelActivation.disableAllPanels()");
-$command("cmd_clearActivationList", "Firebug.PanelActivation.clearAnnotations()");
-$command("cmd_clearConsole", "Firebug.Console.clear(Firebug.currentContext)");
-$command("cmd_allOn", "Firebug.PanelActivation.toggleAll('on')");
-$command("cmd_toggleOrient", "Firebug.chrome.toggleOrient()");
+$command("cmd_customizeFBKeys", "Firebug.ShortcutsModel.customizeShortcuts();");
+$command("cmd_enablePanels", "Firebug.PanelActivation.enableAllPanels();");
+$command("cmd_disablePanels", "Firebug.PanelActivation.disableAllPanels();");
+$command("cmd_clearActivationList", "Firebug.PanelActivation.clearAnnotations();");
+$command("cmd_clearConsole", "Firebug.Console.clear(Firebug.currentContext);");
+$command("cmd_allOn", "Firebug.PanelActivation.toggleAll('on');");
+$command("cmd_toggleOrient", "Firebug.chrome.toggleOrient();");
+$command("cmd_resetAllOptions", "Firebug.resetAllOptions(true);");
 $command("cmd_toggleProfiling", ""); //todo
 
 $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event)");
