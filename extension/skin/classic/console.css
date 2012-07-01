@@ -1,3 +1,4 @@
+/* See license.txt for terms of usage */
 
 .panelNode-console {
     overflow-x: hidden;
@@ -9,10 +10,9 @@
 }
 
 .logRow {
-    position: relative;
-    margin: 0;
+    display: table;
+    width: 100%;
     border-bottom: 1px solid #D7D7D7;
-    padding: 2px 4px 1px 6px;
     background-color: #FFFFFF;
 }
 
@@ -43,7 +43,35 @@
     display: block;
 }
 
-/*************************************************************************************************/
+.logRow > div {
+    display: table-row;
+}
+
+.logContent {
+    display: table-cell;
+    padding: 2px 0 2px 4px;
+}
+
+.logCounter {
+    display: table-cell;
+    padding: 2px 0 2px 5px;
+    width: 20px;
+}
+
+.logCounterValue:empty {
+    display: none;
+}
+
+.logCounterValue {
+    border: 0.1em solid rgba(0, 0, 0, 0.4);
+    border-radius: 40px 40px 40px 40px;
+    background-color: #ffffff;
+    font-weight: bold;
+    padding: 0 4px;
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.4) 30%, transparent);
+}
+
+/*****************************************************************************************/
 
 .logRow-command > .objectBox-text {
     font-family: monospace;
@@ -61,6 +89,15 @@
     padding-left: 22px;
     background-repeat: no-repeat;
     background-position: 4px 2px;
+}
+
+.logRow-info > div > .logContent,
+.logRow-warn > div > .logContent,
+.logRow-warningMessage > div > .logContent,
+.logRow-error > div > .logContent,
+.logRow-errorMessage > div > .logContent,
+.logRow-assert > div > .logContent {
+    padding-left: 22px;
 }
 
 .logRow-assert,
@@ -182,9 +219,20 @@
     font-weight: bold;
     color: #0000FF;
 }
+
 .objectLink-sourceLink > .systemLink {
     float: right;
     color: #FF0000;
+}
+
+
+.logRow:not(.logRow-group) > div > .objectLink-sourceLink {
+    position: relative;
+    display: table-cell;
+    padding: 0 4px;
+    text-align: right;
+    width: 0;
+    white-space: nowrap;
 }
 
 .logRow > .objectLink-sourceLink > div,
@@ -193,7 +241,7 @@
     padding-left: 5px;
 }
 
-/*************************************************************************************************/
+/************************************************************************************************/
 
 .errorTitle {
     margin-top: 0px;

@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -16,7 +17,7 @@ define([
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+function(Obj, Domplate, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
     Wrapper, Xpcom) {
 
 // ********************************************************************************************* //
@@ -54,6 +55,19 @@ Firebug.ConsolePanel = function () {};
 
 Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
+    template: domplate(
+    {
+        logRowTag:
+            DIV({"class": "$className", role: "listitem"},
+                DIV(
+                    DIV({"class": "logContent"}),
+                    DIV({"class": "logCounter"},
+                        SPAN({"class": "logCounterValue"})
+                    )
+                )
+            )
+    }),
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
@@ -370,6 +384,31 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getMessageIdentifier: function(objects)
+    {
+        if (typeof objects == "string")
+            return objects;
+        else if (objects instanceof Object && typeof objects[0] != "undefined")
+            return objects[0];
+        else if (objects instanceof Object)
+            return objects.message + objects.href + ":" + objects.lineNo;
+    },
+
+    increaseRowCount: function(row)
+    {
+        var node = row.getElementsByClassName("logCounterValue");
+        if (!node)
+            return;
+
+        node = node.item(0);
+
+        var count = parseInt(node.textContent);
+        if (isNaN(count))
+            count = 1;
+
+        node.textContent = count + 1;
+    },
+
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
         var container = this.getTopContainer();
@@ -380,14 +419,29 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var row = this.createRow("logRow", className);
+            var msgId = this.getMessageIdentifier(objects);
+            var previousMsgId = this.getMessageIdentifier(this.lastLogObjects);
 
-            appender.apply(this, [objects, row, rep]);
+            if (msgId == previousMsgId)
+            {
+                this.increaseRowCount(container.lastChild);
+            }
+            else
+            {
+                var row = this.createRow("logRow", className);
+                var logContent = row.getElementsByClassName("logContent").item(0);
+                appender.apply(this, [objects, logContent, rep]);
 
-            if (sourceLink)
-                FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
+                if (!sourceLink && objects.getSourceLink)
+                    sourceLink = objects.getSourceLink();
 
-            container.appendChild(row);
+                if (sourceLink)
+                    FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
+
+                container.appendChild(row);
+            }
+
+            this.lastLogObjects = objects;
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -513,11 +567,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         function logText(text, row)
         {
-            var nodeSpan = row.ownerDocument.createElement("span");
-            Css.setClass(nodeSpan, "logRowHint");
+            Css.setClass(row, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(nodeSpan);
-            nodeSpan.appendChild(node);
+            row.appendChild(node);
         }
 
         function logTextNode(text, row)
@@ -650,12 +702,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        Events.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        Events.dispatch(this.fbListeners, "onLogRowCreated", [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-        groupBody.setAttribute('role', 'group');
+        groupBody.setAttribute("role", "group");
         this.groups.push(groupBody);
 
         // Expand/collapse logic.
@@ -667,12 +719,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 if (Css.hasClass(groupRow, "opened"))
                 {
                     Css.removeClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'false');
+                    event.target.setAttribute("aria-expanded", "false");
                 }
                 else
                 {
                     Css.setClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'true');
+                    event.target.setAttribute("aria-expanded", "true");
                 }
             }
         }, false);
@@ -690,8 +742,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     createRow: function(rowName, className)
     {
         var elt = this.document.createElement("div");
-        elt.className = rowName + (className ? " " + rowName + "-" + className : "");
-        return elt;
+        var row = this.template.logRowTag.append({className: rowName +
+            (className ? " " + rowName + "-" + className : "")}, elt);
+        return row;
     },
 
     getTopContainer: function()
@@ -851,4 +904,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-});
+}});
