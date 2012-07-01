@@ -11,7 +11,7 @@ function runTest()
         {
             var tasks = new FBTest.TaskList();
             FBTest.selectPanel("console");
-            // we create the instructions we will play with            
+            // we create the instructions we will play with
             var instructions = "var a = \"no selection\";";
             instructions += "var b = window.a || \"selection\";";
             instructions += "console.log(b);";
@@ -22,14 +22,14 @@ function runTest()
             var RES_NO_SELECTION = 'no selection';
             var RES_SELECTION = 'selection';
 
-            tasks.push(executeAndVerifySelection, instructions, RES_SELECTION, 
+            tasks.push(executeAndVerifySelection, instructions, RES_SELECTION,
                 true, selectionStart);
-            
+
             tasks.push(executeAndVerifyNoSelection, instructions, RES_NO_SELECTION, true);
-            
-            tasks.push(executeAndVerifySelection, instructions, RES_NO_SELECTION, 
+
+            tasks.push(executeAndVerifySelection, instructions, RES_NO_SELECTION,
                 false, selectionStart);
-            
+
             tasks.run(function()
             {
                 FBTest.testDone("executeSelection.DONE");
@@ -43,11 +43,11 @@ function executeAndVerifyNoSelection(callback, instructions, expected, useComman
     executeAndVerifySelection(callback, instructions, expected, useCommandEditor);
 }
 
-function executeAndVerifySelection(callback, instructions, expected, useCommandEditor, 
+function executeAndVerifySelection(callback, instructions, expected, useCommandEditor,
                                    selectionStart, selectionEnd)
 {
-    FBTrace.sysout("executeSelection executeAndVerifySelection : instructions : \"" + 
-                    instructions + "\"; useCommandEditor : " + 
+    FBTrace.sysout("executeSelection executeAndVerifySelection : instructions : \"" +
+                    instructions + "\"; useCommandEditor : " +
                     useCommandEditor + "; expect : "+expected);
     FBTest.clearConsole();
     FBTest.clearAndTypeCommand(instructions, useCommandEditor);
