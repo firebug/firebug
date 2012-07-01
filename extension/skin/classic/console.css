@@ -1,3 +1,4 @@
+/* See license.txt for terms of usage */
 
 .panelNode-console {
     overflow-x: hidden;
@@ -9,10 +10,10 @@
 }
 
 .logRow {
+    display: table;
     position: relative;
-    margin: 0;
+    width: 100%;
     border-bottom: 1px solid #D7D7D7;
-    padding: 2px 4px 1px 6px;
     background-color: #FFFFFF;
 }
 
@@ -43,6 +44,42 @@
     display: block;
 }
 
+.logRow > div {
+    display: table-row;
+}
+
+.logContent {
+    display: table-cell;
+    padding: 2px 0 2px 4px;
+}
+
+.logContent:empty {
+    display: none;
+}
+
+.logCounter {
+    display: none;
+    padding: 2px 0 2px 5px;
+    width: 20px;
+}
+
+.logCounter[count] {
+    display: table-cell;
+}
+
+.logCounterValue:empty {
+    display: none;
+}
+
+.logCounterValue {
+    border: 0.1em solid rgba(0, 0, 0, 0.4);
+    border-radius: 40px 40px 40px 40px;
+    background-color: #ffffff;
+    font-weight: bold;
+    padding: 0 4px;
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.4) 30%, transparent);
+}
+
 /*************************************************************************************************/
 
 .logRow-command > .objectBox-text {
@@ -57,9 +94,17 @@
 .logRow-assert,
 .logRow-warningMessage,
 .logRow-errorMessage {
-    padding-left: 22px;
     background-repeat: no-repeat;
     background-position: 4px 2px;
+}
+
+.logRow-info > div > .logContent,
+.logRow-warn > div > .logContent,
+.logRow-warningMessage > div > .logContent,
+.logRow-error > div > .logContent,
+.logRow-errorMessage > div > .logContent,
+.logRow-assert > div > .logContent {
+    padding-left: 22px;
 }
 
 .logRow-assert,
@@ -172,6 +217,16 @@
 .objectLink-sourceLink > .systemLink {
     float: right;
     color: #FF0000;
+}
+
+
+.logRow:not(.logRow-group) > div > .objectLink-sourceLink {
+    position: relative;
+    display: table-cell;
+    padding: 0 4px;
+    text-align: right;
+    width: 0;
+    white-space: nowrap;
 }
 
 .logRow > .objectLink-sourceLink > div,
@@ -430,7 +485,7 @@
 }
 
 .logRow-help .commandDesc {
-    color: gray
+    color: gray;
 }
 
 /*************************************************************************************************/
@@ -609,7 +664,7 @@
 
 /*************************************************************************************************/
 
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow {
     cursor: pointer;
@@ -618,11 +673,11 @@
     background-position: 3px 3px;
 }
 
-.logRow-errorMessage > .hasTwisty > .errorTitle {
+.logRow-errorMessage .hasTwisty > .errorTitle {
     background-position: 2px 3px;
 }
 
-.logRow-errorMessage > .hasTwisty > .errorTitle:hover,
+.logRow-errorMessage .hasTwisty > .errorTitle:hover,
 .logRow-spy .spyHead .spyTitle:hover,
 .logGroup > .logRow:hover {
     text-decoration: underline;
