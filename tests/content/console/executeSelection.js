@@ -52,7 +52,7 @@ function executeAndVerifySelection(callback, instructions, expected, useCommandE
     FBTest.clearConsole();
     FBTest.clearAndTypeCommand(instructions, useCommandEditor);
 
-    if(selectionStart !== undefined)
+    if (selectionStart !== undefined)
     {
         var cmdLine = FW.Firebug.CommandLine.getCommandLine(FW.Firebug.currentContext);
         cmdLine.setSelectionRange(selectionStart, selectionEnd || cmdLine.value.length);
