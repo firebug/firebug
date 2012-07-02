@@ -438,8 +438,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
 
-FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
-
             if (msgId && msgId == previousMsgId)
             {
                 this.increaseRowCount(container.lastChild);
