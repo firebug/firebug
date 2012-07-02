@@ -386,29 +386,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-<<<<<<< HEAD
     getMessageId: function(object, sourceLink)
-=======
-    getMessageId: function(object)
->>>>>>> Fix XHR spy logs
     {
         // The object could provide it's own custom ID.
         if (object instanceof Object && typeof(object.getId) == "function")
             return object.getId();
 
         // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
-<<<<<<< HEAD
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         if (object instanceof Object && typeof object[0] != "undefined")
             return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-=======
-        //else if (typeof object == "string")
-        //    return object;
-        //else if (object instanceof Object && typeof object[0] != "undefined")
-        //    return object[0];
->>>>>>> Fix XHR spy logs
 
         // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
@@ -445,14 +434,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-<<<<<<< HEAD
             var msgId = this.getMessageId(objects, sourceLink);
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
-=======
-            var msgId = this.getMessageId(objects);
-            var previousMsgId = this.getMessageId(this.lastLogObjects);
->>>>>>> Fix XHR spy logs
 
             if (msgId && msgId == previousMsgId)
             {
@@ -669,36 +653,23 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
-        // Last CSS style defined using "%c" that should be applied on
-        // created log-row parts (elements). See issue 6064.
-        // Example: console.log('%cred-text %cgreen-text', 'color:red', 'color:green');
-        var lastStyle;
-
         for (var i = 0; i < parts.length; ++i)
         {
-            var node;
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex];
+                var object = objects[objIndex++];
                 if (part.type == "%c")
-                    lastStyle = object.toString();
-                else if (objIndex < objects.length)
-                    node = this.appendObject(object, row, part.rep);
+                    row.setAttribute("style", object.toString());
+                else if (typeof(object) != "undefined")
+                    this.appendObject(object, row, part.rep);
                 else
-                    node = this.appendObject(part.type, row, FirebugReps.Text);
-                objIndex++;
+                    this.appendObject(part.type, row, FirebugReps.Text);
             }
             else
             {
-                node = FirebugReps.Text.tag.append({object: part}, row);
+                FirebugReps.Text.tag.append({object: part}, row);
             }
-
-            // Apply custom style if available.
-            if (lastStyle && node)
-                node.setAttribute("style", lastStyle);
-
-            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
@@ -868,16 +839,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
-
-    showInfoTip: function(infoTip, target, x, y)
-    {
-        var object = Firebug.getRepObject(target);
-        var rep = Firebug.getRep(object, this.context);
-        if (!rep)
-            return false;
-
-        return rep.showInfoTip(infoTip, target, x, y);
-    }
 });
 
 // ********************************************************************************************* //
