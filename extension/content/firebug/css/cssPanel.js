@@ -1229,7 +1229,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }
