@@ -654,37 +654,28 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
-        // Last CSS style defined using "%c" that should be applied on
-        // created log-row parts (elements). See issue 6064.
-        // Example: console.log('%cred-text %cgreen-text', 'color:red', 'color:green');
-        var lastStyle;
-
         for (var i = 0; i < parts.length; ++i)
         {
-            var node;
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex];
+                var object = objects[objIndex++];
                 if (part.type == "%c")
-                    lastStyle = object.toString();
-                else if (objIndex < objects.length)
-                    node = this.appendObject(object, row, part.rep);
+                    row.setAttribute("style", object.toString());
+                else if (typeof(object) != "undefined")
+                    this.appendObject(object, row, part.rep);
                 else
-                    node = this.appendObject(part.type, row, FirebugReps.Text);
-                objIndex++;
+                    this.appendObject(part.type, row, FirebugReps.Text);
             }
             else
             {
+<<<<<<< HEAD
                 var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
                 node = tag.append({object: part}, row);
+=======
+                FirebugReps.Text.tag.append({object: part}, row);
+>>>>>>> Issue 4979: reset lastLogObjects member when clean up
             }
-
-            // Apply custom style if available.
-            if (lastStyle && node)
-                node.setAttribute("style", lastStyle);
-
-            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
@@ -854,16 +845,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
-
-    showInfoTip: function(infoTip, target, x, y)
-    {
-        var object = Firebug.getRepObject(target);
-        var rep = Firebug.getRep(object, this.context);
-        if (!rep)
-            return false;
-
-        return rep.showInfoTip(infoTip, target, x, y);
-    }
 });
 
 // ********************************************************************************************* //
