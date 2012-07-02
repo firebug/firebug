@@ -605,7 +605,7 @@
 
 /************************************************************************************************/
 
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow {
     cursor: pointer;
@@ -614,11 +614,11 @@
     background-position: 3px 3px;
 }
 
-.logRow-errorMessage > .hasTwisty > .errorTitle {
+.logRow-errorMessage .hasTwisty > .errorTitle {
     background-position: 2px 3px;
 }
 
-.logRow-errorMessage > .hasTwisty > .errorTitle:hover,
+.logRow-errorMessage .hasTwisty > .errorTitle:hover,
 .logRow-spy .spyHead .spyTitle:hover,
 .logGroup > .logRow:hover {
     text-decoration: underline;
