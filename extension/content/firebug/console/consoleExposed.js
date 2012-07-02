@@ -156,13 +156,16 @@ function createFirebugConsole(context, win)
                 context.frameCounters[frameId] = frameCounter;
             }
             else
+            {
                 ++frameCounter.count;
+            }
 
             var label = key == undefined
                 ? frameCounter.count
                 : key + " " + frameCounter.count;
 
-            frameCounter.logRow.firstChild.firstChild.nodeValue = label;
+            var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
+            node.firstChild.nodeValue = label;
         }
         return Console.getDefaultReturnValue(win);
     };
