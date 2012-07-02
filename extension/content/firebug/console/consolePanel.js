@@ -442,7 +442,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 var logContent = row.getElementsByClassName("logContent").item(0);
                 appender.apply(this, [objects, logContent, rep]);
 
-                if (!sourceLink && objects.getSourceLink)
+                if (!sourceLink && objects && objects.getSourceLink)
                     sourceLink = objects.getSourceLink();
 
                 if (sourceLink)
