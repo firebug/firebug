@@ -1796,7 +1796,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1925,6 +1925,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             if (!preExpr)
                 keywords = keywords.concat(["inherit"]);
 
+            if (!cycle)
+            {
+                // Make some good default suggestions.
+                var list = ["white", "black", "solid", "outset", "repeat"];
+                for (var i = 0; i < list.length; ++i)
+                {
+                    if (Str.hasPrefix(list[i], expr) && keywords.indexOf(list[i]) !== -1)
+                    {
+                        out.suggestion = list[i];
+                        break;
+                    }
+                }
+            }
+
             return stripCompletedParens(keywords, postExpr);
         }
     },
@@ -1934,8 +1948,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!Css.hasClass(this.target, "cssPropValue"))
             return null;
 
-        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
-        // into 'no-repeat' should work).
+        // For non-multi-valued properties, fail (pre-completions don't make sense,
+        // and it's less risky).
         var row = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
         if (!Css.multiValuedProperties.hasOwnProperty(propName))
