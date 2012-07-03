@@ -73,7 +73,7 @@
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>
 
-        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('FAQ');"/>
+        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('help');"/>
     </commandset>
 
     <keyset id="mainKeyset">
