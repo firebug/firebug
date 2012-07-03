@@ -10,6 +10,21 @@ function(Firebug, Wrapper, Events) {
 // ********************************************************************************************* //
 // Command Line APIs
 
+// List of command line APIs
+var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+    "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
+    "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
+    "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+
+// List of shortcuts for some console methods
+var consoleShortcuts = ["dir", "dirxml", "table"];
+
+// List of console variables.
+var props = ["$0", "$1", "help"];
+
+// ********************************************************************************************* //
+// Command Line Implementation
+
 /**
  * Returns a command line object (bundled with passed window through closure). The object
  * provides all necessary APIs as described here:
@@ -37,12 +52,6 @@ function createFirebugCommandLine(context, win)
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Exposed Properties
 
-    // List of command line APIs
-    var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
-        "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-        "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
-        "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
-
     // Define command line methods
     for (var i=0; i<commands.length; i++)
     {
@@ -63,7 +72,6 @@ function createFirebugCommandLine(context, win)
     }
 
     // Define shortcuts for some console methods
-    var consoleShortcuts = ["dir", "dirxml", "table"];
     for (var i=0; i<consoleShortcuts.length; i++)
     {
         var command = consoleShortcuts[i];
@@ -82,8 +90,7 @@ function createFirebugCommandLine(context, win)
         commandLine.__exposedProps__[command] = "rw";
     }
 
-    // Define console variables (inspector history).
-    var props = ["$0", "$1"];
+    // Define console variables.
     for (var i=0; i<props.length; i++)
     {
         var prop = props[i];
@@ -242,7 +249,10 @@ document.documentElement.appendChild(script);
 
 Firebug.CommandLineExposed =
 {
-    createFirebugCommandLine: createFirebugCommandLine
+    createFirebugCommandLine: createFirebugCommandLine,
+    commands: commands,
+    consoleShortcuts: consoleShortcuts,
+    properties: props,
 };
 
 return Firebug.CommandLineExposed;

@@ -21,12 +21,13 @@ define([
     "firebug/console/eventMonitor",
     "firebug/lib/keywords",
     "firebug/console/console",
+    "firebug/console/commandLineHelp",
     "firebug/console/commandLineExposed",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console) {
+    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console, CommandLineHelp) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1185,6 +1186,12 @@ function FirebugCommandLineAPI(context)
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
+    this.help = function()
+    {
+        CommandLineHelp.render(context);
+        return Firebug.Console.getDefaultReturnValue(context.window);
+    };
+
     // xxxHonza: removed from 1.10 (issue 5599)
     /*this.memoryProfile = function(title)
     {
@@ -1338,9 +1345,17 @@ Firebug.CommandLine.injector =
 // ********************************************************************************************* //
 // CommandLine Handler
 
+/**
+ * This object is responsible for handling commands executing in the page context.
+ * When a command (CMD API) is being executed, the page sends a DOM event that is
+ * handled by 'handleEvent' method.
+ *
+ * @param {Object} context
+ * @param {Object} win is the window the handler is bound into
+ */
 function CommandLineHandler(context, win)
 {
-    this.handleEvent = function(event)  // win is the window the handler is bound into
+    this.handleEvent = function(event)
     {
         context.baseWindow = context.baseWindow || context.window;
         this.api = new FirebugCommandLineAPI(context);
