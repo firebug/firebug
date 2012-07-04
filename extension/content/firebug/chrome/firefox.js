@@ -16,7 +16,16 @@ var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMe
 function getBrowserDocument()
 {
     // TODO: this function is called very frequently, worth optimizing
-    return Firebug.chrome.inDetachedScope ? Firebug.chrome.originalBrowser.ownerDocument : top.document;
+    try
+    {
+        var chrome = Firebug.chrome;
+        return chrome.inDetachedScope ? chrome.originalBrowser.ownerDocument : top.document;
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("firefox.getBrowserDocument; EXCEPTION " + e, e);
+    }
 }
 
 // ********************************************************************************************* //
