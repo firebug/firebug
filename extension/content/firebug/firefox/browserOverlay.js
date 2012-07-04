@@ -1012,12 +1012,12 @@ $menupopupOverlay($("menu_View_Popup"), [
 $menupopupOverlay($("menuWebDeveloperPopup"), [
     $menu({
         id: "menu_webDeveloper_firebug",
-        insertbefore: "webConsole",
+        insertbefore: "menu_devToolbar",
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
     }, [firebugMenuPopup.cloneNode(true)]),
     $menuseparator({
-        insertbefore: "webConsole"
+        insertbefore: "menu_devToolbar"
     })
 ]);
 
