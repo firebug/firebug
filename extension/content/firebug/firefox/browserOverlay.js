@@ -1025,7 +1025,7 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
 $menupopupOverlay($("appmenu_webDeveloper_popup"), [
     $splitmenu({
         id: "appmenu_firebug",
-        insertbefore: "appmenu_webConsole",
+        insertbefore: "appmenu_devToolbar",
         command: "cmd_toggleFirebug",
         key: "key_toggleFirebug",
         label: "firebug.Firebug",
@@ -1033,7 +1033,7 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
         "class": "fbInternational"
     }, [firebugMenuPopup.cloneNode(true)]),
     $menuseparator({
-        insertbefore: "appmenu_webConsole"
+        insertbefore: "appmenu_devToolbar"
     })
 ]);
 
