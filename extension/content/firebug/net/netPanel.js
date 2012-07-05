@@ -336,7 +336,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 command: Obj.bindFixed(System.copyToClipboard, System, file.href)
             }
         );
-        
+
         if (params)
         {
             items.push(
