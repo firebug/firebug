@@ -361,6 +361,9 @@ Firebug.GlobalUI =
         if (popup.state == "open")
             return;
 
+        while (popup.lastChild)
+            popup.removeChild(popup.lastChild);
+
         // Generate dynamic content.
         for (var i=0; i<firebugMenuContent.length; i++)
             popup.appendChild(firebugMenuContent[i].cloneNode(true));
@@ -412,7 +415,7 @@ Firebug.GlobalUI =
             closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
 
-        // Allow customizing of Firebug menu (see FBTest and FBTrace).
+        // Allow Firebug menu customization (see FBTest and FBTrace as an example).
         var event = new CustomEvent("firebugMenuShowing", {detail: popup});
         document.dispatchEvent(event);
     },
@@ -422,8 +425,13 @@ Firebug.GlobalUI =
         if (popup.state == "open")
             return;
 
-        while (popup.lastChild)
-            popup.removeChild(popup.lastChild);
+        // xxxHonza: I don't know why the timeout must be here, but if it isn't
+        // the icon menu is broken (see issue 5427)
+        setTimeout(function()
+        {
+            while (popup.lastChild)
+                popup.removeChild(popup.lastChild);
+        });
     },
 
     onPositionPopupShowing: function(popup)
