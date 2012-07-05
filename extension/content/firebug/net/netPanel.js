@@ -347,7 +347,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 }
             );
         }
-		
+        
         if (isPost)
         {
             items.push(
