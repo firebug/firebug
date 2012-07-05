@@ -16,13 +16,21 @@ function runTest()
 
         var chrome = FW.Firebug.chrome;
         var fbMenu = chrome.$("fbFirebugMenu");
-        var locMenu = fbMenu.querySelector("menu");
-        var menupopup = locMenu.querySelector("menupopup");
+        var menupopup;
 
         // test if right item is checked in ui location menu
         tasks.push(click, fbMenu);
-        tasks.push(click, locMenu);
-        tasks.push(testMenuItem, menupopup, 0);
+        tasks.push(click, function()
+        {
+            var locMenu = fbMenu.querySelector("menu");
+            menupopup = locMenu.querySelector("menupopup");
+            return locMenu;
+        });
+
+        tasks.push(function(callback)
+        {
+            testMenuItem(callback, menupopup, 0);
+        });
 
         // set position to "top"
         tasks.push(click, function()
@@ -32,7 +40,10 @@ function runTest()
         })
 
         // Top menu-item must be checked
-        tasks.push(testMenuItem, menupopup, 1);
+        tasks.push(function(callback)
+        {
+            testMenuItem(callback, menupopup, 1);
+        });
 
         tasks.push(function(callback)
         {
