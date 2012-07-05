@@ -2311,13 +2311,13 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", false);
 
         this.panel.panelNode.removeChild(this.box);

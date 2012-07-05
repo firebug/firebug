@@ -2660,7 +2660,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     updateOption: function(name, value)
     {
         if (name == "breakOnErrors")
-            Firebug.chrome.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
+            Firebug.chrome.getElementById("cmd_firebug_breakOnErrors").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)

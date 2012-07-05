@@ -188,7 +188,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.showToolbarButtons("fbNetButtons", enabled);
 
         if (enabled)
-            Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", this.persistContent);
         else
             this.table = null;
 

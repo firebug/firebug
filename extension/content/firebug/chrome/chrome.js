@@ -1386,14 +1386,14 @@ var FirebugChrome =
 
     onMenuShowing: function(popup)
     {
-        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_detachFirebug")[0];
         if (detachFirebug)
         {
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_toggleFirebug")[0];
         if (toggleFirebug)
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
@@ -1469,7 +1469,7 @@ var FirebugChrome =
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
         if (!this.contextMenuObject &&
-        !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
+            !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
             !sel.isCollapsed)
         {
             var menuitem = Menu.createMenuItem(popup, {label: "Copy"});
@@ -1691,7 +1691,7 @@ var FirebugChrome =
     breakOnNext: function(context, event)
     {
         // Avoid bubbling from associated options.
-        if (event.target.id != "cmd_toggleBreakOn")
+        if (event.target.id != "cmd_firebug_toggleBreakOn")
             return;
 
         if (!context)

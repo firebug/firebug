@@ -78,13 +78,13 @@ this.onFirebugMenuShowing = function(event)
         // Open Test Console
         $menupopupOverlay(parent, [
             $menuseparator({
-                insertbefore: "menu_aboutSeparator",
+                insertbefore: "menu_firebug_aboutSeparator",
             }),
             $menuitem({
                 id: "menu_openTestConsole",
                 label: "Open Test Console",
                 command: "cmd_openTestConsole",
-                insertbefore: "menu_aboutSeparator",
+                insertbefore: "menu_firebug_aboutSeparator",
                 key: "key_openTestConsole"
             })
         ]);
@@ -97,7 +97,7 @@ this.onFirebugMenuShowing = function(event)
                 type: "checkbox",
                 label: "Always Open Test Console",
                 oncommand: "FBTestFirebugOverlay.onToggleOption(this)",
-                insertbefore: "menu_optionsSeparator",
+                insertbefore: "menu_firebug_optionsSeparator",
                 option: "alwaysOpenTestConsole"
             })
         ]);

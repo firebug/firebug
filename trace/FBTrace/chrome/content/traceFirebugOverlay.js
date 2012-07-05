@@ -47,13 +47,13 @@ this.onFirebugMenuShowing = function(event)
         // Open Test Console
         $menupopupOverlay(parent, [
             $menuseparator({
-                insertbefore: "menu_aboutSeparator",
+                insertbefore: "menu_firebug_aboutSeparator",
             }),
             $menuitem({
                 id: "menu_openTraceConsole",
                 label: "Open_Firebug_Tracing",
                 command: "cmd_openTraceConsole",
-                insertbefore: "menu_aboutSeparator",
+                insertbefore: "menu_firebug_aboutSeparator",
                 "class": "fbInternational",
                 key: "key_openTraceConsole"
             })
@@ -67,7 +67,7 @@ this.onFirebugMenuShowing = function(event)
                 type: "checkbox",
                 label: "Always_Open_Firebug_Tracing",
                 oncommand: "FBTraceFirebugOverlay.onToggleOption(this)",
-                insertbefore: "menu_optionsSeparator",
+                insertbefore: "menu_firebug_optionsSeparator",
                 option: "alwaysOpenTraceConsole"
             })
         ]);

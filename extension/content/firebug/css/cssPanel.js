@@ -2579,13 +2579,13 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.focus();
 
         // match CSSModule.getEditorOptionKey
-        var command = Firebug.chrome.$("cmd_togglecssEditMode");
+        var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var command = Firebug.chrome.$("cmd_togglecssEditMode");
+        var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
         command.setAttribute("checked", false);
 
         if (this.box.parentNode == this.panel.panelNode)
