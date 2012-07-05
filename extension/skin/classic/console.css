@@ -425,7 +425,7 @@
     background-color: #EFEFEF;
 }
 
-.logRow-help .commandName {
+.logRow-help .commandName .objectLink {
     color: green;
     font-family: monospace;
 }

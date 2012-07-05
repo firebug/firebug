@@ -5,8 +5,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/console/commandLineExposed",
+    "firebug/chrome/window",
 ],
-function(Domplate, Locale, Dom, CommandLineExposed) { with (Domplate) {
+function(Domplate, Locale, Dom, CommandLineExposed, Win) { with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -70,13 +71,23 @@ var HelpEntry = domplate(
         FOR("command", "$commands",
             TR({"class": "focusRow helpRow subFocusRow", "role": "row"},
                 TD({"class": "a11yFocus helpCell commandName", "role": "presentation"},
-                    "$command|getName"
+                    A({"class": "objectLink", onclick: "$onClick", _repObject: "$command"},
+                        "$command|getName"
+                    )
                 ),
                 TD({"class": "a11yFocus helpCell commandDesc", "role": "gridcell"},
                     "$command|getDesc"
                 )
             )
         ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onClick: function(event)
+    {
+        var object = Firebug.getRepObject(event.target);
+        Win.openNewTab("http://getfirebug.com/wiki/index.php/" + object.name);
+    },
 
     getName: function(object)
     {
