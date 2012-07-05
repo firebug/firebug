@@ -363,7 +363,7 @@ Firebug.GlobalUI =
 
         // Generate dynamic content.
         for (var i=0; i<firebugMenuContent.length; i++)
-            popup.appendChild(firebugMenuContent[i]);
+            popup.appendChild(firebugMenuContent[i].cloneNode(true));
 
         var collapsed = "true";
         if (Firebug.chrome)
