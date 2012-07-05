@@ -340,11 +340,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if(params)
         {
         	items.push(
-            		{
-            	        	label: "CopyRequestParameters",
-                		tooltiptext: "clipboard.tip.Copy_Request_Parameters",
-                		command: Obj.bindFixed(this.copyUrlParams, this, file)
-            		}
+            	    {
+            	        label: "CopyRequestParameters",
+                	tooltiptext: "clipboard.tip.Copy_Request_Parameters",
+                	command: Obj.bindFixed(this.copyUrlParams, this, file)
+            	    }
         	);
 	}
 		
