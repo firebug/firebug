@@ -327,6 +327,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var object = Firebug.getObjectByURL(this.context, file.href);
         var isPost = NetUtils.isURLEncodedRequest(file, this.context);
+        var params = Url.parseURLParams(file.href);
 
         items.push(
             {
@@ -335,7 +336,18 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 command: Obj.bindFixed(System.copyToClipboard, System, file.href)
             }
         );
-
+        
+        if(params)
+        {
+        	items.push(
+            	{
+            	    label: "CopyRequestParameters",
+                	tooltiptext: "clipboard.tip.Copy_Request_Parameters",
+                	command: Obj.bindFixed(this.copyUrlParams, this, file)
+            	}
+        	);
+		}
+		
         if (isPost)
         {
             items.push(
@@ -454,6 +466,18 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // Context menu commands
+    
+    copyUrlParams: function(file)
+    {
+    	var params = Url.parseURLParams(file.href);
+    	var url="";
+    	for(var i=0;i<params.length;i++)
+    	{
+    		var result = params.map(function(o) { return o.name + ": " + o.value; });
+    	}
+    		System.copyToClipboard(result.join("\n"));
+    },
+    
     copyParams: function(file)
     {
         var text = NetUtils.getPostText(file, this.context, true);
