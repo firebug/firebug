@@ -251,7 +251,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         var editor = this.getDefaultEditor();
         var doc = popup.ownerDocument;
-        var item = doc.getElementById("menu_firebugOpenWithEditor");
+        var item = doc.getElementById("menu_firebug_firebugOpenWithEditor");
 
         if (item)
         {

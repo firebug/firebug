@@ -120,6 +120,9 @@ var Loader =
         try
         {
             Services.scriptloader.loadSubScript(url, context);
+
+            if (FBTrace.DBG_MODULES)
+                FBTrace.sysout("mini-require; Module loaded " + fullName, url);
         }
         catch (err)
         {

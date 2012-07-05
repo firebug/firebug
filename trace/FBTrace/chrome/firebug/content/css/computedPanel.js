@@ -151,6 +151,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateComputedView: function(element)
     {
+        // The current selection can be null.
+        if (!element)
+            return;
+
         var doc = element.ownerDocument;
         var win = doc.defaultView;
 
@@ -293,6 +297,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 this.panelNode);
         }
 
+        if (this.scrollTop)
+        {
+            this.panelNode.scrollTop = this.scrollTop;
+            delete this.scrollTop;
+        }
+
         Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
     },
 
@@ -433,13 +443,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         // Wait for loadedContext to restore the panel
         if (this.context.loaded)
         {
-            var state;
             Persist.restoreObjects(this, state);
 
             if (state)
             {
                 if (state.scrollTop)
-                    this.panelNode.scrollTop = state.scrollTop;
+                    this.scrollTop = state.scrollTop;
 
                 if (state.groupOpened)
                     this.groupOpened = state.groupOpened;
@@ -480,15 +489,13 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var options = [
-            "showUserAgentCSS",
-            "computedStylesDisplay",
-            "colorDisplay",
-            "showMozillaSpecificStyles"
-        ];
+        var options = new Set();
+        options.add("showUserAgentCSS");
+        options.add("computedStylesDisplay");
+        options.add("colorDisplay");
+        options.add("showMozillaSpecificStyles");
 
-        var isRefreshOption = function(element) { return element == name; };
-        if (options.some(isRefreshOption))
+        if (options.has(name))
             this.refresh();
     },
 

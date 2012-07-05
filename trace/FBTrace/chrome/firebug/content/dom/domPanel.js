@@ -641,6 +641,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     addMember: function(object, type, props, name, value, level, order, context)
     {
+        try
+        {
+            return this.addMemberInternal.apply(this, arguments);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domPanel.addMember; EXCEPTION " + err, err);
+        }
+    },
+
+    addMemberInternal: function(object, type, props, name, value, level, order, context)
+    {
         // do this first in case a call to instanceof reveals contents
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
@@ -1456,19 +1469,17 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var options = [
-            "showUserProps",
-            "showUserFuncs",
-            "showDOMProps",
-            "showDOMFuncs",
-            "showDOMConstants",
-            "showInlineEventHandlers",
-            "showOwnProperties",
-            "showEnumerableProperties"
-        ];
+        var options = new Set();
+        options.add("showUserProps");
+        options.add("showUserFuncs");
+        options.add("showDOMProps");
+        options.add("showDOMFuncs");
+        options.add("showDOMConstants");
+        options.add("showInlineEventHandlers");
+        options.add("showOwnProperties");
+        options.add("showEnumerableProperties");
 
-        var isRefreshOption = function(element) { return element == name; };
-        if (options.some(isRefreshOption))
+        if (options.has(name))
             this.rebuild(true);
     },
 
@@ -1603,7 +1614,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
                 command: Obj.bindFixed(this.rebuild, this, true)
             }

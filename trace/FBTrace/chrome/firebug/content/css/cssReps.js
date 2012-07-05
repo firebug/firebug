@@ -149,7 +149,8 @@ var CSSInfoTip = Obj.extend(InfoTip,
            "font-size:14px;",
            "font-size:18px;"
         ];
-        var fontObject = Fonts.getFontInfo(null, null, fontName.replace(/"/g, ""));
+        var fontObject = Fonts.getFontInfo(null, null,
+            fontName.replace(/^(["'])?(.*?)\1$/g, "$2"));
 
         if (FBTrace.DBG_INFOTIP)
         {

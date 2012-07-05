@@ -151,7 +151,8 @@ var HttpObserver = Obj.extend(BaseObserver,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.onExamineResponse: " + request.name);
 
-        if (!Options.get("cookies.logEvents"))
+        // Do not collect received cookies if they are not necessary.
+        if (!Options.get("cookies.logEvents") && !Options.get("cookies.showRejectedCookies"))
             return;
 
         // If logging to console is on, remember the set-cookie string, so

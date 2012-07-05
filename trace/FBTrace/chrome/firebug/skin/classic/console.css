@@ -44,7 +44,7 @@
     display: block;
 }
 
-/*****************************************************************************************/
+/*************************************************************************************************/
 
 .logRow-command > .objectBox-text {
     font-family: monospace;
@@ -111,7 +111,7 @@
     background-image: url(chrome://firebug/skin/error.svg);
 }
 
-/*****************************************************************************************/
+/*************************************************************************************************/
 
 .inline {
     display: inline;
@@ -155,7 +155,8 @@
 }
 
 .objectBox-null,
-.objectBox-undefined {
+.objectBox-undefined,
+.logRowHint {
     font-style: italic;
     color: #787878;
 }
@@ -180,7 +181,7 @@
     padding-left: 5px;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 
 .errorTitle {
     margin-top: 0px;
@@ -340,7 +341,7 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/* Profiler Heaer */
+/* Profiler Header */
 
 .headerCell {
     cursor: pointer;
@@ -389,6 +390,48 @@
 
 .useA11y .profileTable *:focus {
     outline-offset: -2px;
+}
+
+/*************************************************************************************************/
+/* Command Line Help */
+
+.logRow-help .logGroupBody {
+    border-bottom: 1px solid #D7D7D7;
+}
+
+.logRow-help .logGroupLabel {
+    text-decoration: none !important;
+}
+
+.logRow-help > .logRow {
+    background-position: 2px 3px !important;
+}
+
+.logRow-help .helpCaptionDesc {
+    color: gray;
+    font-weight: normal;
+    padding-left: 10px;
+}
+
+.logRow-help .helpTable {
+    margin-bottom: 4px;
+}
+
+.logRow-help .helpCell {
+    padding: 2px 4px 2px 4px;
+}
+
+.logRow-help .helpTable tr:nth-child(even) {
+    background-color: #EFEFEF;
+}
+
+.logRow-help .commandName .objectLink {
+    color: green;
+    font-family: monospace;
+}
+
+.logRow-help .commandDesc {
+    color: gray
 }
 
 /*************************************************************************************************/
@@ -550,13 +593,22 @@
     margin-left: 4px;
 }
 
-/*****************************************************************************************/
+/*************************************************************************************************/
+/* Cycle reference*/
+
+.objectLink-Reference {
+    font-family: monospace;
+    font-weight: bold;
+    color: rgb(102, 102, 255);
+}
+
+/*************************************************************************************************/
 
 .logRow-dir {
     padding: 0;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 
 .logRow-errorMessage > .hasTwisty > .errorTitle,
 .logRow-spy .spyHead .spyTitle,

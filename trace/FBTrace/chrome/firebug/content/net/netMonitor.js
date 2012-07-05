@@ -294,7 +294,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         var panel = context.getPanel(panelName);
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", panel.persistContent);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", panel.persistContent);
     },
 
     updateOption: function(name, value)

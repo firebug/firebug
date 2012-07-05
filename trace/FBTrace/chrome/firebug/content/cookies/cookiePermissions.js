@@ -23,15 +23,15 @@ const cookieLifeTimePref = "lifetimePolicy";
 
 const permOptions =
 {
-    "default-session": ["firecookie.default.session", false],
-    "default-third-party-session": ["firecookie.default.thirdPartySession", false],
-    "default-third-party": ["firecookie.default.thirdParty", false],
-    "default-allow": ["firecookie.default.allow", false],
-    "default-deny": ["firecookie.default.deny", false],
-    "default-warn": ["firecookie.default.warn", false],
-    "host-allow-session": ["firecookie.host.session", true],
-    "host-allow": ["firecookie.host.accept", true],
-    "host-deny": ["firecookie.host.reject", true]
+    "default-session": ["cookies.default.session", false],
+    "default-third-party-session": ["cookies.default.thirdPartySession", false],
+    "default-third-party": ["cookies.default.thirdParty", false],
+    "default-allow": ["cookies.default.allow", false],
+    "default-deny": ["cookies.default.deny", false],
+    "default-warn": ["cookies.default.warn", false],
+    "host-allow-session": ["cookies.host.session", true],
+    "host-allow": ["cookies.host.accept", true],
+    "host-deny": ["cookies.host.reject", true]
 };
 
 // ********************************************************************************************* //
@@ -54,7 +54,7 @@ var CookiePermissions = Obj.extend(Object,
         if (tooltip.fcEnabled)
         {
             var host = context.window.location.host;
-            tooltip.label = Locale.$STRF("firecookie.perm.manage.tooltip", [host]);
+            tooltip.label = Locale.$STRF("cookies.perm.manage.tooltip", [host]);
         }
 
         return tooltip.fcEnabled;
@@ -153,7 +153,7 @@ var CookiePermissions = Obj.extend(Object,
                 permissionManager.add(location, "cookie", permissionManager.DENY_ACTION);
 
             case "default-deny":
-                if (Options.get(clearWhenDeny))
+                if (Options.get("cookies.clearWhenDeny"))
                     Firebug.CookieModule.onRemoveAll(context);
                 break;
         }

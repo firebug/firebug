@@ -53,7 +53,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
-                DIV({role: "list", "aria-label": Locale.$STR("aria.labels.style rules") },
+                DIV({"class": "cssNonInherited", role: "list",
+                        "aria-label": Locale.$STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
@@ -77,6 +78,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             DIV({"class": "cssElementRuleContainer"},
                 TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            ),
+
+        newRuleTag:
+            DIV({"class": "cssElementRuleContainer"},
+                DIV({"class": "cssRule insertBefore", style: "display: none"}, "")
             ),
 
         CSSFontPropValueTag:
@@ -138,6 +144,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 this.removeSystemRules(rules, sections);
         }
 
+        // Reset the selection, so that clicking that starts before the view
+        // update still result in proper mouseup events (issue 5500).
+        this.document.defaultView.getSelection().removeAllRanges();
+
         if (rules.length || sections.length)
         {
             inheritLabel = Locale.$STR("InheritedFrom");
@@ -173,6 +183,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             Events.dispatch([Firebug.A11yModel], "onCSSRulesAdded", [this, result]);
         }
+
+        // Avoid a flickering "disable" icon by forcing a reflow (issue 5500).
+        this.panelNode.offsetHeight;
     },
 
     getStylesheetURL: function(rule, getBaseUri)
@@ -200,7 +213,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getElementRules(parent, rules, usedProps, true);
 
             if (rules.length)
-                sections.splice(0, 0, {element: parent, rules: rules});
+                sections.unshift({element: parent, rules: rules});
         }
     },
 
@@ -245,7 +258,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     this.markOverriddenProps(element, props, usedProps, inheritMode);
 
                 var ruleId = this.getRuleId(rule);
-                rules.splice(0, 0, {rule: rule, id: ruleId,
+                rules.unshift({rule: rule, id: ruleId,
                     // Show universal selectors with pseudo-class
                     // (http://code.google.com/p/fbug/issues/detail?id=3683)
                     selector: rule.selectorText.replace(/ :/g, " *:"),
@@ -262,7 +275,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+            FBTrace.sysout("getElementRules " + rules.length + " rules for " +
                 Xpath.getElementXPath(element), rules);
     },
 
@@ -437,8 +450,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         if (props.length)
         {
-            rules.splice(0, 0,
-                {rule: element, id: Xpath.getElementXPath(element),
+            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
                     selector: "element.style", props: props, inherited: inheritMode});
         }
     },
@@ -457,14 +469,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onClick = Obj.bind(this.onClick, this);
         this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
         this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
 
-        // We only need the basic panel initialize, not the intermeditate objects
-        Firebug.Panel.initialize.apply(this, arguments);
+        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
     },
 
     show: function(state)
@@ -479,22 +488,19 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         {
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
-            var doc = win.document;
-            context.addEventListener(doc, "mouseover", this.onHoverChange, false);
-            context.addEventListener(doc, "mousedown", this.onActiveChange, false);
+            context.addEventListener(win, "mouseover", this.onHoverChange, false);
+            context.addEventListener(win, "mousedown", this.onActiveChange, false);
         }
     },
 
     unwatchWindow: function(context, win)
     {
-        var doc = win.document;
-        context.removeEventListener(doc, "mouseover", this.onHoverChange, false);
-        context.removeEventListener(doc, "mousedown", this.onActiveChange, false);
+        context.removeEventListener(win, "mouseover", this.onHoverChange, false);
+        context.removeEventListener(win, "mousedown", this.onActiveChange, false);
 
+        var doc = win.document;
         if (Dom.isAncestor(this.stateChangeEl, doc))
-        {
             this.removeStateChangeHandlers();
-        }
     },
 
     supportsObject: function(object, type)
@@ -528,24 +534,19 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             return;
         }
 
-        if (!element)
-            return;
-
         this.updateView(element);
     },
 
     updateOption: function(name, value)
     {
-        var options = [
-            "onlyShowAppliedStyles",
-            "showUserAgentCSS",
-            "expandShorthandProps",
-            "colorDisplay",
-            "showMozillaSpecificStyles"
-        ];
+        var options = new Set();
+        options.add("onlyShowAppliedStyles");
+        options.add("showUserAgentCSS");
+        options.add("expandShorthandProps");
+        options.add("colorDisplay");
+        options.add("showMozillaSpecificStyles");
 
-        var isRefreshOption = function(element) { return element == name; };
-        if (options.some(isRefreshOption))
+        if (options.has(name))
             this.refresh();
     },
 
@@ -628,6 +629,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             label: "EditStyle",
             tooltiptext: "style.tip.Edit_Style",
             command: Obj.bindFixed(this.editElementStyle, this)
+        },
+        {
+            label: "AddRule",
+            tooltiptext: "style.tip.Add_Rule",
+            command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
         if (style instanceof Ci.nsIDOMFontFace && style.rule)
