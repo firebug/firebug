@@ -466,15 +466,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // Context menu commands
-    
+
     copyUrlParams: function(file)
     {
-    	var params = Url.parseURLParams(file.href);
-    	var url="";
-    	var result = params.map(function(o) { return o.name + ": " + o.value; });
-    	System.copyToClipboard(result.join("\n"));
+        var params = Url.parseURLParams(file.href);
+        var url="";
+        var result = params.map(function(o) { return o.name + ": " + o.value; });
+        System.copyToClipboard(result.join("\n"));
     },
-    
+
     copyParams: function(file)
     {
         var text = NetUtils.getPostText(file, this.context, true);
