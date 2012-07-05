@@ -809,6 +809,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         return Win.iterateBrowserWindows("navigator:browser", function(win)
         {
+            // Firebug doesn't have to be loaded in every browser window (see delayed load).
+            if (!win.Firebug.TabWatcher)
+                return false;
+
             return win.Firebug.TabWatcher.iterateContexts(function(context)
             {
                 if (context.stopped)
@@ -1636,20 +1640,20 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (context.stopped)
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
-            chrome.setGlobalAttribute("cmd_rerun", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_firebug_rerun", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_firebug_stepOver", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_firebug_stepInto", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_firebug_stepOut", "disabled", "false");
         }
         else
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false");
-            chrome.setGlobalAttribute("cmd_rerun", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_firebug_rerun", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_firebug_stepOver", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_firebug_stepInto", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_firebug_stepOut", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "disabled", "true");
         }
     },
 
@@ -1690,7 +1694,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         try
         {
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn",
+            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn",
                 "breakable");
 
             if (FBTrace.DBG_BP)
@@ -1702,7 +1706,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             // If currentBreakable is false, then we are armed, but we broke
             if (currentBreakable == "false")
-                Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", "true");
+                Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", "true");
 
             // If Firebug is minimized, open the UI to show we are stopped
             if (Firebug.isMinimized())

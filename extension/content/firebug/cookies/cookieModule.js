@@ -30,6 +30,7 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/chrome/firefox",
+    "firebug/cookies/legacy",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
@@ -386,13 +387,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     updateOption: function(name, value)
     {
-        if (name == "cookies.clearWhenDeny")
-        {
-        }
-        else if (name == "cookies.LogEvents")
-        {
-        }
-        else if (name == "consoleFilterTypes")
+        if (name == "consoleFilterTypes")
         {
             this.updateConsoleFilter();
         }
@@ -528,7 +523,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             // is not triggered.
             TabWatcher.iterateContexts(function(context)
             {
-                context.getPanel("cookies").refresh();
+                context.getPanel(panelName).refresh();
             });
         }
         catch (e)
@@ -547,7 +542,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // is not triggered.
         TabWatcher.iterateContexts(function(context)
         {
-            context.getPanel("cookies").refresh();
+            context.getPanel(panelName).refresh();
         });
     },
 

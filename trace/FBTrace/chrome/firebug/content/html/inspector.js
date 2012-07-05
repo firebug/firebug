@@ -215,7 +215,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.inspecting = true;
         this.inspectingContext = context;
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
 
         var inspectingPanelName = this._resolveInspectingPanelName(context);
@@ -313,7 +313,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (!waitForClick)
             this.detachClickInspectListeners(context.window);
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "false");
 
         this.inspecting = false;
 
@@ -763,7 +763,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // The panel can be null (if disabled) so use the global context.
         // var context = Firebug.currentContext;
         // var disabled = (context && context.loaded) ? false : true;
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", disabled);
     },
 
     /**
@@ -773,7 +773,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     loadedContext: function(context)
     {
         // See the comment in showPanel.
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", "false");
     },
 
     /**

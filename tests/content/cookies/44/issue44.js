@@ -2,6 +2,8 @@ function runTest()
 {
     FBTest.sysout("cookies.test.issue44; START");
 
+    FBTest.setPref("cookies.filterByPath", false);
+
     FBTest.openNewTab(basePath + "cookies/44/issue44.php", function(win)
     {
         FBTestFireCookie.enableCookiePanel(function(win)

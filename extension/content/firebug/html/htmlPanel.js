@@ -1,3 +1,4 @@
+/* See license.txt for terms of usage */
 
 define([
     "firebug/lib/object",
@@ -133,19 +134,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         Firebug.Editor.stopEditing();
 
-        if (!this.selection.parentNode)
+        // After mutation listeners have made the element appear in the panel,
+        // re-select it (and also update the disable state of the "Edit" button).
+        this.context.delay(function()
         {
-            Firebug.chrome.clearStatusPath();
-
-            // nextSelection is set in mutation handlers. When the editing mode stops
-            // this variable (if set) will be used as the next selected node, effectively
-            // replacing the old selected node that doesn't have to exist any more (after
-            // the editing).
-            // If nextSelection is not set a default node (e.g. body) will be selected.
-            // See issue 5506
-            this.select(this.nextSelection, true);
-            delete this.nextSelection;
-        }
+            this.select(this.selection, true);
+        }.bind(this));
     },
 
     isEditing: function()
@@ -159,7 +153,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         delete this.lastSearch;
     },
 
-    select: function(object, forceUpdate)
+    select: function(object, forceUpdate, noEditChange)
     {
         if (!object)
             object = this.getDefaultSelection();
@@ -175,10 +169,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selection = object;
             this.updateSelection(object);
 
-            // The Edit button (in the toolbar) must be updated every time the selection
-            // changes. Some elements (such as <html>) can't be edited (see issue 5506).
-            var edit = Firebug.chrome.$("fbToggleHTMLEditing");
-            edit.disabled = object ? Css.nonEditableTags.hasOwnProperty(object.localName) : false;
+            // Update the Edit button to reflect editability of the selection.
+            // (Except during editing, when it should always be possible to click it.)
+            var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
+            editButton.disabled = (this.selection && !this.isEditing() &&
+                Css.nonEditableTags.hasOwnProperty(this.selection.localName));
 
             // Distribute selection change further to listeners.
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
@@ -187,7 +182,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             // displayed in the editor (textarea) so that it corresponds to the current
             // selection. This typically happens when the user clicks on object-status-path
             // buttons in the toolbar.
-            if (this.isEditing())
+            // For the case when the selection is changed from within the editor, don't
+            // change the edited element.
+            if (this.isEditing() && !noEditChange)
                 this.editNode(object);
         }
     },
@@ -410,8 +407,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             // but it's also risky. Mutation listeners should be registered
             // at the moment when it's clear that the window/frame has been
             // loaded.
-            if (doc.location == "about:blank")
-                return;
+
+            // This break HTML panel for about:blank pages (see issue 5120).
+            //if (doc.location == "about:blank")
+            //    return;
 
             Events.addEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
             Events.addEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
@@ -690,17 +689,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
-
-                    if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                    {
-                        // If the editing mode is currently active, remember the target mutation.
-                        // The mutation is coming from user changes and will be selected as soon
-                        // as editing is finished. Only HTMLElement can be selected (not a simple
-                        // text node).
-                        // See issue 5506
-                        if (this.isEditing() && (target instanceof window.HTMLElement))
-                            this.nextSelection = target;
-                    }
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
@@ -1349,15 +1337,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     updateOption: function(name, value)
     {
-        var options = [
-            "showCommentNodes",
-            "entityDisplay",
-            "showTextNodesWithWhitespace",
-            "showFullTextNodes"
-        ];
+        var options = new Set();
+        options.add("showCommentNodes");
+        options.add("entityDisplay");
+        options.add("showTextNodesWithWhitespace");
+        options.add("showFullTextNodes");
 
-        var isRefreshOption = function(element) { return element == name; };
-        if (options.some(isRefreshOption))
+        if (options.has(name))
         {
             this.resetSearch();
             Dom.clearNode(this.panelNode);
@@ -2166,7 +2152,7 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             catch (e)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
+                    FBTrace.sysout("TextNodeEditor.saveEdit; EXCEPTION " + e, e);
             }
         }
     }
@@ -2308,64 +2294,105 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     {
         this.target = target;
         this.panel = panel;
-        this.editingElements = [target.repObject, null];
+        var el = target.repObject;
+        if (this.innerEditMode)
+        {
+            this.editingParent = el;
+        }
+        else
+        {
+            this.editingRange = el.ownerDocument.createRange();
+            this.editingRange.selectNode(el);
+            this.originalLocalName = el.localName;
+        }
 
         this.panel.panelNode.appendChild(this.box);
 
         this.input.value = value;
         this.input.focus();
 
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", false);
 
         this.panel.panelNode.removeChild(this.box);
 
-        delete this.editingElements;
+        delete this.editingParent;
+        delete this.editingRange;
+        delete this.originalLocalName;
         delete this.target;
         delete this.panel;
     },
 
-    saveEdit: function(target, value, previousValue)
+    getNewSelection: function(fragment)
     {
-        // Remove all of the nodes in the last range we created, except for
-        // the first one, because setOuterHTML will replace it
-        var first = this.editingElements[0], last = this.editingElements[1];
-        if (last && last != first)
+        // Get a new element to select in the HTML panel. An element with the
+        // same localName is preferred, or just any element. If there is none,
+        // we choose the parent instead.
+        var found = null;
+        var nodes = fragment.childNodes;
+        for (var i = 0; i < nodes.length; ++i)
         {
-            for (var child = first.nextSibling; child;)
+            var n = nodes[i];
+            if (n.nodeType === Node.ELEMENT_NODE)
             {
-                var next = child.nextSibling;
-                child.parentNode.removeChild(child);
-                if (child == last)
-                    break;
-                else
-                    child = next;
+                if (n.localName === this.originalLocalName)
+                    return n;
+                if (!found)
+                    found = n;
             }
         }
+        if (found)
+            return found;
+        return this.editingRange.startContainer;
+    },
 
-        // Make sure that we create at least one node here, even if it's just
-        // an empty space, because this code depends on having something to replace
-        if (!value)
-            value = " ";
-
+    saveEdit: function(target, value, previousValue)
+    {
         if (this.innerEditMode)
-            this.editingElements[0].innerHTML = value;
+        {
+            try
+            {
+                // xxxHonza: Catch "can't access dead object" exception.
+                this.editingParent.innerHTML = value;
+            }
+            catch (e)
+            {
+                FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
+            }
+        }
         else
-            this.editingElements = Dom.setOuterHTML(this.editingElements[0], value);
+        {
+            try
+            {
+                var range = this.editingRange;
+                var fragment = range.createContextualFragment(value);
+                var sel = this.getNewSelection(fragment);
 
-        var element = Firebug.getRepObject(target);
-        if (!element)
-            return;
+                var cnl = fragment.childNodes.length;
+                range.deleteContents();
+                range.insertNode(fragment);
+                var sc = range.startContainer, so = range.startOffset;
+                range.setEnd(sc, so + cnl);
 
-        // Make sure the object status path (in the toolbar) is updated.
-        var panel = Firebug.getElementPanel(target);
-        Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
+                this.panel.select(sel, false, true);
+
+                // Clear and update the status path, to make sure it doesn't
+                // show elements no longer in the DOM.
+                Firebug.chrome.clearStatusPath();
+                Firebug.chrome.syncStatusPath();
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("HTMLEditor.saveEdit; EXCEPTION " + e, e);
+            }
+        }
     },
 
     endEditing: function()

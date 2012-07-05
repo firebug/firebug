@@ -431,6 +431,10 @@
     color: gray;
 }
 
+.netInfoResponseHeadersBody .headerFromBFCache {
+    color: gray;
+}
+
 /************************************************************************************************/
 /* Time Info tip */
 

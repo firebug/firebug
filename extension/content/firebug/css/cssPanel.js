@@ -1229,7 +1229,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }
@@ -1789,13 +1789,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propRow = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(propRow, "cssPropName").textContent.toLowerCase();
+
         if (propName == "font" || propName == "font-family")
             return CSSModule.parseCSSFontFamilyValue(value, offset, propName);
         else
             return CSSModule.parseCSSValue(value, offset);
     },
 
-    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle)
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
     {
         if (Dom.getAncestorByClass(this.target, "importRule"))
         {
@@ -1908,9 +1909,35 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 keywords = Css.getCSSKeywordsByProperty(nodeType, propName, avoid);
             }
 
+            // Don't complete minus signs into -moz-calc (issue 5603). (Unless we
+            // have other specialized values as completions, like '-moz-available',
+            // in which case completion is still interesting.)
+            var isMoz = function(x)
+            {
+                return (x.charAt(0) === "-");
+            };
+            if (expr === "-" && keywords.filter(isMoz).join(",") === "-moz-calc()")
+            {
+                keywords = [];
+            }
+
             // Add the magic inherit property, if it's sufficiently alone.
             if (!preExpr)
                 keywords = keywords.concat(["inherit"]);
+
+            if (!cycle)
+            {
+                // Make some good default suggestions.
+                var list = ["white", "black", "solid", "outset", "repeat"];
+                for (var i = 0; i < list.length; ++i)
+                {
+                    if (Str.hasPrefix(list[i], expr) && keywords.indexOf(list[i]) !== -1)
+                    {
+                        out.suggestion = list[i];
+                        break;
+                    }
+                }
+            }
 
             return stripCompletedParens(keywords, postExpr);
         }
@@ -1921,8 +1948,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!Css.hasClass(this.target, "cssPropValue"))
             return null;
 
-        // For non-multi-valued properties, fail (expanding 'background-repeat: repeat'
-        // into 'no-repeat' should work).
+        // For non-multi-valued properties, fail (pre-completions don't make sense,
+        // and it's less risky).
         var row = Dom.getAncestorByClass(this.target, "cssProp");
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
         if (!Css.multiValuedProperties.hasOwnProperty(propName))
@@ -2552,13 +2579,13 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.focus();
 
         // match CSSModule.getEditorOptionKey
-        var command = Firebug.chrome.$("cmd_togglecssEditMode");
+        var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var command = Firebug.chrome.$("cmd_togglecssEditMode");
+        var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
         command.setAttribute("checked", false);
 
         if (this.box.parentNode == this.panel.panelNode)

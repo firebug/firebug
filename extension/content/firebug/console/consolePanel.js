@@ -136,7 +136,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.setFilter(Firebug.consoleFilterTypes);
 
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             this.persistContent);
 
         this.showPanel(state);
@@ -269,8 +269,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace",
             "console.option.tip.Show_Stack_Trace");
+
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
+
         return menuItem;
     },
 
@@ -465,13 +467,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     appendFormatted: function(objects, row, rep)
     {
-        if (!objects || !objects.length)
-            return;
-
         function logText(text, row)
         {
+            Css.setClass(row, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
             row.appendChild(node);
+        }
+
+        if (!objects || !objects.length)
+        {
+            // Make sure the log-row has proper height (even if empty).
+            logText(Locale.$STR("console.msg.nothing_to_output"), row);
+            return;
         }
 
         var format = objects[0];
@@ -482,12 +489,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             format = "";
             objIndex = 0;
         }
-        else  // a string
+        else
         {
-            if (objects.length === 1) // then we have only a string...
+            // So, we have only a string...
+            if (objects.length === 1)
             {
-                if (format.length < 1) { // ...and it has no characters.
-                    logText("(an empty string)", row);
+                // ...and it has no characters.
+                if (format.length < 1)
+                {
+                    logText(Locale.$STR("console.msg.an_empty_string"), row);
                     return;
                 }
             }

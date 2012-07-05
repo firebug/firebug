@@ -23,6 +23,11 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Persist, Menu, FBS) {
 
 // ********************************************************************************************* //
+// Constants
+
+const animationDuration = 0.8;
+
+ // ********************************************************************************************* //
 // Breakpoints
 
 Firebug.Breakpoint = Obj.extend(Firebug.Module,
@@ -31,7 +36,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
     toggleBreakOnNext: function(panel)
     {
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn", "breakable");
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
 
         if (FBTrace.DBG_BP)
             FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
@@ -39,7 +44,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
         // Toggle button's state.
         breakable = (breakable == "true" ? "false" : "true");
-        Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", breakable);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", breakable);
 
         // Call the current panel's logic related to break-on-next.
         // If breakable == "true" the feature is currently disabled.
@@ -77,13 +82,13 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var supported = panel.supportsBreakOnNext();
 
         // Enable by default and disable if needed.
-        Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "disabled", null);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "disabled", null);
 
         // Disable BON if script is disabled or if BON isn't supported by the current panel.
         if (!scriptEnabled || !scriptActive || !supported)
         {
-            Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", "disabled");
-            Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "disabled", "true");
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", "disabled");
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "disabled", "true");
             this.updateBreakOnNextTooltips(panel);
             return;
         }
@@ -107,9 +112,29 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
             Menu.createMenuItem(menuPopup, menuItems[i]);
     },
 
+    toggleTabHighlighting: function(event)
+    {
+        // Don't continue if it's the wrong animation phase
+        if (Math.floor(event.elapsedTime * 10) % (animationDuration * 20) != 0)
+            return;
+
+        Events.removeEventListener(event.target, "animationiteration",
+            Firebug.Breakpoint.toggleTabHighlighting, true);
+
+        var panel = Firebug.currentContext.getPanel(event.target.panelType.prototype.name);
+        if (!panel)
+            return;
+
+        if (!panel.context.delayedArmedTab)
+            return;
+
+        panel.context.delayedArmedTab.setAttribute("breakOnNextArmed", "true");
+        delete panel.context.delayedArmedTab;
+    },
+
     updateBreakOnNextTooltips: function(panel)
     {
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_toggleBreakOn", "breakable");
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
 
         // Get proper tooltip for the break-on-next button from the current panel.
         // If breakable is set to "false" the feature is already activated (throbbing).
@@ -122,7 +147,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         if (breakable == "disabled")
             tooltip += " " + Locale.$STR("firebug.bon.scriptPanelNeeded");
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "tooltiptext", tooltip);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "tooltiptext", tooltip);
     },
 
     updateBreakOnNextState: function(panel, armed)
@@ -130,7 +155,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         // If the panel should break at the next chance, set the button to not breakable,
         // which means already active (throbbing).
         var breakable = armed ? "false" : "true";
-        Firebug.chrome.setGlobalAttribute("cmd_toggleBreakOn", "breakable", breakable);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", breakable);
     },
 
     updatePanelTab: function(panel, armed)
@@ -145,7 +170,34 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(panel.name);
         if (tab)
-            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
+        {
+            if (armed)
+            {
+                // If there is already a panel armed synchronize highlighting of the panel tabs
+                var tabPanel = tab.parentNode;
+                var otherTabIsArmed = false;
+                for (var i = 0; i < tabPanel.children.length; ++i)
+                {
+                    var panelTab = tabPanel.children[i];
+                    if (panelTab !== tab && panelTab.getAttribute("breakOnNextArmed") == "true")
+                    {
+                        panel.context.delayedArmedTab = tab;
+                        Events.addEventListener(panelTab, "animationiteration",
+                            this.toggleTabHighlighting, true);
+                        otherTabIsArmed = true;
+                        break;
+                    }
+                }
+
+                if (!otherTabIsArmed)
+                    tab.setAttribute("breakOnNextArmed", "true");
+            }
+            else
+            {
+                delete panel.context.delayedArmedTab;
+                tab.setAttribute("breakOnNextArmed", "false");
+            }
+        }
     },
 
     updatePanelTabs: function(context)
@@ -253,8 +305,8 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
     tag:
-        DIV({"class": "breakpointRow focusRow", role: "option", "aria-checked": "$bp.checked",
-                _repObject: "$bp", onclick: "$onClick"},
+        DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", role: "option",
+                "aria-checked": "$bp.checked", _repObject: "$bp", onclick: "$onClick"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp.checked", tabindex : '-1'}),
@@ -288,6 +340,11 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     disableBreakpoint: function(href, lineNumber)
     {
         FBS.disableBreakpoint(href, lineNumber);
+    },
+
+    isDisabled: function(bp)
+    {
+        return !bp.checked;
     },
 
     getContextMenuItems: function(breakpoint, target)
@@ -355,10 +412,19 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             var sourceLink = node.repObject;
 
             panel.noRefresh = true;
-            if (event.target.checked)
+            var checkBox = event.target;
+            var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+            if (checkBox.checked)
+            {
                 this.enableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "true");
+            }
             else
+            {
                 this.disableBreakpoint(sourceLink.href, sourceLink.line);
+                bpRow.setAttribute("aria-checked", "false");
+            }
             panel.noRefresh = false;
         }
         else if (Dom.getAncestorByClass(event.target, "closeButton"))

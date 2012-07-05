@@ -50,8 +50,8 @@
         <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')"/>
         <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')"/>
         <command id="cmd_reload" oncommand="Firebug.chrome.reload()"/>
-        <command id="cmd_reloadSkipCache" oncommand="Firebug.chrome.reload(true)"/>
-        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
+        <command id="cmd_firebug_reloadSkipCache" oncommand="Firebug.chrome.reload(true)"/>
+        <command id="cmd_firebug_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
     </commandset>
 
     <keyset id="mainKeyset"/>
@@ -71,12 +71,12 @@
             <spacer flex="1"/>
             <!-- Allow to minimize/attach Firebug if deactivated -->
             <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic fbInternational"
-                tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
+                tooltiptext="Minimize Firebug" command="cmd_firebug_minimizeFirebug"/>
         </hbox>
         <hbox flex="1" pack="center" align="center">
             <button id="fbResumeBoxButton"
                 label="label.Activate Firebug for the current website"
-                command="cmd_toggleSuspendFirebug" class="fbInternational"/>
+                command="cmd_firebug_toggleSuspendFirebug" class="fbInternational"/>
         </hbox>
     </vbox>
 

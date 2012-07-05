@@ -96,7 +96,6 @@ const COMPONENTS_FILTERS = [
 
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
-const reTooMuchRecursion = /too\smuch\srecursion/;
 
 Cu.import("resource://firebug/prefLoader.js");
 
@@ -748,7 +747,6 @@ var fbs =
         fbs.restoreBreakpoints();
 
         this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
-        fbs._lastErrorDebuggr = null;
 
 
         if (FBTrace.DBG_FBS_ERRORS)
@@ -2178,13 +2176,13 @@ var fbs =
 
     onThrow: function(frame, type, rv)
     {
-        if ( isFilteredURL(frame.script.fileName) )
+        if (isFilteredURL(frame.script.fileName))
             return RETURN_CONTINUE_THROW;
 
         if (rv && rv.value && rv.value.isValid)
         {
             var value = rv.value;
-            if (value.jsClassName == "Error" && reTooMuchRecursion.test(value.stringValue))
+            if (value.jsClassName == "Error" && value.stringValue.indexOf("too much recursion") !== -1)
             {
                 if (fbs._lastErrorCaller)
                 {
@@ -2214,24 +2212,7 @@ var fbs =
             delete fbs._lastErrorCaller; // throw is not recursion either
         }
 
-        if (this.showStackTrace)  // store these in case the throw is not caught
-        {
-            var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
-            if (debuggr)
-            {
-                // https://bugzilla.mozilla.org/show_bug.cgi?id=669730
-                //fbs._lastErrorScript = frame.script;
-                //fbs._lastErrorLine = frame.line;
-                //fbs._lastErrorDebuggr = debuggr;
-                //fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
-            }
-            else
-            {
-                delete fbs._lastErrorDebuggr;
-            }
-        }
-
-        if (fbs.trackThrowCatch)
+        if (fbs.showStackTrace)
         {
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.onThrow from tag:" + frame.script.tag + ":" +

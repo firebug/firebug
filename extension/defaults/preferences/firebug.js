@@ -27,6 +27,7 @@ pref("extensions.firebug.addonBarOpened", false);
 pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
+pref("extensions.firebug.delayLoad", true);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
@@ -56,7 +57,6 @@ pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.tabularLogMaxHeight", 200);
 pref("extensions.firebug.consoleFilterTypes", "all");
-pref("extensions.firebug.memoryProfilerEnable", false);
 pref("extensions.firebug.preferJSDSourceLinks", false);
 
 // HTML

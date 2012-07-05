@@ -10,6 +10,21 @@ function(Firebug, Wrapper, Events) {
 // ********************************************************************************************* //
 // Command Line APIs
 
+// List of command line APIs
+var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+    "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
+    "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
+    "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+
+// List of shortcuts for some console methods
+var consoleShortcuts = ["dir", "dirxml", "table"];
+
+// List of console variables.
+var props = ["$0", "$1", "help"];
+
+// ********************************************************************************************* //
+// Command Line Implementation
+
 /**
  * Returns a command line object (bundled with passed window through closure). The object
  * provides all necessary APIs as described here:
@@ -24,8 +39,9 @@ function createFirebugCommandLine(context, win)
     if (!contentView)
     {
         if (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("createFirebugCommandLine ERROR no contentView "+context.getName())
-            return null;
+            FBTrace.sysout("createFirebugCommandLine ERROR no contentView " + context.getName());
+
+        return null;
     }
 
     // The commandLine object
@@ -35,12 +51,6 @@ function createFirebugCommandLine(context, win)
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Exposed Properties
-
-    // List of command line APIs
-    var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
-        "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-        "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
-        "copy", "memoryProfile", "memoryProfileEnd"];
 
     // Define command line methods
     for (var i=0; i<commands.length; i++)
@@ -53,7 +63,7 @@ function createFirebugCommandLine(context, win)
 
         function createCommandHandler(cmd) {
             return function() {
-                return notifyFirebug(arguments, cmd, 'firebugExecuteCommand');
+                return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
             }
         }
 
@@ -62,7 +72,6 @@ function createFirebugCommandLine(context, win)
     }
 
     // Define shortcuts for some console methods
-    var consoleShortcuts = ["dir", "dirxml", "table"];
     for (var i=0; i<consoleShortcuts.length; i++)
     {
         var command = consoleShortcuts[i];
@@ -81,8 +90,7 @@ function createFirebugCommandLine(context, win)
         commandLine.__exposedProps__[command] = "rw";
     }
 
-    // Define console variables (inspector history).
-    var props = ["$0", "$1"];
+    // Define console variables.
     for (var i=0; i<props.length; i++)
     {
         var prop = props[i];
@@ -91,7 +99,7 @@ function createFirebugCommandLine(context, win)
 
         function createVariableHandler(prop) {
             return function() {
-                return notifyFirebug(arguments, prop, 'firebugExecuteCommand');
+                return notifyFirebug(arguments, prop, "firebugExecuteCommand");
             }
         }
 
@@ -111,7 +119,7 @@ function createFirebugCommandLine(context, win)
     function attachCommandLine()
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.attachCommandLine; "+window.location);
+            FBTrace.sysout("commandLine.Exposed.attachCommandLine; " + window.location);
 
         if (!contentView.console)
         {
@@ -119,28 +127,33 @@ function createFirebugCommandLine(context, win)
             contentView.console = console;
         }
 
-        Events.addEventListener(contentView.document, "firebugCommandLine", firebugEvalEvent, true);
+        Events.addEventListener(contentView.document, "firebugCommandLine",
+            firebugEvalEvent, true);
     }
 
     function detachCommandLine()
     {
-        Events.removeEventListener(contentView.document, "firebugCommandLine", firebugEvalEvent, true);
-        delete contentView._FirebugCommandLine; // suicide!
+        Events.removeEventListener(contentView.document, "firebugCommandLine",
+            firebugEvalEvent, true);
+
+        // suicide!
+        delete contentView._FirebugCommandLine;
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.detachCommandLine; "+window.location);
+            FBTrace.sysout("commandLine.Exposed.detachCommandLine; " + window.location);
     }
 
     function firebugEvalEvent(event)
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.firebugEvalEvent "+window.location);
+            FBTrace.sysout("commandLine.Exposed.firebugEvalEvent " + window.location);
 
-        var expr = contentView.document.getUserData("firebug-expr"); // see commandLine.js
+        // see commandLine.js
+        var expr = contentView.document.getUserData("firebug-expr");
         evaluate(expr);
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed; did evaluate on "+expr);
+            FBTrace.sysout("commandLine.Exposed; did evaluate on " + expr);
     }
 
     function evaluate(expr)
@@ -154,7 +167,7 @@ function createFirebugCommandLine(context, win)
             //var result = FirebugEvaluate(expr, contentView);
             notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
-        catch(exc)
+        catch (exc)
         {
             // change source and line number of exeptions from commandline code
             // create new error since properties of nsIXPCException are not modifiable
@@ -172,13 +185,15 @@ function createFirebugCommandLine(context, win)
                 result.message = exc.message;
                 result.lineNumber = exc.lineNumber - line;
                 result.fileName = "data:," + encodeURIComponent(expr);
-                if(!isXPCException)
+
+                if (!isXPCException)
                     result.name = exc.name;
             }
             else
             {
                 result = exc;
             }
+
             notifyFirebug([result], "evaluateError", "firebugAppendConsole");
         }
     }
@@ -198,14 +213,17 @@ function createFirebugCommandLine(context, win)
         contentView.document.dispatchEvent(event);
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed; dispatched event "+methodName+" via "+
-                eventID+" with "+objs.length+ " user objects, [0]:"+commandLine.userObjects[0]);
+        {
+            FBTrace.sysout("commandLine.Exposed; dispatched event " + methodName + " via " +
+                eventID + " with " + objs.length + " user objects, [0]:" +
+                commandLine.userObjects[0]);
+        }
 
         var result;
         if (contentView.document.getUserData("firebug-retValueType") == "array")
             result = [];
 
-        if (!result && commandLine.userObjects.length == length+1)
+        if (!result && commandLine.userObjects.length == length + 1)
             return commandLine.userObjects[length];
 
         for (var i=length; i<commandLine.userObjects.length && result; i++)
@@ -231,7 +249,10 @@ document.documentElement.appendChild(script);
 
 Firebug.CommandLineExposed =
 {
-    createFirebugCommandLine: createFirebugCommandLine
+    createFirebugCommandLine: createFirebugCommandLine,
+    commands: commands,
+    consoleShortcuts: consoleShortcuts,
+    properties: props,
 };
 
 return Firebug.CommandLineExposed;

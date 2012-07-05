@@ -44,6 +44,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const hiddenColsPref = "net.hiddenColumns";
+
 var panelName = "net";
 
 // ********************************************************************************************* //
@@ -363,7 +365,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Store current state into the preferences.
-        Options.set("net.hiddenColumns", table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
 
         panel.updateHRefLabelWidth();
     },
@@ -383,8 +385,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Reset visibility. Only the Status column is hidden by default.
-        panel.table.setAttribute("hiddenCols", "colStatus");
-        Options.set("net.hiddenColumns", "colStatus");
+        Options.clear(hiddenColsPref);
+        panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
     },
 });
 
@@ -859,6 +861,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             )
         ),
 
+    responseHeadersFromBFCacheTag:
+        TR(
+            TD({"class": "headerFromBFCache"},
+                Locale.$STR("net.label.ResponseHeadersFromBFCache")
+            )
+        ),
+
     customTab:
         A({"class": "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab",
             view: "$tabId", "role": "tab"},
@@ -1034,8 +1043,20 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (file.responseHeaders && !netInfoBox.responseHeadersPresented)
             {
                 netInfoBox.responseHeadersPresented = true;
+
                 Firebug.NetMonitor.NetInfoHeaders.renderHeaders(headersText,
                     file.responseHeaders, "ResponseHeaders");
+
+                // If the request comes from the BFCache do not display reponse headers.
+                // There is not real response from the server and all headers come from
+                // the cache. So, the user should see the 'Response Headers From Cache'
+                // section (see issue 5573).
+                if (file.fromBFCache)
+                {
+                    // Display a message instead of headers.
+                    var body = Dom.getElementByClass(headersText, "netInfoResponseHeadersBody");
+                    Firebug.NetMonitor.NetInfoBody.responseHeadersFromBFCacheTag.replace({}, body);
+                }
             }
 
             if (file.cachedResponseHeaders && !netInfoBox.cachedResponseHeadersPresented)

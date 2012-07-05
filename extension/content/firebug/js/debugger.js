@@ -1241,45 +1241,75 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     onThrow: function(frame, rv)
     {
-        // onThrow is called for throw and for any catch that does not succeed.
+        // onThrow is called for throw, for catches that do not succeed,
+        // and for functions that exceptions pass through.
         var context = this.breakContext;
         delete this.breakContext;
 
         if (!context)
         {
-            FBTrace.sysout("debugger.onThrow, no context, try to get from frame\n");
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("debugger.onThrow, no context, try to get from frame\n");
             context = this.getContextByFrame(frame);
         }
 
-        if (FBTrace.DBG_BP)
+        if (FBTrace.DBG_ERRORLOG)
+        {
+            var lines = [];
+            var frames = StackFrame.getCorrectedStackTrace(frame, context).frames;
+            for (var i=0; i<frames.length; i++)
+                lines.push(frames[i].line + ", " + frames[i].fn);
+
             FBTrace.sysout("debugger.onThrow context:" + (context ? context.getName() :
-                "undefined"));
+                "undefined") + ", " + lines.join("; "), frames);
+        }
 
         if (!context)
             return RETURN_CONTINUE_THROW;
 
-        if (!FBS.trackThrowCatch)
+        if (!FBS.showStackTrace)
             return RETURN_CONTINUE_THROW;
 
         try
         {
-            var isCatch = this.isCatchFromPreviousThrow(frame, context);
-            if (!isCatch)
+            var realThrow = this.isRealThrow(frame, context);
+            if (realThrow)
             {
                 context.thrownStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
+
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.onThrow reset context.thrownStackTrace",
                         context.thrownStackTrace.frames);
+
+                // xxxHonza: this could fix Issue 3276: Track Throw/Catch is not working
+                /*if (FBS.trackThrowCatch)
+                {
+                    var object = {
+                        errorMessage: errorObject.value.stringValue,
+                        message: errorObject.value.stringValue,
+                        sourceName: "",
+                        lineNumber: -1,
+                        sourceLine: "",
+                        category: "javascript",
+                        flags: 2,
+                        exceptionFlag: 2,
+                    };
+
+                    Firebug.Errors.logScriptError(context, object, false);
+
+                    context.thrownStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
+                }*/
             }
             else
             {
                 if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.onThrow isCatch\n");
+                    FBTrace.sysout("debugger.onThrow not a real throw");
             }
         }
-        catch  (exc)
+        catch (exc)
         {
-            FBTrace.sysout("onThrow FAILS: "+exc+"\n");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("onThrow FAILS: " + exc, exc);
         }
 
         if (Firebug.connection.dispatch("onThrow",[context, frame, rv]))
@@ -1288,33 +1318,56 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return RETURN_CONTINUE_THROW;
     },
 
-    isCatchFromPreviousThrow: function(frame, context)
+    isRealThrow: function(mozFrame, context)
     {
-        if (context.thrownStackTrace)
+        // Determine whether the throw was a real one, or just a rethrow of the
+        // last exception (probably automatically inserted - which it seems
+        // happens for every function an exception passes through - but it
+        // could also be manual because there is no simple way to tell them
+        // apart). A rethrow is detected when the current stack exists at the
+        // end of the previous exception's, except that the current top-most
+        // stack frame only has to be in the same function to match.
+        if (!context.thrownStackTrace)
+            return true;
+
+        var trace = context.thrownStackTrace.frames;
+        var findMozFrame = mozFrame.callingFrame, againstFrame = null;
+        if (findMozFrame)
         {
-            var trace = context.thrownStackTrace.frames;
-            if (trace.length > 1)  // top of stack is [0]
+            // Verify that the previous exception includes this frame's call
+            // site somewhere.
+            var findFrameSig = findMozFrame.script.tag + "." + findMozFrame.pc;
+            for (var i=1; i<trace.length; i++)
             {
-                var curFrame = frame;
-                var curFrameSig = curFrame.script.tag +"."+curFrame.pc;
-                for (var i = 1; i < trace.length; i++)
+                var preFrameSig = trace[i].signature();
+
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
                 {
-                    var preFrameSig = trace[i].signature();
-
-                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
-                        FBTrace.sysout("debugger.isCatchFromPreviousThrow " + curFrameSig + "==" +
-                            preFrameSig);
-
-                    if (curFrameSig == preFrameSig)
-                    {
-                        // catch from previous throw (or do we need to compare whole stack?
-                        return true;
-                    }
+                    FBTrace.sysout("debugger.isRealThrow " + findFrameSig + "==" +
+                        preFrameSig);
                 }
-                // We looked at the previous stack and did not match the current frame
+
+                if (findFrameSig === preFrameSig)
+                {
+                    againstFrame = trace[i-1];
+                    break;
+                }
             }
+
+            if (!againstFrame)
+                return true;
         }
-       return false;
+        else
+        {
+            againstFrame = trace[trace.length-1];
+        }
+
+        // Verify that the current frame's function location matches what the
+        // exception has above the matched frame.
+        if (mozFrame.script !== againstFrame.script)
+            return true;
+
+        return false;
     },
 
     onMonitorScript: function(frame)
@@ -1358,7 +1411,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         try
         {
-            if (FBTrace.DBG_ERRORS)
+            if (FBTrace.DBG_ERRORLOG)
                 FBTrace.sysout("debugger.onError: "+error.errorMessage+" in "+
                     (context?context.getName():"no context"), error);
 
@@ -1367,7 +1420,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
             Firebug.errorStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
 
-            if (FBTrace.DBG_ERRORS)
+            if (FBTrace.DBG_ERRORLOG)
                 FBTrace.sysout("debugger.onError; break=" + Firebug.breakOnErrors +
                     ", errorStackTrace:", Firebug.errorStackTrace);
 
@@ -2607,7 +2660,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     updateOption: function(name, value)
     {
         if (name == "breakOnErrors")
-            Firebug.chrome.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
+            Firebug.chrome.getElementById("cmd_firebug_breakOnErrors").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)

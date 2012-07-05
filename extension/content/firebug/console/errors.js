@@ -349,6 +349,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         {
             FBTrace.sysout("errors.observe logScriptError " +
                 (Firebug.errorStackTrace ? "have " : "NO ") +
+                (Firebug.showStackTrace ? "show stack trace" : "do not show stack trace ") +
                 "errorStackTrace error object:",
                 {object: object, errorStackTrace: Firebug.errorStackTrace});
         }
@@ -364,25 +365,14 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         if (object.columnNumber > 0)
             error.colNumber = object.columnNumber;
 
-        if (Firebug.showStackTrace && Firebug.errorStackTrace)
-        {
-            // Firebug.errorStackTrace is set in onError (JSD hook).
-            // However it can happen that the stack trace doesn't belong to the error
-            // happening here (e.g. onError is not executed for throws).
-            // So, use the url and line number to check whether the remembered stack
-            // corresponds to what the current error says (see issue 5400).
-            // Note that this can exclude come stacks:
-            // see https://bugzilla.mozilla.org/show_bug.cgi?id=703519
-            var trace = Firebug.errorStackTrace;
-            var frame = (trace.frames && trace.frames[0]) ? trace.frames[0] : null;
-            if (frame && frame.href == error.href && frame.line == error.lineNo)
-                error.correctWithStackTrace(trace);
-        }
-        else if (checkForUncaughtException(context, object))
+        if (checkForException(context, object))
         {
             context = getExceptionContext(context, object);
             correctLineNumbersOnExceptions(object, error);
         }
+
+        if (Firebug.showStackTrace && Firebug.errorStackTrace)
+            error.correctWithStackTrace(Firebug.errorStackTrace);
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
         if (!msgId)
@@ -822,39 +812,28 @@ function lessTalkMoreAction(context, object, isWarning)
     return msgId;
 }
 
-function checkForUncaughtException(context, object)
+function checkForException(context, object)
 {
     if (object.flags & object.exceptionFlag)
     {
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.observe is exception");
 
-        if (reUncaught.test(object.errorMessage))
+        if (context.thrownStackTrace)
         {
+            Firebug.errorStackTrace = context.thrownStackTrace;
+
             if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("uncaught exception matches " + reUncaught);
+                FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
 
-            if (context.thrownStackTrace)
-            {
-                Firebug.errorStackTrace = context.thrownStackTrace;
-
-                if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
-
-                delete context.thrownStackTrace;
-            }
-            else
-            {
-                 if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("errors.observe NO context.thrownStackTrace");
-            }
-            return true;
+            delete context.thrownStackTrace;
         }
         else
         {
-            if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("errors.observe not an uncaught exception");
+             if (FBTrace.DBG_ERRORLOG)
+                FBTrace.sysout("errors.observe NO context.thrownStackTrace");
         }
+        return true;
     }
 
     delete context.thrownStackTrace;
@@ -863,7 +842,7 @@ function checkForUncaughtException(context, object)
 
 /**
  * Returns a parent window (outer window) for given error object (an object
- * that is passed to a consoleListener).
+ * that is passed into a consoleListener).
  * This method should be the primary way how to find the parent window for any
  * error object.
  *
@@ -910,7 +889,7 @@ function getErrorWindow(object)
 
 function getExceptionContext(context, object)
 {
-    var errorWin = getErrorWindow(object)
+    var errorWin = getErrorWindow(object);
     if (errorWin)
     {
         var errorContext = Firebug.connection.getContextByWindow(errorWin);

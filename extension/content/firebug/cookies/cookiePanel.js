@@ -46,6 +46,8 @@ const removeConfirmation = "cookies.removeConfirmation";
 // Services
 var cookieManager = Xpcom.CCSV("@mozilla.org/cookiemanager;1", "nsICookieManager2");
 
+const panelName = "cookies";
+
 // ********************************************************************************************* //
 // Panel Implementation
 
@@ -58,7 +60,7 @@ function CookiePanel() {}
 CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 /** @lends CookiePanel */
 {
-    name: "cookies",
+    name: panelName,
     title: Locale.$STR("cookies.Panel"),
     searchable: true,
     breakable: true,
@@ -284,8 +286,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (Firebug.chrome.setGlobalAttribute)
         {
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "breakable", "true");
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "tooltiptext",
                 Locale.$STR("cookies.Break On Cookie"));
         }
     },

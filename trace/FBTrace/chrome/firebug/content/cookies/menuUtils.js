@@ -3,44 +3,52 @@
 define([
     "firebug/lib/object",
     "firebug/lib/options",
-    "firebug/lib/locale",
 ],
-function(Obj, Options, Locale) {
+function(Obj, Options) {
 
 // ********************************************************************************************* //
 // Menu Utils
 
 var MenuUtils = 
 {
-    optionMenu: function(context, label, domain, option)
+    optionMenu: function(context, label, tooltiptext, domain, option)
     {
-        var value = Options.get(option);
-        return { label: Locale.$STR(label), nol10n: true, type: "checkbox", checked: value,
-            command: Obj.bindFixed(MenuUtils.setPref, this, domain, option, !value) };
+        var value = Options.getPref(domain, option);
+        return {
+            label: label,
+            tooltiptext: tooltiptext,
+            type: "checkbox",
+            checked: value,
+            command: Obj.bindFixed(this.setPref, this, domain, option, !value)
+        };
     },
 
-    optionAllowGlobally: function(context, label, domain, option)
+    optionAllowGlobally: function(context, label, tooltiptext, domain, option)
     {
-        var value = Options.get(option) == 0;
-        return { label: Locale.$STR(label), nol10n: true, type: "checkbox",
+        var value = Options.getPref(domain, option) == 0;
+        return {
+            label: label,
+            tooltiptext: tooltiptext,
+            type: "checkbox",
             checked: value,
-            command: Obj.bindFixed(this.onAllowCookie, this, domain, option)}
+            command: Obj.bindFixed(this.onAllowCookie, this, domain, option)
+        }
     },
 
     // Command handlers
     onAllowCookie: function(domain, option)
     {
-        var value = Options.get(option);
+        var value = Options.getPref(domain, option);
         switch (value)
         {
             case 0: // accept all cookies by default
-            Options.set(option, 2);
+            Options.setPref(domain, option, 2);
             return;
 
             case 1: // only accept from the originating site (block third party cookies)
             case 2: // block all cookies by default;
             case 3: // use p3p settings
-            Options.set(option, 0);
+            Options.setPref(domain, option, 0);
             return;
         } 
     },
@@ -49,9 +57,9 @@ var MenuUtils =
     {
     },
 
-    setPref: function(prefDomain, name, value)
+    setPref: function(domain, name, value)
     {
-        Options.set(name, value);
+        Options.setPref(domain, name, value);
     }
 };
 

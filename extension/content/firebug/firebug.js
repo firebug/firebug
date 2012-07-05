@@ -46,6 +46,7 @@ const versionURL = "chrome://firebug/content/branch.properties";
 const firebugURLs =  // TODO chrome.js
 {
     main: "http://www.getfirebug.com",
+    help: "http://www.getfirebug.com/help",
     FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
     docs: "http://www.getfirebug.com/docs.html",
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
@@ -508,6 +509,20 @@ window.Firebug =
 
     registerPanel: function()
     {
+        for (var i=0; i<arguments.length; ++i)
+        {
+            var panelName = arguments[i].prototype.name;
+            var panel = panelTypeMap[panelName];
+            if (panel)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("firebug.registerPanel; ERROR a panel with the same " +
+                        "ID already registered! " + panelName);
+                }
+            }
+        }
+
         // In order to keep built in panels (like Console, Script...) be the first one
         // and insert all panels coming from extension at the end, catch any early registered
         // panel (i.e. before FBL.initialize is called, such as YSlow) in a temp array
@@ -517,13 +532,13 @@ window.Firebug =
         else
             panelTypes.push.apply(panelTypes, arguments);
 
-        for (var i = 0; i < arguments.length; ++i)
+        for (var i=0; i<arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
 
         if (FBTrace.DBG_REGISTRATION)
         {
-            for (var i = 0; i < arguments.length; ++i)
-                FBTrace.sysout("registerPanel "+arguments[i].prototype.name);
+            for (var i=0; i<arguments.length; ++i)
+                FBTrace.sysout("registerPanel " + arguments[i].prototype.name);
         }
 
         // If Firebug is not initialized yet the UI will be updated automatically soon.
@@ -1410,6 +1425,10 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
         if (context)
         {
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);
+
+            if (!handler)
+                handler = Firebug.Console.isReadyElsePreparing(context, global);;
+
             if (handler)
             {
                 FBTrace.sysout("Firebug.getConsoleByGlobal " + handler.console + " for " +
@@ -1422,10 +1441,12 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
                 FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global " +
                     global + " " + Win.safeGetWindowLocation(global), global);
         }
-
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
-                global, global);
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
+                    global, global);
+        }
     }
     catch (exc)
     {
