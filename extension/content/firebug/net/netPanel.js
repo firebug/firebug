@@ -342,11 +342,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             items.push(
                 {
             	    label: "CopyRequestParameters",
-			        tooltiptext: "net.tip.Copy_Request_Parameters",
-                	command: Obj.bindFixed(this.copyUrlParams, this, file)
+	            tooltiptext: "net.tip.Copy_Request_Parameters",
+                    command: Obj.bindFixed(this.copyUrlParams, this, file)
             	}
-        	);
-	    }
+            );
+	}
 		
         if (isPost)
         {
