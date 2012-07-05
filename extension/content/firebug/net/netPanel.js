@@ -337,7 +337,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         );
         
-        if(params)
+        if (params)
         {
             items.push(
                 {
