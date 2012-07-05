@@ -61,7 +61,11 @@
                                 <!-- Button image-->
                                 <image src="chrome://firebug/skin/firebug.png"/>
 
-                                <!-- Content comes from fbFirebugMenuPopup -->
+                                <menupopup id="menu_firebugIconMenu" class="fbFirebugMenuPopup"
+                                    onpopupshowing="return Firebug.GlobalUI.onMenuShowing(this);"
+                                    onpopuphiding="return Firebug.GlobalUI.onMenuHiding(this);">
+                                    <!-- Content comes from firebugMenuContent -->
+                                </menupopup>
                             </toolbarbutton>
 
                             <!-- HTML Inspector -->

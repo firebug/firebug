@@ -357,6 +357,14 @@ Firebug.GlobalUI =
 
     onMenuShowing: function(popup)
     {
+        // If this popup is already open the event comes from a sub menu, just ignore it.
+        if (popup.state == "open")
+            return;
+
+        // Generate dynamic content.
+        for (var i=0; i<firebugMenuContent.length; i++)
+            popup.appendChild(firebugMenuContent[i]);
+
         var collapsed = "true";
         if (Firebug.chrome)
         {
@@ -403,6 +411,19 @@ Firebug.GlobalUI =
         {
             closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
+
+        // Allow customizing of Firebug menu (see FBTest and FBTrace).
+        var event = new CustomEvent("firebugMenuShowing", {detail: popup});
+        document.dispatchEvent(event);
+    },
+
+    onMenuHiding: function(popup)
+    {
+        if (popup.state == "open")
+            return;
+
+        while (popup.lastChild)
+            popup.removeChild(popup.lastChild);
     },
 
     onPositionPopupShowing: function(popup)
@@ -671,9 +692,7 @@ $menupopupOverlay($("mainPopupSet"), [
  * and initialized as soon as Firebug UI is actually loaded. Since it's cloned from the original
  * (global scope) extensions don't have to extend it (possible new menu items are already there).
  */
-var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
-    "class": "fbFirebugMenuPopup",
-    onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);"}, [
+var firebugMenuContent = [
 
     // Open/close Firebug
     $menuitem(
@@ -966,7 +985,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         oncommand: "Firebug.GlobalUI.openAboutDialog()",
         "class": "firebugAbout fbInternational"
     }),
-]);
+];
 
 // ********************************************************************************************* //
 // Global Menu Overlays
@@ -1012,12 +1031,16 @@ $menupopupOverlay($("menu_View_Popup"), [
 $menupopupOverlay($("menuWebDeveloperPopup"), [
     $menu({
         id: "menu_webDeveloper_firebug",
-        insertbefore: "webConsole",
+        insertbefore: "menu_devToolbar",
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)]),
+    }, [
+        $menupopup({id: "menu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ]),
     $menuseparator({
-        insertbefore: "webConsole"
+        insertbefore: "menu_devToolbar"
     })
 ]);
 
@@ -1025,15 +1048,19 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
 $menupopupOverlay($("appmenu_webDeveloper_popup"), [
     $splitmenu({
         id: "appmenu_firebug",
-        insertbefore: "appmenu_webConsole",
+        insertbefore: "appmenu_devToolbar",
         command: "cmd_toggleFirebug",
         key: "key_toggleFirebug",
         label: "firebug.Firebug",
         iconic: "true",
         "class": "fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)]),
+    }, [
+        $menupopup({id: "appmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ]),
     $menuseparator({
-        insertbefore: "appmenu_webConsole"
+        insertbefore: "appmenu_devToolbar"
     })
 ]);
 
@@ -1046,7 +1073,11 @@ $menupopupOverlay($("toolsPopup"), [
         key: "key_toggleFirebug",
         label: "firebug.Firebug",
         "class": "menuitem-iconic fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)])
+    }, [
+        $menupopup({id: "toolsmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ])
 ]);
 
 // ********************************************************************************************* //

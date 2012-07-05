@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <!-- See license.txt for terms of usage -->
 
-<?xul-overlay href="chrome://firebug/content/firefox/external-editors/editorsOverlay.xul"?>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 
@@ -73,7 +71,7 @@
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>
 
-        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('FAQ');"/>
+        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('help');"/>
     </commandset>
 
     <keyset id="mainKeyset">
