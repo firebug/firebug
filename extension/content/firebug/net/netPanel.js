@@ -470,7 +470,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     copyUrlParams: function(file)
     {
         var params = Url.parseURLParams(file.href);
-        var url="";
         var result = params.map(function(o) { return o.name + ": " + o.value; });
         System.copyToClipboard(result.join("\n"));
     },
