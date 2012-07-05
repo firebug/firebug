@@ -352,8 +352,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             items.push(
                 {
-                    label: "CopyLocationParameters",
-                    tooltiptext: "net.tip.Copy_Location_Parameters",
+                    label: "CopyURLParameters",
+                    tooltiptext: "net.tip.Copy_URL_Parameters",
                     command: Obj.bindFixed(this.copyParams, this, file)
                 }
             );
