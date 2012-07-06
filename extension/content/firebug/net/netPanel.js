@@ -341,9 +341,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             items.push(
                 {
-                    label: "CopyURLParameters",
-                    tooltiptext: "net.tip.Copy_URL_Parameters",
-                    command: Obj.bindFixed(this.copyUrlParams, this, file)
+                    label: "CopyRequestParameters",
+                    tooltiptext: "net.tip.Copy_Request_Parameters",
+                    command: Obj.bindFixed(this.copyRequestParams, this, file)
                 }
             );
         }
@@ -467,11 +467,20 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // Context menu commands
 
-    copyUrlParams: function(file)
+    copyRequestParams: function(file)
     {
-        var params = Url.parseURLParams(file.href);
-        var result = params.map(function(o) { return o.name + ": " + o.value; });
-        System.copyToClipboard(result.join("\n"));
+        var method = file.method;
+        if (method=='POST')
+        {
+            var params = NetUtils.getPostText(file);
+            System.copyToClipboard(params);
+        }
+        else
+        {
+            var params = Url.parseURLParams(file.href);
+            var result = params.map(function(o) { return o.name + ": " + o.value; });
+            System.copyToClipboard(result.join("\n"));
+        }
     },
 
     copyParams: function(file)
