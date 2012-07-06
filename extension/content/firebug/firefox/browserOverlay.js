@@ -415,6 +415,16 @@ Firebug.GlobalUI =
             closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
 
+        // Update About Menu
+        var version = Firebug.GlobalUI.getVersion();
+        if (version)
+        {
+            var node = popup.getElementsByClassName("firebugAbout")[0];
+            var aboutLabel = node.getAttribute("label");
+            node.setAttribute("label", aboutLabel + " " + version);
+            node.classList.remove("firebugAbout");
+        }
+
         // Allow Firebug menu customization (see FBTest and FBTrace as an example).
         var event = new CustomEvent("firebugMenuShowing", {detail: popup});
         document.dispatchEvent(event);
@@ -987,7 +997,7 @@ var firebugMenuContent = [
     $menuseparator({id: "menu_firebug_aboutSeparator"}),
 
     $menuitem({
-        id: "Firebug_About",
+        id: "menu_firebug_about",
         label: "firebug.About",
         tooltiptext: "firebug.menu.tip.About",
         oncommand: "Firebug.GlobalUI.openAboutDialog()",
@@ -1170,23 +1180,6 @@ if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarp
 // Internationalize all elements with 'fbInternational' class. Clone before internationalizing.
 var elements = cloneArray(document.getElementsByClassName("fbInternational"));
 Locale.internationalizeElements(document, elements, ["label", "tooltiptext", "aria-label"]);
-
-// ********************************************************************************************* //
-// Update About Menu
-
-var version = Firebug.GlobalUI.getVersion();
-if (version)
-{
-    var nodes = document.querySelectorAll(".firebugAbout");
-    nodes = cloneArray(nodes);
-    for (var i=0; i<nodes.length; i++)
-    {
-        var node = nodes[i];
-        var aboutLabel = node.getAttribute("label");
-        node.setAttribute("label", aboutLabel + " " + version);
-        node.classList.remove("firebugAbout");
-    }
-}
 
 // ********************************************************************************************* //
 // First Run Page
