@@ -414,9 +414,11 @@
 
 .netTable.showBFCacheResponses .netRow.fromBFCache {
     display: table-row;
+    background-image: url("bfcache-bk.png");
+    background-repeat: repeat;
 }
 
-.netRow.fromBFCache .netLabel,
+.netRow.fromCache .netLabel,
 .netRow.fromBFCache .netBlockingBar,
 .netRow.fromBFCache .netResolvingBar,
 .netRow.fromBFCache .netConnectingBar,
@@ -426,7 +428,7 @@
     opacity: 0.5;
 }
 
-.netRow.fromBFCache .netHrefLabel {
+.netRow.fromCache .netHrefLabel {
     opacity: 1.0;
     color: gray;
 }
