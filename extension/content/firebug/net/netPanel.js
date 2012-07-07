@@ -328,7 +328,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var object = Firebug.getObjectByURL(this.context, file.href);
         var isPost = NetUtils.isURLEncodedRequest(file, this.context);
         var params = Url.parseURLParams(file.href);
-
         items.push(
             {
                 label: "CopyLocation",
@@ -336,16 +335,21 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 command: Obj.bindFixed(System.copyToClipboard, System, file.href)
             }
         );
-
-        if (params)
+        try
         {
-            items.push(
-                {
-                    label: "CopyRequestParameters",
-                    tooltiptext: "net.tip.Copy_Request_Parameters",
-                    command: Obj.bindFixed(this.copyRequestParams, this, file)
-                }
-            );
+            if (params.length > 0)
+            {
+                items.push(
+                    {
+                        label: "CopyURLParameters",
+                        tooltiptext: "net.tip.Copy_URL_Parameters",
+                        command: Obj.bindFixed(this.copyURLParams, this, file)
+                    }
+                );
+            }
+        }
+        catch(err)
+        {
         }
 
         if (isPost)
@@ -355,6 +359,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     label: "CopyLocationParameters",
                     tooltiptext: "net.tip.Copy_Location_Parameters",
                     command: Obj.bindFixed(this.copyParams, this, file)
+                },
+                {
+                    label: "CopyPOSTParameters",
+                    tooltiptext: "net.tip.Copy_POST_Parameters",
+                    command: Obj.bindFixed(this.copyPOSTParams, this, file)
                 }
             );
         }
@@ -467,22 +476,19 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // Context menu commands
 
-    copyRequestParams: function(file)
+    copyURLParams: function(file)
     {
-        var method = file.method;
-        if (method=='POST')
-        {
-            var params = NetUtils.getPostText(file);
-            System.copyToClipboard(params);
-        }
-        else
-        {
-            var params = Url.parseURLParams(file.href);
-            var result = params.map(function(o) { return o.name + ": " + o.value; });
-            System.copyToClipboard(result.join("\n"));
-        }
+        var params = Url.parseURLParams(file.href);
+        var result = params.map(function(o) { return o.name + ": " + o.value; });
+        System.copyToClipboard(result.join("\n"));
     },
 
+    copyPOSTParams: function(file)
+    {
+        var params = NetUtils.getPostText(file, this.context, true);
+        System.copyToClipboard(params);
+    },
+ 
     copyParams: function(file)
     {
         var text = NetUtils.getPostText(file, this.context, true);
