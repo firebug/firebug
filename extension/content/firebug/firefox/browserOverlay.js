@@ -20,7 +20,7 @@ var firebugURLs =
     FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
     docs: "http://www.getfirebug.com/docs.html",
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
-    discuss: "http://groups.google.com/group/firebug",
+    discuss: "https://groups.google.com/forum/#!forum/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
     donate: "http://getfirebug.com/getinvolved",
     extensions: "http://getfirebug.com/wiki/index.php/Firebug_Extensions",
