@@ -488,9 +488,9 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
             var args = [];
         }
 
-        if (name ==  "anonymous")
+        if (name == "anonymous")
         {
-            name = StackFrame.guessFunctionName(this.sourceFile.href,
+            var name = StackFrame.guessFunctionName(this.sourceFile.href,
                 this.getBaseLineNumberByScript(script), context);
         }
 

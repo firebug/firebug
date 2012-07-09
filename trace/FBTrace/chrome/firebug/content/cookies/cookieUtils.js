@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/cookies/cookie"
+    "firebug/cookies/cookie",
+    "firebug/lib/string"
 ],
-function(Cookie) {
+function(Cookie, Str) {
 
 // ********************************************************************************************* //
 // Menu Utils
@@ -35,9 +36,9 @@ var CookieUtils =
         if (value)
             value = value.replace(/\+/g, " ");
 
-        var c = { 
+        var c = {
             name        : cookie.name,
-            value       : unescape(value),
+            value       : Str.convertToUnicode(unescape(value)),
             isDomain    : cookie.isDomain,
             host        : cookie.host,
             path        : cookie.path,

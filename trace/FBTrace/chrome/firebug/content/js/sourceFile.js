@@ -488,9 +488,9 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
             var args = [];
         }
 
-        if (name ==  "anonymous")
+        if (name == "anonymous")
         {
-            name = StackFrame.guessFunctionName(this.sourceFile.href,
+            var name = StackFrame.guessFunctionName(this.sourceFile.href,
                 this.getBaseLineNumberByScript(script), context);
         }
 
@@ -922,9 +922,13 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
         var scripts = sourceFile.getScriptsAtLineNumber(line);
         if (scripts)
         {
-            var script = scripts[0]; // TODO try others?
+            // TODO try others?
+            var script = scripts[0];
             var analyzer = sourceFile.getScriptAnalyzer(script);
-            line = analyzer.getBaseLineNumberByScript(script);
+
+            // Some analyzers don't implement this method.
+            if (analyzer.getBaseLineNumberByScript)
+                line = analyzer.getBaseLineNumberByScript(script);
         }
     }
 

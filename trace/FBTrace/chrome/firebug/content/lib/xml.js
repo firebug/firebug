@@ -130,23 +130,15 @@ Xml.getElementHTML = function(element)
                     continue;
                 }
 
-                html.push(' ', attr.nodeName, '="', Str.escapeForElementAttribute(attr.nodeValue),'"');
+                html.push(' ', attr.name, '="', Str.escapeForElementAttribute(attr.value), '"');
             }
 
             if (elt.firstChild)
             {
                 html.push('>');
 
-                var pureText=true;
-                for (var child = element.firstChild; child; child = child.nextSibling)
-                    pureText=pureText && (child.nodeType == Node.TEXT_NODE);
-
-                if (pureText)
-                    html.push(Str.escapeForHtmlEditor(elt.textContent));
-                else {
-                    for (var child = elt.firstChild; child; child = child.nextSibling)
-                        toHTML(child);
-                }
+                for (var child = elt.firstChild; child; child = child.nextSibling)
+                    toHTML(child);
 
                 html.push('</', nodeName, '>');
             }

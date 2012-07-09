@@ -22,6 +22,7 @@ define([
     "firebug/chrome/menu",
     "firebug/net/netUtils",
     "firebug/net/netProgress",
+    "firebug/css/cssReps",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -36,7 +37,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -187,7 +188,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.showToolbarButtons("fbNetButtons", enabled);
 
         if (enabled)
-            Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", this.persistContent);
         else
             this.table = null;
 
@@ -561,7 +562,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         return this.conditionEditor;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Activable Panel
 
     /**
@@ -642,7 +643,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     return true;
 
                 this.infoTipURL = infoTipURL;
-                return Firebug.InfoTip.populateImageInfoTip(infoTip, row.repObject.href);
+                return CSSInfoTip.populateImageInfoTip(infoTip, row.repObject.href);
             }
         }
 

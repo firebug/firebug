@@ -33,7 +33,7 @@ function testCPUProfileClearButton(callback)
         var doc = chrome.window.document;
         FBTest.clickToolbarButton(chrome, "fbConsoleClear");
 
-        var button = doc.getElementById("cmd_toggleProfiling");
+        var button = doc.getElementById("cmd_firebug_toggleProfiling");
         FBTest.ok(!button.checked, "'Profile' button must not be pressed when 'Clear' button was pressed");
 
         callback();
@@ -50,7 +50,7 @@ function testCPUProfileConsoleClearCommand(callback)
         FBTest.executeCommand("console.clear()");
 
         var doc = FW.Firebug.chrome.window.document;
-        var button = doc.getElementById("cmd_toggleProfiling");
+        var button = doc.getElementById("cmd_firebug_toggleProfiling");
         FBTest.ok(!button.checked, "'Profile' button must not be pressed when 'console.clear()' was executed");
 
         callback();
@@ -67,8 +67,8 @@ function testMemoryProfileClearButton(callback)
         var chrome = FW.Firebug.chrome;
         var doc = chrome.window.document;
         FBTest.clickToolbarButton(chrome, "fbConsoleClear");
-        
-        var button = doc.getElementById("cmd_toggleMemoryProfiling");
+
+        var button = doc.getElementById("cmd_firebug_toggleMemoryProfiling");
         FBTest.ok(!button.checked, "'Memory Profile' button must not be pressed when 'Clear' button was pressed");
 
         callback();
@@ -85,7 +85,7 @@ function testMemoryProfileConsoleClearCommand(callback)
         FBTest.executeCommand("console.clear()");
 
         var doc = FW.Firebug.chrome.window.document;
-        var button = doc.getElementById("cmd_toggleMemoryProfiling");
+        var button = doc.getElementById("cmd_firebug_toggleMemoryProfiling");
         FBTest.ok(!button.checked, "'Memory Profile' button must not be pressed when 'console.clear()' was executed");
 
         callback();

@@ -46,6 +46,7 @@ const versionURL = "chrome://firebug/content/branch.properties";
 const firebugURLs =  // TODO chrome.js
 {
     main: "http://www.getfirebug.com",
+    help: "http://www.getfirebug.com/help",
     FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
     docs: "http://www.getfirebug.com/docs.html",
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",

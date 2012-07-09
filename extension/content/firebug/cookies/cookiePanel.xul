@@ -7,19 +7,19 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <commandset id="mainCommandSet">
-        <command id="cmd_cookieRemoveAll" oncommand="Firebug.CookieModule.onRemoveAll(Firebug.currentContext)"/>
-        <command id="cmd_cookieRemoveAllSession" oncommand="Firebug.CookieModule.onRemoveAllSession(Firebug.currentContext)"/>
-        <command id="cmd_cookieCreate" oncommand="Firebug.CookieModule.onCreateCookie(Firebug.currentContext)"/>
-        <command id="cmd_cookieViewAll" oncommand="Firebug.CookieModule.onViewAll(Firebug.currentContext)"/>
-        <command id="cmd_cookieViewExceptions" oncommand="Firebug.CookieModule.onViewExceptions(Firebug.currentContext)"/>
-        <command id="cmd_cookieFilterByPath" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.filterByPath')"/>
-        <command id="cmd_cookieShowRejectedCookies" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.showRejectedCookies')"/>
-        <command id="cmd_cookieExportAll" oncommand="Firebug.CookieModule.onExportAll(Firebug.currentContext)"/>
-        <command id="cmd_cookieExportForSite" oncommand="Firebug.CookieModule.onExportForSite(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieRemoveAll" oncommand="Firebug.CookieModule.onRemoveAll(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieRemoveAllSession" oncommand="Firebug.CookieModule.onRemoveAllSession(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieCreate" oncommand="Firebug.CookieModule.onCreateCookie(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieViewAll" oncommand="Firebug.CookieModule.onViewAll(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieViewExceptions" oncommand="Firebug.CookieModule.onViewExceptions(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieFilterByPath" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.filterByPath')"/>
+        <command id="cmd_firebug_cookieShowRejectedCookies" oncommand="Firebug.CookieModule.onFilter(Firebug.currentContext, 'cookies.showRejectedCookies')"/>
+        <command id="cmd_firebug_cookieExportAll" oncommand="Firebug.CookieModule.onExportAll(Firebug.currentContext)"/>
+        <command id="cmd_firebug_cookieExportForSite" oncommand="Firebug.CookieModule.onExportForSite(Firebug.currentContext)"/>
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_removeAllCookies" key="o" modifiers="control,shift" command="cmd_cookieRemoveAll" class="fbOnlyKey"/>
+        <key id="key_firebug_removeAllCookies" key="o" modifiers="control,shift" command="cmd_firebug_cookieRemoveAll" class="fbOnlyKey"/>
     </keyset>
 
     <!-- Firebug toolbar -->
@@ -52,7 +52,7 @@
                             onpopupshowing="return Firebug.CookieModule.onCreateCookieShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcCreate" class="fbInternational"
                             label="cookies.Create"
-                            tooltip="fcCreateCookieTooltip" command="cmd_cookieCreate"/>
+                            tooltip="fcCreateCookieTooltip" command="cmd_firebug_cookieCreate"/>
                         <menuseparator/>
 
                         <!-- Remove all cookies -->
@@ -60,27 +60,27 @@
                             onpopupshowing="return Firebug.CookieModule.onRemoveAllShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcRemoveAll" class="fbInternational"
                             label="cookies.RemoveAll"
-                            key="key_removeAllCookies"
-                            tooltip="fcRemoveAllTooltip" command="cmd_cookieRemoveAll"/>
+                            key="key_firebug_removeAllCookies"
+                            tooltip="fcRemoveAllTooltip" command="cmd_firebug_cookieRemoveAll"/>
 
                         <!-- Remove all session cookies -->
                         <tooltip id="fcRemoveAllSessionTooltip"
                             onpopupshowing="return Firebug.CookieModule.onRemoveAllSessionShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcRemoveAllSession" class="fbInternational"
                             label="cookies.Remove Session Cookies"
-                            tooltip="fcRemoveAllSessionTooltip" command="cmd_cookieRemoveAllSession"/>
+                            tooltip="fcRemoveAllSessionTooltip" command="cmd_firebug_cookieRemoveAllSession"/>
                         <menuseparator/>
 
                         <!-- Export cookies xxxHonza: remove this for now and wait for user feedback
                         <menuitem id="fcExportAll" class="fbInternational"
                             label="cookies.export.Export All Cookies"
                             tooltiptext="cookies.export.Export All Cookies Tooltip"
-                            command="cmd_cookieExportAll"/> -->
+                            command="cmd_firebug_cookieExportAll"/> -->
                         <tooltip id="fcExportForSiteTooltip"
                             onpopupshowing="return Firebug.CookieModule.onExportForSiteShowTooltip(this, Firebug.currentContext)"/>
                         <menuitem id="fcExportForSite" class="fbInternational"
                             label="cookies.export.Export For Site"
-                            tooltip="fcExportForSiteTooltip" command="cmd_cookieExportForSite"/>
+                            tooltip="fcExportForSiteTooltip" command="cmd_firebug_cookieExportForSite"/>
                     </menupopup>
                 </toolbarbutton>
 
@@ -94,13 +94,13 @@
                             value="cookies.filterByPath"
                             label="cookies.filter.byPath"
                             tooltiptext="cookies.filter.byPathTooltip"
-                            command="cmd_cookieFilterByPath"/>
+                            command="cmd_firebug_cookieFilterByPath"/>
                         <menuitem id="fcShowRejectedCookies" type="checkbox"
                             class="fbInternational"
                             value="cookies.showRejectedCookies"
                             label="cookies.filter.showRejectedCookies"
                             tooltiptext="cookies.filter.showRejectedCookiesTooltip"
-                            command="cmd_cookieShowRejectedCookies"/>
+                            command="cmd_firebug_cookieShowRejectedCookies"/>
                         <!--<menuseparator/>
                         <menu id="fcCustomPathFilter" label="cookies.Path Filter">
                             <menupopup id="fcCustomPathFilterPanel" ignorekeys="true"
@@ -135,11 +135,11 @@
                     tooltiptext="cookies.ToolsTooltip">
                     <menupopup>
                         <menuitem id="fcCookieViewAll" class="fbInternational"
-                            command="cmd_cookieViewAll"
+                            command="cmd_firebug_cookieViewAll"
                             label="cookies.ViewAll"
                             tooltiptext="cookies.ViewAllTooltip"/>
                         <menuitem id="fcCookieViewExceptions" class="fbInternational"
-                            command="cmd_cookieViewExceptions"
+                            command="cmd_firebug_cookieViewExceptions"
                             label="cookies.ViewExceptions"
                             tooltiptext="cookies.ViewExceptionsTooltip"/>
                     </menupopup>

@@ -65,7 +65,7 @@ function testConsolPanel(callback)
             var spyLogRow2 = FW.FBL.getElementByClass(panel.panelNode, "netInfoJSONTab","netInfoTab");
             FBTest.click(spyLogRow2);
 
-            var openedGroups = panel.panelNode.querySelectorAll(".memberLabelCell");
+            var openedGroups = panel.panelNode.querySelectorAll(".memberLabel");
             FBTest.executeContextMenuCommand(openedGroups[0], "fbNetCopyJSON", function()
             {
                 var expected =

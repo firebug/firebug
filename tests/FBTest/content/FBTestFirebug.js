@@ -935,7 +935,7 @@ this.enableConsolePanel = function(callback)
  */
 this.disableAllPanels = function()
 {
-    FW.FBL.$("cmd_disablePanels").doCommand();
+    FW.FBL.$("cmd_firebug_disablePanels").doCommand();
 };
 
 /**
@@ -943,7 +943,7 @@ this.disableAllPanels = function()
  */
 this.enableAllPanels = function()
 {
-    FW.FBL.$("cmd_enablePanels").doCommand();
+    FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
 
 /**

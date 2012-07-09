@@ -173,12 +173,12 @@ Dom.addScript = function(doc, id, src)
 
 Dom.setOuterHTML = function(element, html)
 {
-    var doc = element.ownerDocument;
-    var range = doc.createRange();
-    range.selectNode(element || doc.documentElement);
-
     try
     {
+        var doc = element.ownerDocument;
+        var range = doc.createRange();
+        range.selectNode(element || doc.documentElement);
+
         var fragment = range.createContextualFragment(html);
         var first = fragment.firstChild;
         var last = fragment.lastChild;
@@ -187,7 +187,7 @@ Dom.setOuterHTML = function(element, html)
     }
     catch (e)
     {
-        return [element, element]
+        return [element, element];
     }
 };
 
@@ -388,7 +388,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
         if (criteria(node.parentNode))
             return node.parentNode;
 
-        return Dom.findPrevious(node.parentNode, criteria, true);
+        return Dom.findPrevious(node.parentNode, criteria, true, maxRoot);
     }
 };
 
@@ -645,7 +645,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
         // Element is horizontally not completely visible or scrolling is enforced
         if (leftSpace < 0 || rightSpace < 0 || scrollWhenVisible)
         {
-            switch (alignmentY)
+            switch (alignmentX)
             {
                 case "left":
                     scrollBox.scrollLeft = offset.x;
@@ -657,7 +657,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
                     var x = elementFitsIntoScrollBox || alignmentX != "centerOrLeft" ?
                         offset.x - (scrollBox.clientWidth - element.offsetWidth) / 2 :
                         offset.x;
-                    scrollBox.scrollLeft = y;
+                    scrollBox.scrollLeft = x;
                     break;
 
                 case "right":

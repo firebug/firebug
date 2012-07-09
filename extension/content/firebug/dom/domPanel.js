@@ -1614,7 +1614,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
                 command: Obj.bindFixed(this.rebuild, this, true)
             }

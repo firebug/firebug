@@ -465,6 +465,49 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// Reference
+
+/**
+ * A placeholder used instead of cycle reference within arrays.
+ * @param {Object} target The original referenced object
+ */
+FirebugReps.ReferenceObj = function(target)
+{
+    this.target = target;
+}
+
+/**
+ * Rep for cycle reference in an array.
+ */
+FirebugReps.Reference = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK({_repObject: "$object"},
+            SPAN({title: "$object|getTooltip"},
+                "[...]")
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "Reference",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof FirebugReps.ReferenceObj);
+    },
+
+    getTooltip: function(object)
+    {
+        return Locale.$STR("firebug.reps.reference");
+    },
+
+    getRealObject: function(object)
+    {
+        return object.target;
+    },
+});
+
+// ********************************************************************************************* //
 
 FirebugReps.Arr = domplate(Firebug.Rep,
 {
@@ -513,12 +556,16 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             {
                 var delim = (i == array.length-1 ? "" : ", ");
                 var value = array[i];
+
+                // Cycle detected
+                if (value === array)
+                    value = new FirebugReps.ReferenceObj(value);
+
                 var rep = Firebug.getRep(value);
                 var tag = rep.shortTag || rep.tag;
-
                 items.push({object: value, tag: tag, delim: delim});
             }
-            catch(exc)
+            catch (exc)
             {
                 var rep = Firebug.getRep(exc);
                 var tag = rep.shortTag || rep.tag;
@@ -3158,7 +3205,8 @@ Firebug.registerRep(
     FirebugReps.StorageList,
     FirebugReps.Attr,
     FirebugReps.Date,
-    FirebugReps.NamedNodeMap
+    FirebugReps.NamedNodeMap,
+    FirebugReps.Reference
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);

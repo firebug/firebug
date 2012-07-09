@@ -21,6 +21,8 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Dom, Str,
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
+                   "typeof", "void", "yield"];
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
 const reJSChar = /[a-zA-Z0-9$_]/;
@@ -178,6 +180,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             FBTrace.sysout("Completing: " + this.completionBase.pre + sep + preExpr + sep + prop);
         }
 
+        var prevCompletions = this.completions;
+
         // We only need to calculate a new candidate list if the expression has
         // changed (we can ignore this.completionBase.pre since completions do not
         // depend upon that).
@@ -186,17 +190,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completionBase.expr = preExpr;
             this.completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr,
                 this.options.includeCurrentScope);
+            prevCompletions = null;
         }
 
-        this.createCompletions(prop);
+        this.createCompletions(prop, prevCompletions);
     };
 
     /**
      * From a valid completion base, create a list of completions (containing
      * those completion candidates that share a (sometimes case-insensitive)
-     * prefix with the user's input) and a default completion.
+     * prefix with the user's input) and a default completion. The completions
+     * for the previous expression (null if none) are used to help with the
+     * latter.
      */
-    this.createCompletions = function(prefix)
+    this.createCompletions = function(prefix, prevCompletions)
     {
         var candidates = this.completionBase.candidates;
         var valid = [], ciValid = [];
@@ -245,7 +252,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix
             };
-            this.pickDefaultCandidate();
+            this.completions.index = this.pickDefaultCandidate(prevCompletions);
 
             if (hasMatchingCase)
             {
@@ -264,20 +271,54 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
-     * Chose a default candidate from the list of completions. This is currently
-     * selected as the shortest completion, to make completions disappear when
-     * typing a variable name that is also the prefix of another.
+     * Choose a default candidate from the list of completions. The first of all
+     * shortest completions is current used for this, except in some very hacky,
+     * but useful, special cases (issue 5593).
      */
-    this.pickDefaultCandidate = function()
+    this.pickDefaultCandidate = function(prevCompletions)
     {
-        var pick = 0;
-        var ar = this.completions.list;
-        for (var i = 1; i < ar.length; i++)
+        var list = this.completions.list, ind;
+
+        // If the typed expression is an extension of the previous completion, keep it.
+        if (prevCompletions && Str.hasPrefix(this.completions.prefix, prevCompletions.prefix))
         {
-            if (ar[i].length < ar[pick].length)
-                pick = i;
+            var lastCompletion = prevCompletions.list[prevCompletions.index];
+            ind = list.indexOf(lastCompletion);
+            if (ind !== -1)
+                return ind;
         }
-        this.completions.index = pick;
+
+        // Special-case certain expressions.
+        var special = {
+            "": ["document", "console", "window", "parseInt", "undefined"],
+            "window.": ["console"],
+            "location.": ["href"],
+            "document.": ["getElementById", "addEventListener", "createElement",
+                "documentElement"]
+        };
+        if (special.hasOwnProperty(this.completionBase.expr))
+        {
+            var ar = special[this.completionBase.expr];
+            for (var i = 0; i < ar.length; ++i)
+            {
+                var prop = ar[i];
+                if (Str.hasPrefix(prop, this.completions.prefix))
+                {
+                    // Use 'prop' as a completion, if it exists.
+                    ind = list.indexOf(prop);
+                    if (ind !== -1)
+                        return ind;
+                }
+            }
+        }
+
+        ind = 0;
+        for (var i = 1; i < list.length; ++i)
+        {
+            if (list[i].length < list[ind].length)
+                ind = i;
+        }
+        return ind;
     };
 
     /**
@@ -970,11 +1011,17 @@ function prevWord(str, from)
     return 0;
 }
 
+/**
+ * Check if a position 'pos', marking the start of a property name, is
+ * preceded by a function-declaring keyword.
+ */
 function isFunctionName(expr, pos)
 {
-    pos -= 9;
-    return (pos >= 0 && expr.substr(pos, 9) === "function " &&
-            (pos === 0 || !reJSChar.test(expr.charAt(pos-1))));
+    var ind = prevNonWs(expr, pos);
+    if (ind === -1 || !reJSChar.test(expr.charAt(ind)))
+        return false;
+    var word = expr.substring(prevWord(expr, ind), ind+1);
+    return (word === "function" || word === "get" || word === "set");
 }
 
 function bwFindMatchingParen(expr, from)
@@ -997,8 +1044,6 @@ function bwFindMatchingParen(expr, from)
  */
 function endingDivIsRegex(expr)
 {
-    var kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
-        "do", "else", "typeof", "void", "yield"];
     var kwCont = ["function", "if", "while", "for", "switch", "catch", "with"];
 
     var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? "{" : expr.charAt(ind));
@@ -1008,7 +1053,7 @@ function endingDivIsRegex(expr)
         // If so, we have a regex, otherwise, we have a division (a variable
         // or literal being divided by something).
         var w = expr.substring(prevWord(expr, ind), ind+1);
-        return (kwActions.indexOf(w) !== -1);
+        return (kwActions.indexOf(w) !== -1 || w === "do" || w === "else");
     }
     else if (ch === ")")
     {
@@ -1040,7 +1085,12 @@ function isObjectDecl(expr, pos)
     if (ind === -1)
         return false;
     var ch = expr.charAt(ind);
-    return !(ch === ")" || ch === "{" || ch === "}" || ch === ";");
+    if (ch === ")" || ch === "{" || ch === "}" || ch === ";")
+        return false;
+    if (!reJSChar.test(ch))
+        return true;
+    var w = expr.substring(prevWord(expr, ind), ind+1);
+    return (kwActions.indexOf(w) !== -1);
 }
 
 function isCommaProp(expr, start)
@@ -1208,13 +1258,12 @@ function killCompletions(expr, origExpr)
     if (bwp !== -1)
     {
         var ind = prevNonWs(expr, bwp);
-        if (ind !== -1)
+        if (ind !== -1 && reJSChar.test(expr.charAt(ind)))
         {
             var stw = prevWord(expr, ind);
             if (expr.substring(stw, ind+1) === "function")
                 return true;
-            ind = prevNonWs(expr, stw);
-            if (ind !== -1 && expr.substring(prevWord(expr, ind), ind+1) === "function")
+            if (isFunctionName(expr, stw))
                 return true;
         }
     }
