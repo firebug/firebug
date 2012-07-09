@@ -199,6 +199,16 @@ function $toolbarButton(id, attrs, children, defaultPos)
     return toolbar.insertItem(id, beforeEl);
 }
 
+function $tooltip(attrs, children)
+{
+    return $el("tooltip", attrs, children);
+}
+
+function $label(attrs)
+{
+    return $el("label", attrs);
+}
+
 // ********************************************************************************************* //
 // Other Helpers
 
@@ -250,6 +260,8 @@ Firebug.GlobalUI =
     $command: $command,
     $key: $key,
     $splitmenu: $splitmenu,
+    $tooltip: $tooltip,
+    $label: $label,
 
     $stylesheet: function(href)
     {
@@ -1112,7 +1124,7 @@ $toolbarButton("inspector-button", {
 // TODO: why contextmenu doesn't work without cloning
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
-    tooltiptext: "firebug.ShowFirebug",
+    tooltip: "firebug-buttonTooltip",
     type: "menu-button",
     command: "cmd_firebug_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
@@ -1173,6 +1185,19 @@ if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarp
     navBar.removeAttribute("collapsed");
     document.persist(navBarId, "collapsed");
 }
+
+// ********************************************************************************************* //
+// Start Button Tooltip
+
+$menupopupOverlay($("mainPopupSet"),
+[
+    $tooltip({
+        "class": "firebugButtonTooltip",
+        id: "firebug-buttonTooltip",
+        orient: "vertical",
+        onpopupshowing: "Firebug.StartButton.onTooltipShowing(event)",
+    })
+]);
 
 // ********************************************************************************************* //
 // Localization
