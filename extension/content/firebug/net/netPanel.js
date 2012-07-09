@@ -328,6 +328,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var object = Firebug.getObjectByURL(this.context, file.href);
         var isPost = NetUtils.isURLEncodedRequest(file, this.context);
         var params = Url.parseURLParams(file.href);
+
         items.push(
             {
                 label: "CopyLocation",
@@ -335,21 +336,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 command: Obj.bindFixed(System.copyToClipboard, System, file.href)
             }
         );
-        try
+
+        if (params.length > 0)
         {
-            if (params.length > 0)
-            {
-                items.push(
-                    {
-                        label: "CopyURLParameters",
-                        tooltiptext: "net.tip.Copy_URL_Parameters",
-                        command: Obj.bindFixed(this.copyURLParams, this, file)
-                    }
-                );
-            }
-        }
-        catch(err)
-        {
+            items.push(
+                {
+                    label: "CopyURLParameters",
+                    tooltiptext: "net.tip.Copy_URL_Parameters",
+                    command: Obj.bindFixed(this.copyURLParams, this, file)
+                }
+            );
         }
 
         if (isPost)
