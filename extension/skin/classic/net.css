@@ -414,7 +414,7 @@
 
 .netTable.showBFCacheResponses .netRow.fromBFCache {
     display: table-row;
-    background-image: url("bfcache-bk.png");
+    background-image: -moz-repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 5px, transparent 5px, transparent 10px);
     background-repeat: repeat;
 }
 
