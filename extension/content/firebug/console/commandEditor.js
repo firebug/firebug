@@ -254,6 +254,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         }
     },
 
+    focus: function()
+    {
+        if (this.editor)
+            this.editor.focus();
+    },
+
     fontSizeAdjust: function(adjust)
     {
         if (!this.editor || !this.editor._view)
@@ -368,6 +374,11 @@ TextEditor.prototype =
     hasFocus: function()
     {
         return this.textBox.getAttribute("focused") == "true";
+    },
+
+    focus: function()
+    {
+        this.textBox.focus();
     },
 
     getSelectedText: function()
