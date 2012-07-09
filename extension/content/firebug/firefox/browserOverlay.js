@@ -1230,6 +1230,7 @@ if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
     if (wm.getMostRecentWindow("navigator:browser") == window.top)
     {
         // Don't forget to update the preference, so the page is not displayed again
+        var version = Firebug.GlobalUI.getVersion();
         PrefLoader.setPref("currentVersion", version);
 
         if (PrefLoader.getPref("showFirstRunPage"))
