@@ -254,13 +254,13 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var panel = context.getPanel("console");
         panel.persistContent = panel.persistContent ? false : true;
 
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             panel.persistContent);
     },
 
     showContext: function(browser, context)
     {
-        Firebug.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
@@ -389,7 +389,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     setStatus: function()
     {
-        var fbStatus = Firefox.getElementById('firebugStatus');
+        var fbStatus = Firefox.getElementById("firebugStatus");
         if (fbStatus)
         {
             if (Firebug.Errors.watchForErrors)

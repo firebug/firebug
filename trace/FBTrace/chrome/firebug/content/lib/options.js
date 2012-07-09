@@ -28,8 +28,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "activateSameOrigin", "allPagesActivation", "hiddenPanels",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
     "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",
-    "showBreakNotification", "showStatusIcon", "stringCropLength",
-    "showFirstRunPage",
+    "showBreakNotification", "stringCropLength", "showFirstRunPage",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
@@ -230,7 +229,7 @@ var Options =
 
     togglePref: function(name)
     {
-        this.setPref(Options.prefDomain, name, !Firebug[name]);
+        this.set(name, !this.get(name));
     },
 
     get: function(name)
@@ -337,13 +336,18 @@ var Options =
             return "boolean";
     },
 
+    clear: function(name)
+    {
+        Options.clearPref(Options.prefDomain, name);
+    },
+
     clearPref: function(prefDomain, name)
     {
         var prefName = prefDomain + "." + name;
         if (prefs.prefHasUserValue(prefName))
             prefs.clearUserPref(prefName);
     },
-
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug UI text zoom
 

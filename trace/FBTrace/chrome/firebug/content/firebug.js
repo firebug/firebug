@@ -46,6 +46,7 @@ const versionURL = "chrome://firebug/content/branch.properties";
 const firebugURLs =  // TODO chrome.js
 {
     main: "http://www.getfirebug.com",
+    help: "http://www.getfirebug.com/help",
     FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
     docs: "http://www.getfirebug.com/docs.html",
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
@@ -74,18 +75,6 @@ var defaultRep = null;
 var defaultFuncRep = null;
 var menuItemControllers = [];
 var panelTypeMap = {};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-try
-{
-    // Register default Firebug string bundle (yet before domplate templates).
-    Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
-}
-catch (exc)
-{
-    dump("Register default string bundle FAILS: "+exc+"\n");
-}
 
 // ********************************************************************************************* //
 
@@ -323,7 +312,7 @@ window.Firebug =
 
     shutdownUI: function()  // TODO chrome.js
     {
-        window.removeEventListener('unload', shutdownFirebug, false);
+        window.removeEventListener("unload", shutdownFirebug, false);
 
         Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
@@ -377,7 +366,7 @@ window.Firebug =
     // dispatch suspendFirebug to all windows
     suspend: function()
     {
-        if(Firebug.rerun)
+        if (Firebug.rerun)
             return;
 
         Firebug.suspendFirebug();
@@ -520,6 +509,20 @@ window.Firebug =
 
     registerPanel: function()
     {
+        for (var i=0; i<arguments.length; ++i)
+        {
+            var panelName = arguments[i].prototype.name;
+            var panel = panelTypeMap[panelName];
+            if (panel)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("firebug.registerPanel; ERROR a panel with the same " +
+                        "ID already registered! " + panelName);
+                }
+            }
+        }
+
         // In order to keep built in panels (like Console, Script...) be the first one
         // and insert all panels coming from extension at the end, catch any early registered
         // panel (i.e. before FBL.initialize is called, such as YSlow) in a temp array
@@ -529,13 +532,13 @@ window.Firebug =
         else
             panelTypes.push.apply(panelTypes, arguments);
 
-        for (var i = 0; i < arguments.length; ++i)
+        for (var i=0; i<arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
 
         if (FBTrace.DBG_REGISTRATION)
         {
-            for (var i = 0; i < arguments.length; ++i)
-                FBTrace.sysout("registerPanel "+arguments[i].prototype.name);
+            for (var i=0; i<arguments.length; ++i)
+                FBTrace.sysout("registerPanel " + arguments[i].prototype.name);
         }
 
         // If Firebug is not initialized yet the UI will be updated automatically soon.
@@ -742,7 +745,7 @@ window.Firebug =
 
         Firebug.chrome.toggleOpen(show);
 
-        if(!show)
+        if (!show)
             Firebug.Inspector.inspectNode(null);
 
         //xxxHonza: should be removed.
@@ -788,29 +791,56 @@ window.Firebug =
     {
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
-
-        var webApp = Firebug.connection.getCurrentSelectedWebApp();
-        var context = Firebug.connection.getContextByWebApp(webApp);
-        if (!context)  // then we are not debugging the selected tab
+        // if is deactivated.
+        if (!Firebug.currentContext)
         {
-            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
-            forceOpen = true;  // Be sure the UI is open for a newly created context
-        }
-        else  // we were debugging
-        {
-
+            var context = Firebug.getContext();
+            // Be sure the UI is open for a newly created context.
+            forceOpen = true;
         }
 
-        if (Firebug.isDetached()) // if we are out of the browser focus the window
-            Firebug.chrome.focus();
-        else if (Firebug.framePosition == "detached")
-            this.detachBar();
-        else if (Firebug.isMinimized()) // toggle minimize
-            Firebug.unMinimize();
-        else if (!forceOpen)  // else isInBrowser
+        if (Firebug.isDetached())
+        {
+            //in detached mode, two possibilities exist, the firebug windows is 
+            // the active window of the user or no.
+            if ( !Firebug.chrome.hasFocus() || forceOpen)
+                Firebug.chrome.focus();
+            else
+                Firebug.minimizeBar();
+        }
+        // toggle minimize
+        else if (Firebug.isMinimized())
+        {
+            // be careful, unMinimize func always sets placement to
+            // inbrowser first then unminimizes. when we want to
+            // unminimize in detached mode must call detachBar func.
+            if (Firebug.framePosition == "detached")
+                this.detachBar();
+            else
+                Firebug.unMinimize();
+        }
+        // else isInBrowser
+        else if (!forceOpen)
+        {
             Firebug.minimizeBar();
+        }
 
         return true;
+    },
+
+    /**
+     * Get context for the current website
+     */
+    getContext: function()
+    {
+        var webApp = Firebug.connection.getCurrentSelectedWebApp();
+        var context = Firebug.connection.getContextByWebApp(webApp);
+        // we are not debugging the selected tab.
+        if (!context)
+        {
+            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
+        }
+        return context;
     },
 
     /**
@@ -839,10 +869,20 @@ window.Firebug =
 
     minimizeBar: function()  // just pull down the UI, but don't deactivate the context
     {
-        if (Firebug.isDetached())  // TODO disable minimize on externalMode
+        if (Firebug.isDetached())
         {
             // TODO reattach
-            Firebug.toggleDetachBar(false, false);
+
+            // window is closing in detached mode
+            if (Firebug.chrome.window.top)
+            {
+                topWindow = Firebug.chrome.window.top;
+                topWindow.exportFirebug();
+                topWindow.close();
+            }
+
+            Firebug.setPlacement("minimized");
+            this.showBar(false);
             Firebug.chrome.focus();
         }
         else // inBrowser -> minimized
@@ -869,21 +909,45 @@ window.Firebug =
         return true;
     },
 
-    // detached -> closed; inBrowser -> detached TODO reattach
+    /**
+     * function to switch between detached and inbrowser modes.
+     * @param forceOpen: should not be closed, stay open if open or open it.
+     * @param reopenInBrowser: switch from detahced to inbrowser mode.
+     */
     toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
-        if (!forceOpen && Firebug.isDetached())  // detached -> minimized
+        //detached -> inbrowser
+        if (!forceOpen && Firebug.isDetached())
         {
             var topWin = Firebug.chrome.window.top;
             topWin.exportFirebug();
             topWin.close();
 
             if (reopenInBrowser)
+            {
+                // Is Firebug deactivated ? if yes, should be
+                // activated at first, then unminimize.
+                if (!Firebug.currentContext)
+                {
+                    var context = Firebug.getContext();
+                }
                 Firebug.unMinimize();
+            }
             else
+            {
                 Firebug.minimizeBar();
+            }
+
             Firebug.chrome.syncPositionPref();
         }
+        // is minimized now but the last time that has been closed, was in detached mode,
+        // so it should be returned to in browser mode because the user has pressed CTRL+F12.
+        else if (Firebug.framePosition == "detached" && Firebug.isMinimized())
+        {
+            Firebug.unMinimize();
+            Firebug.chrome.syncPositionPref();
+        }
+        // else is in browser mode, then switch to detached mode.
         else
         {
             this.detachBar();
@@ -911,7 +975,7 @@ window.Firebug =
             return null;
         }
 
-        if(Firebug.chrome.waitingForDetach)
+        if (Firebug.chrome.waitingForDetach)
             return null;
         Firebug.chrome.waitingForDetach = true;
 
@@ -1059,6 +1123,22 @@ window.Firebug =
         });
 
         return resultTypes;
+    },
+
+    /**
+     * Returns all panel types, whose activation can be toggled
+     * @returns {Object} Activable panel types
+     */
+    getActivablePanelTypes: function()
+    {
+        var activablePanelTypes = [];
+        for (var i = 0; i < panelTypes.length; ++i)
+        {
+            if (this.PanelActivation.isPanelActivable(panelTypes[i]))
+                activablePanelTypes.push(panelTypes[i]);
+        }
+
+        return activablePanelTypes;
     },
 
     /**
@@ -1345,6 +1425,10 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
         if (context)
         {
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);
+
+            if (!handler)
+                handler = Firebug.Console.isReadyElsePreparing(context, global);;
+
             if (handler)
             {
                 FBTrace.sysout("Firebug.getConsoleByGlobal " + handler.console + " for " +
@@ -1357,14 +1441,16 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
                 FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global " +
                     global + " " + Win.safeGetWindowLocation(global), global);
         }
-
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
-                global, global);
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
+                    global, global);
+        }
     }
-    catch(exc)
+    catch (exc)
     {
-        if(FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
 }
@@ -1929,19 +2015,21 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         // to simply generate the sorted list within the module, rather than
         // sorting within the UI.
         var self = this;
-        function compare(a, b) {
+        function compare(a, b)
+        {
             var locA = self.getObjectDescription(a);
             var locB = self.getObjectDescription(b);
-            if(locA.path > locB.path)
+            if (locA.path > locB.path)
                 return 1;
-            if(locA.path < locB.path)
+            if (locA.path < locB.path)
                 return -1;
-            if(locA.name > locB.name)
+            if (locA.name > locB.name)
                 return 1;
-            if(locA.name < locB.name)
+            if (locA.name < locB.name)
                 return -1;
             return 0;
         }
+
         var allLocs = this.getLocationList().sort(compare);
         for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
 

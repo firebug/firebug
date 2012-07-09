@@ -34,7 +34,7 @@ function loadDefaultPrefs(path, fileName)
         if (path.isDirectory())
             uri = Services.io.newURI("defaults/preferences/" + fileName, null, baseURI).spec;
         else
-            uri = "jar:" + baseURI.spec + "!/defaults/preferences/prefs.js";
+            uri = "jar:" + baseURI.spec + "!/defaults/preferences/" + fileName;
 
         // Load preference file and use 'pref' function to define all prefs.
         Services.scriptloader.loadSubScript(uri, {pref: pref});
@@ -55,6 +55,7 @@ function loadDefaultPrefs(path, fileName)
  */
 function clearDefaultPrefs(domain)
 {
+    domain = domain || PrefLoader.prefDomain;
     var pb = Services.prefs.getDefaultBranch(domain);
 
     var names = pb.getChildList("");

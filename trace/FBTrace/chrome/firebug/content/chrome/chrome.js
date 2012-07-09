@@ -75,6 +75,7 @@ var FirebugChrome =
      */
     initialize: function()
     {
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -292,6 +293,21 @@ var FirebugChrome =
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.shutdown; Done for " + win.location);
+    },
+
+    /**
+     * Checking first window in back order, (Most recent window). is itself firebug ?
+     */
+    hasFocus: function()
+    {
+        try
+        {
+            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+        }
+        catch(ex)
+        {
+            return false;
+        }
     },
 
     appendStylesheet: function(uri)
@@ -630,7 +646,9 @@ var FirebugChrome =
                 " sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
 
         var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
-        var panel = this.selectPanel(bestPanelName, sidePanelName, true);
+
+        // Allow refresh if needed (the last argument).
+        var panel = this.selectPanel(bestPanelName, sidePanelName/*, true*/);
         if (panel)
             panel.select(object, forceUpdate);
 
@@ -1038,6 +1056,9 @@ var FirebugChrome =
     updateOrient: function(value)
     {
         var panelPane = FirebugChrome.$("fbPanelPane");
+        if (!panelPane)
+            return;
+
         var newOrient = value ? "vertical" : "horizontal";
         if (panelPane.orient == newOrient)
             return;
@@ -1368,14 +1389,14 @@ var FirebugChrome =
 
     onMenuShowing: function(popup)
     {
-        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_detachFirebug")[0];
         if (detachFirebug)
         {
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_toggleFirebug")[0];
         if (toggleFirebug)
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
@@ -1451,7 +1472,7 @@ var FirebugChrome =
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
         if (!this.contextMenuObject &&
-        !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
+            !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
             !sel.isCollapsed)
         {
             var menuitem = Menu.createMenuItem(popup, {label: "Copy"});
@@ -1673,7 +1694,7 @@ var FirebugChrome =
     breakOnNext: function(context, event)
     {
         // Avoid bubbling from associated options.
-        if (event.target.id != "cmd_toggleBreakOn")
+        if (event.target.id != "cmd_firebug_toggleBreakOn")
             return;
 
         if (!context)
@@ -1854,6 +1875,7 @@ function onBlur(event)
     // XXXhh Is this really necessary? I disabled it for now as this was preventing me
     // to show highlights on focus
     //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
+
 }
 
 function onSelectLocation(event)

@@ -165,8 +165,16 @@ Firebug.Activation = Obj.extend(Firebug.Module,
     // Firebug is opened in browser
     watchBrowser: function(browser)
     {
-        var annotation = "firebugged.showFirebug";
-        this.setPageAnnotation(browser.currentURI.spec, annotation);
+        try
+        {
+            var annotation = "firebugged.showFirebug";
+            this.setPageAnnotation(browser.currentURI.spec, annotation);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("activation.watchBrowser; EXCEPTION " + e, e);
+        }
     },
 
     // Firebug closes in browser

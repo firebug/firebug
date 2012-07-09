@@ -136,7 +136,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.setFilter(Firebug.consoleFilterTypes);
 
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             this.persistContent);
 
         this.showPanel(state);

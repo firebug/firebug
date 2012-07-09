@@ -286,8 +286,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (Firebug.chrome.setGlobalAttribute)
         {
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "breakable", "true");
+            Firebug.chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "tooltiptext",
                 Locale.$STR("cookies.Break On Cookie"));
         }
     },

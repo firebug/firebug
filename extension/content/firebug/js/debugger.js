@@ -2660,7 +2660,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     updateOption: function(name, value)
     {
         if (name == "breakOnErrors")
-            Firebug.chrome.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
+            Firebug.chrome.getElementById("cmd_firebug_breakOnErrors").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)
@@ -2676,8 +2676,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         FBS.unregisterDebugger(this);
     },
 
-    registerDebugger: function() // 1.3.1 safe for multiple calls
+    /**
+     * 1.3.1 safe for multiple calls
+     */
+    registerDebugger: function()
     {
+        // Do not activate JSD on shutdown.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=756267#c12
+        if (Firebug.isShutdown)
+            return;
+
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("registerDebugger");
 
