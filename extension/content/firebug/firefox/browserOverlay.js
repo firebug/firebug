@@ -942,9 +942,9 @@ var firebugMenuContent = [
             }),
             $menuitem(
             {
-                id: "menu_firebug_firebugFAQ",
-                label: "firebug.FAQ",
-                tooltiptext: "firebug.menu.tip.FAQ",
+                id: "menu_firebug_firebugHelp",
+                label: "firebug.help",
+                tooltiptext: "firebug.menu.tip.help",
                 command: "cmd_firebug_openHelp",
                 key: "key_firebug_help",
                 "class": "fbInternational"
