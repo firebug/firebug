@@ -1113,7 +1113,7 @@ $menupopupOverlay($("toolsPopup"), [
 // ********************************************************************************************* //
 // Firefox Toolbar Buttons
 
-$toolbarButton("inspector-button", {
+$toolbarButton("firebug-inspectorButton", {
     label: "firebug.Inspect",
     tooltiptext: "firebug.InspectElement",
     observes: "cmd_firebug_toggleInspecting",
