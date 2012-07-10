@@ -90,14 +90,14 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
                 tooltip.appendChild($label({
                     "class": "alwaysOn",
                     value: Locale.$STR("enablement.on") + " " +
-                        Locale.$STR("enablement.for all pages")
+                        Locale.$STR("enablement.for_all_pages")
                 }));
             }
 
             // Panel enablement status info
             tooltip.appendChild($label({
                 "class": "enablement",
-                value: "Panel enablement status:"
+                value: Locale.$STR("enablement.Panel_activation_status")
             }));
 
             var statuses = this.getEnablementStatus();
