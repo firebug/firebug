@@ -398,6 +398,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     parseCmdLine: function(cmdLine, options)
     {
+        cmdLine = cmdLine || "";
+
         var lastI = 0, args = [], argIndex = 0, inGroup;
         var subs = "col|line|file|url".split("|");
 
@@ -456,6 +458,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         });
 
         cmdLine = args.join("");
+
         // add %file
         if (!/%(url|file)/.test(cmdLine))
             cmdLine += " %file";
@@ -472,6 +475,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 return options[b];
             });
         })
+
         return args;
     },
 
