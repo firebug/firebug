@@ -1236,6 +1236,16 @@ this.executeCommandAndVerify = function(callback, expression, expected, tagName,
     FBTest.executeCommand(expression);
 };
 
+/**
+ * Simulate selection in the Command Editor or the Command Line
+ * @param {Integer} the index of the start of the selection
+ * @param {Integer} the index of the end of the selection
+ */
+/*this.setCommandSelectionRange = function(selectionStart, selectionEnd)
+{
+    FW.Firebug.CommandLine.getCommandLine().setSelectionRange(selectionStart, selectionEnd);
+}*/
+
 // ********************************************************************************************* //
 // Toolbar buttons
 
