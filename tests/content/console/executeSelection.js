@@ -44,11 +44,12 @@ function executeAndVerifyNoSelection(callback, instructions, expected, useComman
 }
 
 function executeAndVerifySelection(callback, instructions, expected, useCommandEditor,
-                                   selectionStart, selectionEnd)
+    selectionStart, selectionEnd)
 {
-    FBTrace.sysout("executeSelection executeAndVerifySelection : instructions : \"" +
-                    instructions + "\"; useCommandEditor : " +
-                    useCommandEditor + "; expect : "+expected);
+    FBTest.sysout("executeSelection executeAndVerifySelection : instructions : \"" +
+        instructions + "\"; useCommandEditor : " +
+        useCommandEditor + "; expect : "+expected);
+
     FBTest.clearConsole();
     FBTest.clearAndTypeCommand(instructions, useCommandEditor);
 
