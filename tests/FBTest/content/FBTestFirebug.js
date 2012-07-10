@@ -1195,7 +1195,7 @@ this.typeCommand = function(string, useCommandEditor)
     var cmdLine = getCommandLine(useCommandEditor);
     var win = panelBar1.browser.contentWindow;
 
-    FBTest.setPref("commandEditor", useCommandEditor);
+    FBTest.setPref("commandEditor", (useCommandEditor == true));
 
     FW.Firebug.chrome.window.focus();
     panelBar1.browser.contentWindow.focus();
