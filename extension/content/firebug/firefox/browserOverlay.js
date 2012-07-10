@@ -296,7 +296,7 @@ Firebug.GlobalUI =
             return callback && callback(Firebug);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("overlay; Load Firebug...");
+            FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
 
         Firebug.waitingForFirstLoad = true;
 
