@@ -46,6 +46,13 @@
     <em:contributor>Sebastian Zartner</em:contributor>
     <em:contributor>Harutyun Amirjanyan</em:contributor>
     <em:contributor>Simon Lindholm</em:contributor>
+    <em:contributor>Joe Walker (Mozilla Corp.)</em:contributor>
+    <em:contributor>Vladimir Zhuravlev</em:contributor>
+    <em:contributor>Farshid Beheshti</em:contributor>
+    <em:contributor>Leon Sorokin</em:contributor>
+    <em:contributor>Florent Fayolle</em:contributor>
+    <em:contributor>Hector Zhao</em:contributor>
+    <em:contributor>Bharath Thiruveedula</em:contributor>
 
     <em:iconURL>chrome://firebug/skin/firebug64.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
