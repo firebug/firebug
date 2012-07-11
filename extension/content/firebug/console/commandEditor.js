@@ -8,8 +8,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/lib/css",
+    "firebug/lib/options",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -53,7 +54,11 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (this.editor)
             return;
 
-        if (typeof(SourceEditor) != "undefined")
+        // The current implementation of the SourceEditor (based on Orion) doesn't
+        // support zooming. So, the TextEditor (based on textarea) can be used
+        // by setting extensions.firebug.enableOrion pref to false.
+        // See issue 5678
+        if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
             this.editor = new SourceEditor();
         else
             this.editor = new TextEditor();
