@@ -12,7 +12,7 @@ function runTest()
         FBTest.waitForDisplayedElement("console", config, function(row)
         {
             // Verify displayed text.
-            var reTextContent = /ReferenceError\:\s*undefinedVariable is not defined\s*var test = undefinedVariable;\s*issue5525.html\s*\(line 10\)/;
+            var reTextContent = /\s*undefinedVariable is not defined\s*var test = undefinedVariable;\s*issue5525.html\s*\(line 10\)/;
             FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
             // Create error breakpoint
