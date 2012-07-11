@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Issue 5655: console panel width empty elements</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5655">Issue 5655</a>:
+        console panel width empty elements</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug</li>
+            <li>Enable and switch to the <em>Console</em> panel</li>
+            <li>Execute following expression on the command line and
+                check the results <i>'expression' -> 'result'</i></li>
+            <ol>
+                <li><code>console.log() -> (nothing to output)</code></li>
+                <li><code>console.log(null) -> null</code></li>
+                <li><code>console.log(undefined) -> undefined</code></li>
+                <li><code>console.log("") -> (an empty string)</code></li>
+                <li><code>console.log("TEXT") -> TEXT</code></li>
+                <li><code>console.log(1,2,0,NaN,null,undefined,"",3, "TEXT", {1:2},[1,2,"", undefined]) ->
+    1 2 0 NaN null undefined (an empty string) 3 TEXT Object { 1=2 } [ 1, 2, "", undefined ]</code></li>
+            </ol>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, odvarko@gmail.com</footer>
+</div>
+</body>
+</html>
