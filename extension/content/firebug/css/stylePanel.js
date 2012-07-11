@@ -612,7 +612,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     getContextMenuItems: function(style, target)
     {
-        var items = CSSStyleSheetPanel.prototype.getContextMenuItems(style, target);
+        var items = CSSStyleSheetPanel.prototype.getContextMenuItems.apply(this, [style, target]);
         var insertIndex = 0;
 
         for (var i = 0; i < items.length; ++i)

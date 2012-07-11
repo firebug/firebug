@@ -474,6 +474,20 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             row.appendChild(node);
         }
 
+        function logTextNode(text, row)
+        {
+            var nodeSpan = row.ownerDocument.createElement("span");
+            if (text === "" || text === null || typeof(text) == "undefined")
+                Css.setClass(nodeSpan, "logRowHint");
+
+            if (text === "")
+                text = Locale.$STR("console.msg.an_empty_string");
+
+            var node = row.ownerDocument.createTextNode(text);
+            row.appendChild(nodeSpan);
+            nodeSpan.appendChild(node);
+        }
+
         if (!objects || !objects.length)
         {
             // Make sure the log-row has proper height (even if empty).
@@ -545,7 +559,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             logText(" ", row);
             var object = objects[i];
             if (typeof(object) == "string")
-                FirebugReps.Text.tag.append({object: object}, row);
+                logTextNode(object, row);
             else
                 this.appendObject(object, row);
         }
