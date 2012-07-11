@@ -556,7 +556,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         for (var i = objIndex; i < objects.length; ++i)
         {
-            logText(" ", row);
+            logTextNode(" ", row);
+
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
