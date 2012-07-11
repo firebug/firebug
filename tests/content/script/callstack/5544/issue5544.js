@@ -18,7 +18,7 @@ function runTest()
                 FBTest.ok(node, "The error message must have a break switch");
 
                 // Verify displayed text.
-                var reTextContent = /\s*ReferenceError\:\s*foops is not defined\s*/;
+                var reTextContent = /\s*\s*foops is not defined\s*/;
                 FBTest.compare(reTextContent, row.textContent, "Text content must match.");
 
                 // Show stack trace.
