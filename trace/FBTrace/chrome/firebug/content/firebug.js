@@ -1188,6 +1188,13 @@ window.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    dispatch: function(listeners, eventId, args)
+    {
+        Events.dispatch(listeners, eventId, args);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // URL mapping
 
     getObjectByURL: function(context, url)

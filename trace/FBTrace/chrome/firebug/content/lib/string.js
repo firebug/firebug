@@ -27,20 +27,20 @@ var entityConversionLists = Str.entityConversionLists =
 {
     normal : {
         whitespace : {
-            '\t' : '\u200c\u2192',
-            '\n' : '\u200c\u00b6',
-            '\r' : '\u200c\u00ac',
-            ' '  : '\u200c\u00b7'
+            "\t" : "\u200c\u2192",
+            "\n" : "\u200c\u00b6",
+            "\r" : "\u200c\u00ac",
+            " "  : "\u200c\u00b7"
         }
     },
     reverse : {
         whitespace : {
-            '&Tab;' : '\t',
-            '&NewLine;' : '\n',
-            '\u200c\u2192' : '\t',
-            '\u200c\u00b6' : '\n',
-            '\u200c\u00ac' : '\r',
-            '\u200c\u00b7' : ' '
+            "&Tab;" : "\t",
+            "&NewLine;" : "\n",
+            "\u200c\u2192" : "\t",
+            "\u200c\u00b6" : "\n",
+            "\u200c\u00ac" : "\r",
+            "\u200c\u00b7" : " "
         }
     }
 };
@@ -58,56 +58,56 @@ function addEntityMapToList(ccode, entity)
     {
         var list = lists[i];
         normal[list]=normal[list] || {};
-        normal[list][ch] = '&' + entity + ';';
+        normal[list][ch] = "&" + entity + ";";
         reverse[list]=reverse[list] || {};
-        reverse[list]['&' + entity + ';'] = ch;
+        reverse[list]["&" + entity + ";"] = ch;
     }
 }
 
 var e = addEntityMapToList,
-    white = 'whitespace',
-    text = 'text',
-    attr = 'attributes',
-    css = 'css',
-    editor = 'editor';
+    white = "whitespace",
+    text = "text",
+    attr = "attributes",
+    css = "css",
+    editor = "editor";
 
-e(0x0000, '#0', text, attr, css, editor);
-e(0x0022, 'quot', attr, css);
-e(0x0026, 'amp', attr, text, css);
-e(0x0027, 'apos', css);
-e(0x003c, 'lt', attr, text, css);
-e(0x003e, 'gt', attr, text, css);
-e(0xa9, 'copy', text, editor);
-e(0xae, 'reg', text, editor);
-e(0x2122, 'trade', text, editor);
+e(0x0000, "#0", text, attr, css, editor);
+e(0x0022, "quot", attr, css);
+e(0x0026, "amp", attr, text, css);
+e(0x0027, "apos", css);
+e(0x003c, "lt", attr, text, css);
+e(0x003e, "gt", attr, text, css);
+e(0xa9, "copy", text, editor);
+e(0xae, "reg", text, editor);
+e(0x2122, "trade", text, editor);
 
 // See http://en.wikipedia.org/wiki/Dash
-e(0x2012, '#8210', attr, text, editor); // figure dash
-e(0x2013, 'ndash', attr, text, editor); // en dash
-e(0x2014, 'mdash', attr, text, editor); // em dash
-e(0x2015, '#8213', attr, text, editor); // horizontal bar
+e(0x2012, "#8210", attr, text, editor); // figure dash
+e(0x2013, "ndash", attr, text, editor); // en dash
+e(0x2014, "mdash", attr, text, editor); // em dash
+e(0x2015, "#8213", attr, text, editor); // horizontal bar
 
 // See http://www.cs.tut.fi/~jkorpela/chars/spaces.html
-e(0x00a0, 'nbsp', attr, text, white, editor);
-e(0x2002, 'ensp', attr, text, white, editor);
-e(0x2003, 'emsp', attr, text, white, editor);
-e(0x2004, 'emsp13', attr, text, white, editor);
-e(0x2005, 'emsp14', attr, text, white, editor);
-e(0x2007, 'numsp', attr, text, white, editor);
-e(0x2008, 'puncsp', attr, text, white, editor);
-e(0x2009, 'thinsp', attr, text, white, editor);
-e(0x200a, 'hairsp', attr, text, white, editor);
-e(0x200b, '#8203', attr, text, white, editor); // zero-width space (ZWSP)
-e(0x200c, 'zwnj', attr, text, white, editor);
+e(0x00a0, "nbsp", attr, text, white, editor);
+e(0x2002, "ensp", attr, text, white, editor);
+e(0x2003, "emsp", attr, text, white, editor);
+e(0x2004, "emsp13", attr, text, white, editor);
+e(0x2005, "emsp14", attr, text, white, editor);
+e(0x2007, "numsp", attr, text, white, editor);
+e(0x2008, "puncsp", attr, text, white, editor);
+e(0x2009, "thinsp", attr, text, white, editor);
+e(0x200a, "hairsp", attr, text, white, editor);
+e(0x200b, "#8203", attr, text, white, editor); // zero-width space (ZWSP)
+e(0x200c, "zwnj", attr, text, white, editor);
 
-e(0x202f, '#8239', attr, text, white, editor); // NARROW NO-BREAK SPACE
-e(0x205f, '#8287', attr, text, white, editor); // MEDIUM MATHEMATICAL SPACE
-e(0x3000, '#12288', attr, text, white, editor); // IDEOGRAPHIC SPACE
-e(0xfeff, '#65279', attr, text, white, editor); // ZERO WIDTH NO-BREAK SPACE
+e(0x202f, "#8239", attr, text, white, editor); // NARROW NO-BREAK SPACE
+e(0x205f, "#8287", attr, text, white, editor); // MEDIUM MATHEMATICAL SPACE
+e(0x3000, "#12288", attr, text, white, editor); // IDEOGRAPHIC SPACE
+e(0xfeff, "#65279", attr, text, white, editor); // ZERO WIDTH NO-BREAK SPACE
 
-e(0x200d, 'zwj', attr, text, white, editor);
-e(0x200e, 'lrm', attr, text, white, editor);
-e(0x200f, 'rlm', attr, text, white, editor);
+e(0x200d, "zwj", attr, text, white, editor);
+e(0x200e, "lrm", attr, text, white, editor);
+e(0x200f, "rlm", attr, text, white, editor);
 
 //************************************************************************************************
 // Entity escaping
@@ -123,31 +123,26 @@ var escapeEntitiesRegEx =
     normal : function(list)
     {
         var chars = [];
-        for ( var ch in list)
-        {
+        for (var ch in list)
             chars.push(ch);
-        }
-        return new RegExp('([' + chars.join('') + '])', 'gm');
+        return new RegExp("([" + chars.join("") + "])", "gm");
     },
     reverse : function(list)
     {
         var chars = [];
-        for ( var ch in list)
-        {
+        for (var ch in list)
             chars.push(ch);
-        }
-        return new RegExp('(' + chars.join('|') + ')', 'gm');
+        return new RegExp("(" + chars.join("|") + ")", "gm");
     }
 };
 
 function getEscapeRegexp(direction, lists)
 {
-    var name = '', re;
+    var name = "";
+    var re;
     var groups = [].concat(lists);
     for (i = 0; i < groups.length; i++)
-    {
         name += groups[i].group;
-    }
     re = entityConversionRegexes[direction][name];
     if (!re)
     {
@@ -188,7 +183,7 @@ function createSimpleEscape(name, direction)
                 {
                     return list[ch];
                 }
-               );
+            );
     }
 }
 
@@ -326,7 +321,7 @@ Str.escapeGroupsForEntities = escapeGroupsForEntities;
 
 function unescapeEntities(str, lists)
 {
-    var re = getEscapeRegexp('reverse', lists),
+    var re = getEscapeRegexp("reverse", lists),
         split = String(str).split(re),
         len = split.length,
         results = [],
@@ -363,23 +358,23 @@ function unescapeEntities(str, lists)
 // ************************************************************************************************
 // String escaping
 
-var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape('text', 'normal');
-var escapeForHtmlEditor = Str.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
-var escapeForElementAttribute = Str.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
-var escapeForCss = Str.escapeForCss = createSimpleEscape('css', 'normal');
+var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape("text", "normal");
+var escapeForHtmlEditor = Str.escapeForHtmlEditor = createSimpleEscape("editor", "normal");
+var escapeForElementAttribute = Str.escapeForElementAttribute = createSimpleEscape("attributes", "normal");
+var escapeForCss = Str.escapeForCss = createSimpleEscape("css", "normal");
 
 // deprecated compatibility functions
-Str.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
-Str.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
+Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
+Str.deprecatedUnescapeHTML = createSimpleEscape("text", "reverse");
 
 Str.escapeHTML = Deprecated.deprecated("use appropriate escapeFor... function",
     Str.deprecateEscapeHTML);
 Str.unescapeHTML = Deprecated.deprecated("use appropriate unescapeFor... function",
     Str.deprecatedUnescapeHTML);
 
-var escapeForSourceLine = Str.escapeForSourceLine = createSimpleEscape('text', 'normal');
+var escapeForSourceLine = Str.escapeForSourceLine = createSimpleEscape("text", "normal");
 
-var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
+var unescapeWhitespace = createSimpleEscape("whitespace", "reverse");
 
 Str.unescapeForTextNode = function(str)
 {
@@ -495,16 +490,12 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
 Str.lineBreak = function()
 {
     if (navigator.appVersion.indexOf("Win") != -1)
-    {
-      return '\r\n';
-    }
+        return "\r\n";
 
     if (navigator.appVersion.indexOf("Mac") != -1)
-    {
-      return '\r';
-    }
+        return "\r";
 
-    return '\n';
+    return "\n";
 };
 
 Str.cropMultipleLines = function(text, limit)
@@ -539,17 +530,17 @@ Str.splitLines = function(text)
 
 Str.trim = function(text)
 {
-    return text.replace(/^\s*|\s*$/g,"");
+    return text.replace(/^\s*|\s*$/g, "");
 }
 
 Str.trimLeft = function(text)
 {
-    return text.replace(/^\s+/,"");
+    return text.replace(/^\s+/, "");
 }
 
 Str.trimRight = function(text)
 {
-    return text.replace(/\s+$/,"");
+    return text.replace(/\s+$/, "");
 }
 
 Str.hasPrefix = function(hay, needle)
@@ -767,22 +758,22 @@ Str.safeToString = function(ob)
         if (!ob)
         {
             if (ob == undefined)
-                return 'undefined';
+                return "undefined";
             if (ob == null)
-                return 'null';
+                return "null";
             if (ob == false)
-                return 'false';
+                return "false";
             return "";
         }
-        if (ob && (typeof (ob['toString']) == "function") )
+        if (ob && (typeof (ob["toString"]) == "function") )
             return ob.toString();
-        if (ob && typeof (ob['toSource']) == 'function')
+        if (ob && typeof (ob["toSource"]) == "function")
             return ob.toSource();
        /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590 */
         var str = "[";
         for (var p in ob)
-            str += p+',';
-        return str + ']';
+            str += p + ",";
+        return str + "]";
 
     }
     catch (exc)

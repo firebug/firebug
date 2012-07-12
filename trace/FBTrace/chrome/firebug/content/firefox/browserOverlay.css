@@ -4,7 +4,7 @@
 /* Customizable Dialog Toolbar Buttons */
 
 /* Inspector button */
-#inspector-button {
+#firebug-inspectorButton {
     list-style-image: url(chrome://firebug/skin/inspect.png);
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
@@ -142,4 +142,35 @@
     min-width: 5px;
     max-width: 5px;
     background-color: -moz-dialog;
+}
+
+/*************************************************************************************************/
+/* Start Button Tooltip */
+
+.firebugButtonTooltip .version {
+    font-weight: bold;
+}
+
+.firebugButtonTooltip .alwaysOn {
+    color: gray;
+}
+
+.firebugButtonTooltip .enablement {
+    border-top: 1px gray dotted;
+    margin-top: 5px;
+    padding-top: 5px;
+    font-style: italic;
+}
+
+.firebugButtonTooltip .panelName,
+.firebugButtonTooltip .panelStatus {
+    color: gray;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-width: 75px
+}
+
+.firebugButtonTooltip .panelStatus.on,
+.firebugButtonTooltip .panelName.on {
+    color: black;
 }

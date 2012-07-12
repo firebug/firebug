@@ -72,6 +72,7 @@
             checked="false"/>
 
         <command id="cmd_firebug_openHelp" oncommand="Firebug.visitWebsite('help');"/>
+        <command id="cmd_firebug_openInEditor" oncommand="Firebug.ExternalEditors.onContextMenuCommand(event);"/>
     </commandset>
 
     <keyset id="mainKeyset">

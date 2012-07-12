@@ -655,7 +655,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatusText)
             text += file.responseStatusText;
 
-        return text ? Str.cropString(text) : " ";
+        text = text ? Str.cropString(text) : " ";
+
+        if (file.fromBFCache)
+            text += " (BFCache)";
+
+        return text;
     },
 
     getDomain: function(file)

@@ -407,7 +407,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enter: function(context, command)
     {
-        var expr = command ? command : this.getCommandLine(context).value;
+        var expr = command ? command : this.getExpression(context);
         if (expr == "")
             return;
 
@@ -951,14 +951,23 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getCommandLine: function(context)
     {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor():
+                this.getSingleRowCommandLine();
+    },
+
+    isInOtherPanel: function(context)
+    {
         // Command line on other panels is never multiline.
         var visible = Firebug.CommandLine.Popup.isVisible();
-        if (visible && context.panelName != "console")
-            return this.getSingleRowCommandLine();
+        return visible && context.panelName != "console";
+    },
 
-        return Firebug.commandEditor
-            ? this.getCommandEditor()
-            : this.getSingleRowCommandLine();
+    getExpression: function(context)
+    {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor().getExpression() :
+                this.getSingleRowCommandLine().value;
     },
 
     getCompletionBox: function()
@@ -975,6 +984,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         return Firebug.CommandEditor;
     }
+
 });
 
 // ********************************************************************************************* //

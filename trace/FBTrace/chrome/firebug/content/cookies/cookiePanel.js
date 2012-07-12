@@ -37,7 +37,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // Cookies preferences
-const logEventsPref = "cookies.logEvents";
 const showRejectedCookies = "cookies.showRejectedCookies";
 const lastSortedColumn = "cookies.lastSortedColumn";
 const hiddenColsPref = "cookies.hiddenColumns";
@@ -297,7 +296,9 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.showToolbarButtons("fbCookieButtons", false);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Options menu
+
     getOptionsMenuItems: function(context)
     {
         return [
@@ -305,8 +306,6 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 "cookies.tip.AllowGlobally", "network.cookie", "cookieBehavior"),
             /*MenuUtils.optionMenu(context, "cookies.clearWhenDeny",
                 "cookies.tip.clearWhenDeny", Firebug.prefDomain, clearWhenDeny),*/
-            MenuUtils.optionMenu(context, "cookies.LogEvents",
-                "cookies.tip.LogEvents", Firebug.prefDomain, logEventsPref),
             MenuUtils.optionMenu(context, "cookies.Confirm cookie removal",
                 "cookies.tip.Confirm cookie removal", Firebug.prefDomain, removeConfirmation)
         ];
@@ -455,6 +454,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Console Panel Listeners
+
     onFilterSet: function(logTypes)
     {
         logTypes.cookies = 1;

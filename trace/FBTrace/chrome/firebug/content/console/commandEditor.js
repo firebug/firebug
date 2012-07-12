@@ -8,8 +8,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/lib/css",
+    "firebug/lib/options",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -53,7 +54,11 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (this.editor)
             return;
 
-        if (typeof(SourceEditor) != "undefined")
+        // The current implementation of the SourceEditor (based on Orion) doesn't
+        // support zooming. So, the TextEditor (based on textarea) can be used
+        // by setting extensions.firebug.enableOrion pref to false.
+        // See issue 5678
+        if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
             this.editor = new SourceEditor();
         else
             this.editor = new TextEditor();
@@ -90,14 +95,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
-        try
-        {
-            this.editor.removeEventListener("keypress", this.onKeyPress);
-        }
-        catch (err)
-        {
-        }
-
         this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.removeEventListener(TEXT_CHANGED, this.onTextChanged);
 
@@ -111,18 +108,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
      */
     onEditorLoad: function()
     {
-        try
-        {
-            // This event is not supported in Fx11, so catch the exception
-            // which is thrown.
-            this.editor.addEventListener("keypress", this.onKeyPress);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERROR)
-                FBTrace.sysout("commandEditor.onEditorLoad; EXCEPTION " + err, err);
-        }
-
         // xxxHonza: Context menu support is going to change in SourceEditor
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.addEventListener(TEXT_CHANGED, this.onTextChanged);
@@ -137,24 +122,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Keyboard shortcuts
-
-    onKeyPress: function(event)
-    {
-        Firebug.CommandLine.update(Firebug.currentContext);
-
-        switch (event.keyCode)
-        {
-            case KeyEvent.DOM_VK_RETURN:
-                if (Events.isControl(event))
-                    this.onExecute();
-            break;
-
-            case KeyEvent.DOM_VK_ESCAPE:
-                this.onEscape();
-                event.preventDefault();
-            break;
-        }
-    },
 
     onExecute: function()
     {
@@ -185,7 +152,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Contex Menu
+    // Context Menu
 
     onContextMenu: function(event)
     {
@@ -257,6 +224,29 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         // TODO xxxHonza
     },
 
+    // returns the applicable commands
+    getExpression: function()
+    {
+        if (this.editor)
+        {
+            if (this.isCollapsed())
+                return this.getText();
+            else
+                return this.editor.getSelectedText();
+        }
+    },
+
+    isCollapsed: function()
+    {
+        var selection;
+        if (this.editor)
+        {
+            selection = this.editor.getSelection(); 
+            return selection.start === selection.end;
+        }
+        return true;
+    },
+
     hasFocus: function()
     {
         try
@@ -267,6 +257,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         catch (e)
         {
         }
+    },
+
+    focus: function()
+    {
+        if (this.editor)
+            this.editor.focus();
     },
 
     fontSizeAdjust: function(adjust)
@@ -369,13 +365,34 @@ TextEditor.prototype =
 
     setSelection: function(start, end)
     {
-        this.textBox.setSelection(start, end);
+        this.textBox.setSelectionRange(start, end);
+    },
+
+    getSelection: function()
+    {
+        return {
+            start: this.textBox.selectionStart,
+            end: this.textBox.selectionEnd
+        };
     },
 
     hasFocus: function()
     {
         return this.textBox.getAttribute("focused") == "true";
-    }
+    },
+
+    focus: function()
+    {
+        this.textBox.focus();
+    },
+
+    getSelectedText: function()
+    {
+        var start = this.textBox.selectionStart;
+        var end = this.textBox.selectionEnd;
+
+        return this.textBox.value.substring(start, end);
+    } 
 }
 
 // ********************************************************************************************* //
