@@ -807,8 +807,9 @@
                 var panel = this.panelBar.selectedPanel;
                 if (!panel)
                     return;
-    
-                var panelItems = panel ? panel.getOptionsMenuItems(Firebug.currentContext) : null;
+
+                var panelItems = this.getOptionsMenuItems(panel);
+
                 if (!panel.activable && !(panelItems && panelItems.length))
                     this.setAttribute("collapsed", "true");
                 else
@@ -826,6 +827,23 @@
                 this.popup.showPopup(anchor || this, -1, -1, "popup",
                     rtlLanguage ? "bottomright" : "bottomleft",
                     rtlLanguage ? "topright" : "topleft");
+            ]]></body>
+        </method>
+
+        <method name="getOptionsMenuItems">
+            <parameter name="panel"/>
+            <body><![CDATA[
+                if (!panel)
+                    return null;
+
+                // Get menu items from the current panel.
+                var context = Firebug.currentContext;
+                var items = panel.getOptionsMenuItems(context);
+
+                // Distribute to listeners so, other modules/extensions can extend the menu.
+                Firebug.dispatch(Firebug.uiListeners, "onOptionsMenu", [context, panel, items]);
+
+                return items;
             ]]></body>
         </method>
     </implementation>
@@ -860,7 +878,7 @@
             if (panel)
             {
                 // Get panel's option items
-                var panelItems = panel.getOptionsMenuItems(Firebug.currentContext);
+                var panelItems = this.getOptionsMenuItems(panel);
                 if (panelItems && panelItems.length > 0)
                     items.push("-");
             }

@@ -149,6 +149,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookieSingle.png");
             bonStack.appendChild(image);
         }
+
+        Firebug.registerUIListener(this);
     },
 
     initializeUI: function()
@@ -165,7 +167,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      * Peforms clean up when Firebug is destroyed.
      * Called by the framework when Firebug is closed for an existing Firefox window.
      */
-    shutdown: function() 
+    shutdown: function()
     {
         this.unregisterObservers();
 
@@ -178,6 +180,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         //Firebug.Console.removeListener(this.ConsoleListener);
         //Firebug.Debugger.removeListener(this.DebuggerListener);
+
+        Firebug.unregisterUIListener(this);
     },
 
     registerObservers: function()
@@ -1044,7 +1048,42 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         parent.openDialog("chrome://browser/content/preferences/permissions.xul",
             "_blank","chrome,resizable=yes", params);
     },
-}); 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Console Panel Options
+
+    /**
+     * Extend Console panel's option menu.
+     */
+    onOptionsMenu: function(context, panel, items)
+    {
+        if (panel.name != "console")
+            return;
+
+        var cookies = [
+            MenuUtils.optionMenu(context, "cookies.showCookieEvents",
+                "cookies.tip.showCookieEvents", Firebug.prefDomain, "cookies.logEvents"),
+        ];
+
+        // The option is disabled if the panel is disabled.
+        if (!this.isEnabled(context))
+            cookies[0].disabled = true;
+
+        // Append new option at the right position.
+        for (var i=0; i<items.length; i++)
+        {
+            var item = items[i];
+            if (item.option == "showStackTrace")
+            {
+                Arr.arrayInsert(items, i+1, cookies);
+                return;
+            }
+        }
+
+        // If "showStackTrace" is not there append at the end.
+        Arr.arrayInsert(items, items.length, cookies);
+    },
+});
 
 // ********************************************************************************************* //
 // Custom info tab within Net panel
