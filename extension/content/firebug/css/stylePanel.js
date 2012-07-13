@@ -305,9 +305,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             var dummyStyle = dummyElement.style;
 
             // xxxHonza: Not sure why this happens.
-            if (!dummyStyle && FBTrace.DBG_ERRORS)
+            if (!dummyStyle)
             {
-                FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
                 return;
             }
 
