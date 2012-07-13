@@ -672,10 +672,11 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 
 Css.getDocumentForStyleSheet = function(styleSheet)
 {
+    if (!styleSheet)
+        return;
+
     while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
-    {
         styleSheet = styleSheet.parentStyleSheet;
-    }
 
     if (styleSheet.ownerNode)
         return styleSheet.ownerNode.ownerDocument;
