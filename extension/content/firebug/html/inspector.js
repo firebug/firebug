@@ -77,8 +77,12 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 (Wrapper.getContentView(elementArr) &&
                     !Xml.isVisible(Wrapper.getContentView(elementArr))))
             {
-                elementArr = (elementArr && elementArr.nodeType == Node.TEXT_NODE) ?
-                    elementArr.parentNode : null;
+                if (elementArr && Dom.isRange(elementArr))
+                    elementArr = elementArr;
+                else if (elementArr && elementArr.nodeType == Node.TEXT_NODE)
+                    elementArr = elementArr.parentNode;
+                else
+                    elementArr = null;
             }
 
             if (elementArr && context && context.highlightTimeout)
@@ -100,7 +104,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
             if (elementArr)
             {
-                if (!isVisibleElement(elementArr))
+                if (elementArr.nodeName && !isVisibleElement(elementArr))
                     highlighter.unhighlight(context);
                 else if (context && context.window && context.window.document)
                     highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
@@ -1236,22 +1240,24 @@ Firebug.Inspector.FrameHighlighter.prototype =
             var bgDiv = highlighter.firstChild;
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
 
-            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+            if (Dom.isElement(element))
+            {
+                cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-            if (cs.MozTransform && cs.MozTransform != "none")
-                css += "-moz-transform: "+cs.MozTransform+"!important;" +
-                       "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
-            if (cs.borderRadius)
-                css += "border-radius: "+cs.borderRadius+"!important;";
-            if (cs.borderTopLeftRadius)
-                css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
-            if (cs.borderTopRightRadius)
-                css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
-            if (cs.borderBottomRightRadius)
-                css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
-            if (cs.borderBottomLeftRadius)
-                css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
-
+                if (cs.MozTransform && cs.MozTransform != "none")
+                    css += "-moz-transform: "+cs.MozTransform+"!important;" +
+                           "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
+                if (cs.borderRadius)
+                    css += "border-radius: "+cs.borderRadius+"!important;";
+                if (cs.borderTopLeftRadius)
+                    css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
+                if (cs.borderTopRightRadius)
+                    css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
+                if (cs.borderBottomRightRadius)
+                    css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
+                if (cs.borderBottomLeftRadius)
+                    css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
+            }
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
 
@@ -1624,6 +1630,10 @@ BoxModelHighlighter.prototype =
 
 function getNonFrameBody(elt)
 {
+    if (Dom.isRange(elt))
+    {
+        elt = elt.commonAncestorContainer;
+    }
     var body = Dom.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }

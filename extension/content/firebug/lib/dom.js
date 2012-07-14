@@ -275,6 +275,16 @@ Dom.isElement = function(o)
     }
 };
 
+Dom.isRange = function(o)
+{
+    try {
+        return o && o instanceof window.Range;
+    }
+    catch (ex) {
+        return false;
+    }
+};
+
 Dom.hasChildElements = function(node)
 {
     if (node.contentDocument) // iframes
