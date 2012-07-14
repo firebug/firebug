@@ -1288,7 +1288,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 }
 
                 // otherwise the proxies take up screen space in browser.xul
-                if (element.ownerDocument.contentType.indexOf("xul") === -1)
+                if (element.ownerDocument && element.ownerDocument.contentType.indexOf("xul") === -1)
                     createProxiesForDisabledElements(body);
             }
         }
