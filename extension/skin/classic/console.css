@@ -283,7 +283,7 @@
 }
 
 .profilerRunning > .logRow {
-    background: transparent url(chrome://firebug/skin/loading_16.gif) no-repeat 2px 0 !important;
+    background: transparent url(chrome://firebug/skin/loading.svg) no-repeat 2px 0 !important;
     padding-left: 22px !important;
 }
 
@@ -715,7 +715,7 @@
 }
 
 .logRow-spy.loading .spyHead .spyRow .spyIcon {
-    background-image: url(chrome://firebug/skin/loading_16.gif);
+    background-image: url(chrome://firebug/skin/loading.svg);
 }
 
 .logRow-spy.loaded:not(.error) .spyHead .spyRow .spyIcon {
