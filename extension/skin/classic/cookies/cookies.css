@@ -215,20 +215,10 @@
 
 /************************************************************************************************/
 
-.cookieRow .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
-    background-repeat: no-repeat;
-    background-position: 2px 2px;
-}
-
 .cookieNameLabel:hover {
     cursor: pointer;
     color: blue;
     text-decoration: underline;
-}
-
-/*.cookieRow */.opened > .cookieCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
 /* Session cookies */

@@ -9,6 +9,9 @@ function runTest()
         {
             FBTest.selectPanel("html");
 
+            // Set display of entities to show them as names
+            FBTest.setPref("entityDisplay", "names");
+
             FBTest.selectElementInHtmlPanel("content", function(node)
             {
                 // Execute an expression on the Command Line
