@@ -1230,6 +1230,13 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         // Reset visibility.
         Options.clear(hiddenColsPref);
         panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
+
+        // Reset also sorting (no sorting by default)
+        var headerRow = panel.table.getElementsByClassName("cookieHeaderRow")[0];
+        var headerSorted = Dom.getChildByClass(headerRow, "cookieHeaderSorted");
+        Css.removeClass(headerSorted, "cookieHeaderSorted");
+        Options.set(lastSortedColumn, "");
+        panel.refresh();
     },
 
     createTable: function(parentNode)
