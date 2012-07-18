@@ -11,62 +11,38 @@
 - <span class="h3">Add option to copy request parameters</span>.
 
 <br/>
-<i>Bharath Thiruveedula, bharaththiruveedula@gmail.com</i>
+<i>Bharath Thiruveedula, bharaththiruveedula@gmail.com</i><br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
 </p>
 
 <ol>
 
 <li>Open the firebug , enable and open the net Panel</li>
-<li>Use the <i>POST</i> button to post data to a server (it will generate XMLHttpRequests) , or enter the value in the textbox and enter the get button</li>
-<li>Now you can see the GET/POST requests in the net panel depends on what type of button you clicked.</li>
-<li>Now right click on the GET/POST request and select the "Copy URL Parameters" or "Copy POST Parameters".</li>
+<li>Click this button to generate a request
+<button id="testButton" onclick="executeTest()">Click Me!</button></li>
+<li>Right click on the new entry in the Net panel and execute
+    <i>Copy URL Parameters</i></li>
+<li>Check the clipboard it should be equal to:
+<pre>v1=d1
+v2=d2</pre></li>
 
+<li>Right click on the new entry in the Net panel and execute
+    <i>Copy POST Parameters</i></li>
+<li>Check the clipboard it should be equal to:
+<pre>value1=param1
+value2=param2</pre></li>
 </ol>
 
-<button id="testButton" onclick="postRequest()">POST</button>
-<form action="issue5592.html" method="GET">
-<input type="text" name="text">
-<input type="submit" value="GET" placeholder="Enter the Value">
-</form>
-
-<p><i>As soon as the user selects the "Copy URL/POST Parameters" the parameters are copied to the user's clipboard</i></p>
-
 <script type="text/javascript">
-function postRequest(postData, callback)
+function executeTest()
 {
-    try
-    {
-        if (!postData)
-        {
-            var date = (new Date()).toUTCString();
-            postData = "date=" + date;
-        }
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue5592.php?v1=d1&v2=d2", true);
 
-
-
-        var request = new XMLHttpRequest();
-        request.open("POST", "issue5592.php", true);
-        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        request.setRequestHeader("Content-Length", postData.length);
-
-        request.onreadystatechange = function()
-        {
-            if (request.readyState == 4 && request.status == 200)
-            {
-                if (callback) {
-                    setTimeout(function() {
-                        callback(request);
-                    }, 300);
-                }
-            }
-        }
-
-        request.send(postData);
-    }
-    catch (err)
-    {
-        alert("Error initializing XMLHttpRequest.\n" + err);
-    }
+    var postData = "value1=param1&value2=param2";
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-Length", postData.length);
+    request.send(postData);
 }
 </script>
   
