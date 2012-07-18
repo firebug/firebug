@@ -980,9 +980,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     selectTabByName: function(netInfoBox, tabName)
     {
-        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo"+tabName+"Tab");
-        if (tab)
-            this.selectTab(tab);
+        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo" + tabName + "Tab");
+        if (!tab)
+            return false;
+
+        this.selectTab(tab);
+
+        return true;
     },
 
     selectTab: function(tab)
