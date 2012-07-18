@@ -391,10 +391,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return object.getId();
 
         // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
-        //else if (typeof object == "string")
-        //    return object;
-        //else if (object instanceof Object && typeof object[0] != "undefined")
-        //    return object[0];
+        else if (typeof object == "string")
+            return object;
+        else if (object instanceof Object && typeof object[0] != "undefined")
+            return object[0];
 
         // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
@@ -429,6 +429,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             var msgId = this.getMessageId(objects);
             var previousMsgId = this.getMessageId(this.lastLogObjects);
+
+FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
 
             if (msgId && msgId == previousMsgId)
             {
