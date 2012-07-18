@@ -17,7 +17,8 @@ function runTest()
             {
                 executeSearchTest("script", false, false, true, function(counter)
                 {
-                    FBTest.compare(13, counter, "There must be precise number of occurences.");
+                    FBTest.compare(13, counter, "There must be precise number " +
+                        "of occurences (13) current: " + counter);
                     callback();
                 });
             });
