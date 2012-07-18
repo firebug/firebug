@@ -1136,7 +1136,7 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
-        if (tab.dataPresented || !Css.hasClass(tab, "netInfoCookiesTab"))
+        if (!tab || tab.dataPresented || !Css.hasClass(tab, "netInfoCookiesTab"))
             return;
 
         tab.dataPresented = true;
