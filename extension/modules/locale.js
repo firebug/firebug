@@ -3,9 +3,11 @@
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+const DEFAULT_LOCALE = "en-US";
 
 var EXPORTED_SYMBOLS = [];
 
@@ -246,7 +248,7 @@ Locale.getDefaultStringBundle = function()
         var uri = Services.io.newURI("chrome://firebug/locale/firebug.properties", "UTF-8", null);
         var fileURI = chromeRegistry.convertChromeURL(uri).spec;
         var parts = fileURI.split("/");
-        parts[parts.length - 2] = "en-US";
+        parts[parts.length - 2] = DEFAULT_LOCALE;
         this.defaultStringBundle = stringBundleService.createBundle(parts.join("/"));
     }
     return this.defaultStringBundle;
