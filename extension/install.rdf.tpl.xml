@@ -61,7 +61,7 @@
     <em:updateURL>https://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
 
     <em:translator>Leszek(teo)Zyczkowski (pl-PL)</em:translator>
-    <em:translator>markh (nl-NL)</em:translator>
+    <em:translator>markh (nl)</em:translator>
     <em:translator>peter3 (sv-SE)</em:translator>
     <em:translator>AlleyKat (da-DK)</em:translator>
     <em:translator>Hector Zhao, lovelywcm (zh-CN)</em:translator>
@@ -74,11 +74,11 @@
     <em:translator>Xavi Ivars - Softcatala (ca)</em:translator>
     <em:translator>gezmen (tr-TR)</em:translator>
     <em:translator>eternoendless (es-AR)</em:translator>
-    <em:translator>Dark Preacher (ru-RU)</em:translator>
+    <em:translator>Dark Preacher (ru)</em:translator>
     <em:translator>Tiago Oliveira, Diego de Carvalho Zimmermann, Alexandre Rapaki (pt-BR)</em:translator>
     <em:translator>Juan Botias, Alvaro G. Vicario (es-ES)</em:translator>
     <em:translator>Andriy Zhouck (uk-UA)</em:translator>
-    <em:translator>Hisateru Tanaka (ja-JP)</em:translator>
+    <em:translator>Hisateru Tanaka, k2jp (ja-JP)</em:translator>
     <em:translator>Mohsen Shadroo (fa-IR)</em:translator>
     <em:translator>Eduard Babayan (hy-AM)</em:translator>
     <em:translator>Helder Magalhaes (pt-PT)</em:translator>
