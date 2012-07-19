@@ -19,8 +19,13 @@ var EXPORTED_SYMBOLS = [];
 // console window.
 // Cu.import("resource://firebug/fbtrace.js");
 
+var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+
 // Just workaround for this module.
-var FBTrace = {sysout: function(){}};
+var FBTrace = {sysout: function(msg)
+{
+    consoleService.logStringMessage(msg);
+}};
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://firebug/prefLoader.js");
@@ -229,6 +234,10 @@ Locale.registerStringBundle = function(bundleURI)
     // Notice that this category entry must not be persistent in Fx 4.0
     categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", false, true);
     this.stringBundle = null;
+
+    bundleURI = getDefaultStringBundleURI(bundleURI);
+    categoryManager.addCategoryEntry("default_strings_firebug", bundleURI, "", false, true);
+    this.defaultStringBundle = null;
 }
 
 Locale.getStringBundle = function()
@@ -241,16 +250,7 @@ Locale.getStringBundle = function()
 Locale.getDefaultStringBundle = function()
 {
     if (!this.defaultStringBundle)
-    {
-        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
-            getService(Ci.nsIChromeRegistry);
-
-        var uri = Services.io.newURI("chrome://firebug/locale/firebug.properties", "UTF-8", null);
-        var fileURI = chromeRegistry.convertChromeURL(uri).spec;
-        var parts = fileURI.split("/");
-        parts[parts.length - 2] = DEFAULT_LOCALE;
-        this.defaultStringBundle = stringBundleService.createBundle(parts.join("/"));
-    }
+        this.defaultStringBundle = stringBundleService.createExtensibleBundle("default_strings_firebug");
     return this.defaultStringBundle;
 }
 
@@ -263,6 +263,22 @@ Locale.getPluralRule = function()
     catch (err)
     {
     }
+}
+
+// ********************************************************************************************* //
+// Helpers
+
+function getDefaultStringBundleURI(bundleURI)
+{
+    var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
+        getService(Ci.nsIChromeRegistry);
+
+    var uri = Services.io.newURI(bundleURI, "UTF-8", null);
+    var fileURI = chromeRegistry.convertChromeURL(uri).spec;
+    var parts = fileURI.split("/");
+    parts[parts.length - 2] = DEFAULT_LOCALE;
+
+    return parts.join("/");
 }
 
 // ********************************************************************************************* //
