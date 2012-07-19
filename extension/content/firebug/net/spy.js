@@ -21,12 +21,13 @@ define([
     "firebug/net/netUtils",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
+    "firebug/lib/wrapper",
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule) {
+    TraceListener, TraceModule, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -977,8 +978,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         try
         {
             // xxxHonza: must be done through Console RDP
-            var postData = NetUtils.getPostText(spy, context, true);
-            var request = new context.window.XMLHttpRequest();
+            var win = Wrapper.unwrapObject(context.window);
+            var request = new win.XMLHttpRequest();
             request.open(spy.method, spy.href, true);
 
             var headers = spy.requestHeaders;
@@ -988,6 +989,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                 request.setRequestHeader(header.name, header.value);
             }
 
+            var postData = NetUtils.getPostText(spy, context, true);
             request.send(postData);
         }
         catch (err)
