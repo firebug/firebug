@@ -177,7 +177,7 @@ function $menupopupOverlay(parent, children)
 
 function $toolbarButton(id, attrs, children, defaultPos)
 {
-    attrs["class"] = "toolbarbutton-1 chromeclass-toolbar-additional";
+    attrs["class"] = "toolbarbutton-1";
     attrs.firebugRootNode = true;
     attrs.id = id;
 
