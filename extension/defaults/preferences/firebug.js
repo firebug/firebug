@@ -63,7 +63,7 @@ pref("extensions.firebug.preferJSDSourceLinks", false);
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
 pref("extensions.firebug.showTextNodesWithWhitespace", false);
-pref("extensions.firebug.entityDisplay", "names");
+pref("extensions.firebug.entityDisplay", "symbols");
 pref("extensions.firebug.showFullTextNodes", true);
 pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);
