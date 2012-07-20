@@ -75,7 +75,7 @@ function $el(name, attributes, children, parent)
     for (var a in attributes)
         el.setAttribute(a, attributes[a]);
 
-    for each(var a in children)
+    for each (var a in children)
         el.appendChild(a);
 
     if (parent)
@@ -151,7 +151,7 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for (var i=0; i<children.length; i++)
+    for (var i=0; i<children.length; ++i)
     {
         var child = children[i];
         var beforeEl;
@@ -163,15 +163,23 @@ function $menupopupOverlay(parent, children)
         }
         else if (child.getAttribute("insertbefore"))
         {
-            var id = child.getAttribute("insertbefore");
-            if (id)
-                beforeEl = parent.querySelector("#" + id);
+            var ids = child.getAttribute("insertbefore").split(",");
+            for (var j=0; j < ids.length; ++j)
+            {
+                beforeEl = parent.querySelector("#" + ids[j]);
+                if (beforeEl)
+                    break;
+            }
         }
         else if (child.getAttribute("insertafter"))
         {
-            var id = child.getAttribute("insertafter");
-            if (id)
-                beforeEl = parent.querySelector("#" + id);
+            var ids = child.getAttribute("insertafter").split(",");
+            for (var j=0; j < ids.length; ++j)
+            {
+                beforeEl = parent.querySelector("#" + ids[j]);
+                if (beforeEl)
+                    break;
+            }
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
@@ -179,7 +187,7 @@ function $menupopupOverlay(parent, children)
         if (beforeEl)
             parent.insertBefore(child, beforeEl);
         else
-            parent.appendChild(child)
+            parent.appendChild(child);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
         child.setAttribute("firebugRootNode", true);
@@ -1076,9 +1084,12 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
     }, [
-        $menupopup({id: "menu_firebug_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "menu_firebug_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ]),
     $menuseparator({
         insertafter: "menu_webDeveloper_firebug"
@@ -1096,9 +1107,12 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
         iconic: "true",
         "class": "fbInternational"
     }, [
-        $menupopup({id: "appmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "appmenu_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ]),
     $menuseparator({
         insertafter: "appmenu_firebug"
@@ -1115,9 +1129,12 @@ $menupopupOverlay($("toolsPopup"), [
         label: "firebug.Firebug",
         "class": "menuitem-iconic fbInternational"
     }, [
-        $menupopup({id: "toolsmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "toolsmenu_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ])
 ]);
 
