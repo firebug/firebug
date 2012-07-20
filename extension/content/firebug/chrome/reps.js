@@ -1101,7 +1101,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getTooltip: function(elt)
     {
-        return this.getXPath(elt) + " (" + elt.namespaceURI+")";
+        var tooltip = this.getXPath(elt);
+
+        if (elt.namespaceURI)
+            tooltip += " (" + elt.namespaceURI + ")";
+
+        return tooltip;
     },
 
     getContextMenuItems: function(elt, target, context)
