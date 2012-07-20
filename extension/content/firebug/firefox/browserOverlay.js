@@ -154,21 +154,32 @@ function $menupopupOverlay(parent, children)
     for (var i=0; i<children.length; i++)
     {
         var child = children[i];
-        var id = child.getAttribute("insertbefore"), beforeEl;
-        if (id)
-            beforeEl = parent.querySelector("#" + id);
+        var beforeEl;
 
-        if (!beforeEl)
+        if (child.getAttribute("position"))
         {
-            id = child.getAttribute("insertafter");
-
+            var pos = child.getAttribute("position");
+            beforeEl = parent.children[pos - 1];
+        }
+        else if (child.getAttribute("insertbefore"))
+        {
+            var id = child.getAttribute("insertbefore");
+            if (id)
+                beforeEl = parent.querySelector("#" + id);
+        }
+        else if (child.getAttribute("insertafter"))
+        {
+            var id = child.getAttribute("insertafter");
             if (id)
                 beforeEl = parent.querySelector("#" + id);
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
 
-        parent.insertBefore(child, beforeEl);
+        if (beforeEl)
+            parent.insertBefore(child, beforeEl);
+        else
+            parent.appendChild(child)
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
         child.setAttribute("firebugRootNode", true);
@@ -1061,7 +1072,7 @@ $menupopupOverlay($("menu_View_Popup"), [
 $menupopupOverlay($("menuWebDeveloperPopup"), [
     $menu({
         id: "menu_webDeveloper_firebug",
-        insertbefore: "menu_devToolbar",
+        position: 1,
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
     }, [
@@ -1070,15 +1081,15 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
             onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
     ]),
     $menuseparator({
-        insertbefore: "menu_firebug_devToolbar"
+        insertafter: "menu_webDeveloper_firebug"
     })
 ]);
 
-// Firefox 4 Web Developer Menu
+// Firefox Button -> Web Developer Menu
 $menupopupOverlay($("appmenu_webDeveloper_popup"), [
     $splitmenu({
         id: "appmenu_firebug",
-        insertbefore: "appmenu_devToolbar",
+        position: 1,
         command: "cmd_firebug_toggleFirebug",
         key: "key_firebug_toggleFirebug",
         label: "firebug.Firebug",
@@ -1090,7 +1101,7 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
             onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
     ]),
     $menuseparator({
-        insertbefore: "appmenu_devToolbar"
+        insertafter: "appmenu_firebug"
     })
 ]);
 
@@ -1303,4 +1314,4 @@ if (FBTrace.DBG_INITIALIZE)
     FBTrace.sysout("Firebug global overlay applied");
 
 // ********************************************************************************************* //
-})()
+})();
