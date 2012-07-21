@@ -47,11 +47,11 @@
 }
 
 .testListRow.results .testName {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(chrome://fbtest/skin/twistyClosed.png);
 }
 
 .testListRow.opened .testName {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-image: url(chrome://fbtest/skin/twistyOpen.png);
 }
 
 .testListRow.error .testLink {
@@ -136,7 +136,7 @@
 }
 
 .testListRow.running .statusIcon {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://fbtest/skin/loading.svg);
     background-position: 10px 0px;
 }
 
@@ -164,11 +164,11 @@
 }
 
 .opened > .testGroupCol > .testGroupName {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-image: url(chrome://fbtest/skin/twistyOpen.png);
 }
 
 .testGroupName {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(chrome://fbtest/skin/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 1px;
     padding-left: 18px;

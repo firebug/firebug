@@ -25,25 +25,25 @@ body {
 }
 
 #stopTest {
-    list-style-image: url("chrome://firebug/skin/trace/clear.png");
+    list-style-image: url("chrome://fbtest/skin/stop.png");
 }
 
 #haltOnFailedTest {
-    list-style-image: url("chrome://fbtest/skin/downloadButtons-aero.png");
-    -moz-image-region: rect(0px 48px 16px 32px);
+    list-style-image: url("chrome://fbtest/skin/failHalt.svg");
 }
 
 #refreshList {
-    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
-    -moz-image-region: rect(0px 64px 16px 48px);
+    list-style-image: url("chrome://browser/skin/Toolbar.png");
+    -moz-image-region: rect(0px 72px 19px 54px);
 }
 
 #noTestTimeout {
-    list-style-image: url(chrome://fbtest/skin/Throbber-small.png);
+    list-style-image: url(chrome://fbtest/skin/noTimeout.svg);
 }
 
 #restartFirefox {
-    list-style-image: url("chrome://fbtest/skin/restart.png");
+    list-style-image: url("chrome://browser/skin/Toolbar.png");
+    -moz-image-region: rect(0px 324px 19px 306px);
 }
 
 /************************************************************************************************/
