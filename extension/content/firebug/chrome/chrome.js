@@ -17,7 +17,7 @@ define([
     "firebug/lib/events",
     "firebug/js/fbs",
     "firebug/chrome/window",
-    "firebug/lib/options",
+    "firebug/lib/options"
 ],
 function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
     Events, FBS, Win, Options) {
@@ -38,6 +38,21 @@ const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const panelURL = "chrome://firebug/content/panel.html";
+
+// URLs used in the Firebug Menu and several other places
+const firebugURLs =
+{
+    main: "https://getfirebug.com",
+    help: "https://getfirebug.com/help",
+    FAQ: "https://getfirebug.com/wiki/index.php/FAQ",
+    docs: "https://getfirebug.com/docs.html",
+    keyboard: "https://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
+    discuss: "https://groups.google.com/forum/#!forum/firebug",
+    issues: "http://code.google.com/p/fbug/issues/list?can=1",
+    donate: "https://getfirebug.com/getinvolved",
+    extensions: "https://getfirebug.com/wiki/index.php/Firebug_Extensions",
+    issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
+};
 
 const statusCropSize = 20;
 
@@ -1712,6 +1727,20 @@ var FirebugChrome =
 
         if (panel && panel.breakable)
             Firebug.Breakpoint.toggleBreakOnNext(panel);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    visitWebsite: function(which, arg)
+    {
+        var url = firebugURLs[which];
+        if (url)
+        {
+            if (arg)
+                url += arg;
+
+            Win.openNewTab(url);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
