@@ -1946,7 +1946,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var box = this.tag.replace(args, parentNode, this);
         var description = box.getElementsByClassName("disabledPanelDescription").item(0);
         FirebugReps.Description.render(args.suggestion, description,
-            Obj.bindFixed(Firebug.visitWebsite,  this, "issue5110"));
+            Obj.bindFixed(Firebug.chrome.visitWebsite, this, "issue5110"));
 
         return box;
     },

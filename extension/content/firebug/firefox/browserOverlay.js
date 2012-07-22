@@ -11,21 +11,9 @@ Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/prefLoader.js");
 
-var Locale = Cu.import("resource://firebug/locale.js").Locale;
+const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
-// Firebug URLs used by the global menu.
-var firebugURLs =
-{
-    main: "http://www.getfirebug.com",
-    FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
-    docs: "http://www.getfirebug.com/docs.html",
-    keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
-    discuss: "https://groups.google.com/forum/#!forum/firebug",
-    issues: "http://code.google.com/p/fbug/issues/list",
-    donate: "http://getfirebug.com/getinvolved",
-    extensions: "http://getfirebug.com/wiki/index.php/Firebug_Extensions",
-    firstRunPage: "http://getfirebug.com/firstrun#Firebug "
-};
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
 // ********************************************************************************************* //
 // String Bundles
@@ -321,7 +309,7 @@ Firebug.GlobalUI =
 
         var container = $("appcontent");
 
-        // List of Firbug scripts that must be loaded into the global scope (browser.xul)
+        // List of Firebug scripts that must be loaded into the global scope (browser.xul)
         var scriptSources = [
             "chrome://firebug/content/trace.js",
             "chrome://firebug/content/legacy.js",
@@ -517,14 +505,11 @@ Firebug.GlobalUI =
         });
     },
 
-    visitWebsite: function(which, arg)
+    openFirstRunPage: function()
     {
-        var url = firebugURLs[which];
-        if (url)
-        {
-            url = arg ? url + arg : url;
-            gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
-        }
+        var version = Firebug.GlobalUI.getVersion();
+        url = firstRunPage + version;
+        gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
     },
 
     setPosition: function(newPosition)
@@ -948,7 +933,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugUrlWebsite",
                 label: "firebug.Website",
                 tooltiptext: "firebug.menu.tip.Website",
-                oncommand: "Firebug.GlobalUI.visitWebsite('main')",
+                oncommand: "Firebug.chrome.visitWebsite('main')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -956,7 +941,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugUrlExtensions",
                 label: "firebug.menu.Extensions",
                 tooltiptext: "firebug.menu.tip.Extensions",
-                oncommand: "Firebug.GlobalUI.visitWebsite('extensions')",
+                oncommand: "Firebug.chrome.visitWebsite('extensions')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -973,7 +958,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugDoc",
                 label: "firebug.Documentation",
                 tooltiptext: "firebug.menu.tip.Documentation",
-                oncommand: "Firebug.GlobalUI.visitWebsite('docs')",
+                oncommand: "Firebug.chrome.visitWebsite('docs')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -981,7 +966,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugKeyboard",
                 label: "firebug.KeyShortcuts",
                 tooltiptext: "firebug.menu.tip.Key_Shortcuts",
-                oncommand: "Firebug.GlobalUI.visitWebsite('keyboard')",
+                oncommand: "Firebug.chrome.visitWebsite('keyboard')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -989,7 +974,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugForums",
                 label: "firebug.Forums",
                 tooltiptext: "firebug.menu.tip.Forums",
-                oncommand: "Firebug.GlobalUI.visitWebsite('discuss')",
+                oncommand: "Firebug.chrome.visitWebsite('discuss')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -997,7 +982,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugIssues",
                 label: "firebug.Issues",
                 tooltiptext: "firebug.menu.tip.Issues",
-                oncommand: "Firebug.GlobalUI.visitWebsite('issues')",
+                oncommand: "Firebug.chrome.visitWebsite('issues')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -1005,7 +990,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugDonate",
                 label: "firebug.Donate",
                 tooltiptext: "firebug.menu.tip.Donate",
-                oncommand: "Firebug.GlobalUI.visitWebsite('donate')",
+                oncommand: "Firebug.chrome.visitWebsite('donate')",
                 "class": "fbInternational"
             }),
         ])
@@ -1209,9 +1194,7 @@ if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarp
         // Check whether insertItem really works
         var curSet = navBar.currentSet.split(",");
         if (curSet.indexOf(startButtonId) == -1)
-        {
             FBTrace.sysout("Startbutton; navBar.insertItem doesn't work", curSet);
-        }
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton; curSet (after modification): " + navBar.currentSet);
@@ -1274,8 +1257,7 @@ if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
                 if (window.closed)
                     return;
 
-                var version = Firebug.GlobalUI.getVersion();
-                Firebug.GlobalUI.visitWebsite("firstRunPage", version);
+                Firebug.GlobalUI.openFirstRunPage();
             }, 1000);
 
             window.addEventListener("unload", function()
