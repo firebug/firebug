@@ -53,9 +53,13 @@
 }
 
 .logCounter {
-    display: table-cell;
+    display: none;
     padding: 2px 0 2px 5px;
     width: 20px;
+}
+
+.logCounter[count] {
+    display: table-cell;
 }
 
 .logCounterValue:empty {

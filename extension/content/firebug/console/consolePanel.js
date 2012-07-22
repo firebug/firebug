@@ -403,17 +403,22 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     increaseRowCount: function(row)
     {
-        var node = row.getElementsByClassName("logCounterValue");
-        if (!node)
+        var counter = row.getElementsByClassName("logCounter").item(0);
+        if (!counter)
+            return;
+        var value = counter.getElementsByClassName("logCounterValue");
+        if (!value)
             return;
 
-        node = node.item(0);
+        value = value.item(0);
 
-        var count = parseInt(node.textContent);
+        var count = parseInt(value.textContent);
         if (isNaN(count))
             count = 1;
 
-        node.textContent = count + 1;
+        count++;
+        counter.setAttribute("count", count);
+        value.textContent = count;
     },
 
     append: function(appender, objects, className, rep, sourceLink, noRow)
