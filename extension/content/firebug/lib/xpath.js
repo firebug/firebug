@@ -162,20 +162,61 @@ Xpath.getElementsBySelector = function(doc, css)
 
 Xpath.getElementsByXPath = function(doc, xpath)
 {
-    var nodes = [];
+    var result = Xpath.evaluateXPath(doc, xpath);
 
-    try {
-        var result = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-        for (var item = result.iterateNext(); item; item = result.iterateNext())
-            nodes.push(item);
+    if (result instanceof Array)
+        return result;
+
+    return [];
+};
+
+Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
+{
+    if (contextNode === undefined)
+        contextNode = doc;
+
+    if (resultType === undefined)
+        resultType = XPathResult.ANY_TYPE;
+
+    try
+    {
+        var result = doc.evaluate(xpath, contextNode, null, resultType, null);
     }
     catch (exc)
     {
-        // Invalid xpath expressions make their way here sometimes.  If that happens,
-        // we still want to return an empty set without an exception.
+        // If an invalid XPath expression was entered, it should be caught without exception
+        return;
     }
 
-    return nodes;
+    switch (result.resultType)
+    {
+        case XPathResult.NUMBER_TYPE:
+            return result.numberValue;
+
+        case XPathResult.STRING_TYPE:
+            return result.stringValue;
+            
+        case XPathResult.BOOLEAN_TYPE:
+            return result.booleanValue;
+
+        case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+        case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+            var nodes = [];
+            for (var item = result.iterateNext(); item; item = result.iterateNext())
+                nodes.push(item);
+            return nodes;
+            
+        case XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE:
+        case XPathResult.ORDERED_NODE_SNAPSHOT_TYPE:
+            var nodes = [];
+            for (var i = 0; i < result.snapshotLength; ++i)
+                nodes.push(result.snapshotItem(i));
+            return nodes;
+            
+        case XPathResult.ANY_UNORDERED_NODE_TYPE:
+        case XPathResult.FIRST_ORDERED_NODE_TYPE:
+            return result.singleNodeValue;
+    }
 };
 
 Xpath.getRuleMatchingElements = function(rule, doc)
