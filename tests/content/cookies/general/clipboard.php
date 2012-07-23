@@ -31,7 +31,7 @@
                     <li>There should be a new cookie entered with the same values as the <code>CopyPasteCookies</code> but with the name <code>CopyPasteCookies-1</code></li>
                 </ul>
             </section>
-            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
         </div>
     </body>
 </html>

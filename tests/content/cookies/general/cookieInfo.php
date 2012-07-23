@@ -51,7 +51,7 @@
                     </li>
                 </ul>
             </section>
-            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
         </div>
     </body>
 </html>
