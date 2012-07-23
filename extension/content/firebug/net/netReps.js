@@ -181,11 +181,15 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             (direction == "asc" && header.sorted == -1))
             return;
 
+        var newDirection = ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc")) ? "ascending" : "descending";
         if (header)
-            header.setAttribute("aria-sort", header.sorted === -1 ? "descending" : "ascending");
+            header.setAttribute("aria-sort", newDirection);
 
         var tbody = table.lastChild;
         var colID = header.getAttribute("id");
+
+        table.setAttribute("sortcolumn", colID);
+        table.setAttribute("sortdirection", newDirection);
 
         var values = [];
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
@@ -221,7 +225,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             switch (colID)
             {
                 case "netTimeCol":
-                    value = row.repObject.startTime;
+                    FBTrace.sysout("row.repObject", row.repObject);
+                    value = row.repObject.requestNumber;
                     break;
                 case "netSizeCol":
                     value = row.repObject.size;
@@ -249,7 +254,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         values.sort(sortFunction);
 
-        if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
+        if (newDirection == "ascending")
         {
             Css.removeClass(header, "sortedDescending");
             Css.setClass(header, "sortedAscending");
