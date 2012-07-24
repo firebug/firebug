@@ -512,7 +512,15 @@ FBTestApp.TestResultTabView = domplate(
 
     isXml: function(text)
     {
-        return text && text.indexOf("<") == 0;
+        var parser = Cc["@mozilla.org/xmlextras/domparser;1"].createInstance(Ci.nsIDOMParser);
+
+        // Create helper root element (for the case where there is no signle root).
+        var tempXml = "<wrapper>" + text + "</wrapper>";
+        var doc = parser.parseFromString(tempXml, "text/xml");
+        var docElem = doc.documentElement;
+        var nsURI = "http://www.mozilla.org/newlayout/xml/parsererror.xml";
+
+        return docElem.namespaceURI != nsURI && docElem.nodeName != "parsererror";
     },
 
     onSwitchView: function(event)
@@ -656,7 +664,7 @@ FBTestApp.TestResult = function(win, pass, msg, expected, result)
     this.fileName = location.substr(location.lastIndexOf("/") + 1);
 
     this.pass = pass ? true : false;
-    this.msg = clean(msg);
+    this.msg = msg;//clean(msg);
 
     // Make sure the following values are strings.
     this.expected = expected ? expected + "" : null;
