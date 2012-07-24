@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.sysout("monitorEvents.START");
 
-    FBTest.openNewTab(basePath + "commandLine/monitorEvents.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/api/monitorEvents.html", function(win)
     {
         FBTest.openFirebug();
 
