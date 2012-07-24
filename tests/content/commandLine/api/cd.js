@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("commandline.cd.START");
-    FBTest.openNewTab(basePath + "commandLine/cd.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/api/cd.html", function(win)
     {
         FBTest.openFirebug();
         FBTest.clearCache();

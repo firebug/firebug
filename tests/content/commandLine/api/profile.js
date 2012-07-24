@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("commandline.profile.START");
-    FBTest.openNewTab(basePath + "commandLine/profile.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/api/profile.html", function(win)
     {
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
