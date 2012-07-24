@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Command Line API: $x()</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1>Command Line API: $x()</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="buttonGroup1">
+                    <button id="btn1">Button 1</button>
+                    <button id="btn2">Button 2</button>
+                    <button id="btn3">Button 3</button>
+                </div>
+                <div id="buttonGroup2">
+                    <button id="btn4">Button 4</button>
+                    <button id="btn5">Button 5</button>
+                </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>
+                        Type <code>$x("//button")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>[button#btn1, button#btn2, button#btn3, button#btn4, button#btn5]</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("count(//button)")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>5</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("string(//button/text())")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>"Button 1"</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("count(//button)>2")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>true</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x(".//button", document.getElementById("buttonGroup2"))</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>[button#btn4, button#btn5]</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("//button", document, "node")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>&lt;button id="btn1"&gt;</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("count(//button)>2", document, "number")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>1</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("count(//button)>2", document, "string")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>"true"</code></span>
+                    </li>
+                    <li>
+                        Type <code>$x("//button", document, "bool")</code> and hit <code class="key">Enter</code><br/>
+                        <span class="ok">&rArr; The console should log <code>true</code></span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><code>$x()</code> should always return a useful result by evaluating the XPath expressions.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
