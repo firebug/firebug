@@ -36,7 +36,7 @@ function runTest()
                 var sourceBox = row.querySelector(".errorSourceBox.errorSource-show");
                 if (FBTest.ok(node, "Source line must be there"))
                 {
-                    var expected = /\s*foops\(\)\s*\;onclick\s*\(line\s*2\)\s*/;
+                    var expected = /\s*onclick\s*\(line\s*2\)\s*/;
                     FBTest.compare(expected, sourceBox.textContent, "The source must match");
                 }
 
