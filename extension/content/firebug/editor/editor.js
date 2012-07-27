@@ -164,6 +164,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
+                currentEditor.cancelEditing(currentTarget, originalValue);
+
                 if (removeGroup && !originalValue && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
@@ -546,6 +548,10 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
     {
         // Remove empty groups by default
         return true;
+    },
+
+    cancelEditing: function(target, value)
+    {
     },
 
     insertNewRow: function(target, insertWhere)
