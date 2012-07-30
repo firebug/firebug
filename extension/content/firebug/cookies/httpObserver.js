@@ -40,11 +40,14 @@ var HttpObserver = Obj.extend(BaseObserver,
     {
         try {
             aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
-            if (aTopic == "http-on-modify-request") {
+            if (aTopic == "http-on-modify-request")
                 this.onModifyRequest(aSubject);
-            } else if (aTopic == "http-on-examine-response") {
+            else if (aTopic == "http-on-examine-response")
                 this.onExamineResponse(aSubject);
-            }
+            else if (aTopic == "http-on-examine-cached-response")
+                this.onExamineResponse(aSubject);
+            else if (aTopic == "http-on-examine-merged-response")
+                this.onExamineResponse(aSubject);
         }
         catch (err)
         {
