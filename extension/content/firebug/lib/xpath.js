@@ -33,7 +33,7 @@ Xpath.getElementTreeXPath = function(element)
     var paths = [];
 
     // Use nodeName (instead of localName) so namespace prefix is included (if any).
-    for (; element && element.nodeType == 1; element = element.parentNode)
+    for (; element && element.nodeType == Node.ELEMENT_NODE; element = element.parentNode)
     {
         var index = 0;
         for (var sibling = element.previousSibling; sibling; sibling = sibling.previousSibling)

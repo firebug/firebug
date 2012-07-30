@@ -1489,7 +1489,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
-                function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
+                function findRow(node) {
+                    return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
+                }
+
                 this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
                 row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
             }

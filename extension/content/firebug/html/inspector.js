@@ -250,7 +250,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     inspectNode: function(node)
     {
-        if (node && node.nodeType != 1)
+        if (node && node.nodeType != Node.ELEMENT_NODE)
             node = node.parentNode;
 
         if (node && Firebug.shouldIgnore(node) && !node.fbProxyFor)

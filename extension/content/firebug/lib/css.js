@@ -237,7 +237,7 @@ Css.getElementCSSPath = function(element)
 {
     var paths = [];
 
-    for (; element && element.nodeType == 1; element = element.parentNode)
+    for (; element && element.nodeType == Node.ELEMENT_NODE; element = element.parentNode)
     {
         var selector = Css.getElementCSSSelector(element);
         paths.splice(0, 0, selector);
@@ -253,7 +253,7 @@ var classNameReCache={};
 
 Css.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != 1 || !node.className || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || name == '')
         return false;
 
     if (name.indexOf(" ") != -1)
@@ -282,7 +282,7 @@ Css.hasClass = function(node, name)
 
 Css.setClass = function(node, name)
 {
-    if (!node || node.nodeType != 1 || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || name == '')
         return;
 
     if (name.indexOf(" ") != -1)
@@ -311,7 +311,7 @@ Css.getClassValue = function(node, name)
 
 Css.removeClass = function(node, name)
 {
-    if (!node || node.nodeType != 1 || node.className == '' || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || node.className == '' || name == '')
         return;
 
     if (name.indexOf(" ") != -1)
