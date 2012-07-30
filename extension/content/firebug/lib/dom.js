@@ -116,7 +116,7 @@ Dom.isAncestor = function(node, potentialAncestor)
 
 Dom.getNextElement = function(node)
 {
-    while (node && node.nodeType != 1)
+    while (node && node.nodeType != Node.ELEMENT_NODE)
         node = node.nextSibling;
 
     return node;
@@ -124,7 +124,7 @@ Dom.getNextElement = function(node)
 
 Dom.getPreviousElement = function(node)
 {
-    while (node && node.nodeType != 1)
+    while (node && node.nodeType != Node.ELEMENT_NODE)
         node = node.previousSibling;
 
     return node;
@@ -292,7 +292,7 @@ Dom.hasChildElements = function(node)
 
     for (var child = node.firstChild; child; child = child.nextSibling)
     {
-        if (child.nodeType == 1)
+        if (child.nodeType == Node.ELEMENT_NODE)
             return true;
     }
 
@@ -303,13 +303,13 @@ Dom.hasChildElements = function(node)
 
 Dom.getNextByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    function iter(node) { return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, state); }
     return Dom.findNext(root, iter);
 };
 
 Dom.getPreviousByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    function iter(node) { return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, state); }
     return Dom.findPrevious(root, iter);
 };
 
@@ -420,7 +420,7 @@ Dom.getClientOffset = function(elt)
 
         if (p)
         {
-            if (p.nodeType == 1)
+            if (p.nodeType == Node.ELEMENT_NODE)
                 addOffset(p, coords, view);
         }
         else if (elt.ownerDocument.defaultView.frameElement)

@@ -205,7 +205,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
-        if (parent && parent.nodeType == 1)
+        if (parent && parent.nodeType == Node.ELEMENT_NODE)
         {
             this.getInheritedRules(parent, sections, usedProps);
 
