@@ -195,6 +195,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         observerService.addObserver(HttpObserver, "http-on-modify-request", false);
         observerService.addObserver(HttpObserver, "http-on-examine-response", false);
+        observerService.addObserver(HttpObserver, "http-on-examine-cached-response", false);
+        observerService.addObserver(HttpObserver, "http-on-examine-merged-response", false);
+
         observerService.addObserver(PermissionObserver, "perm-changed", false);
         registerCookieObserver(CookieObserver);
         prefs.addObserver(networkPrefDomain, PrefObserver, false);
@@ -217,6 +220,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         observerService.removeObserver(HttpObserver, "http-on-modify-request");
         observerService.removeObserver(HttpObserver, "http-on-examine-response");
+        observerService.removeObserver(HttpObserver, "http-on-examine-cached-response");
+        observerService.removeObserver(HttpObserver, "http-on-examine-merged-response");
+
         observerService.removeObserver(PermissionObserver, "perm-changed");
         unregisterCookieObserver(CookieObserver);
         prefs.removeObserver(networkPrefDomain, PrefObserver);
