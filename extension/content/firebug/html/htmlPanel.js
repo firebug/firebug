@@ -932,8 +932,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             if (index == 0)
             {
-                // punch thru and adopt the root element as our child
-                var skipChild = node.contentDocument.documentElement;
+                // punch thru and adopt the document node as our child
+                var skipChild = node.contentDocument.firstChild;
 
                 // (the node's).(type 9 document).(HTMLElement)
                 return this.setEmbedConnection(node, skipChild);
