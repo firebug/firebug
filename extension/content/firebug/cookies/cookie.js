@@ -127,10 +127,13 @@ Cookie.prototype =
         try
         {
             var host = this.cookie.host;
+            var path = this.cookie.path;
+
             var httpProtocol = this.cookie.isSecure ? "https://" : "http://";
-            return ioService.newURI(httpProtocol + host + this.cookie.path, null, null);
+            var uri = httpProtocol + host + (path ? path : "");
+            return ioService.newURI(uri, null, null);
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COOKIES)
                 FBTrace.sysout("cookies.getURI FAILS for " + this.cookie.name);
