@@ -390,8 +390,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     registerMutationListeners: function(win)
     {
-        if (this.context.attachedMutation)
-            return;
+        // The 'attachedMutation' flag should be maintained per window. Otherwise
+        // we can miss some registration. Events.addEventListener is safe for multiple
+        // calls so, let's remove the condition for now as part of issue 5761 fix.
+        // This should be improved together with issue 5490
+        //if (this.context.attachedMutation)
+        //    return;
 
         this.context.attachedMutation = true;
 
