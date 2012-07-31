@@ -647,7 +647,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getProtocol: function(file)
     {
-        return Url.getProtocol(file.href);
+        var protocol = Url.getProtocol(file.href);
+        var spdy = file.responseHeadersText.search(/X-Firefox-Spdy/i) >=0;
+        return spdy ? protocol +" SPDY" : protocol;
     },
 
     getStatus: function(file)
