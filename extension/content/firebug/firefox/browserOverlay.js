@@ -1288,9 +1288,15 @@ if (typeof(nsContextMenu) != "undefined")
     {
         initItemsOriginal.apply(this, arguments);
 
-        var showInspect = !PrefLoader.getPref("hideDefaultInspector");
-        this.showItem("inspect-separator", showInspect);
-        this.showItem("context-inspect", showInspect);
+        // Hide built-in inspector menu item if the pref "extensions.firebug.hideDefaultInspector"
+        // says so. Note that there is also built-in preference "devtools.inspector.enable" that
+        // can be used for the same purpose.
+        var hideInspect = PrefLoader.getPref("hideDefaultInspector");
+        if (hideInspect)
+        {
+            this.showItem("inspect-separator", false);
+            this.showItem("context-inspect", false);
+        }
     }
 }
 
