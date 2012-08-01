@@ -98,12 +98,14 @@ Firebug.InsideOutBox.prototype =
             FBTrace.sysout("insideOutBox.select object:"+object, object);
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
+
         if (makeBoxVisible)
         {
             this.openObjectBox(objectBox);
             if (!noScrollIntoView)
                 Dom.scrollIntoCenterView(objectBox);
         }
+
         return objectBox;
     },
 
@@ -165,16 +167,15 @@ Firebug.InsideOutBox.prototype =
         if (!panel)
         {
             if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
-                FBTrace.sysout("selectObjectBox no panel for "+objectBox, objectBox);
+                FBTrace.sysout("selectObjectBox no panel for " + objectBox, objectBox);
             return;
         }
-
 
         var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
             Css.removeClass(this.selectedObjectBox, "selected");
-            Events.dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
+            Events.dispatch(panel.fbListeners, "onObjectBoxUnselected", [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
@@ -186,7 +187,7 @@ Firebug.InsideOutBox.prototype =
                     this.toggleObjectBox(objectBox, true);
             }
         }
-        Events.dispatch(panel.fbListeners, 'onObjectBoxSelected', [objectBox]);
+        Events.dispatch(panel.fbListeners, "onObjectBoxSelected", [objectBox]);
     },
 
     openObjectBox: function(objectBox)
@@ -199,9 +200,9 @@ Firebug.InsideOutBox.prototype =
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
                 Css.setClass(parentBox, "open");
-                labelBox = parentBox.getElementsByClassName('nodeLabelBox').item(0);
+                labelBox = parentBox.getElementsByClassName("nodeLabelBox").item(0);
                 if (labelBox)
-                    labelBox.setAttribute('aria-expanded', 'true')
+                    labelBox.setAttribute("aria-expanded", "true")
             }
         }
     },
@@ -260,7 +261,7 @@ Firebug.InsideOutBox.prototype =
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
-            labelBox.setAttribute('aria-expanded', 'false');
+            labelBox.setAttribute("aria-expanded", "false");
 
         // Recursively contract all child boxes
         var nodeChildBox = this.getChildObjectBox(objectBox);
@@ -283,7 +284,7 @@ Firebug.InsideOutBox.prototype =
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
-            labelBox.setAttribute('aria-expanded', isOpen);
+            labelBox.setAttribute("aria-expanded", isOpen);
 
         if (!forceOpen && isOpen)
             this.contractObjectBox(objectBox);

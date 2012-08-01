@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   width="16"
+   height="16"
+   id="failHalt">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3757">
+      <stop
+         id="stop3759"
+         style="stop-color:#0000a0;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3761"
+         style="stop-color:#6464ff;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="8"
+       y1="16"
+       x2="8"
+       y2="0"
+       id="linearGradient3763"
+       xlink:href="#linearGradient3757"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     transform="translate(0,-1036.3622)"
+     id="layer1">
+    <path
+       d="M 16,8 A 8,8 0 1 1 0,8 8,8 0 1 1 16,8 z"
+       transform="matrix(0.84848485,0,0,0.84848485,1.2121212,1037.5743)"
+       id="path2987"
+       style="fill:url(#linearGradient3763);fill-opacity:1;fill-rule:evenodd;stroke:#00008c;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <rect
+       width="2"
+       height="7"
+       x="5"
+       y="1040.8622"
+       id="rect3767"
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+    <rect
+       width="2"
+       height="7"
+       x="9"
+       y="1040.8622"
+       id="rect3767-1"
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+  </g>
+</svg>

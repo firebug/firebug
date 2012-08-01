@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<binding id="popupFilterPanel" extends="chrome://global/content/bindings/popup.xml#panel">
+    <content>
+        <xul:vbox align="center">
+            <xul:hbox anonid="filterBox" />
+            <xul:hbox>
+                <xul:button label="Apply" xbl:inherits="oncommand=onapply"/>
+            </xul:hbox>
+        </xul:vbox>
+    </content>
+    <implementation>
+        <constructor><![CDATA[
+            this.filterBox = document.getAnonymousElementByAttribute(this, "anonid", "filterBox");
+        ]]></constructor>
+
+        <!-- Value of the filter -->
+        <property name="value" onget="return this.textbox ? this.textbox.value : null;"/>
+        
+        <!-- Filter input init -->
+        <method name="init">
+            <parameter name="value"/>
+            <body><![CDATA[
+            // Remove old text box
+            if (this.textbox)
+                this.filterbox.removeChild(this.textbox);
+            
+            // Create new text box.
+            this.textbox = document.createElementNS(
+                "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+                "xul:textbox");
+            this.textbox.setAttribute("anonid", "filterValue");
+            this.textbox.setAttribute("size", "35");
+            this.textbox.setAttribute("value", value);
+            this.filterBox.appendChild(this.textbox); 
+            ]]></body>
+        </method>( 
+    </implementation>
+</binding>
+
+</bindings>

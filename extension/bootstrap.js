@@ -3,7 +3,9 @@
 // ********************************************************************************************* //
 // Constants
 
-var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 // List of firebug modules that must be loaded at startup and unloaded on shutdown.
 // !important every new module loaded with Cu.import must be added here
@@ -13,9 +15,12 @@ var FIREBUG_MODULES = [
     "resource://firebug/firebug-http-observer.js",
     "resource://firebug/firebug-service.js",
     "resource://firebug/firebug-trace-service.js",
+    "resource://firebug/gcli.js",
     "resource://firebug/loader.js",
     "resource://firebug/locale.js",
+    "resource://firebug/mini-require.js",
     "resource://firebug/observer-service.js",
+    "resource://firebug/prefLoader.js",
     "resource://firebug/require-debug.js",
     "resource://firebug/require.js",
     "resource://firebug/storageService.js"
@@ -45,11 +50,15 @@ function startup(params, reason)
     // Add our chrome registration. not needed for 10+
     Components.manager.addBootstrappedManifestLocation(params.installPath);
 
+    Cu.import("resource://firebug/prefLoader.js");
+
+    // Register default preferences
+    PrefLoader.loadDefaultPrefs(params.installPath, "firebug.js");
+    PrefLoader.loadDefaultPrefs(params.installPath, "cookies.js");
+    PrefLoader.loadDefaultPrefs(params.installPath, "tracingConsole.js");
+
     // Load the overlay manager
     Cu.import("resource://firebug/loader.js");
-
-    // register default values
-    FirebugLoader.registerDefaultPrefs();
 
     //register extensions
     FirebugLoader.startup();
@@ -61,6 +70,9 @@ function startup(params, reason)
 
     // Listen for new windows, Firebug must be loaded into them too.
     Services.ww.registerNotification(windowWatcher);
+
+    // GCLI commands
+    Cu.import("resource://firebug/gcli.js");
 }
 
 function shutdown(params, reason)
@@ -89,7 +101,7 @@ function shutdown(params, reason)
     fbs.shutdown();
 
     // remove default preferences
-    FirebugLoader.clearDefaultPrefs();
+    PrefLoader.clearDefaultPrefs();
 
     // Unload all Firebug modules added with Cu.import
     FIREBUG_MODULES.forEach(Cu.unload, Cu);

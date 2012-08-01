@@ -81,9 +81,8 @@ Firebug.EditorSelector =
         if (!mode)
             return;
 
-        var menuitem = Firebug.chrome.$("menu_" + this.getEditorOptionKey() + mode);
-
-        var command = Firebug.chrome.$("cmd_toggle"+this.getEditorOptionKey());
+        var menuitem = Firebug.chrome.$("menu_firebug_" + this.getEditorOptionKey() + mode);
+        var command = Firebug.chrome.$("cmd_firebug_toggle" + this.getEditorOptionKey());
         command.setAttribute("label", menuitem.label);
         command.setAttribute("tooltiptext", menuitem.tooltipText);
     },
@@ -98,7 +97,7 @@ Firebug.EditorSelector =
         {
             if (child.localName == "menuitem")
             {
-                if (child.id == "menu_"+this.getEditorOptionKey()+mode)
+                if (child.id == "menu_firebug_" + this.getEditorOptionKey()+mode)
                     child.setAttribute("checked", true);
                 else
                     child.removeAttribute("checked");

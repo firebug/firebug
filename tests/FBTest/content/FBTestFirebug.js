@@ -563,6 +563,16 @@ this.isDetached = function()
     return FW.Firebug.isDetached();
 };
 
+this.isMinimized = function()
+{
+    return FW.Firebug.isMinimized();
+};
+
+this.isInBrowser = function()
+{
+    return FW.Firebug.isInBrowser();
+};
+
 /**
  * Detach Firebug into a new separate window.
  */
@@ -692,10 +702,20 @@ function waitForWindowLoad(browser, callback)
             //if (!win.wrappedJSObject)
             //    win.wrappedJSObject = win;
 
-            //xxxHonza: I have seen win == null once
-            FBTest.sysout("callback <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< "+win.location);
+            //xxxHonza: I have seen win == null once. It looks like the callback
+            // is executed for a window, which is already unloaded. Could this happen
+            // in case where the test is finished before the listeners are actually
+            // executed?
+            // xxxHonza: remove 'load' and 'MozAfterPaint' listeners when the test
+            // finishes before the window is actually loaded.
+            // Use refreshHaltedDebugger test as an example. (breaks during the page load
+            // and immediatelly calls testDone)
+            if (!win)
+                FBTrace.sysout("waitForWindowLoad: ERROR no window!");
+
             // The window is loaded, execute the callback now.
-            callback(win);
+            if (win)
+                callback(win);
         }
         catch (exc)
         {
@@ -727,7 +747,8 @@ function waitForWindowLoad(browser, callback)
             setTimeout(executeCallback, 100);
     }
 
-    FBTest.sysout("adding event listener <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    FBTest.sysout("waitForWindowLoad: adding event listener");
+
     browser.addEventListener("load", waitForEvents, true);
     browser.addEventListener("MozAfterPaint", waitForEvents, true);
 }
@@ -914,7 +935,7 @@ this.enableConsolePanel = function(callback)
  */
 this.disableAllPanels = function()
 {
-    FW.FBL.$("cmd_disablePanels").doCommand();
+    FW.FBL.$("cmd_firebug_disablePanels").doCommand();
 };
 
 /**
@@ -922,7 +943,7 @@ this.disableAllPanels = function()
  */
 this.enableAllPanels = function()
 {
-    FW.FBL.$("cmd_enablePanels").doCommand();
+    FW.FBL.$("cmd_firebug_enablePanels").doCommand();
 };
 
 /**
@@ -1117,6 +1138,19 @@ this.getPref = function(pref)
 // ********************************************************************************************* //
 // Command Line
 
+function getCommandLine(useCommandEditor)
+{
+    return useCommandEditor ?
+        FW.Firebug.CommandEditor :
+        FW.Firebug.CommandLine.getSingleRowCommandLine();
+}
+
+/**
+ * executes an expression inside the Command Line
+ * @param {String} the command to execute
+ * @param {Object} the Firebug.chrome object
+ * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
+ */
 this.executeCommand = function(expr, chrome, useCommandEditor)
 {
     this.clearAndTypeCommand(expr, useCommandEditor);
@@ -1127,39 +1161,51 @@ this.executeCommand = function(expr, chrome, useCommandEditor)
         FBTest.sendKey("RETURN", "fbCommandLine");
 };
 
-this.clearCommand = function(useCommandEditor)
+/**
+ * clears the Command Line or the Command Editor
+ */
+this.clearCommand = function()
 {
-    var doc = FW.Firebug.chrome.window.document;
-    var cmdLine = doc.getElementById(useCommandEditor ? "fbCommandEditor": "fbCommandLine");
-    cmdLine.value = "";
+    FW.Firebug.CommandLine.clear(FW.Firebug.currentContext);
 };
 
+
+/**
+ * clears and types a command into the Command Line or the Command Editor 
+ * @param {String} the command to type
+ * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
+ * 
+ */
 this.clearAndTypeCommand = function(string, useCommandEditor)
 {
-    FBTest.clearCommand(useCommandEditor);
+    FBTest.clearCommand();
     FBTest.typeCommand(string, useCommandEditor);
 };
 
+/**
+ * types a command into the Command Line or the Command Editor 
+ * @param {String} the command to type
+ * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
+ * 
+ */
 this.typeCommand = function(string, useCommandEditor)
 {
     var doc = FW.Firebug.chrome.window.document;
-    var cmdLine = doc.getElementById(useCommandEditor ? "fbCommandEditor": "fbCommandLine");
     var panelBar1 = doc.getElementById("fbPanelBar1");
+    var cmdLine = getCommandLine(useCommandEditor);
     var win = panelBar1.browser.contentWindow;
 
-    if (useCommandEditor)
-        FBTest.setPref("largeCommandLine", useCommandEditor);
+    FBTest.setPref("commandEditor", (useCommandEditor == true));
 
     FW.Firebug.chrome.window.focus();
     panelBar1.browser.contentWindow.focus();
-    FBTest.focus(cmdLine);
+    cmdLine.focus();
 
     FBTest.sysout("typing "+string+" in to "+cmdLine+" focused on "+
         FW.FBL.getElementCSSSelector(doc.commandDispatcher.focusedElement)+
         " win "+panelBar1.browser.contentWindow);
 
-    for (var i=0; i<string.length; ++i)
-        FBTest.synthesizeKey(string.charAt(i), null, win);
+    this.sendString(string, doc.commandDispatcher.focusedElement);
 };
 
 /**
@@ -1189,6 +1235,16 @@ this.executeCommandAndVerify = function(callback, expression, expected, tagName,
     FBTest.progress("Execute expression: " + expression);
     FBTest.executeCommand(expression);
 };
+
+/**
+ * Simulate selection in the Command Editor or the Command Line
+ * @param {Integer} the index of the start of the selection
+ * @param {Integer} the index of the end of the selection
+ */
+/*this.setCommandSelectionRange = function(selectionStart, selectionEnd)
+{
+    FW.Firebug.CommandLine.getCommandLine().setSelectionRange(selectionStart, selectionEnd);
+}*/
 
 // ********************************************************************************************* //
 // Toolbar buttons
@@ -2107,7 +2163,7 @@ this.waitForHtmlMutation = function(chrome, tagName, callback)
     // corresponding element.
     var mutated = new MutationRecognizer(view, tagName, attributes);
     mutated.matches = matches;
-    mutated.onRecognizeAsync(function onMutate(node)
+    mutated.onRecognize(function onMutate(node)
     {
         // Now wait till the HTML panel unhighlight the element (removes the mutate class)
         var unmutated = new MutationRecognizer(view, tagName, null, null, attributes);
@@ -2166,6 +2222,16 @@ this.selectElementInHtmlPanel = function(element, callback)
     });
     */
 };
+
+/**
+ * Returns selected node box - a <div> element in the HTML panel. The element should have
+ * following classes set: "nodeBox containerNodeBox selected"
+ */
+this.getSelectedNodeBox = function()
+{
+    var panel = FBTest.getPanel("html");
+    return panel.panelNode.querySelector(".nodeBox.selected");
+}
 
 // ********************************************************************************************* //
 // Context menu

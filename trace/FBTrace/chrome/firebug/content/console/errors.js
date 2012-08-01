@@ -349,6 +349,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         {
             FBTrace.sysout("errors.observe logScriptError " +
                 (Firebug.errorStackTrace ? "have " : "NO ") +
+                (Firebug.showStackTrace ? "show stack trace" : "do not show stack trace ") +
                 "errorStackTrace error object:",
                 {object: object, errorStackTrace: Firebug.errorStackTrace});
         }
@@ -364,15 +365,14 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         if (object.columnNumber > 0)
             error.colNumber = object.columnNumber;
 
-        if (Firebug.showStackTrace && Firebug.errorStackTrace)
-        {
-            error.correctWithStackTrace(Firebug.errorStackTrace);
-        }
-        else if (checkForUncaughtException(context, object))
+        if (checkForException(context, object))
         {
             context = getExceptionContext(context, object);
             correctLineNumbersOnExceptions(object, error);
         }
+
+        if (Firebug.showStackTrace && Firebug.errorStackTrace)
+            error.correctWithStackTrace(Firebug.errorStackTrace);
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
         if (!msgId)
@@ -442,7 +442,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return false;
 
-                // If the error's parent widow is available, check if it
+                // If the error's parent window is available, check if it
                 // corresponds to the context.window. If not bail out to avoid
                 // error reporting in a wrong window.
                 var errorWindow = getErrorWindow(object);
@@ -812,39 +812,28 @@ function lessTalkMoreAction(context, object, isWarning)
     return msgId;
 }
 
-function checkForUncaughtException(context, object)
+function checkForException(context, object)
 {
     if (object.flags & object.exceptionFlag)
     {
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.observe is exception");
 
-        if (reUncaught.test(object.errorMessage))
+        if (context.thrownStackTrace)
         {
+            Firebug.errorStackTrace = context.thrownStackTrace;
+
             if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("uncaught exception matches " + reUncaught);
+                FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
 
-            if (context.thrownStackTrace)
-            {
-                Firebug.errorStackTrace = context.thrownStackTrace;
-
-                if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
-
-                delete context.thrownStackTrace;
-            }
-            else
-            {
-                 if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("errors.observe NO context.thrownStackTrace");
-            }
-            return true;
+            delete context.thrownStackTrace;
         }
         else
         {
-            if (FBTrace.DBG_ERRORLOG)
-                FBTrace.sysout("errors.observe not an uncaught exception");
+             if (FBTrace.DBG_ERRORLOG)
+                FBTrace.sysout("errors.observe NO context.thrownStackTrace");
         }
+        return true;
     }
 
     delete context.thrownStackTrace;
@@ -853,7 +842,7 @@ function checkForUncaughtException(context, object)
 
 /**
  * Returns a parent window (outer window) for given error object (an object
- * that is passed int a consoleListener).
+ * that is passed into a consoleListener).
  * This method should be the primary way how to find the parent window for any
  * error object.
  *
@@ -864,7 +853,7 @@ function getErrorWindow(object)
     try
     {
         // nsIScriptError2 is merged into nsIScriptError in Firefox 12 (bug
-        // 711721), so check the two interfaces in order.
+        // 711721), so check for the one that is relevant.
         var why;
         if (object instanceof (Ci["nsIScriptError2"] || Ci["nsIScriptError"]))
         {
@@ -900,7 +889,7 @@ function getErrorWindow(object)
 
 function getExceptionContext(context, object)
 {
-    var errorWin = getErrorWindow(object)
+    var errorWin = getErrorWindow(object);
     if (errorWin)
     {
         var errorContext = Firebug.connection.getContextByWindow(errorWin);

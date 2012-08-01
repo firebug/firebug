@@ -4,18 +4,20 @@
 /* Customizable Dialog Toolbar Buttons */
 
 /* Inspector button */
-#inspector-button {
+#firebug-inspectorButton {
     list-style-image: url(chrome://firebug/skin/inspect.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+    list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
+    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
 }
 
-#firebug-button[firebugActive="true"] .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
+#firebug-button[firebugActive="true"] {
+    filter: none;
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
@@ -90,45 +92,19 @@
 }
 
 /*************************************************************************************************/
-/* Firebug Status Icon */
-
-#fbStatusBar {
-    min-width: 26px;
-    cursor: pointer;
-}
-
-#fbStatusText {
-    cursor: pointer;
-    color: red;
-    font-weight: bold;
-}
-
-#fbStatusBar[showErrors] #fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/errorIcon.png);
-}
-
-#fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-#fbStatusIcon[firebugActive="true"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-/*************************************************************************************************/
 /* Firebug Menu & Firefox context menu */
 
 #menu_firebug, #appmenu_firebug, #menu_webDeveloper_firebug {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
-#menu_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/Templarian_inspector.png);
+#menu_firebug_firebugInspect {
+    list-style-image: url(chrome://firebug/skin/inspect.png);
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
-#menu_firebugInspect:hover,
-#menu_firebugInspect:active {
+#menu_firebug_firebugInspect:hover,
+#menu_firebug_firebugInspect:active {
     -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
@@ -166,4 +142,35 @@
     min-width: 5px;
     max-width: 5px;
     background-color: -moz-dialog;
+}
+
+/*************************************************************************************************/
+/* Start Button Tooltip */
+
+.firebugButtonTooltip .version {
+    font-weight: bold;
+}
+
+.firebugButtonTooltip .alwaysOn {
+    color: gray;
+}
+
+.firebugButtonTooltip .enablement {
+    border-top: 1px gray dotted;
+    margin-top: 5px;
+    padding-top: 5px;
+    font-style: italic;
+}
+
+.firebugButtonTooltip .panelName,
+.firebugButtonTooltip .panelStatus {
+    color: gray;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-width: 75px
+}
+
+.firebugButtonTooltip .panelStatus.on,
+.firebugButtonTooltip .panelName.on {
+    color: black;
 }

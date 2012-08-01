@@ -84,8 +84,8 @@ var contentTypes =
 
 /**
  * Implementation of cache model. The only purpose of this object is to register an HTTP
- * observer so, HTTP communication can be intercepted and all incoming data stored within
- * a cache.
+ * observer, so that HTTP communication can be intercepted and all incoming data stored
+ * within a cache.
  */
 Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
 {
@@ -202,6 +202,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
                 this.onExamineResponse(subject, win);
             else if (topic == "http-on-examine-cached-response")
                 this.onCachedResponse(subject, win);
+            else if (topic == "http-on-examine-merged-response")
+                this.onCachedResponse(subject, win);
         }
         catch (err)
         {
@@ -295,7 +297,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
  * This object replaces the SourceCache, which still exist only for backward
  * compatibility.
  *
- * The object is derived from SourceCache so, the same interface and most of the
+ * The object is derived from SourceCache, so the same interface and most of the
  * implementation is used.
  */
 Firebug.TabCache = function(context)
@@ -391,8 +393,8 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
         if (!currLines)
             currLines = this.cache[url] = [];
 
-        // Join the last line with the new first one so, the source code
-        // lines are properly formatted...
+        // Join the last line with the new first one to make the source code
+        // lines properly formatted...
         if (currLines.length && lines.length)
         {
             // ... but only if the last line isn't already completed.
@@ -412,8 +414,8 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
     {
         // The ancestor implementation (SourceCache) uses ioService.newChannel, which
         // can result in additional request to the server (in case the response can't
-        // be loaded from the Firefox cache) - known as double-load problem.
-        // This new implementation (TabCache) uses nsITraceableChannel so, all responses
+        // be loaded from the Firefox cache) - known as the double-load problem.
+        // This new implementation (TabCache) uses nsITraceableChannel, so all responses
         // should be already cached.
 
         // xxxHonza: TODO entire implementation of this method should be removed in Firebug 1.5
@@ -529,7 +531,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 
     onStopRequest: function(request, requestContext, statusCode)
     {
-        // The response is finally received so, remove the request from the list of
+        // The response has been received; remove the request from the list of
         // current responses.
         var url = Http.safeGetRequestName(request);
         delete this.responses[url];

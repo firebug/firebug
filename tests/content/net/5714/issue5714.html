@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5714:      Can't resend requests</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function onTestExecute()
+{
+    var postData = "test data";
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue5714.php", true);
+    request.setRequestHeader("Content-Length", postData.length);
+    request.send(postData);
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5714">Issue 5714</a>:
+        Can't resend requests</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Net panel and enable it</li>
+            <li>Click this button to generate AJAX:
+                <button id="testButton" onclick="onTestExecute()">Click Me!</button></li>
+            <li>Right Click on the new entry and execute <i>Resend</i></li>
+            <li>A new entry should appear</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

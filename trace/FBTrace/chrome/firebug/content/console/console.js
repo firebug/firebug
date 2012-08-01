@@ -83,7 +83,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
+                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
                 return row;
             }
         }
@@ -115,7 +115,7 @@ Firebug.ConsoleBase =
 
         if (context)
         {
-            // There could be some logs waiting in the throttle queue so,
+            // There could be some logs waiting in the throttle queue, so
             // clear asynchronously after the queue is flushed.
             context.throttle(this.clearPanel, this, [context]);
 
@@ -199,8 +199,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initialize: function()
     {
-        Firebug.consoleFilterTypes = "";
-
         // Initialize log limit.
         this.updateMaxLimit();
 
@@ -256,13 +254,13 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var panel = context.getPanel("console");
         panel.persistContent = panel.persistContent ? false : true;
 
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             panel.persistContent);
     },
 
     showContext: function(browser, context)
     {
-        Firebug.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
@@ -391,7 +389,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     setStatus: function()
     {
-        var fbStatus = Firefox.getElementById('firebugStatus');
+        var fbStatus = Firefox.getElementById("firebugStatus");
         if (fbStatus)
         {
             if (Firebug.Errors.watchForErrors)

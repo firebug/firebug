@@ -297,7 +297,6 @@ h1.groupHeader {
 .disabledPanelDescription {
     margin: 8px 0;
     font-size: 13px;
-    width: 75%;
 }
 
 .disabledPanelDescription.applyDesc{

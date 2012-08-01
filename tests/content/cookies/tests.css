@@ -1,0 +1,28 @@
+h1 {
+    margin-bottom: 0;
+    margin-top: 10px;
+}
+
+h3 {
+    margin-bottom: 0;
+}
+
+ul {
+    margin-top: 5px;
+}
+code {
+    color: green;
+}
+
+.topBar {
+    font-family: Verdana;
+    font-size: 13px;
+}
+
+.topBar > a {
+    text-decoration:none;
+}
+
+.topBar > a:hover {
+    text-decoration:underline;;
+}

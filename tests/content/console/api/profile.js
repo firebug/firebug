@@ -40,7 +40,7 @@ function runTest()
                     // Verify some result data.
                     FBTest.compare("fib", profileRows[1].childNodes[0].textContent,
                         "The 'fib' function was profiled.");
-                    FBTest.compare(242785, profileRows[1].childNodes[1].textContent,
+                    FBTest.compare(21891, profileRows[1].childNodes[1].textContent,
                         "The 'fib' function was called exactly 242785 times.");
                     FBTest.compare("100%", profileRows[1].childNodes[2].textContent,
                         "Only the 'fib' function was executed.");

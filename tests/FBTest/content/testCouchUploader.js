@@ -28,6 +28,12 @@ FBTestApp.TestCouchUploader =
 
         // Get header document...
         var header = this.getHeaderDoc();
+        var params = this.getUserMessage();
+        if (params.cancel)
+            return;
+
+        // Crop the message (1K max)
+        header["User Message"] = cropString(params.message, 1024);
 
         // Since Gecko 2.0 installed extensions must be collected asynchronously
         var self = this;
@@ -143,6 +149,20 @@ FBTestApp.TestCouchUploader =
         return header;
     },
 
+    getUserMessage: function()
+    {
+        var params = {
+            message: "",
+            cancel: false,
+        };
+
+        var dialog = parent.openDialog("chrome://fbtest/content/userMessage.xul",
+            "_blank", "chrome,centerscreen,resizable=yes,modal=yes",
+            params);
+
+        return params;
+    },
+
     getExtensions: function(callback)
     {
         try
@@ -233,7 +253,7 @@ FBTestApp.TestCouchUploader =
 /** @namespace */
 var CouchDB =
 {
-    uri: "http://brasstacks.mozilla.com/couchdb/firebug/",
+    uri: Firebug.getPref("extensions.fbtest", "databaseURL"),
 
     saveDoc: function(doc, options)
     {
@@ -328,7 +348,15 @@ function toJSON(obj)
 
 function parseJSON(data)
 {
-    return JSON.parse(data);
+    try
+    {
+        return JSON.parse(data);
+    }
+    catch (e)
+    {
+        FBTrace.sysout("testCouchUploader.parseJSON; EXCEPTION " + e, e);
+        FBTrace.sysout("testCouchUploader.parseJSON; Data ", data);
+    }
 }
 
 // ************************************************************************************************

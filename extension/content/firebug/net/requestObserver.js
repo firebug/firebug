@@ -49,6 +49,7 @@ var HttpRequestObserver =
             observerService.addObserver(this, "http-on-modify-request", false);
             observerService.addObserver(this, "http-on-examine-response", false);
             observerService.addObserver(this, "http-on-examine-cached-response", false);
+            observerService.addObserver(this, "http-on-examine-merged-response", false);
         }
 
         this.observing = true;
@@ -65,6 +66,7 @@ var HttpRequestObserver =
             observerService.removeObserver(this, "http-on-modify-request");
             observerService.removeObserver(this, "http-on-examine-response");
             observerService.removeObserver(this, "http-on-examine-cached-response");
+            observerService.removeObserver(this, "http-on-examine-merged-response");
         }
 
         this.observing = false;
@@ -83,7 +85,8 @@ var HttpRequestObserver =
             // Notify all registered observers.
             if (topic == "http-on-modify-request" ||
                 topic == "http-on-examine-response" ||
-                topic == "http-on-examine-cached-response")
+                topic == "http-on-examine-cached-response" ||
+                topic == "http-on-examine-merged-response")
             {
                 this.notifyObservers(subject, topic, data);
             }

@@ -1,6 +1,18 @@
+var supportedVersion = FBTest.compareFirefoxVersion("15*") >= 0;
+
 function runTest()
 {
     FBTest.sysout("issue3645.START");
+
+    // A bug needed for this feature has been fixed in Firefox 15
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=746601
+    if (!supportedVersion)
+    {
+        FBTest.progress("This test needs Firefox 15+");
+        FBTest.testDone("issue1811.DONE");
+        return;
+    }
+
     FBTest.openNewTab(basePath + "script/callstack/3645/issue3645.html", function(win)
     {
         FBTest.openFirebug();

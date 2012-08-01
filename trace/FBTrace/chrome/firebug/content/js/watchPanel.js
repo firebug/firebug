@@ -9,9 +9,10 @@ define([
     "firebug/lib/css",
     "firebug/js/stackFrame",
     "firebug/lib/locale",
+    "firebug/lib/string",
     "firebug/dom/domPanel",     // Firebug.DOMBasePanel, Firebug.DOMPanel.DirTable
 ],
-function(Obj, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale) {
+function(Obj, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str) {
 
 // ********************************************************************************************* //
 // Watch Panel
@@ -193,6 +194,8 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     addWatch: function(expression)
     {
+        expression = Str.trim(expression);
+
         if (FBTrace.DBG_WATCH)
             FBTrace.sysout("Firebug.WatchPanel.addWatch; expression: "+expression);
 
@@ -364,8 +367,11 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 function getWatchRowIndex(row)
 {
     var index = -1;
-    for (; row && Css.hasClass(row, "watchRow"); row = row.previousSibling)
-        ++index;
+    for (; row; row = row.previousSibling)
+    {
+        if (Css.hasClass(row, "watchRow"))
+            ++index;
+    }
     return index;
 }
 

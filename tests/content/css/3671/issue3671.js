@@ -24,8 +24,8 @@ function runTest()
             // property name that is in Firebug's internal list).
             FBTest.sendKey("UP", editor);
             FBTest.sendKey("UP", editor);
-            FBTest.compare("text-transform", editor.value,
-                "Must be autocompleted to text-transform.");
+            FBTest.compare("border-image-width", editor.value,
+                "Must be autocompleted to 'border-image-width'");
 
             FBTest.testDone("issue3671.DONE");
         });

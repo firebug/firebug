@@ -1,0 +1,50 @@
+<html>
+<head>
+  <title>Test Case for Issue #5592:	Add option to copy request parameters</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Issue #5592</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=5592">Issue #5592</a>
+- <span class="h3">Add option to copy request parameters</span>.
+
+<br/>
+<i>Bharath Thiruveedula, bharaththiruveedula@gmail.com</i><br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+
+<li>Open the firebug , enable and open the net Panel</li>
+<li>Click this button to generate a request
+<button id="testButton" onclick="executeTest()">Click Me!</button></li>
+<li>Right click on the new entry in the Net panel and execute
+    <i>Copy URL Parameters</i></li>
+<li>Check the clipboard it should be equal to:
+<pre>v1=d1
+v2=d2</pre></li>
+
+<li>Right click on the new entry in the Net panel and execute
+    <i>Copy POST Parameters</i></li>
+<li>Check the clipboard it should be equal to:
+<pre>value1=param1
+value2=param2</pre></li>
+</ol>
+
+<script type="text/javascript">
+function executeTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue5592.php?v1=d1&v2=d2", true);
+
+    var postData = "value1=param1&value2=param2";
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-Length", postData.length);
+    request.send(postData);
+}
+</script>
+  
+</body>
+</html>

@@ -79,7 +79,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
         }
 
-        // The console can't be multiline on other panels so, hide the toggle-to-multiline
+        // The console can't be multiline on other panels, so hide the toggle-to-multiline
         // button (displayed at the end of the one line command line)
         Dom.collapse(chrome.$("fbToggleCommandLine"), !isConsole);
 
@@ -125,7 +125,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
             FBTrace.sysout("commandLine.Popup.toggle;");
 
         var newState = !this.isVisible();
-        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPopup", "checked", newState);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked", newState);
         Firebug.Options.set("alwaysShowCommandLine", newState);
 
         this.updateVisibility(newState);
@@ -195,7 +195,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     isVisible: function()
     {
-        var checked = Firebug.chrome.getGlobalAttribute("cmd_toggleCommandPopup", "checked");
+        var checked = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked");
         return (checked == "true") ? true : false;
     },
 
@@ -222,7 +222,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     onKeyPress: function(event)
     {
-        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+        if (!Events.noKeyModifiers(event))
             return false;
 
         // ESC

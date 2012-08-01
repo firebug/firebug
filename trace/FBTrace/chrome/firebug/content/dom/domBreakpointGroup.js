@@ -190,11 +190,11 @@ var BreakpointRep = domplate(Firebug.Rep,
     inspectable: false,
 
     tag:
-        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+        DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", _repObject: "$bp",
             role: "option", "aria-checked": "$bp.checked"},
-            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
+            DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : "-1"}),
+                    _checked: "$bp.checked", tabindex: "-1", onclick: "$onEnable"}),
                 SPAN({"class": "breakpointName"}, "$bp.propName"),
                 IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
             ),
@@ -209,6 +209,11 @@ var BreakpointRep = domplate(Firebug.Rep,
         // only here in panel code.
         var rep = Firebug.getRep(object, Firebug.currentContext);
         return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
+    isDisabled: function(bp)
+    {
+        return !bp.checked;
     },
 
     onRemove: function(event)
@@ -243,22 +248,28 @@ var BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!Css.hasClass(checkBox, "breakpointCheckbox"))
-            return;
+        var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
+
+        if (checkBox.checked)
+        {
+            Css.removeClass(bpRow, "disabled");
+            bpRow.setAttribute("aria-checked", "true");
+        }
+        else
+        {
+            Css.setClass(bpRow, "disabled");
+            bpRow.setAttribute("aria-checked", "false");
+        }
+
+        var bp = bpRow.repObject;
+        bp.checked = checkBox.checked;
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
-        var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
-        bp.checked = checkBox.checked;
-
         var domPanel = context.getPanel("dom", true);
         if (domPanel)
         {
-            // xxxsz: Needs a better way to update display of breakpoint than
-            // invalidate the whole panel's display
-            domPanel.context.invalidatePanels("breakpoints");
-
             var row = findRow(domPanel.panelNode, bp.object, bp.propName);
             if (row)
                 row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");

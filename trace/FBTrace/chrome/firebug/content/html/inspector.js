@@ -13,21 +13,17 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/window",
     "firebug/lib/system",
+    "firebug/html/highlighterCache"
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
-    Win, System) {
+    Win, System, HighlighterCache) {
 
 // ********************************************************************************************* //
 // Constants
 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
-const ident = {
-    frame: 0,
-    boxModel: 1,
-    imageMap: 2,
-    proxyElt: 3
-};
+const ident = HighlighterCache.ident;
 
 // ********************************************************************************************* //
 // Globals
@@ -51,13 +47,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      * frame or image map highlighters. Can highlight single or multiple elements.
      *
      * Examples:
-     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'),
-     *     window.content.document.getElementById('logo')],
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById("gbar"),
+     *     window.content.document.getElementById("logo")],
      *     window.content, "frame", null,
      *     ["#ff0000",{background:"#0000ff", border:"#ff0000"}])
      * or
-     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'),
-     *     window.content.document.getElementById('logo')], window.content, "boxModel", null,
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById("gbar"),
+     *     window.content.document.getElementById("logo")], window.content, "boxModel", null,
      *     [{content: "#ff0000", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"},
      *         {content: "#00ff00", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"}])
      *
@@ -81,10 +77,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 (Wrapper.getContentView(elementArr) &&
                     !Xml.isVisible(Wrapper.getContentView(elementArr))))
             {
-                if (elementArr && elementArr.nodeType == 3)
-                    elementArr = elementArr.parentNode;
-                else
-                    elementArr = null;
+                elementArr = (elementArr && elementArr.nodeType == Node.TEXT_NODE) ?
+                    elementArr.parentNode : null;
             }
 
             if (elementArr && context && context.highlightTimeout)
@@ -118,6 +112,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                     if (FBTrace.DBG_INSPECT)
                         FBTrace.sysout("Removing inspector highlighter due to setTimeout loop");
 
+                    if (!oldContext.highlightTimeout)
+                        return;
+
                     delete oldContext.highlightTimeout;
 
                     if (oldContext.window && oldContext.window.document)
@@ -125,8 +122,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                         highlighter.unhighlight(oldContext);
 
                         if (oldContext.inspectorMouseMove)
+                        {
                             Events.removeEventListener(oldContext.window.document, "mousemove",
                                 oldContext.inspectorMouseMove, true);
+                        }
                     }
                 }, inspectDelay);
             }
@@ -151,13 +150,11 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
                     if (elt && elt instanceof HTMLElement)
                     {
-                        if (elt.nodeType === 3)
+                        if (elt.nodeType == Node.TEXT_NODE)
                             elt = elt.parentNode;
 
-                        if (usingColorArray)
-                            highlighter.highlight(context, elt, null, colorObj[i], true);
-                        else
-                            highlighter.highlight(context, elt, null, colorObj, true);
+                        var obj = usingColorArray ? colorObj[i] : colorObj;
+                        highlighter.highlight(context, elt, null, obj, true);
                     }
                 }
             }
@@ -171,7 +168,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     clearAllHighlights: function()
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
     },
 
     /**
@@ -218,7 +215,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.inspecting = true;
         this.inspectingContext = context;
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
 
         var inspectingPanelName = this._resolveInspectingPanelName(context);
@@ -237,8 +234,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (context.stopped)
             Firebug.Debugger.thaw(context);
 
-        var hoverNodes = context.window.document.querySelectorAll(':hover');
-        if (hoverNodes.length)
+        var hoverNodes = context.window.document.querySelectorAll(":hover");
+
+        if (hoverNodes.length != 0)
             this.inspectNode(hoverNodes[hoverNodes.length-1]);
     },
 
@@ -315,7 +313,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (!waitForClick)
             this.detachClickInspectListeners(context.window);
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "false");
 
         this.inspecting = false;
 
@@ -347,14 +345,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     _resolveInspectingPanelName: function(context)
     {
-        var name, requestingPanel = context && context.getPanel(context.panelName);
+        var requestingPanel = context && context.getPanel(context.panelName);
 
-        if (requestingPanel && requestingPanel.inspectable)
-            name = requestingPanel.name;
-        else
-            name = "html";
-
-        return name;
+        return (requestingPanel && requestingPanel.inspectable) ? requestingPanel.name : "html";
     },
 
     /**
@@ -392,10 +385,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             target = Firebug.chrome.getNextObject(true);
             if (node && !target)
             {
-                if (node.contentDocument)
-                    target = node.contentDocument.documentElement;
-                else
-                    target = Dom.getNextElement(node.firstChild);
+                target = node.contentDocument ?
+                    node.contentDocument.documentElement : Dom.getNextElement(node.firstChild);
             }
         }
 
@@ -419,21 +410,21 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         var highlightType = rp.highlightType;
         var isMulti = rp.isMulti;
 
-        if(!context || (!highlighter && !isMulti))
+        if (!context || (!highlighter && !isMulti))
             return;
 
         if (isMulti && element)
         {
             this.highlightObject(element, context, highlightType, null, colorObj);
         }
-        else if(!isMulti)
+        else if (!isMulti)
         {
-            var highlighterNode = highlighterCache.get(highlighter.ident);
+            var highlighterNode = HighlighterCache.get(highlighter.ident);
 
-            if(highlighterNode && highlighter.ident === ident.boxModel)
+            if (highlighterNode && highlighter.ident === ident.boxModel)
                 highlighterNode = highlighterNode.offset;
 
-            if(highlighterNode && highlighterNode.parentNode)
+            if (highlighterNode && highlighterNode.parentNode)
             {
                 this.clearAllHighlights();
                 highlighter.highlight(context, element, boxFrame, colorObj, isMulti);
@@ -490,8 +481,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         [
             chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this.stopInspecting, this)),
             chrome.keyCodeListen("ESCAPE", null, Obj.bindFixed(this.stopInspecting, this, true)),
-            chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(this.inspectNodeBy, this, "up"), true),
-            chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(this.inspectNodeBy, this, "down"), true),
+            chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(this.inspectNodeBy, this,
+                "up"), true),
+            chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(this.inspectNodeBy, this,
+                "down"), true),
         ];
 
         Win.iterateWindows(win, Obj.bind(function(subWin)
@@ -500,8 +493,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
                     " subWindow of " + win.location);
 
-            Events.addEventListener(subWin.document, "mouseover", this.onInspectingMouseOver, true);
-            Events.addEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
+            Events.addEventListener(subWin.document, "mouseover", this.onInspectingMouseOver,
+                true);
+            Events.addEventListener(subWin.document, "mousedown", this.onInspectingMouseDown,
+                true);
             Events.addEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
             Events.addEventListener(subWin.document, "click", this.onInspectingClick, true);
             Events.addEventListener(subWin.document, "keypress", this.onInspectingKeyPress, true);
@@ -532,10 +527,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         Win.iterateWindows(win, Obj.bind(function(subWin)
         {
-            Events.removeEventListener(subWin.document, "mouseover", this.onInspectingMouseOver, true);
-            Events.removeEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
+            Events.removeEventListener(subWin.document, "mouseover", this.onInspectingMouseOver,
+                true);
+            Events.removeEventListener(subWin.document, "mousedown", this.onInspectingMouseDown,
+                true);
             Events.removeEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
-            Events.removeEventListener(subWin.document, "keypress", this.onInspectingKeyPress, true);
+            Events.removeEventListener(subWin.document, "keypress", this.onInspectingKeyPress,
+                true);
         }, this));
     },
 
@@ -600,11 +598,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     onInspectingMouseDown: function(event)
     {
         if (FBTrace.DBG_INSPECT)
+        {
             FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,
                 tmpRealOriginalTarget:event.tmpRealOriginalTarget, event:event});
+        }
 
         // Allow to scroll the document while inspecting
-        if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
+        if (event.originalTarget && event.originalTarget.tagName == "xul:thumb")
             return;
 
         Events.cancelEvent(event);
@@ -619,11 +619,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     onInspectingMouseUp: function(event)
     {
         if (FBTrace.DBG_INSPECT)
+        {
             FBTrace.sysout("onInspectingMouseUp event", {originalTarget: event.originalTarget,
                 tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+        }
 
         // Allow to release scrollbar while inspecting
-        if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
+        if (event.originalTarget && event.originalTarget.tagName == "xul:thumb")
             return;
 
         this.stopInspecting(false, true);
@@ -761,7 +763,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // The panel can be null (if disabled) so use the global context.
         // var context = Firebug.currentContext;
         // var disabled = (context && context.loaded) ? false : true;
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", disabled);
     },
 
     /**
@@ -771,7 +773,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     loadedContext: function(context)
     {
         // See the comment in showPanel.
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", "false");
     },
 
     /**
@@ -812,9 +814,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     toggleQuickInfoBox: function()
     {
-        var qiBox = Firebug.chrome.$('fbQuickInfoPanel');
+        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
 
-        if (qiBox.state === "open")
+        if (qiBox.state == "open")
             quickInfoBox.hide();
 
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
@@ -838,45 +840,48 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
 function getHighlighter(type)
 {
-    if (type == "boxModel")
+    switch (type)
     {
-        if (!boxModelHighlighter)
-            boxModelHighlighter = new BoxModelHighlighter();
+        case "boxModel":
+            if (!boxModelHighlighter)
+                boxModelHighlighter = new BoxModelHighlighter();
 
-        return boxModelHighlighter;
-    }
-    else if (type == "frame")
-    {
-        if (!frameHighlighter)
-            frameHighlighter = new Firebug.Inspector.FrameHighlighter();
+            return boxModelHighlighter;
 
-        return frameHighlighter;
+        case "frame":
+            if (!frameHighlighter)
+                frameHighlighter = new Firebug.Inspector.FrameHighlighter();
+
+            return frameHighlighter;
     }
 }
 
-function pad(element, t, r, b, l) {
-    var css = 'padding:' + Math.abs(t) + "px " + Math.abs(r) + "px "
+function pad(element, t, r, b, l)
+{
+    var css = "padding:" + Math.abs(t) + "px " + Math.abs(r) + "px "
          + Math.abs(b) + "px " + Math.abs(l) + "px !important;";
 
-    if(element)
+    if (element)
         element.style.cssText = css;
     else
         return css;
 }
 
-function moveImp(element, x, y) {
-    var css = 'left:' + x + 'px !important;top:' + y + 'px !important;';
+function moveImp(element, x, y)
+{
+    var css = "left:" + x + "px !important;top:" + y + "px !important;";
 
-    if(element)
+    if (element)
         element.style.cssText = css;
     else
         return css;
 }
 
-function resizeImp(element, w, h) {
-    var css = 'width:' + w + 'px !important;height:' + h + 'px !important;';
+function resizeImp(element, w, h)
+{
+    var css = "width:" + w + "px !important;height:" + h + "px !important;";
 
-    if(element)
+    if (element)
         element.style.cssText = css;
     else
         return css;
@@ -898,9 +903,9 @@ function getImageMapHighlighter(context)
         if (elt)
             doc = elt.ownerDocument;
 
-        canvas = doc.getElementById('firebugCanvas');
+        canvas = doc.getElementById("firebugCanvas");
 
-        if(!canvas)
+        if (!canvas)
         {
             canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
             hideElementFromInspection(canvas);
@@ -909,11 +914,13 @@ function getImageMapHighlighter(context)
             canvas.width = context.window.innerWidth;
             canvas.height = context.window.innerHeight;
 
-            Events.addEventListener(context.window, "scroll", function(){
+            Events.addEventListener(context.window, "scroll", function()
+            {
                 context.imageMapHighlighter.show(false);
             }, true);
 
-            Events.addEventListener(doc, "mousemove", function(event){
+            Events.addEventListener(doc, "mousemove", function(event)
+            {
                 mx = event.clientX;
                 my = event.clientY;
             }, true);
@@ -930,44 +937,42 @@ function getImageMapHighlighter(context)
 
             show: function(state)
             {
-                if(!canvas)
+                if (!canvas)
                     init(null);
 
-                canvas.style.cssText = 'display:' + (state?'block':'none') + ' !important';
+                canvas.style.cssText = "display:"+(state ? "block" : "none")+" !important";
             },
 
             getImages: function(mapName, multi)
             {
-                var i, rect, nsResolver, xpe, elt, elts,
-                    images = [],
-                    eltsLen = 0;
-
-                if(!mapName)
+                if (!mapName)
                     return;
 
-                xpe = new XPathEvaluator();
-                nsResolver = xpe.createNSResolver(doc.documentElement);
+                var xpe = new XPathEvaluator();
+                var nsResolver = xpe.createNSResolver(doc.documentElement);
 
-                elts = xpe.evaluate("//map[@name='" + mapName + "']", doc,
+                var elts = xpe.evaluate("//map[@name='" + mapName + "']", doc,
                     nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-                if(elts.snapshotLength === 0)
+                if (elts.snapshotLength === 0)
                     return;
 
                 elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']",
                     doc.documentElement, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-                eltsLen = elts.snapshotLength;
+                var eltsLen = elts.snapshotLength;
 
-                for (i = 0; i < eltsLen; i++)
+                var images = [];
+                for (var i = 0; i < eltsLen; ++i)
                 {
-                    elt = elts.snapshotItem(i);
-                    rect = Dom.getLTRBWH(elt);
+                    var elt = elts.snapshotItem(i);
+                    var rect = Dom.getLTRBWH(elt);
 
                     if (multi)
                     {
                         images.push(elt);
                     }
-                    else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
+                    else if (rect.left <= mx && rect.right >= mx && rect.top <= my &&
+                        rect.bottom >= my)
                     {
                         images[0] = elt;
                         break;
@@ -979,59 +984,59 @@ function getImageMapHighlighter(context)
 
             highlight: function(eltArea, multi)
             {
-                var i, j, v, vLen, images, imagesLen, rect, shape;
+                if (!eltArea || !eltArea.coords)
+                    return;
 
-                if (eltArea && eltArea.coords)
+                var images = this.getImages(eltArea.parentNode.name, multi) || [];
+
+                init(eltArea);
+
+                var v = eltArea.coords.split(",");
+
+                if (!ctx)
+                    ctx = canvas.getContext("2d");
+
+                ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
+                ctx.strokeStyle = "rgb(44, 167, 220)";
+                ctx.lineWidth = 2;
+
+                if (images.length == 0)
+                    images[0] = eltArea;
+
+                for (var j = 0, imagesLen = images.length; j < imagesLen; ++j)
                 {
-                    images = this.getImages(eltArea.parentNode.name, multi) || [];
+                    var rect = Dom.getLTRBWH(images[j], context);
 
-                    init(eltArea);
+                    ctx.beginPath();
 
-                    v = eltArea.coords.split(",");
+                    if (!multi || (multi && j===0))
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    if(!ctx)
-                        ctx = canvas.getContext("2d");
+                    var shape = eltArea.shape.toLowerCase();
 
-                    ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
-                    ctx.strokeStyle = "rgb(44, 167, 220)";
-                    ctx.lineWidth = 2;
-
-                    if(images.length === 0)
-                        images[0] = eltArea;
-
-                    imagesLen = images.length;
-
-                    for(j = 0; j < imagesLen; j++)
+                    if (shape === "rect")
                     {
-                        rect = Dom.getLTRBWH(images[j], context);
-
-                        ctx.beginPath();
-
-                        if(!multi || (multi && j===0))
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                        shape = eltArea.shape.toLowerCase();
-
-                        if (shape === 'rect')
-                            ctx.rect(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10), v[2] - v[0], v[3] - v[1]);
-                        else if (shape === 'circle')
-                            ctx.arc(rect.left + parseInt(v[0], 10) + ctx.lineWidth / 2, rect.top + parseInt(v[1], 10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
-                        else
-                        {
-                            vLen = v.length;
-                            ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
-                            for(i=2; i < vLen; i += 2)
-                                ctx.lineTo(rect.left + parseInt(v[i], 10), rect.top + parseInt(v[i + 1], 10));
-                            ctx.lineTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
-                        }
-
-                        ctx.fill();
-                        ctx.stroke();
-                        ctx.closePath();
+                        ctx.rect(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10), v[2] - v[0], v[3] - v[1]);
+                    }
+                    else if (shape === "circle")
+                    {
+                        ctx.arc(rect.left + parseInt(v[0], 10) + ctx.lineWidth / 2, rect.top + parseInt(v[1], 10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
+                    }
+                    else
+                    {
+                        var vLen = v.length;
+                        ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
+                        for (var i = 2; i < vLen; i += 2)
+                            ctx.lineTo(rect.left + parseInt(v[i], 10), rect.top + parseInt(v[i + 1], 10));
+                        ctx.lineTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
                     }
 
-                    this.show(true);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.closePath();
                 }
+
+                this.show(true);
             },
 
             destroy: function()
@@ -1062,20 +1067,18 @@ var quickInfoBox =
 
         this.needsToHide = false;
 
-        var vbox, lab,
-            needsTitle = false,
-            needsTitle2 = false,
-            domAttribs = ['nodeName', 'id', 'name', 'offsetWidth', 'offsetHeight'],
-            cssAttribs = ['position'],
-            compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
-                           'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
-                           'fontFamily', 'cssFloat', 'display', 'visibility'],
-            qiBox = Firebug.chrome.$('fbQuickInfoPanel');
+        var domAttribs = ["nodeName", "id", "name", "offsetWidth", "offsetHeight"];
+        var cssAttribs = ["position"];
+        var compAttribs = [
+            "width", "height", "zIndex", "position", "top", "right", "bottom", "left",
+            "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
+            "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"];
+        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
 
         if (qiBox.state==="closed")
         {
-            this.storedX = this.storedX || Firefox.getElementById('content').tabContainer.boxObject.screenX + 5;
-            this.storedY = this.storedY || Firefox.getElementById('content').tabContainer.boxObject.screenY + 35;
+            this.storedX = this.storedX || Firefox.getElementById("content").tabContainer.boxObject.screenX + 5;
+            this.storedY = this.storedY || Firefox.getElementById("content").tabContainer.boxObject.screenY + 35;
 
             // Dynamically set noautohide to avoid mozilla bug 545265.
             if (!this.noautohideAdded)
@@ -1091,12 +1094,13 @@ var quickInfoBox =
         }
 
         qiBox.removeChild(qiBox.firstChild);
-        vbox = document.createElement("vbox");
+        var vbox = document.createElement("vbox");
         qiBox.appendChild(vbox);
 
-        needsTitle = this.addRows(element, vbox, domAttribs);
-        needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
+        var needsTitle = this.addRows(element, vbox, domAttribs);
+        var needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
 
+        var lab;
         if (needsTitle || needsTitle2)
         {
             lab = document.createElement("label");
@@ -1116,7 +1120,7 @@ var quickInfoBox =
     hide: function()
     {
         // if mouse is over panel defer hiding to mouseout to not cause flickering
-        var qiBox = Firebug.chrome.$('fbQuickInfoPanel');
+        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
         if (qiBox.state==="closed")
             return;
 
@@ -1130,35 +1134,35 @@ var quickInfoBox =
 
     addRows: function(domBase, vbox, attribs, computedStyle)
     {
-        if(!domBase)
+        if (!domBase)
             return;
 
-        var i, cs, desc, hbox, lab, value,
-            needsTitle = false,
-            attribsLen = attribs.length;
-
-        for (i = 0; i < attribsLen; i++)
+        var needsTitle = false;
+        for (var i = 0; i < attribs.length; i++)
         {
-            if(computedStyle)
+            var value;
+            if (computedStyle)
             {
-                cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
+                var cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
                 value = cs.getPropertyValue(attribs[i]);
 
                 if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
                     value = rgbToHex(value);
             }
             else
+            {
                 value = domBase[attribs[i]];
+            }
 
             if (value)
             {
                 needsTitle = true;
-                hbox = document.createElement("hbox");
-                lab = document.createElement("label");
+                var hbox = document.createElement("hbox");
+                var lab = document.createElement("label");
                 lab.setAttribute("class", "fbQuickInfoName");
                 lab.setAttribute("value", attribs[i]);
                 hbox.appendChild(lab);
-                desc = document.createElement("label");
+                var desc = document.createElement("label");
                 desc.setAttribute("class", "fbQuickInfoValue");
                 desc.appendChild(document.createTextNode(": " + value));
                 hbox.appendChild(desc);
@@ -1234,24 +1238,24 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-            if(cs.MozTransform && cs.MozTransform != "none")
+            if (cs.MozTransform && cs.MozTransform != "none")
                 css += "-moz-transform: "+cs.MozTransform+"!important;" +
                        "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
-            if(cs.borderRadius)
+            if (cs.borderRadius)
                 css += "border-radius: "+cs.borderRadius+"!important;";
-            if(cs.borderTopLeftRadius)
+            if (cs.borderTopLeftRadius)
                 css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
-            if(cs.borderTopRightRadius)
+            if (cs.borderTopRightRadius)
                 css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
-            if(cs.borderBottomRightRadius)
+            if (cs.borderBottomRightRadius)
                 css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
-            if(cs.borderBottomLeftRadius)
+            if (cs.borderBottomLeftRadius)
                 css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
 
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
 
-            if(colorObj && colorObj.background)
+            if (colorObj && colorObj.background)
             {
                 bgDiv.style.cssText = "width: 100%!important; height: 100%!important;" +
                     "background-color: "+colorObj.background+"!important; opacity: 0.6!important;";
@@ -1314,10 +1318,10 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
     getHighlighter: function(context, isMulti)
     {
-        if(!isMulti)
+        if (!isMulti)
         {
-            var div = highlighterCache.get(ident.frame);
-            if(div)
+            var div = HighlighterCache.get(ident.frame);
+            if (div)
                 return div;
         }
 
@@ -1332,7 +1336,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
         div.ident = ident.frame;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
         return div;
     }
 };
@@ -1522,7 +1526,7 @@ BoxModelHighlighter.prototype =
 
     unhighlight: function(context)
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
         quickInfoBox.hide();
     },
 
@@ -1537,10 +1541,10 @@ BoxModelHighlighter.prototype =
             if (FBTrace.DBG_INSPECT && doc)
                 FBTrace.sysout("inspect.getNodes doc: " + doc.location);
 
-            if(!isMulti)
+            if (!isMulti)
             {
-                var nodes = highlighterCache.get(ident.boxModel);
-                if(nodes)
+                var nodes = HighlighterCache.get(ident.boxModel);
+                if (nodes)
                     return nodes;
             }
 
@@ -1589,7 +1593,7 @@ BoxModelHighlighter.prototype =
         }
 
         nodes.ident = ident.boxModel;
-        highlighterCache.add(nodes);
+        HighlighterCache.add(nodes);
         return nodes;
     },
 
@@ -1618,122 +1622,6 @@ BoxModelHighlighter.prototype =
 
 // ********************************************************************************************* //
 
-var highlighterCache =
-{
-    highlighters:
-    {
-        frameArr: [],
-        boxModelArr: [],
-        proxyEltArr: []
-    },
-
-    get: function(type)
-    {
-        var node;
-        var hl = this.highlighters;
-
-        switch (type)
-        {
-            case ident.boxModel:
-                if(hl.boxModelArr.length === 1)
-                {
-                    node = hl.boxModelArr[0];
-                    if(!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.frame:
-                if(hl.frameArr.length === 1)
-                {
-                    node = hl.frameArr[0];
-                    if(!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.proxyElt:
-                if(hl.proxyEltArr.length === 1)
-                {
-                    node = hl.proxyEltArr[0];
-                    if(!node.parentElement)
-                        return node;
-                }
-            break;
-        }
-    },
-
-    add: function(node)
-    {
-        switch (node.ident)
-        {
-            case ident.boxModel:
-                this.highlighters.boxModelArr.push(node);
-            break;
-            case ident.frame:
-                this.highlighters.frameArr.push(node);
-            break;
-            case ident.proxyElt:
-                this.highlighters.proxyEltArr.push(node);
-            break;
-        }
-    },
-
-    clear: function()
-    {
-        var clearCache = function(arr) {
-            var i, highlighter;
-
-            for(i = arr.length - 1; i >= 0; i--)
-            {
-                highlighter = arr[i];
-
-                if (highlighter && highlighter.parentNode)
-                    highlighter.parentNode.removeChild(highlighter);
-            }
-        };
-
-        var clearBoxModelCache = function(arr)
-        {
-            var node;
-            for (var i = arr.length - 1; i >= 0; i--)
-            {
-                var names = ["lines", "offset", "parent"];
-                for (var j=0; j<names.length; j++)
-                {
-                    var name = names[j];
-                    if (name === "lines")
-                    {
-                        var lineNames = ["bottom", "left", "top", "right"];
-                        for (var k=0; k<lineNames.length; k++)
-                        {
-                            var lineName = lineNames[k];
-                            node = arr[i].lines[lineName];
-
-                            if (node && node.parentNode)
-                                node.parentNode.removeChild(node);
-                        }
-                    }
-                    else
-                    {
-                        node = arr[i][name];
-                        if (node && node.parentNode)
-                            node.parentNode.removeChild(node);
-                    }
-                }
-            }
-        };
-
-        clearBoxModelCache(this.highlighters.boxModelArr);
-        clearCache(this.highlighters.frameArr);
-        clearCache(this.highlighters.proxyEltArr);
-
-        this.highlighters.boxModelArr=[];
-        this.highlighters.frameArr=[];
-        this.highlighters.proxyEltArr=[];
-    }
-};
-
-// ********************************************************************************************* //
-
 function getNonFrameBody(elt)
 {
     var body = Dom.getBody(elt.ownerDocument);
@@ -1757,7 +1645,7 @@ function createProxiesForDisabledElements(body)
         xpe = new XPathEvaluator(),
         nsResolver = xpe.createNSResolver(doc.documentElement);
 
-    var result = xpe.evaluate('//*[@disabled]', doc.documentElement,
+    var result = xpe.evaluate("//*[@disabled]", doc.documentElement,
         nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
     var l = result.snapshotLength;
@@ -1790,7 +1678,7 @@ function createProxiesForDisabledElements(body)
 
         body.appendChild(div);
         div.ident = ident.proxyElt;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
     }
 }
 
@@ -1798,7 +1686,7 @@ function rgbToHex(value)
 {
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b)
     {
-        return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
+        return "#"+((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
     });
 }
 

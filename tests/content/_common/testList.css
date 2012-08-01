@@ -129,7 +129,7 @@ h3 {
 }
 
 .testListRow.running .statusIcon {
-    background-image: url(chrome://firebug/skin/loading_16.gif);
+    background-image: url(chrome://firebug/skin/loading.svg);
     background-position: 10px 0px;
 }
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Execute Command Selection</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            window.addEventListener("load", function(){
+                var email = document.getElementById("email");
+                email.textContent = email.textContent
+                    .replace("__AT__", String.fromCharCode(64))
+                    .replace("__DOT__", ".");
+            }, false);
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5535">Issue 5535</a>: Execute Command Selection</h1>
+        </header>
+        <div>
+            <section id="description">
+                <p>This test case is intended for <em>command editor</em></p>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Switch to the editor mode</li>
+                    <li>Type the following commands : <br/>
+                        <code style="color:green; white-space: normal;">var a = "no selection";<br/>
+                            var b = window.a || "selection";<br/>
+                            console.log(b);<br/></code></li>
+                    <li>Select the 2<sup>nd</sup> and the 3<sup>rd</sup> line</li>
+                    <li>Click on "Run".</li>
+                    <li>The console panel should display : <br/>
+                        <code style="color: red"> selection</code>
+                    </li>
+                    <li>Collapse the selection</li>
+                    <li>Click on "Run"</li>
+                    <li>The Console panel should display : <br/>
+                        <code style="color: red"> no selection</code>
+                    </li>
+                    <li>Switch back to Command Line</li>
+                    <li>Select <code style="color: green">var b = window.a || "selection";  console.log(b);</code></li>
+                    <li>Press <i>Enter</i></li>
+                    <li>The Console panel should display : <br/>
+                        <code style="color: red"> no selection</code>
+                    </li>
+                </ol>
+            </section>
+            <footer>
+                Florent FAYOLLE, &lt;<span id="email">florent.fayolle69__AT__gmail__DOT__com</span>&gt;
+            </footer>
+        </div>
+    </body>
+</html>

@@ -44,6 +44,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const hiddenColsPref = "net.hiddenColumns";
+
 var panelName = "net";
 
 // ********************************************************************************************* //
@@ -179,11 +181,15 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             (direction == "asc" && header.sorted == -1))
             return;
 
+        var newDirection = ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc")) ? "ascending" : "descending";
         if (header)
-            header.setAttribute("aria-sort", header.sorted === -1 ? "descending" : "ascending");
+            header.setAttribute("aria-sort", newDirection);
 
         var tbody = table.lastChild;
         var colID = header.getAttribute("id");
+
+        table.setAttribute("sortcolumn", colID);
+        table.setAttribute("sortdirection", newDirection);
 
         var values = [];
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
@@ -219,7 +225,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             switch (colID)
             {
                 case "netTimeCol":
-                    value = row.repObject.startTime;
+                    FBTrace.sysout("row.repObject", row.repObject);
+                    value = row.repObject.requestNumber;
                     break;
                 case "netSizeCol":
                     value = row.repObject.size;
@@ -247,7 +254,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         values.sort(sortFunction);
 
-        if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
+        if (newDirection == "ascending")
         {
             Css.removeClass(header, "sortedDescending");
             Css.setClass(header, "sortedAscending");
@@ -363,7 +370,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Store current state into the preferences.
-        Options.set("net.hiddenColumns", table.getAttribute("hiddenCols"));
+        Options.set(hiddenColsPref, table.getAttribute("hiddenCols"));
 
         panel.updateHRefLabelWidth();
     },
@@ -383,8 +390,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Reset visibility. Only the Status column is hidden by default.
-        panel.table.setAttribute("hiddenCols", "colStatus");
-        Options.set("net.hiddenColumns", "colStatus");
+        Options.clear(hiddenColsPref);
+        panel.table.setAttribute("hiddenCols", Options.get(hiddenColsPref));
     },
 });
 
@@ -640,7 +647,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getProtocol: function(file)
     {
-        return Url.getProtocol(file.href);
+        var protocol = Url.getProtocol(file.href);
+        var text = file.responseHeadersText;
+        var spdy = text ? text.search(/X-Firefox-Spdy/i) >= 0 : null;
+        return spdy ? protocol + " SPDY" : protocol;
     },
 
     getStatus: function(file)
@@ -653,7 +663,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatusText)
             text += file.responseStatusText;
 
-        return text ? Str.cropString(text) : " ";
+        text = text ? Str.cropString(text) : " ";
+
+        if (file.fromBFCache)
+            text += " (BFCache)";
+
+        return text;
     },
 
     getDomain: function(file)
@@ -859,6 +874,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             )
         ),
 
+    responseHeadersFromBFCacheTag:
+        TR(
+            TD({"class": "headerFromBFCache"},
+                Locale.$STR("net.label.ResponseHeadersFromBFCache")
+            )
+        ),
+
     customTab:
         A({"class": "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab",
             view: "$tabId", "role": "tab"},
@@ -966,9 +988,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     selectTabByName: function(netInfoBox, tabName)
     {
-        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo"+tabName+"Tab");
-        if (tab)
-            this.selectTab(tab);
+        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo" + tabName + "Tab");
+        if (!tab)
+            return false;
+
+        this.selectTab(tab);
+
+        return true;
     },
 
     selectTab: function(tab)
@@ -1034,8 +1060,20 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (file.responseHeaders && !netInfoBox.responseHeadersPresented)
             {
                 netInfoBox.responseHeadersPresented = true;
+
                 Firebug.NetMonitor.NetInfoHeaders.renderHeaders(headersText,
                     file.responseHeaders, "ResponseHeaders");
+
+                // If the request comes from the BFCache do not display reponse headers.
+                // There is not real response from the server and all headers come from
+                // the cache. So, the user should see the 'Response Headers From Cache'
+                // section (see issue 5573).
+                if (file.fromBFCache)
+                {
+                    // Display a message instead of headers.
+                    var body = Dom.getElementByClass(headersText, "netInfoResponseHeadersBody");
+                    Firebug.NetMonitor.NetInfoBody.responseHeadersFromBFCacheTag.replace({}, body);
+                }
             }
 
             if (file.cachedResponseHeaders && !netInfoBox.cachedResponseHeadersPresented)
@@ -1360,7 +1398,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         TR({"role": "presentation"},
             TD({colspan: 2, "role": "presentation"},
                 FOR("line", "$param|getParamValueIterator",
-                    CODE({"class":"focusRow subFocusRow" , "role": "listitem"}, "$line")
+                    CODE({"class":"focusRow subFocusRow", "role": "listitem"}, "$line")
                 )
             )
         ),

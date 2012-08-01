@@ -17,9 +17,10 @@ define([
     "firebug/lib/events",
     "firebug/js/fbs",
     "firebug/chrome/window",
+    "firebug/lib/options"
 ],
 function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
-    Events, FBS, Win) {
+    Events, FBS, Win, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -37,6 +38,21 @@ const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const panelURL = "chrome://firebug/content/panel.html";
+
+// URLs used in the Firebug Menu and several other places
+const firebugURLs =
+{
+    main: "https://getfirebug.com",
+    help: "https://getfirebug.com/help",
+    FAQ: "https://getfirebug.com/wiki/index.php/FAQ",
+    docs: "https://getfirebug.com/docs.html",
+    keyboard: "https://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
+    discuss: "https://groups.google.com/forum/#!forum/firebug",
+    issues: "http://code.google.com/p/fbug/issues/list?can=1",
+    donate: "https://getfirebug.com/getinvolved",
+    extensions: "https://getfirebug.com/wiki/index.php/Firebug_Extensions",
+    issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
+};
 
 const statusCropSize = 20;
 
@@ -74,6 +90,7 @@ var FirebugChrome =
      */
     initialize: function()
     {
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -293,6 +310,21 @@ var FirebugChrome =
             FBTrace.sysout("chrome.shutdown; Done for " + win.location);
     },
 
+    /**
+     * Checking first window in back order, (Most recent window). is itself firebug ?
+     */
+    hasFocus: function()
+    {
+        try
+        {
+            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+        }
+        catch(ex)
+        {
+            return false;
+        }
+    },
+
     appendStylesheet: function(uri)
     {
         var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
@@ -319,8 +351,12 @@ var FirebugChrome =
 
         if (name == "textSize")
             this.applyTextSize(value);
-        if (name =="omitObjectPathStack")
+
+        if (name == "omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
+
+        if (name == "viewPanelOrient")
+            this.updateOrient(value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -625,7 +661,9 @@ var FirebugChrome =
                 " sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
 
         var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
-        var panel = this.selectPanel(bestPanelName, sidePanelName, true);
+
+        // Allow refresh if needed (the last argument).
+        var panel = this.selectPanel(bestPanelName, sidePanelName/*, true*/);
         if (panel)
             panel.select(object, forceUpdate);
 
@@ -1023,14 +1061,24 @@ var FirebugChrome =
 
     toggleOrient: function(preferredValue)
     {
-        var panelPane = FirebugChrome.$("fbPanelPane");
-        if(panelPane.orient == preferredValue)
+        var value = Options.get("viewPanelOrient");
+        if (value == preferredValue)
             return;
-        var newValue = panelPane.orient == "vertical" ? "horizontal" : "vertical";
-        panelSplitter.orient = panelPane.orient = newValue;
 
-        var option = FirebugChrome.$("menu_toggleOrient").getAttribute("option");
-        Firebug.Options.set(option, newValue == "vertical");
+        Options.togglePref("viewPanelOrient");
+    },
+
+    updateOrient: function(value)
+    {
+        var panelPane = FirebugChrome.$("fbPanelPane");
+        if (!panelPane)
+            return;
+
+        var newOrient = value ? "vertical" : "horizontal";
+        if (panelPane.orient == newOrient)
+            return;
+
+        panelSplitter.orient = panelPane.orient = newOrient;
     },
 
     setPosition: function(pos)
@@ -1356,14 +1404,14 @@ var FirebugChrome =
 
     onMenuShowing: function(popup)
     {
-        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_detachFirebug")[0];
         if (detachFirebug)
         {
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_firebug_toggleFirebug")[0];
         if (toggleFirebug)
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
@@ -1439,7 +1487,7 @@ var FirebugChrome =
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
         if (!this.contextMenuObject &&
-        !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
+            !FirebugChrome.$("cmd_copy").getAttribute("disabled") &&
             !sel.isCollapsed)
         {
             var menuitem = Menu.createMenuItem(popup, {label: "Copy"});
@@ -1632,7 +1680,7 @@ var FirebugChrome =
         try
         {
             // Firefox 4.0+ implements a new AddonManager. In case of Firefox 3.6 the module
-            // is not avaialble and there is an exception.
+            // is not available and there is an exception.
             Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
         }
         catch (err)
@@ -1661,7 +1709,7 @@ var FirebugChrome =
     breakOnNext: function(context, event)
     {
         // Avoid bubbling from associated options.
-        if (event.target.id != "cmd_toggleBreakOn")
+        if (event.target.id != "cmd_firebug_toggleBreakOn")
             return;
 
         if (!context)
@@ -1679,6 +1727,20 @@ var FirebugChrome =
 
         if (panel && panel.breakable)
             Firebug.Breakpoint.toggleBreakOnNext(panel);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    visitWebsite: function(which, arg)
+    {
+        var url = firebugURLs[which];
+        if (url)
+        {
+            if (arg)
+                url += arg;
+
+            Win.openNewTab(url);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1727,7 +1789,7 @@ function getBestPanelName(object, context, panelName)
     if (!panelName && context)
         panelName = context.panelName;
 
-    // Check, if the panel type of the suggested panel supports the object, and if so, go with it
+    // Check if the panel type of the suggested panel supports the object, and if so, go with it
     if (panelName)
     {
         var panelType = Firebug.getPanelType(panelName);
@@ -1842,6 +1904,7 @@ function onBlur(event)
     // XXXhh Is this really necessary? I disabled it for now as this was preventing me
     // to show highlights on focus
     //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
+
 }
 
 function onSelectLocation(event)
@@ -2005,19 +2068,6 @@ function onPanelClick(event)
                 }
             }
         }
-        else if (Events.isControlClick(event) || Events.isMiddleClick(event))
-        {
-            if (!realRep || !realRep.browseObject(realObject, Firebug.currentContext))
-            {
-                if (rep && !(rep != realRep && rep.browseObject(object, Firebug.currentContext)))
-                {
-                    var panel = Firebug.getElementPanel(event.target);
-                    if (!panel || !panel.browseObject(realObject))
-                        return;
-                }
-            }
-            Events.cancelEvent(event);
-        }
     }
 }
 
@@ -2086,6 +2136,30 @@ function onPanelMouseUp(event)
                 Events.cancelEvent(event);
             }
         }
+    }
+    else if (Events.isControlClick(event) || Events.isMiddleClick(event))
+    {
+        var repNode = Firebug.getRepNode(event.target);
+        if (!repNode)
+            return;
+
+        var object = repNode.repObject;
+        var rep = Firebug.getRep(object, Firebug.currentContext);
+        var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
+        var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : rep;
+        if (!realObject)
+            realObject = object;
+
+        if (!realRep || !realRep.browseObject(realObject, Firebug.currentContext))
+        {
+            if (rep && !(rep != realRep && rep.browseObject(object, Firebug.currentContext)))
+            {
+                var panel = Firebug.getElementPanel(event.target);
+                if (!panel || !panel.browseObject(realObject))
+                    return;
+            }
+        }
+        Events.cancelEvent(event);
     }
 }
 

@@ -1,4 +1,4 @@
-content    fbtest   content/
+content    fbtest   content/ contentaccessible=yes
 skin       fbtest   classic/1.0     skin/classic/
 locale     fbtest   en-US           locale/en-US/
 

@@ -20,7 +20,8 @@ body {
 .hasHeaders .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
-.computedStyle.hasSelectors > .stylePropName {
+.computedStyle.hasSelectors > .stylePropName,
+.cookieRow > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 3px;
@@ -36,7 +37,8 @@ body {
 .netRow.opened > .netCol > .netHrefLabel,
 .objectBox-stackFrame.hasTwisty.opened,
 .netPageRow.opened > .netCol > .netPageTitle,
-.computedStyle.hasSelectors.opened > .stylePropName {
+.computedStyle.hasSelectors.opened > .stylePropName,
+.cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
 }
 

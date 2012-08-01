@@ -117,7 +117,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
             return;
         }
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleMemoryProfiling", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleMemoryProfiling", "checked", "true");
 
         this.profiling = true;
         FBS.addHandler(this);
@@ -148,7 +148,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
         FBS.removeHandler(this);
         this.profiling = false;
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleMemoryProfiling", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleMemoryProfiling", "checked", "false");
 
         // Calculate total diff
         var oldReport = context.memoryProfileStack.pop();
@@ -571,7 +571,7 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
                                 Locale.$STR("Function")
                             )
                         ),
-                        TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
+                        TH({"class": "headerCell a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox", title: Locale.$STR("CallsHeaderTooltip")},
                                 Locale.$STR("Calls")
                             )

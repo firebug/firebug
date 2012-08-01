@@ -167,7 +167,16 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
                 return;  // did not create a context
             }
-            // else we should show
+
+            // Special case for about:blank (see issue 5120)
+            // HTML panel's edit mode can cause onStateChange changes and context
+            // recreation.
+            if (context.loaded && context == Firebug.currentContext &&
+                context.getName() == "about:blank")
+            {
+                FBTrace.sysout("tabWatcher.watchTopWindow; page already watched");
+                return;
+            }
         }
         else // then we've not looked this window in this session
         {
@@ -191,7 +200,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         if (win instanceof Ci.nsIDOMWindow && win.parent == win && context)
         {
-            // xxxHonza: This place can be called multiple times for one window so,
+            // xxxHonza: This place can be called multiple times for one window, so
             // make sure event listeners are not registered twice.
             // There should be a better way to find out whether the listeneres are actually
             // registered for the window.
@@ -330,7 +339,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("-> shouldCreateContext FBLISTENERS" , this.fbListeners);
+            FBTrace.sysout("-> shouldCreateContext FBLISTENERS", this.fbListeners);
 
         // Create if any listener says true to showCreateContext
         if (Events.dispatch2(this.fbListeners, "shouldCreateContext",
@@ -433,7 +442,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     /**
      * Attaches to a window that may be either top-level or a frame within the page.
      */
-    watchWindow: function(win, context)
+    watchWindow: function(win, context, skipCompletedDocuments)
     {
         if (!context)
             context = this.getContextByWindow(Win.getRootWindow(win));
@@ -445,6 +454,21 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (context)
             TabWatcherUnloader.registerWindow(win);
 
+        try
+        {
+            // If the documents is already completed do not register the window
+            // it should be registered already at this point
+            // This condition avoids situation when "about:document-onload-blocker"
+            // and STATE_START is fired for a window, which is consequently never
+            // firing "unload" and so, stays registered within context.windows
+            // See issue 5582 (comment #4)
+            if (skipCompletedDocuments && win.document.readyState == "complete")
+                return;
+        }
+        catch (err)
+        {
+        }
+
         // Unfortunately, dummy requests that trigger the call to watchWindow
         // are called several times, so we have to avoid dispatching watchWindow
         // more than once
@@ -453,8 +477,11 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             context.windows.push(win);
 
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchWindow register *** FRAME *** to context for " +
-                    "win.location: " + location);
+            {
+                FBTrace.sysout("-> tabWatcher.watchWindow; " + Win.safeGetWindowLocation(win) +
+                    " [" + Win.getWindowId(win).toString() + "] " + context.windows.length +
+                    " - " + win.document.readyState);
+            }
 
             Events.dispatch(this.fbListeners, "watchWindow", [context, win]);
 
@@ -509,7 +536,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         {
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.sysout("unwatchWindow: no context for win " +
+                FBTrace.sysout("unwatchWindow: ERROR no context for win " +
                     Win.safeGetWindowLocation(win));
             }
             return;
@@ -518,8 +545,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         var index = context.windows.indexOf(win);
         if (FBTrace.DBG_WINDOWS)
         {
-            FBTrace.sysout("-> tabWatcher.unwatchWindow context: " + context.getName() +
-                " index of win: " + index + "/" + context.windows.length, context.windows);
+            FBTrace.sysout("-> tabWatcher.unwatchWindow; " + Win.safeGetWindowLocation(win) +
+                " [" + Win.getWindowId(win).toString() + "] " + context.windows.length +
+                " - " + win.document.readyState);
         }
 
         if (index != -1)
@@ -890,7 +918,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: " +
                 Http.safeGetRequestName(request) + ", win: " + win.location.href +
                 ", content URL: " + (win.document ? win.document.URL : "no content URL") +
-                " " + Http.getStateDescription(flag));
+                " " + Http.getStateDescription(flag) + ", " + status);
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
@@ -914,7 +942,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
                 }
                 else
                 {
-                    Firebug.TabWatcher.watchWindow(win);
+                    Firebug.TabWatcher.watchWindow(win, null, true);
                 }
             }
         }
@@ -1030,7 +1058,7 @@ var TabWatcherHttpObserver = Obj.extend(Object,
 
             if (win == win.parent)
             {
-                // Make sure the frame listener is registered for top level window so,
+                // Make sure the frame listener is registered for top level window, so
                 // we can get all onStateChange events and init context for all opened tabs.
                 var browser = Firebug.TabWatcher.getBrowserByWindow(win);
 

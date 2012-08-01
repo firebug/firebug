@@ -11,6 +11,8 @@ var require, define;
 // Constants
 
 var Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
@@ -57,13 +59,22 @@ var Loader =
         }
 
         var self = this;
-        var args = deps.map(function(dep) {
-            return self.loadModule(dep);
+        var args = deps.map(function(dep)
+        {
+            var result = self.loadModule(dep);
+            if (!result)
+            {
+                FBTrace.sysout("mini-require; ERROR Could be a cycle dependency or undefined " +
+                    "return value from a module: " + dep, self.getDeps());
+            }
+            return result;
         });
 
         try
         {
             var module = this.currentModule[this.currentModule.length - 1];
+            module.deps = deps;
+            module.args = args;
             module.exports = callback.apply(module.scope, args);
         }
         catch (err)
@@ -109,6 +120,9 @@ var Loader =
         try
         {
             Services.scriptloader.loadSubScript(url, context);
+
+            if (FBTrace.DBG_MODULES)
+                FBTrace.sysout("mini-require; Module loaded " + fullName, url);
         }
         catch (err)
         {
@@ -150,6 +164,38 @@ var Loader =
 
         // If there is no protocol, use baseUrl.
         return baseUrl + moduleUrl;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debugging Dependencies
+
+    getDeps: function()
+    {
+        var result = {};
+        for (var p in this.modules)
+            this.calculateDeps(p, result);
+        return result;
+    },
+
+    calculateDeps: function(moduleId, result)
+    {
+        var deps = result[moduleId];
+        if (deps)
+            return deps;
+
+        deps = result[moduleId] = {};
+
+        var module = this.modules[moduleId];
+        if (!module.deps)
+            return deps;
+
+        for (var i=0; i<module.deps.length; i++)
+        {
+            var id = module.deps[i];
+            deps[id] = this.calculateDeps(id, result);
+        }
+
+        return deps;
     }
 }
 

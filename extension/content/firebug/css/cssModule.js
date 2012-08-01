@@ -9,8 +9,10 @@ define([
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/xml",
+    "firebug/lib/options",
+    "firebug/lib/array"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -139,7 +141,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     },
 
     /**
-     * Method for atomic propertly removal, such as through the context menu.
+     * Method for atomic property removal, such as through the context menu.
      */
     deleteProperty: function(rule, propName, context)
     {
@@ -168,6 +170,23 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         }
 
         Events.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
+    },
+
+    /**
+     * Get a document's temporary stylesheet for storage of user-provided rules.
+     * If it doesn't exist yet, create it.
+     */
+    getDefaultStyleSheet: function(doc)
+    {
+        // Cache the temporary sheet on an expando of the document.
+        var sheet = doc.fbDefaultSheet;
+        if (!sheet)
+        {
+            sheet = Css.appendStylesheet(doc, "chrome://firebug/default-stylesheet.css").sheet;
+            sheet.defaultStylesheet = true;
+            doc.fbDefaultSheet = sheet;
+        }
+        return sheet;
     },
 
     cleanupSheets: function(doc, context)
@@ -228,13 +247,11 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     cleanupSheetHandler: function(event, context)
     {
-        var target = event.target,
-            tagName = (target.tagName || "").toLowerCase();
+        var target = event.target;
+        var tagName = (target.tagName || "").toLowerCase();
 
         if (tagName == "link")
-        {
             this.cleanupSheets(target.ownerDocument, context);
-        }
     },
 
     parseCSSValue: function(value, offset)
@@ -356,7 +373,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return m ? m[0] : "";
     },
 
-    getPropertyInfo: function(computedStyle, propName) {
+    getPropertyInfo: function(computedStyle, propName)
+    {
         var propInfo = {
             property: propName,
             value: computedStyle.getPropertyValue(propName),
@@ -365,6 +383,46 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         };
 
         return propInfo;
+    },
+
+    getColorDisplayOptionMenuItems: function()
+    {
+        return [
+            "-",
+            {
+                label: "computed.option.label.Colors_As_Hex",
+                tooltiptext: "computed.option.tip.Colors_As_Hex",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHex",
+                command: function() {
+                    return Options.set("colorDisplay", "hex");
+                },
+                checked: Options.get("colorDisplay") == "hex"
+            },
+            {
+                label: "computed.option.label.Colors_As_RGB",
+                tooltiptext: "computed.option.tip.Colors_As_RGB",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayRGB",
+                command: function() {
+                    return Options.set("colorDisplay", "rgb");
+                },
+                checked: Options.get("colorDisplay") == "rgb"
+            },
+            {
+                label: "computed.option.label.Colors_As_HSL",
+                tooltiptext: "computed.option.tip.Colors_As_HSL",
+                type: "radio",
+                name: "colorDisplay",
+                id: "colorDisplayHSL",
+                command: function() {
+                    return Options.set("colorDisplay", "hsl");
+                },
+                checked: Options.get("colorDisplay") == "hsl"
+            }
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -400,21 +458,19 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     watchWindow: function(context, win)
     {
-        var doc = win.document;
-        this.cleanupSheetListener= Obj.bind(this.cleanupSheetHandler, this, context);
+        if (!context.cleanupSheetListener)
+            context.cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
 
-        context.addEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
-        context.addEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+        context.addEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
+        context.addEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
     },
 
     unwatchWindow: function(context, win)
     {
-        var doc = win.document;
-
-        if (this.cleanupSheetListener)
+        if (context.cleanupSheetListener)
         {
-            context.removeEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
-            context.removeEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+            context.removeEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
+            context.removeEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
         }
     },
 

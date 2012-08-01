@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 3663: too much recursion when logging array contains itself</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function onExecuteTest()
+{
+  var arr = [];
+  arr.push("a1");
+  arr.push(arr);
+  arr.push("b1");
+  console.log(arr);
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3663">Issue 3663</a>:
+        too much recursion when logging array contains itself</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and select+enable the Console Panel</li>
+            <li>Press this button
+                <button onclick="onExecuteTest()" id="testButton">Execute</button></li>
+            <li>The Console panel should display:
+            <code>["a1", [...], "b1"]</code>
+            </li>
+            <li><code>[...]</code> represents a cycle reference</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

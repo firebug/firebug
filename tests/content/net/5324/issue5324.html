@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5324: SPDY support in the Net panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="text/javascript">
+function executeTest(postData, callback)
+{
+    var request = new XMLHttpRequest();
+    request.open("GET", "issue5324.php", true);
+    request.send(null);
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5324">Issue 5324</a>:
+        SPDY support in the Net panel</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and select the Net panel</li>
+            <li>Click this button ot initiate a XHR:
+                <button id="testButton" onclick="executeTest()">Click Me!</button>
+            </li>
+            <li>Check the new XHR entry. The Protocol column should show
+                <code>SPDY</code> flag.
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

@@ -61,16 +61,16 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         var shortcut = branch.getCharPref("shortcut." + element);
         var tokens = shortcut.split(" ");
         var key = tokens.pop();
-        var modifiers = tokens.join(",")
+        var modifiers = tokens.join(",");
 
-        var keyElem = document.getElementById("key_" + element);
+        var keyElem = document.getElementById("key_firebug_" + element);
         if (!keyElem)
         {
             // If key is not defined in xul, add it
             keyElem = document.createElement("key");
             keyElem.className = "fbOnlyKey";
-            keyElem.id = "key_"+element;
-            keyElem.command = "cmd_"+element;
+            keyElem.id = "key_firebug_" + element;
+            keyElem.command = "cmd_firebug_" + element;
             document.getElementById("mainKeyset").appendChild(keyElem);
         }
 
@@ -101,8 +101,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
             this.keysets.push(keyElem.parentNode);
 
         // Modify shortcut for global key, if it exists
-        var keyElem = Firefox.getElementById("key_" + element);
-
+        var keyElem = Firefox.getElementById("key_firebug_" + element);
         if (!keyElem)
             return;
 
@@ -113,10 +112,11 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         }
 
         // Disable existing global shortcuts
-        var selector = "key["+attr+"='"+key+"'][modifiers='"+modifiers+"']"
-            + ":not([id='key_"+element+"']):not([disabled='true'])";
+        var selector = "key[" + attr + "='" + key + "'][modifiers='" + modifiers + "']"
+            + ":not([id='key_firebug_" + element + "']):not([disabled='true'])";
+
         var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
-        for (var i = existingKeyElements.length - 1; i >= 0; i--)
+        for (var i=existingKeyElements.length-1; i>=0; i--)
         {
             var existingKeyElement = existingKeyElements[i];
             existingKeyElement.setAttribute("disabled", "true");
@@ -139,7 +139,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
             FBTrace: FBTrace
         };
 
-        // Open customize shortcuts dialog. Pass FBL into the XUL window so,
+        // Open the "customize shortcuts" dialog. Pass FBL into the XUL window so that
         // common APIs can be used (e.g. localization).
         window.openDialog("chrome://firebug/content/firefox/customizeShortcuts.xul", "",
             "chrome,centerscreen,dialog,modal,resizable=yes", args);

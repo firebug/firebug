@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5506: Element path doesn't get updated when changing elements in Edit mode</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    <script>
+function f() {
+    var el = document.getElementById("content");
+    el.removeChild(el.firstChild);
+    el.removeChild(el.firstChild);
+
+    var newEl = document.createElement("span");
+    el.appendChild(newEl);
+}
+    </script>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5506">Issue 5506</a>:
+    Element path doesn't get updated when changing elements in Edit mode</h1>
+</header>
+<div>
+    <section id="content">a1<div id="test1">a2<b id="test2">&lt;&nbsp;&gt;  </b>b2</div>b1</section>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug</li>
+            <li>Inspect the <b>&lt;&nbsp;&gt;</b> text above</li>
+            <li>
+                Click the <span style="color:green">Edit</span> button in the toolbar.<br>
+                <span class="ok">&rarr; The editor selection matches the HTML.</span><br>
+                <span class="ok">&rarr; The element is shown in the element path.</span>
+            </li>
+            <li>
+                Change the text to: <pre>&lt;i&gt;&lt;/i&gt;&lt;b&gt;&lt;/b&gt;&lt;i&gt;&lt;/i&gt;</pre>
+                <span class="ok">&rarr; The editor contents appear in the right place.</span><br>
+                <span class="ok">&rarr; The new "b" element is shown in the element path.</span>
+            </li>
+            <li>
+                Click the "b" button in the element path.<br>
+                <span class="ok">&rarr; The editor now only contains <code>&lt;b&gt;&lt;/b&gt;</code>.</span><br>
+            </li>
+            <li>
+                Click the "div" button in the element path.<br>
+                <span class="ok">&rarr; The editor should match the div's contents.</span><br>
+            </li>
+            <li>
+                Change the text to: <pre>&lt;b invalid="</pre>
+                <span class="ok">&rarr; The element disappears from the page.</span><br>
+                <span class="ok">&rarr; The element path starts from "section#content" instead.</span>
+            </li>
+            <li>Programmatically remove the remaining two text nodes "a1" and "a2" from the page, and add a span instead:
+                <input type="button" onclick="window.f();" value="Go"></li>
+            <li>
+                Change the text to: <pre>&lt;strong&gt;&lt;/strong&gt;hi</pre>
+                <span class="ok">&rarr; The element appears before the span.</span><br>
+                <span class="ok">&rarr; The element path shows "strong".</span>
+            </li>
+            <li>
+                Click <span style="color:green">Edit</span> button again to stop editing.<br>
+                <span class="ok">&rarr; The "strong" element is selected in the HTML panel.</span><br>
+            </li>
+        </ol>
+    </section>
+    <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>
+</div>
+</body>
+</html>

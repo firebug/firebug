@@ -125,7 +125,14 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: "+this.saveTimeout);
+        {
+            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: " +
+                this.saveTimeout);
+        }
+
+        // Make sure the content is save if there is a timeout in progress.
+        if (this.saveTimeout)
+            this.save();
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
@@ -151,8 +158,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         {
             if (cancel)
             {
-                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel,
-                    currentTarget, removeGroup && !originalValue]);
+                Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose",
+                    [currentPanel, currentTarget, removeGroup && !originalValue]);
 
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
@@ -180,10 +187,11 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentEditor.hide();
         currentPanel.editing = false;
 
-        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor,
+            currentTarget]);
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("Editor stop panel "+currentPanel.name);
+            FBTrace.sysout("Editor stop panel " + currentPanel.name);
 
         currentTarget = null;
         currentGroup = null;
@@ -755,6 +763,16 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return [];
     },
 
+    getAutoCompletePropSeparator: function(range, expr, prefixOf)
+    {
+        return null;
+    },
+
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        return null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleter: function()
@@ -763,7 +781,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.autoCompleter = new Firebug.AutoCompleter(false,
                 Obj.bind(this.getAutoCompleteRange, this),
-                Obj.bind(this.getAutoCompleteList, this));
+                Obj.bind(this.getAutoCompleteList, this),
+                Obj.bind(this.getAutoCompletePropSeparator, this),
+                Obj.bind(this.autoCompleteAdjustSelection, this));
         }
 
         return this.autoCompleter;
@@ -893,6 +913,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             if (reverted)
                 Events.cancelEvent(event);
         }
+        else if (event.keyCode == KeyEvent.DOM_VK_RIGHT && this.completeAsYouType)
+        {
+            if (this.getAutoCompleter().acceptCompletion(this.input))
+                Events.cancelEvent(event);
+        }
         else if (event.charCode && this.advanceToNext(this.target, event.charCode))
         {
             Firebug.Editor.tabNextEditor();
@@ -904,10 +929,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             Events.cancelEvent(event);
         }
-        else
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE ||
+            event.keyCode == KeyEvent.DOM_VK_DELETE)
         {
-            // If the user backspaces, don't autocomplete after the upcoming input event
-            this.ignoreNextInput = event.keyCode == KeyEvent.DOM_VK_BACK_SPACE;
+            // If the user deletes text, don't autocomplete after the upcoming input event
+            this.ignoreNextInput = true;
         }
     },
 
@@ -1045,9 +1071,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ********************************************************************************************* //
 // Autocompletion
 
-Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
+Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator,
+    adjustSelectionOnAccept)
 {
     var candidates = null;
+    var suggestedDefault = null;
     var lastValue = "";
     var originalOffset = -1;
     var originalValue = null;
@@ -1078,12 +1106,32 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
     this.reset = function()
     {
         candidates = null;
+        suggestedDefault = null;
         originalOffset = -1;
         originalValue = null;
         lastExpr = null;
         lastOffset = 0;
         exprOffset = 0;
         lastIndex = null;
+    };
+
+    this.acceptCompletion = function(textBox)
+    {
+        if (!adjustSelectionOnAccept)
+            return false;
+
+        var value = textBox.value;
+        var offset = textBox.selectionStart;
+        var offsetEnd = textBox.selectionEnd;
+        if (!candidates || value !== lastValue || offset !== lastOffset || offset >= offsetEnd)
+            return false;
+
+        var ind = adjustSelectionOnAccept(value, offsetEnd);
+        if (ind === null)
+            return false;
+
+        textBox.setSelectionRange(ind, ind);
+        return true;
     };
 
     this.complete = function(context, textBox, cycle)
@@ -1114,68 +1162,90 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         if (!candidates || !cycle || value != lastValue || offset != lastOffset)
         {
-            originalOffset = offset;
+            originalOffset = lastOffset = offset;
             originalValue = lastValue = value;
 
             // Find the part of the string that is being completed
-            var range = getRange(value, offset);
+            var range = getRange(value, lastOffset);
             if (!range)
                 range = {start: 0, end: value.length};
 
             preExpr = value.substr(0, range.start);
-            var expr = value.substring(range.start, range.end);
+            lastExpr = value.substring(range.start, range.end);
             postExpr = value.substr(range.end);
             exprOffset = range.start;
 
             if (FBTrace.DBG_EDITOR)
             {
                 var sep = (value.indexOf("|") > -1) ? "^" : "|";
-                FBTrace.sysout(preExpr+sep+expr+sep+postExpr + " offset: " + offset);
+                FBTrace.sysout(preExpr+sep+lastExpr+sep+postExpr + " offset: " + lastOffset);
             }
 
-            if (!cycle)
-            {
-                if (!expr)
-                    return false;
-
-                if (lastExpr && Str.hasPrefix(lastExpr, expr))
-                    return false;
-            }
-
-            lastExpr = expr;
-            lastOffset = offset;
-
-            var searchExpr = "";
+            var search = false;
 
             // Check if the cursor is somewhere in the middle of the expression
-            if (expr && offset != range.end)
+            if (lastExpr && offset != range.end)
             {
                 if (cycle)
                 {
-                    // Complete by resetting the completion list to the full
-                    // list of candidates, finding our current position in it,
-                    // and cycling from there.
-                    searchExpr = expr;
-                    lastOffset = offset = range.start;
-                    lastExpr = expr = "";
+                    // Complete by resetting the completion list to a more complete
+                    // list of candidates, finding our current position in it, and
+                    // cycling from there.
+                    search = true;
+                    lastOffset = range.start;
+                }
+                else if (offset != range.start+1)
+                {
+                    // Nothing new started, just fail.
+                    return false;
                 }
                 else
                 {
-                    // We can't complete unless we are at the right edge.
-                    return false;
+                    // Try to parse the typed character as the start of a new
+                    // property, moving the rest of lastExpr over into postExpr
+                    // (possibly with a separator added). If there is no support
+                    // for prefix-completions, fail. If the character could
+                    // plausibly be part of a leftwards expansion, fail.
+                    // Note that this does not show unless there is a completion.
+                    var moveOver = lastExpr.substr(1);
+                    lastExpr = lastExpr.charAt(0);
+                    range.start = offset - 1;
+                    range.end = offset;
+
+                    var cand = evaluator(preExpr, lastExpr, postExpr, range, false, context, {});
+                    var imov = (caseSensitive ? moveOver : moveOver.toLowerCase());
+                    for (var i = 0; i < cand.length; ++i)
+                    {
+                        var c = cand[i];
+                        if (c.length <= imov.length || c.charAt(0) !== lastExpr)
+                            continue;
+                        c = (caseSensitive ? c : c.toLowerCase());
+                        if (c.substr(-imov.length) === imov)
+                            return false;
+                    }
+
+                    var sep = getNewPropSeparator(range, lastExpr, moveOver);
+                    if (sep === null)
+                        return false;
+                    if (!Str.hasPrefix(moveOver, sep))
+                        moveOver = sep + moveOver;
+
+                    postExpr = moveOver + postExpr;
                 }
             }
 
             // Don't complete globals unless cycling.
-            if (!cycle && !value)
+            if (!cycle && !lastExpr)
                 return false;
 
-            var values = evaluator(preExpr, expr, postExpr);
+            var out = {};
+            var values = evaluator(preExpr, lastExpr, postExpr, range, search, context, out);
+            suggestedDefault = out.suggestion || null;
 
-            if (searchExpr)
-                this.setCandidatesBySearchExpr(searchExpr, values);
+            if (search)
+                this.setCandidatesBySearchExpr(lastExpr, values);
             else
-                this.setCandidatesByExpr(expr, values);
+                this.setCandidatesByExpr(lastExpr, values);
         }
 
         if (!candidates.length)
@@ -1186,7 +1256,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         // Adjust the case of the completion - when editing colors, 'd' should
         // be completed into 'darkred', not 'darkRed'.
-        var userTyped = lastExpr.substr(0, offset-exprOffset);
+        var userTyped = lastExpr.substr(0, lastOffset-exprOffset);
         completion = this.convertCompletionCase(completion, userTyped);
 
         var line = preExpr + completion + postExpr;
@@ -1194,7 +1264,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
         // Show the completion
         lastValue = textBox.value = line;
-        textBox.setSelectionRange(offset, offsetEnd);
+        textBox.setSelectionRange(lastOffset, offsetEnd);
 
         return true;
     };
@@ -1297,12 +1367,32 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 
     this.pickDefaultCandidate = function()
     {
-        // The shortest candidate is default value
-        var pick = 0;
-        for (var i = 1; i < candidates.length; i++)
+        // If we have a suggestion and it's in the candidate list, use that
+        if (suggestedDefault)
         {
-            if (candidates[i].length < candidates[pick].length)
+            var ind = candidates.indexOf(suggestedDefault);
+            if (ind !== -1)
+                return ind;
+        }
+
+        var userTyped = lastExpr.substr(0, lastOffset-exprOffset);
+        var utLen = userTyped.length;
+
+        // Otherwise, default to the shortest candidate that matches the case,
+        // or the shortest one that doesn't
+        var pick = -1, pcand, pcaseState;
+        for (var i = 0; i < candidates.length; i++)
+        {
+            var cand = candidates[i];
+            var caseState = (cand.substr(0, utLen) === userTyped ? 1 : 0);
+            if (pick === -1 ||
+                caseState > pcaseState ||
+                (caseState === pcaseState && cand.length < pcand.length))
+            {
                 pick = i;
+                pcand = cand;
+                pcaseState = caseState;
+            }
         }
         return pick;
     };

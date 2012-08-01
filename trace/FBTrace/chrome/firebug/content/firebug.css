@@ -265,7 +265,7 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     overflow-y: auto;
 }
 
-/* Evaluated scripts can take a lot of horizontal space on the toolbar so, this is the limit */
+/* Evaluated scripts can take a lot of horizontal space on the toolbar, so this is the limit */
 #fbLocationList {
     max-width: 250px;
 }
@@ -337,8 +337,20 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 
 /************************************************************************************************/
 
+@-moz-keyframes armedBlinking {
+    100% {
+        text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange;
+    }
+}
+
 panelTab[breakOnNextArmed="true"] > .panelTab-text {
-    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange !important;
+    -moz-animation: armedBlinking 0.8s ease-out infinite alternate;
+}
+
+panelTab.highlighted {
+    text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange !important;
+    -moz-transition-property: text-shadow;
+    -moz-transition-duration: 0.8s;
 }
 
 panelTab[aria-disabled='true'] {

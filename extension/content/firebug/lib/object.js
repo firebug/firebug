@@ -92,6 +92,9 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         var type = typeof(ob);
         if (type == "string" && ob.length)
             return true;
+         
+        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
+            return false;
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);
@@ -121,8 +124,8 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
     {
         // Primitive (non string) objects will throw an exception when passed into
         // Object.keys or Object.getOwnPropertyNames APIs.
-        // There are also many of "security error" exceptions I guess none is really
-        // necessary to be dispalyed in FBTrace console so, remove the tracing for now.
+        // There are also many "security error" exceptions I guess none of which are really
+        // necessary to display in the FBTrace console, so, remove the tracing for now.
         // if (FBTrace.DBG_ERRORS)
         //     FBTrace.sysout("lib.hasProperties(" + Str.safeToString(ob) + ") ERROR " + exc, exc);
 

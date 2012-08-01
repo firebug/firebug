@@ -118,6 +118,8 @@ NetProgress.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    requestNumber: 1,
+
     startFile: function startFile(request, win)
     {
         var file = this.getRequestFile(request, win);
@@ -416,7 +418,7 @@ NetProgress.prototype =
             }
         }
 
-        // Don't update the UI now (optimalization).
+        // Don't update the UI now (optimization).
         return null;
     },
 
@@ -458,7 +460,7 @@ NetProgress.prototype =
                      getPrintableTime() + ", " + request.URI.path, file);
         }
 
-        // Don't update the UI now (optimalization).
+        // Don't update the UI now (optimization).
         return null;
     },
 
@@ -483,7 +485,7 @@ NetProgress.prototype =
             file.waitingForTime = time; // in case waiting-for would never came.
         }
 
-        // Don't update the UI now (optimalization).
+        // Don't update the UI now (optimization).
         return null;
     },
 
@@ -504,7 +506,7 @@ NetProgress.prototype =
             file.waitingForTime = time; // in case waiting-for would never came.
         }
 
-        // Don't update the UI now (optimalization).
+        // Don't update the UI now (optimization).
         return null;
     },
 
@@ -816,6 +818,8 @@ NetProgress.prototype =
         }
 
         file.request = request;
+        file.requestNumber = this.requestNumber;
+        this.requestNumber++;
         this.requests.push(request);
         this.files.push(file);
 

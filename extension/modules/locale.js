@@ -3,18 +3,32 @@
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+const DEFAULT_LOCALE = "en-US";
 
 var EXPORTED_SYMBOLS = [];
 
 // ********************************************************************************************* //
 // Services
 
-Cu.import("resource://firebug/fbtrace.js");
+// xxxHonza: FBTrace console doesn't have to exist at this point (Firebug is bootstrapped).
+// In such case an empty object is created and all consequent logs are not visible in the
+// console window.
+// Cu.import("resource://firebug/fbtrace.js");
+
+var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+
+// Just workaround for this module.
+var FBTrace = {sysout: function(msg)
+{
+    consoleService.logStringMessage(msg);
+}};
+
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
 
 // Import of PluralForm object.
 Cu.import("resource://gre/modules/PluralForm.jsm");
@@ -63,7 +77,7 @@ Locale.$STR = function(name, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {
@@ -104,7 +118,7 @@ Locale.$STRF = function(name, args, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {
@@ -204,7 +218,7 @@ Locale.internationalizeElements = function(doc, elements, attributes)
         if (!element)
             continue;
 
-        // Remove fbInternational class so, the label is not translated again later.
+        // Remove fbInternational class, so that the label is not translated again later.
         element.classList.remove("fbInternational");
 
         for (var j=0; j<attributes.length; j++)
@@ -220,6 +234,10 @@ Locale.registerStringBundle = function(bundleURI)
     // Notice that this category entry must not be persistent in Fx 4.0
     categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", false, true);
     this.stringBundle = null;
+
+    bundleURI = getDefaultStringBundleURI(bundleURI);
+    categoryManager.addCategoryEntry("default_strings_firebug", bundleURI, "", false, true);
+    this.defaultStringBundle = null;
 }
 
 Locale.getStringBundle = function()
@@ -232,16 +250,7 @@ Locale.getStringBundle = function()
 Locale.getDefaultStringBundle = function()
 {
     if (!this.defaultStringBundle)
-    {
-        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
-            getService(Ci.nsIChromeRegistry);
-
-        var uri = Services.io.newURI("chrome://firebug/locale/firebug.properties", "UTF-8", null);
-        var fileURI = chromeRegistry.convertChromeURL(uri).spec;
-        var parts = fileURI.split("/");
-        parts[parts.length - 2] = "en-US";
-        this.defaultStringBundle = stringBundleService.createBundle(parts.join("/"));
-    }
+        this.defaultStringBundle = stringBundleService.createExtensibleBundle("default_strings_firebug");
     return this.defaultStringBundle;
 }
 
@@ -254,6 +263,22 @@ Locale.getPluralRule = function()
     catch (err)
     {
     }
+}
+
+// ********************************************************************************************* //
+// Helpers
+
+function getDefaultStringBundleURI(bundleURI)
+{
+    var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
+        getService(Ci.nsIChromeRegistry);
+
+    var uri = Services.io.newURI(bundleURI, "UTF-8", null);
+    var fileURI = chromeRegistry.convertChromeURL(uri).spec;
+    var parts = fileURI.split("/");
+    parts[parts.length - 2] = DEFAULT_LOCALE;
+
+    return parts.join("/");
 }
 
 // ********************************************************************************************* //

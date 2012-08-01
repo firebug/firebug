@@ -1,0 +1,34 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <title>Issue 4153: Re-attaching detached, deactivated Firebug UI doesn't close it</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4153">Issue 4153</a>: Re-attaching detached, deactivated Firebug UI doesn't close it</h1>
+        </header>
+        <div>
+            <section id="content">
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug in detached mode on this page.</li>
+                    <li>Deactivate firebug by Selecting "Deactivate Firebug" from the menu or by pressing Shift+F12.</li>
+                    <li>Press Ctrl + F12 to attach Firebug to the main window.</li>
+                </ol>
+                <h3>Observed result</h3>
+                <ul>
+                    <li>Firebug opens in browser with blank panel.</li>
+                </ul>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Firebug must be activated before attaching to the main window.</li>
+                </ul>
+            </section>
+            <footer>Farshid Beheshti, Farshid.Beheshti@gmail.com</footer>
+        </div>
+    </body>
+</html>

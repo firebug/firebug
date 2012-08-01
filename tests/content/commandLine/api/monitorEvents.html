@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Command Line API: monitorEvents()</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #monitoredElement {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Command Line API: monitorEvents()</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="monitoredElement" tabindex="0"></div>
+            </section>
+            <section id="description">
+                <h2>Single event</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>monitorEvents(document.getElementById("monitoredElement"), "click")</code> and hit <code class="key">Enter</code></li>
+                    <li>Click the blue <code>&lt;div&gt;</code> (<code>#monitoredElement</code>) above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        &rArr; The console should list a <em>click</em> event:<br/>
+                        <code>click clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;</code>
+                    </li>
+                </ul>
+                <h2>Event family</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>monitorEvents(document.getElementById("monitoredElement"), "key")</code> and hit <code class="key">Enter</code></li>
+                    <li>Click the blue <code>&lt;div&gt;</code> (<code>#monitoredElement</code>) above</li>
+                    <li>Press <code class="key">A</code> on the keyboard</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        &rArr; The console should list a <em>keydown</em>, a <em>keypress</em> and a <em>keyup</em> event:<br/>
+                        <code>keydown charCode=0, keyCode=65
+keypress charCode=97, keyCode=0
+keyup charCode=0, keyCode=65</code>
+                    </li>
+                </ul>
+                <h2>Multiple events</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>monitorEvents(document.getElementById("monitoredElement"), ["click", "key"])</code> and hit <code class="key">Enter</code></li>
+                    <li>
+                        Click the blue <code>&lt;div&gt;</code> (<code>#monitoredElement</code>) above<br/>
+                        <span class="ok">
+                            &rArr; The console should list a <em>click</em> event:<br/>
+                            (<code>click clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;</code>)
+                        </span>
+                    </li>
+                    <li>
+                        Press <code class="key">A</code> on the keyboard<br/>
+                        <span class="ok">
+                            &rArr; The console should list a <em>keydown</em>, a <em>keypress</em> and a <em>keyup</em> event:<br/>
+                            <code>keydown charCode=0, keyCode=65
+keypress charCode=97, keyCode=0
+keyup charCode=0, keyCode=65</code>
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>All events defined inside the array in <code>monitorEvents()</code> should be monitored</li>
+                </ul>
+                <h2>All events</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>monitorEvents(document.getElementById("monitoredElement"))</code> and hit <code class="key">Enter</code></li>
+                    <li>
+                        Click the blue <code>&lt;div&gt;</code> (<code>#monitoredElement</code>) above<br/>
+                        <span class="ok">
+                            &rArr; The console should list a <em>mouseover</em>, several <em>mousemove</em>, a <em>mousedown</em>, a <em>focus</em>, a <em>mouseup</em> and a <em>click</em> event:<br/>
+                            <code>mouseover clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;
+mousemove clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;
+...
+mousedown clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;
+focus
+mouseup clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;
+click clientX=&lt;x coordinate&gt;, clientY=&lt;y coordinate&gt;</code>
+                        </span>
+                    </li>
+                    <li>
+                        Press <code class="key">A</code> on the keyboard<br/>
+                        <span class="ok">
+                            &rArr; The console should list a <em>keydown</em>, a <em>keypress</em> and a <em>keyup</em> event:<br/>
+                            <code>keydown charCode=0, keyCode=65
+keypress charCode=97, keyCode=0
+keyup charCode=0, keyCode=65</code>
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>All events triggered by <code>#monitoredElement</code> should be monitored</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

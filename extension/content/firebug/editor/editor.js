@@ -125,7 +125,14 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: "+this.saveTimeout);
+        {
+            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: " +
+                this.saveTimeout);
+        }
+
+        // Make sure the content is save if there is a timeout in progress.
+        if (this.saveTimeout)
+            this.save();
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
@@ -151,8 +158,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         {
             if (cancel)
             {
-                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel,
-                    currentTarget, removeGroup && !originalValue]);
+                Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose",
+                    [currentPanel, currentTarget, removeGroup && !originalValue]);
 
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
@@ -180,10 +187,11 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentEditor.hide();
         currentPanel.editing = false;
 
-        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor,
+            currentTarget]);
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("Editor stop panel "+currentPanel.name);
+            FBTrace.sysout("Editor stop panel " + currentPanel.name);
 
         currentTarget = null;
         currentGroup = null;
@@ -760,6 +768,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return null;
     },
 
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        return null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleter: function()
@@ -769,7 +782,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.autoCompleter = new Firebug.AutoCompleter(false,
                 Obj.bind(this.getAutoCompleteRange, this),
                 Obj.bind(this.getAutoCompleteList, this),
-                Obj.bind(this.getAutoCompletePropSeparator, this));
+                Obj.bind(this.getAutoCompletePropSeparator, this),
+                Obj.bind(this.autoCompleteAdjustSelection, this));
         }
 
         return this.autoCompleter;
@@ -897,6 +911,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             var reverted = this.getAutoCompleter().revert(this.input);
             if (reverted)
+                Events.cancelEvent(event);
+        }
+        else if (event.keyCode == KeyEvent.DOM_VK_RIGHT && this.completeAsYouType)
+        {
+            if (this.getAutoCompleter().acceptCompletion(this.input))
                 Events.cancelEvent(event);
         }
         else if (event.charCode && this.advanceToNext(this.target, event.charCode))
@@ -1052,7 +1071,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ********************************************************************************************* //
 // Autocompletion
 
-Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator)
+Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropSeparator,
+    adjustSelectionOnAccept)
 {
     var candidates = null;
     var suggestedDefault = null;
@@ -1093,6 +1113,25 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
         lastOffset = 0;
         exprOffset = 0;
         lastIndex = null;
+    };
+
+    this.acceptCompletion = function(textBox)
+    {
+        if (!adjustSelectionOnAccept)
+            return false;
+
+        var value = textBox.value;
+        var offset = textBox.selectionStart;
+        var offsetEnd = textBox.selectionEnd;
+        if (!candidates || value !== lastValue || offset !== lastOffset || offset >= offsetEnd)
+            return false;
+
+        var ind = adjustSelectionOnAccept(value, offsetEnd);
+        if (ind === null)
+            return false;
+
+        textBox.setSelectionRange(ind, ind);
+        return true;
     };
 
     this.complete = function(context, textBox, cycle)
@@ -1165,10 +1204,25 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
                     // Try to parse the typed character as the start of a new
                     // property, moving the rest of lastExpr over into postExpr
                     // (possibly with a separator added). If there is no support
-                    // for prefix-completions, fail.
+                    // for prefix-completions, fail. If the character could
+                    // plausibly be part of a leftwards expansion, fail.
                     // Note that this does not show unless there is a completion.
                     var moveOver = lastExpr.substr(1);
                     lastExpr = lastExpr.charAt(0);
+                    range.start = offset - 1;
+                    range.end = offset;
+
+                    var cand = evaluator(preExpr, lastExpr, postExpr, range, false, context, {});
+                    var imov = (caseSensitive ? moveOver : moveOver.toLowerCase());
+                    for (var i = 0; i < cand.length; ++i)
+                    {
+                        var c = cand[i];
+                        if (c.length <= imov.length || c.charAt(0) !== lastExpr)
+                            continue;
+                        c = (caseSensitive ? c : c.toLowerCase());
+                        if (c.substr(-imov.length) === imov)
+                            return false;
+                    }
 
                     var sep = getNewPropSeparator(range, lastExpr, moveOver);
                     if (sep === null)
@@ -1177,8 +1231,6 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
                         moveOver = sep + moveOver;
 
                     postExpr = moveOver + postExpr;
-                    range.end = range.start;
-                    range.start = offset;
                 }
             }
 

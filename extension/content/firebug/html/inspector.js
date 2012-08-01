@@ -13,21 +13,17 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/window",
     "firebug/lib/system",
+    "firebug/html/highlighterCache"
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
-    Win, System) {
+    Win, System, HighlighterCache) {
 
 // ********************************************************************************************* //
 // Constants
 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
-const ident = {
-    frame: 0,
-    boxModel: 1,
-    imageMap: 2,
-    proxyElt: 3
-};
+const ident = HighlighterCache.ident;
 
 // ********************************************************************************************* //
 // Globals
@@ -81,8 +77,12 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 (Wrapper.getContentView(elementArr) &&
                     !Xml.isVisible(Wrapper.getContentView(elementArr))))
             {
-                elementArr = (elementArr && elementArr.nodeType == Node.TEXT_NODE) ?
-                    elementArr.parentNode : null;
+                if (elementArr && Dom.isRange(elementArr))
+                    elementArr = elementArr;
+                else if (elementArr && elementArr.nodeType == Node.TEXT_NODE)
+                    elementArr = elementArr.parentNode;
+                else
+                    elementArr = null;
             }
 
             if (elementArr && context && context.highlightTimeout)
@@ -104,7 +104,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
             if (elementArr)
             {
-                if (!isVisibleElement(elementArr))
+                if (elementArr.nodeName && !isVisibleElement(elementArr))
                     highlighter.unhighlight(context);
                 else if (context && context.window && context.window.document)
                     highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
@@ -172,7 +172,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     clearAllHighlights: function()
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
     },
 
     /**
@@ -219,7 +219,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.inspecting = true;
         this.inspectingContext = context;
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
 
         var inspectingPanelName = this._resolveInspectingPanelName(context);
@@ -250,7 +250,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     inspectNode: function(node)
     {
-        if (node && node.nodeType != 1)
+        if (node && node.nodeType != Node.ELEMENT_NODE)
             node = node.parentNode;
 
         if (node && Firebug.shouldIgnore(node) && !node.fbProxyFor)
@@ -317,7 +317,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (!waitForClick)
             this.detachClickInspectListeners(context.window);
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "checked", "false");
 
         this.inspecting = false;
 
@@ -423,7 +423,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         }
         else if (!isMulti)
         {
-            var highlighterNode = highlighterCache.get(highlighter.ident);
+            var highlighterNode = HighlighterCache.get(highlighter.ident);
 
             if (highlighterNode && highlighter.ident === ident.boxModel)
                 highlighterNode = highlighterNode.offset;
@@ -767,7 +767,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // The panel can be null (if disabled) so use the global context.
         // var context = Firebug.currentContext;
         // var disabled = (context && context.loaded) ? false : true;
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", disabled);
     },
 
     /**
@@ -777,7 +777,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     loadedContext: function(context)
     {
         // See the comment in showPanel.
-        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
+        // Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleInspecting", "disabled", "false");
     },
 
     /**
@@ -1240,22 +1240,24 @@ Firebug.Inspector.FrameHighlighter.prototype =
             var bgDiv = highlighter.firstChild;
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
 
-            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+            if (Dom.isElement(element))
+            {
+                cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-            if (cs.MozTransform && cs.MozTransform != "none")
-                css += "-moz-transform: "+cs.MozTransform+"!important;" +
-                       "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
-            if (cs.borderRadius)
-                css += "border-radius: "+cs.borderRadius+"!important;";
-            if (cs.borderTopLeftRadius)
-                css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
-            if (cs.borderTopRightRadius)
-                css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
-            if (cs.borderBottomRightRadius)
-                css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
-            if (cs.borderBottomLeftRadius)
-                css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
-
+                if (cs.MozTransform && cs.MozTransform != "none")
+                    css += "-moz-transform: "+cs.MozTransform+"!important;" +
+                           "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
+                if (cs.borderRadius)
+                    css += "border-radius: "+cs.borderRadius+"!important;";
+                if (cs.borderTopLeftRadius)
+                    css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
+                if (cs.borderTopRightRadius)
+                    css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
+                if (cs.borderBottomRightRadius)
+                    css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
+                if (cs.borderBottomLeftRadius)
+                    css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
+            }
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
 
@@ -1292,7 +1294,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 }
 
                 // otherwise the proxies take up screen space in browser.xul
-                if (element.ownerDocument.contentType.indexOf("xul") === -1)
+                if (element.ownerDocument && element.ownerDocument.contentType.indexOf("xul") === -1)
                     createProxiesForDisabledElements(body);
             }
         }
@@ -1324,7 +1326,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         if (!isMulti)
         {
-            var div = highlighterCache.get(ident.frame);
+            var div = HighlighterCache.get(ident.frame);
             if (div)
                 return div;
         }
@@ -1340,7 +1342,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
         div.ident = ident.frame;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
         return div;
     }
 };
@@ -1530,7 +1532,7 @@ BoxModelHighlighter.prototype =
 
     unhighlight: function(context)
     {
-        highlighterCache.clear();
+        HighlighterCache.clear();
         quickInfoBox.hide();
     },
 
@@ -1547,7 +1549,7 @@ BoxModelHighlighter.prototype =
 
             if (!isMulti)
             {
-                var nodes = highlighterCache.get(ident.boxModel);
+                var nodes = HighlighterCache.get(ident.boxModel);
                 if (nodes)
                     return nodes;
             }
@@ -1597,7 +1599,7 @@ BoxModelHighlighter.prototype =
         }
 
         nodes.ident = ident.boxModel;
-        highlighterCache.add(nodes);
+        HighlighterCache.add(nodes);
         return nodes;
     },
 
@@ -1626,124 +1628,12 @@ BoxModelHighlighter.prototype =
 
 // ********************************************************************************************* //
 
-var highlighterCache =
-{
-    highlighters:
-    {
-        frameArr: [],
-        boxModelArr: [],
-        proxyEltArr: []
-    },
-
-    get: function(type)
-    {
-        var node;
-        var hl = this.highlighters;
-
-        switch (type)
-        {
-            case ident.boxModel:
-                if (hl.boxModelArr.length === 1)
-                {
-                    node = hl.boxModelArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.frame:
-                if (hl.frameArr.length === 1)
-                {
-                    node = hl.frameArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-            case ident.proxyElt:
-                if (hl.proxyEltArr.length === 1)
-                {
-                    node = hl.proxyEltArr[0];
-                    if (!node.parentElement)
-                        return node;
-                }
-            break;
-        }
-    },
-
-    add: function(node)
-    {
-        switch (node.ident)
-        {
-            case ident.boxModel:
-                this.highlighters.boxModelArr.push(node);
-            break;
-            case ident.frame:
-                this.highlighters.frameArr.push(node);
-            break;
-            case ident.proxyElt:
-                this.highlighters.proxyEltArr.push(node);
-            break;
-        }
-    },
-
-    clear: function()
-    {
-        var clearCache = function(arr) {
-            var i, highlighter;
-
-            for (i = arr.length - 1; i >= 0; i--)
-            {
-                highlighter = arr[i];
-
-                if (highlighter && highlighter.parentNode)
-                    highlighter.parentNode.removeChild(highlighter);
-            }
-        };
-
-        var clearBoxModelCache = function(arr)
-        {
-            var node;
-            for (var i = arr.length - 1; i >= 0; i--)
-            {
-                var names = ["lines", "offset", "parent"];
-                for (var j=0; j<names.length; j++)
-                {
-                    var name = names[j];
-                    if (name === "lines")
-                    {
-                        var lineNames = ["bottom", "left", "top", "right"];
-                        for (var k=0; k<lineNames.length; k++)
-                        {
-                            var lineName = lineNames[k];
-                            node = arr[i].lines[lineName];
-
-                            if (node && node.parentNode)
-                                node.parentNode.removeChild(node);
-                        }
-                    }
-                    else
-                    {
-                        node = arr[i][name];
-                        if (node && node.parentNode)
-                            node.parentNode.removeChild(node);
-                    }
-                }
-            }
-        };
-
-        clearBoxModelCache(this.highlighters.boxModelArr);
-        clearCache(this.highlighters.frameArr);
-        clearCache(this.highlighters.proxyEltArr);
-
-        this.highlighters.boxModelArr=[];
-        this.highlighters.frameArr=[];
-        this.highlighters.proxyEltArr=[];
-    }
-};
-
-// ********************************************************************************************* //
-
 function getNonFrameBody(elt)
 {
+    if (Dom.isRange(elt))
+    {
+        elt = elt.commonAncestorContainer;
+    }
     var body = Dom.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
@@ -1798,7 +1688,7 @@ function createProxiesForDisabledElements(body)
 
         body.appendChild(div);
         div.ident = ident.proxyElt;
-        highlighterCache.add(div);
+        HighlighterCache.add(div);
     }
 }
 

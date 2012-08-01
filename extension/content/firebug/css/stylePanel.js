@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/js/sourceLink",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -17,11 +18,12 @@ define([
     "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
+    "firebug/css/cssModule",
     "firebug/css/cssPanel",
     "firebug/chrome/menu"
 ],
-function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSStyleSheetPanel, Menu) {
+function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
+    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -51,7 +53,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
-                DIV({role: "list", "aria-label": Locale.$STR("aria.labels.style rules") },
+                DIV({"class": "cssNonInherited", role: "list",
+                        "aria-label": Locale.$STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
@@ -75,6 +78,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             DIV({"class": "cssElementRuleContainer"},
                 TAG(Firebug.CSSStyleRuleTag.tag, {rule: "$rule"}),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            ),
+
+        newRuleTag:
+            DIV({"class": "cssElementRuleContainer"},
+                DIV({"class": "cssRule insertBefore", style: "display: none"}, "")
             ),
 
         CSSFontPropValueTag:
@@ -136,6 +144,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 this.removeSystemRules(rules, sections);
         }
 
+        // Reset the selection, so that clicking that starts before the view
+        // update still result in proper mouseup events (issue 5500).
+        this.document.defaultView.getSelection().removeAllRanges();
+
         if (rules.length || sections.length)
         {
             inheritLabel = Locale.$STR("InheritedFrom");
@@ -171,11 +183,14 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             Events.dispatch([Firebug.A11yModel], "onCSSRulesAdded", [this, result]);
         }
+
+        // Avoid a flickering "disable" icon by forcing a reflow (issue 5500).
+        this.panelNode.offsetHeight;
     },
 
     getStylesheetURL: function(rule, getBaseUri)
     {
-        // if the parentStyleSheet.href is null, CSS std says its inline style
+        // If parentStyleSheet.href is null, then per the CSS standard this is an inline style.
         if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
         else if (getBaseUri)
@@ -190,7 +205,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
-        if (parent && parent.nodeType == 1)
+        if (parent && parent.nodeType == Node.ELEMENT_NODE)
         {
             this.getInheritedRules(parent, sections, usedProps);
 
@@ -198,7 +213,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getElementRules(parent, rules, usedProps, true);
 
             if (rules.length)
-                sections.splice(0, 0, {element: parent, rules: rules});
+                sections.unshift({element: parent, rules: rules});
         }
     },
 
@@ -243,7 +258,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     this.markOverriddenProps(element, props, usedProps, inheritMode);
 
                 var ruleId = this.getRuleId(rule);
-                rules.splice(0, 0, {rule: rule, id: ruleId,
+                rules.unshift({rule: rule, id: ruleId,
                     // Show universal selectors with pseudo-class
                     // (http://code.google.com/p/fbug/issues/detail?id=3683)
                     selector: rule.selectorText.replace(/ :/g, " *:"),
@@ -260,7 +275,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+            FBTrace.sysout("getElementRules " + rules.length + " rules for " +
                 Xpath.getElementXPath(element), rules);
     },
 
@@ -290,9 +305,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             var dummyStyle = dummyElement.style;
 
             // xxxHonza: Not sure why this happens.
-            if (!dummyStyle && FBTrace.DBG_ERRORS)
+            if (!dummyStyle)
             {
-                FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
                 return;
             }
 
@@ -435,8 +451,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         if (props.length)
         {
-            rules.splice(0, 0,
-                {rule: element, id: Xpath.getElementXPath(element),
+            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
                     selector: "element.style", props: props, inherited: inheritMode});
         }
     },
@@ -455,14 +470,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onClick = Obj.bind(this.onClick, this);
         this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
         this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
 
-        // We only need the basic panel initialize, not the intermeditate objects
-        Firebug.Panel.initialize.apply(this, arguments);
+        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
     },
 
     show: function(state)
@@ -477,22 +489,19 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         {
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
-            var doc = win.document;
-            context.addEventListener(doc, "mouseover", this.onHoverChange, false);
-            context.addEventListener(doc, "mousedown", this.onActiveChange, false);
+            context.addEventListener(win, "mouseover", this.onHoverChange, false);
+            context.addEventListener(win, "mousedown", this.onActiveChange, false);
         }
     },
 
     unwatchWindow: function(context, win)
     {
-        var doc = win.document;
-        context.removeEventListener(doc, "mouseover", this.onHoverChange, false);
-        context.removeEventListener(doc, "mousedown", this.onActiveChange, false);
+        context.removeEventListener(win, "mouseover", this.onHoverChange, false);
+        context.removeEventListener(win, "mousedown", this.onActiveChange, false);
 
+        var doc = win.document;
         if (Dom.isAncestor(this.stateChangeEl, doc))
-        {
             this.removeStateChangeHandlers();
-        }
     },
 
     supportsObject: function(object, type)
@@ -502,7 +511,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
         this.updateCascadeView(element);
 
@@ -526,24 +535,25 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             return;
         }
 
-        if (!element)
-            return;
-
         this.updateView(element);
     },
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps" ||
-            name == "onlyShowAppliedStyles")
-        {
+        var options = new Set();
+        options.add("onlyShowAppliedStyles");
+        options.add("showUserAgentCSS");
+        options.add("expandShorthandProps");
+        options.add("colorDisplay");
+        options.add("showMozillaSpecificStyles");
+
+        if (options.has(name))
             this.refresh();
-        }
     },
 
     getOptionsMenuItems: function()
     {
-        var ret = [
+        var items = [
             Menu.optionMenu("Only_Show_Applied_Styles", "onlyShowAppliedStyles",
                 "style.option.tip.Only_Show_Applied_Styles"),
             Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
@@ -552,46 +562,58 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 "css.option.tip.Expand_Shorthand_Properties")
         ];
 
+        items = Arr.extendArray(items, CSSModule.getColorDisplayOptionMenuItems());
+
         if (Dom.domUtils && this.selection)
         {
-            var state = safeGetContentState(this.selection);
             var self = this;
 
-            ret.push("-");
-
-            ret.push(
-                {
-                    label: "style.option.label.active",
-                    type: "checkbox",
-                    checked: state & STATE_ACTIVE,
-                    tooltiptext: "style.option.tip.active",
-                    command: function()
-                    {
-                        self.updateContentState(STATE_ACTIVE, !this.getAttribute("checked"));
-                    }
-                }
-            );
-
-            ret.push(
+            items.push(
+                "-",
                 {
                     label: "style.option.label.hover",
                     type: "checkbox",
-                    checked: state & STATE_HOVER,
+                    checked: self.hasPseudoClassLock(":hover"),
                     tooltiptext: "style.option.tip.hover",
                     command: function()
                     {
-                        self.updateContentState(STATE_HOVER, !this.getAttribute("checked"));
+                        self.togglePseudoClassLock(":hover");
+                    }
+                },
+                {
+                    label: "style.option.label.active",
+                    type: "checkbox",
+                    checked: self.hasPseudoClassLock(":active"),
+                    tooltiptext: "style.option.tip.active",
+                    command: function()
+                    {
+                        self.togglePseudoClassLock(":active");
                     }
                 }
             );
+            if (Dom.domUtils.hasPseudoClassLock)
+            {
+                items.push(
+                    {
+                        label: "style.option.label.focus",
+                        type: "checkbox",
+                        checked: self.hasPseudoClassLock(":focus"),
+                        tooltiptext: "style.option.tip.focus",
+                        command: function()
+                        {
+                            self.togglePseudoClassLock(":focus");
+                        }
+                    }
+                );
+            }
         }
 
-        return ret;
+        return items;
     },
 
     getContextMenuItems: function(style, target)
     {
-        var items = CSSStyleSheetPanel.prototype.getContextMenuItems(style, target);
+        var items = CSSStyleSheetPanel.prototype.getContextMenuItems.apply(this, [style, target]);
         var insertIndex = 0;
 
         for (var i = 0; i < items.length; ++i)
@@ -608,6 +630,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             label: "EditStyle",
             tooltiptext: "style.tip.Edit_Style",
             command: Obj.bindFixed(this.editElementStyle, this)
+        },
+        {
+            label: "AddRule",
+            tooltiptext: "style.tip.Add_Rule",
+            command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
         if (style instanceof Ci.nsIDOMFontFace && style.rule)
@@ -646,15 +673,67 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
-    updateContentState: function(state, remove)
+    hasPseudoClassLock: function(pseudoClass)
+    {
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            return Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass);
+        }
+        else
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var state = safeGetContentState(this.selection);
+            switch(pseudoClass)
+            {
+                case ":active":
+                    return state & STATE_ACTIVE;
+
+                case ":hover":
+                    return state & STATE_HOVER;
+            }
+        }
+    },
+
+    togglePseudoClassLock: function(pseudoClass)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("css.updateContentState; state: " + state + ", remove: " + remove);
+            FBTrace.sysout("css.togglePseudoClassLock; pseudo-class: " + pseudoClass);
 
-        Dom.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
-            this.selection, state);
+        if (Dom.domUtils.hasPseudoClassLock)
+        {
+            if (Dom.domUtils.hasPseudoClassLock(this.selection, pseudoClass))
+                Dom.domUtils.removePseudoClassLock(this.selection, pseudoClass);
+            else
+                Dom.domUtils.addPseudoClassLock(this.selection, pseudoClass);
+        }
+        else
+        {
+            // Fallback in case the new pseudo-class lock API isn't available
+            var currentState = safeGetContentState(this.selection);
+            var remove = false;
+            switch(pseudoClass)
+            {
+                case ":active":
+                    state = STATE_ACTIVE;
+                    break;
+
+                case ":hover":
+                    state = STATE_HOVER;
+                    break;
+            }
+            remove = currentState & state;
+
+            Dom.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
+                this.selection, state);
+        }
 
         this.refresh();
+    },
+
+    clearPseudoClassLocks: function()
+    {
+        if (Dom.domUtils.clearPseudoClassLocks)
+            Dom.domUtils.clearPseudoClassLocks(this.selection);
     },
 
     addStateChangeHandlers: function(el)

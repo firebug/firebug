@@ -10,21 +10,4 @@
         <key id="key_openTraceConsole" key="r" modifiers="shift" command="cmd_openTraceConsole" class="fbOnlyKey"/>
     </keyset>
 
-    <!-- Overlay for Firebug menu -->
-    <menupopup id="fbFirebugMenuPopup">
-        <menuitem id="menu_openTraceConsole" label="Open_Firebug_Tracing"
-            command="cmd_openTraceConsole" insertbefore="menu_aboutSeparator"
-            class="fbInternational" key="key_openTraceConsole"/>
-
-        <menu id="FirebugMenu_Options">
-            <menupopup id="FirebugMenu_OptionsPopup">
-                <menuitem id="FirebugMenu_Options_alwaysOpenTraceConsole"
-                    insertbefore="menu_optionsSeparator"
-                    type="checkbox" label="Always_Open_Firebug_Tracing"
-                    oncommand="FBTraceFirebugOverlay.onToggleOption(this)"
-                    class="fbInternational" option="alwaysOpenTraceConsole"/>
-            </menupopup>
-        </menu>
-    </menupopup>
-
 </overlay>

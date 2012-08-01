@@ -12,9 +12,16 @@ var EXPORTED_SYMBOLS = [];
 // ********************************************************************************************* //
 // Services
 
-Cu.import("resource://firebug/fbtrace.js");
+// xxxHonza: FBTrace console doesn't have to exist at this point (Firebug is bootstrapped).
+// In such case an empty object is created and all consequent logs are not visible in the
+// console window.
+// Cu.import("resource://firebug/fbtrace.js");
+
+// Just workaround for this module.
+var FBTrace = {sysout: function(){}};
+
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
 
 // Import of PluralForm object.
 Cu.import("resource://gre/modules/PluralForm.jsm");
@@ -63,7 +70,7 @@ Locale.$STR = function(name, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {
@@ -104,7 +111,7 @@ Locale.$STRF = function(name, args, bundle)
 {
     var strKey = name.replace(" ", "_", "g");
 
-    if (!FirebugLoader.getPref("useDefaultLocale"))
+    if (!PrefLoader.getPref("useDefaultLocale"))
     {
         try
         {
@@ -204,7 +211,7 @@ Locale.internationalizeElements = function(doc, elements, attributes)
         if (!element)
             continue;
 
-        // Remove fbInternational class so, the label is not translated again later.
+        // Remove fbInternational class, so that the label is not translated again later.
         element.classList.remove("fbInternational");
 
         for (var j=0; j<attributes.length; j++)

@@ -6,95 +6,133 @@ function runTest()
         FBTest.openFirebug();
         var panel = FBTest.selectPanel("html");
 
-        FBTest.selectElementInHtmlPanel("sayHi", function(node)
-        {
-            var attributes = node.getElementsByClassName("nodeAttr");
+        var tasks = new FBTest.TaskList();
+        tasks.push(checkQuotesInId);
+        tasks.push(checkQuotesInOnClick, panel, win);
+        tasks.push(checkQuotesInStyle, panel, win);
 
-            clickAttributeValue(attributes, "id", function(attribute, editor) {
-                // Enter a double quote
-                FBTest.sendChar("\"", editor);
-                if (FBTest.ok(editor, "Editor must still be available"))
-                    FBTest.ok(editor.value != "\"", "Editor must be at the next attribute now");
-            });
-  
-            clickAttributeValue(attributes, "onclick", function(attribute, editor) {
-                // Move text cursor between the opening bracket and 'output' of
-                // 'getElementById(output')'
-                FBTest.sendKey("HOME", editor);
-                for (var i=0; i<37; i++)
-                    FBTest.sendKey("RIGHT", editor);
-  
-                // Enter a single quote
-                FBTest.sendChar("'", editor);
-  
-                if (!FBTest.ok(editor, "Editor must still be available") &&
-                    !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
-                        "to the next editable item when a single quote is entered"))
-                {
-                    FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                        firstClientRect.top-boundingClientRect.top);
-                    editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
-                }
-  
-                FBTest.compare(/getElementById\('output'\)/, editor.value,
-                    "Single quote must be entered");
-  
-                // Move text cursor before the 'H' of 'Hi'
-                for (var i=0; i<61; i++)
-                    FBTest.sendKey("RIGHT", editor);
-  
-                // Enter a double quote
-                FBTest.sendChar("\"", editor);
-  
-                if (!FBTest.ok(editor, "Editor must still be available") &&
-                    !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
-                        "to the next editable item when a double quote is entered"))
-                {
-                    FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                        firstClientRect.top-boundingClientRect.top);
-                    editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
-                }
-  
-                FBTest.compare(/"Hi/, editor.value, "Double quote must be entered");
+        tasks.run(function() {
+            FBTest.testDone("issue4542.DONE");
+        });
+    });
+}
 
-                // Click outside the CSS selector to stop inline editing
-                FBTest.synthesizeMouse(panel.panelNode, 0, 0);
+function checkQuotesInId(callback)
+{
+    FBTest.progress("Check quotes in 'id'");
 
+    FBTest.selectElementInHtmlPanel("sayHi", function(node)
+    {
+        var attributes = node.getElementsByClassName("nodeAttr");
 
-                FBTest.click(win.document.getElementById("sayHi"));
-                FBTest.compare("Hi there, tester!", win.document.getElementById("output").textContent, "Changes in panel must effect page content");
-            });
+        clickAttributeValue(attributes, "id", function(attribute, editor) {
+            // Enter a double quote
+            FBTest.sendChar("\"", editor);
+            if (FBTest.ok(editor, "Editor must still be available"))
+                FBTest.ok(editor.value != "\"", "Editor must be at the next attribute now");
 
-            clickAttributeValue(attributes, "style", function(attribute, editor) {
-                var buttonDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
+            callback();
+        });
+    });
+}
 
-                // Move text cursor after the opening bracket of 'background-image: url(firebug.png');'
-                FBTest.sendKey("HOME", editor);
-                for (var i=0; i<22; i++)
-                    FBTest.sendKey("RIGHT", editor);
+function checkQuotesInOnClick(callback, panel, win)
+{
+    FBTest.progress("Check quotes in 'onclick'");
 
-                // Enter a single quote
-                FBTest.sendChar("'", editor);
+    FBTest.selectElementInHtmlPanel("sayHi", function(node)
+    {
+        var attributes = node.getElementsByClassName("nodeAttr");
 
-                if (!FBTest.ok(editor, "Editor must still be available") &&
-                    !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
-                        "to the next editable item when a single quote is entered"))
-                {
-                    FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                        firstClientRect.top-boundingClientRect.top);
-                    editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
-                }
+        clickAttributeValue(attributes, "onclick", function(attribute, editor) {
+            // Move text cursor between the opening bracket and 'output' of
+            // 'getElementById(output')'
+            FBTest.sendKey("HOME", editor);
+            for (var i=0; i<37; i++)
+                FBTest.sendKey("RIGHT", editor);
 
-                FBTest.compare(/background-image: url\('firebug.png'\)/, editor.value,
-                    "Single quote must be entered");
-  
-                // Click outside the CSS selector to stop inline editing
-                FBTest.synthesizeMouse(panel.panelNode, 0, 0);
+            // Enter a single quote
+            FBTest.sendChar("'", editor);
 
-                var buttonDisplayAfter = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
-                FBTest.ok(buttonDisplayBefore != buttonDisplayAfter, "The button display must have changed");
-             });
-             FBTest.testDone("issue4542.DONE");
+            if (!FBTest.ok(editor, "Editor must still be available") &&
+                !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
+                    "to the next editable item when a single quote is entered"))
+            {
+                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
+                    firstClientRect.top-boundingClientRect.top);
+                editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
+            }
+
+            FBTest.compare(/getElementById\('output'\)/, editor.value,
+                "Single quote must be entered");
+
+            // Move text cursor before the 'H' of 'Hi'
+            for (var i=0; i<61; i++)
+                FBTest.sendKey("RIGHT", editor);
+
+            // Enter a double quote
+            FBTest.sendChar("\"", editor);
+
+            if (!FBTest.ok(editor, "Editor must still be available") &&
+                !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
+                    "to the next editable item when a double quote is entered"))
+            {
+                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
+                    firstClientRect.top-boundingClientRect.top);
+                editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
+            }
+
+            FBTest.compare(/"Hi/, editor.value, "Double quote must be entered");
+
+            // Click outside the CSS selector to stop inline editing
+            FBTest.synthesizeMouse(panel.panelNode, 0, 0);
+
+            FBTest.click(win.document.getElementById("sayHi"));
+            FBTest.compare("Hi there, tester!", win.document.getElementById("output").textContent, "Changes in panel must effect page content");
+
+            callback();
+        });
+    });
+}
+
+function checkQuotesInStyle(callback, panel, win)
+{
+    FBTest.progress("Check quotes in 'style'");
+
+    FBTest.selectElementInHtmlPanel("sayHi", function(node)
+    {
+        var attributes = node.getElementsByClassName("nodeAttr");
+
+        clickAttributeValue(attributes, "style", function(attribute, editor) {
+            var buttonDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
+
+            // Move text cursor after the opening bracket of 'background-image: url(firebug.png');'
+            FBTest.sendKey("HOME", editor);
+            for (var i=0; i<22; i++)
+                FBTest.sendKey("RIGHT", editor);
+
+            // Enter a single quote
+            FBTest.sendChar("'", editor);
+
+            if (!FBTest.ok(editor, "Editor must still be available") &&
+                !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
+                    "to the next editable item when a single quote is entered"))
+            {
+                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
+                    firstClientRect.top-boundingClientRect.top);
+                editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
+            }
+
+            FBTest.compare(/background-image: url\('firebug.png'\)/, editor.value,
+                "Single quote must be entered");
+
+            // Click outside the CSS selector to stop inline editing
+            FBTest.synthesizeMouse(panel.panelNode, 0, 0);
+
+            var buttonDisplayAfter = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
+            FBTest.ok(buttonDisplayBefore != buttonDisplayAfter, "The button display must have changed");
+
+            callback();
         });
     });
 }
@@ -104,20 +142,21 @@ function runTest()
 function clickAttributeValue(attributes, name, callback)
 {
     var attribute;
-    for each (attribute in attributes)
+    for (var i = 0; i < attributes.length; ++i)
     {
+        attribute = attributes[i];
         if (attribute.getElementsByClassName("nodeName").item(0).textContent == name)
             break;
     }
     var attributeValue = attribute.getElementsByClassName("nodeValue").item(0);
-  
+
     // Click the attribute value to open the inline editor
     var boundingClientRect = attributeValue.getBoundingClientRect();
     var firstClientRect = attributeValue.getClientRects()[0];
-  
+
     if (FBTrace.DBG_FBTEST)
         FBTrace.sysout("clientrect", {cr: firstClientRect, bcr: boundingClientRect});
-  
+
     FBTest.synthesizeMouse(attributeValue, firstClientRect.left-boundingClientRect.left,
         firstClientRect.top-boundingClientRect.top);
 

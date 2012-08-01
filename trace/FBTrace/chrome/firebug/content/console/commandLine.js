@@ -21,12 +21,13 @@ define([
     "firebug/console/eventMonitor",
     "firebug/lib/keywords",
     "firebug/console/console",
+    "firebug/console/commandLineHelp",
     "firebug/console/commandLineExposed",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console) {
+    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console, CommandLineHelp) {
 
 // ********************************************************************************************* //
 // Constants
@@ -71,7 +72,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     // returns user-level wrapped object I guess.
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
-        exceptionFunction)
+        exceptionFunction, noStateChange)
     {
         if (!context)
             return;
@@ -97,7 +98,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                     successConsoleFunction, exceptionFunction);
             }
 
-            context.invalidatePanels("dom", "html");
+            if (!noStateChange)
+                context.invalidatePanels("dom", "html");
         }
         catch (exc)
         {
@@ -140,7 +142,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (!Firebug.CommandLine.isAttached(context, win))
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
-                "its too early for command line "+Win.getWindowId(win)+" location:"+
+                "it's too early for command line "+Win.getWindowId(win)+" location:"+
                 Win.safeGetWindowLocation(win), document);
 
             if (Xml.isXMLPrettyPrint(context, win))
@@ -164,7 +166,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
-                    "document.getUserData , its too early for command line",
+                    "through document.getUserData, it is too early for command line",
                      win], context, "error", true);
             }
             return;
@@ -195,7 +197,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (result === ignoreReturnValue)
                     return;
 
-                // result will be pass thru this function
                 successConsoleFunction(result, context);
             });
         }
@@ -272,7 +273,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             result = Firebug.Debugger.evaluate(expr, context, scope);
 
-            // result will be pass thru this function
             successConsoleFunction(result, context);
         }
         catch (e)
@@ -320,7 +320,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (result === ignoreReturnValue)
                     return;
 
-                // result will be pass thru this function
                 successConsoleFunction(result, context);
             });
         }
@@ -381,7 +380,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluateInSandbox success for sandbox ", scriptToEval);
 
-            // result will be pass thru this function
             successConsoleFunction(result, context);
         }
         catch (e)
@@ -409,7 +407,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enter: function(context, command)
     {
-        var expr = command ? command : this.getCommandLine(context).value;
+        var expr = command ? command : this.getExpression(context);
         if (expr == "")
             return;
 
@@ -655,7 +653,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             var completionBox = this.getCompletionBox();
 
             var options = {
-                completionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
                 tabWarnings: true,
                 includeCurrentScope: true
             };
@@ -952,14 +951,23 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getCommandLine: function(context)
     {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor():
+                this.getSingleRowCommandLine();
+    },
+
+    isInOtherPanel: function(context)
+    {
         // Command line on other panels is never multiline.
         var visible = Firebug.CommandLine.Popup.isVisible();
-        if (visible && context.panelName != "console")
-            return this.getSingleRowCommandLine();
+        return visible && context.panelName != "console";
+    },
 
-        return Firebug.commandEditor
-            ? this.getCommandEditor()
-            : this.getSingleRowCommandLine();
+    getExpression: function(context)
+    {
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+                this.getCommandEditor().getExpression() :
+                this.getSingleRowCommandLine().value;
     },
 
     getCompletionBox: function()
@@ -976,6 +984,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         return Firebug.CommandEditor;
     }
+
 });
 
 // ********************************************************************************************* //
@@ -1187,7 +1196,14 @@ function FirebugCommandLineAPI(context)
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.memoryProfile = function(title)
+    this.help = function()
+    {
+        CommandLineHelp.render(context);
+        return Firebug.Console.getDefaultReturnValue(context.window);
+    };
+
+    // xxxHonza: removed from 1.10 (issue 5599)
+    /*this.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
         return Firebug.Console.getDefaultReturnValue(context.window);
@@ -1197,7 +1213,7 @@ function FirebugCommandLineAPI(context)
     {
         Firebug.MemoryProfiler.stop(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
-    };
+    };*/
 }
 
 // ********************************************************************************************* //
@@ -1339,9 +1355,17 @@ Firebug.CommandLine.injector =
 // ********************************************************************************************* //
 // CommandLine Handler
 
+/**
+ * This object is responsible for handling commands executing in the page context.
+ * When a command (CMD API) is being executed, the page sends a DOM event that is
+ * handled by 'handleEvent' method.
+ *
+ * @param {Object} context
+ * @param {Object} win is the window the handler is bound into
+ */
 function CommandLineHandler(context, win)
 {
-    this.handleEvent = function(event)  // win is the window the handler is bound into
+    this.handleEvent = function(event)
     {
         context.baseWindow = context.baseWindow || context.window;
         this.api = new FirebugCommandLineAPI(context);

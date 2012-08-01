@@ -91,7 +91,15 @@
 
 #fbSearchOptionsPanel > vbox {
     margin-right: -38px;
+    background: #424242;
 }
+
+#fbSearchOptionsPanel > description {
+    background: #424242;
+    margin: 0;
+}
+
+
 
 .fbsearch-options-label {
     color: #ffffff;

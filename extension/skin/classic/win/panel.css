@@ -13,7 +13,9 @@
 .objectBox-stackFrame.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
 .cssComputedHeader > .twisty,
-.computedStyle.hasSelectors > .stylePropName {
+.breakpointHeader > .twisty,
+.computedStyle.hasSelectors > .stylePropName,
+.cookieRow > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 2px;
@@ -31,7 +33,9 @@
 .netPageRow.opened > .netCol > .netPageTitle,
 .objectBox-stackFrame.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
-.computedStyle.hasSelectors.opened > .stylePropName {
+.breakpointBlock.opened > .breakpointHeader > .twisty,
+.computedStyle.hasSelectors.opened > .stylePropName,
+.cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
@@ -39,7 +43,8 @@
     background-position: 4px 4px;
 }
 
-.hasHeaders .netHrefLabel {
+.hasHeaders .netHrefLabel,
+.cookieRow > .cookieNameCol > .cookieNameLabel {
     background-position: 2px 50%;
 }
 

@@ -465,6 +465,49 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// Reference
+
+/**
+ * A placeholder used instead of cycle reference within arrays.
+ * @param {Object} target The original referenced object
+ */
+FirebugReps.ReferenceObj = function(target)
+{
+    this.target = target;
+}
+
+/**
+ * Rep for cycle reference in an array.
+ */
+FirebugReps.Reference = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK({_repObject: "$object"},
+            SPAN({title: "$object|getTooltip"},
+                "[...]")
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "Reference",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof FirebugReps.ReferenceObj);
+    },
+
+    getTooltip: function(object)
+    {
+        return Locale.$STR("firebug.reps.reference");
+    },
+
+    getRealObject: function(object)
+    {
+        return object.target;
+    },
+});
+
+// ********************************************************************************************* //
 
 FirebugReps.Arr = domplate(Firebug.Rep,
 {
@@ -513,12 +556,16 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             {
                 var delim = (i == array.length-1 ? "" : ", ");
                 var value = array[i];
+
+                // Cycle detected
+                if (value === array)
+                    value = new FirebugReps.ReferenceObj(value);
+
                 var rep = Firebug.getRep(value);
                 var tag = rep.shortTag || rep.tag;
-
                 items.push({object: value, tag: tag, delim: delim});
             }
-            catch(exc)
+            catch (exc)
             {
                 var rep = Firebug.getRep(exc);
                 var tag = rep.shortTag || rep.tag;
@@ -593,11 +640,11 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     onToggleProperties: function(event)
     {
-        Events.cancelEvent(event);
-
         var target = event.originalTarget;
         if (Css.hasClass(target, "objectBox-array"))
         {
+            Events.cancelEvent(event);
+
             Css.toggleClass(target, "opened");
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
@@ -834,7 +881,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getAttrValue: function(attr)
     {
         var limit = Firebug.displayedAttributeValueLimit;
-        return (limit > 0) ? Str.cropString(attr.nodeValue, limit) : attr.nodeValue;
+        return (limit > 0) ? Str.cropString(attr.value, limit) : attr.value;
     },
 
     getVisible: function(elt)
@@ -1061,6 +1108,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var type;
         var monitored = EventMonitor.areEventsMonitored(elt, null, context);
+        var items = [];
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
             type = "HTML";
@@ -1073,12 +1121,13 @@ FirebugReps.Element = domplate(Firebug.Rep,
         else
             type = "XML";
 
-        var items = [
+        items.push(
         {
             label: Locale.$STRF("html.Copy_Node", [type]),
             tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
             command: Obj.bindFixed(this.copyHTML, this, elt)
-        }];
+        });
+
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
         {
             items.push(
@@ -1089,7 +1138,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
         }
 
-        return items.concat([
+        items = items.concat([
             {
                 label: "CopyXPath",
                 tooltiptext: "html.tip.Copy_XPath",
@@ -1101,7 +1150,23 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Copy_CSS_Path",
                 id: "fbCopyCSSPath",
                 command: Obj.bindFixed(this.copyCSSPath, this, elt)
-            },
+            }
+        ]);
+
+        var tag = elt.localName.toLowerCase();
+        if (tag == "script" || tag == "link" || tag == "a" || tag == "img")
+        {
+            items = items.concat([
+                "-",
+                {
+                    label: "OpenInTab",
+                    tooltiptext: "firebug.tip.Open_In_Tab",
+                    command: Obj.bindFixed(this.browseObject, this, elt, context)
+                }
+            ]);
+        }
+
+        items = items.concat([
             "-",
             {
                 label: "ShowEventsInConsole",
@@ -1120,6 +1185,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 command: Obj.bindFixed(elt.scrollIntoView, elt)
             }
         ]);
+
+        return items;
     }
 });
 
@@ -1181,8 +1248,16 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return type == "object" && object && object.constructor && object.constructor.toString &&
-            regexpConstructorRE.test(object.constructor.toString());
+        try
+        {
+            return type == "object" && object && object.constructor && object.constructor.toString &&
+                regexpConstructorRE.test(object.constructor.toString());
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err)
+        }
     },
 
     getSource: function(object)
@@ -1364,6 +1439,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSKeyframeRule";
         }
+        else if (rule instanceof window.CSSNameSpaceRule)
+        {
+            return "CSSNameSpaceRule";
+        }
 
         return "CSSRule";
     },
@@ -1399,6 +1478,14 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
             rule instanceof window.MozCSSKeyframeRule)
         {
             return rule.keyText;
+        }
+        else if (rule instanceof window.CSSNameSpaceRule)
+        {
+            var reNamespace = /^@namespace (.+ )?url\("(.*?)"\);$/;
+            var namespace = rule.cssText.match(reNamespace);
+            var prefix = namespace[1] || "";
+            var name = namespace[2];
+            return prefix + name;
         }
 
         return "";
@@ -1822,7 +1909,12 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,
 
     getSourceLinkTitle: function(frame)
     {
-        var fileName = Str.cropString(Url.getFileName(frame.href), 17);
+        var fileName = Url.getFileName(frame.href);
+
+        var maxWidth = Firebug.sourceLinkLabelWidth;
+        if (maxWidth > 0)
+            var fileName = Str.cropString(fileName, maxWidth);
+
         return Locale.$STRF("Line", [fileName, frame.line]);
     },
 
@@ -2233,7 +2325,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
-                    Events.dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
+                    Events.dispatch(panel.fbListeners, "modifyLogRow", [panel, traceBox]);
                 }
             }
             else
@@ -2563,7 +2655,8 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return Locale.$STRP("firebug.storage.totalItems", [storage.length]);
+        var object = this.objectView(storage);
+        return Locale.$STRP("firebug.storage.totalItems", [Object.keys(object).length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2588,67 +2681,75 @@ FirebugReps.Storage = domplate(Firebug.Rep,
         return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
-    propIterator: function(object, max)
+    propIterator: function(storage, max)
     {
-        // we can't utilize the existing function due to:
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=573875
-        //return FirebugReps.Obj.propIterator(object, max);
+        var object = this.objectView(storage);
+        return FirebugReps.Obj.propIterator(object, max);
+    },
 
-        max = max || 3;
-        if (!object)
-            return [];
+    objectView: function(storage)
+    {
+        var object = this.makeObject(storage);
+        for (var any in object)
+            return object;
 
-        var props = [];
-        var len = 0, count = 0;
+        // We might have hit upon an https site (bug 709238).
+        // As a hack, we'll check if the current context's window
+        // contains the object as localStorage or sessionStorage.
+        try {
+            var context = Firebug.currentContext;
+            var win = context && context.window;
+            if (win && win.location.protocol === "https:")
+            {
+                var names = ["localStorage", "sessionStorage"], done = false;
+                for (var i = 0; i < 2; ++i)
+                {
+                    if (win[names[i]] !== storage)
+                        continue;
+                    Firebug.CommandLine.evaluate(
+                        "((" + this.makeObject + ")(" + names[i] + "))",
+                        context,
+                        null, null,
+                        function(result) {
+                            object = result;
+                            done = true;
+                        },
+                        function() {},
+                        true
+                    );
+                    if (done)
+                        break;
+                }
+            }
+        }
+        catch(e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.Storage.objectView; EXCEPTION " + e, e);
+        }
 
+        return object;
+    },
+
+    makeObject: function(storage)
+    {
+        // Create a raw object, free from getItem etc., from a storage.
+        // May be serialized and run in page scope.
+        var object = {};
         try
         {
-            for (var i=0; i<object.length; i++)
+            for (var name in storage)
             {
-                var value;
-                var name;
-                try
-                {
-                    name = object.key(i);
-                    value = object.getItem(name);
-                    if (value instanceof window.StorageItem)
-                        value = value.value;
-                }
-                catch (exc)
-                {
-                    continue;
-                }
-
-                var rep = Firebug.getRep(value);
-                var tag = rep.shortTag || rep.tag;
-
-                count++;
-                if (count <= max)
-                    props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
-                else
-                    break;
-            }
-
-            if (count > max)
-            {
-                props[Math.max(1,max-1)] = {
-                    object: Locale.$STR("firebug.reps.more") + "...",
-                    tag: FirebugReps.Caption.tag,
-                    name: "",
-                    equal:"",
-                    delim:""
-                };
-            }
-            else if (props.length > 0)
-            {
-                props[props.length-1].delim = '';
+                var value = storage.getItem(name);
+                Object.defineProperty(object, name, {value: value, enumerable: true});
             }
         }
-        catch (exc)
+        catch(e)
         {
+            // We can't log an error in page scope.
         }
-        return props;
-    },
+        return object;
+    }
 });
 
 // ********************************************************************************************* //
@@ -2860,18 +2961,18 @@ FirebugReps.Attr = domplate(Firebug.Rep,
             SPAN(
                 SPAN({"class": "attrTitle"}, "$object|getTitle"),
                 SPAN({"class": "attrEqual"}, "="),
-                TAG("$object|getValueTag", {object: "$object.nodeValue"})
+                TAG("$object|getValueTag", {object: "$object.value"})
             )
         ),
 
     getTitle: function(attr)
     {
-        return attr.nodeName;
+        return attr.name;
     },
 
     getValueTag: function(object)
     {
-        return Firebug.getRep(object.nodeValue).tag;
+        return Firebug.getRep(object.value).tag;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2981,8 +3082,8 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         for (var i=0; i<object.length && i<max; i++)
         {
             var item = object.item(i);
-            var name = item.nodeName;
-            var value = item.nodeValue;
+            var name = item.name;
+            var value = item.value;
 
             var rep = Firebug.getRep(value);
             var tag = rep.tag;
@@ -3030,6 +3131,13 @@ FirebugReps.ErrorMessageObj.prototype =
 {
     getSourceLine: function()
     {
+        if (!this.context.sourceCache)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!")
+            return;
+        }
+
         return this.context.sourceCache.getLine(this.href, this.lineNo);
     },
 
@@ -3097,7 +3205,8 @@ Firebug.registerRep(
     FirebugReps.StorageList,
     FirebugReps.Attr,
     FirebugReps.Date,
-    FirebugReps.NamedNodeMap
+    FirebugReps.NamedNodeMap,
+    FirebugReps.Reference
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);

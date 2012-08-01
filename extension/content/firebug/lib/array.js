@@ -120,29 +120,54 @@ Arr.arrayInsert = function(array, index, other)
 }
 
 /**
- * Merge two arrays and keep only unique values. Note that this method always
- * sorts the output (sorting is used for fast removal of duplicated items).
- *
- * @param {Array} arr1 The first array to merge.
- * @param {Array} arr2 The second array to merge.
- * @param {Function} sortFunc Optional function for proper sorting of items in arrays.
+ * Filter out unique values of an array, saving only the first occurrence of
+ * every value. In case the array is sorted, a faster path is taken.
+ */
+Arr.unique = function(ar, sorted)
+{
+    var ret = [], len = ar.length;
+    if (sorted)
+    {
+        for (var i = 0; i < len; ++i)
+        {
+            // Skip duplicated entries
+            if (i && ar[i-1] === ar[i])
+                continue;
+            ret.push(ar[i]);
+        }
+    }
+    else
+    {
+        // Keep a map whose ","-prefixed keys represent the values that have
+        // occurred so far in the array (this avoids overwriting e.g. __proto__).
+        var map = {};
+        for (var i = 0; i < len; ++i)
+        {
+            if (!map.hasOwnProperty("," + ar[i]))
+            {
+                ret.push(ar[i]);
+                map["," + ar[i]] = 1;
+            }
+        }
+    }
+    return ret;
+};
+
+/**
+ * Sort an array and eliminate duplicates from it.
+ */
+Arr.sortUnique = function(ar, sortFunc)
+{
+    return Arr.unique(ar.slice().sort(sortFunc), true);
+};
+
+/**
+ * Merge together two arrays, sort the result, and eliminate any duplicates.
  */
 Arr.merge = function(arr1, arr2, sortFunc)
 {
-    var ar = Arr.extendArray(arr1, arr2);
-    ar.sort(sortFunc);
-
-    var ret = [];
-    for (var i=0; i<ar.length; i++)
-    {
-        // Skip duplicated entries
-        if (i && ar[i-1] === ar[i])
-            continue;
-        ret.push(ar[i]);
-    }
-
-    return ret;
-}
+    return Arr.sortUnique(arr1.concat(arr2), sortFunc);
+};
 
 // ********************************************************************************************* //
 

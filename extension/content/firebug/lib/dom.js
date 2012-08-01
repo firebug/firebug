@@ -116,7 +116,7 @@ Dom.isAncestor = function(node, potentialAncestor)
 
 Dom.getNextElement = function(node)
 {
-    while (node && node.nodeType != 1)
+    while (node && node.nodeType != Node.ELEMENT_NODE)
         node = node.nextSibling;
 
     return node;
@@ -124,7 +124,7 @@ Dom.getNextElement = function(node)
 
 Dom.getPreviousElement = function(node)
 {
-    while (node && node.nodeType != 1)
+    while (node && node.nodeType != Node.ELEMENT_NODE)
         node = node.previousSibling;
 
     return node;
@@ -173,12 +173,12 @@ Dom.addScript = function(doc, id, src)
 
 Dom.setOuterHTML = function(element, html)
 {
-    var doc = element.ownerDocument;
-    var range = doc.createRange();
-    range.selectNode(element || doc.documentElement);
-
     try
     {
+        var doc = element.ownerDocument;
+        var range = doc.createRange();
+        range.selectNode(element || doc.documentElement);
+
         var fragment = range.createContextualFragment(html);
         var first = fragment.firstChild;
         var last = fragment.lastChild;
@@ -187,7 +187,7 @@ Dom.setOuterHTML = function(element, html)
     }
     catch (e)
     {
-        return [element, element]
+        return [element, element];
     }
 };
 
@@ -275,6 +275,16 @@ Dom.isElement = function(o)
     }
 };
 
+Dom.isRange = function(o)
+{
+    try {
+        return o && o instanceof window.Range;
+    }
+    catch (ex) {
+        return false;
+    }
+};
+
 Dom.hasChildElements = function(node)
 {
     if (node.contentDocument) // iframes
@@ -282,7 +292,7 @@ Dom.hasChildElements = function(node)
 
     for (var child = node.firstChild; child; child = child.nextSibling)
     {
-        if (child.nodeType == 1)
+        if (child.nodeType == Node.ELEMENT_NODE)
             return true;
     }
 
@@ -293,13 +303,13 @@ Dom.hasChildElements = function(node)
 
 Dom.getNextByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    function iter(node) { return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, state); }
     return Dom.findNext(root, iter);
 };
 
 Dom.getPreviousByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    function iter(node) { return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, state); }
     return Dom.findPrevious(root, iter);
 };
 
@@ -388,7 +398,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
         if (criteria(node.parentNode))
             return node.parentNode;
 
-        return Dom.findPrevious(node.parentNode, criteria, true);
+        return Dom.findPrevious(node.parentNode, criteria, true, maxRoot);
     }
 };
 
@@ -410,7 +420,7 @@ Dom.getClientOffset = function(elt)
 
         if (p)
         {
-            if (p.nodeType == 1)
+            if (p.nodeType == Node.ELEMENT_NODE)
                 addOffset(p, coords, view);
         }
         else if (elt.ownerDocument.defaultView.frameElement)
@@ -427,6 +437,12 @@ Dom.getClientOffset = function(elt)
     return coords;
 };
 
+/**
+ * Gets layout info about an element
+ * @param {Object} elt Element to get the info for
+ * @returns {Object} Layout information including "left", "top", "right", "bottom",
+ *     "width" and "height"
+ */
 Dom.getLTRBWH = function(elt)
 {
     var bcrect,
@@ -454,11 +470,21 @@ Dom.getLTRBWH = function(elt)
     return dims;
 };
 
+/**
+ * Gets the offset size of an element
+ * @param {Object} elt Element to move
+ * @returns {Object} Offset width and height of the element
+ */
 Dom.getOffsetSize = function(elt)
 {
     return {width: elt.offsetWidth, height: elt.offsetHeight};
 };
 
+/**
+ * Get the next scrollable ancestor
+ * @param {Object} element Element to search the ancestor for
+ * @returns {Object} Scrollable ancestor
+ */
 Dom.getOverflowParent = function(element)
 {
     for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
@@ -468,6 +494,11 @@ Dom.getOverflowParent = function(element)
     }
 };
 
+/**
+ * Checks whether an element is scrolled to the bottom
+ * @param {Object} element Element to check
+ * @returns {Boolean} True, if element is scrolled to the bottom, otherwise false
+ */
 Dom.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
@@ -480,6 +511,11 @@ Dom.isScrolledToBottom = function(element)
     return onBottom;
 };
 
+/**
+ * Scrolls a scrollable element to the bottom
+ * @param {Object} element Element to scroll
+ * @returns {Boolean} True, if the element could be scrolled to the bottom, otherwise false
+ */
 Dom.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight;
@@ -494,12 +530,24 @@ Dom.scrollToBottom = function(element)
     return (element.scrollTop == element.scrollHeight);
 };
 
+/**
+ * Moves an element
+ * @param {Object} element Element to move
+ * @param {Number} x New horizontal position
+ * @param {Number} y New vertical position
+ */
 Dom.move = function(element, x, y)
 {
     element.style.left = x + "px";
     element.style.top = y + "px";
 };
 
+/**
+ * Resizes an element
+ * @param {Object} element Element to resize
+ * @param {Number} w New width
+ * @param {Number} h New height
+ */
 Dom.resize = function(element, w, h)
 {
     element.style.width = w + "px";
@@ -535,7 +583,19 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     }
 };
 
-Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
+/**
+ * Scrolls an element into view
+ * @param {Object} element Element to scroll to
+ * @param {Object} scrollBox Scrolled element (Must be an ancestor of "element" or
+ *     null for automatically determining the ancestor) 
+ * @param {String} alignmentX Horizontal alignment for the element
+ *     (valid values: "centerOrLeft", "left", "middle", "right", "none")
+ * @param {String} alignmentY Vertical alignment for the element
+ *     (valid values: "centerOrTop", "top", "middle", "bottom", "none")
+ * @param {Boolean} scrollWhenVisible Specifies whether "scrollBox" should be scrolled even when
+ *     "element" is completely visible
+ */
+Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVisible)
 {
     if (!element)
         return;
@@ -560,8 +620,8 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
         var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight) -
             (offset.y + element.offsetHeight);
 
-        // Element is vertically not completely visible
-        if (topSpace < 0 || bottomSpace < 0)
+        // Element is vertically not completely visible or scrolling is enforced
+        if (topSpace < 0 || bottomSpace < 0 || scrollWhenVisible)
         {
             switch (alignmentY)
             {
@@ -592,10 +652,10 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
         var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth) -
             (offset.x + element.clientWidth);
 
-        // Element is horizontally not completely visible
-        if (leftSpace < 0 || rightSpace < 0)
+        // Element is horizontally not completely visible or scrolling is enforced
+        if (leftSpace < 0 || rightSpace < 0 || scrollWhenVisible)
         {
-            switch (alignmentY)
+            switch (alignmentX)
             {
                 case "left":
                     scrollBox.scrollLeft = offset.x;
@@ -607,7 +667,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
                     var x = elementFitsIntoScrollBox || alignmentX != "centerOrLeft" ?
                         offset.x - (scrollBox.clientWidth - element.offsetWidth) / 2 :
                         offset.x;
-                    scrollBox.scrollLeft = y;
+                    scrollBox.scrollLeft = x;
                     break;
 
                 case "right":
@@ -622,6 +682,14 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY)
         FBTrace.sysout("dom.scrollTo", element.innerHTML);
 };
 
+/**
+ * Centers an element inside a scrollable area
+ * @param {Object} element Element to scroll to
+ * @param {Object} scrollBox Scrolled element (Must be an ancestor of "element" or
+ *     null for automatically determining the ancestor) 
+ * @param {Boolean} notX Specifies whether the element should be centered horizontally
+ * @param {Boolean} notY Specifies whether the element should be centered vertically
+ */
 Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
     Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft", notY ? "none" : "centerOrTop");

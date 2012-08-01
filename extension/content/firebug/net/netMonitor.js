@@ -294,7 +294,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         var panel = context.getPanel(panelName);
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", panel.persistContent);
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", panel.persistContent);
     },
 
     updateOption: function(name, value)
@@ -398,6 +398,8 @@ var NetHttpObserver =
             else if (topic == "http-on-examine-response")
                 this.onExamineResponse(subject, win, tabId, context);
             else if (topic == "http-on-examine-cached-response")
+                this.onExamineCachedResponse(subject, win, tabId, context);
+            else if (topic == "http-on-examine-merged-response")
                 this.onExamineCachedResponse(subject, win, tabId, context);
         }
         catch (err)

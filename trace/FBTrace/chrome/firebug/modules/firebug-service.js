@@ -96,9 +96,11 @@ const COMPONENTS_FILTERS = [
 
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
-const reTooMuchRecursion = /too\smuch\srecursion/;
 
-const getPref = Components.utils.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
+Cu.import("resource://firebug/prefLoader.js");
+
+var getPref = PrefLoader.getPref;
+
 // ********************************************************************************************* //
 // Globals
 
@@ -745,7 +747,6 @@ var fbs =
         fbs.restoreBreakpoints();
 
         this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
-        fbs._lastErrorDebuggr = null;
 
 
         if (FBTrace.DBG_FBS_ERRORS)
@@ -1254,14 +1255,20 @@ var fbs =
             if (!url)
                 continue;
 
-            var urlBreakpoints = fbs.getBreakpoints(url);
+            var urlBreakpointsTemp = fbs.getBreakpoints(url);
 
             if (FBTrace.DBG_FBS_BP)
+            {
                 FBTrace.sysout("fbs.clearAllBreakpoints " + url + " urlBreakpoints: " +
-                    (urlBreakpoints ? urlBreakpoints.length : "null"));
+                    (urlBreakpointsTemp ? urlBreakpointsTemp.length : "null"));
+            }
 
-            if (!urlBreakpoints)
+            if (!urlBreakpointsTemp)
                 continue;
+
+            // Clone before iteration the array is modified within the loop.
+            var urlBreakpoints = [];
+            urlBreakpoints.push.apply(urlBreakpoints, urlBreakpointsTemp);
 
             for (var ibp=0; ibp<urlBreakpoints.length; ibp++)
             {
@@ -1276,9 +1283,13 @@ var fbs =
     {
         if (url)
         {
-            var urlBreakpoints = fbs.getBreakpoints(url);
-            if (urlBreakpoints)
+            var urlBreakpointsTemp = fbs.getBreakpoints(url);
+            if (urlBreakpointsTemp)
             {
+                // Clone before iteration (the array can be modified in the callback).
+                var urlBreakpoints = [];
+                urlBreakpoints.push.apply(urlBreakpoints, urlBreakpointsTemp);
+
                 for (var i = 0; i < urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
@@ -1346,7 +1357,27 @@ var fbs =
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
-            fbs.saveBreakpoints(url);  // after every call to onToggleBreakpoint
+
+            // after every call to onToggleBreakpoint
+            fbs.saveBreakpoints(url);
+        }
+    },
+
+    clearErrorBreakpoints: function(sourceFiles, debuggr)
+    {
+        for (var i=0; i<sourceFiles.length; ++i)
+        {
+            var url = sourceFiles[i].href;
+            if (!url)
+                continue;
+
+            fbs.enumerateErrorBreakpoints(url,
+            {
+                call: function(url, lineNo)
+                {
+                    fbs.clearErrorBreakpoint(url, lineNo, debuggr);
+                }
+            });
         }
     },
 
@@ -1357,20 +1388,24 @@ var fbs =
 
     enumerateErrorBreakpoints: function(url, cb)
     {
+        // Clone breakpoints array before iteration. The callback could modify it.
+        var copyBreakpoints = [];
+        copyBreakpoints.push.apply(copyBreakpoints, errorBreakpoints);
+
         if (url)
         {
-            for (var i = 0; i < errorBreakpoints.length; ++i)
+            for (var i=0; i<copyBreakpoints.length; ++i)
             {
-                var bp = errorBreakpoints[i];
+                var bp = copyBreakpoints[i];
                 if (bp.href == url)
                     cb.call(bp.href, bp.lineNo, bp);
             }
         }
         else
         {
-            for (var i = 0; i < errorBreakpoints.length; ++i)
+            for (var i=0; i<copyBreakpoints.length; ++i)
             {
-                var bp = errorBreakpoints[i];
+                var bp = copyBreakpoints[i];
                 cb.call(bp.href, bp.lineNo, bp);
             }
         }
@@ -2141,13 +2176,13 @@ var fbs =
 
     onThrow: function(frame, type, rv)
     {
-        if ( isFilteredURL(frame.script.fileName) )
+        if (isFilteredURL(frame.script.fileName))
             return RETURN_CONTINUE_THROW;
 
         if (rv && rv.value && rv.value.isValid)
         {
             var value = rv.value;
-            if (value.jsClassName == "Error" && reTooMuchRecursion.test(value.stringValue))
+            if (value.jsClassName == "Error" && value.stringValue.indexOf("too much recursion") !== -1)
             {
                 if (fbs._lastErrorCaller)
                 {
@@ -2177,24 +2212,7 @@ var fbs =
             delete fbs._lastErrorCaller; // throw is not recursion either
         }
 
-        if (this.showStackTrace)  // store these in case the throw is not caught
-        {
-            var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
-            if (debuggr)
-            {
-                // https://bugzilla.mozilla.org/show_bug.cgi?id=669730
-                //fbs._lastErrorScript = frame.script;
-                //fbs._lastErrorLine = frame.line;
-                //fbs._lastErrorDebuggr = debuggr;
-                //fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
-            }
-            else
-            {
-                delete fbs._lastErrorDebuggr;
-            }
-        }
-
-        if (fbs.trackThrowCatch)
+        if (fbs.showStackTrace)
         {
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.onThrow from tag:" + frame.script.tag + ":" +
@@ -3696,7 +3714,7 @@ var fbs =
                 var bp = urlBreakpoints[i];
 
                 // Do not store breakpoins for "Run until this line". These are not
-                // visible in Firebug UI and so, it isn't possible to remove them
+                // visible in Firebug UI and so, it is not possible to remove them.
                 // Note that there can be cases where such breakpoint is not removed
                 // by RunUntil (e.g. crash).
                 if (bp.type == BP_UNTIL)
@@ -3927,7 +3945,7 @@ var fbs =
             ERROR("fbs.step ERROR unknown mode "+mode);
 
         // The actual stepping starts after we resume the debuggger. Stepping is always
-        // done when the execution/debugger is paused so, we need to resum and break e.g.
+        // done when the execution/debugger is paused, so we need to resume and break e.g.
         // on the next line.
     },
 
@@ -4571,7 +4589,7 @@ function shiftCallType(type)
 // ********************************************************************************************* //
 // Chromebug Tracing
 
-// xxxJJB, shouldn't the followin code be part of Chromebug (could be done as part of splitting
+// xxxJJB, shouldn't the following code be part of Chromebug (could be done as part of splitting
 // this file into more modules?)
 // xxxhonza, yes
 

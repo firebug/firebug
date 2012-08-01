@@ -155,7 +155,7 @@ FBTestApp.TestConsole =
 
         // 3) If no list is specified, use the default from currently installed Firebug.
         if (!defaultTestList)
-            defaultTestList = "http://getfirebug.com/tests/content/testlists/firebug1.10.html";
+            defaultTestList = "http://getfirebug.com/tests/head/firebug.html";
 
         if (FBTrace.DBG_FBTEST)
             FBTrace.sysout("fbtest.TestConsole.getDefaultTestList; " + defaultTestList);
@@ -312,8 +312,8 @@ FBTestApp.TestConsole =
             // Remember successfully loaded test within test history.
             self.appendToHistory(self.testListPath, self.testCasePath, self.driverBaseURI);
 
-            // In case the test list path is "fbtest:all" update the self.testListPath
-            // sine it has been changed as individual test lists have been loaded.
+            // In case the test list path is "fbtest:all" update the testListPath
+            // since it has been changed as individual test lists have been loaded.
             self.testListPath = testListPath;
 
             self.updateURLBars();

@@ -9,6 +9,8 @@ var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/prefLoader.js");
+
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
 // Firebug URLs used by the global menu.
@@ -18,15 +20,22 @@ var firebugURLs =
     FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
     docs: "http://www.getfirebug.com/docs.html",
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
-    discuss: "http://groups.google.com/group/firebug",
+    discuss: "https://groups.google.com/forum/#!forum/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
     donate: "http://getfirebug.com/getinvolved",
     extensions: "http://getfirebug.com/wiki/index.php/Firebug_Extensions",
     firstRunPage: "http://getfirebug.com/firstrun#Firebug "
 };
 
+// ********************************************************************************************* //
+// String Bundles
+
 // Register bundle yet before any Locale.$STR* API is used.
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
+
+// xxxHonza: this needs to be done befor firebug/cookies modules are loaded
+// and it should be part of the cookies directory.
+Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 
 // ********************************************************************************************* //
 // Overlay Helpers
@@ -45,7 +54,7 @@ function $el(name, attributes, children, parent)
 {
     attributes = attributes || {};
 
-    if (!Array.isArray(children))
+    if (!Array.isArray(children) && !parent)
     {
         parent = children;
         children = null;
@@ -97,15 +106,19 @@ function $command(id, oncommand, arg)
     }, $("mainCommandSet"))
 }
 
-function $key(id, keycode, modifiers, command, position)
+function $key(id, key, modifiers, command, position)
 {
-    return $el("key", {
+    var attributes = 
+    {
         id: id,
-        keycode: keycode,
         modifiers: modifiers,
         command: command,
         position: position
-    }, $("mainKeyset"))
+    };
+
+    attributes[KeyEvent["DOM_"+key] ? "keycode" : "key"] = key;
+
+    return $el("key", attributes, $("mainKeyset"));
 }
 
 function $menupopup(attributes, children, parent)
@@ -138,11 +151,13 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for each(var child in children)
+    for (var i=0; i<children.length; i++)
     {
+        var child = children[i];
         var id = child.getAttribute("insertbefore"), beforeEl;
         if (id)
             beforeEl = parent.querySelector("#" + id);
+
         if (!beforeEl)
         {
             id = child.getAttribute("insertafter");
@@ -152,6 +167,7 @@ function $menupopupOverlay(parent, children)
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
+
         parent.insertBefore(child, beforeEl);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
@@ -181,6 +197,16 @@ function $toolbarButton(id, attrs, children, defaultPos)
         i++;
 
     return toolbar.insertItem(id, beforeEl);
+}
+
+function $tooltip(attrs, children)
+{
+    return $el("tooltip", attrs, children);
+}
+
+function $label(attrs)
+{
+    return $el("label", attrs);
 }
 
 // ********************************************************************************************* //
@@ -234,6 +260,8 @@ Firebug.GlobalUI =
     $command: $command,
     $key: $key,
     $splitmenu: $splitmenu,
+    $tooltip: $tooltip,
+    $label: $label,
 
     $stylesheet: function(href)
     {
@@ -268,7 +296,7 @@ Firebug.GlobalUI =
             return callback && callback(Firebug);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("overlay; Load Firebug...");
+            FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
 
         Firebug.waitingForFirstLoad = true;
 
@@ -297,14 +325,14 @@ Firebug.GlobalUI =
             })
         ], container);
 
-        // When Firebug is fully loaded and initialized it fires an "FirebugLoaded"
-        // event to the browser document (browser.xul scope) so, wait for it now.
+        // When Firebug is fully loaded and initialized it fires a "FirebugLoaded"
+        // event to the browser document (browser.xul scope). Wait for that to happen.
         document.addEventListener("FirebugLoaded", function onLoad()
         {
             document.removeEventListener("FirebugLoaded", onLoad, false);
             Firebug.waitingForFirstLoad = false;
 
-            // TODO find a better place for notifying extensions
+            // xxxHonza: TODO find a better place for notifying extensions
             FirebugLoader.dispatchToScopes("firebugFrameLoad", [Firebug]);
             callback && callback(Firebug);
         }, false);
@@ -319,7 +347,7 @@ Firebug.GlobalUI =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = FirebugLoader.getPref(option);
+                    var checked = PrefLoader.getPref(option);
 
                     // xxxHonza: I belive that allPagesActivation could be simple boolean option.
                     if (option == "allPagesActivation")
@@ -336,11 +364,22 @@ Firebug.GlobalUI =
         var option = menuItem.getAttribute("option");
         var checked = menuItem.getAttribute("checked") == "true";
 
-        FirebugLoader.setPref(option, checked);
+        PrefLoader.setPref(option, checked);
     },
 
     onMenuShowing: function(popup)
     {
+        // If this popup is already open the event comes from a sub menu, just ignore it.
+        if (popup.state == "open")
+            return;
+
+        while (popup.lastChild)
+            popup.removeChild(popup.lastChild);
+
+        // Generate dynamic content.
+        for (var i=0; i<firebugMenuContent.length; i++)
+            popup.appendChild(firebugMenuContent[i].cloneNode(true));
+
         var collapsed = "true";
         if (Firebug.chrome)
         {
@@ -348,11 +387,11 @@ Firebug.GlobalUI =
             collapsed = fbContentBox.getAttribute("collapsed");
         }
 
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
 
-        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
-        var toggleFirebug = popup.querySelector("#menu_toggleFirebug");
+        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu.
+        var toggleFirebug = popup.querySelector("#menu_firebug_toggleFirebug");
         if (toggleFirebug)
         {
             var hiddenUI = (collapsed == "true" || placement == "minimized");
@@ -363,26 +402,58 @@ Firebug.GlobalUI =
                 Locale.$STR("firebug.menu.tip.Open_Firebug") :
                 Locale.$STR("firebug.menu.tip.Minimize_Firebug")));
 
-            // If Firebug is detached, use "Focus Firebug Window" label
-            if (currPos == "detached" && Firebug.currentContext)
-            {
-                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
-                toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
-            }
-
-            // Hide "Focus Firebug Window" item if the menu is opened from within
-            // the detached Firebug window.
             var currentLocation = toggleFirebug.ownerDocument.defaultView.top.location.href;
             var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
-            toggleFirebug.setAttribute("collapsed", (inDetachedWindow ? "true" : "false"));
+
+            // If Firebug is detached, use "Focus Firebug Window" label
+            // instead of "Hide Firebug" when the menu isn't opened from
+            // within the detached Firebug window. the 'placement' is used
+            // to ensure Firebug isn't closed with close button of detached window
+            // and 'inDetachedWindow' variable is also used to ensure the menu is
+            // opened from within the detached window.
+            if (currPos == "detached" && Firebug.currentContext &&
+                placement != "minimized" && !inDetachedWindow)
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
+                toggleFirebug.setAttribute("tooltiptext",
+                    Locale.$STR("firebug.menu.tip.Focus_Firebug"));
+            }
         }
 
         // Hide "Deactivate Firebug" menu if Firebug is not active.
-        var closeFirebug = popup.querySelector("#menu_closeFirebug");
+        var closeFirebug = popup.querySelector("#menu_firebug_closeFirebug");
         if (closeFirebug)
         {
             closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
+
+        // Update About Menu
+        var version = Firebug.GlobalUI.getVersion();
+        if (version)
+        {
+            var node = popup.getElementsByClassName("firebugAbout")[0];
+            var aboutLabel = node.getAttribute("label");
+            node.setAttribute("label", aboutLabel + " " + version);
+            node.classList.remove("firebugAbout");
+        }
+
+        // Allow Firebug menu customization (see FBTest and FBTrace as an example).
+        var event = new CustomEvent("firebugMenuShowing", {detail: popup});
+        document.dispatchEvent(event);
+    },
+
+    onMenuHiding: function(popup)
+    {
+        if (popup.state == "open")
+            return;
+
+        // xxxHonza: I don't know why the timeout must be here, but if it isn't
+        // the icon menu is broken (see issue 5427)
+        setTimeout(function()
+        {
+            while (popup.lastChild)
+                popup.removeChild(popup.lastChild);
+        });
     },
 
     onPositionPopupShowing: function(popup)
@@ -395,7 +466,7 @@ Firebug.GlobalUI =
             "Firebug.chrome.setPosition('%pos%')" + "})";
 
         var items = [];
-        var currPos = FirebugLoader.getPref("framePosition");
+        var currPos = PrefLoader.getPref("framePosition");
         for each (var pos in ["detached", "top", "bottom", "left", "right"])
         {
             var label = pos.charAt(0).toUpperCase() + pos.slice(1);
@@ -408,7 +479,7 @@ Firebug.GlobalUI =
             });
 
             if (pos == "detached")
-                items.key = "key_detachFirebug";
+                items.key = "key_firebug_detachFirebug";
 
             popup.appendChild(item);
         }
@@ -503,29 +574,29 @@ $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet
 // ********************************************************************************************* //
 // Global Commands
 
-$command("cmd_closeFirebug", "Firebug.closeFirebug(true)");
-$command("cmd_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)");
-$command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)");
-$command("cmd_toggleFirebug", "Firebug.toggleBar()");
-$command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
-$command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg)", "document.popupNode");
-$command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
-$command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
-$command("cmd_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
-$command("cmd_normalTextSize", "Firebug.Options.setTextSize(0);");
-$command("cmd_focusFirebugSearch", "if (Firebug.currentContext) Firebug.Search.onSearchCommand(document);");
-$command("cmd_customizeFBKeys", "Firebug.ShortcutsModel.customizeShortcuts()");
-$command("cmd_enablePanels", "Firebug.PanelActivation.enableAllPanels()");
-$command("cmd_disablePanels", "Firebug.PanelActivation.disableAllPanels()");
-$command("cmd_clearActivationList", "Firebug.PanelActivation.clearAnnotations()");
-$command("cmd_clearConsole", "Firebug.Console.clear(Firebug.currentContext)");
-$command("cmd_allOn", "Firebug.PanelActivation.toggleAll('on')");
-$command("cmd_toggleOrient", ""); //todo
-$command("cmd_toggleOrient", ""); //todo
-$command("cmd_toggleOrient", ""); //todo
-$command("cmd_toggleProfiling", ""); //todo
+$command("cmd_firebug_closeFirebug", "Firebug.closeFirebug(true);");
+$command("cmd_firebug_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext);");
+$command("cmd_firebug_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext);");
+$command("cmd_firebug_toggleFirebug", "Firebug.toggleBar();");
+$command("cmd_firebug_detachFirebug", "Firebug.toggleDetachBar(false, true);");
+$command("cmd_firebug_inspect", "Firebug.Inspector.inspectFromContextMenu(arg);", "document.popupNode");
+$command("cmd_firebug_toggleBreakOn", "if (Firebug.currentContext) Firebug.chrome.breakOnNext(Firebug.currentContext, event);");
+$command("cmd_firebug_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true);");
+$command("cmd_firebug_increaseTextSize", "Firebug.Options.changeTextSize(1);");
+$command("cmd_firebug_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
+$command("cmd_firebug_normalTextSize", "Firebug.Options.setTextSize(0);");
+$command("cmd_firebug_focusFirebugSearch", "if (Firebug.currentContext) Firebug.Search.onSearchCommand(document);");
+$command("cmd_firebug_customizeFBKeys", "Firebug.ShortcutsModel.customizeShortcuts();");
+$command("cmd_firebug_enablePanels", "Firebug.PanelActivation.enableAllPanels();");
+$command("cmd_firebug_disablePanels", "Firebug.PanelActivation.disableAllPanels();");
+$command("cmd_firebug_clearActivationList", "Firebug.PanelActivation.clearAnnotations();");
+$command("cmd_firebug_clearConsole", "Firebug.Console.clear(Firebug.currentContext);");
+$command("cmd_firebug_allOn", "Firebug.PanelActivation.toggleAll('on');");
+$command("cmd_firebug_toggleOrient", "Firebug.chrome.toggleOrient();");
+$command("cmd_firebug_resetAllOptions", "Firebug.resetAllOptions(true);");
+$command("cmd_firebug_toggleProfiling", ""); //todo
 
-$command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event)");
+$command("cmd_firebug_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event)");
 
 // ********************************************************************************************* //
 // Global Shortcuts
@@ -536,14 +607,14 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 
     globalShortcuts.forEach(function(id)
     {
-        var shortcut = FirebugLoader.getPref("key.shortcut." + id);
+        var shortcut = PrefLoader.getPref("key.shortcut." + id);
         var tokens = shortcut.split(" ");
         var key = tokens.pop();
 
         var keyProps = {
-            id: "key_" + id,
+            id: "key_firebug_" + id,
             modifiers: tokens.join(","),
-            command: "cmd_" + id,
+            command: "cmd_firebug_" + id,
             position: 1
         };
 
@@ -557,7 +628,7 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 
     keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
 })(["toggleFirebug", "toggleInspecting", "focusCommandLine",
-    "detachFirebug", "closeFirebug"]);
+    "detachFirebug", "closeFirebug", "toggleBreakOn"]);
 
 
 /* Used by the global menu, but should be really global shortcuts?
@@ -591,14 +662,14 @@ $menupopupOverlay($("mainPopupSet"), [
         ]),
         $menuseparator(),
         $menuitem({
-            id: "menu_ClearConsole",
+            id: "menu_firebug_ClearConsole",
             label: "firebug.ClearConsole",
             tooltiptext: "firebug.ClearTooltip",
-            command: "cmd_clearConsole",
-            key: "key_clearConsole"
+            command: "cmd_firebug_clearConsole",
+            key: "key_firebug_clearConsole"
         }),
         $menuitem({
-            id: "menu_showErrorCount",
+            id: "menu_firebug_showErrorCount",
             type: "checkbox",
             label: "firebug.Show_Error_Count",
             tooltiptext: "firebug.menu.tip.Show_Error_Count",
@@ -607,31 +678,31 @@ $menupopupOverlay($("mainPopupSet"), [
         }),
         $menuseparator(),
         $menuitem({
-            id: "menu_enablePanels",
+            id: "menu_firebug_enablePanels",
             label: "firebug.menu.Enable_All_Panels",
             tooltiptext: "firebug.menu.tip.Enable_All_Panels",
-            command: "cmd_enablePanels"
+            command: "cmd_firebug_enablePanels"
         }),
         $menuitem({
-            id: "menu_disablePanels",
+            id: "menu_firebug_disablePanels",
             label: "firebug.menu.Disable_All_Panels",
             tooltiptext: "firebug.menu.tip.Disable_All_Panels",
-            command: "cmd_disablePanels"
+            command: "cmd_firebug_disablePanels"
         }),
         $menuseparator(),
         $menuitem({
-            id: "menu_AllOn",
+            id: "menu_firebug_AllOn",
             type: "checkbox",
             label: "On_for_all_web_pages",
             tooltiptext: "firebug.menu.tip.On_for_all_Web_Sites",
-            command: "cmd_allOn",
+            command: "cmd_firebug_allOn",
             option: "allPagesActivation"
         }),
         $menuitem({
-            id: "menu_clearActivationList",
+            id: "menu_firebug_clearActivationList",
             label: "firebug.menu.Clear_Activation_List",
             tooltiptext: "firebug.menu.tip.Clear_Activation_List",
-            command: "cmd_clearActivationList"
+            command: "cmd_firebug_clearActivationList"
         })
     ])
 ])
@@ -644,34 +715,32 @@ $menupopupOverlay($("mainPopupSet"), [
  * and one in Firefox 4 (top-left orange button menu) -> Web Developer
  *
  * If extensions want to override the menu thay need to iterate all existing instance
- * using document.querySelectorAll(".fbFirebugMenuPopup") and appen new menu items to all
+ * using document.querySelectorAll(".fbFirebugMenuPopup") and append new menu items to all
  * of them. Iteration must be done in the global space (browser.xul)
  *
  * The same menu is also used for Firebug Icon Menu (Firebug's toolbar). This menu is cloned
- * and initialized as soon as Firebug UI is actually loaded. Sine it's cloned from the original
+ * and initialized as soon as Firebug UI is actually loaded. Since it's cloned from the original
  * (global scope) extensions don't have to extend it (possible new menu items are already there).
  */
-var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
-    "class": "fbFirebugMenuPopup",
-    onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);"}, [
+var firebugMenuContent = [
 
     // Open/close Firebug
     $menuitem(
     {
-        id: "menu_toggleFirebug",
+        id: "menu_firebug_toggleFirebug",
         label: "firebug.ShowFirebug",
         tooltiptext: "firebug.menu.tip.Open_Firebug",
-        command: "cmd_toggleFirebug",
-        key: "key_toggleFirebug",
+        command: "cmd_firebug_toggleFirebug",
+        key: "key_firebug_toggleFirebug",
         "class": "fbInternational"
     }),
     $menuitem(
     {
-        id: "menu_closeFirebug",
+        id: "menu_firebug_closeFirebug",
         label: "firebug.Deactivate_Firebug",
         tooltiptext: "firebug.tip.Deactivate_Firebug",
-        command: "cmd_closeFirebug",
-        key: "key_closeFirebug",
+        command: "cmd_firebug_closeFirebug",
+        key: "key_firebug_closeFirebug",
         "class": "fbInternational"
     }),
 
@@ -695,9 +764,9 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         label:"firebug.OpenWith",
         tooltiptext:"firebug.menu.tip.Open_With",
         "class": "fbInternational",
-        insertafter: "menu_openActionsSeparator",
+        insertafter: "menu_firebug_openActionsSeparator",
         openFromContext: "true",
-        command: "cmd_openInEditor"
+        command: "cmd_firebug_openInEditor"
     },
     [
         $menupopup({id:"fbFirebugMenu_OpenWith",
@@ -717,29 +786,29 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         [
             $menuitem(
             {
-                id: "menu_increaseTextSize",
+                id: "menu_firebug_increaseTextSize",
                 label: "firebug.IncreaseTextSize",
                 tooltiptext: "firebug.menu.tip.Increase_Text_Size",
-                command: "cmd_increaseTextSize",
-                key: "key_increaseTextSize",
+                command: "cmd_firebug_increaseTextSize",
+                key: "key_firebug_increaseTextSize",
                 "class": "fbInternational"
             }),
             $menuitem(
             {
-                id: "menu_decreaseTextSize",
+                id: "menu_firebug_decreaseTextSize",
                 label: "firebug.DecreaseTextSize",
                 tooltiptext: "firebug.menu.tip.Decrease_Text_Size",
-                command: "cmd_decreaseTextSize",
-                key: "key_decreaseTextSize",
+                command: "cmd_firebug_decreaseTextSize",
+                key: "key_firebug_decreaseTextSize",
                 "class": "fbInternational"
             }),
             $menuitem(
             {
-                id: "menu_normalTextSize",
+                id: "menu_firebug_normalTextSize",
                 label: "firebug.NormalTextSize",
                 tooltiptext: "firebug.menu.tip.Normal_Text_Size",
-                command: "cmd_normalTextSize",
-                key: "key_normalTextSize",
+                command: "cmd_firebug_normalTextSize",
+                key: "key_firebug_normalTextSize",
                 "class": "fbInternational"
             }),
         ])
@@ -762,7 +831,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         [
             $menuitem(
             {
-                id: "menu_toggleShowErrorCount",
+                id: "menu_firebug_toggleShowErrorCount",
                 type: "checkbox",
                 label: "firebug.Show_Error_Count",
                 tooltiptext: "firebug.menu.tip.Show_Error_Count",
@@ -772,7 +841,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_showTooltips",
+                id: "menu_firebug_showTooltips",
                 type: "checkbox",
                 label: "firebug.menu.Show_Info_Tips",
                 tooltiptext: "firebug.menu.tip.Show_Info_Tips",
@@ -782,7 +851,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_shadeBoxModel",
+                id: "menu_firebug_shadeBoxModel",
                 type: "checkbox",
                 label: "ShadeBoxModel",
                 tooltiptext: "inspect.option.tip.Shade_Box_Model",
@@ -792,7 +861,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "showQuickInfoBox",
+                id: "menu_firebug_showQuickInfoBox",
                 type: "checkbox",
                 label: "ShowQuickInfoBox",
                 tooltiptext: "inspect.option.tip.Show_Quick_Info_Box",
@@ -802,7 +871,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_enableA11y",
+                id: "menu_firebug_enableA11y",
                 type: "checkbox",
                 label: "firebug.menu.Enable_Accessibility_Enhancements",
                 tooltiptext: "firebug.menu.tip.Enable_Accessibility_Enhancements",
@@ -812,7 +881,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_activateSameOrigin",
+                id: "menu_firebug_activateSameOrigin",
                 type: "checkbox",
                 label: "firebug.menu.Activate_Same_Origin_URLs2",
                 tooltiptext: "firebug.menu.tip.Activate_Same_Origin_URLs",
@@ -822,21 +891,21 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_toggleOrient",
+                id: "menu_firebug_toggleOrient",
                 type: "checkbox",
                 label: "firebug.menu.Vertical_Panels",
                 tooltiptext: "firebug.menu.tip.Vertical_Panels",
-                command: "cmd_toggleOrient",
+                command: "cmd_firebug_toggleOrient",
                 option: "viewPanelOrient",
                 "class": "fbInternational"
             }),
-            $menuseparator({id: "menu_optionsSeparator"}),
+            $menuseparator({id: "menu_firebug_optionsSeparator"}),
             $menuitem(
             {
-                id: "menu_resetAllOptions",
+                id: "menu_firebug_resetAllOptions",
                 label: "firebug.menu.Reset_All_Firebug_Options",
                 tooltiptext: "firebug.menu.tip.Reset_All_Firebug_Options",
-                command: "cmd_resetAllOptions",
+                command: "cmd_firebug_resetAllOptions",
                 "class": "fbInternational"
             }),
         ])
@@ -857,7 +926,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         [
             $menuitem(
             {
-                id: "menu_firebugUrlWebsite",
+                id: "menu_firebug_firebugUrlWebsite",
                 label: "firebug.Website",
                 tooltiptext: "firebug.menu.tip.Website",
                 oncommand: "Firebug.GlobalUI.visitWebsite('main')",
@@ -865,7 +934,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugUrlExtensions",
+                id: "menu_firebug_firebugUrlExtensions",
                 label: "firebug.menu.Extensions",
                 tooltiptext: "firebug.menu.tip.Extensions",
                 oncommand: "Firebug.GlobalUI.visitWebsite('extensions')",
@@ -873,16 +942,16 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugFAQ",
-                label: "firebug.FAQ",
-                tooltiptext: "firebug.menu.tip.FAQ",
-                command: "cmd_openHelp",
-                key: "key_help",
+                id: "menu_firebug_firebugHelp",
+                label: "firebug.help",
+                tooltiptext: "firebug.menu.tip.help",
+                command: "cmd_firebug_openHelp",
+                key: "key_firebug_help",
                 "class": "fbInternational"
             }),
             $menuitem(
             {
-                id: "menu_firebugDoc",
+                id: "menu_firebug_firebugDoc",
                 label: "firebug.Documentation",
                 tooltiptext: "firebug.menu.tip.Documentation",
                 oncommand: "Firebug.GlobalUI.visitWebsite('docs')",
@@ -890,7 +959,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugKeyboard",
+                id: "menu_firebug_firebugKeyboard",
                 label: "firebug.KeyShortcuts",
                 tooltiptext: "firebug.menu.tip.Key_Shortcuts",
                 oncommand: "Firebug.GlobalUI.visitWebsite('keyboard')",
@@ -898,7 +967,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugForums",
+                id: "menu_firebug_firebugForums",
                 label: "firebug.Forums",
                 tooltiptext: "firebug.menu.tip.Forums",
                 oncommand: "Firebug.GlobalUI.visitWebsite('discuss')",
@@ -906,7 +975,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugIssues",
+                id: "menu_firebug_firebugIssues",
                 label: "firebug.Issues",
                 tooltiptext: "firebug.menu.tip.Issues",
                 oncommand: "Firebug.GlobalUI.visitWebsite('issues')",
@@ -914,7 +983,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             }),
             $menuitem(
             {
-                id: "menu_firebugDonate",
+                id: "menu_firebug_firebugDonate",
                 label: "firebug.Donate",
                 tooltiptext: "firebug.menu.tip.Donate",
                 oncommand: "Firebug.GlobalUI.visitWebsite('donate')",
@@ -923,30 +992,30 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
         ])
     ]),
 
-    $menuseparator({id: "menu_miscActionsSeparator", collapsed: "true"}),
+    $menuseparator({id: "menu_firebug_miscActionsSeparator", collapsed: "true"}),
 
-    $menuseparator({id: "menu_toolsSeparator", collapsed: "true"}),
+    $menuseparator({id: "menu_firebug_toolsSeparator", collapsed: "true"}),
 
     $menuitem(
     {
-        id: "menu_customizeShortcuts",
+        id: "menu_firebug_customizeShortcuts",
         label: "firebug.menu.Customize_shortcuts",
         tooltiptext: "firebug.menu.tip.Customize_Shortcuts",
-        command: "cmd_customizeFBKeys",
-        key: "key_customizeFBKeys",
+        command: "cmd_firebug_customizeFBKeys",
+        key: "key_firebug_customizeFBKeys",
         "class": "fbInternational"
     }),
 
-    $menuseparator({id: "menu_aboutSeparator"}),
+    $menuseparator({id: "menu_firebug_aboutSeparator"}),
 
     $menuitem({
-        id: "Firebug_About",
+        id: "menu_firebug_about",
         label: "firebug.About",
         tooltiptext: "firebug.menu.tip.About",
         oncommand: "Firebug.GlobalUI.openAboutDialog()",
         "class": "firebugAbout fbInternational"
     }),
-]);
+];
 
 // ********************************************************************************************* //
 // Global Menu Overlays
@@ -955,9 +1024,9 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
 $menupopupOverlay($("contentAreaContextMenu"), [
     $menuseparator(),
     $menuitem({
-        id: "menu_firebugInspect",
+        id: "menu_firebug_firebugInspect",
         label: "firebug.InspectElementWithFirebug",
-        command: "cmd_inspect",
+        command: "cmd_firebug_inspect",
         "class": "menuitem-iconic fbInternational"
     })
 ]);
@@ -965,12 +1034,12 @@ $menupopupOverlay($("contentAreaContextMenu"), [
 // Firefox view menu
 $menupopupOverlay($("menu_viewPopup"), [
     $menuitem({
-        id: "menu_viewToggleFirebug",
+        id: "menu_firebug_viewToggleFirebug",
         insertbefore: "toggle_taskbar",
         label: "firebug.Firebug",
         type: "checkbox",
-        key: "key_toggleFirebug",
-        command: "cmd_toggleFirebug",
+        key: "key_firebug_toggleFirebug",
+        command: "cmd_firebug_toggleFirebug",
         "class": "fbInternational"
     })
 ]);
@@ -978,12 +1047,12 @@ $menupopupOverlay($("menu_viewPopup"), [
 // SeaMonkey view menu
 $menupopupOverlay($("menu_View_Popup"), [
     $menuitem({
-        id: "menu_viewToggleFirebug",
+        id: "menu_firebug_viewToggleFirebug",
         insertafter: "menuitem_fullScreen",
         label: "firebug.Firebug",
         type: "checkbox",
-        key: "key_toggleFirebug",
-        command: "cmd_toggleFirebug",
+        key: "key_firebug_toggleFirebug",
+        command: "cmd_firebug_toggleFirebug",
         "class": "menuitem-iconic fbInternational"
     })
 ]);
@@ -992,12 +1061,16 @@ $menupopupOverlay($("menu_View_Popup"), [
 $menupopupOverlay($("menuWebDeveloperPopup"), [
     $menu({
         id: "menu_webDeveloper_firebug",
-        insertbefore: "webConsole",
+        insertbefore: "menu_devToolbar",
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)]),
+    }, [
+        $menupopup({id: "menu_firebug_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ]),
     $menuseparator({
-        insertbefore: "webConsole"
+        insertbefore: "menu_firebug_devToolbar"
     })
 ]);
 
@@ -1005,15 +1078,19 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
 $menupopupOverlay($("appmenu_webDeveloper_popup"), [
     $splitmenu({
         id: "appmenu_firebug",
-        insertbefore: "appmenu_webConsole",
-        command: "cmd_toggleFirebug",
-        key: "key_toggleFirebug",
+        insertbefore: "appmenu_devToolbar",
+        command: "cmd_firebug_toggleFirebug",
+        key: "key_firebug_toggleFirebug",
         label: "firebug.Firebug",
         iconic: "true",
         "class": "fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)]),
+    }, [
+        $menupopup({id: "appmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ]),
     $menuseparator({
-        insertbefore: "appmenu_webConsole"
+        insertbefore: "appmenu_devToolbar"
     })
 ]);
 
@@ -1022,42 +1099,66 @@ $menupopupOverlay($("toolsPopup"), [
     $menu({
         id: "menu_firebug",
         insertbefore: "appmenu_webConsole",
-        command: "cmd_toggleFirebug",
-        key: "key_toggleFirebug",
+        command: "cmd_firebug_toggleFirebug",
+        key: "key_firebug_toggleFirebug",
         label: "firebug.Firebug",
         "class": "menuitem-iconic fbInternational"
-    }, [firebugMenuPopup.cloneNode(true)])
+    }, [
+        $menupopup({id: "toolsmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"})
+    ])
 ]);
 
 // ********************************************************************************************* //
 // Firefox Toolbar Buttons
 
-$toolbarButton("inspector-button", {
+$toolbarButton("firebug-inspectorButton", {
     label: "firebug.Inspect",
     tooltiptext: "firebug.InspectElement",
-    observes: "cmd_toggleInspecting",
-    image: "chrome://firebug/skin/inspect.png"
+    observes: "cmd_firebug_toggleInspecting",
+    style: "list-style-image: url(chrome://firebug/skin/inspect.png);" +
+        "-moz-image-region: rect(0, 16px, 16px, 0);"
 });
+
+// Start Button Tooltip. As soon as Firebug is fully loaded, the tooltip content will be
+// generated by firebug/firefox/start-button/startButtonOverlay module.
+$menupopupOverlay($("mainPopupSet"), [
+    $tooltip({
+        "class": "firebugButtonTooltip",
+        id: "firebug-buttonTooltip",
+        orient: "vertical",
+    }, [
+        $label({
+            "class": "version",
+            "value": "Firebug " + Firebug.GlobalUI.getVersion()
+        }),
+        $label({
+            "class": "status",
+            "value": Locale.$STR("startbutton.tip.deactivated")
+        })
+    ])
+]);
 
 // TODO: why contextmenu doesn't work without cloning
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
-    tooltiptext: "firebug.ShowFirebug",
+    tooltip: "firebug-buttonTooltip",
     type: "menu-button",
-    command: "cmd_toggleFirebug",
+    command: "cmd_firebug_toggleFirebug",
     contextmenu: "fbStatusContextMenu",
     observes: "firebugStatus",
-    style: "list-style-image:url(chrome://firebug/skin/firebug-gray-16.png)"
+    style: "list-style-image: url(chrome://firebug/skin/firebug16.png)"
 }, [$("fbStatusContextMenu").cloneNode(true)]);
 
 // Appends Firebug start button into Firefox toolbar automatically after installation.
-// The button is appended only once so, if the user removes it, it isn't appended again.
+// The button is appended only once - if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
 // toolbarpalette check is for seamonkey, where it is in the document
 if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
-    && !FirebugLoader.getPref("toolbarCustomizationDone"))
+    && !PrefLoader.getPref("toolbarCustomizationDone"))
 {
-    FirebugLoader.setPref("toolbarCustomizationDone", true);
+    PrefLoader.setPref("toolbarCustomizationDone", true);
 
     // Get the current navigation bar button set (a string of button IDs) and append
     // ID of the Firebug start button into it.
@@ -1112,26 +1213,8 @@ var elements = cloneArray(document.getElementsByClassName("fbInternational"));
 Locale.internationalizeElements(document, elements, ["label", "tooltiptext", "aria-label"]);
 
 // ********************************************************************************************* //
-// Update About Menu
-
-var version = Firebug.GlobalUI.getVersion();
-if (version)
-{
-    var nodes = document.querySelectorAll(".firebugAbout");
-    nodes = cloneArray(nodes);
-    for (var i=0; i<nodes.length; i++)
-    {
-        var node = nodes[i];
-        var aboutLabel = node.getAttribute("label");
-        node.setAttribute("label", aboutLabel + " " + version);
-        node.classList.remove("firebugAbout");
-    }
-}
-
-// ********************************************************************************************* //
 // First Run Page
 
-var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 function checkFirebugVersion(currentVersion)
@@ -1147,42 +1230,36 @@ function checkFirebugVersion(currentVersion)
     return versionChecker.compare(version, currentVersion);
 }
 
-var SessionObserver =
+if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
 {
-    observe: function(subjet, topic, data)
+    // Open the page in the top most window, so the user can see it immediately.
+    if (wm.getMostRecentWindow("navigator:browser") == window.top)
     {
-        if (topic != "sessionstore-windows-restored")
-            return;
+        // Don't forget to update the preference, so the page is not displayed again
+        var version = Firebug.GlobalUI.getVersion();
+        PrefLoader.setPref("currentVersion", version);
 
-        //xxxHonza: Removing observer at this moment is risky. What if the registration
-        // is done too late and the even never come?
-        observerService.removeObserver(SessionObserver, "sessionstore-windows-restored");
-
-        setTimeout(function()
+        if (PrefLoader.getPref("showFirstRunPage"))
         {
-            // Open the page in the top most window so, the user can see it immediately.
-            if (wm.getMostRecentWindow("navigator:browser") != window.top)
-                return;
-
-            // Avoid opening of the page in another browser window.
-            if (checkFirebugVersion(FirebugLoader.getPref("currentVersion")) > 0)
+            var timeout = setTimeout(function()
             {
-                // Don't forget to update the preference so, the page is not displayed again
-                FirebugLoader.setPref("currentVersion", version);
+                if (window.closed)
+                    return;
 
-                if (FirebugLoader.getPref("showFirstRunPage"))
-                    Firebug.GlobalUI.visitWebsite("firstRunPage",  version);
-            }
-        }, 500);
+                var version = Firebug.GlobalUI.getVersion();
+                Firebug.GlobalUI.visitWebsite("firstRunPage", version);
+            }, 1000);
+
+            window.addEventListener("unload", function()
+            {
+                clearTimeout(timeout);
+            }, false);
+        }
     }
 }
 
-var currentVersion = FirebugLoader.getPref("currentVersion");
-if (checkFirebugVersion(currentVersion) > 0)
-    observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
-
 // ********************************************************************************************* //
-// Context Menu Workaround
+// Firefox Page Context Menu
 
 if (typeof(nsContextMenu) != "undefined")
 {
@@ -1194,6 +1271,30 @@ if (typeof(nsContextMenu) != "undefined")
         if (this.isTargetAFormControl(aNode))
             this.shouldDisplay = true;
     };
+
+    // Hide built-in inspector if the pref says so.
+    var initItemsOriginal = nsContextMenu.prototype.initItems;
+    nsContextMenu.prototype.initItems = function()
+    {
+        initItemsOriginal.apply(this, arguments);
+
+        var showInspect = !PrefLoader.getPref("hideDefaultInspector");
+        this.showItem("inspect-separator", showInspect);
+        this.showItem("context-inspect", showInspect);
+    }
+}
+
+// ********************************************************************************************* //
+// All Pages Activation" is on
+
+// Load Firebug by default if activation is on for all pages (see issue 5522)
+if (PrefLoader.getPref("allPagesActivation") == "on" || !PrefLoader.getPref("delayLoad"))
+{
+    Firebug.GlobalUI.startFirebug(function()
+    {
+        FBTrace.sysout("Firebug loaded by default since 'allPagesActivation' is on " +
+            "or 'delayLoad' is false");
+    });
 }
 
 // ********************************************************************************************* //

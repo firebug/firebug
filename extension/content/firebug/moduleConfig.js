@@ -43,9 +43,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/chrome/shortcuts",
         "firebug/firefox/start-button/startButtonOverlay",
         "firebug/firefox/external-editors/externalEditors",
-        "firebug/firefox/firebugMenu",
         "firebug/chrome/panelActivation",
-        "firebug/console/memoryProfiler",
+        //"firebug/console/memoryProfiler", xxxHonza: removed from 1.10 (issue 5599)
         "firebug/chrome/tableRep",
         "firebug/html/htmlPanel",
         "firebug/console/commandLinePopup",
@@ -57,7 +56,9 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/js/tabCache",
         "firebug/chrome/activation",
         "firebug/css/stylePanel",
-        "firebug/css/computedPanel"
+        "firebug/css/computedPanel",
+        "firebug/cookies/cookieModule",
+        "firebug/cookies/cookiePanel",
     ];
 
     return config;
@@ -83,7 +84,7 @@ Firebug.registerExtension = function(extName, extConfig)
     var tempConfig = this.getExtensionConfig(extName);
     if (tempConfig)
     {
-        FBTrace.sysout("firebug.registerExtension; ERROR An extenstion with the same ID " +
+        FBTrace.sysout("firebug.registerExtension; ERROR An extension with the same ID " +
             "already exists! - " + extName, tempConfig);
         return;
     }

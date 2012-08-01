@@ -189,11 +189,14 @@
                 // Make sure the panel is visible.
                 this.togglePanel(panelName, true);
 
+                // Optimization is done only if the panel really doesn't need to be refreshed.
                 if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
 
                 if (FBTrace.DBG_PANELS)
-                    FBTrace.sysout("selectPanel " + panelName + " panel: " + panel);
+                    FBTrace.sysout("selectPanel " + panelName + " panel: " + panel +
+                        ", forceUpdate: " + forceUpdate + ", noRefresh: " + noRefresh +
+                        ", needsUpdate: " + (panel ? panel.needsRefresh : ""));
 
                 this.hideSelectedPanel();
 
@@ -804,8 +807,9 @@
                 var panel = this.panelBar.selectedPanel;
                 if (!panel)
                     return;
-    
-                var panelItems = panel ? panel.getOptionsMenuItems(Firebug.currentContext) : null;
+
+                var panelItems = this.getOptionsMenuItems(panel);
+
                 if (!panel.activable && !(panelItems && panelItems.length))
                     this.setAttribute("collapsed", "true");
                 else
@@ -823,6 +827,23 @@
                 this.popup.showPopup(anchor || this, -1, -1, "popup",
                     rtlLanguage ? "bottomright" : "bottomleft",
                     rtlLanguage ? "topright" : "topleft");
+            ]]></body>
+        </method>
+
+        <method name="getOptionsMenuItems">
+            <parameter name="panel"/>
+            <body><![CDATA[
+                if (!panel)
+                    return null;
+
+                // Get menu items from the current panel.
+                var context = Firebug.currentContext;
+                var items = panel.getOptionsMenuItems(context);
+
+                // Distribute to listeners so, other modules/extensions can extend the menu.
+                Firebug.dispatch(Firebug.uiListeners, "onOptionsMenu", [context, panel, items]);
+
+                return items;
             ]]></body>
         </method>
     </implementation>
@@ -857,7 +878,7 @@
             if (panel)
             {
                 // Get panel's option items
-                var panelItems = panel.getOptionsMenuItems(Firebug.currentContext);
+                var panelItems = this.getOptionsMenuItems(panel);
                 if (panelItems && panelItems.length > 0)
                     items.push("-");
             }
@@ -1202,7 +1223,7 @@
                 var object = objects[i];
                 var description = locator.getObjectDescription(object);
                 if (!description)
-                    FBTrace.sysout("binding.xml popupshowing Fails" , object);
+                    FBTrace.sysout("binding.xml popupshowing Fails", object);
 
                 var entry = {object: object, fileName: description.name};
 
@@ -1257,7 +1278,7 @@
                 }
             }
 
-            // Focus Firebug UI so, keyboard navigation (up/down) in the menu works.
+            // Focus Firebug UI so that keyboard navigation (up/down) in the menu works.
             Firebug.chrome.focus();
         ]]></handler>
 

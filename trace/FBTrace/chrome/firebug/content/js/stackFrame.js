@@ -62,11 +62,11 @@ StackFrame.getCorrectedStackTrace = function(frame, context)
         if (trace.frames.length > 100)  // TODO in the loop above
         {
             var originalLength = trace.frames.length;
-            trace.frames.splice(50, originalLength - 100);
+            trace.frames.splice(50, originalLength - 100, null);
             var excuse = "(eliding "+(originalLength - 100)+" frames)";
 
             trace.frames[50] = new StackFrame.StackFrame({href: excuse}, 0, excuse,
-                [], null, null, context);
+                [], null, null, context, newestFrame);
         }
 
     }
@@ -114,7 +114,7 @@ StackFrame.getStackFrame = function(frame, context, newestFrameXB)
                     script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
 
             return new StackFrame.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame,
-                null, sourceFile.context, newestFrameXB);
+                frame.pc, sourceFile.context, newestFrameXB);
         }
         else
         {
@@ -124,13 +124,13 @@ StackFrame.getStackFrame = function(frame, context, newestFrameXB)
 
             var script = frame.script;
             return new StackFrame.StackFrame({href: Url.normalizeURL(script.fileName)}, frame.line,
-                script.functionName, [], frame, null, context, newestFrameXB);
+                script.functionName, [], frame, frame.pc, context, newestFrameXB);
         }
     }
     catch (exc)
     {
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("getCorrectedStackTrace fails: "+exc, exc);
+            FBTrace.sysout("getStackFrame fails: "+exc, exc);
         return null;
     }
 };
@@ -240,7 +240,7 @@ StackFrame.StackFrame.prototype =
 
     signature: function()
     {
-        return this.script.tag +"." + this.pc;
+        return this.script.tag + "." + this.pc;
     },
 
     getThisValue: function()
@@ -259,7 +259,7 @@ StackFrame.StackFrame.prototype =
 
     clearScopes: function(viewChrome)
     {
-        // Clears cached scope chain and so, it can be regenerated the next time
+        // Clears cached scope chain, so that it regenerates the next time
         // getScopes() is executed.
         this.scope = null;
     },
@@ -350,6 +350,13 @@ StackFrame.parseToStackFrame = function(line, context) // function name (arg, ar
             //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
             //var params = JSON.parse("["+m2[2]+"]");
             return new StackFrame.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
+        }
+        else
+        {
+            // Firefox 14 removes arguments from <exception-object>.stack.toString()
+            // That's why the m2 reg doesn't match
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=744842
+            return new StackFrame.StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
         }
     }
 }
@@ -710,7 +717,7 @@ StackFrame.resumeShowStackTrace = function()
     if (saveShowStackTrace)
     {
         Firebug.showStackTrace = saveShowStackTrace;
-        delete saveShowStackTrace;
+        saveShowStackTrace = null;
     }
 };
 

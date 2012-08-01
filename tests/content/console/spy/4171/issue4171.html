@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4171: Expanding an XMLHttpRequest in Console tab before it ends makes JSON tab disappear</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="text/javascript">
+function executeTest()
+{
+    var oXmlHttp = new XMLHttpRequest();
+    oXmlHttp.open("GET", "issue4171.php");
+    oXmlHttp.send(null);
+}
+</script>
+
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4171">Issue 4171</a>:
+        Expanding an XMLHttpRequest in Console tab before it ends makes JSON tab disappear</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, switch to the Console panel and enable it.</li>
+            <li>Click this button <button id="testButton" onclick="executeTest()">Click Me!</button></li>
+            <li>It generates a new XHR entry in the Console panel</li>
+            <li>Expand the entry before the request finishes (you have about 5 sec)</li>
+            <li>Only <i>Headers</i> info tab is displayed since the request didn't finish yet</li>
+            <li>As soon as the response is received, both <i>Response</i> and <i>JSON</i> tabs
+                should appear.</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

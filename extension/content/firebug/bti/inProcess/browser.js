@@ -460,8 +460,8 @@ Browser.prototype.disconnect = function()
     this.removeListener(Firebug);
     TabWatcher.destroy();
 
-    // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
-    // destroyContext event is properly dispatched to the Firebug object and
+    // Remove the listener after the Firebug.TabWatcher.destroy() method is called, so
+    // that the destroyContext event is properly dispatched to the Firebug object and
     // consequently to all registered modules.
     TabWatcher.removeListener(this);
 
