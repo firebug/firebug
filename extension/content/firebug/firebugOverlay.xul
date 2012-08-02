@@ -36,8 +36,8 @@
             noautofocus="true">
         </panel>
 
-        <panel id="fbCommandHistory" noautofocus="true">
-        </panel>
+        <menupopup id="fbCommandHistory" noautofocus="true">
+        </menupopup>
 
         <!-- Context menu for the Command Editor -->
         <menupopup id="fbCommandEditorPopup" />
