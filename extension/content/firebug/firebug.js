@@ -1719,9 +1719,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
         if (this.panelNode)
         {
+            var scrollTop = this.panelNode.scrollTop;
             this.panelNode = doc.adoptNode(this.panelNode, true);
             this.panelNode.ownerPanel = this;
             doc.body.appendChild(this.panelNode);
+            this.panelNode.scrollTop = scrollTop;
         }
     },
 
