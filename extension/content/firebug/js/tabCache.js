@@ -202,8 +202,6 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
                 this.onExamineResponse(subject, win);
             else if (topic == "http-on-examine-cached-response")
                 this.onCachedResponse(subject, win);
-            else if (topic == "http-on-examine-merged-response")
-                this.onCachedResponse(subject, win);
         }
         catch (err)
         {
