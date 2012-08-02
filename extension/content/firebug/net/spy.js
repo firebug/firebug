@@ -278,8 +278,7 @@ var SpyHttpObserver =
         {
             if (topic != "http-on-modify-request" &&
                 topic != "http-on-examine-response" &&
-                topic != "http-on-examine-cached-response" &&
-                topic != "http-on-examine-merged-response")
+                topic != "http-on-examine-cached-response")
             {
                 if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
                     FBTrace.sysout("spy.SpyHttpObserver.observe; ERROR Unknown topic: " + topic);
@@ -319,8 +318,6 @@ var SpyHttpObserver =
                 else if (topic == "http-on-examine-response")
                     this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-examine-cached-response")
-                    this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
-                else if (topic == "http-on-examine-merged-response")
                     this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
 
                 return;

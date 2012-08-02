@@ -399,8 +399,6 @@ var NetHttpObserver =
                 this.onExamineResponse(subject, win, tabId, context);
             else if (topic == "http-on-examine-cached-response")
                 this.onExamineCachedResponse(subject, win, tabId, context);
-            else if (topic == "http-on-examine-merged-response")
-                this.onExamineCachedResponse(subject, win, tabId, context);
         }
         catch (err)
         {
