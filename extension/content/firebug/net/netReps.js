@@ -1169,6 +1169,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             this.htmlPreview = netInfoBox.getElementsByClassName("netInfoHtmlPreview").item(0);
             this.htmlPreview.contentWindow.document.body.innerHTML = text;
 
+            // Workaround for issue 5774 (it's not clear why the 'load' event is actually
+            // sent to the iframe when the user swithes Firebug panels).
+            // The event is sent only for the iframes in the Console panel.
+            context.addEventListener(this.htmlPreview, "load", function(event)
+            {
+                event.target.contentDocument.body.innerHTML = text;
+            });
+
             var defaultHeight = parseInt(Options.get("netHtmlPreviewHeight"));
             if (!isNaN(defaultHeight))
                 this.htmlPreview.style.height = defaultHeight + "px";
