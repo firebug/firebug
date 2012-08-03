@@ -37,7 +37,8 @@ function runTest()
                 if (FBTest.ok(node, "Source line must be there"))
                 {
                     var expected = /\s*onclick\s*\(line\s*2\)\s*/;
-                    FBTest.compare(expected, sourceBox.textContent, "The source must match");
+                    FBTest.compare(expected, sourceBox.textContent, "The source must match: " +
+                        sourceBox.textContent);
                 }
 
                 FBTest.testDone("issue5544.DONE");
