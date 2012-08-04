@@ -18,7 +18,7 @@ function runTest()
 
             FBTest.compare("text", cmdLine.value, "Content of Command Line must be: 'text'");
 
-            FBTest.sendShortcut("a", {ctrlKey: true}, win);
+            FBTest.sendShortcut("a", {accelKey: true}, win);
             FBTest.sendShortcut("VK_DELETE", null, win);
 
             FW.Firebug.chrome.selectPanel("html");
