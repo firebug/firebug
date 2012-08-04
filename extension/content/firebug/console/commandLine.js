@@ -1043,34 +1043,14 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(selector, start)  // returns unwrapped elements from the page
+    this.$ = function(id)  // returns unwrapped elements from the page
     {
-        var result;
-        if (start && start.querySelector && (start.nodeType == 1 || start.nodeType == 9 || start.nodeType == 11))
-            result = start.querySelector(selector);
-        else
-        {
-            result = Wrapper.unwrapObject(context.baseWindow.document).querySelector(selector);
-            if (result == null && (selector||"")[0] !== "#")
-            {
-                result = Wrapper.unwrapObject(context.baseWindow.document).querySelector("#" + selector);
-                if (result != null)
-                {
-                    Firebug.Console.log("The console function $() has changed from $=getElementById(id) to $=querySelector(selector). You might try $(\"#" + selector + "\")", context, "warn");
-                    result = null;
-                }
-            }
-        }
-        return result;
+        return Wrapper.unwrapObject(context.baseWindow.document).getElementById(id);
     };
 
-    this.$$ = function(selector, start) // returns unwrapped elements from the page
+    this.$$ = function(selector) // returns unwrapped elements from the page
     {
-        var result;
-        if (start && start.querySelectorAll && (start.nodeType == 1 || start.nodeType == 9 || start.nodeType == 11))
-            result = start.querySelectorAll(selector);
-        else
-            result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
         return Arr.cloneArray(result);
     };
 
