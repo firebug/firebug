@@ -33,10 +33,10 @@ function runTest()
                 FBTest.waitForDisplayedElement("html", config, function(node)
                 {
                     paragraph = node.getElementsByClassName("nodeText").item(0);
-                    FBTest.compare(/Loram.*?\.\.\..*?voluptua\./, paragraph.textContent,
+                    FBTest.compare(/Lorem.*?\.\.\..*?voluptua\./, paragraph.textContent,
                         "Node contents in HTML panel must be cropped and contain 'Loram'");
 
-                    FBTest.compare(/^Loram(?!.*\.\.\.)/, win.document.getElementById("paragraph").textContent,
+                    FBTest.compare(/^Lorem(?!.*\.\.\.)/, win.document.getElementById("paragraph").textContent,
                         "Node contents on page must not be cropped and contain 'Loram'");
 
                     FBTest.testDone("issue2183.DONE");
