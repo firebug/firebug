@@ -22,7 +22,7 @@ function runTest()
 
             function replaceWith(str)
             {
-                FBTest.sendShortcut("a", {ctrlKey: true});
+                FBTest.sendShortcut("a", {accelKey: true});
                 if (str === "")
                     FBTest.synthesizeKey("VK_BACK_SPACE", null, win);
                 else
