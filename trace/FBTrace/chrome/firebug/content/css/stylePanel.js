@@ -205,7 +205,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
-        if (parent && parent.nodeType == 1)
+        if (parent && parent.nodeType == Node.ELEMENT_NODE)
         {
             this.getInheritedRules(parent, sections, usedProps);
 
@@ -305,9 +305,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             var dummyStyle = dummyElement.style;
 
             // xxxHonza: Not sure why this happens.
-            if (!dummyStyle && FBTrace.DBG_ERRORS)
+            if (!dummyStyle)
             {
-                FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
                 return;
             }
 

@@ -118,6 +118,8 @@ NetProgress.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    requestNumber: 1,
+
     startFile: function startFile(request, win)
     {
         var file = this.getRequestFile(request, win);
@@ -816,6 +818,8 @@ NetProgress.prototype =
         }
 
         file.request = request;
+        file.requestNumber = this.requestNumber;
+        this.requestNumber++;
         this.requests.push(request);
         this.files.push(file);
 

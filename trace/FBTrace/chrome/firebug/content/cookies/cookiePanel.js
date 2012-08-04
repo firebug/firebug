@@ -425,7 +425,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getEditor: function(target, value)
     {
         if (!this.conditionEditor)
-            this.conditionEditor = new Firebug.CookieModule.ConditionEditor(this.document);
+            this.conditionEditor = new Breakpoints.ConditionEditor(this.document);
         return this.conditionEditor;
     },
 

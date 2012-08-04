@@ -215,20 +215,10 @@
 
 /************************************************************************************************/
 
-.cookieRow .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
-    background-repeat: no-repeat;
-    background-position: 2px 2px;
-}
-
 .cookieNameLabel:hover {
     cursor: pointer;
     color: blue;
     text-decoration: underline;
-}
-
-/*.cookieRow */.opened > .cookieCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
 /* Session cookies */
@@ -355,7 +345,7 @@
 
 .cookieInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: #FFFFFF -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .cookieInfoBody {

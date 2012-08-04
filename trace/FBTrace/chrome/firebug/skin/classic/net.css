@@ -285,7 +285,7 @@
     width: 16px;
     height: 16px;
     background: transparent no-repeat 0 0;
-    background-image: url(chrome://firebug/skin/loading_16.gif);
+    background-image: url(chrome://firebug/skin/loading.svg);
     display:inline-block;
 }
 

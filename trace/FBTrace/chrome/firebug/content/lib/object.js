@@ -92,6 +92,9 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         var type = typeof(ob);
         if (type == "string" && ob.length)
             return true;
+         
+        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
+            return false;
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);

@@ -193,7 +193,7 @@ code {
 
 .completionBox {
     position: absolute;
-    color: silver;
+    color: #A0A0A0;
 }
 
 .completionInput {
@@ -228,7 +228,7 @@ code {
 .infoTipLoading {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/loading_16.gif) no-repeat;
+    background: url(chrome://firebug/skin/loading.svg) no-repeat;
 }
 
 .infoTipImageBox {

@@ -181,11 +181,15 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             (direction == "asc" && header.sorted == -1))
             return;
 
+        var newDirection = ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc")) ? "ascending" : "descending";
         if (header)
-            header.setAttribute("aria-sort", header.sorted === -1 ? "descending" : "ascending");
+            header.setAttribute("aria-sort", newDirection);
 
         var tbody = table.lastChild;
         var colID = header.getAttribute("id");
+
+        table.setAttribute("sortcolumn", colID);
+        table.setAttribute("sortdirection", newDirection);
 
         var values = [];
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
@@ -221,7 +225,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             switch (colID)
             {
                 case "netTimeCol":
-                    value = row.repObject.startTime;
+                    FBTrace.sysout("row.repObject", row.repObject);
+                    value = row.repObject.requestNumber;
                     break;
                 case "netSizeCol":
                     value = row.repObject.size;
@@ -249,7 +254,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         values.sort(sortFunction);
 
-        if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
+        if (newDirection == "ascending")
         {
             Css.removeClass(header, "sortedDescending");
             Css.setClass(header, "sortedAscending");
@@ -642,7 +647,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getProtocol: function(file)
     {
-        return Url.getProtocol(file.href);
+        var protocol = Url.getProtocol(file.href);
+        var text = file.responseHeadersText;
+        var spdy = text ? text.search(/X-Firefox-Spdy/i) >= 0 : null;
+        return spdy ? protocol + " SPDY" : protocol;
     },
 
     getStatus: function(file)
@@ -980,9 +988,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     selectTabByName: function(netInfoBox, tabName)
     {
-        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo"+tabName+"Tab");
-        if (tab)
-            this.selectTab(tab);
+        var tab = Dom.getChildByClass(netInfoBox, "netInfoTabs", "netInfo" + tabName + "Tab");
+        if (!tab)
+            return false;
+
+        this.selectTab(tab);
+
+        return true;
     },
 
     selectTab: function(tab)
@@ -1156,6 +1168,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             var text = NetUtils.getResponseText(file, context);
             this.htmlPreview = netInfoBox.getElementsByClassName("netInfoHtmlPreview").item(0);
             this.htmlPreview.contentWindow.document.body.innerHTML = text;
+
+            // Workaround for issue 5774 (it's not clear why the 'load' event is actually
+            // sent to the iframe when the user swithes Firebug panels).
+            // The event is sent only for the iframes in the Console panel.
+            context.addEventListener(this.htmlPreview, "load", function(event)
+            {
+                event.target.contentDocument.body.innerHTML = text;
+            });
 
             var defaultHeight = parseInt(Options.get("netHtmlPreviewHeight"));
             if (!isNaN(defaultHeight))

@@ -21,12 +21,13 @@ define([
     "firebug/net/netUtils",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
+    "firebug/lib/wrapper",
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule) {
+    TraceListener, TraceModule, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -407,9 +408,11 @@ var SpyHttpObserver =
             Arr.remove(spy.context.spies, spy);
 
         if (FBTrace.DBG_SPY)
+        {
             FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
                 spy.responseTime + "ms, spy.responseText: " +
                 (spy.reponseText ? spy.responseText.length : 0) + " bytes");
+        }
     }
 };
 
@@ -548,8 +551,10 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         spy.attach();
 
     if (FBTrace.DBG_SPY)
+    {
         FBTrace.sysout("spy.getSpyForXHR; New spy object created (" +
             (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
+    }
 
     return spy;
 }
@@ -721,7 +726,7 @@ function onHTTPSpyReadyStateChange(spy, event)
 
         // Update UI.
         updateLogRow(spy);
-        updateHttpSpyInfo(spy);
+        updateHttpSpyInfo(spy, true);
 
         // Notify the Net panel about a request being loaded.
         // xxxHonza: I don't think this is necessary.
@@ -759,6 +764,7 @@ function onHTTPSpyLoad(spy)
         spy.responseText = Http.safeGetXHRResponseText(spy.xhrRequest);
 
         updateLogRow(spy);
+        updateHttpSpyInfo(spy, true);
     }
 }
 
@@ -798,8 +804,10 @@ function onHTTPSpyAbort(spy)
     // xxxHonza: the net panel shoud find out this itself.
     var netProgress = spy.context.netProgress;
     if (netProgress)
+    {
         netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText,
             spy.responseText]);
+    }
 }
 
 // ********************************************************************************************* //
@@ -821,7 +829,7 @@ function callPageHandler(spy, event, originalHandler)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION "+exc, [exc, event]);
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
 
         var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
         if (xpcError) //
@@ -918,8 +926,9 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             if (Css.hasClass(logRow, "opened"))
             {
                 updateHttpSpyInfo(spy);
+
                 if (spyHeadTable)
-                    spyHeadTable.setAttribute('aria-expanded', 'true');
+                    spyHeadTable.setAttribute("aria-expanded", "true");
             }
             else
             {
@@ -928,7 +937,11 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                     [netInfoBox, spy]);
 
                 if (spyHeadTable)
-                    spyHeadTable.setAttribute('aria-expanded', 'false');
+                    spyHeadTable.setAttribute("aria-expanded", "false");
+
+                // Remove the info box, it'll be re-created (together with custom tabs)
+                // the next time the XHR entry is opened/updated.
+                netInfoBox.parentNode.removeChild(netInfoBox);
             }
         }
     },
@@ -965,8 +978,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         try
         {
             // xxxHonza: must be done through Console RDP
-            var postData = NetUtils.getPostText(spy, context, true);
-            var request = new context.window.XMLHttpRequest();
+            var win = Wrapper.unwrapObject(context.window);
+            var request = new win.XMLHttpRequest();
             request.open(spy.method, spy.href, true);
 
             var headers = spy.requestHeaders;
@@ -976,6 +989,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                 request.setRequestHeader(header.name, header.value);
             }
 
+            var postData = NetUtils.getPostText(spy, context, true);
             request.send(postData);
         }
         catch (err)
@@ -1036,7 +1050,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             id: "fbSpyOpenInTab",
             command: Obj.bindFixed(this.openInTab, this, spy)
         });
-        
+
         items.push({
             label: "Open_Response_In_New_Tab",
             tooltiptext: "net.tip.Open_Response_In_New_Tab",
@@ -1074,17 +1088,23 @@ Firebug.XHRSpyListener =
 
 function updateTime(spy)
 {
-    var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
-    if (spy.responseTime)
-        timeBox.textContent = " " + Str.formatTime(spy.responseTime);
+    if(spy.logRow)
+    {
+        var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
+        if (spy.responseTime)
+            timeBox.textContent = " " + Str.formatTime(spy.responseTime);
+    }
 }
 
 function updateLogRow(spy)
 {
     updateTime(spy);
 
-    var statusBox = spy.logRow.getElementsByClassName("spyStatus").item(0);
-    statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
+    if(spy.logRow)
+    {
+        var statusBox = spy.logRow.getElementsByClassName("spyStatus").item(0);
+        statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
+    }
 
     if (spy.loaded)
     {
@@ -1108,13 +1128,13 @@ function updateLogRow(spy)
     }
 }
 
-function updateHttpSpyInfo(spy)
+function updateHttpSpyInfo(spy, updateInfoBody)
 {
     if (!spy.logRow || !Css.hasClass(spy.logRow, "opened"))
         return;
 
     if (!spy.params)
-        spy.params = Url.parseURLParams(spy.href+"");
+        spy.params = Url.parseURLParams(spy.href + "");
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
@@ -1124,12 +1144,34 @@ function updateHttpSpyInfo(spy)
 
     var template = Firebug.NetMonitor.NetInfoBody;
     var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+
+    var defaultTab;
+
+    // If the associated XHR row is currently expanded, make sure to recreate
+    // the info bodies if the flag says so.
+    if (updateInfoBody)
+    {
+        // Remember the current selected info tab.
+        if (netInfoBox.selectedTab)
+            defaultTab = netInfoBox.selectedTab.getAttribute("view");
+
+        // Remove the info box so, it's recreated below.
+        netInfoBox.parentNode.removeChild(netInfoBox);
+        netInfoBox = null;
+    }
+
     if (!netInfoBox)
     {
         var head = Dom.getChildByClass(spy.logRow, "spyHead");
         netInfoBox = template.tag.append({"file": spy}, head);
+
+        // Notify listeners so, custom info tabs can be appended
         Events.dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
-        template.selectTabByName(netInfoBox, "Response");
+
+        // If the response tab isn't available/visible (perhaps the response didn't came yet),
+        // select the 'Headers' tab by default or keep the default tab.
+        defaultTab = defaultTab || (template.hideResponse(spy) ? "Headers" : "Response");
+        template.selectTabByName(netInfoBox, defaultTab);
     }
     else
     {
@@ -1146,7 +1188,8 @@ function getRequestHeaders(spy)
     var channel = spy.xhrRequest.channel;
     if (channel instanceof Ci.nsIHttpChannel)
     {
-        channel.visitRequestHeaders({
+        channel.visitRequestHeaders(
+        {
             visitHeader: function(name, value)
             {
                 headers.push({name: name, value: value});
@@ -1166,7 +1209,8 @@ function getResponseHeaders(spy)
         var channel = spy.xhrRequest.channel;
         if (channel instanceof Ci.nsIHttpChannel)
         {
-            channel.visitResponseHeaders({
+            channel.visitResponseHeaders(
+            {
                 visitHeader: function(name, value)
                 {
                     headers.push({name: name, value: value});
@@ -1177,8 +1221,10 @@ function getResponseHeaders(spy)
     catch (exc)
     {
         if (FBTrace.DBG_SPY || FBTrace.DBG_ERRORS)
+        {
             FBTrace.sysout("spy.getResponseHeaders; EXCEPTION " +
                 Http.safeGetRequestName(spy.request), exc);
+        }
     }
 
     return headers;

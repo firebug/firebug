@@ -2241,7 +2241,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 box.a11yCaretOffset = offset = 0;
         }
         var startNode = node.getElementsByClassName("sourceRowText").item(0)
-        if (startNode && startNode.firstChild && startNode.firstChild.nodeType == 3)
+        if (startNode && startNode.firstChild && startNode.firstChild.nodeType == Node.TEXT_NODE)
         {
             startNode = startNode.firstChild;
             if (offset >= startNode.length)
@@ -2948,7 +2948,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
     isVisibleByStyle: function (elem)
     {
-        if (!elem || elem.nodeType != 1)
+        if (!elem || elem.nodeType != Node.ELEMENT_NODE)
             return false;
         var style = elem.ownerDocument.defaultView.getComputedStyle(elem, null);
         return style.visibility !== "hidden" && style.display !== "none";
@@ -3027,7 +3027,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             return null;
 
         function criteria(node) {
-            return node.nodeType == 1 && Css.hasClass(node, className);
+            return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, className);
         }
 
         for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
@@ -3062,7 +3062,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             return null;
 
         function criteria(node) {
-            return node.nodeType == 1 && Css.hasClass(node, className);
+            return node.nodeType == Node.ELEMENT_NODE && Css.hasClass(node, className);
         }
 
         if (!upOnly)

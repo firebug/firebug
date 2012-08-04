@@ -196,6 +196,9 @@ var HttpObserver = Obj.extend(BaseObserver,
         if (!context.cookies.activeCookies)
             context.cookies.activeCookies = [];
 
+        if (!activeHost)
+            return;
+
         var activeCookies = context.cookies.activeCookies;
 
         // xxxHonza

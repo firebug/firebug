@@ -240,6 +240,9 @@ DomplateTag.prototype =
             var iterOuts = [];
             outputs.push(iterOuts);
 
+            if (!iter)
+                return;
+
             if (isArray(iter) || iter instanceof NodeList)
                 iter = new ArrayIterator(iter);
 
@@ -1164,14 +1167,14 @@ var Renderer =
         var html = this.renderHTML(args, outputs, self);
 
         var root;
-        if (parent.nodeType == 1)
+        if (parent.nodeType == Node.ELEMENT_NODE)
         {
             parent.innerHTML = html;
             root = parent.firstChild;
         }
         else
         {
-            if (!parent || parent.nodeType != 9)
+            if (!parent || parent.nodeType != Node.DOCUMENT_NODE)
                 parent = document;
 
             if (!womb || womb.ownerDocument != parent)

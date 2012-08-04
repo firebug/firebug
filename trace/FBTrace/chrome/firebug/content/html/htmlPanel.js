@@ -390,8 +390,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     registerMutationListeners: function(win)
     {
-        if (this.context.attachedMutation)
-            return;
+        // The 'attachedMutation' flag should be maintained per window. Otherwise
+        // we can miss some registration. Events.addEventListener is safe for multiple
+        // calls so, let's remove the condition for now as part of issue 5761 fix.
+        // This should be improved together with issue 5490
+        //if (this.context.attachedMutation)
+        //    return;
 
         this.context.attachedMutation = true;
 
@@ -798,7 +802,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (parentNode)
         {
-            if (parentNode.nodeType == 9) // then parentNode is Document element
+            if (parentNode.nodeType == Node.DOCUMENT_NODE)
             {
                 if (parentNode.defaultView)
                 {
@@ -807,8 +811,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     if (FBTrace.DBG_HTML)
                     {
-                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+
-                            parentNode.defaultView.frameElement);
+                        FBTrace.sysout("getParentObject; node is document node"+
+                            ", frameElement:" + parentNode.defaultView.frameElement);
                     }
 
                     return parentNode.defaultView.frameElement;
@@ -841,7 +845,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             // Documents have no parentNode; Attr, Document, DocumentFragment, Entity,
             // and Notation. top level windows have no parentNode
-            if (node && node.nodeType == 9) // document type
+            if (node && node.nodeType == Node.DOCUMENT_NODE)
             {
                 // generally a reference to the window object for the document, however
                 // that is not defined in the specification
@@ -928,8 +932,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             if (index == 0)
             {
-                // punch thru and adopt the root element as our child
-                var skipChild = node.contentDocument.documentElement;
+                // punch thru and adopt the document node as our child
+                var skipChild = node.contentDocument.firstChild;
 
                 // (the node's).(type 9 document).(HTMLElement)
                 return this.setEmbedConnection(node, skipChild);
@@ -1597,7 +1601,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         var items = [];
 
-        if (node.nodeType == 1)
+        if (node.nodeType == Node.ELEMENT_NODE)
         {
             items.push(
                 "-",
@@ -1710,7 +1714,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             return;
 
         var node = Firebug.getRepObject(target);
-        if (node && node.nodeType == 1)
+        if (node && node.nodeType == Node.ELEMENT_NODE)
         {
             var nodeName = node.localName.toUpperCase();
             var attribute = Dom.getAncestorByClass(target, "nodeAttr");
@@ -2647,7 +2651,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     getContextMenuItems: function(context, node, target, items)
     {
-        if (!(node && node.nodeType == 1))
+        if (!(node && node.nodeType == Node.ELEMENT_NODE))
             return;
 
         var breakpoints = context.mutationBreakpoints;

@@ -11,21 +11,9 @@ Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/prefLoader.js");
 
-var Locale = Cu.import("resource://firebug/locale.js").Locale;
+const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
-// Firebug URLs used by the global menu.
-var firebugURLs =
-{
-    main: "http://www.getfirebug.com",
-    FAQ: "http://getfirebug.com/wiki/index.php/FAQ",
-    docs: "http://www.getfirebug.com/docs.html",
-    keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
-    discuss: "https://groups.google.com/forum/#!forum/firebug",
-    issues: "http://code.google.com/p/fbug/issues/list",
-    donate: "http://getfirebug.com/getinvolved",
-    extensions: "http://getfirebug.com/wiki/index.php/Firebug_Extensions",
-    firstRunPage: "http://getfirebug.com/firstrun#Firebug "
-};
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
 
 // ********************************************************************************************* //
 // String Bundles
@@ -75,7 +63,7 @@ function $el(name, attributes, children, parent)
     for (var a in attributes)
         el.setAttribute(a, attributes[a]);
 
-    for each(var a in children)
+    for each (var a in children)
         el.appendChild(a);
 
     if (parent)
@@ -151,24 +139,43 @@ function $menupopupOverlay(parent, children)
     if (!parent)
         return;
 
-    for (var i=0; i<children.length; i++)
+    for (var i=0; i<children.length; ++i)
     {
         var child = children[i];
-        var id = child.getAttribute("insertbefore"), beforeEl;
-        if (id)
-            beforeEl = parent.querySelector("#" + id);
+        var beforeEl;
 
-        if (!beforeEl)
+        if (child.getAttribute("position"))
         {
-            id = child.getAttribute("insertafter");
-
-            if (id)
-                beforeEl = parent.querySelector("#" + id);
+            var pos = child.getAttribute("position");
+            beforeEl = parent.children[pos - 1];
+        }
+        else if (child.getAttribute("insertbefore"))
+        {
+            var ids = child.getAttribute("insertbefore").split(",");
+            for (var j=0; j < ids.length; ++j)
+            {
+                beforeEl = parent.querySelector("#" + ids[j]);
+                if (beforeEl)
+                    break;
+            }
+        }
+        else if (child.getAttribute("insertafter"))
+        {
+            var ids = child.getAttribute("insertafter").split(",");
+            for (var j=0; j < ids.length; ++j)
+            {
+                beforeEl = parent.querySelector("#" + ids[j]);
+                if (beforeEl)
+                    break;
+            }
             if (beforeEl)
                 beforeEl = beforeEl.nextSibling;
         }
 
-        parent.insertBefore(child, beforeEl);
+        if (beforeEl)
+            parent.insertBefore(child, beforeEl);
+        else
+            parent.appendChild(child);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
         child.setAttribute("firebugRootNode", true);
@@ -177,7 +184,7 @@ function $menupopupOverlay(parent, children)
 
 function $toolbarButton(id, attrs, children, defaultPos)
 {
-    attrs["class"] = "toolbarbutton-1 chromeclass-toolbar-additional";
+    attrs["class"] = "toolbarbutton-1";
     attrs.firebugRootNode = true;
     attrs.id = id;
 
@@ -302,7 +309,7 @@ Firebug.GlobalUI =
 
         var container = $("appcontent");
 
-        // List of Firbug scripts that must be loaded into the global scope (browser.xul)
+        // List of Firebug scripts that must be loaded into the global scope (browser.xul)
         var scriptSources = [
             "chrome://firebug/content/trace.js",
             "chrome://firebug/content/legacy.js",
@@ -498,14 +505,11 @@ Firebug.GlobalUI =
         });
     },
 
-    visitWebsite: function(which, arg)
+    openFirstRunPage: function()
     {
-        var url = firebugURLs[which];
-        if (url)
-        {
-            url = arg ? url + arg : url;
-            gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
-        }
+        var version = Firebug.GlobalUI.getVersion();
+        url = firstRunPage + version;
+        gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
     },
 
     setPosition: function(newPosition)
@@ -929,7 +933,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugUrlWebsite",
                 label: "firebug.Website",
                 tooltiptext: "firebug.menu.tip.Website",
-                oncommand: "Firebug.GlobalUI.visitWebsite('main')",
+                oncommand: "Firebug.chrome.visitWebsite('main')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -937,7 +941,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugUrlExtensions",
                 label: "firebug.menu.Extensions",
                 tooltiptext: "firebug.menu.tip.Extensions",
-                oncommand: "Firebug.GlobalUI.visitWebsite('extensions')",
+                oncommand: "Firebug.chrome.visitWebsite('extensions')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -954,7 +958,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugDoc",
                 label: "firebug.Documentation",
                 tooltiptext: "firebug.menu.tip.Documentation",
-                oncommand: "Firebug.GlobalUI.visitWebsite('docs')",
+                oncommand: "Firebug.chrome.visitWebsite('docs')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -962,7 +966,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugKeyboard",
                 label: "firebug.KeyShortcuts",
                 tooltiptext: "firebug.menu.tip.Key_Shortcuts",
-                oncommand: "Firebug.GlobalUI.visitWebsite('keyboard')",
+                oncommand: "Firebug.chrome.visitWebsite('keyboard')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -970,7 +974,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugForums",
                 label: "firebug.Forums",
                 tooltiptext: "firebug.menu.tip.Forums",
-                oncommand: "Firebug.GlobalUI.visitWebsite('discuss')",
+                oncommand: "Firebug.chrome.visitWebsite('discuss')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -978,7 +982,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugIssues",
                 label: "firebug.Issues",
                 tooltiptext: "firebug.menu.tip.Issues",
-                oncommand: "Firebug.GlobalUI.visitWebsite('issues')",
+                oncommand: "Firebug.chrome.visitWebsite('issues')",
                 "class": "fbInternational"
             }),
             $menuitem(
@@ -986,7 +990,7 @@ var firebugMenuContent = [
                 id: "menu_firebug_firebugDonate",
                 label: "firebug.Donate",
                 tooltiptext: "firebug.menu.tip.Donate",
-                oncommand: "Firebug.GlobalUI.visitWebsite('donate')",
+                oncommand: "Firebug.chrome.visitWebsite('donate')",
                 "class": "fbInternational"
             }),
         ])
@@ -1061,36 +1065,42 @@ $menupopupOverlay($("menu_View_Popup"), [
 $menupopupOverlay($("menuWebDeveloperPopup"), [
     $menu({
         id: "menu_webDeveloper_firebug",
-        insertbefore: "menu_devToolbar",
+        position: 1,
         label: "firebug.Firebug",
         "class": "menu-iconic fbInternational"
     }, [
-        $menupopup({id: "menu_firebug_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "menu_firebug_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ]),
     $menuseparator({
-        insertbefore: "menu_firebug_devToolbar"
+        insertafter: "menu_webDeveloper_firebug"
     })
 ]);
 
-// Firefox 4 Web Developer Menu
+// Firefox Button -> Web Developer Menu
 $menupopupOverlay($("appmenu_webDeveloper_popup"), [
     $splitmenu({
         id: "appmenu_firebug",
-        insertbefore: "appmenu_devToolbar",
+        position: 1,
         command: "cmd_firebug_toggleFirebug",
         key: "key_firebug_toggleFirebug",
         label: "firebug.Firebug",
         iconic: "true",
         "class": "fbInternational"
     }, [
-        $menupopup({id: "appmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "appmenu_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ]),
     $menuseparator({
-        insertbefore: "appmenu_devToolbar"
+        insertafter: "appmenu_firebug"
     })
 ]);
 
@@ -1104,9 +1114,12 @@ $menupopupOverlay($("toolsPopup"), [
         label: "firebug.Firebug",
         "class": "menuitem-iconic fbInternational"
     }, [
-        $menupopup({id: "toolsmenu_firebugMenuPopup", "class": "fbFirebugMenuPopup",
+        $menupopup({
+            id: "toolsmenu_firebugMenuPopup",
+            "class": "fbFirebugMenuPopup",
             onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"})
+            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"
+        })
     ])
 ]);
 
@@ -1181,9 +1194,7 @@ if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarp
         // Check whether insertItem really works
         var curSet = navBar.currentSet.split(",");
         if (curSet.indexOf(startButtonId) == -1)
-        {
             FBTrace.sysout("Startbutton; navBar.insertItem doesn't work", curSet);
-        }
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton; curSet (after modification): " + navBar.currentSet);
@@ -1246,8 +1257,7 @@ if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
                 if (window.closed)
                     return;
 
-                var version = Firebug.GlobalUI.getVersion();
-                Firebug.GlobalUI.visitWebsite("firstRunPage", version);
+                Firebug.GlobalUI.openFirstRunPage();
             }, 1000);
 
             window.addEventListener("unload", function()
@@ -1278,9 +1288,15 @@ if (typeof(nsContextMenu) != "undefined")
     {
         initItemsOriginal.apply(this, arguments);
 
-        var showInspect = !PrefLoader.getPref("hideDefaultInspector");
-        this.showItem("inspect-separator", showInspect);
-        this.showItem("context-inspect", showInspect);
+        // Hide built-in inspector menu item if the pref "extensions.firebug.hideDefaultInspector"
+        // says so. Note that there is also built-in preference "devtools.inspector.enable" that
+        // can be used for the same purpose.
+        var hideInspect = PrefLoader.getPref("hideDefaultInspector");
+        if (hideInspect)
+        {
+            this.showItem("inspect-separator", false);
+            this.showItem("context-inspect", false);
+        }
     }
 }
 
@@ -1303,4 +1319,4 @@ if (FBTrace.DBG_INITIALIZE)
     FBTrace.sysout("Firebug global overlay applied");
 
 // ********************************************************************************************* //
-})()
+})();
