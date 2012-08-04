@@ -19,11 +19,11 @@ function runTest()
             tasks.push(testDomPanel);
 
             tasks.push(executeCommandAndVerify,
-                "$('testId').attributes", expectedValue,
+                "$('#testId').attributes", expectedValue,
                 "a", "objectLink objectLink-NamedNodeMap");
 
             tasks.push(executeCommandAndVerify,
-                "$('testId').attributes[0]",
+                "$('#testId').attributes[0]",
                 expectedValue2,
                 "a", "objectLink objectLink-Attr");
 
