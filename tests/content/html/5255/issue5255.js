@@ -18,7 +18,7 @@ function runTest()
             FBTest.focus(textArea);
 
             // Select all (we want to override the existing markup)
-            FBTest.sendShortcut("a", {ctrlKey: true});
+            FBTest.sendShortcut("a", {accelKey: true});
 
             // Type new text
             FBTest.sendString("<i>3</i><i>4</i><i>5</i>", textArea);
