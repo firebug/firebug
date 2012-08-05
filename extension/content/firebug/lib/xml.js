@@ -82,6 +82,7 @@ var getLocalName = Xml.getLocalName = function(node)
 // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
 Xml.selfClosingTags =
 {
+    "::before":1,"::after":1,
     "meta": 1,
     "link": 1,
     "area": 1,

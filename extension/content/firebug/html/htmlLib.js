@@ -8,8 +8,9 @@ define([
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/string",
+    "firebug/firefox/xpcom"
 ],
-function(Obj, Events, Css, Dom, Search, Xml, Str) {
+function(Obj, Events, Css, Dom, Search, Xml, Str, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -819,14 +820,84 @@ var HTMLLib =
 
         getNextSibling: function(node)
         {
-            // the Mozilla XBL tree walker fails for nextSibling
-            return node.nextSibling;
+            if (node._firebugNextNode)
+                return node._firebugNextNode;
+            
+            // node::after;
+            // node.nextSibling::before
+            // node.nextSibling
+            
+            if (node.nodeType == 1)
+            {
+                var pseudoElements = [":after"];
+                for (var p = 0; p < pseudoElements.length; p++)
+                {
+                    try
+                    {
+                        var inspectedRules = Dom.domUtils.getCSSStyleRules(node, pseudoElements[p]);
+                        var content = false;
+                        if (inspectedRules && inspectedRules.Count())
+                        {
+                            for (var i = 0; i < inspectedRules.Count(); i++)
+                            {
+                                if (content) continue;
+                                var rule = Xpcom.QI(inspectedRules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
+                                // var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
+                                if (rule && rule.style && rule.style.content)
+                                    content = rule.style.content;
+                            }
+                            var pseudoEl = node.ownerDocument.createElement(pseudoElements[p]);
+                            pseudoEl._firebugParentNode = node.parentNode;
+                            pseudoEl._firebugNextNode = node.nextSibling;
+                            pseudoEl.innerText = content;
+                            return pseudoEl;
+                        }
+                    }
+                    catch (exc)
+                    {
+                    }
+                }
+            }
+            
+            node = node.nextSibling;
+            if (!node || node.nodeType !== 1)
+                return node;
+            var pseudoElements = [":before", ":first-letter", ":first-line"];
+            for (var p = 0; p < pseudoElements.length; p++)
+            {
+                try
+                {
+                    var inspectedRules = Dom.domUtils.getCSSStyleRules(node, pseudoElements[p]);
+                    var content = false;
+                    if (inspectedRules && inspectedRules.Count())
+                    {
+                        for (var i = 0; i < inspectedRules.Count(); i++)
+                        {
+                            if (content) continue;
+                            var rule = Xpcom.QI(inspectedRules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
+                            // var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
+                            if (rule && rule.style && rule.style.content)
+                                content = rule.style.content;
+                        }
+                        var pseudoEl = node.ownerDocument.createElement(":" + pseudoElements[p]);
+                        pseudoEl._firebugParentNode = node.parentNode;
+                        pseudoEl._firebugNextNode = node;
+                        pseudoEl.innerText = content;
+                        pseudoEl.namespaceURI == 'http://www.w3.org/1999/xhtml';
+                        return pseudoEl;
+                    }
+                }
+                catch (exc)
+                {
+                }
+            }
+            return node;
         },
 
         getParentNode: function(node)
         {
             // the Mozilla XBL tree walker fails for parentNode
-            return node.parentNode;
+            return node.parentNode || node._firebugParentNode;
         }
     },
 
