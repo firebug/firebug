@@ -666,6 +666,7 @@ const categoryMap =
     "DOM": "js",
     "Events": "js",
     "CSS": "css",
+    "HTML": "xml",
     "XML": "xml",
     "malformed-xml": "xml"
 };
@@ -704,9 +705,10 @@ function whyNotShown(url, categoryList, isWarning)
         {
             return "showCSSErrors";
         }
-        else if ((category == "XML" || category == "malformed-xml" ) && !Firebug.showXMLErrors)
+        else if ((category == "HTML" || category == "XML" || category == "malformed-xml" ) &&
+            !Firebug.showXMLErrors)
         {
-            return "showXMLErors";
+            return "showXMLErrors";
         }
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                 && !isWarning && !Firebug.showJSErrors)
