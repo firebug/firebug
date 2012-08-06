@@ -2262,6 +2262,19 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var emptyAttr = {name: "", value: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
+    },
+
+    getInitialValue: function(target, value)
+    {
+        if(value == "")
+            return value;
+        var element = Firebug.getRepObject(target);
+            if(element && element instanceof window.Element)
+            {
+                var attributeName = Dom.getPreviousByClass(target, "nodeName").textContent;
+                return element.getAttribute(attributeName);
+            }
+        return value;
     }
 });
 
