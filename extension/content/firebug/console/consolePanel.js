@@ -155,12 +155,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (state)
             wasScrolledToBottom = state.wasScrolledToBottom;
 
-        if (typeof(wasScrolledToBottom) == "boolean")
+        if (typeof wasScrolledToBottom == "boolean")
         {
             this.wasScrolledToBottom = wasScrolledToBottom;
             delete state.wasScrolledToBottom;
         }
-        else
+        else if (typeof this.wasScrolledToBottom != "boolean")
         {
             // If the previous state doesn't says where to scroll,
             // scroll to the bottom by default.

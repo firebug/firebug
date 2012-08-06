@@ -450,6 +450,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);
+
+        var consolePanel = Firebug.currentContext.panelMap.console;
+        if (consolePanel)
+            Dom.scrollToBottom(consolePanel.panelNode);
     },
 
     enterInspect: function(context)
