@@ -2266,14 +2266,16 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getInitialValue: function(target, value)
     {
-        if(value == "")
+        if (value == "")
             return value;
+
         var element = Firebug.getRepObject(target);
-            if(element && element instanceof window.Element)
-            {
-                var attributeName = Dom.getPreviousByClass(target, "nodeName").textContent;
-                return element.getAttribute(attributeName);
-            }
+        if (element && element instanceof window.Element)
+        {
+            var attributeName = Dom.getPreviousByClass(target, "nodeName").textContent;
+            return element.getAttribute(attributeName);
+        }
+
         return value;
     }
 });
