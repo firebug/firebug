@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4889: Folding for breakpoint categories</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function firstFunction()
+        {
+            nonExistingFunction();
+        }
+
+        function secondFunction()
+        {
+            anotherNonExistingFunction();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4889">Issue 4889</a>: Folding for breakpoint categories</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="callFirstFunction" onclick="firstFunction()">Call first non-existing function</button>
+                <button id="callSecondFunction" onclick="secondFunction()">Call second non-existing function</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and the <em>Script</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Switch to the <em>Console</em> panel</li>
+                    <li>
+                        Click the two buttons <em>Call first non-existing function</em> and <em>Call second non-existing function</em><br/>
+                        <span class="ok">&rArr; There should be two errors shown inside the console.</span>
+                    </li>
+                    <li>Click the breakpoints besides the two errors</li>
+                    <li>
+                        Switch to the <em>Script</em> panel and there to the <em>Breakpoints</em> side panel<br/>
+                        <span class="ok">&rArr; There should be an <em>Error Breakpoints</em> section containing two error breakpoints.</span>
+                    </li>
+                    <li>
+                        Click the <em>Error Breakpoints</em> header<br/>
+                        <span class="ok">&rArr; The section should be collapsed.</span>
+                    </li>
+                    <li>
+                        Click the <em>Error Breakpoints</em> header again<br/>
+                        <span class="ok">&rArr; The section should be expanded.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Folding of breakpoint categories should work as expected.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
