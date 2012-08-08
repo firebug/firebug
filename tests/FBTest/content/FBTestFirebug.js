@@ -2010,6 +2010,11 @@ this.clearSearchField = function()
     searchBox.value = "";
 }
 
+this.getSearchFieldText = function()
+{
+    return FW.Firebug.chrome.$("fbSearchBox").value;
+}
+
 /**
  * Executes search within the Script panel.
  * @param {String} searchText Keyword set into the search box.
