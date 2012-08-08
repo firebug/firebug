@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4845: Rerun should have a shortcut like the other debugging options</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function secondLevelFunction()
+        {
+            console.log("Hello Firebug user!");
+            debugger;
+        }
+
+        function init()
+        {
+            secondLevelFunction();
+        }
+
+        window.addEventListener("load", init, false);
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4845">Issue 4845</a>: Rerun should have a shortcut like the other debugging options</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and the <em>Script</em> panel and switch to the <em>Script</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; The script execution should stop at line 11 (<code>debugger;</code>).</span>
+                    </li>
+                    <li>
+                        Switch to the <em>Console</em> panel<br/>
+                        <span class="ok">&rArr; The console should list a log message <code>Hello Firebug user!</code>.</span>
+                    </li>
+                    <li>Switch back to the <em>Script</em> panel</li>
+                    <li>Press <code class="key">Shift+F8</code> to rerun the stack trace</li>
+                    <li>Switch to the <em>Console</em> panel again</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The console should list two logs of <code>Hello Firebug user!</code>, which indicates that the stack trace was executed again.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
