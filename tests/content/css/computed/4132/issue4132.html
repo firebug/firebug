@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4132: Only show applied styles in Computed side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            color: blue;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4132">Issue 4132</a>: Only show applied styles in Computed side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element">Hello Firebug user!</div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>
+                        Inspect the &lt;div&gt; above containing <code>Hello Firebug user!</code> (<code>#element</code>)<br/>
+                        <span class="ok">&rArr; There should just be CSS styles shown inside the <em>Computed</em> side panel, which were changed by the CSS defined on the page.</span>
+                    </li>
+                    <li>
+                        Check <em>Show User Agent CSS</em> in the <em>Computed</em> side panel options<br/>
+                        <span class="ok">&rArr; All CSS properties should be shown inside the <em>Computed</em> side panel, also the ones not changed by the CSS defined on the page.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Computed</em> side panel should optionally hide the user agent CSS.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
