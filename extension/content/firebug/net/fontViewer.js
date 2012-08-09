@@ -539,6 +539,7 @@ Firebug.FontViewerModel.Preview = domplate(
         var propValueTemplates = {
             vendor: Firebug.FontViewerModel.Preview.vendorTag,
             credits: Firebug.FontViewerModel.Preview.creditsTag,
+            description: Firebug.FontViewerModel.Preview.translatedInfoTag,
             copyright: Firebug.FontViewerModel.Preview.translatedInfoTag,
             trademark: Firebug.FontViewerModel.Preview.translatedInfoTag,
             license: Firebug.FontViewerModel.Preview.licenseTag
