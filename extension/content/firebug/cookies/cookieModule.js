@@ -676,45 +676,29 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
-    onRemoveAllShared: function(context, sessionOnly)
+    removeCookies: function(context, filter)
     {
         var panel = context.getPanel(panelName, true);
         if (!panel)
             return;
 
-        var cookies = [];
-
-        // Remove all cookies in the list. Notice that the list can be further
-        // filtered by the search-box (the right side of Firebug's tab bar)
-        // So, make sure in case of searching-on, only visible (matched)
-        // cookies are removed.
-        var searching = Css.hasClass(panel.panelNode, "searching");
-        var row = Dom.getElementByClass(panel.panelNode, "cookieRow");
-        while (row)
+        FBTrace.sysout("cookies", {ctx: context, activeHosts: context.cookies.activeHosts.length});
+        for (var host in context.cookies.activeHosts)
         {
-            if (!searching || Css.hasClass(row, "matched"))
+            var cookieEnumerator = cookieManager.getCookiesFromHost(host);
+
+            while(cookieEnumerator.hasMoreElements())
             {
-                var cookie = row.repObject;
-
-                // Some entries within the Cookies panel don't represent a cookie.
-                if (cookie)
-                {
-                    // If sessionOnly flag is true, only session cookies will be removed.
-                    if (sessionOnly)
-                    {
-                        if (!cookie.cookie.expires)
-                            cookies.push(cookie);
-                    }
-                    else
-                        cookies.push(cookie);
-                }
+                var cookie = cookieEnumerator.getNext();
+                cookie = cookie.QueryInterface(Ci.nsICookie2);
+                FBTrace.sysout("cookie " + cookie.name + ", " + cookie.host, cookie);
+                var sessionCookieToRemove = typeof filter.session != "undefined" && filter.session &&
+                    cookie.isSession;
             }
-
-            row = row.nextSibling;
         }
 
-        for (var i=0; i<cookies.length; i++)
-            CookieReps.CookieRow.onRemove(cookies[i]);
+        /*for (var i=0; i<cookies.length; i++)
+            CookieReps.CookieRow.onRemove(cookies[i]);*/
     },
 
     onRemoveAll: function(context)
@@ -737,7 +721,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeConfirmation, !check.value);
         }
 
-        Firebug.CookieModule.onRemoveAllShared(context, false);
+        Firebug.CookieModule.removeCookies(context, false);
     },
 
     onRemoveAllSession: function(context)
@@ -760,7 +744,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value)
         }
 
-        Firebug.CookieModule.onRemoveAllShared(context, true);
+        Firebug.CookieModule.removeCookies(context, true);
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)
