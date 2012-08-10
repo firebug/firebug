@@ -886,7 +886,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var context = Firebug.currentContext;
 
-        if (!this.commandHistory.isShown())
+        var commandEditorOpen = (Firebug.commandEditor && context.panelName == "console");
+        if (!this.commandHistory.isShown() && !commandEditorOpen)
         {
             this.autoCompleter.complete(context);
         }
