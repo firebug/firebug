@@ -151,11 +151,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 var prop = listValue.value[i];
                 var name = Wrapper.unwrapIValue(prop.name);
-
-                // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=712289.
-                if (typeof name !== "string")
-                    break;
-
                 names.push(name);
             }
 
@@ -2728,11 +2723,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (this.hasObservers())
         {
             this.activateDebugger();
-
-            // bug712289, do not display the activation message if JSD is not available
-            if (!FBS.isJSDAvailable())
-                return;
-
             if (Firebug.currentContext)
             {
                 var name = observer.name || observer.dispatchName || observer.toolName;

@@ -8,9 +8,8 @@ define([
     "firebug/lib/domplate",
     "firebug/lib/url",
     "firebug/lib/dom",
-    "firebug/js/fbs",   // bug712289
 ],
-function(Obj, Firebug, Firefox, Locale, Domplate, Url, Dom, FBS) {
+function(Obj, Firebug, Firefox, Locale, Domplate, Url, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -334,16 +333,6 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var parentNode = this.getParentNode(browser);
         this.tag.replace(args, parentNode, this);
         parentNode.removeAttribute("collapsed");
-
-        // bug712289
-        if (panelName == "script" && !FBS.isJSDAvailable())
-        {
-            Dom.hide(parentNode.querySelector(".descImage"), true);
-            Dom.hide(parentNode.querySelector(".objectLink"), true);
-
-            var desc = parentNode.querySelector(".disabledPanelDescription");
-            desc.innerHTML = Locale.$STR("moduleManager.scriptPanelNotAvailable");
-        }
     },
 
     /**

@@ -88,10 +88,6 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
         var prop = listValue.value[i];
         var name = Wrapper.unwrapIValue(prop.name);
 
-        // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=712289.
-        if (typeof name !== "string")
-            break;
-
         if (prop.value.jsType === prop.value.TYPE_NULL) // null is an object (!)
         {
             scopeVars[name] = null;

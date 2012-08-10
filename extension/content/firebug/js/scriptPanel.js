@@ -22,7 +22,6 @@ define([
     "firebug/chrome/menu",
     "firebug/trace/debug",
     "firebug/lib/keywords",
-    "firebug/js/fbs",   // bug712289
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
@@ -31,7 +30,7 @@ define([
 ],
 function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
     Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords, FBS) {
+    System, Menu, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -1567,27 +1566,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onActiveTool: function(isActive)
     {
         this.onJavaScriptDebugging(isActive, "onActiveTool");
-    },
-
-    setEnabled: function(enable)
-    {
-        // bug712289
-        if (!FBS.isJSDAvailable())
-        {
-            Firebug.SourceBoxPanel.setEnabled.apply(this, [false]);
-            return;
-        }
-
-        Firebug.SourceBoxPanel.setEnabled.apply(this, arguments);
-    },
-
-    isPanelEnabled: function(panelType)
-    {
-        // bug712289
-        if (!FBS.isJSDAvailable())
-            return false;
-
-        return Firebug.SourceBoxPanel.isPanelEnabled.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
