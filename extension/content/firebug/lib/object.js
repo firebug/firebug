@@ -68,8 +68,7 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             return false;
 
         var obString = Str.safeToString(ob);
-        if (obString === "[object StorageList]" ||
-            obString === "[xpconnect wrapped native prototype]")
+        if (obString === "[xpconnect wrapped native prototype]")
         {
             return true;
         }

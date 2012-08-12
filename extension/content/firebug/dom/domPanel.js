@@ -439,12 +439,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             if (isArguments(object))
                 object = Arr.cloneArray(object);
 
-            if ("StorageList" in window && object instanceof window.StorageList)
-            {
-                var domain = context.window.location.hostname;
-                object = object.namedItem(domain);
-            }
-
             try
             {
                 var contentView = this.getObjectView(object);
@@ -680,12 +674,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 hasChildren = hasChildren || Obj.hasProperties(proto,
                     !Firebug.showEnumerableProperties, Firebug.showOwnProperties);
             }
-        }
-
-        if ("StorageList" in window && value instanceof window.StorageList)
-        {
-            var domain = context.window.location.hostname;
-            hasChildren = value.namedItem(domain).length > 0;
         }
 
         var member = {

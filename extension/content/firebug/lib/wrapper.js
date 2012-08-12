@@ -19,11 +19,6 @@ Wrapper.getContentView = function(object)
     if (typeof(object) === "undefined" || object == null)
         return false;
 
-    // There is an exception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if ("StorageList" in window && object instanceof window.StorageList)
-        return false;
-
     return (object.wrappedJSObject);
 }
 
@@ -31,11 +26,6 @@ Wrapper.unwrapObject = function(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
     if (typeof(object) === 'undefined' || object == null)
-        return object;
-
-    // There is an exception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if ("StorageList" in window && object instanceof window.StorageList)
         return object;
 
     if (object.wrappedJSObject)

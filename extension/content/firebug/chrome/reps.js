@@ -710,9 +710,6 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             // do this first to avoid security 1000 errors
             else if (obj instanceof Ci.nsIDOMHistory)
                 return false;
-            // do this first to avoid security 1000 errors
-            else if ("StorageList" in view && obj instanceof view.StorageList)
-                return false;
             // do this first to avoid exceptions
             else if (obj.toString() === "[xpconnect wrapped native prototype]")
                 return false;
@@ -2759,112 +2756,6 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.StorageList = domplate(Firebug.Rep,
-{
-    tag:
-        OBJECTLINK(
-            SPAN({"class": "storageTitle"}, "$object|summarize "),
-            FOR("prop", "$object|longPropIterator",
-                "$prop.name",
-                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
-                TAG("$prop.tag", {object: "$prop.object"}),
-                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
-            )
-        ),
-
-    shortTag:
-        OBJECTLINK({onclick: "$onClick"},
-            SPAN({"class": "storageTitle"}, "$object|summarize "),
-            FOR("prop", "$object|shortPropIterator",
-                "$prop.name",
-                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
-                TAG("$prop.tag", {object: "$prop.object"}),
-                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
-            )
-        ),
-
-    onClick: function(event)
-    {
-        var globalStorage = event.currentTarget.repObject;
-        var context = Firebug.currentContext;
-        var domain = context.window.location.hostname;
-
-        Firebug.chrome.select(globalStorage.namedItem(domain));
-        Events.cancelEvent(event);
-    },
-
-    summarize: function(globalStorage)
-    {
-        try
-        {
-            var context = Firebug.currentContext;
-            var domain = context.window.location.hostname;
-            var length = globalStorage.namedItem(domain).length;
-            return Locale.$STRP("firebug.storage.totalItems", [length]) + " ";
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.StorageList.summarize; EXCEPTION " + e, e);
-        }
-        return "";
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "StorageList",
-
-    supportsObject: function(object, type)
-    {
-        return ("StorageList" in window && object instanceof window.StorageList);
-    },
-
-    getRealObject: function(object, context)
-    {
-        try
-        {
-            var domain = context.window.location.hostname;
-            return globalStorage.namedItem(domain);
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.StorageList.getRealObject; EXCEPTION " + e, e);
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Iterator
-
-    longPropIterator: function(object)
-    {
-        return this.propIterator(object, 100);
-    },
-
-    shortPropIterator: function(object)
-    {
-        return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
-    },
-
-    propIterator: function(object, max)
-    {
-        try
-        {
-            var context = Firebug.currentContext;
-            var domain = context.window.location.hostname;
-            return FirebugReps.Storage.propIterator(object.namedItem(domain), max);
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.StorageList.propIterator; EXCEPTION " + e, e);
-        }
-        return [];
-    },
-});
-
-// ********************************************************************************************* //
-
 FirebugReps.XPathResult = domplate(FirebugReps.Arr,
 {
     className: "array xPathResult",
@@ -3034,7 +2925,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         ),
 
     shortTag:
-        OBJECTLINK({onclick: "$onClick"},
+        OBJECTLINK(
             SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
             FOR("prop", "$object|shortPropIterator",
                 SPAN({"class": "nodeName"}, "$prop.name"),
@@ -3044,16 +2935,6 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
             ),
             SPAN({"class": "arrayRightBracket", role: "presentation"}, "]")
         ),
-
-    onClick: function(event)
-    {
-        var globalStorage = event.currentTarget.repObject;
-        var context = Firebug.currentContext;
-        var domain = context.window.location.hostname;
-
-        Firebug.chrome.select(globalStorage.namedItem(domain));
-        Events.cancelEvent(event);
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -3207,7 +3088,6 @@ Firebug.registerRep(
     FirebugReps.Arr,
     FirebugReps.XPathResult,
     FirebugReps.Storage,
-    FirebugReps.StorageList,
     FirebugReps.Attr,
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,

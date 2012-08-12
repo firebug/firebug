@@ -873,7 +873,6 @@ domMemberMap.Window =
     "length",
 
     "sessionStorage",
-    "globalStorage",
 
     "setTimeout",
     "setInterval",
