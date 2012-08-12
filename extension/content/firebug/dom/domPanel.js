@@ -126,9 +126,9 @@ const DirTablePlate = domplate(Firebug.Rep,
             TAG("$memberRowTag", {member: "$member"})
         ),
 
-    memberIterator: function(object, level)
+    memberIterator: function(object)
     {
-        var members = Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
+        var members = Firebug.DOMBasePanel.prototype.getMembers(object, 0, null);
         if (members.length)
             return members;
 
@@ -422,7 +422,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     /**
      * @param object a user-level object wrapped in security blanket
      * @param level for a.b.c, level is 2
-     * @param context
+     * @param optional context
      */
     getMembers: function(object, level, context)
     {
