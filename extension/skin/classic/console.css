@@ -1,4 +1,3 @@
-/* See license.txt for terms of usage */
 
 .panelNode-console {
     overflow-x: hidden;
@@ -448,6 +447,7 @@
 
 /*************************************************************************************************/
 
+.objectLink-event,
 .objectLink-regexp,
 .objectLink-Storage,
 .objectLink-object,

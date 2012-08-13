@@ -1588,14 +1588,27 @@ FirebugReps.Window = domplate(Firebug.Rep,
 
 FirebugReps.Event = domplate(Firebug.Rep,
 {
-    tag: TAG("$copyEventTag", {object: "$object|copyEvent"}),
+    className: "event",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    tag:
+        TAG("$copyEventTag", {object: "$object|copyEvent"}),
 
     copyEventTag:
-        OBJECTLINK("$object|summarizeEvent"),
+        SPAN(
+            OBJECTLINK("$object|summarizeEvent"),
+            SPAN("&nbsp"),
+            SPAN("&#187;"),
+            SPAN("&nbsp"),
+            TAG("$object|getTargetTag", {object: "$object|getTarget"})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     summarizeEvent: function(event)
     {
-        var info = [event.type, ' '];
+        var info = [event.type, " "];
 
         var eventFamily = Events.getEventFamily(event.type);
         if (eventFamily == "mouse")
@@ -1606,14 +1619,23 @@ FirebugReps.Event = domplate(Firebug.Rep,
         return info.join("");
     },
 
+    getTarget: function(event)
+    {
+        return event.target;
+    },
+
+    getTargetTag: function(event)
+    {
+        var rep = Firebug.getRep(event.target);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
     copyEvent: function(event)
     {
         return new Dom.EventCopy(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "object",
 
     supportsObject: function(object, type)
     {
