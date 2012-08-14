@@ -260,6 +260,19 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }, this));
     },
 
+    // deletes all the watches
+    deleteAllWatches: function()
+    {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.deleteAllWatches");
+        this.watches = [];
+        this.rebuild(true);
+        this.context.setTimeout(Obj.bindFixed(function()
+        {
+            this.showToolbox(null);
+        }, this));
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     showToolbox: function(row)
