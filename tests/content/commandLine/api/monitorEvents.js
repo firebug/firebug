@@ -43,11 +43,11 @@ function runTest()
  */
 function executeAndVerify(callback, win, eventTypes, actions, expected)
 {
-    var config = {tagName: "a", classes: "objectLink objectLink-event", counter: expected.length};
+    var config = {tagName: "a", classes: "objectLink objectLink-eventLog", counter: expected.length};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
         var panelNode = FBTest.getPanel("console").panelNode;
-        var rows = panelNode.getElementsByClassName("objectLink-event");
+        var rows = panelNode.getElementsByClassName("objectLink-eventLog");
         for (var i = 0; i < expected.length; i++)
         {
             FBTest.compare(expected[i], rows[i].textContent, "Verify: " +
