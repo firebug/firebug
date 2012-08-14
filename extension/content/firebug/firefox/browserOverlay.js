@@ -449,7 +449,7 @@ Firebug.GlobalUI =
         document.dispatchEvent(event);
     },
 
-    onMenuHiding: function(popup)
+    onMenuHiding: function(popup, event)
     {
         if (popup != event.target)
             return;
