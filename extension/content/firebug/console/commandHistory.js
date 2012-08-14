@@ -189,9 +189,13 @@ Firebug.CommandHistory = function()
 
     this.onMouseUp = function(event)
     {
+        var i = event.target.value;
+        if (i == undefined)
+            return;
+
         var commandLine = Firebug.CommandLine.getCommandLine(Firebug.currentContext);
 
-        commandLine.value = commands[event.target.value];
+        commandLine.value = commands[i];
         commandPointer = event.target.value;
 
         Firebug.CommandLine.commandHistory.hide();
