@@ -1596,13 +1596,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
         TAG("$copyEventTag", {object: "$object|copyEvent"}),
 
     copyEventTag:
-        SPAN(
-            OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
-            SPAN("&#187;"),
-            SPAN("&nbsp"),
-            TAG("$object|getTargetTag", {object: "$object|getTarget"})
-        ),
+        OBJECTLINK("$object|summarizeEvent"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1617,17 +1611,6 @@ FirebugReps.Event = domplate(Firebug.Rep,
             info.push("charCode=", event.charCode, ", keyCode=", event.keyCode);
 
         return info.join("");
-    },
-
-    getTarget: function(event)
-    {
-        return event.target;
-    },
-
-    getTargetTag: function(event)
-    {
-        var rep = Firebug.getRep(event.target);
-        return rep.shortTag ? rep.shortTag : rep.tag;
     },
 
     copyEvent: function(event)
@@ -1646,6 +1629,52 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         return "Event " + event.type;
     }
+});
+
+// ********************************************************************************************* //
+
+FirebugReps.EventLog = domplate(FirebugReps.Event,
+{
+    className: "eventLog",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    tag:
+        TAG("$copyEventTag", {object: "$object|copyEvent"}),
+
+    copyEventTag:
+        SPAN(
+            OBJECTLINK("$object|summarizeEvent"),
+            SPAN("&nbsp"),
+            SPAN("&#187;"),
+            SPAN("&nbsp"),
+            TAG("$object|getTargetTag", {object: "$object|getTarget"})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    copyEvent: function(log)
+    {
+        return new Dom.EventCopy(log.event);
+    },
+
+    getTarget: function(event)
+    {
+        return event.target;
+    },
+
+    getTargetTag: function(event)
+    {
+        var rep = Firebug.getRep(event.target);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    supportsObject: function(object, type)
+    {
+        return object instanceof Firebug.EventMonitor.EventLog;
+    },
 });
 
 // ********************************************************************************************* //
@@ -3113,7 +3142,8 @@ Firebug.registerRep(
     FirebugReps.Attr,
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
-    FirebugReps.Reference
+    FirebugReps.Reference,
+    FirebugReps.EventLog
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);

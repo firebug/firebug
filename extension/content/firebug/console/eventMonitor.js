@@ -157,11 +157,19 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
 
     onMonitorEvent: function(event, context)
     {
-        Firebug.Console.log(event, context);
+        var obj = new Firebug.EventMonitor.EventLog(event);
+        Firebug.Console.log(obj, context);
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
+
+Firebug.EventMonitor.EventLog = function(event)
+{
+    this.event = event;
+}
+
+// ********************************************************************************************* //
 // Helpers
 
 function getMonitoredEventTypes(types)
