@@ -374,10 +374,10 @@ Firebug.GlobalUI =
         PrefLoader.setPref(option, checked);
     },
 
-    onMenuShowing: function(popup)
+    onMenuShowing: function(popup, event)
     {
-        // If this popup is already open the event comes from a sub menu, just ignore it.
-        if (popup.state == "open")
+        // If the event comes from a sub menu, just ignore it.
+        if (popup != event.target)
             return;
 
         while (popup.lastChild)
@@ -451,7 +451,7 @@ Firebug.GlobalUI =
 
     onMenuHiding: function(popup)
     {
-        if (popup.state == "open")
+        if (popup != event.target)
             return;
 
         // xxxHonza: I don't know why the timeout must be here, but if it isn't
@@ -1072,8 +1072,8 @@ $menupopupOverlay($("menuWebDeveloperPopup"), [
         $menupopup({
             id: "menu_firebug_firebugMenuPopup",
             "class": "fbFirebugMenuPopup",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this, event);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this, event);"
         })
     ]),
     $menuseparator({
@@ -1095,8 +1095,8 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
         $menupopup({
             id: "appmenu_firebugMenuPopup",
             "class": "fbFirebugMenuPopup",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this);"
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this, event);",
+            onpopuphiding: "return Firebug.GlobalUI.onMenuHiding(this, event);"
         })
     ]),
     $menuseparator({
@@ -1117,8 +1117,8 @@ $menupopupOverlay($("toolsPopup"), [
         $menupopup({
             id: "toolsmenu_firebugMenuPopup",
             "class": "fbFirebugMenuPopup",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);",
-            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this);"
+            onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this, event);",
+            onpopupshowing: "return Firebug.GlobalUI.onMenuHiding(this, event);"
         })
     ])
 ]);
