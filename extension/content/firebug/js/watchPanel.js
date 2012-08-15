@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/object",
+    "firebug/chrome/firefox",
     "firebug/firebug",
     "firebug/dom/toggleBranch",
     "firebug/lib/events",
@@ -12,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/dom/domPanel",     // Firebug.DOMBasePanel, Firebug.DOMPanel.DirTable
 ],
-function(Obj, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str) {
+function(Obj, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str) {
 
 // ********************************************************************************************* //
 // Watch Panel
@@ -188,8 +189,17 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     showEmptyMembers: function()
     {
-        this.tag.replace({domPanel: this, toggles: new ToggleBranch.ToggleBranch()},
+        var domTable = this.tag.replace({domPanel: this, toggles: new ToggleBranch.ToggleBranch()},
             this.panelNode);
+
+        // The direction needs to be adjusted according to the direction
+        // of the user agent. See issue 5073.
+        // TODO: Set the direction at the <body> to allow correct formatting of all relevant parts.
+        // This requires more adjustments related for rtl user agents.
+        var mainFrame = Firefox.getElementById("fbMainFrame");
+        var cs = mainFrame.ownerDocument.defaultView.getComputedStyle(mainFrame);
+        var watchRow = domTable.getElementsByClassName("watchNewRow").item(0);
+        watchRow.style.direction = cs.direction;
     },
 
     addWatch: function(expression)
