@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+var EXPORTED_SYMBOLS = ["Firebug"];
+
 var Firebug = Firebug || {};
 
 // ********************************************************************************************* //

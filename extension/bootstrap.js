@@ -63,6 +63,10 @@ function startup(params, reason)
     //register extensions
     FirebugLoader.startup();
 
+    // Load server side in case we are in the server mode.
+    if (loadServer())
+        return;
+
     // Load Firebug into all existing browser windows.
     var enumerator = Services.wm.getEnumerator("navigator:browser");
     while (enumerator.hasMoreElements())
@@ -80,6 +84,9 @@ function shutdown(params, reason)
     // Don't need to clean anything up if the application is shutting down
     if (reason == APP_SHUTDOWN)
         return;
+
+    // Shutdown the server (in case we are in server mode).
+    unloadServer();
 
     // Remove "new window" listener.
     Services.ww.unregisterNotification(windowWatcher);
@@ -129,6 +136,41 @@ var windowWatcher = function windowWatcher(win, topic)
         if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
             FirebugLoader.loadIntoWindow(win);
     }, false);
+}
+
+// ********************************************************************************************* //
+// Server
+
+var serverScope = {};
+
+function loadServer()
+{
+    // If Firebug is running in server mode, load the server module
+    // and skip the UI overlays.
+    var prefDomain = "extensions.firebug";
+    var serverMode = PrefLoader.getPref(prefDomain, "serverMode");
+
+    try
+    {
+        if (serverMode)
+        {
+            Services.scriptloader.loadSubScript(
+                "chrome://firebug/content/server/main.js",
+                serverScope);
+        }
+    }
+    catch (e)
+    {
+        Cu.reportError(e);
+    }
+
+    return serverMode;
+}
+
+function unloadServer()
+{
+    if (serverScope.FirebugServer)
+        serverScope.FirebugServer.shutdown();
 }
 
 // ********************************************************************************************* //

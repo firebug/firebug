@@ -31,8 +31,9 @@ pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
 
 // Remoting
-pref("extensions.firebug.serverHost", "legoas");
-pref("extensions.firebug.serverPort", 6000);
+pref("extensions.firebug.serverHost", "localhost");
+pref("extensions.firebug.serverPort", 5999);
+pref("extensions.firebug.serverMode", false);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
