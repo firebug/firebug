@@ -61,6 +61,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/cookies/cookiePanel",
         "firebug/debugger/debugger",
         "firebug/debugger/scriptPanel",
+        "firebug/remoting/connectionMenu",
     ];
 
     return config;

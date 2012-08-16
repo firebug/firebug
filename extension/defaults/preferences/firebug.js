@@ -30,6 +30,10 @@ pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
 
+// Remoting
+pref("extensions.firebug.serverHost", "legoas");
+pref("extensions.firebug.serverPort", 6000);
+
 // Command line
 pref("extensions.firebug.commandEditor", false);
 pref("extensions.firebug.alwaysShowCommandLine", false);

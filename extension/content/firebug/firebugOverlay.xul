@@ -3,6 +3,7 @@
 
 <?xul-overlay href="firefox/firebugMenuOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/cookies/cookiePanel.xul"?>
+<?xul-overlay href="chrome://firebug/content/remoting/connectionMenu.xul"?>
 
 <?xml-stylesheet href="firebug.css"?>
 
