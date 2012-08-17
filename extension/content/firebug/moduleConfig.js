@@ -61,9 +61,12 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/css/computedPanel",
         "firebug/cookies/cookieModule",
         "firebug/cookies/cookiePanel",
+
+        // Remoting
         "firebug/debugger/debugger",
         "firebug/debugger/scriptPanel",
         "firebug/remoting/connectionMenu",
+        "firebug/remoting/tabListMenu",
     ];
 
     return config;

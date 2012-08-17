@@ -1,38 +1,37 @@
 /* See license.txt for terms of usage */
 
 define([
-    "httpmonitor/lib/trace",
-    "httpmonitor/lib/object",
-    "httpmonitor/lib/menu",
-    "httpmonitor/lib/string",
-    "httpmonitor/lib/events",
-    "httpmonitor/base/module",
-    "httpmonitor/chrome/chrome",
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/chrome/menu",
+    "firebug/lib/string",
+    "firebug/lib/events",
 ],
-function(FBTrace, Obj, Menu, Str, Events, Module, Chrome) {
+function(FBTrace, Obj, Menu, Str, Events) {
 
 // ********************************************************************************************* //
 // Module
 
 /**
- * @module
+ * @module This module represents tab-list menu that shows list of tabs from
+ * connected remote browser instance.
  */
-var TabListMenu = Obj.extend(Module,
-/** @lends TabListMenu */
+Firebug.TabListMenu = Obj.extend(Firebug.Module,
+/** @lends Firebug.TabListMenu */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
     initialize: function()
     {
-        Module.initialize.apply(this, arguments);
+        Firebug.Module.initialize.apply(this, arguments);
 
         this.updateUI();
     },
 
     shutdown: function()
     {
-        Module.shutdown.apply(this, arguments);
+        Firebug.Module.shutdown.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,18 +42,17 @@ var TabListMenu = Obj.extend(Module,
         // Create temporary menu item.
         Menu.createMenuItem(popup, {
             nol10n: true,
-            image: Chrome.config.skinBaseUrl + "netmonitor-loading_16.gif",
+            image: "firebug-loading_16.gif",
             label: "Fetching list of remote tabs...",
             disabled: true,
         });
 
         var self = this;
 
-        // Context is not available at this moment, it's going to be created
-        // by selecting a tab through this menu so, use the proxy from global
-        // HttpMonitor (application) object.
-        // xxxHonza: it's hacky to use 'top', but how to access the proxy?
-        var proxy = top.HttpMonitor.proxy;
+        // xxxHonza: TODO: use default (global) proxy
+        var proxy = null;
+        if (!proxy)
+            return;
 
         proxy.getTabs(function(tabs)
         {
@@ -89,10 +87,10 @@ var TabListMenu = Obj.extend(Module,
 
     updateUI: function()
     {
-        var menu = Chrome.$("httpMonitorTabListMenu");
+        var menu = Firebug.chrome.$("firebugTabListMenu");
 
-        var label = "Select Tab";
-        var context = Chrome.currentContext;
+        var label = "Select Remote Tab";
+        var context = Firebug.currentContext;
         var tab = context ? context.tab : null;
         if (tab)
             label = Str.cropString(tab.label, 100);
@@ -131,9 +129,9 @@ var TabListMenu = Obj.extend(Module,
 // ********************************************************************************************* //
 // Registration
 
-Chrome.registerModule(TabListMenu);
+Firebug.registerModule(Firebug.TabListMenu);
 
-return TabListMenu;
+return Firebug.TabListMenu;
 
 // ********************************************************************************************* //
 });

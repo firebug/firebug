@@ -1,0 +1,10 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Connection Menu */
+
+#fbPaneBar1-connectionToolbar {
+    border-bottom: 1px solid lightgray;
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+}

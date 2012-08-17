@@ -186,6 +186,12 @@ Connection.prototype =
         this.transport.hooks = this;
         this.transport.ready();
         this.connecting = true;
+
+        /*var client = this.client = new DebuggerClient(this.transport);
+
+        client.connect(function(aType, aTraits) {
+            FBTrace.sysout("done")
+        }.bind(this));*/
     },
 
     close: function()
