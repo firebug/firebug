@@ -100,7 +100,7 @@ Fonts.getFontInfo = function(context, win, identifier)
 
     for (var i=0; i<fonts.length; i++)
     {
-        if ((identifier == fonts[i].URI) ||
+        if (identifier == fonts[i].URI ||
             identifier.toLowerCase() == fonts[i].CSSFamilyName.toLowerCase() ||
             identifier.toLowerCase() == fonts[i].name.toLowerCase())
         {
