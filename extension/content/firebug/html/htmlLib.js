@@ -804,37 +804,20 @@ var HTMLLib =
     // to reuse the HTML panel
     ElementWalkerFunctions:
     {
-        getTreeWalker: function(node)
+        pseudoize: function(node)
         {
-            if (!this.treeWalker || this.treeWalker.currentNode !== node)
-                this.treeWalker = node.ownerDocument.createTreeWalker(
-                    node, NodeFilter.SHOW_ALL, null, false);
-
-            return this.treeWalker;
-        },
-
-        getFirstChild: function(node)
-        {
-            return node.firstChild;
-        },
-
-        getNextSibling: function(node)
-        {
-            if (node._firebugNextNode)
-                return node._firebugNextNode;
-            
-            // node::after;
-            // node.nextSibling::before
-            // node.nextSibling
-            
-            if (node.nodeType == 1)
+            if (node.nodeType == 1 && !node._firebugPseudoized) 
             {
-                var pseudoElements = [":after"];
+                var pseudoElements = [":before", ":after"];
                 for (var p = 0; p < pseudoElements.length; p++)
                 {
                     try
                     {
-                        var inspectedRules = Dom.domUtils.getCSSStyleRules(node, pseudoElements[p]);
+                        var pname = pseudoElements[p];
+                        var oldState = Dom.domUtils.getContentState(node);
+                        //Dom.domUtils.setContentState(node, 23);
+                        var inspectedRules = Dom.domUtils.getCSSStyleRules(node, pname);
+                        Dom.domUtils.setContentState(node, oldState);
                         var content = false;
                         if (inspectedRules && inspectedRules.Count())
                         {
@@ -846,10 +829,27 @@ var HTMLLib =
                                 if (rule && rule.style && rule.style.content)
                                     content = rule.style.content;
                             }
-                            var pseudoEl = node.ownerDocument.createElement(pseudoElements[p]);
-                            pseudoEl._firebugParentNode = node.parentNode;
-                            pseudoEl._firebugNextNode = node.nextSibling;
+                            var pseudoEl = node.ownerDocument.createElement(pname);
+                            pseudoEl._firebugPseudoized = true;
+                            pseudoEl._firebugParentNode = node;
                             pseudoEl.innerText = content;
+                            switch(pname)
+                            {
+                                case ":before":
+                                    node._firebugFirstChild = pseudoEl;
+                                    pseudoEl._firebugNextSibling = node.firstChild;
+                                    break;
+                                case ":after":
+                                    if (node.lastChild)
+                                        node.lastChild._firebugNextSibling = pseudoEl;
+                                    else if (node._firebugFirstChild)
+                                        node._firebugFirstChild._firebugNextSibling = pseudoEl;
+                                    else
+                                        node._firebugFirstChild = pseudoEl;
+                                        
+                                    break;
+                            }
+//                            node["_firebug"+pname] = pseudoEl;
                             return pseudoEl;
                         }
                     }
@@ -857,47 +857,37 @@ var HTMLLib =
                     {
                     }
                 }
+                node._firebugPseudoized = true;
             }
-            
-            node = node.nextSibling;
-            if (!node || node.nodeType !== 1)
-                return node;
-            var pseudoElements = [":before", ":first-letter", ":first-line"];
-            for (var p = 0; p < pseudoElements.length; p++)
-            {
-                try
-                {
-                    var inspectedRules = Dom.domUtils.getCSSStyleRules(node, pseudoElements[p]);
-                    var content = false;
-                    if (inspectedRules && inspectedRules.Count())
-                    {
-                        for (var i = 0; i < inspectedRules.Count(); i++)
-                        {
-                            if (content) continue;
-                            var rule = Xpcom.QI(inspectedRules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
-                            // var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
-                            if (rule && rule.style && rule.style.content)
-                                content = rule.style.content;
-                        }
-                        var pseudoEl = node.ownerDocument.createElement(":" + pseudoElements[p]);
-                        pseudoEl._firebugParentNode = node.parentNode;
-                        pseudoEl._firebugNextNode = node;
-                        pseudoEl.innerText = content;
-                        pseudoEl.namespaceURI == 'http://www.w3.org/1999/xhtml';
-                        return pseudoEl;
-                    }
-                }
-                catch (exc)
-                {
-                }
-            }
+        },
+        
+        getTreeWalker: function(node)
+        {
+            if (!this.treeWalker || this.treeWalker.currentNode !== node)
+                this.treeWalker = node.ownerDocument.createTreeWalker(
+                    node, NodeFilter.SHOW_ALL, null, false);
+
+            return this.treeWalker;
+        },
+
+        getFirstChild: function(node)
+        {
+            this.pseudoize(node);
+            return node._firebugFirstChild || node.firstChild;
+        },
+
+        getNextSibling: function(node)
+        {            
+            this.pseudoize(node);
+            node = node._firebugNextSibling || node.nextSibling;
             return node;
         },
 
         getParentNode: function(node)
         {
+            this.pseudoize(node);
             // the Mozilla XBL tree walker fails for parentNode
-            return node.parentNode || node._firebugParentNode;
+            return node._firebugParentNode || node.parentNode ;
         }
     },
 
