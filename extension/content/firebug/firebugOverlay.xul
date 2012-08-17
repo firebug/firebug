@@ -5,8 +5,6 @@
 <?xul-overlay href="chrome://firebug/content/cookies/cookiePanel.xul"?>
 <?xul-overlay href="chrome://firebug/content/remoting/connectionMenu.xul"?>
 
-<?xml-stylesheet href="firebug.css"?>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 
@@ -37,7 +35,7 @@
             noautofocus="true">
         </panel>
 
-        <menupopup id="fbCommandHistory" noautofocus="true">
+        <menupopup id="fbCommandHistory" noautofocus="true" ignorekeys='true'>
         </menupopup>
 
         <!-- Context menu for the Command Editor -->

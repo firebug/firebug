@@ -670,6 +670,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
                         return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
+                    break;
 
                 case "fontFamily":
                     return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
@@ -678,6 +679,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             delete this.infoTipType;
             delete this.infoTipValue;
             delete this.infoTipObject;
+
+            return false;
         }
     },
 

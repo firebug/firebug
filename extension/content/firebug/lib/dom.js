@@ -695,6 +695,27 @@ Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
     Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft", notY ? "none" : "centerOrTop");
 };
 
+Dom.scrollMenupopup = function(popup, item) {
+    var doc = popup.ownerDocument;
+    var box = doc.getAnonymousNodes(popup)[0];
+    var scrollBox = doc.getAnonymousNodes(box)[1];
+    if (item == undefined) {
+        scrollBox.scrollTop = scrollBox.scrollHeight + 100;
+    } else if (item == 0) {
+        scrollBox.scrollTop = 0;
+    } else {
+        var popupRect = popup.getBoundingClientRect();
+        var itemRect = item.getBoundingClientRect();
+
+        if (itemRect.top < popupRect.top + itemRect.height) {
+            scrollBox.scrollTop += itemRect.top - popupRect.top - itemRect.height;
+        } else if (itemRect.bottom + itemRect.height > popupRect.bottom) {
+            scrollBox.scrollTop -= popupRect.bottom - itemRect.bottom - itemRect.height;
+        }
+    }
+}
+
+
 // ********************************************************************************************* //
 // DOM Members
 
