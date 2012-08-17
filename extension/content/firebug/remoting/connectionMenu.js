@@ -38,7 +38,7 @@ Firebug.ConnectionMenu = Obj.extend(Firebug.Module,
         var onDisconnect = Obj.bind(this.onDisconnect, this);
 
         // Create connection and connect by default.
-        // xxxHonza: use devtools.debugger.remote-autoconnect pref
+        // xxxHonza: use devtools.debugger.remote-autoconnect pref?
         this.connection = new Connection(onConnect, onDisconnect);
         this.connect();
     },
@@ -131,7 +131,7 @@ Firebug.ConnectionMenu = Obj.extend(Firebug.Module,
 
         this.updateUI();
 
-        Events.dispatch(this.fbListeners, "onConnect");
+        Events.dispatch(this.fbListeners, "onConnect", [this.connection]);
     },
 
     onDisconnect: function()

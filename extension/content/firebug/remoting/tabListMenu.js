@@ -6,8 +6,10 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/string",
     "firebug/lib/events",
+    "firebug/lib/dom",
+    "firebug/remoting/tabWatcherProxy",
 ],
-function(FBTrace, Obj, Menu, Str, Events) {
+function(FBTrace, Obj, Menu, Str, Events, Dom, TabWatcherProxy) {
 
 // ********************************************************************************************* //
 // Module
@@ -26,11 +28,16 @@ Firebug.TabListMenu = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
+        // xxxHonza: What about 'onConnect' dispatched by BTI.Browser?
+        Firebug.ConnectionMenu.addListener(this);
+
         this.updateUI();
     },
 
     shutdown: function()
     {
+        Firebug.ConnectionMenu.removeListener(this);
+
         Firebug.Module.shutdown.apply(this, arguments);
     },
 
@@ -49,12 +56,10 @@ Firebug.TabListMenu = Obj.extend(Firebug.Module,
 
         var self = this;
 
-        // xxxHonza: TODO: use default (global) proxy
-        var proxy = null;
-        if (!proxy)
+        if (!this.tabWatcherProxy)
             return;
 
-        proxy.getTabs(function(tabs)
+        this.tabWatcherProxy.getTabs(function(tabs)
         {
             self.clear(popup);
 
@@ -89,6 +94,15 @@ Firebug.TabListMenu = Obj.extend(Firebug.Module,
     {
         var menu = Firebug.chrome.$("firebugTabListMenu");
 
+        // Hide if not connected.
+        if (!this.tabWatcherProxy)
+        {
+            Dom.collapse(menu, true);
+            return;
+        }
+
+        Dom.collapse(menu, false);
+
         var label = "Select Remote Tab";
         var context = Firebug.currentContext;
         var tab = context ? context.tab : null;
@@ -107,13 +121,17 @@ Firebug.TabListMenu = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection Listener
 
-    onConnect: function()
+    onConnect: function(connection)
     {
+        this.tabWatcherProxy = new TabWatcherProxy(connection);
+
         this.updateUI();
     },
 
     onDisconnect: function()
     {
+        this.tabWatcherProxy = null;
+
         this.updateUI();
     },
 
@@ -122,6 +140,8 @@ Firebug.TabListMenu = Obj.extend(Firebug.Module,
 
     selectTab: function(tab)
     {
+        this.tabWatcherProxy.onSelectTab(tab);
+
         Events.dispatch(this.fbListeners, "onSelectTab", [tab]);
     },
 });
