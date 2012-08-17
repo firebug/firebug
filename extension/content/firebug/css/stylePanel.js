@@ -95,11 +95,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         getSeparator: function(part)
         {
-            if (part.type == "otherProps")
-                return " ";
-
             if (part.lastFont || part.type == "important")
                 return "";
+
+            if (part.type == "otherProps")
+                return " ";
 
             return ",";
         },
@@ -827,7 +827,11 @@ function getFontPropValueParts(element, value, propName)
         );
         var matches = rePreFont.exec(value);
         if (!matches)
-            return;
+        {
+            // Non-simple font value, like "inherit", "status-bar" or
+            // "-moz-calc(12px) Arial" - just return the whole text.
+            return [{type: "otherProps", value: value, lastFont: true}];
+        }
         var preProps = matches[0].slice(0, -1);
         parts.push({type: "otherProps", value: preProps});
         value = value.substr(matches[0].length);

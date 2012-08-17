@@ -78,7 +78,7 @@ Fonts.getFontsUsedInContext = function(context)
  * Retrieves the information about a font
  * @context: Context of the font
  * @win: Window the font is used in
- * @identifier: Either a URL in case of a Fonts font or the font name
+ * @identifier: Either a URL in case of a web font or the font name
  * @return Object with information about the font
  */
 Fonts.getFontInfo = function(context, win, identifier)
@@ -94,15 +94,15 @@ Fonts.getFontInfo = function(context, win, identifier)
     }
 
     var fonts = Fonts.getFonts(doc.documentElement);
-    var url = Url.splitURLBase(identifier);
 
     if (FBTrace.DBG_FONTS)
-        FBTrace.sysout("Fonts.getFontInfo;", {fonts:fonts, url:url});
+        FBTrace.sysout("Fonts.getFontInfo;", {fonts:fonts, identifier: identifier});
 
     for (var i=0; i<fonts.length; i++)
     {
-        if ((fonts[i].rule && url && identifier == fonts[i].URI) ||
-            identifier == fonts[i].CSSFamilyName || identifier == fonts[i].name)
+        if (identifier == fonts[i].URI ||
+            identifier.toLowerCase() == fonts[i].CSSFamilyName.toLowerCase() ||
+            identifier.toLowerCase() == fonts[i].name.toLowerCase())
         {
             return fonts[i];
         }
