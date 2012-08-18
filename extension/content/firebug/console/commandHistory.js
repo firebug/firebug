@@ -80,9 +80,9 @@ Firebug.CommandHistory = function()
 
         commandPointer += dir;
         if (commandPointer < 0)
-            commandPointer = commands.length;
-        else if (commandPointer > commands.length)
             commandPointer = 0;
+        else if (commandPointer > commands.length)
+            commandPointer = commands.length;
 
         if (commandPointer < commands.length)
         {
