@@ -236,19 +236,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     getSize: function(cookie)
     {
         var size = cookie.cookie.name.length + cookie.cookie.value.length;
-        return this.formatSize(size);
-    },
-
-    formatSize: function(bytes)
-    {
-        if (bytes == -1 || bytes == undefined)
-            return "?";
-        else if (bytes < 1024)
-            return bytes + " B";
-        else if (bytes < 1024*1024)
-            return Math.ceil(bytes/1024) + " KB";
-        else
-            return (Math.ceil(bytes/1024)/1024) + " MB";    // OK, this is probable not necessary ;-)
+        return Str.formatSize(size);
     },
 
     getPath: function(cookie)
