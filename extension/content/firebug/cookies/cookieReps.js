@@ -928,6 +928,69 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
     }
 });
 
+
+CookieReps.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip", role:"presentation"},
+            TBODY(
+                FOR("size", "$sizeInfo",
+                    TAG("$size|getRowTag", {size: "$size"})
+                )
+            )
+        ),
+
+    sizeTag:
+        TR({"class": "sizeInfoRow", $collapsed: "$size|hideRow"},
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"+" :"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatNumber")
+        ),
+
+    separatorTag:
+        TR(
+            TD({"colspan": 3, "height": "7px"})
+        ),
+
+    descTag:
+        TR(
+            TD({"colspan": 3, "class": "sizeInfoDescCol"}, "$size.label")
+        ),
+
+    getRowTag: function(size)
+    {
+        if (size.size == -2)
+            return this.descTag;
+
+        return (size.label == "-") ? this.separatorTag : this.sizeTag;
+    },
+
+    hideRow: function(size)
+    {
+        return size.size < 0;
+    },
+
+    formatSize: function(size)
+    {
+        return Str.formatSize(size.size);
+    },
+
+    formatNumber: function(size)
+    {
+        return size.size ? (Str.formatNumber(size.size)) : "";
+    },
+
+    render: function(cookie, parentNode)
+    {
+        var size = cookie.cookie.name.length + cookie.cookie.value.length;
+        size = Str.formatSize(size);
+        var sizeInfo = [];
+        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Cookie_Size"), size: size});
+        //sizeInfo.push({label: Locale.$STR("net.sizeinfo.Post Body"), size: postText.length});
+
+        this.tag.replace({sizeInfo: sizeInfo}, parentNode);
+    },
+});
+
 // ********************************************************************************************* //
 // Header Template (domplate)
 

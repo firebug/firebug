@@ -481,6 +481,33 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             Firebug.Console.removeListener(Firebug.CookieModule.ConsoleListener);
         }
     },
+
+    // Support for info tips.
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var row = Dom.getAncestorByClass(target, "cookieRow");
+        if (row && row.repObject)
+        {
+            if (Dom.getAncestorByClass(target, "cookieSizeCol"))
+            {
+                var infoTipCookieId = "cookiesize";
+                if (infoTipCookieId == this.infoTipCookieId && row.repObject == this.infoTipFile)
+                    return true;
+
+                this.infoTipCookieId = infoTipCookieId;
+                this.infoTipFile = row.repObject;
+                return this.populateSizeInfoTip(infoTip, row.repObject);
+            }
+        }
+
+        delete this.infoTipURL;
+        return false;
+    },
+    populateSizeInfoTip: function(infoTip, cookie)
+    {
+        CookieReps.SizeInfoTip.render(cookie, infoTip);
+        return true;
+    },
 }); 
 
 // ********************************************************************************************* //
