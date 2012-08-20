@@ -711,7 +711,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             else if (obj instanceof Ci.nsIDOMHistory)
                 return false;
             // do this first to avoid exceptions
-            else if (obj.toString() === "[xpconnect wrapped native prototype]")
+            else if (obj.toString && obj.toString() === "[xpconnect wrapped native prototype]")
                 return false;
             else if (isFinite(obj.length) && typeof obj.splice === "function")
                 return true;
