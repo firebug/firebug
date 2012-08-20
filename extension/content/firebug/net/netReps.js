@@ -1965,7 +1965,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
     formatNumber: function(size)
     {
-        return size.size ? ("(" + Str.formatNumber(size.size) + ")") : "";
+        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
     },
 
     render: function(file, parentNode)
