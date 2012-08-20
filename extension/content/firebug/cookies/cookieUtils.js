@@ -36,9 +36,17 @@ var CookieUtils =
         if (value)
             value = value.replace(/\+/g, " ");
 
+        value = unescape(value);
+
+        try
+        {
+            value = Str.convertToUnicode(value);
+        }
+        catch (exc) { }
+
         var c = {
             name        : cookie.name,
-            value       : Str.convertToUnicode(unescape(value)),
+            value       : value,
             isDomain    : cookie.isDomain,
             host        : cookie.host,
             path        : cookie.path,
