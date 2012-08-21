@@ -175,7 +175,7 @@ Firebug.ConnectionMenu = Obj.extend(Firebug.Module,
         var isConnected = this.isConnected();
 
         var connectItem = Firebug.chrome.$("cmd_firebugConnect");
-        var disconnectItem = Firebug.hrome.$("cmd_firebugDisconnect");
+        var disconnectItem = Firebug.chrome.$("cmd_firebugDisconnect");
 
         var host = Options.get("serverHost");
         var port = Options.get("serverPort");
