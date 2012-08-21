@@ -932,7 +932,7 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
 CookieReps.SizeInfoTip = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip", role:"presentation"},
+        TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},
             TBODY(
                 FOR("size", "$sizeInfo",
                     TAG("$size|getRowTag", {size: "$size"})
@@ -942,18 +942,9 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
 
     sizeTag:
         TR({"class": "sizeInfoRow", $collapsed: "$size|hideRow"},
-            TD({"class": "sizeInfoLabelCol"}, "$size.label"+" :"),
-            TD({"class": "sizeInfoSizeCol"}, "$size|formatNumber")
-        ),
-
-    separatorTag:
-        TR(
-            TD({"colspan": 3, "height": "7px"})
-        ),
-
-    descTag:
-        TR(
-            TD({"colspan": 3, "class": "sizeInfoDescCol"}, "$size.label")
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
+            TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
         ),
 
     getRowTag: function(size)
@@ -971,22 +962,20 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
 
     formatSize: function(size)
     {
-        return Str.formatSize(size.size);
+        size = Str.formatSize(size.size);
+        return size;
     },
 
     formatNumber: function(size)
     {
-        return size.size ? (Str.formatNumber(size.size)) : "";
+        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
     },
 
     render: function(cookie, parentNode)
     {
         var size = cookie.cookie.name.length + cookie.cookie.value.length;
-        size = Str.formatSize(size);
         var sizeInfo = [];
-        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Cookie_Size"), size: size});
-        //sizeInfo.push({label: Locale.$STR("net.sizeinfo.Post Body"), size: postText.length});
-
+        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
 });

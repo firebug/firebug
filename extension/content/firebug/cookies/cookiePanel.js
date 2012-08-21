@@ -500,9 +500,10 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
-        delete this.infoTipURL;
+        delete this.infoTipCookieId;
         return false;
     },
+    
     populateSizeInfoTip: function(infoTip, cookie)
     {
         CookieReps.SizeInfoTip.render(cookie, infoTip);
