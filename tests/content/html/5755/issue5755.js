@@ -20,7 +20,7 @@ function runTest()
                 if (FBTest.ok(texteditor, "Editor must be loaded now."))
                 {
                     FBTest.compare(longOnclickValue, texteditor.value,
-                        "Inline editor must contains whole string of onclick value.");
+                        "Inline editor must contain whole string of onclick value.");
                 }
                 FBTest.testDone("issue5755.DONE");
             });

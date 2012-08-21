@@ -17,18 +17,14 @@
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>
-                    <li>Switch to the HTML panel</li>
-                    <li>Make sure that the <em>displayedAttributeValueLimit</em> pref has a value other than 0</li>
-                    <li>
-                        Inspect the button "A long onclick" at the top of the page (#long-onclick)<br/>
-                    </li>
-                    <li>
-                        Click on the value of <code>onclick</code> attribute<br/>
-                    </li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Set the <code>displayedAttributeValueLimit</code> pref via <code>about:config</code> to 10</li>
+                    <li>Inspect the button <em>A long onclick</em> at the top of the page (<code>#long-onclick</code>)</li>
+                    <li>Click the value of the <code>onclick</code> attribute</li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>The Inline editor should open and be filled with whole string of onclick value instead of cropped string</li>
+                    <li>The inline editor should open and be filled with whole string of the <code>onclick</code> value.</li>
                 </ul>
             </section>
             <footer>Farshid Beheshti, farshid.beheshti@gmail.com</footer>
