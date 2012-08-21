@@ -3,6 +3,7 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/json",
+    "firebug/lib/string",
 ],
 function(Xpcom, Json) {
 
@@ -140,7 +141,12 @@ Cookie.prototype =
         }
 
         return null;
-    }
+    },
+
+    getSize: function(cookie)
+    {
+        return cookie.cookie.name.length + cookie.cookie.value.length;
+    },
 };
 
 // ********************************************************************************************* //
