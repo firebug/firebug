@@ -1111,6 +1111,10 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
+        // XXX: Temporary fix for issue 5577.
+        if (Dom.getAncestorByClass(target, "cssElementRuleContainer"))
+            return;
+
         var type;
         var items = [];
 
