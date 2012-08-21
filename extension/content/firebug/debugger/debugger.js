@@ -30,6 +30,45 @@ Firebug.JSD2Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.destroy.apply(this, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // extends ActivableModule
+
+    onObserverChange: function(observer)
+    {
+        if (this.hasObservers())
+            this.activateDebugger();
+        else
+            this.deactivateDebugger();
+    },
+
+    activateDebugger: function()
+    {
+        FBTrace.sysout("JSD2Debugger.activateDebugger;");
+    },
+
+    deactivateDebugger: function()
+    {
+        FBTrace.sysout("JSD2Debugger.deactivateDebugger;");
+    },
+
+    onSuspendFirebug: function()
+    {
+        if (!Firebug.JSD2Debugger.isAlwaysEnabled())
+            return;
+
+        FBTrace.sysout("JSD2Debugger.onSuspendFirebug;");
+
+        return false;
+    },
+
+    onResumeFirebug: function()
+    {
+        if (!Firebug.JSD2Debugger.isAlwaysEnabled())
+            return;
+
+        FBTrace.sysout("JSD2Debugger.onResumeFirebug;");
+    },
 });
 
 // ********************************************************************************************* //

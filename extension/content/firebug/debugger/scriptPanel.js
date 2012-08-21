@@ -27,11 +27,77 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     initialize: function(context, doc)
     {
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
+
+        this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
+        this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
     },
 
     destroy: function(state)
     {
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // extends ActivablePanel
+
+    onActivationChanged: function(enable)
+    {
+        if (enable)
+        {
+            Firebug.JSD2Debugger.addObserver(this);
+            Firebug.TabCacheModel.addObserver(this);
+        }
+        else
+        {
+            Firebug.JSD2Debugger.removeObserver(this);
+            Firebug.TabCacheModel.removeObserver(this);
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Panel show/hide
+
+    show: function(state)
+    {
+        var enabled = this.isEnabled();
+        if (!enabled)
+            return;
+
+        var active = true;
+
+        // These buttons are visible only, if debugger is enabled.
+        this.showToolbarButtons("fbLocationSeparator", active);
+        this.showToolbarButtons("fbDebuggerButtons", active);
+        this.showToolbarButtons("fbLocationButtons", active);
+        this.showToolbarButtons("fbScriptButtons", active);
+        this.showToolbarButtons("fbStatusButtons", active);
+
+        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
+        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
+        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
+        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
+        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut",
+                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+
+        // Additional debugger panels are visible only, if debugger is active.
+        this.panelSplitter.collapsed = !active;
+        this.sidePanelDeck.collapsed = !active;
+    },
+
+    hide: function(state)
+    {
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location List
+
+    getLocationList: function()
+    {
     },
 });
 
