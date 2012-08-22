@@ -85,9 +85,12 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             var hasAnnotation = Annotations.pageHasAnnotation(uri);
 
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation +
-                    " for "+uri.spec+" in "+browser.contentWindow.location +
-                    " using activateSameOrigin: "+Firebug.activateSameOrigin);
+            {
+                FBTrace.sysout("shouldCreateContext hasAnnotation " + hasAnnotation +
+                    " for " + uri.spec + " in " +
+                    (browser ? browser.contentWindow.location : "no browser") +
+                    " using activateSameOrigin: " + Firebug.activateSameOrigin);
+            }
 
             // Annotated, so return the value.
             if (hasAnnotation)
@@ -97,9 +100,12 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             {
                 var dst = browser.FirebugLink.dst;
                 var dstURI = this.convertToURIKey(dst.spec, Firebug.activateSameOrigin);
+
                 if (FBTrace.DBG_ACTIVATION)
+                {
                     FBTrace.sysout("shouldCreateContext found FirebugLink pointing to " +
                         dstURI.spec, browser.FirebugLink);
+                }
 
                 if (dstURI && dstURI.equals(uri)) // and it matches us now
                 {
@@ -109,8 +115,10 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                     if (srcURI)
                     {
                         if (FBTrace.DBG_ACTIVATION)
+                        {
                             FBTrace.sysout("shouldCreateContext found FirebugLink pointing from " +
                                 srcURI.spec, browser.FirebugLink);
+                        }
 
                         // and it's on the same domain
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host))
