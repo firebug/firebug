@@ -40,7 +40,7 @@ Firebug.ConnectionMenu = Obj.extend(Firebug.Module,
         // Create connection and connect by default.
         // xxxHonza: use devtools.debugger.remote-autoconnect pref?
         this.connection = new Connection(onConnect, onDisconnect);
-        this.connect();
+        //this.connect();
     },
 
     shutdown: function()

@@ -3,8 +3,10 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/debugger/debuggerClient",
+    "firebug/lib/locale",
 ],
-function (Obj, Firebug) {
+function (Obj, Firebug, DebuggerClient, Locale) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -30,10 +32,18 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
+
+        // A connection obejct should be passed into the constructor so, the client
+        // can use it to communicate to the server.
+        // var connection = context.getConnection();
+        this.debuggerClient = new DebuggerClient(null);
+        this.debuggerClient.connect();
     },
 
     destroy: function(state)
     {
+        this.debuggerClient.disconnect();
+
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
