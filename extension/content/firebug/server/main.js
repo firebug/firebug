@@ -37,7 +37,7 @@ var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsol
 try
 {
     Server.initialize();
-    consoleService.logStringMessage("main; 2... ");
+    consoleService.logStringMessage("Firebug server initialized");
 
     // Load actors after the server is initialized.
     // xxxHonza: next step: implement some actors.
