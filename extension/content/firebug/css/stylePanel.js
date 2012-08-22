@@ -15,7 +15,6 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/xpath",
-    "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
     "firebug/css/cssModule",
@@ -23,7 +22,7 @@ define([
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
