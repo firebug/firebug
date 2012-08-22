@@ -285,6 +285,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var monitored = scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
             scriptInfo.lineNo) : false;
 
+        var self = this;
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
             {
@@ -293,7 +294,11 @@ FirebugReps.Func = domplate(Firebug.Rep,
                 nol10n: true,
                 type: "checkbox",
                 checked: monitored,
-                command: Obj.bindFixed(this.monitor, this, fn, monitored)
+                command: function()
+                {
+                    var checked = this.hasAttribute("checked");
+                    self.monitor(fn, !checked);
+                }
             },
             "-",
             {
@@ -1107,7 +1112,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getContextMenuItems: function(elt, target, context)
     {
         var type;
-        var monitored = EventMonitor.areEventsMonitored(elt, null, context);
         var items = [];
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
@@ -1173,9 +1177,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Show_Events_In_Console",
                 id: "fbShowEventsInConsole",
                 type: "checkbox",
-                checked: monitored,
-                command: Obj.bindFixed(EventMonitor.toggleMonitorEvents,
-                    EventMonitor, elt, null, monitored, context)
+                checked: EventMonitor.areEventsMonitored(elt, null, context),
+                command: function()
+                {
+                    var checked = this.hasAttribute("checked");
+                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
+                }
             },
             "-",
             {

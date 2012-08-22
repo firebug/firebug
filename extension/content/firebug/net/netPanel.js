@@ -312,7 +312,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             tooltiptext: "net.option.tip.Disable_Browser_Cache",
             command: function()
             {
-                BrowserCache.toggle(!this.getAttribute("checked"));
+                BrowserCache.toggle(!this.hasAttribute("checked"));
             }
         };
     },

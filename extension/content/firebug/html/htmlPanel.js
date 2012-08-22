@@ -346,6 +346,30 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             null : ["link", "script", "style"]);
     },
 
+    updateNodeVisibility: function(node)
+    {
+        var wasHidden = node.classList.contains("nodeHidden");
+        if (!Xml.isVisible(node.repObject))
+        {
+            // Hide this node and, through CSS, every descendant.
+            node.classList.add("nodeHidden");
+        }
+        else if (wasHidden)
+        {
+            // The node has changed state from hidden to shown. While in the
+            // hidden state, some descendants may have been explicitly marked
+            // with .nodeHidden (not just through CSS inheritance), so we need
+            // to recheck the visibility of those.
+            node.classList.remove("nodeHidden");
+            var desc = Arr.cloneArray(node.getElementsByClassName("nodeHidden"));
+            for (var i = 0; i < desc.length; ++i)
+            {
+                if (Xml.isVisible(desc[i].repObject))
+                    desc[i].classList.remove("nodeHidden");
+            }
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getElementSourceText: function(node)
@@ -479,10 +503,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!objectNodeBox)
             return;
 
-        if (Xml.isVisible(objectNodeBox.repObject))
-            Css.removeClass(objectNodeBox, "nodeHidden");
-        else
-            Css.setClass(objectNodeBox, "nodeHidden");
+        this.updateNodeVisibility(objectNodeBox);
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {

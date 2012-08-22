@@ -1308,6 +1308,13 @@ if (PrefLoader.getPref("allPagesActivation") == "on" || !PrefLoader.getPref("del
 {
     Firebug.GlobalUI.startFirebug(function()
     {
+        var browser = Firebug.Firefox.getBrowserForWindow(this);
+        var uri = Firebug.Firefox.getCurrentURI();
+
+        // Open Firebug UI (e.g. if the annotations say so, issue 5623)
+        if (uri && Firebug.TabWatcher.shouldCreateContext(browser, uri.spec, null))
+            Firebug.toggleBar(true);
+
         FBTrace.sysout("Firebug loaded by default since 'allPagesActivation' is on " +
             "or 'delayLoad' is false");
     });

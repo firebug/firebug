@@ -192,7 +192,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     cleanupSheets: function(doc, context)
     {
         if (!context)
-            return;
+            return false;
 
         // Due to the manner in which the layout engine handles multiple
         // references to the same sheet we need to kick it a little bit.
@@ -220,6 +220,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             }
         }*/
 
+        var result = true;
+
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
         // This voodoo touches each style sheet to force some Firefox internal change
         // to allow edits.
@@ -238,11 +240,17 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             }
             catch(e)
             {
+                result = false;
+
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+
-                        (styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+                    FBTrace.sysout("css.show: sheet.cssRules FAILS for " +
+                        (styleSheets[i] ? styleSheets[i].href : "null sheet") + e, e);
             }
         }
+
+        // Return true only if all stylesheets are fully loaded and there is no
+        // excpetion when accessing them.
+        return result;
     },
 
     cleanupSheetHandler: function(event, context)
