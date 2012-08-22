@@ -294,8 +294,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             type: "checkbox",
             checked: strictValue,
             tooltiptext: "console.option.tip.Show_Strict_Warnings",
-            command: Obj.bindFixed(Options.setPref, Options,
-                strictDomain, strictName, !strictValue)
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                Options.setPref(strictDomain, strictName, checked);
+            }
         };
     },
 

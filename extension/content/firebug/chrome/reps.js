@@ -285,6 +285,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var monitored = scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
             scriptInfo.lineNo) : false;
 
+        var self = this;
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
             {
@@ -293,7 +294,11 @@ FirebugReps.Func = domplate(Firebug.Rep,
                 nol10n: true,
                 type: "checkbox",
                 checked: monitored,
-                command: Obj.bindFixed(this.monitor, this, fn, monitored)
+                command: function()
+                {
+                    var checked = this.hasAttribute("checked");
+                    self.monitor(fn, !checked);
+                }
             },
             "-",
             {
@@ -671,7 +676,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     highlightObject: function(object, context, target)
     {
-        // Highlighting huge amount of elements on the page can cause sericous performance
+        // Highlighting huge amount of elements on the page can cause serious performance
         // problems (see issue 4736). So, avoid highlighting if the number of elements in
         // the array exceeds specified limit.
         var arr = this.getRealObject(object, context);
@@ -711,7 +716,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             else if (obj instanceof Ci.nsIDOMHistory)
                 return false;
             // do this first to avoid exceptions
-            else if (obj.toString() === "[xpconnect wrapped native prototype]")
+            else if (obj.toString && obj.toString() === "[xpconnect wrapped native prototype]")
                 return false;
             else if (isFinite(obj.length) && typeof obj.splice === "function")
                 return true;
@@ -907,14 +912,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return elt.getAttribute("class")
-                ? ("." + elt.getAttribute("class").split(" ")[0])
-                : "";
+            return elt.classList.length > 0 ? ("." + elt.classList[0]) : "";
         }
         catch (err)
         {
+            return "";
         }
-        return "";
     },
 
     getValue: function(elt)
@@ -1109,7 +1112,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getContextMenuItems: function(elt, target, context)
     {
         var type;
-        var monitored = EventMonitor.areEventsMonitored(elt, null, context);
         var items = [];
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
@@ -1175,9 +1177,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Show_Events_In_Console",
                 id: "fbShowEventsInConsole",
                 type: "checkbox",
-                checked: monitored,
-                command: Obj.bindFixed(EventMonitor.toggleMonitorEvents,
-                    EventMonitor, elt, null, monitored, context)
+                checked: EventMonitor.areEventsMonitored(elt, null, context),
+                command: function()
+                {
+                    var checked = this.hasAttribute("checked");
+                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
+                }
             },
             "-",
             {

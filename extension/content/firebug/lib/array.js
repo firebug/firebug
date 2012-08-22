@@ -91,13 +91,13 @@ Arr.sliceArray = function(array, index)
 
 Arr.cloneArray = function(array, fn)
 {
-   var newArray = [];
+   var newArray = [], len = array.length;
 
    if (fn)
-       for (var i = 0; i < array.length; ++i)
+       for (var i = 0; i < len; ++i)
            newArray.push(fn(array[i]));
    else
-       for (var i = 0; i < array.length; ++i)
+       for (var i = 0; i < len; ++i)
            newArray.push(array[i]);
 
    return newArray;

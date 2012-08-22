@@ -1376,7 +1376,7 @@ var FirebugChrome =
 
             var sidePanel = panelBar2.selectedPanel;
             if (sidePanel)
-                sidePanel.select(object);
+                sidePanel.refresh();
         }
     },
 

@@ -15,7 +15,6 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/xpath",
-    "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
     "firebug/css/cssModule",
@@ -23,7 +22,7 @@ define([
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -511,8 +510,18 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        var result = CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
+        // If cleanupSheets returns false there was an exception thrown when accessing
+        // a styleshet (probably since it isn't fully loaded yet). So, delay the panel
+        // update and try it again a bit later (issue 5654).
+        if (!result)
+        {
+            this.context.setTimeout(Obj.bindFixed(this.updateView, this, element), 200);
+            return;
+        }
+
+        // All stylesheets should be ready now, update the view.
         this.updateCascadeView(element);
 
         if (Dom.domUtils)
