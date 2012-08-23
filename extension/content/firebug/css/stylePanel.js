@@ -682,6 +682,23 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Extends stylesheet (CSS Panel)
+
+    deleteRuleDeclaration: function(cssSelector)
+    {
+        var repObject = Firebug.getRepObject(cssSelector);
+
+        if (repObject instanceof window.Element)
+            CSSModule.deleteRule(repObject);
+        else
+            CSSStyleSheetPanel.prototype.deleteRuleDeclaration(cssSelector);
+
+        this.refresh();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     hasPseudoClassLock: function(pseudoClass)
     {
         if (Dom.domUtils.hasPseudoClassLock)

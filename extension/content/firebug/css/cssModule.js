@@ -87,15 +87,27 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return insertIndex;
     },
 
-    deleteRule: function(styleSheet, ruleIndex)
+    deleteRule: function(src, ruleIndex)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length,
-                styleSheet.cssRules);
+        {
+            if (src instanceof window.Element)
+            {
+                FBTrace.sysout("deleteRule: " + ruleIndex + " " + src.cssRules.length,
+                    styleSheet.cssRules);
+            }
+            else
+            {
+                FBTrace.sysout("deleteRule: element.style", src);
+            }
+        }
 
-        Events.dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
+        Events.dispatch(this.fbListeners, "onCSSDeleteRule", [src, ruleIndex]);
 
-        styleSheet.deleteRule(ruleIndex);
+        if (src instanceof window.Element)
+            src.removeAttribute("style");
+        else
+            src.deleteRule(ruleIndex);
     },
 
     setProperty: function(rule, propName, propValue, propPriority)
