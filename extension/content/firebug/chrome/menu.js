@@ -121,8 +121,9 @@ Menu.createMenuSeparator = function(popup, item, before)
 {
     if (item instanceof Node)
     {
-        FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
-        Deprecated.deprecated("The function's header changed to "+
+        if (FBTrace.DBG_MENU)
+            FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
+        return Deprecated.deprecated("The function's header changed to "+
             "createMenuSeparator(popup, item, before)",
             Menu.createMenuSeparator, [popup, null, before])();
     }
