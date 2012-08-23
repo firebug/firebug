@@ -77,6 +77,7 @@ function startup(params, reason)
 
     // GCLI commands
     Cu.import("resource://firebug/gcli.js");
+    FirebugGCLICommands.startup();
 }
 
 function shutdown(params, reason)
@@ -100,6 +101,9 @@ function shutdown(params, reason)
     {
         Cu.reportError(e);
     }
+
+    // Unregister all GCLI commands
+    FirebugGCLICommands.shutdown();
 
     // xxxHonza: I think this shouldn't be here (perhaps in firebug-service.js)
     // Shutdown Firebug's JSD debugger service.
