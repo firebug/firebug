@@ -52,7 +52,7 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         FBTrace.sysout("JSD2ScriptPanel.onConnect;");
 
-        this.debuggerClient = new DebuggerClient(browser.connection);
+        this.debuggerClient = new DebuggerClient(this.context, browser.connection);
         this.debuggerClient.attach(function()
         {
             FBTrace.sysout("ScriptPanel.initialize; Debugger attached!");
@@ -125,6 +125,21 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     getLocationList: function()
     {
+        return this.context.getAllCompilationUnits();
+    },
+
+    getDefaultLocation: function()
+    {
+        var compilationUnits = this.getLocationList();
+        if (!compilationUnits.length)
+            return null;
+
+        return compilationUnits[0];
+    },
+
+    getObjectLocation: function(compilationUnit)
+    {
+        return compilationUnit.getURL();
     },
 });
 
