@@ -649,8 +649,6 @@ SourceScripts.prototype =
             var sourceFile = new SourceFile(script.url, script.startLine, script.lineCount);
             this.watchSourceFile(sourceFile);
         }
-
-        this.context
     },
 
     onScriptsCleared: function()
