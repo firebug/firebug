@@ -448,9 +448,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         this.markOverriddenProps(element, props, usedProps, inheritMode);
 
-        if (props.length)
+        if (props.length != 0)
         {
-            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
+            rules.unshift({rule: element.style, id: Xpath.getElementXPath(element),
                     selector: "element.style", props: props, inherited: inheritMode});
         }
     },
@@ -458,6 +458,34 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     inspectDeclaration: function(rule)
     {
         Firebug.chrome.select(rule, "stylesheet");
+    },
+
+    editElementStyle: function()
+    {
+        var rulesBox = this.panelNode.getElementsByClassName("cssElementRuleContainer")[0];
+        var styleRuleBox = rulesBox && Firebug.getElementByRepObject(rulesBox, this.selection);
+        if (!styleRuleBox)
+        {
+            FBTrace.sysout("this.selection.style", this.selection.style);
+            var rule = {rule: this.selection.style, inherited: false, selector: "element.style", props: []};
+            if (!rulesBox)
+            {
+                // The element did not have any displayed styles. We need to create the
+                // whole tree and remove the no styles message
+                styleRuleBox = this.template.cascadedTag.replace({
+                    rules: [rule], inherited: [], inheritLabel: Locale.$STR("InheritedFrom")
+                }, this.panelNode);
+
+                styleRuleBox = styleRuleBox.getElementsByClassName("cssElementRuleContainer")[0];
+            }
+            else
+                styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox);
+
+            styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
+        }
+
+        FBTrace.sysout("styleRuleBox", styleRuleBox);
+        Firebug.Editor.insertRowForObject(styleRuleBox);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -624,6 +652,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         var items = CSSStyleSheetPanel.prototype.getContextMenuItems.apply(this, [style, target]);
         var insertIndex = 0;
+        var isElementStyle = style instanceof window.CSSStyleDeclaration && !style.parentRule;
 
         for (var i = 0; i < items.length; ++i)
         {

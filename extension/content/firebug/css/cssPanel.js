@@ -588,32 +588,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    editElementStyle: function()
-    {
-        var rulesBox = this.panelNode.getElementsByClassName("cssElementRuleContainer")[0];
-        var styleRuleBox = rulesBox && Firebug.getElementByRepObject(rulesBox, this.selection);
-        if (!styleRuleBox)
-        {
-            var rule = {rule: this.selection, inherited: false, selector: "element.style", props: []};
-            if (!rulesBox)
-            {
-                // The element did not have any displayed styles. We need to create the
-                // whole tree and remove the no styles message
-                styleRuleBox = this.template.cascadedTag.replace({
-                    rules: [rule], inherited: [], inheritLabel: Locale.$STR("InheritedFrom")
-                }, this.panelNode);
-
-                styleRuleBox = styleRuleBox.getElementsByClassName("cssElementRuleContainer")[0];
-            }
-            else
-                styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox);
-
-            styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
-        }
-
-        Firebug.Editor.insertRowForObject(styleRuleBox);
-    },
-
     addRelatedRule: function()
     {
         if (!this.panelNode.getElementsByClassName("cssElementRuleContainer")[0])
@@ -1655,15 +1629,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
+        if (rule instanceof window.CSSStyleRule || rule instanceof window.CSSStyleDeclaration)
         {
             if (Css.hasClass(target, "cssPropName"))
             {
   
                 if (value && previousValue != value)  // name of property has changed.
                 {
-                    // Record the original CSS text for the inline case so we can reconstruct at a later
-                    // point for diffing purposes
+                    // Record the original CSS text for the inline case so we can reconstruct at a 
+                    // later point for diffing purposes
                     var baseText = rule.style ? rule.style.cssText : rule.cssText;
   
                     propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
@@ -1686,8 +1660,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             parsedValue.priority);
                     }
   
-                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
-                        previousValue, baseText]);
+                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, 
+                        value, previousValue, baseText]);
                 }
                 else if (!value)
                 {
@@ -1721,7 +1695,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
   
             if (value)
             {
-                var saveSuccess = !!rule.style.getPropertyValue(propName || value);
+                var style = rule.style || rule;
+                var saveSuccess = !!style.getPropertyValue(propName || value);
                 if(!saveSuccess && !propName)
                 {
                     propName = value.replace(/-./g, function(match)
@@ -1729,7 +1704,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         return match[1].toUpperCase()
                     });
     
-                    if (propName in rule.style || propName == "float")
+                    if (propName in style || propName == "float")
                         saveSuccess = "almost";
                 }
     
