@@ -1455,6 +1455,7 @@ Firebug.Listener = function()
     // the same array.
     this.fbListeners = null;
 }
+
 Firebug.Listener.prototype =
 {
     addListener: function(listener)
@@ -1478,8 +1479,18 @@ Firebug.Listener.prototype =
     {
         // if this.fbListeners is null, remove is being called with no add
         Arr.remove(this.fbListeners, listener);
+    },
+
+    dispatch: function(eventName, args)
+    {
+        if (this.fbListeners && this.fbListeners.length > 0)
+            Events.dispatch(this.fbListeners, eventName, args);
     }
 };
+
+// xxxHonza: the proper name should be EventSource (the opposite of a listener)
+
+Firebug.EventSource = Firebug.Listener;
 
 // ********************************************************************************************* //
 
