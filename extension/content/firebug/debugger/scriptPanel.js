@@ -33,18 +33,35 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
-        // A connection obejct should be passed into the constructor so, the client
-        // can use it to communicate to the server.
-        // var connection = context.getConnection();
-        this.debuggerClient = new DebuggerClient(null);
-        this.debuggerClient.connect();
+        Firebug.connection.addListener(this);
+
+        FBTrace.sysout("JSD2ScriptPanel.initialize;");
     },
 
     destroy: function(state)
     {
-        this.debuggerClient.disconnect();
+        Firebug.connection.removeListener(this);
 
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Connection
+
+    onConnect: function(browser)
+    {
+        FBTrace.sysout("JSD2ScriptPanel.onConnect;");
+
+        this.debuggerClient = new DebuggerClient(browser.connection);
+        this.debuggerClient.attach(function()
+        {
+            FBTrace.sysout("ScriptPanel.initialize; Debugger attached!");
+        });
+    },
+
+    onDisconnect: function()
+    {
+        this.debuggerClient.detach();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

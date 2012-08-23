@@ -11,8 +11,9 @@ define([
     "arch/webApp",
     "firebug/lib/options",
     "firebug/chrome/tabWatcher",
+    "firebug/remoting/connection",
 ],
-function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
+function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher, Connection) {
 
 // ********************************************************************************************* //
 // Browser
@@ -422,6 +423,13 @@ Browser.prototype.addListener = function(listener)
     else
         FBTrace.sysout("BTI.Browser.addListener; ERROR The listener is already appended " +
             (listener.dispatchName ? listener.dispatchName : ""));
+
+    // If a listener is appended after connect, let's send fake onConnect
+    // to ensure initialization.
+    if (this.isConnected())
+        Events.dispatch2([listener], "onConnect", [this]);
+
+    FBTrace.sysout("BTI.Browser.addListener; listener added: " + listener.dispatchName, listener);
 };
 
 Browser.prototype.removeListener = function(listener)
@@ -448,24 +456,6 @@ Browser.prototype.dispatch = function(eventName, args)
     {
         FBTrace.sysout("BTI.Browser.dispatch; EXCEPTION " + exc, exc);
     }
-}
-
-/**
- * Disconnects this client from the browser it is associated with.
- *
- * @function
- */
-Browser.prototype.disconnect = function()
-{
-    this.removeListener(Firebug);
-    TabWatcher.destroy();
-
-    // Remove the listener after the Firebug.TabWatcher.destroy() method is called, so
-    // that the destroyContext event is properly dispatched to the Firebug object and
-    // consequently to all registered modules.
-    TabWatcher.removeListener(this);
-
-    this._setConnected(false);
 }
 
 // ********************************************************************************************* //
@@ -504,28 +494,6 @@ Browser.prototype._setFocusContext = function(context)
     this.activeContext = context;
     if (prev !== context)
         this.dispatch("onContextChanged", [prev, this.activeContext]);
-};
-
-/**
- * Sets whether this proxy is connected to its underlying browser.
- * Sends 'onDisconnect' notification when the browser becomes disconnected.
- *
- * @function
- * @param connected whether this proxy is connected to its underlying browser
- */
-Browser.prototype._setConnected = function(connected)
-{
-    if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("BTI.Browser._setConnected " + connected + " this.connected " +
-            this.connected);
-
-    var wasConnected = this.connected;
-    this.connected = connected;
-
-    if (wasConnected && !connected)
-        this.dispatch("onDisconnect", [this]);
-    else if (!wasConnected && connected)
-        this.dispatch("onConnect", [this]);
 };
 
 // ********************************************************************************************* //
@@ -825,8 +793,63 @@ Browser.prototype.connect = function ()
     TabWatcher.initialize();
     TabWatcher.addListener(TabWatchListener);
 
-    this._setConnected(true);
+    var self = this;
+
+    function _onConnect()
+    {
+        self._setConnected(true);
+    }
+
+    function _onDisconnect()
+    {
+        self._setConnected(false);
+    }
+
+    // Create connection and connect by default.
+    // xxxHonza: use devtools.debugger.remote-autoconnect pref?
+    this.connection = new Connection(_onConnect, _onDisconnect);
+    this.connection.open();
 }
+
+/**
+ * Disconnects this client from the browser it is associated with.
+ *
+ * @function
+ */
+Browser.prototype.disconnect = function()
+{
+    this.removeListener(Firebug);
+    TabWatcher.destroy();
+
+    // Remove the listener after the Firebug.TabWatcher.destroy() method is called, so
+    // that the destroyContext event is properly dispatched to the Firebug object and
+    // consequently to all registered modules.
+    TabWatcher.removeListener(this);
+
+    this.connection.close();
+}
+
+/**
+ * Sets whether this proxy is connected to its underlying browser.
+ * Sends 'onDisconnect' notification when the browser becomes disconnected.
+ *
+ * @function
+ * @param connected whether this proxy is connected to its underlying browser
+ */
+Browser.prototype._setConnected = function(connected)
+{
+    //if (FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("BTI.Browser._setConnected " + connected + " this.connected " +
+            this.connected);
+
+    var wasConnected = this.connected;
+    this.connected = connected;
+
+    if (wasConnected && !connected)
+        this.dispatch("onDisconnect", [this]);
+    else if (!wasConnected && connected)
+        this.dispatch("onConnect", [this]);
+};
 
 // ********************************************************************************************* //
 

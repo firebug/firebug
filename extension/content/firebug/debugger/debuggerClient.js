@@ -39,46 +39,20 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    connect: function()
+    attach: function(callback)
     {
-        this.remoteDebugger = true;
+        this.connection.addListener("tabNavigated", this.onTabNavigated);
+        this.connection.addListener("tabDetached", this.onTabDetached);
 
-        var host = Options.get("serverHost");
-        var port = Options.get("serverPort");
-
-        // Initialize the server to allow connections throug pipe transport.
-        if (!this.remoteDebugger)
+        var self = this;
+        this.connection.listTabs(function(response)
         {
-            DebuggerServer.init(function () { return true; });
-            DebuggerServer.addBrowserActors();
-        }
-
-        var transport = this.remoteDebugger ?
-            debuggerSocketConnect(host, port) :
-            DebuggerServer.connectPipe();
-
-        FBTrace.sysout("debuggerClient.connect; host: " + host + ":" + port);
-
-        // The transport should be wrapped within a Connection object, which should be
-        // passed into the constructor. This approach will allow to attach further clients
-        // (like e.g. NetMonitorClient to the same connection).
-        //this.client = new DebuggerClient(this.connection);
-
-        this.client = new DebuggerClient(transport);
-        this.client.addListener("tabNavigated", this.onTabNavigated);
-        this.client.addListener("tabDetached", this.onTabDetached);
-
-        this.client.connect(function(type, traits)
-        {
-            this.client.listTabs(function(response)
-            {
-                var tab = response.tabs[response.selected];
-                this.startDebugging(tab);
-            }.bind(this));
-        }.bind(this));
+            var tab = response.tabs[response.selected];
+            self.startDebugging(tab);
+        });
     },
 
-    disconnect: function()
+    detach: function()
     {
         
     },
@@ -100,17 +74,18 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
 
     startDebugging: function(tabGrip)
     {
-        this.client.attachTab(tabGrip.actor, function(response, tabClient)
+        FBTrace.sysout("startDebugging")
+        this.connection.attachTab(tabGrip.actor, function(response, tabActor)
         {
-            if (!tabClient)
+            if (!tabActor)
             {
                 Cu.reportError("No tab client found!");
                 return;
             }
 
-            this.tabClient = tabClient;
+            this.tabActor = tabActor;
 
-            this.client.attachThread(response.threadActor, function(response, threadClient)
+            /*this.connection.attachThread(response.threadActor, function(response, threadClient)
             {
                 if (!threadClient)
                 {
@@ -120,14 +95,6 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
 
                 this.activeThread = threadClient;
 
-                /*DebuggerController.ThreadState.connect(function() {
-                    DebuggerController.StackFrames.connect(function() {
-                        DebuggerController.SourceScripts.connect(function() {
-                            aThreadClient.resume();
-                        });
-                    });
-                });*/
-
                 this.scripts = new SourceScripts(this.client, this.activeThread);
                 this.scripts.connect();
 
@@ -135,7 +102,7 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
 
                 FBTrace.sysout("debuggerClient.startDebugging;");
 
-            }.bind(this));
+            }.bind(this));*/
         }.bind(this));
     }
 });
