@@ -935,32 +935,21 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
         TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},
             TBODY(
                 FOR("size", "$sizeInfo",
-                    TAG("$size|getRowTag", {size: "$size"})
+                    TAG("$size|sizeTag", {size: "$size"})
                 )
             )
         ),
 
     sizeTag:
-        TR({"class": "sizeInfoRow", $collapsed: "$size|hideRow"},
+        TR({"class": "sizeInfoRow"},
             TD({"class": "sizeInfoLabelCol"}, "$size.label"),
             TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
             TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
         ),
 
-    getRowTag: function(size)
-    {
-        return (size.label == "-") ? this.separatorTag : this.sizeTag;
-    },
-
-    hideRow: function(size)
-    {
-        return size.size < 0;
-    },
-
     formatSize: function(size)
     {
-        size = Str.formatSize(size.size);
-        return size;
+        return Str.formatSize(size.size);
     },
 
     formatNumber: function(size)
@@ -977,7 +966,7 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
         sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
 
         if (size != rawSize)
-            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Raw_Size"), size: rawSize});
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
