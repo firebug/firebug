@@ -27,7 +27,7 @@ const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 // ********************************************************************************************* //
 // CSS Module
 
-Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector),
+Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 {
     dispatchName: "cssModule",
 
