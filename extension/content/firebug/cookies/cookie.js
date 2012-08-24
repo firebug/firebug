@@ -147,6 +147,11 @@ Cookie.prototype =
     {
         return cookie.cookie.name.length + cookie.cookie.value.length;
     },
+
+    getRawSize: function(cookie)
+    {
+        return cookie.cookie.name.length + cookie.cookie.rawValue.length
+    },
 };
 
 // ********************************************************************************************* //

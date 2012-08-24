@@ -490,12 +490,12 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             if (Dom.getAncestorByClass(target, "cookieSizeCol"))
             {
-                var infoTipCookieId = "cookiesize";
+                var infoTipCookieId = "cookiesize-"+row.repObject.name;
                 if (infoTipCookieId == this.infoTipCookieId && row.repObject == this.infoTipFile)
                     return true;
 
                 this.infoTipCookieId = infoTipCookieId;
-                this.infoTipFile = row.repObject;
+                this.infoTipCookie = row.repObject;
                 return this.populateSizeInfoTip(infoTip, row.repObject);
             }
         }

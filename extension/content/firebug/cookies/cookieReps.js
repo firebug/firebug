@@ -949,9 +949,6 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
 
     getRowTag: function(size)
     {
-        if (size.size == -2)
-            return this.descTag;
-
         return (size.label == "-") ? this.separatorTag : this.sizeTag;
     },
 
@@ -974,8 +971,12 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
     render: function(cookie, parentNode)
     {
         var size = cookie.getSize(cookie);
+        var rawSize = cookie.getRawSize(cookie);
         var sizeInfo = [];
-        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+        if(size==rawSize)
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+        else
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size},{label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
 });
