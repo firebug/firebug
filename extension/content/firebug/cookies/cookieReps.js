@@ -928,6 +928,62 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
     }
 });
 
+
+CookieReps.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},
+            TBODY(
+                FOR("size", "$sizeInfo",
+                    TAG("$size|getRowTag", {size: "$size"})
+                )
+            )
+        ),
+
+    sizeTag:
+        TR({"class": "sizeInfoRow", $collapsed: "$size|hideRow"},
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
+            TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
+        ),
+
+    getRowTag: function(size)
+    {
+        return (size.label == "-") ? this.separatorTag : this.sizeTag;
+    },
+
+    hideRow: function(size)
+    {
+        return size.size < 0;
+    },
+
+    formatSize: function(size)
+    {
+        size = Str.formatSize(size.size);
+        return size;
+    },
+
+    formatNumber: function(size)
+    {
+        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
+    },
+
+    render: function(cookie, parentNode)
+    {
+        var size = cookie.getSize();
+        var rawSize = cookie.getRawSize();
+        var sizeInfo = [];
+        if (size == rawSize)
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+        else
+        {
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
+        }
+        this.tag.replace({sizeInfo: sizeInfo}, parentNode);
+    },
+});
+
 // ********************************************************************************************* //
 // Header Template (domplate)
 
