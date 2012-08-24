@@ -143,14 +143,14 @@ Cookie.prototype =
         return null;
     },
 
-    getSize: function(cookie)
+    getSize: function()
     {
-        return cookie.cookie.name.length + cookie.cookie.value.length;
+        return this.cookie.name.length + this.cookie.value.length;
     },
 
-    getRawSize: function(cookie)
+    getRawSize: function()
     {
-        return cookie.cookie.name.length + cookie.cookie.rawValue.length
+        return this.cookie.name.length + this.cookie.rawValue.length
     },
 };
 
