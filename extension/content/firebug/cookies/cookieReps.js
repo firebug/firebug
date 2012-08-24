@@ -973,13 +973,12 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
         var size = cookie.getSize();
         var rawSize = cookie.getRawSize();
         var sizeInfo = [];
-        if (size == rawSize)
-            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
-        else
-        {
-            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+
+        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+
+        if (size != rawSize)
             sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
-        }
+
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
 });
