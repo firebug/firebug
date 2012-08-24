@@ -978,7 +978,7 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
         else
         {
             sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
-            sizeinfo.push({label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.RawSize"), size: rawSize});
         }
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
