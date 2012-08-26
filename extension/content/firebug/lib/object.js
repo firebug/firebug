@@ -34,7 +34,7 @@ Obj.extend = function()
     }
 
     var newOb = {};
-    for (var i = 0; i < arguments.length; ++i)
+    for (var i = 0, len = arguments.length; i < len; ++i)
     {
         for (var prop in arguments[i])
             newOb[prop] = arguments[i][prop];
