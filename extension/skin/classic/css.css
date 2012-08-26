@@ -170,7 +170,7 @@
     text-align: right;
 }
 
-.cssRule .objectLink-sourceLink {
+.cssElementRuleContainer > .objectLink-sourceLink {
     top: 0;
 }
 

@@ -1340,7 +1340,7 @@
                 {
                     if (child.localName == "menuitem")
                     {
-                        var label = child.getAttribute("label").toLowerCase();
+                        var label = child.getAttribute("tooltiptext").toLowerCase();
                         child._searchMatch = label.indexOf(substring) != -1;
                         if (child._searchMatch)
                         {

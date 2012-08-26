@@ -1114,30 +1114,34 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
-        if (this.infoTipType == "color")
+        var propValue = Dom.getAncestorByClass(target, "cssPropValue");
+        if (propValue)
         {
-            items.push(
-                {
-                    label: "CopyColor",
-                    tooltiptext: "css.tip.Copy_Color",
-                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
-                }
-            );
-        }
-        else if (this.infoTipType == "image")
-        {
-            items.push(
-                {
-                    label: "CopyImageLocation",
-                    tooltiptext: "css.tip.Copy_Image_Location",
-                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
-                },
-                {
-                    label: "OpenImageInNewTab",
-                    tooltiptext: "css.tip.Open_Image_In_New_Tab",
-                    command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject)
-                }
-            );
+            if (this.infoTipType == "color")
+            {
+                items.push(
+                    {
+                        label: "CopyColor",
+                        tooltiptext: "css.tip.Copy_Color",
+                        command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
+                    }
+                );
+            }
+            else if (this.infoTipType == "image")
+            {
+                items.push(
+                    {
+                        label: "CopyImageLocation",
+                        tooltiptext: "css.tip.Copy_Image_Location",
+                        command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
+                    },
+                    {
+                        label: "OpenImageInNewTab",
+                        tooltiptext: "css.tip.Open_Image_In_New_Tab",
+                        command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject)
+                    }
+                );
+            }
         }
 
         if (!Url.isSystemStyleSheet(this.selection))
@@ -1303,6 +1307,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
                         return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
+                    break;
 
                 case "fontFamily":
                     return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
@@ -1311,6 +1316,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             delete this.infoTipType;
             delete this.infoTipValue;
             delete this.infoTipObject;
+
+            return false;
         }
     },
 
@@ -1575,17 +1582,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         CSSModule.deleteRule(styleSheet, ruleIndex);
 
-        if (this.context.panelName == "stylesheet")
-        {
-            var rule = Dom.getAncestorByClass(cssSelector, "cssRule");
-            if (rule)
-                rule.parentNode.removeChild(rule);
-        }
-        else
-        {
-            var sidePanel = Firebug.chrome.getSelectedSidePanel();
-            sidePanel.refresh();
-        }
+        var rule = Dom.getAncestorByClass(cssSelector, "cssRule");
+        if (rule)
+            rule.parentNode.removeChild(rule);
     },
 
     copyStyleDeclaration: function(cssSelector)

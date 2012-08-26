@@ -630,17 +630,12 @@ Str.cleanIndentation = function(text)
 // ************************************************************************************************
 // Formatting
 
-Str.formatNumber = function(number)
-{
-    number += "";
-    var x = number.split(".");
-    var x1 = x[0];
-    var x2 = x.length > 1 ? "." + x[1] : "";
-    var rgx = /(\d+)(\d{3})/;
-    while (rgx.test(x1))
-        x1 = x1.replace(rgx, "$1" + "," + "$2");
-    return x1 + x2;
-}
+
+//deprecated compatibility functions
+Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
+
+Str.formatNumber = Deprecated.deprecated("use <number>.toLocaleString() instead",
+    function(number) { return number.toLocaleString(); });
 
 Str.formatSize = function(bytes)
 {
@@ -670,13 +665,13 @@ Str.formatSize = function(bytes)
     if (bytes == -1 || bytes == undefined)
         return "?";
     else if (bytes == 0)
-        return "0";
+        return "0 B";
     else if (bytes < 1024)
-        result = bytes + " B";
+        result = bytes.toLocaleString() + " B";
     else if (bytes < (1024*1024))
-        result = Math.round((bytes/1024)*a)/a + " KB";
+        result = (Math.round((bytes/1024)*a)/a).toLocaleString() + " KB";
     else
-        result = Math.round((bytes/(1024*1024))*a)/a + " MB";
+        result = (Math.round((bytes/(1024*1024))*a)/a).toLocaleString() + " MB";
 
     return negative ? "-" + result : result;
 }

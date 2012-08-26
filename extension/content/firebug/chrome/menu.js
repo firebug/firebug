@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/options",
-    "firebug/lib/css"
+    "firebug/lib/css",
+    "firebug/lib/deprecated"
 ],
-function(FBTrace, Locale, Options, Css) {
+function(FBTrace, Locale, Options, Css, Deprecated) {
 
 // ********************************************************************************************* //
 // Constants
@@ -30,7 +31,7 @@ Menu.createMenu = function(popup, label)
 
 Menu.createMenuItem = function(popup, item, before)
 {
-    if (typeof(item) == "string" && item.charAt(0) == "-")
+    if ((typeof(item) == "string" && item == "-") || item.label == "-")
         return Menu.createMenuSeparator(popup, before);
 
     var menuitem = popup.ownerDocument.createElement("menuitem");
@@ -116,17 +117,30 @@ Menu.createMenuHeader = function(popup, item)
     return header;
 };
 
-Menu.createMenuSeparator = function(popup, before)
+Menu.createMenuSeparator = function(popup, item, before)
 {
+    if (item instanceof Node)
+    {
+        return Deprecated.deprecated("The function's header changed to "+
+            "createMenuSeparator(popup, item, before)",
+            Menu.createMenuSeparator, [popup, null, before])();
+    }
+
     if (!popup.firstChild)
         return;
 
-    var menuitem = popup.ownerDocument.createElement("menuseparator");
+    if (FBTrace.DBG_MENU)
+        FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
+
+    var menuItem = popup.ownerDocument.createElement("menuseparator");
+    if (item && item.id)
+        menuItem.setAttribute("id", item.id);
+
     if (before)
-        popup.insertBefore(menuitem, before);
+        popup.insertBefore(menuItem, before);
     else
-        popup.appendChild(menuitem);
-    return menuitem;
+        popup.appendChild(menuItem);
+    return menuItem;
 };
 
 /**
