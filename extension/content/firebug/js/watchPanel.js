@@ -361,6 +361,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (!path || !path.length)
             return;
 
+
         // Ignore top level variables in the Watch panel.
         if (panel.name == "watches" && path.length == 1)
             return;
@@ -372,6 +373,37 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
            command: Obj.bindFixed(this.addWatch, this, path.join(""))
         });
     },
+
+    getContextMenuItems: function(object, target)
+    {
+        var items = Firebug.DOMBasePanel.prototype.getContextMenuItems.apply(this, arguments);
+
+        // find the index of "DeleteWatch" in the items: 
+        var iDeleteWatch = items.map(function(item)
+        {
+            return item.label;
+        }).indexOf("DeleteWatch");
+
+        // if DeleteWatch was found: 
+        if (iDeleteWatch >= 0)
+        {
+            if (FBTrace.DBG_WATCH)
+                FBTrace.sysout("insert DeleteAllWatches at : "+ (iDeleteWatch+1));
+
+            // insert DeleteAllWatches after DeleteWatch
+            items.splice(iDeleteWatch + 1, 0, {
+                id: "fbDeleteAllWatches",
+                label: "DeleteAllWatches",
+                tooltiptext: "watch.tip.Delete_All_Watches",
+                command: Obj.bindFixed(this.deleteAllWatches, this)
+            });
+        }
+        else if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("could not insert DeleteAllWatches");
+
+
+        return items;
+    }
 });
 
 // ********************************************************************************************* //

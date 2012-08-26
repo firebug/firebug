@@ -1584,17 +1584,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            if (isWatch)
-            {
-                items.push(
-                    {
-                        label: "DeleteAllWatches",
-                        tooltiptext: "watch.tip.Delete_All_Watches",
-                        command: Obj.bindFixed(this.deleteAllWatches, this, row)
-                    }
-                );
-            }
-
             if (!Dom.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
