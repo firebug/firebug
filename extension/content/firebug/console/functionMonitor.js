@@ -135,11 +135,15 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 
     onToggleStackTrace: function(event)
     {
-        var target = event.target;
+        var target = event.originalTarget;
 
-        // Clicking on the source link uses default navigation.
-        if (Css.hasClass(target, "objectLink-sourceLink"))
+        // Only clicking on the expand button or the function title actually expands
+        // the function call log. All other clicks keep default behavior
+        if (!(Css.hasClass(target, "objectBox-functionCall") ||
+            Css.hasClass(target, "functionCallTitle")))
+        {
             return;
+        }
 
         var objectBox = Dom.getAncestorByClass(target, "objectBox-functionCall");
         if (!objectBox)
