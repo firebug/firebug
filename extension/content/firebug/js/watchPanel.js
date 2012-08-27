@@ -389,28 +389,25 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         var items = Firebug.DOMBasePanel.prototype.getContextMenuItems.apply(this, arguments);
 
         // find the index of "DeleteWatch" in the items: 
-        var iDeleteWatch = items.map(function(item)
+        var deleteWatchIndex = items.map(function(item)
         {
-            return item.label;
-        }).indexOf("DeleteWatch");
+            return item.id;
+        }).indexOf("DeleteProperty");
 
-        // if DeleteWatch was found: 
-        if (iDeleteWatch >= 0)
-        {
-            if (FBTrace.DBG_WATCH)
-                FBTrace.sysout("insert DeleteAllWatches at : "+ (iDeleteWatch+1));
+        // if DeleteWatch was found, we insert DeleteAllWatches after it
+        // otherwise, we insert the item at the beginning of the menu
+        var deleteAllWatchesIndex = (deleteWatchIndex >= 0) ? deleteWatchIndex + 1 : 0;
 
-            // insert DeleteAllWatches after DeleteWatch
-            items.splice(iDeleteWatch + 1, 0, {
-                id: "fbDeleteAllWatches",
-                label: "DeleteAllWatches",
-                tooltiptext: "watch.tip.Delete_All_Watches",
-                command: Obj.bindFixed(this.deleteAllWatches, this)
-            });
-        }
-        else if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("could not insert DeleteAllWatches");
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("insert DeleteAllWatches at: "+ deleteAllWatchesIndex);
 
+        // insert DeleteAllWatches after DeleteWatch
+        items.splice(deleteAllWatchesIndex, 0, {
+            id: "deleteAllWatches",
+            label: "DeleteAllWatches",
+            tooltiptext: "watch.tip.Delete_All_Watches",
+            command: Obj.bindFixed(this.deleteAllWatches, this)
+        });
 
         return items;
     }
