@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Command Line API: dirxml</h1>
+
+<p>This test-case is intended for <b>dirxml</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Execute teh following expression in the command line:<br/>
+<code style="color:green">dirxml(document.getElementById("content"));</code></li>
+<li>The console panel should display a following XML log:</li>
+</ol>
+
+<pre style="color:green">
+&lt;div id="content" style="display: none;"&gt;
+    &lt;span&gt;a&lt;/span&gt;
+    &lt;span&gt;
+        &lt;span>b&lt;/span&gt;
+    &lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+<br/><br/>
+
+<div id="content" style="display: none;">
+    <span>a</span>
+    <span>
+        <span>b</span>
+    </span>
+</div>
+
+</body>
+</html>
