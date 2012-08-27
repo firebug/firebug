@@ -388,6 +388,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     {
         var items = Firebug.DOMBasePanel.prototype.getContextMenuItems.apply(this, arguments);
 
+        if (!this.watches || this.watches.length == 0)
+            return items;
+
         // find the index of "DeleteWatch" in the items: 
         var deleteWatchIndex = items.map(function(item)
         {
