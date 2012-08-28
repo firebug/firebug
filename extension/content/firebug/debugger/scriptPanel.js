@@ -167,6 +167,16 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSource: function(compilationUnit)
     {
+        if (!compilationUnit)
+            compilationUnit = this.getDefaultLocation();
+
+        if (!compilationUnit)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("scriptPanel.showSource; ERROR no compilation unit!");
+            return;
+        }
+
         var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
