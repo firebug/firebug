@@ -31,4 +31,9 @@
     background-color: rgb(238, 238, 238) !important;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Breakpoints */
+
+.annotationHTML.breakpoint {
+    background-image: url(chrome://firebug/skin/breakpoint.png);
+}

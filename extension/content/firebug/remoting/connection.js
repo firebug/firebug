@@ -65,7 +65,7 @@ function Connection(onConnect, onDisconnect)
 
     // Transport layer.
     this.transport = null;
-    this.local = false;
+    this.local = true;  // Local debugging over JSON for now. 
 
     // Clients ane requests management.
     this.threadClients = {};

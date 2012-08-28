@@ -25,6 +25,10 @@ Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 // and it should be part of the cookies directory.
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 
+// JSD2 related new strings are in a separate bundle
+// They should be integrated/remoted at the end of JSD2 refactoring
+Locale.registerStringBundle("chrome://firebug/locale/firebug-jsd2.properties");
+
 // ********************************************************************************************* //
 // Overlay Helpers
 

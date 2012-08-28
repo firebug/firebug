@@ -13,14 +13,14 @@ function (Obj, DebuggerClient, Locale, Events, ScriptView, CompilationUnit) {
 // ********************************************************************************************* //
 // Script panel
 
-Firebug.JSD2ScriptPanel = function()
+Firebug.JSD2.ScriptPanel = function()
 {
 };
 
 var BasePanel = Firebug.ActivablePanel;
-Firebug.JSD2ScriptPanel.prototype = Obj.extend(BasePanel,
+Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 {
-    dispatchName: "JSD2ScriptPanel",
+    dispatchName: "JSD2.ScriptPanel",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
@@ -81,12 +81,12 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         if (enable)
         {
-            Firebug.JSD2Debugger.addObserver(this);
+            Firebug.JSD2.Debugger.addObserver(this);
             Firebug.TabCacheModel.addObserver(this);
         }
         else
         {
-            Firebug.JSD2Debugger.removeObserver(this);
+            Firebug.JSD2.Debugger.removeObserver(this);
             Firebug.TabCacheModel.removeObserver(this);
         }
     },
@@ -154,45 +154,10 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateLocation: function(compilationUnit)
     {
-        // XXXjjb do we need to show a blank?
-        if (!compilationUnit)
-            return;
+        this.showSource(compilationUnit);
 
-        if (!(compilationUnit instanceof CompilationUnit))
-        {
-            FBTrace.sysout("Script panel location not a CompilationUnit: ", compilationUnit);
-            throw new Error("Script panel location not a CompilationUnit: " + compilationUnit);
-        }
-
-        // Since our last use of the compilationUnit we may have compiled or
-        // recompiled the source
-        var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());
-        if (!updatedCompilationUnit)
-            updatedCompilationUnit = this.getDefaultLocation();
-
-        if (!updatedCompilationUnit)
-            return;
-
-        if (this.activeWarningTag)
-        {
-            Dom.clearNode(this.panelNode);
-            delete this.activeWarningTag;
-
-            // The user was seeing the warning, but selected a file to show in the Script panel.
-            // The removal of the warning leaves the panel without a clientHeight, so
-            //  the old sourcebox will be out of sync. Just remove it and start over.
-            this.removeAllSourceBoxes();
-            // we are not passing state so I guess we could miss a restore
-            this.show();
-
-            // If show() reset the flag, obey it
-            if (this.activeWarningTag)
-                return;
-        }
-
-        this.showSource(updatedCompilationUnit);
-
-        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
+        Events.dispatch(this.fbListeners, "onUpdateScriptLocation",
+            [this, compilationUnit]);
     },
 
     showSource: function(compilationUnit)
@@ -210,9 +175,9 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(BasePanel,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.JSD2ScriptPanel);
+Firebug.registerPanel(Firebug.JSD2.ScriptPanel);
 
-return Firebug.JSD2ScriptPanel;
+return Firebug.JSD2.ScriptPanel;
 
 // ********************************************************************************************* //
 });

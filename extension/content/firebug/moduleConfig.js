@@ -67,10 +67,18 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/debugger/scriptPanel",
         "firebug/remoting/connectionMenu",
         "firebug/remoting/tabListMenu",
+        "firebug/debugger/breakpointModule",
+        "firebug/debugger/breakpointPanel",
     ];
 
     return config;
 }
+
+// ********************************************************************************************* //
+
+// Create an extra namespace for JSD2 objects.
+// xxxHonza: should this really be here?
+Firebug.JSD2 = {};
 
 // ********************************************************************************************* //
 // Firebug Extension Registration

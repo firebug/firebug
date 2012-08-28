@@ -14,9 +14,9 @@ const Ci = Components.interfaces;
 
 // ********************************************************************************************* //
 
-Firebug.JSD2Debugger = Obj.extend(Firebug.ActivableModule,
+Firebug.JSD2.Debugger = Obj.extend(Firebug.ActivableModule,
 {
-    dispatchName: "JSD2Debugger",
+    dispatchName: "JSD2.Debugger",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
@@ -54,7 +54,7 @@ Firebug.JSD2Debugger = Obj.extend(Firebug.ActivableModule,
 
     onSuspendFirebug: function()
     {
-        if (!Firebug.JSD2Debugger.isAlwaysEnabled())
+        if (!Firebug.JSD2.Debugger.isAlwaysEnabled())
             return;
 
         FBTrace.sysout("JSD2Debugger.onSuspendFirebug;");
@@ -64,7 +64,7 @@ Firebug.JSD2Debugger = Obj.extend(Firebug.ActivableModule,
 
     onResumeFirebug: function()
     {
-        if (!Firebug.JSD2Debugger.isAlwaysEnabled())
+        if (!Firebug.JSD2.Debugger.isAlwaysEnabled())
             return;
 
         FBTrace.sysout("JSD2Debugger.onResumeFirebug;");
@@ -74,9 +74,9 @@ Firebug.JSD2Debugger = Obj.extend(Firebug.ActivableModule,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerActivableModule(Firebug.JSD2Debugger);
+Firebug.registerActivableModule(Firebug.JSD2.Debugger);
 
-return Firebug.JSD2Debugger;
+return Firebug.JSD2.Debugger;
 
 // ********************************************************************************************* //
 });
