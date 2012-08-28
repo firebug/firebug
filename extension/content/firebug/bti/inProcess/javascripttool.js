@@ -159,7 +159,9 @@ JavaScriptTool.onActivateTool = function(toolname, active)
         {
             context.invalidatePanels('script');
         });
-        JavaScriptTool.asTool.setActive(active);
+
+        if (JavaScriptTool.asTool)
+            JavaScriptTool.asTool.setActive(active);
     }
 },
 

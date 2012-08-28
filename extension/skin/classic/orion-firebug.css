@@ -11,10 +11,11 @@
 
 .viewContainer {
     /*font-size: 11px; see issue 5488*/
+    background-color: rgb(238, 238, 238) !important;
 }
 
 .view {
-    background: white;
+    background: white !important;
 }
 
 .token_string {
@@ -24,6 +25,10 @@
 
 .token_keyword {
     color: blue;
+}
+
+.ruler {
+    background-color: rgb(238, 238, 238) !important;
 }
 
 /************************************************************************************************/

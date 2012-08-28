@@ -386,11 +386,12 @@
                                 is used by default, which could launch FirebugChrome.initializeUI
                                 yet before the right content (i.e. panel.html) is loaded.
                                 The same for the fbPanelBar1-browser. -->
+                            <!-- xxxHonza: Orion requires 'chrome' type, needs to be 'content' ! -->
                             <browser id="fbPanelBar1-browser"
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
                                      src="chrome://firebug/content/panel.html"
-                                     type="content"
+                                     type="chrome"
                                      role="tabpanel" />
                         </deck>
                     </vbox>

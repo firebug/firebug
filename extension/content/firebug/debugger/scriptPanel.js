@@ -2,18 +2,23 @@
 
 define([
     "firebug/lib/object",
-    "firebug/firebug",
     "firebug/debugger/debuggerClient",
     "firebug/lib/locale",
+    "firebug/lib/events",
+    "firebug/debugger/scriptView",
+    "arch/compilationunit",
 ],
-function (Obj, Firebug, DebuggerClient, Locale) {
+function (Obj, DebuggerClient, Locale, Events, ScriptView, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Script panel
 
-Firebug.JSD2ScriptPanel = function() {};
+Firebug.JSD2ScriptPanel = function()
+{
+};
 
-Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
+var BasePanel = Firebug.ActivablePanel;
+Firebug.JSD2ScriptPanel.prototype = Obj.extend(BasePanel,
 {
     dispatchName: "JSD2ScriptPanel",
 
@@ -28,12 +33,15 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     initialize: function(context, doc)
     {
-        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
+        BasePanel.initialize.apply(this, arguments);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
         Firebug.connection.addListener(this);
+
+        this.scriptView = new ScriptView();
+        this.scriptView.initialize(this.panelNode);
 
         FBTrace.sysout("JSD2ScriptPanel.initialize;");
     },
@@ -42,7 +50,9 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         Firebug.connection.removeListener(this);
 
-        Firebug.SourceBoxPanel.destroy.apply(this, arguments);
+        BasePanel.destroy.apply(this, arguments);
+
+        this.scriptView.destroy();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -141,6 +151,60 @@ Firebug.JSD2ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         return compilationUnit.getURL();
     },
+
+    updateLocation: function(compilationUnit)
+    {
+        // XXXjjb do we need to show a blank?
+        if (!compilationUnit)
+            return;
+
+        if (!(compilationUnit instanceof CompilationUnit))
+        {
+            FBTrace.sysout("Script panel location not a CompilationUnit: ", compilationUnit);
+            throw new Error("Script panel location not a CompilationUnit: " + compilationUnit);
+        }
+
+        // Since our last use of the compilationUnit we may have compiled or
+        // recompiled the source
+        var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());
+        if (!updatedCompilationUnit)
+            updatedCompilationUnit = this.getDefaultLocation();
+
+        if (!updatedCompilationUnit)
+            return;
+
+        if (this.activeWarningTag)
+        {
+            Dom.clearNode(this.panelNode);
+            delete this.activeWarningTag;
+
+            // The user was seeing the warning, but selected a file to show in the Script panel.
+            // The removal of the warning leaves the panel without a clientHeight, so
+            //  the old sourcebox will be out of sync. Just remove it and start over.
+            this.removeAllSourceBoxes();
+            // we are not passing state so I guess we could miss a restore
+            this.show();
+
+            // If show() reset the flag, obey it
+            if (this.activeWarningTag)
+                return;
+        }
+
+        this.showSource(updatedCompilationUnit);
+
+        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
+    },
+
+    showSource: function(compilationUnit)
+    {
+        var self = this;
+        function callback(unit, firstLineNumber, lastLineNumber, lines)
+        {
+            self.scriptView.showSource(lines.join(""));
+        }
+
+        compilationUnit.getSourceLines(-1, -1, callback);
+    }
 });
 
 // ********************************************************************************************* //
