@@ -50,8 +50,6 @@ ScriptView.prototype =
 
         this.editor._iframe.style.width = "100%";
         this.editor._iframe.style.height = "100%";
-
-        FBTrace.sysout("scriptView.initialize; ");
     },
 
     destroy: function()

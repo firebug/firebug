@@ -183,7 +183,7 @@ Connection.prototype =
     detachTab: function Connection_detach(onResponse)
     {
         var packet = {
-            to: this.tabActor,
+            to: this.activeTab,
             type: DebugProtocolTypes.detach
         };
 
@@ -290,6 +290,9 @@ Connection.prototype =
 
             this.notify(packet.type, packet);
 
+            if (packet.error)
+                FBTrace.sysout("debuggerClient.attachThread; ERROR " + packet.error, packet.error);
+
             if (onResponse)
                 onResponse(packet);
         }
@@ -382,7 +385,7 @@ function eventSource(aProto)
         // Prevent a bad listener from interfering with the others.
         var msg = e + ": " + e.stack;
         Cu.reportError(msg);
-        dumpn(msg);
+        FBTrace.sysout("EventSource.notify; ERROR " + e, e);
       }
     }
   }

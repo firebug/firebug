@@ -69,3 +69,4 @@ pref("extensions.firebug.DBG_EVENTLISTENERS", false);   // track/untrack for reg
 pref("extensions.firebug.DBG_COMMANDEDITOR", false);    // Multiline console based on SourceEditor (Orion)
 pref("extensions.firebug.DBG_CONNECTION", false);       // Connection to the remote browser (for remote debugging)
 pref("extensions.firebug.DBG_MENU", false);             // Menus and context menus in Firebug
+pref("extensions.firebug.DBG_BTI", false);              // Browser Tools Interface

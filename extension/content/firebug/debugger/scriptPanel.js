@@ -52,6 +52,11 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 
         BasePanel.destroy.apply(this, arguments);
 
+        this.debuggerClient.detach(function()
+        {
+            FBTrace.sysout("ScriptPanel.destroy; Debugger detached");
+        });
+
         this.scriptView.destroy();
     },
 
@@ -65,13 +70,13 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         this.debuggerClient = new DebuggerClient(this.context, browser.connection);
         this.debuggerClient.attach(function()
         {
-            FBTrace.sysout("ScriptPanel.initialize; Debugger attached!");
+            FBTrace.sysout("ScriptPanel.initialize; Debugger attached");
         });
     },
 
     onDisconnect: function()
     {
-        this.debuggerClient.detach();
+        FBTrace.sysout("JSD2ScriptPanel.onDisconnect;");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

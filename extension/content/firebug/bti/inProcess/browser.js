@@ -429,7 +429,11 @@ Browser.prototype.addListener = function(listener)
     if (this.isConnected())
         Events.dispatch2([listener], "onConnect", [this]);
 
-    FBTrace.sysout("BTI.Browser.addListener; listener added: " + listener.dispatchName, listener);
+    if (FBTrace.DBG_BTI)
+    {
+        FBTrace.sysout("BTI.Browser.addListener; listener added: " +
+            listener.dispatchName, listener);
+    }
 };
 
 Browser.prototype.removeListener = function(listener)

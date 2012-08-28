@@ -47,6 +47,9 @@ function JSD2DebuggerClient(context, connection)
     this.connection = connection;
 
     this.threadClients = {};
+
+    this.onTabNavigatedListener = this.onTabNavigated.bind(this);
+    this.onTabDetachedListener = this.onTabDetached.bind(this);
 }
 
 JSD2DebuggerClient.prototype = Obj.extend(Object,
@@ -68,8 +71,8 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
 
     attach: function(callback)
     {
-        this.connection.addListener("tabNavigated", this.onTabNavigated);
-        this.connection.addListener("tabDetached", this.onTabDetached);
+        this.connection.addListener("tabNavigated", this.onTabNavigatedListener);
+        this.connection.addListener("tabDetached", this.onTabDetachedListener);
 
         var self = this;
         this.connection.listTabs(function(response)
@@ -79,9 +82,21 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
         });
     },
 
-    detach: function()
+    detach: function(callback)
     {
-        
+        FBTrace.sysout("debuggerClient.detach;", this);
+
+        this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
+        this.connection.removeListener("tabDetached", this.onTabDetachedListener);
+
+        var self = this;
+        this.activeThread.detach(function()
+        {
+            self.connection.detachTab(function()
+            {
+                callback();
+            });
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,6 +105,12 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
     onTabNavigated: function()
     {
         FBTrace.sysout("debuggerClient.onTabNavigated;");
+
+        var self = this;
+        this.detach(function()
+        {
+            self.attach();
+        });
     },
 
     onTabDetached: function()
@@ -128,7 +149,7 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
                 this.scripts.connect();
                 this.activeThread.resume();
 
-                FBTrace.sysout("debuggerClient.startDebugging;");
+                FBTrace.sysout("debuggerClient.startDebugging; ", this);
 
             }.bind(this));
         }.bind(this));
@@ -150,6 +171,7 @@ JSD2DebuggerClient.prototype = Obj.extend(Object,
                 self.threadClients[threadActor] = threadClient;
                 self.activeThread = threadClient;
             }
+
             onResponse(response, threadClient);
         });
     },
@@ -348,10 +370,10 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.client.request(packet, function(aResponse)
         {
-            if (self.activeThread === self._client._threadClients[self._actor])
+            //if (self.activeThread === self._client._threadClients[self._actor])
                 delete self.activeThread;
 
-            delete self._client._threadClients[self._actor];
+            //delete self._client._threadClients[self._actor];
 
             if (onResponse)
                 onResponse(aResponse);
