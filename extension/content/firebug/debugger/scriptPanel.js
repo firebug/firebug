@@ -41,6 +41,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         Firebug.connection.addListener(this);
 
         this.scriptView = new ScriptView();
+        this.scriptView.addListener(this);
         this.scriptView.initialize(this.panelNode);
 
         FBTrace.sysout("JSD2ScriptPanel.initialize;");
@@ -57,6 +58,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
             FBTrace.sysout("ScriptPanel.destroy; Debugger detached");
         });
 
+        this.scriptView.removeListener(this);
         this.scriptView.destroy();
     },
 
@@ -184,6 +186,22 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         compilationUnit.getSourceLines(-1, -1, callback);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoints
+
+    onBreakpointAdd: function(bp)
+    {
+        this.debuggerClient.activeThread.setBreakpoint({
+            url: this.location.url,
+            line: bp.line
+        });
+    },
+
+    onBreakpointRemove: function(bp)
+    {
+        FBTrace.sysout("scriptView.onEditorBreakpointRemove " + bp, bp);
     }
 });
 

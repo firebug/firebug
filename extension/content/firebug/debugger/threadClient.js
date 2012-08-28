@@ -34,6 +34,11 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     actor: null,
     pauseOnExceptions: false,
 
+    isPaused: function()
+    {
+        return this.state === "paused";
+    },
+
     assertPaused: function DebuggerClientassertPaused(command)
     {
         if (!this.paused)
@@ -68,8 +73,10 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.client.request(packet, function(aResponse)
         {
-            if (aResponse.error) {
+            self.state = "running";
 
+            if (aResponse.error)
+            {
                 // There was an error resuming, back to paused state.
                 self.state = "paused";
             }
@@ -228,6 +235,8 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     setBreakpoint: function DebuggerClient_setBreakpoint(aLocation, onResponse)
     {
+        FBTrace.sysout("ThreadClient.setBreakpoint; state: " + this.state);
+
         // A helper function that sets the breakpoint.
         var doSetBreakpoint = function _doSetBreakpoint(aCallback)
         {
@@ -251,8 +260,11 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
             }.bind(this));
         }.bind(this);
 
+        FBTrace.sysout("ThreadClient.setBreakpoint; state: " + this.state +
+            ", paused: " + this.paused + ", isPaused: " + this.isPaused());
+
         // If the debuggee is paused, just set the breakpoint.
-        if (this.paused)
+        if (this.isPaused())
         {
             doSetBreakpoint();
             return;
