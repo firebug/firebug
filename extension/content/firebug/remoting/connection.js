@@ -243,6 +243,10 @@ Connection.prototype =
                 return true;
 
             self.activeRequests[request.to] = request;
+
+            if (FBTrace.DBG_CONNECTION)
+                FBTrace.sysout("connection.send; " + JSON.stringify(request), request);
+
             self.transport.send(request.request);
 
             return false;
@@ -258,6 +262,9 @@ Connection.prototype =
      */
     onPacket: function Connection_onPacket(packet)
     {
+        if (FBTrace.DBG_CONNECTION)
+            FBTrace.sysout("connection.onPacket; " + JSON.stringify(packet), packet);
+
         if (!this.connected)
         {
             // Hello packet.
