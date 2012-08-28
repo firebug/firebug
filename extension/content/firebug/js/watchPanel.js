@@ -270,6 +270,19 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }, this));
     },
 
+    // deletes all the watches
+    deleteAllWatches: function()
+    {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.deleteAllWatches");
+        this.watches = [];
+        this.rebuild(true);
+        this.context.setTimeout(Obj.bindFixed(function()
+        {
+            this.showToolbox(null);
+        }, this));
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     showToolbox: function(row)
@@ -358,6 +371,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (!path || !path.length)
             return;
 
+
         // Ignore top level variables in the Watch panel.
         if (panel.name == "watches" && path.length == 1)
             return;
@@ -369,6 +383,37 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
            command: Obj.bindFixed(this.addWatch, this, path.join(""))
         });
     },
+
+    getContextMenuItems: function(object, target)
+    {
+        var items = Firebug.DOMBasePanel.prototype.getContextMenuItems.apply(this, arguments);
+
+        if (!this.watches || this.watches.length == 0)
+            return items;
+
+        // find the index of "DeleteWatch" in the items: 
+        var deleteWatchIndex = items.map(function(item)
+        {
+            return item.id;
+        }).indexOf("DeleteProperty");
+
+        // if DeleteWatch was found, we insert DeleteAllWatches after it
+        // otherwise, we insert the item at the beginning of the menu
+        var deleteAllWatchesIndex = (deleteWatchIndex >= 0) ? deleteWatchIndex + 1 : 0;
+
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("insert DeleteAllWatches at: "+ deleteAllWatchesIndex);
+
+        // insert DeleteAllWatches after DeleteWatch
+        items.splice(deleteAllWatchesIndex, 0, {
+            id: "deleteAllWatches",
+            label: "DeleteAllWatches",
+            tooltiptext: "watch.tip.Delete_All_Watches",
+            command: Obj.bindFixed(this.deleteAllWatches, this)
+        });
+
+        return items;
+    }
 });
 
 // ********************************************************************************************* //

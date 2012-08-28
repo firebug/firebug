@@ -928,6 +928,50 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
     }
 });
 
+
+CookieReps.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},
+            TBODY(
+                FOR("size", "$sizeInfo",
+                    TAG("$size|sizeTag", {size: "$size"})
+                )
+            )
+        ),
+
+    sizeTag:
+        TR({"class": "sizeInfoRow"},
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
+            TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
+        ),
+
+    formatSize: function(size)
+    {
+        return Str.formatSize(size.size);
+    },
+
+    formatNumber: function(size)
+    {
+        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
+    },
+
+    render: function(cookie, parentNode)
+    {
+        var size = cookie.getSize();
+        var rawSize = cookie.getRawSize();
+        var sizeInfo = [];
+
+        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+
+        if (size != rawSize)
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Raw_Size"), size: rawSize});
+
+        this.tag.replace({sizeInfo: sizeInfo}, parentNode);
+    },
+});
+
 // ********************************************************************************************* //
 // Header Template (domplate)
 

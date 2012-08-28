@@ -1577,6 +1577,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 items.push(
                     {
                         label: isWatch ? "DeleteWatch" : "DeleteProperty",
+                        id: "DeleteProperty",
                         tooltiptext: isWatch ? "watch.tip.Delete_Watch" :
                             "dom.tip.Delete_Property",
                         command: Obj.bindFixed(this.deleteProperty, this, row)
