@@ -1044,42 +1044,6 @@ Css.cssInfo.svg =
     "writing-mode": ["writingMode"]
 };
 
-Css.inheritedStyleNames =
-{
-    "border-collapse": 1,
-    "border-spacing": 1,
-    "caption-side": 1,
-    "color": 1,
-    "cursor": 1,
-    "direction": 1,
-    "empty-cells": 1,
-    "font": 1,
-    "font-family": 1,
-    "font-size-adjust": 1,
-    "font-size": 1,
-    "font-style": 1,
-    "font-variant": 1,
-    "font-weight": 1,
-    "letter-spacing": 1,
-    "line-height": 1,
-    "list-style": 1,
-    "list-style-image": 1,
-    "list-style-position": 1,
-    "list-style-type": 1,
-    "orphans": 1,
-    "quotes": 1,
-    "text-align": 1,
-    "text-decoration": 1,
-    "text-indent": 1,
-    "text-shadow": 1,
-    "text-transform": 1,
-    "visibility": 1,
-    "white-space": 1,
-    "widows": 1,
-    "word-spacing": 1,
-    "word-wrap": 1
-};
-
 Css.multiValuedProperties =
 {
     "background": 1,
