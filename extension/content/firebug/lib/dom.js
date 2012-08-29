@@ -1060,7 +1060,10 @@ domMemberMap.Window =
     "startProfiling",
     "stopProfiling",
     "unescape",
-    "uneval"
+    "uneval",
+    "Performance",
+    "PerformanceNavigation",
+    "PerformanceTiming"
 ];
 
 domMemberMap.Object =
