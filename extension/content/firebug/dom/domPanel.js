@@ -429,9 +429,16 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (!level)
             level = 0;
 
-        var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-            domProps = [], domFuncs = [], domConstants = [], proto = [],
-            domHandlers = [];
+        var ordinals = [];
+        var userProps = [];
+        var userClasses = [];
+        var userFuncs = [];
+        var domProps = [];
+        var domClasses = [];
+        var domFuncs = [];
+        var domConstants = [];
+        var proto = [];
+        var domHandlers = [];
 
         try
         {
@@ -531,13 +538,24 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 else if (typeof(val) == "function")
                 {
                     if (isClassFunction(val))
-                        this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    {
+                        if (Dom.isDOMMember(object, name))
+                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context);
+                        else
+                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    }
                     else if (Dom.isDOMMember(object, name))
+                    {
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                    }
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
+                    {
                         this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context);
+                    }
                     else
+                    {
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                    }
                 }
                 else
                 {
@@ -594,6 +612,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (Firebug.showDOMFuncs)
         {
+            domClasses.sort(sortName);
+            members.push.apply(members, domClasses);
+
             domFuncs.sort(sortName);
             members.push.apply(members, domFuncs);
         }
