@@ -21,9 +21,8 @@ Cu["import"]("resource:///modules/devtools/dbg-server.jsm");
 // ********************************************************************************************* //
 // Debugger Client
 
-function DebuggerClient(context, connection)
+function DebuggerClient(connection)
 {
-    this.context = context;
     this.connection = connection;
 
     this.threadClients = {};
@@ -68,6 +67,13 @@ DebuggerClient.prototype = Obj.extend(Object,
 
         this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.removeListener("tabDetached", this.onTabDetachedListener);
+
+        if (!this.activeThread)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debuggerClient.detach; ERROR activeThread not defined?");
+            return;
+        }
 
         var self = this;
         this.activeThread.detach(function()
@@ -122,8 +128,7 @@ DebuggerClient.prototype = Obj.extend(Object,
 
                 this.activeThread = threadClient;
 
-                this.scripts = new SourceScripts(this.context, this.connection,
-                    this.activeThread);
+                this.scripts = new SourceScripts(this.connection,this.activeThread);
 
                 // Connect script manager and resume remote thread.
                 this.scripts.connect();
@@ -164,16 +169,15 @@ DebuggerClient.prototype = Obj.extend(Object,
  * Keeps the source script list up-to-date, using the thread client's
  * source script cache.
  */
-function SourceScripts(context, client, thread)
+function SourceScripts(client, thread)
 {
-    this.context = context;
     this.client = client;
     this.thread = thread;
 }
 
 SourceScripts.prototype =
 {
-    connect: function (callback)
+    connect: function(callback)
     {
         this.thread.addListener(this);
 
@@ -213,15 +217,25 @@ SourceScripts.prototype =
 
     watchSourceFile: function(sourceFile)
     {
+        // xxxHonza: the Script panel update should happen from within the Script panel
+        // The DebuggerClient (or SourceScripts) should just fire an event to the panel.
+
+        var context = Firebug.currentContext;
+
         // store in the context and notify listeners
-        this.context.addSourceFile(sourceFile);
+        context.addSourceFile(sourceFile);
 
         // Update the Script panel, this script could have been loaded asynchronously
         // and perhaps is the only one that should be displayed (otherwise the panel
         // would show: No Javascript on this page). See issue 4932
-        var panel = this.context.getPanel("jsd2script", true);
-        if (panel)
-            panel.context.invalidatePanels("jsd2script");
+        var panel = context.getPanel("jsd2script", true);
+        if (!panel)
+            return;
+
+        context.invalidatePanels("jsd2script");
+
+        if (!panel.location)
+            panel.navigate(null);
     },
 };
 

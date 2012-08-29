@@ -139,6 +139,13 @@ function onModulesLoaded(ChromeFactory, FBL, Firebug, Browser)
     // extensions.
     Firebug.connection = new Browser();  // prepare for addListener calls
 
+    // xxxHonza: BTI refactoring suggestions: 
+    // 1) The connection is an object that ensures sending and receiving packets
+    // 2) The current Firebug.connection should be renamed to Firebug.proxy
+    // 3) The BTI Browser should be renamed to BrowserProxy
+    // 4) The connection should be withih the proxy: Firebug.proxy.connection
+    Firebug.proxy = Firebug.connection;
+
     Browser.onDebug = function()
     {
         FBTrace.sysout.apply(FBTrace, arguments);

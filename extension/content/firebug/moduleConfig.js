@@ -69,6 +69,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/remoting/tabListMenu",
         "firebug/debugger/breakpointModule",
         "firebug/debugger/breakpointPanel",
+        "firebug/debugger/debuggerTool",
     ];
 
     return config;

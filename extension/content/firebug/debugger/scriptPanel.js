@@ -2,20 +2,20 @@
 
 define([
     "firebug/lib/object",
-    "firebug/debugger/debuggerClient",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/debugger/scriptView",
     "arch/compilationunit",
+    "firebug/debugger/debuggerTool",
 ],
-function (Obj, DebuggerClient, Locale, Events, ScriptView, CompilationUnit) {
+function (Obj, Locale, Events, ScriptView, CompilationUnit, DebuggerTool) {
 
 // ********************************************************************************************* //
 // Script panel
 
 Firebug.JSD2.ScriptPanel = function()
 {
-};
+}
 
 var BasePanel = Firebug.ActivablePanel;
 Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
@@ -44,22 +44,20 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.addListener(this);
         this.scriptView.initialize(this.panelNode);
 
-        FBTrace.sysout("JSD2ScriptPanel.initialize;");
+        // The tool (serves as a proxy to the backend service) is registered dynamicaly.
+        // Depending on the current tool the communication can be local or remote.
+        // Access to the back-end debugger service (JSD2) must always be done through the tool.
+        this.tool = Firebug.proxy.getTool("debugger");
     },
 
     destroy: function(state)
     {
         Firebug.connection.removeListener(this);
 
-        BasePanel.destroy.apply(this, arguments);
-
-        this.debuggerClient.detach(function()
-        {
-            FBTrace.sysout("ScriptPanel.destroy; Debugger detached");
-        });
-
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
+
+        BasePanel.destroy.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,11 +67,6 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         FBTrace.sysout("JSD2ScriptPanel.onConnect;");
 
-        this.debuggerClient = new DebuggerClient(this.context, browser.connection);
-        this.debuggerClient.attach(function()
-        {
-            FBTrace.sysout("ScriptPanel.initialize; Debugger attached");
-        });
     },
 
     onDisconnect: function()
@@ -86,6 +79,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onActivationChanged: function(enable)
     {
+        // xxxHonza: needs to be revisited
         if (enable)
         {
             Firebug.JSD2.Debugger.addObserver(this);
@@ -172,10 +166,11 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnit)
             compilationUnit = this.getDefaultLocation();
 
+        // Sources doesn't have to be fetched from the server yet. In such case there
+        // are not compilation units and so, no default location.
         if (!compilationUnit)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("scriptPanel.showSource; ERROR no compilation unit!");
+            FBTrace.sysout("scriptPanel.showSource; ERROR no compilation unit");
             return;
         }
 
@@ -193,15 +188,12 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onBreakpointAdd: function(bp)
     {
-        this.debuggerClient.activeThread.setBreakpoint({
-            url: this.location.url,
-            line: bp.line
-        });
+        this.tool.setBreakpoint(this.context, this.location.href, bp.line);
     },
 
     onBreakpointRemove: function(bp)
     {
-        FBTrace.sysout("scriptView.onEditorBreakpointRemove " + bp, bp);
+        FBTrace.sysout("scriptPanel.onBreakpointRemove " + bp, bp);
     }
 });
 

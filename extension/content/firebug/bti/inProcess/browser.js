@@ -842,7 +842,7 @@ Browser.prototype.disconnect = function()
  */
 Browser.prototype._setConnected = function(connected)
 {
-    //if (FBTrace.DBG_ACTIVATION)
+    if (FBTrace.DBG_ACTIVATION)
         FBTrace.sysout("BTI.Browser._setConnected " + connected + " this.connected " +
             this.connected);
 

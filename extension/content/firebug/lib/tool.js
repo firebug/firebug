@@ -5,31 +5,36 @@ define([
 function() {
 
 // ********************************************************************************************* //
+// Tool Implementation
 
-var FirebugTool = function(name)
+function Tool(name)
 {
     this.toolName = name;
     this.active = false;
 }
 
-FirebugTool.prototype =
+Tool.prototype =
 {
     getName: function()
     {
         return this.toolName;
     },
+
     getActive: function()
     {
         return this.active;
     },
+
     setActive: function(active)
     {
         this.active = !!active;
     }
 }
-// ********************************************************************************************* //
 
-return FirebugTool;
+// ********************************************************************************************* //
+// Registration
+
+return Tool;
 
 // ********************************************************************************************* //
 });

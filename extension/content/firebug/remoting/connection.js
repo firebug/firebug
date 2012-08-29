@@ -298,7 +298,7 @@ Connection.prototype =
             this.notify(packet.type, packet);
 
             if (packet.error)
-                FBTrace.sysout("debuggerClient.attachThread; ERROR " + packet.error, packet.error);
+                FBTrace.sysout("debuggerClient.attachThread; ERROR: " + packet.error, packet);
 
             if (onResponse)
                 onResponse(packet);

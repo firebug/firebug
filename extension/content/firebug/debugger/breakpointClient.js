@@ -44,7 +44,7 @@ BreakpointClient.prototype =
             if (onResponse)
                 onResponse(response);
         });
-  }
+    }
 };
 
 // ********************************************************************************************* //
