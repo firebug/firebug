@@ -804,7 +804,7 @@ Dom.isDOMConstant = function(object, name)
     // so use this as workaround
     var str = Object.prototype.toString.call(object);
     var isDOMProperty = ["[object Window]", "[object Node]", "[object Location]",
-        "[object Event]"].indexOf(str);
+        "[object Event]"].indexOf(str) !== -1;
 
     if (!(object === window.Window ||
         object === window.Object ||
