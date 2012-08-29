@@ -1048,7 +1048,6 @@ Css.inheritedStyleNames =
 {
     "border-collapse": 1,
     "border-spacing": 1,
-    "border-style": 1,
     "caption-side": 1,
     "color": 1,
     "cursor": 1,
@@ -1067,14 +1066,16 @@ Css.inheritedStyleNames =
     "list-style-image": 1,
     "list-style-position": 1,
     "list-style-type": 1,
-    "opacity": 1,
+    "orphans": 1,
     "quotes": 1,
     "text-align": 1,
     "text-decoration": 1,
     "text-indent": 1,
     "text-shadow": 1,
     "text-transform": 1,
+    "visibility": 1,
     "white-space": 1,
+    "widows": 1,
     "word-spacing": 1,
     "word-wrap": 1
 };
