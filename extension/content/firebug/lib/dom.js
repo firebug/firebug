@@ -780,7 +780,7 @@ Dom.getDOMMembers = function(object)
     else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
 
-    return null;
+    return domMemberCache.Object;
 };
 
 Dom.isDOMMember = function(object, propName)
@@ -798,12 +798,26 @@ Dom.isDOMConstant = function(object, name)
     if (name == "__proto__")
         return false;
 
-    if (!(object instanceof Window ||
-        object instanceof Node ||
-        object instanceof Location ||
-        object instanceof Event ||
-        object instanceof Dom.EventCopy))
+    // object isn't recognized as such when using ===,
+    // so use this as workaround
+    isDOMProperty = (object.toString() == "[object Window]" || object.toString() == "[object Node]" ||
+        object.toString() == "[object Location]" || object.toString() == "[object Event]"); 
+
+    if (!(object === window.Window ||
+        object === window.Object ||
+        object === window.Node ||
+        object === window.Location ||
+        object === window.Event ||
+        object === Dom.EventCopy ||
+        object instanceof window.Window ||
+        object instanceof window.Node ||
+        object instanceof window.Location ||
+        object instanceof window.Event ||
+        object instanceof Dom.EventCopy ||
+        isDOMProperty))
+    {
         return false;
+    }
 
     return Dom.domConstantMap.hasOwnProperty(name);
 }
@@ -856,6 +870,8 @@ domMemberMap.Window =
     "mozPaintCount", //FF4.0
     "mozRequestAnimationFrame", //FF4.0
     "mozIndexedDB", //FF4.0
+    "mozCancelAnimationFrame",
+    "mozCancelRequestAnimationFrame",
 
     "mozCancelAnimationFrame",
     "mozCancelRequestAnimationFrame",
@@ -957,6 +973,133 @@ domMemberMap.Window =
     "matchMedia", // https://developer.mozilla.org/en/DOM/window.matchMedia
 
     "getInterface",
+
+    "BarProp",
+    "Controllers",
+    "Crypto",
+    "DOMException",
+    "DOMStringList",
+    "EventTarget",
+    "History",
+    "MimeTypeArray",
+    "MozURLProperty",
+    "Navigator",
+    "NodeList",
+    "OfflineResourceList",
+    "Screen",
+    "Storage",
+    "XULControllers",
+    "Document",
+    "Element",
+    "HTMLCollection",
+    "HTMLDocument",
+    "HTMLElement",
+    "HTMLHtmlElement",
+    "Infinity",
+    "JSON",
+    "Location",
+    "Math",
+    "NaN",
+    "Node",
+    "StopIteration",
+    "Window",
+    "XULElement",
+    "undefined",
+    "CSS2Properties",
+    "CSSStyleDeclaration",
+    "Error",
+    "EvalError",
+    "InternalError",
+    "Namespace",
+    "QName",
+    "RangeError",
+    "ReferenceError",
+    "SyntaxError",
+    "TypeError",
+    "URIError",
+    "Array",
+    "ArrayBuffer",
+    "Boolean",
+    "DataView",
+    "Date",
+    "Float32Array",
+    "Float64Array",
+    "Function",
+    "Int16Array",
+    "Int32Array",
+    "Int8Array",
+    "Iterator",
+    "Map",
+    "Number",
+    "Object",
+    "ParallelArray",
+    "QueryInterface",
+    "RegExp",
+    "Set",
+    "String",
+    "Uint16Array",
+    "Uint32Array",
+    "Uint8Array",
+    "Uint8ClampedArray",
+    "WeakMap",
+    "XML",
+    "XMLList",
+    "decodeURI",
+    "decodeURIComponent",
+    "dumpProfile",
+    "encodeURI",
+    "encodeURIComponent",
+    "escape",
+    "isFinite",
+    "isNaN",
+    "isXMLName",
+    "parseFloat",
+    "parseInt",
+    "pauseProfilers",
+    "resumeProfilers",
+    "startProfiling",
+    "stopProfiling",
+    "unescape",
+    "uneval"
+];
+
+domMemberMap.Object =
+[
+    "arguments",
+    "caller",
+    "length",
+    "name",
+    "__defineGetter__",
+    "__defineSetter__",
+    "__lookupGetter__",
+    "__lookupSetter__",
+    "apply",
+    "bind",
+    "call",
+    "constructor",
+    "create",
+    "defineProperties",
+    "defineProperty",
+    "freeze",
+    "getOwnPropertyDescriptor",
+    "getOwnPropertyNames",
+    "getPrototypeOf",
+    "hasOwnProperty",
+    "isExtensible",
+    "isFrozen",
+    "isGenerator",
+    "isPrototypeOf",
+    "isSealed",
+    "keys",
+    "preventExtensions",
+    "propertyIsEnumerable",
+    "seal",
+    "toLocaleString",
+    "toSource",
+    "toString",
+    "unwatch",
+    "valueOf",
+    "watch"
 ];
 
 domMemberMap.Location =
@@ -972,7 +1115,9 @@ domMemberMap.Location =
 
     "assign",
     "reload",
-    "replace"
+    "replace",
+
+    "QueryInterface"
 ];
 
 domMemberMap.Node =
@@ -1023,7 +1168,9 @@ domMemberMap.Node =
     "isSupported",
     "getFeature",
     "getUserData",
-    "setUserData"
+    "setUserData",
+
+    "QueryInterface"
 ];
 
 domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
@@ -1909,6 +2056,7 @@ Dom.domInlineEventHandlersMap =
     "onmozpointerlockchange": 1,
     "onmozpointerlockerror": 1,
     "onuserproximity": 1,
+    "onwheel": 1
 }
 
 // ********************************************************************************************* //
