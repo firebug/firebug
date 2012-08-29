@@ -802,8 +802,9 @@ Dom.isDOMConstant = function(object, name)
 
     // object isn't recognized as such when using ===,
     // so use this as workaround
-    isDOMProperty = (object.toString() == "[object Window]" || object.toString() == "[object Node]" ||
-        object.toString() == "[object Location]" || object.toString() == "[object Event]"); 
+    var str = Object.prototype.toString.call(object);
+    var isDOMProperty = ["[object Window]", "[object Node]", "[object Location]",
+        "[object Event]"].indexOf(str) !== -1;
 
     if (!(object === window.Window ||
         object === window.Object ||
