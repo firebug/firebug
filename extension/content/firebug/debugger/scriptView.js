@@ -52,6 +52,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor = new SourceEditor();
         this.editor.init(parentNode, config, this.onEditorLoad.bind(this));
 
+        // xxxHonza: use CSS?
         this.editor._iframe.style.width = "100%";
         this.editor._iframe.style.height = "100%";
     },
@@ -107,6 +108,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Search
+
     search: function(text, reverse)
     {
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
