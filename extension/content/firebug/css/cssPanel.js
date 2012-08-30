@@ -532,7 +532,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     addProperty: function(name, value, important, disabled, inheritMode, props)
     {
-        if (inheritMode && !Css.inheritedStyleNames[name])
+        if (inheritMode && !Dom.domUtils.isInheritedProperty(name))
             return;
 
         name = this.translateName(name, value);
