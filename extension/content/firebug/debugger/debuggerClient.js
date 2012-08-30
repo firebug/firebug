@@ -50,6 +50,8 @@ DebuggerClient.prototype = Obj.extend(Object,
 
     attach: function(callback)
     {
+        FBTrace.sysout("debuggerClient.attach;");
+
         this.connection.addListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.addListener("tabDetached", this.onTabDetachedListener);
 
@@ -63,7 +65,7 @@ DebuggerClient.prototype = Obj.extend(Object,
 
     detach: function(callback)
     {
-        FBTrace.sysout("debuggerClient.detach;", this);
+        FBTrace.sysout("debuggerClient.detach;");
 
         this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.removeListener("tabDetached", this.onTabDetachedListener);

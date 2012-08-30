@@ -61,6 +61,7 @@ var defaultRep = null;
 var defaultFuncRep = null;
 var menuItemControllers = [];
 var panelTypeMap = {};
+var tools = {};
 
 // ********************************************************************************************* //
 
@@ -650,6 +651,26 @@ window.Firebug =
         var listener = Firebug.TraceModule.getListenerByPrefix(prefix);
         if (listener)
             Firebug.TraceModule.removeListener(listener);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BTI Tools
+
+    registerTool: function(tool)
+    {
+        FBTrace.sysout("tool", tool)
+        if (tool.toolName)
+            tools[tool.toolName] = tool;
+    },
+
+    unregisterTool: function(tool)
+    {
+        // TODO
+    },
+
+    getTool: function(name)
+    {
+        return tools[name];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

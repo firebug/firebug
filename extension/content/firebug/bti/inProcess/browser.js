@@ -445,6 +445,10 @@ Browser.prototype.removeListener = function(listener)
     else
         FBTrace.sysout("BTI.Browser.removeListener; ERROR Unknown listener " +
             (listener.dispatchName ? listener.dispatchName : ""));
+
+    // xxxHonza: should it be alwasy called or only if isConnected() == true?
+    //if (this.isConnected())
+        Events.dispatch2([listener], "onDisconnect", [this]);
 };
 
 /**

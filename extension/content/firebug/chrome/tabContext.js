@@ -68,6 +68,14 @@ Firebug.TabContext.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Tools (proxies)
+
+    getTool: function(name)
+    {
+        return Firebug.getTool(name);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getWindowLocation: function()
     {

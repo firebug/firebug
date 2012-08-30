@@ -2,9 +2,8 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/firebug",
 ],
-function(FBTrace, Firebug) {
+function(FBTrace) {
 
 // ********************************************************************************************* //
 

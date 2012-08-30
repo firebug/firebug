@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
 ],
-function () {
+function (FBTrace) {
 
 // ********************************************************************************************* //
 // Constants and Services

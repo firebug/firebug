@@ -31,6 +31,9 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     enableA11y: true,
     order: 45,
 
+    // Will appear in detached Firebug Remote XUL window.
+    remotable: true,
+
     initialize: function(context, doc)
     {
         BasePanel.initialize.apply(this, arguments);
@@ -43,11 +46,6 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView = new ScriptView();
         this.scriptView.addListener(this);
         this.scriptView.initialize(this.panelNode);
-
-        // The tool (serves as a proxy to the backend service) is registered dynamicaly.
-        // Depending on the current tool the communication can be local or remote.
-        // Access to the back-end debugger service (JSD2) must always be done through the tool.
-        this.tool = Firebug.proxy.getTool("debugger");
     },
 
     destroy: function(state)
@@ -63,15 +61,25 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    onConnect: function(browser)
+    onConnect: function(proxy)
     {
         FBTrace.sysout("JSD2ScriptPanel.onConnect;");
 
+        // The tool (serves as a proxy to the backend service) is registered dynamicaly.
+        // Depending on the current tool the communication can be local or remote.
+        // Access to the back-end debugger service (JSD2) must always be done through the tool.
+        this.tool = this.context.getTool("debugger");
+        this.tool.onConnect(this.context, proxy.connection);
     },
 
-    onDisconnect: function()
+    onDisconnect: function(proxy)
     {
         FBTrace.sysout("JSD2ScriptPanel.onDisconnect;");
+
+        if (this.tool)
+            this.tool.onDisconnect(this.context, proxy.connection);
+
+        this.tool = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

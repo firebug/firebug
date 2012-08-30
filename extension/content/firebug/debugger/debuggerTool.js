@@ -13,32 +13,42 @@ define([
 function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit) {
 
 // ********************************************************************************************* //
-// Debugger Tool Module
+// Debugger Tool
 
-var DebuggerToolModule = Obj.extend(Firebug.Module,
+var DebuggerTool = Obj.extend(Firebug.Module,
 {
-    dispatchName: "JSD2.DebuggerToolModule",
+    dispatchName: "JSD2.DebuggerTool",
+
+    toolName: "debugger",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Initialization
+    // Connection
 
-    initialize: function()
+    onConnect: function(context, connection)
     {
         if (FBTrace.DBG_BTI)
-            FBTrace.sysout("bti.DebuggerTool.initialize;");
+            FBTrace.sysout("bti.DebuggerTool.onConnect;");
 
-        // Register this tool as a proxy listener so, it gets all the event from the 
-        // remote/local browser.
-        Firebug.proxy.addListener(this);
+        if (context.debuggerClient)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("bti.DebuggerTool; ERROR debugger tool already registered");
+            return;
+        }
+
+        // Attach the debugger.
+        context.debuggerClient = new DebuggerClient(connection);
+        context.debuggerClient.attach(function()
+        {
+            FBTrace.sysout("DebuggerTool.onConnect; Debugger attached");
+        });
     },
 
-    shutdown: function()
+    onDisconnect: function(context, connection)
     {
-        Firebug.proxy.removeListener(this);
-
-        if (this.debuggerClient)
+        if (context.debuggerClient)
         {
-            this.debuggerClient.detach(function()
+            context.debuggerClient.detach(function()
             {
                 FBTrace.sysout("ScriptPanel.destroy; Debugger detached");
             });
@@ -46,57 +56,13 @@ var DebuggerToolModule = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onConnect: function(proxy)
-    {
-        if (FBTrace.DBG_BTI)
-            FBTrace.sysout("bti.DebuggerTool.onConnect;", proxy);
-
-        if (proxy.getTool("debugger"))
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("bti.DebuggerTool; ERROR debugger tool already registered");
-            return;
-        }
-
-        this.tool = new DebuggerTool(proxy.connection);
-        proxy.registerTool(this.tool);
-    },
-
-    onDisconnect: function(proxy)
-    {
-        if (this.tool)
-            proxy.unregisterTool(this.tool);
-    },
-});
-
-// ********************************************************************************************* //
-// Debugger Tool
-
-function DebuggerTool(connection)
-{
-    this.toolName = "debugger";
-    this.active = false;
-
-    // Attach the debugger.
-    this.debuggerClient = new DebuggerClient(connection);
-    this.debuggerClient.attach(function()
-    {
-        FBTrace.sysout("DebuggerTool.onConnect; Debugger attached");
-    });
-}
-
-DebuggerTool.prototype = Obj.extend(new Tool(),
-{
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     setBreakpoint: function(context, url, lineNumber)
     {
         FBTrace.sysout("setBreakpoint " + url + ", " + lineNumber);
 
-        this.debuggerClient.activeThread.setBreakpoint({
+        context.debuggerClient.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
         });
@@ -132,9 +98,10 @@ DebuggerTool.prototype = Obj.extend(new Tool(),
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(DebuggerToolModule);
+Firebug.registerModule(DebuggerTool);
+Firebug.registerTool(DebuggerTool);
 
-return DebuggerToolModule;
+return DebuggerTool;
 
 // ********************************************************************************************* //
 });
