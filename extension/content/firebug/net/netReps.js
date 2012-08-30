@@ -684,24 +684,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getLocalAddress: function(file)
     {
-        var address = file.localAddress ? file.localAddress : "";
-        var port = file.localPort ? file.localPort : "";
-
-        var result = address;
-        result += result ? ":" : "";
-        result += port;
-        return result;
+        return Str.formatIP(file.localAddress, file.localPort);
     },
 
     getRemoteAddress: function(file)
     {
-        var address = file.remoteAddress ? file.remoteAddress : "";
-        var port = file.remotePort ? file.remotePort : "";
-
-        var result = address;
-        result += result ? ":" : "";
-        result += port;
-        return result;
+        return Str.formatIP(file.remoteAddress, file.remotePort);
     },
 
     getElapsedTime: function(file)
