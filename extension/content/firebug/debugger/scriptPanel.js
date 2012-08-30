@@ -184,6 +184,17 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+    search: function(text, reverse)
+    {
+        return this.scriptView.search(text, reverse);
+    },
+
+    onNavigateToNextDocument: function(scanDoc, reverse)
+    {
+        return this.navigateToNextDocument(scanDoc, reverse);
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     onBreakpointAdd: function(bp)
