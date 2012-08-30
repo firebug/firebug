@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/options",
+    "firebug/debugger/rdp",
 ],
-function(FBTrace, Obj, Options, TabClient) {
+function(FBTrace, Obj, Options, RDP) {
 
 // ********************************************************************************************* //
 // XPCOM
@@ -17,36 +18,6 @@ Cu["import"]("resource:///modules/devtools/dbg-server.jsm");
 
 // ********************************************************************************************* //
 // Constants
-
-/**
- * Set of protocol messages that are sent by the server without a prior request
- * by the client.
- */
-const UnsolicitedNotifications = {
-  "newScript": "newScript",
-  "tabDetached": "tabDetached",
-  "tabNavigated": "tabNavigated"
-};
-
-/**
- * Set of protocol messages that affect thread state, and the
- * state the actor is in after each message.
- */
-const ThreadStateTypes = {
-  "paused": "paused",
-  "resumed": "attached",
-  "detached": "detached"
-};
-
-/**
- * Set of debug protocol request types that specify the protocol request being
- * sent to the server.
- */
-const DebugProtocolTypes = {
-  "listTabs": "listTabs",
-  "attach": "attach",
-  "detach": "detach",
-};
 
 const ROOT_ACTOR_NAME = "root";
 
@@ -154,7 +125,7 @@ Connection.prototype =
     {
         var packet = {
             to: ROOT_ACTOR_NAME,
-            type: DebugProtocolTypes.listTabs
+            type: RDP.DebugProtocolTypes.listTabs
         };
 
         this.request(packet, function(aResponse)
@@ -167,7 +138,7 @@ Connection.prototype =
     {
         var packet = {
             to: tabActor,
-            type: DebugProtocolTypes.attach
+            type: RDP.DebugProtocolTypes.attach
         };
 
         var self = this;
@@ -184,7 +155,7 @@ Connection.prototype =
     {
         var packet = {
             to: this.activeTab,
-            type: DebugProtocolTypes.detach
+            type: RDP.DebugProtocolTypes.detach
         };
 
         var self = this;
@@ -285,15 +256,16 @@ Connection.prototype =
             var onResponse;
 
             // Don't count unsolicited notifications as responses.
-            if (packet.from in this.activeRequests && !(packet.type in UnsolicitedNotifications))
+            if (packet.from in this.activeRequests && !(packet.type in RDP.UnsolicitedNotifications))
             {
                 onResponse = this.activeRequests[packet.from].onResponse;
                 delete this.activeRequests[packet.from];
             }
 
+            // xxxHonza: implemented in debuggerClient.
             // paused/resumed/detached get special treatment...
-            if (packet.type in ThreadStateTypes && packet.from in this.threadClients)
-                this.threadClients[packet.from].onThreadState(packet);
+            //if (packet.type in ThreadStateTypes && packet.from in this.threadClients)
+            //   this.threadClients[packet.from].onThreadState(packet);
 
             this.notify(packet.type, packet);
 
@@ -321,15 +293,12 @@ Connection.prototype =
     {
         this.notify("closed");
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Private Methods
-
 }
 
 // ********************************************************************************************* //
 // Event Source Decorator
 
+// xxxHonza: Firebug.EventSource should be used (and perhaps refactored)
 function eventSource(aProto)
 {
   aProto.addListener = function EV_addListener(aName, aListener) {
@@ -359,6 +328,7 @@ function eventSource(aProto)
   };
 
   aProto.removeListener = function EV_removeListener(aName, aListener) {
+
     if (!this._listeners || !this._listeners[aName]) {
       return;
     }
@@ -397,7 +367,6 @@ function eventSource(aProto)
     }
   }
 }
-
 
 // ********************************************************************************************* //
 // Registration

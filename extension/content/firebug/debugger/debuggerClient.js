@@ -4,11 +4,11 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/debugger/sourceFile",
-    "firebug/debugger/debugProtocolTypes",
+    "firebug/debugger/rdp",
     "firebug/debugger/threadClient",
     "firebug/debugger/breakpointClient",
 ],
-function (Obj, Options, SourceFile, DebugProtocolTypes, ThreadClient, BreakpointClient) {
+function (Obj, Options, SourceFile, RDP, ThreadClient, BreakpointClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -29,6 +29,7 @@ function DebuggerClient(connection)
 
     this.onTabNavigatedListener = this.onTabNavigated.bind(this);
     this.onTabDetachedListener = this.onTabDetached.bind(this);
+    this.onPausedListener = this.onPaused.bind(this);
 }
 
 DebuggerClient.prototype = Obj.extend(Object,
@@ -54,6 +55,7 @@ DebuggerClient.prototype = Obj.extend(Object,
 
         this.connection.addListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.addListener("tabDetached", this.onTabDetachedListener);
+        this.connection.addListener("paused", this.onPausedListener);
 
         var self = this;
         this.connection.listTabs(function(response)
@@ -67,15 +69,16 @@ DebuggerClient.prototype = Obj.extend(Object,
     {
         FBTrace.sysout("debuggerClient.detach;");
 
-        this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
-        this.connection.removeListener("tabDetached", this.onTabDetachedListener);
-
         if (!this.activeThread)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debuggerClient.detach; ERROR activeThread not defined?");
             return;
         }
+
+        this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
+        this.connection.removeListener("tabDetached", this.onTabDetachedListener);
+        this.connection.removeListener("paused", this.onPausedListener);
 
         var self = this;
         this.activeThread.detach(function()
@@ -104,6 +107,13 @@ DebuggerClient.prototype = Obj.extend(Object,
     onTabDetached: function()
     {
         FBTrace.sysout("debuggerClient.onTabDetached;");
+    },
+
+    onPaused: function(type, packet)
+    {
+        // paused/resumed/detached get special treatment...
+        if (packet.type in RDP.ThreadStateTypes && packet.from in this.threadClients)
+            this.threadClients[packet.from].onThreadState(packet);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -146,7 +156,7 @@ DebuggerClient.prototype = Obj.extend(Object,
     {
         var packet = {
             to: threadActor,
-            type: "attach"
+            type: RDP.DebugProtocolTypes.attach
         };
 
         var self = this;
@@ -154,7 +164,7 @@ DebuggerClient.prototype = Obj.extend(Object,
         {
             if (!response.error)
             {
-                var threadClient = new ThreadClient(self.connection, threadActor);
+                var threadClient = new ThreadClient(self.connection, threadActor, self);
                 self.threadClients[threadActor] = threadClient;
                 self.activeThread = threadClient;
             }

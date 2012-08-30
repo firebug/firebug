@@ -4,10 +4,10 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/debugger/sourceFile",
-    "firebug/debugger/debugProtocolTypes",
+    "firebug/debugger/rdp",
     "firebug/debugger/breakpointClient",
 ],
-function (Obj, Options, SourceFile, DebugProtocolTypes, BreakpointClient) {
+function (Obj, Options, SourceFile, RDP, BreakpointClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -19,10 +19,11 @@ Cu["import"]("resource:///modules/devtools/dbg-server.jsm");
 
 // ********************************************************************************************* //
 
-function ThreadClient(connection, actor)
+function ThreadClient(connection, actor, debuggerClient)
 {
     this.connection = connection;
     this.actor = actor;
+    this.debuggerClient = debuggerClient;
     this.frameCache = [];
     this.scriptCache = {};
 }
@@ -65,7 +66,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         var packet = {
             to: this.actor,
-            type: DebugProtocolTypes.resume,
+            type: RDP.DebugProtocolTypes.resume,
             resumeLimit: aLimit,
             pauseOnExceptions: this.pauseOnExceptions
         };
@@ -128,7 +129,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     {
         var packet = {
             to: this.actor,
-            type: DebugProtocolTypes.interrupt
+            type: RDP.DebugProtocolTypes.interrupt
         };
 
         var self = this;
@@ -195,7 +196,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         this.state = "resuming";
 
         var self = this;
-        var request = { to: this.actor, type: DebugProtocolTypes.clientEvaluate,
+        var request = { to: this.actor, type: RDP.DebugProtocolTypes.clientEvaluate,
             frame: aFrame, expression: aExpression };
 
         this.connection.request(request, function(response)
@@ -219,15 +220,18 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     detach: function DebuggerClient_detach(onResponse)
     {
-        var self = this;
-        var packet = { to: this.actor, type: DebugProtocolTypes.detach };
+        var packet = {
+            to: this.actor,
+            type: RDP.DebugProtocolTypes.detach
+        };
 
+        var self = this;
         this.connection.request(packet, function(response)
         {
-            //if (self.activeThread === self._client._threadClients[self._actor])
+            if (self.debuggerClient.activeThread === this)
                 delete self.activeThread;
 
-            //delete self._client._threadClients[self._actor];
+            delete self.debuggerClient.threadClients[self.actor];
 
             if (onResponse)
                 onResponse(response);
@@ -249,7 +253,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         {
             var packet = {
                 to: this.actor,
-                type: DebugProtocolTypes.setBreakpoint,
+                type: RDP.DebugProtocolTypes.setBreakpoint,
                 location: location
             };
 
@@ -299,7 +303,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     getScripts: function DebuggerClient_getScripts(onResponse)
     {
-        var packet = { to: this.actor, type: DebugProtocolTypes.scripts };
+        var packet = { to: this.actor, type: RDP.DebugProtocolTypes.scripts };
         this.connection.request(packet, onResponse);
     },
 
@@ -368,7 +372,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     {
         this.assertPaused("frames");
 
-        var packet = { to: this.actor, type: DebugProtocolTypes.frames,
+        var packet = { to: this.actor, type: RDP.DebugProtocolTypes.frames,
             start: start, count: count ? count : undefined };
 
         this.connection.request(packet, onResponse);
@@ -475,10 +479,13 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     onThreadState: function DebuggerClient_onThreadState(aPacket)
     {
-        this.state = ThreadStateTypes[aPacket.type];
+        FBTrace.sysout("onThreadState");
+
+        this.state = RDP.ThreadStateTypes[aPacket.type];
         this.clearFrames();
         this.clearPauseGrips();
-        this.connection.eventsEnabled && this.notify(aPacket.type, aPacket);
+
+        //this.connection.eventsEnabled && this.notify(aPacket.type, aPacket);
     },
 });
 
