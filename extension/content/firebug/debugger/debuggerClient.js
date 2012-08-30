@@ -171,9 +171,9 @@ DebuggerClient.prototype = Obj.extend(Object,
  * Keeps the source script list up-to-date, using the thread client's
  * source script cache.
  */
-function SourceScripts(client, thread)
+function SourceScripts(connection, thread)
 {
-    this.client = client;
+    this.connection = connection;
     this.thread = thread;
 }
 
@@ -214,11 +214,11 @@ SourceScripts.prototype =
 
     onScriptsCleared: function()
     {
-        
     },
 
     watchSourceFile: function(sourceFile)
     {
+        // @hack
         // xxxHonza: the Script panel update should happen from within the Script panel
         // The DebuggerClient (or SourceScripts) should just fire an event to the panel.
 
@@ -235,6 +235,7 @@ SourceScripts.prototype =
             return;
 
         context.invalidatePanels("jsd2script");
+        context.invalidatePanels("jsd2breakpoints");
 
         if (!panel.location)
             panel.navigate(null);

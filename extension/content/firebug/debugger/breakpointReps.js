@@ -10,8 +10,9 @@ define([
     "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/debugger/breakpoint",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom, Breakpoint) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -172,7 +173,7 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Firebug.Debugger.Breakpoint);  // FIXME moz back end
+        return (object instanceof Breakpoint);  // FIXME moz back end
     },
 
     onClick: function(event)

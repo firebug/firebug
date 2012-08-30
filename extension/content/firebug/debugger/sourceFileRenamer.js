@@ -18,6 +18,9 @@ function SourceFileRenamer(context)
 
 SourceFileRenamer.prototype.checkForRename = function(url, line, props)
 {
+    // xxxHonza: Do we have to rename in JSD2? I guess not...
+    return false;
+
     var sourceFile = this.context.sourceFileMap[url];
     if (sourceFile.isEval() || sourceFile.isEvent())
     {

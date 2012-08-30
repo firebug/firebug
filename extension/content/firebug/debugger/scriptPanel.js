@@ -34,6 +34,9 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     // Will appear in detached Firebug Remote XUL window.
     remotable: true,
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
     initialize: function(context, doc)
     {
         BasePanel.initialize.apply(this, arguments);
@@ -69,6 +72,8 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         // Depending on the current tool the communication can be local or remote.
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
         this.tool = this.context.getTool("debugger");
+
+        //xxxHonza: This should be done by the context
         this.tool.onConnect(this.context, proxy.connection);
     },
 
@@ -76,6 +81,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         FBTrace.sysout("JSD2ScriptPanel.onDisconnect;");
 
+        //xxxHonza: This should be done by the context
         if (this.tool)
             this.tool.onDisconnect(this.context, proxy.connection);
 

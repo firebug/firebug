@@ -658,7 +658,6 @@ window.Firebug =
 
     registerTool: function(tool)
     {
-        FBTrace.sysout("tool", tool)
         if (tool.toolName)
             tools[tool.toolName] = tool;
     },

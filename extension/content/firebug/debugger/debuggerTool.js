@@ -15,7 +15,7 @@ function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit) {
 // ********************************************************************************************* //
 // Debugger Tool
 
-var DebuggerTool = Obj.extend(Firebug.Module,
+var DebuggerTool = Obj.extend(new Firebug.EventSource(),
 {
     dispatchName: "JSD2.DebuggerTool",
 
@@ -62,10 +62,16 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         FBTrace.sysout("setBreakpoint " + url + ", " + lineNumber);
 
+        var self = this;
+        function callback(response, bpClient)
+        {
+            self.dispatch("onBreakpointSet", [response, bpClient]);
+        }
+
         context.debuggerClient.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
-        });
+        }, callback);
     },
 
     clearBreakpoint: function(context, url, lineNumber)
@@ -98,7 +104,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(DebuggerTool);
 Firebug.registerTool(DebuggerTool);
 
 return DebuggerTool;

@@ -5,8 +5,9 @@ define([
     "firebug/lib/options",
     "firebug/debugger/sourceFile",
     "firebug/debugger/debugProtocolTypes",
+    "firebug/debugger/breakpointClient",
 ],
-function (Obj, Options, SourceFile, DebugProtocolTypes) {
+function (Obj, Options, SourceFile, DebugProtocolTypes, BreakpointClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -18,9 +19,9 @@ Cu["import"]("resource:///modules/devtools/dbg-server.jsm");
 
 // ********************************************************************************************* //
 
-function ThreadClient(client, actor)
+function ThreadClient(connection, actor)
 {
-    this.client = client;
+    this.connection = connection;
     this.actor = actor;
     this.frameCache = [];
     this.scriptCache = {};
@@ -29,8 +30,6 @@ function ThreadClient(client, actor)
 ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 {
     state: "paused",
-    get paused() { return this.state === "paused"; },
-
     actor: null,
     pauseOnExceptions: false,
 
@@ -41,7 +40,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
     assertPaused: function DebuggerClientassertPaused(command)
     {
-        if (!this.paused)
+        if (!this.isPaused())
             throw Error(command + " command sent while not paused.");
     },
 
@@ -71,18 +70,18 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
             pauseOnExceptions: this.pauseOnExceptions
         };
 
-        this.client.request(packet, function(aResponse)
+        this.connection.request(packet, function(response)
         {
             self.state = "running";
 
-            if (aResponse.error)
+            if (response.error)
             {
                 // There was an error resuming, back to paused state.
                 self.state = "paused";
             }
 
             if (onResponse)
-                onResponse(aResponse);
+                onResponse(response);
         });
     },
 
@@ -127,11 +126,21 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     interrupt: function DebuggerClient_interrupt(onResponse)
     {
-        var packet = { to: this.actor, type: DebugProtocolTypes.interrupt };
-        this.client.request(packet, function(aResponse)
+        var packet = {
+            to: this.actor,
+            type: DebugProtocolTypes.interrupt
+        };
+
+        var self = this;
+        this.connection.request(packet, function(response)
         {
+            FBTrace.sysout("threadClient.interrupt; interrupted ", response);
+
+            if (!response.error)
+                self.state = "paused";
+
             if (onResponse)
-                onResponse(aResponse);
+                onResponse(response);
         });
     },
 
@@ -150,14 +159,14 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         // If the debuggee is paused, the value of the flag will be communicated in
         // the next resumption. Otherwise we have to force a pause in order to send
         // the flag.
-        if (!this.paused)
+        if (!this.isPaused())
         {
-            this.interrupt(function(aResponse)
+            this.interrupt(function(response)
             {
-                if (aResponse.error)
+                if (response.error)
                 {
                     // Can't continue if pausing failed.
-                    onResponse(aResponse);
+                    onResponse(response);
                     return;
                 }
                 this.resume(onResponse);
@@ -189,16 +198,16 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var request = { to: this.actor, type: DebugProtocolTypes.clientEvaluate,
             frame: aFrame, expression: aExpression };
 
-        this.client.request(request, function(aResponse)
+        this.connection.request(request, function(response)
         {
-            if (aResponse.error)
+            if (response.error)
             {
                 // There was an error resuming, back to paused state.
                 self.state = "paused";
             }
 
             if (onResponse)
-                onResponse(aResponse);
+                onResponse(response);
         });
     },
 
@@ -213,7 +222,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         var packet = { to: this.actor, type: DebugProtocolTypes.detach };
 
-        this.client.request(packet, function(aResponse)
+        this.connection.request(packet, function(response)
         {
             //if (self.activeThread === self._client._threadClients[self._actor])
                 delete self.activeThread;
@@ -221,47 +230,45 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
             //delete self._client._threadClients[self._actor];
 
             if (onResponse)
-                onResponse(aResponse);
+                onResponse(response);
         });
     },
 
     /**
      * Request to set a breakpoint in the specified location.
      *
-     * @param object aLocation
+     * @param object location
      *        The source location object where the breakpoint will be set.
      * @param function onResponse
      *        Called with the thread's response.
      */
-    setBreakpoint: function DebuggerClient_setBreakpoint(aLocation, onResponse)
+    setBreakpoint: function DebuggerClient_setBreakpoint(location, onResponse)
     {
-        FBTrace.sysout("ThreadClient.setBreakpoint; state: " + this.state);
-
         // A helper function that sets the breakpoint.
-        var doSetBreakpoint = function _doSetBreakpoint(aCallback)
+        var doSetBreakpoint = function _doSetBreakpoint(callback)
         {
-            var packet = { to: this.actor, type: DebugProtocolTypes.setBreakpoint,
-                location: aLocation };
+            var packet = {
+                to: this.actor,
+                type: DebugProtocolTypes.setBreakpoint,
+                location: location
+            };
 
-            this.client.request(packet, function (aResponse)
+            this.connection.request(packet, function(response)
             {
                 // Ignoring errors, since the user may be setting a breakpoint in a
                 // dead script that will reappear on a page reload.
                 if (onResponse)
                 {
-                    var bpClient = new BreakpointClient(this.client, aResponse.actor,
-                        aLocation);
+                    var bpClient = new BreakpointClient(this.connection, response.actor,
+                        location);
 
-                    if (aCallback)
-                        aCallback(onResponse(aResponse, bpClient));
+                    if (callback)
+                        callback(onResponse(response, bpClient));
                     else
-                        onResponse(aResponse, bpClient);
+                        onResponse(response, bpClient);
                 }
             }.bind(this));
         }.bind(this);
-
-        FBTrace.sysout("ThreadClient.setBreakpoint; state: " + this.state +
-            ", paused: " + this.paused + ", isPaused: " + this.isPaused());
 
         // If the debuggee is paused, just set the breakpoint.
         if (this.isPaused())
@@ -271,12 +278,12 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         // Otherwise, force a pause in order to set the breakpoint.
-        this.interrupt(function(aResponse)
+        this.interrupt(function(response)
         {
-            if (aResponse.error)
+            if (response.error)
             {
                 // Can't set the breakpoint if pausing failed.
-                onResponse(aResponse);
+                onResponse(response);
                 return;
             }
 
@@ -293,7 +300,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     getScripts: function DebuggerClient_getScripts(onResponse)
     {
         var packet = { to: this.actor, type: DebugProtocolTypes.scripts };
-        this.client.request(packet, onResponse);
+        this.connection.request(packet, onResponse);
     },
 
     /**
@@ -301,7 +308,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      * scriptscleared event to keep up to date on changes to this cache,
      * and can fill it using the fillScripts method.
      */
-    get cachedScripts()
+    getCachedScripts: function()
     {
         return this.scriptCache;
     },
@@ -364,7 +371,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var packet = { to: this.actor, type: DebugProtocolTypes.frames,
             start: start, count: count ? count : undefined };
 
-        this.client.request(packet, onResponse);
+        this.connection.request(packet, onResponse);
     },
 
     /**
@@ -372,7 +379,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      * framescleared event to keep up to date on changes to this cache,
      * and can fill it using the fillFrames method.
      */
-    get cachedFrames()
+    getCachedFrames: function()
     {
         return this.frameCache;
     },
@@ -380,9 +387,9 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     /**
      * true if there are more stack frames available on the server.
      */
-    get moreFrames()
+    getMoreFrames: function()
     {
-        return this.paused && (!this.frameCache || this.frameCache.length == 0
+        return this.isPaused() && (!this.frameCache || this.frameCache.length == 0
           || !this.frameCache[this.frameCache.length - 1].oldest);
     },
 
@@ -406,9 +413,9 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var numFrames = this.frameCache.length;
 
         var self = this;
-        this.getFrames(numFrames, total - numFrames, function(aResponse)
+        this.getFrames(numFrames, total - numFrames, function(response)
         {
-            for each (var frame in aResponse.frames)
+            for each (var frame in response.frames)
                 self.frameCache[frame.depth] = frame;
 
             // If we got as many frames as we asked for, there might be more
@@ -446,7 +453,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         if (aGrip.actor in this.pauseGrips)
             return this.pauseGrips[aGrip.actor];
 
-        var client = new GripClient(this.client, aGrip);
+        var client = new GripClient(this.connection, aGrip);
         this.pauseGrips[aGrip.actor] = client;
         return client;
     },
@@ -471,7 +478,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         this.state = ThreadStateTypes[aPacket.type];
         this.clearFrames();
         this.clearPauseGrips();
-        this.client.eventsEnabled && this.notify(aPacket.type, aPacket);
+        this.connection.eventsEnabled && this.notify(aPacket.type, aPacket);
     },
 });
 

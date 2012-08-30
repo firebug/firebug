@@ -10,11 +10,10 @@ define([
     "firebug/lib/persist",
     "firebug/debugger/sourceFileRenamer",
     "firebug/debugger/breakpoint",
-    "firebug/debugger/breakpointReps",
-    "firebug/debugger/breakpointNotification",
+    "firebug/debugger/breakpointStore",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, StackFrame, Persist, SourceFileRenamer,
-    Breakpoint) {
+    Breakpoint, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -36,6 +35,10 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     order: 2,
     enableA11y: true,
     deriveA11yFrom: "console",
+    remotable: true,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -82,9 +85,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var monitors = extracted.monitors;
 
         if (FBTrace.DBG_BP)
+        {
             FBTrace.sysout("breakpoints.refresh extracted " +
-                breakpoints.length+errorBreakpoints.length+monitors.length,
+                breakpoints.length + errorBreakpoints.length + monitors.length,
                 [breakpoints, errorBreakpoints, monitors]);
+        }
 
         function sortBreakpoints(a, b)
         {
@@ -99,8 +104,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         monitors.sort(sortBreakpoints);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoints.refresh sorted "+breakpoints.length+
-                errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+        {
+            FBTrace.sysout("breakpoints.refresh sorted " + breakpoints.length +
+                errorBreakpoints.length + monitors.length,
+                [breakpoints, errorBreakpoints, monitors]);
+        }
 
         var groups = [];
 
@@ -126,7 +134,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                     this.groupOpened[groups[i].name] : true;
             }
 
-            Firebug.JSD2.Breakpoint.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);
+            Firebug.JSD2.Breakpoint.BreakpointListRep.tag.replace(
+                {groups: groups}, this.panelNode);
         }
         else
         {
@@ -135,8 +144,9 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (FBTrace.DBG_BP)
         {
-            FBTrace.sysout("breakpoints.refresh "+breakpoints.length+
-                errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+            FBTrace.sysout("breakpoints.refresh " + breakpoints.length +
+                errorBreakpoints.length + monitors.length,
+                [breakpoints, errorBreakpoints, monitors]);
         }
 
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
@@ -151,16 +161,16 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var renamer = new SourceFileRenamer(context);
         var self = this;
 
-        // xxxHonza use DebuggerClient to get all breapoints:
-        return null;
-
-        for (var url in context.sourceFileMap)
+        for (var url in context.compilationUnits)
         {
-            FBS.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
+            BreakpointStore.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
             {
                 if (FBTrace.DBG_BP)
-                    FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+
-                        url+"@"+line+" context "+context.getName(), props);
+                {
+                    FBTrace.sysout("breakpoints.extractBreakpoints type: " + props.type +
+                        " in url " + url + "@" + line + " context " + context.getName(),
+                        props);
+                }
 
                 // some url in this sourceFileMap has changed, we'll be back.
                 if (renamer.checkForRename(url, line, props))
@@ -170,10 +180,13 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     var script = scripts[0];
                     var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
+
                     if (FBTrace.DBG_BP)
-                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script="+
-                            script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+
-                            context.getName());
+                    {
+                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script=" +
+                            script.tag + (analyzer ? " has analyzer" : " no analyzer") +
+                            " in context " + context.getName());
+                    }
 
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
@@ -185,17 +198,20 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                 else
                 {
                     if (FBTrace.DBG_BP)
-                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+
-                            url+"@"+line+"\n");
+                    {
+                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future " +
+                            "for url@line=" + url + "@" + line);
+                    }
 
                     var isFuture = true;
                 }
 
                 var source = context.sourceCache.getLine(url, line);
-                breakpoints.push(new Breakpoint(name, url, line, !props.disabled, source, isFuture));
+                breakpoints.push(new Breakpoint(name, url, line, !props.disabled,
+                    source, isFuture));
             }});
 
-            FBS.enumerateErrorBreakpoints(url, {call: function(url, line, props)
+            BreakpointStore.enumerateErrorBreakpoints(url, {call: function(url, line, props)
             {
                 // some url in this sourceFileMap has changed, we'll be back.
                 if (renamer.checkForRename(url, line, props))
@@ -206,7 +222,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                 errorBreakpoints.push(new Breakpoint(name, url, line, true, source));
             }});
 
-            FBS.enumerateMonitors(url, {call: function(url, line, props)
+            BreakpointStore.enumerateMonitors(url, {call: function(url, line, props)
             {
                 // some url in this sourceFileMap has changed, we'll be back.
                 if (renamer.checkForRename(url, line, props))
@@ -235,8 +251,10 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         // even if we did not rename, some bp may be dynamic
         if (FBTrace.DBG_SOURCEFILES)
+        {
             FBTrace.sysout("breakpoints.extractBreakpoints context.dynamicURLhasBP: "+
                 context.dynamicURLhasBP, result);
+        }
 
         return result;
     },
@@ -246,9 +264,10 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var items = [];
 
         var context = this.context;
-
-        var bpCount = 0, disabledCount = 0;
+        var bpCount = 0;
+        var disabledCount = 0;
         var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
+
         for (var i=0; i<checkBoxes.length; i++)
         {
             ++bpCount;
@@ -258,34 +277,28 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (disabledCount)
         {
-            items.push(
-                {
-                    label: "EnableAllBreakpoints",
-                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true),
-                    tooltiptext: "breakpoints.option.tip.Enable_All_Breakpoints"
-                }
-            );
-        }
-        if (bpCount && disabledCount != bpCount)
-        {
-            items.push(
-                {
-                    label: "DisableAllBreakpoints",
-                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false),
-                    tooltiptext: "breakpoints.option.tip.Disable_All_Breakpoints"
-                }
-            );
+            items.push({
+                label: "EnableAllBreakpoints",
+                command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true),
+                tooltiptext: "breakpoints.option.tip.Enable_All_Breakpoints"
+            });
         }
 
-        items.push(
-            "-",
-            {
-                label: "ClearAllBreakpoints",
-                disabled: !bpCount,
-                command: Obj.bindFixed(this.clearAllBreakpoints, this, context),
-                tooltiptext: "breakpoints.option.tip.Clear_All_Breakpoints"
-            }
-        );
+        if (bpCount && disabledCount != bpCount)
+        {
+            items.push({
+                label: "DisableAllBreakpoints",
+                command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false),
+                tooltiptext: "breakpoints.option.tip.Disable_All_Breakpoints"
+            });
+        }
+
+        items.push("-", {
+            label: "ClearAllBreakpoints",
+            disabled: !bpCount,
+            command: Obj.bindFixed(this.clearAllBreakpoints, this, context),
+            tooltiptext: "breakpoints.option.tip.Clear_All_Breakpoints"
+        });
 
         return items;
     },
