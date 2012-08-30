@@ -106,6 +106,83 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Search
+    search: function(text, reverse)
+    {
+        var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
+        if (!curDoc && Firebug.searchGlobal)
+        {
+            return this.searchOtherDocs(text, reverse) ||
+                this.searchCurrentDoc(true, text, reverse);
+        }
+        return curDoc;
+    },
+
+    searchOtherDocs: function(text, reverse)
+    {
+        var scanRE = Firebug.Search.getTestingRegex(text);
+
+        var self = this;
+
+        function scanDoc(compilationUnit)
+        {
+            var lines = null;
+
+            // TODO The source lines arrive asynchronous in general
+            compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber,
+                lastLineNumber, linesRead)
+            {
+                lines = linesRead;
+            });
+
+            if (!lines)
+                return;
+
+            // We don't care about reverse here as we are just looking for existence.
+            // If we do have a result, we will handle the reverse logic on display.
+            for (var i = 0; i < lines.length; i++)
+            {
+                if (scanRE.test(lines[i]))
+                    return true;
+            }
+        }
+
+        if (this.dispatch("onNavigateToNextDocument", [scanDoc, reverse]))
+            return this.searchCurrentDoc(true, text, reverse) && "wraparound";
+    },
+
+    searchCurrentDoc: function(wrapSearch, text, reverse)
+    {
+        var options =
+        {
+            ignoreCase: !Firebug.Search.isCaseSensitive(text),
+            backwards: reverse
+        };
+
+        if (this.currentSearch && text == this.currentSearch.text)
+        {
+            options.start = this.currentSearch.start;
+            if (reverse)
+                options.start -= text.length + 1;
+        }
+        else
+        {
+            this.currentSearch = {text: text, start: 0};
+        }
+
+        var offset = this.editor.find(text, options);
+        FBTrace.sysout("search", {options: options, offset: offset});
+        if (offset != -1)
+        {
+            this.editor.setSelection(offset, offset + text.length);
+            this.currentSearch.start = offset + text.length;
+            return true;
+        }
+
+        return false;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     onBreakpointChange: function(event)
