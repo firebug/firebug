@@ -424,7 +424,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
             // If we got as many frames as we asked for, there might be more
             // frames available.
-            self.notify("framesadded");
+            self.dispatch("framesadded");
         });
 
         return true;
@@ -477,15 +477,16 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      * Handle thread state change by doing necessary cleanup and notifying all
      * registered listeners.
      */
-    onThreadState: function DebuggerClient_onThreadState(aPacket)
+    onThreadState: function DebuggerClient_onThreadState(packet)
     {
-        FBTrace.sysout("onThreadState");
+        FBTrace.sysout("threadClient.onThreadState; type: " + packet.type, packet);
 
-        this.state = RDP.ThreadStateTypes[aPacket.type];
+        this.state = RDP.ThreadStateTypes[packet.type];
         this.clearFrames();
         this.clearPauseGrips();
 
-        //this.connection.eventsEnabled && this.notify(aPacket.type, aPacket);
+        if (this.connection.eventsEnabled)
+            this.dispatch(packet.type, [this.debuggerClient.context, packet]);
     },
 });
 

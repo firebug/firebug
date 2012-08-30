@@ -36,10 +36,14 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
+        var self = this;
+
         // Attach the debugger.
-        context.debuggerClient = new DebuggerClient(connection);
-        context.debuggerClient.attach(function()
+        context.debuggerClient = new DebuggerClient(context, connection);
+        context.debuggerClient.attach(function(activeThread)
         {
+            activeThread.addListener(self);
+
             FBTrace.sysout("DebuggerTool.onConnect; Debugger attached");
         });
     },
@@ -48,9 +52,11 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     {
         if (context.debuggerClient)
         {
-            context.debuggerClient.detach(function()
+            context.debuggerClient.detach(function(activeThread)
             {
-                FBTrace.sysout("ScriptPanel.destroy; Debugger detached");
+                activeThread.removeListener(this);
+
+                FBTrace.sysout("DebuggerTool.onDisconnect; Debugger detached");
             });
         }
     },
@@ -58,17 +64,9 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
-    setBreakpoint: function(context, url, lineNumber)
+    setBreakpoint: function(context, url, lineNumber, callback)
     {
-        FBTrace.sysout("setBreakpoint " + url + ", " + lineNumber);
-
-        var self = this;
-        function callback(response, bpClient)
-        {
-            self.dispatch("onBreakpointSet", [response, bpClient]);
-        }
-
-        context.debuggerClient.activeThread.setBreakpoint({
+        return context.debuggerClient.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
         }, callback);
@@ -99,6 +97,49 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     {
         //return JSDebugger.fbs.getBreakpointCondition(url, lineNumber);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debugging
+
+    rerun: function(context)
+    {
+    },
+
+    resume: function(contex, callback)
+    {
+        return context.debuggerClient.activeThread.resume(callback);
+    },
+
+    stepOver: function(context, callback)
+    {
+        return context.debuggerClient.activeThread.stepOver(callback);
+    },
+
+    stepInto: function(context, callback)
+    {
+        return context.debuggerClient.activeThread.stepIn(callback);
+    },
+
+    stepOut: function(context, callback)
+    {
+        return context.debuggerClient.activeThread.stepOut(callback);
+    },
+
+    runUntil: function(context, compilationUnit, lineNumber, callback)
+    {
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Thread Listener
+
+    paused: function(context, packet)
+    {
+        FBTrace.sysout("debuggerTool.paused; why: " + packet.why.type, packet);
+
+        // @hack: shouldn't be only for breakpoints
+        if (packet.why.type == "breakpoint")
+            this.dispatch("onStartDebugging", [context, packet.frame]);
+    }
 });
 
 // ********************************************************************************************* //

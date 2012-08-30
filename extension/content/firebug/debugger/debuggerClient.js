@@ -21,8 +21,9 @@ Cu["import"]("resource:///modules/devtools/dbg-server.jsm");
 // ********************************************************************************************* //
 // Debugger Client
 
-function DebuggerClient(connection)
+function DebuggerClient(context, connection)
 {
+    this.context = context;
     this.connection = connection;
 
     this.threadClients = {};
@@ -61,7 +62,7 @@ DebuggerClient.prototype = Obj.extend(Object,
         this.connection.listTabs(function(response)
         {
             var tab = response.tabs[response.selected];
-            self.startDebugging(tab);
+            self.startDebugging(tab, callback);
         });
     },
 
@@ -81,11 +82,13 @@ DebuggerClient.prototype = Obj.extend(Object,
         this.connection.removeListener("paused", this.onPausedListener);
 
         var self = this;
-        this.activeThread.detach(function()
+        var activeThread = this.activeThread;
+
+        activeThread.detach(function()
         {
             self.connection.detachTab(function()
             {
-                callback();
+                callback(activeThread);
             });
         });
     },
@@ -118,7 +121,7 @@ DebuggerClient.prototype = Obj.extend(Object,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    startDebugging: function(tabGrip)
+    startDebugging: function(tabGrip, callback)
     {
         this.connection.attachTab(tabGrip.actor, function(response, tabActor)
         {
@@ -140,13 +143,14 @@ DebuggerClient.prototype = Obj.extend(Object,
 
                 this.activeThread = threadClient;
 
-                this.scripts = new SourceScripts(this.connection,this.activeThread);
-
-                // Connect script manager and resume remote thread.
+                // Connect script manager
+                this.scripts = new SourceScripts(this.connection, this.activeThread);
                 this.scripts.connect();
+
+                // Resume remote thread.
                 this.activeThread.resume();
 
-                FBTrace.sysout("debuggerClient.startDebugging; ", this);
+                callback(threadClient);
 
             }.bind(this));
         }.bind(this));
@@ -172,10 +176,12 @@ DebuggerClient.prototype = Obj.extend(Object,
             onResponse(response, threadClient);
         });
     },
-
 });
 
 // ********************************************************************************************* //
+// Source Scripts
+
+//xxxHonza: This entire object should be refactored.
 
 /**
  * Keeps the source script list up-to-date, using the thread client's
