@@ -424,7 +424,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
             // If we got as many frames as we asked for, there might be more
             // frames available.
-            self.dispatch("framesadded");
+            self.dispatch("framesadded", [self.debuggerClient.context, self.frameCache]);
         });
 
         return true;
@@ -439,7 +439,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         if (this.frameCache.length > 0)
         {
             this.frameCache = [];
-            this.notify("framescleared");
+            this.dispatch(this.debuggerClient.context, "framescleared");
         }
     },
 

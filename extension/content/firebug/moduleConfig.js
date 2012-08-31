@@ -62,16 +62,12 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/cookies/cookieModule",
         "firebug/cookies/cookiePanel",
 
-        // Remoting & JSD2
-        "firebug/debugger/debugger",
-        "firebug/debugger/scriptPanel",
+        // Remoting
         "firebug/remoting/connectionMenu",
         "firebug/remoting/tabListMenu",
-        "firebug/debugger/breakpointModule",
-        "firebug/debugger/breakpointPanel",
-        "firebug/debugger/debuggerTool",
-        "firebug/debugger/breakpointStore",
-        "firebug/debugger/breakpointReps",
+
+        // JSD2
+        "firebug/debugger/main",
     ];
 
     return config;

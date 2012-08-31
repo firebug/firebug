@@ -4,9 +4,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/debugger/sourceFile",
-    "firebug/debugger/debugProtocolTypes",
+    "firebug/debugger/rdp",
 ],
-function (Obj, Options, SourceFile, DebugProtocolTypes) {
+function (Obj, Options, SourceFile, RDP) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -36,7 +36,7 @@ BreakpointClient.prototype =
     {
         var packet = {
             to: this.actor,
-            type: DebugProtocolTypes["delete"]
+            type: RDP.DebugProtocolTypes["delete"]
         };
 
         this.client.request(packet, function(response)

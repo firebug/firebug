@@ -1,13 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
-    "firebug/lib/options",
-    "firebug/debugger/sourceFile",
-    "firebug/debugger/debugProtocolTypes",
-    "firebug/debugger/breakpointClient",
+    "firebug/lib/trace",
 ],
-function (Obj, Options, SourceFile, DebugProtocolTypes, BreakpointClient) {
+function (FBTrace) {
 
 // ********************************************************************************************* //
 // Remote Debugging Protocol Types

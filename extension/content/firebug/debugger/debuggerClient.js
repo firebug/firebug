@@ -100,11 +100,13 @@ DebuggerClient.prototype = Obj.extend(Object,
     {
         FBTrace.sysout("debuggerClient.onTabNavigated;");
 
-        var self = this;
+        // xxxHonza: for local debugging we have TabWatcher
+        // for remote debugging tab-navitated shoud be handler by TabClient
+        /*var self = this;
         this.detach(function()
         {
             self.attach();
-        });
+        });*/
     },
 
     onTabDetached: function()

@@ -8,9 +8,11 @@ define([
     "firebug/firebug",
     "firebug/lib/tool",
     "firebug/debugger/debuggerClient",
-    "arch/compilationunit"
+    "arch/compilationunit",
+    "firebug/debugger/stackFrame",
+    "firebug/debugger/stackTrace",
 ],
-function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit) {
+function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit, StackFrame, StackTrace) {
 
 // ********************************************************************************************* //
 // Debugger Tool
@@ -24,17 +26,12 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    onConnect: function(context, connection)
+    attach: function(context, connection, listener)
     {
-        if (FBTrace.DBG_BTI)
-            FBTrace.sysout("bti.DebuggerTool.onConnect;");
+        this.addListener(listener);
 
         if (context.debuggerClient)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("bti.DebuggerTool; ERROR debugger tool already registered");
             return;
-        }
 
         var self = this;
 
@@ -43,22 +40,20 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
         context.debuggerClient.attach(function(activeThread)
         {
             activeThread.addListener(self);
-
-            FBTrace.sysout("DebuggerTool.onConnect; Debugger attached");
         });
     },
 
-    onDisconnect: function(context, connection)
+    detach: function(context, connection, listener)
     {
-        if (context.debuggerClient)
-        {
-            context.debuggerClient.detach(function(activeThread)
-            {
-                activeThread.removeListener(this);
+        this.removeListener(listener);
 
-                FBTrace.sysout("DebuggerTool.onDisconnect; Debugger detached");
-            });
-        }
+        if (!context.debuggerClient)
+            return;
+
+        context.debuggerClient.detach(function(activeThread)
+        {
+            activeThread.removeListener(this);
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -130,6 +125,13 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stack Trace
+
+    getCurrentFrame: function(context)
+    {
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Thread Listener
 
     paused: function(context, packet)
@@ -138,7 +140,22 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
 
         // @hack: shouldn't be only for breakpoints
         if (packet.why.type == "breakpoint")
-            this.dispatch("onStartDebugging", [context, packet.frame]);
+        {
+            context.debuggerClient.activeThread.fillFrames(50);
+
+            var frame = StackFrame.buildStackFrame(packet.frame, context);
+            this.dispatch("onStartDebugging", [frame]);
+        }
+    },
+
+    framesadded: function(context, frames)
+    {
+        var stackTrace = StackTrace.buildStackTrace(frames, context);
+        this.dispatch("onStackCreated", [stackTrace]);
+    },
+
+    framescleared: function()
+    {
     }
 });
 

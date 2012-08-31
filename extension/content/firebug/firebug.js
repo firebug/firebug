@@ -1232,12 +1232,13 @@ window.Firebug =
             }
             catch (exc)
             {
-                if (FBTrace.DBG_ERRORS)
+                // xxxHonza: should not be hidden, but there is so much of these logs...
+                /*if (FBTrace.DBG_ERRORS)
                 {
                     FBTrace.sysout("firebug.getRep FAILS: "+ exc, exc);
                     FBTrace.sysout("firebug.getRep reps["+i+"/"+reps.length+"]: "+
                         (typeof(reps[i])), reps[i]);
-                }
+                }*/
             }
         }
 

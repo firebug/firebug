@@ -54,6 +54,27 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Connection
+
+    onConnect: function(proxy)
+    {
+        FBTrace.sysout("BreakpointPanel.onConnect;");
+
+        this.tool = this.context.getTool("debugger");
+        this.tool.attach(this.context, proxy.connection, this);
+    },
+
+    onDisconnect: function(proxy)
+    {
+        FBTrace.sysout("BreakpointPanel.onDisconnect;");
+
+        // Detach from the current tool.
+        this.tool.detach(this.context, proxy.connection, this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     show: function(state)
     {
         if (this.context.loaded)
@@ -353,7 +374,15 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         event.initMouseEvent("click", true, true, doc.defaultView, 0, 0, 0, 0, 0,
             false, false, false, false, 0, null);
         return node.dispatchEvent(event);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Tool Listener
+
+    onStartDebugging: function(frame)
+    {
+        FBTrace.sysout("breakpointPanel.onStartDebugging;");
+    },
 });
 
 // ********************************************************************************************* //

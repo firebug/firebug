@@ -8,18 +8,22 @@ define([
     "arch/compilationunit",
     "firebug/debugger/debuggerTool",
     "firebug/chrome/menu",
+    "firebug/debugger/stackFrame",
+    "firebug/debugger/sourceLink",
 ],
-function (Obj, Locale, Events, ScriptView, CompilationUnit, DebuggerTool, Menu) {
+function (Obj, Locale, Events, ScriptView, CompilationUnit, DebuggerTool, Menu,
+    StackFrame, SourceLink) {
 
 // ********************************************************************************************* //
 // Script panel
 
-Firebug.JSD2.ScriptPanel = function()
-{
-}
-
+/**
+ * @Panel
+ */
+function ScriptPanel() {}
 var BasePanel = Firebug.ActivablePanel;
-Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
+ScriptPanel.prototype = Obj.extend(BasePanel,
+/** @lends ScriptPanel */
 {
     dispatchName: "JSD2.ScriptPanel",
 
@@ -73,24 +77,15 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         // Depending on the current tool the communication can be local or remote.
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
         this.tool = this.context.getTool("debugger");
-        this.tool.addListener(this);
-
-        //xxxHonza: This should be done by the context
-        this.tool.onConnect(this.context, proxy.connection);
+        this.tool.attach(this.context, proxy.connection, this);
     },
 
     onDisconnect: function(proxy)
     {
         FBTrace.sysout("JSD2ScriptPanel.onDisconnect;");
 
-        if (this.tool)
-        {
-            this.tool.removeListener(this);
-
-            //xxxHonza: This should be done by the context
-            this.tool.onDisconnect(this.context, proxy.connection);
-            this.tool = null;
-        }
+        // Detach from the current tool.
+        this.tool.detach(this.context, proxy.connection, this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -492,8 +487,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
 
     resume: function(context)
     {
-        FBTrace.sysout("resume")
-        this.tool.resumeJavaScript(context);
+        this.tool.resume(context);
     },
 
     stepOver: function(context)
@@ -517,17 +511,33 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    supportsObject: function(object, type)
+    {
+        if (object instanceof CompilationUnit
+            || (object instanceof SourceLink.SourceLink && object.type == "js")
+            || typeof(object) == "function"
+            || object instanceof StackFrame.StackFrame)
+        {
+            // Higher priority than the DOM panel.
+            return 2;
+        }
+
+        return 0;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tool Listener
 
     onStartDebugging: function(frame)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.startDebugging enter context: " + this.context.getName());
+            FBTrace.sysout("script.startDebugging enter context: " + this.context.getName(), frame);
 
         try
         {
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn",
-                "breakable");
+            var currentBreakable = Firebug.chrome.getGlobalAttribute(
+                "cmd_firebug_toggleBreakOn", "breakable");
 
             if (FBTrace.DBG_BP)
             {
@@ -548,12 +558,12 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
             this.syncListeners(this.context);
 
             // Update Break on Next lightning
-            Firebug.Breakpoint.updatePanelTab(this, false);
-            Firebug.chrome.select(frame, "script", null, true);
-            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
+            //Firebug.Breakpoint.updatePanelTab(this, false);
+            Firebug.chrome.select(frame, "jsd2script", null, true);
+            Firebug.chrome.syncPanel("jsd2script");  // issue 3463 and 4213
             Firebug.chrome.focus();
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
@@ -574,7 +584,7 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
 
-        try
+        /*try
         {
             var chrome = Firebug.chrome;
 
@@ -599,16 +609,16 @@ Firebug.JSD2.ScriptPanel.prototype = Obj.extend(BasePanel,
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
             Debug.ERROR(exc);
-        }
+        }*/
     },
 });
 
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.JSD2.ScriptPanel);
+Firebug.registerPanel(ScriptPanel);
 
-return Firebug.JSD2.ScriptPanel;
+return ScriptPanel;
 
 // ********************************************************************************************* //
 });
