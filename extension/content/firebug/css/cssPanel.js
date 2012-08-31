@@ -1231,6 +1231,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         {
                             label: Locale.$STRF("DeleteProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
+                            id: "fbDeleteCSSProp",
                             nol10n: true,
                             command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
                         },
