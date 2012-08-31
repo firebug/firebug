@@ -256,11 +256,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 if (!isPseudoElementSheet)
                     this.markOverriddenProps(element, props, usedProps, inheritMode);
 
-                var ruleId = this.getRuleId(rule);
-                rules.unshift({rule: rule, id: ruleId,
-                    // Show universal selectors with pseudo-class
-                    // (http://code.google.com/p/fbug/issues/detail?id=3683)
-                    selector: rule.selectorText.replace(/ :/g, " *:"),
+                rules.unshift({
+                    rule: rule,
+                    selector: rule.selectorText.replace(/ :/g, " *:"), // (issue 3683)
                     sourceLink: sourceLink,
                     props: props, inherited: inheritMode,
                     isSystemSheet: isSystemSheet,
@@ -442,7 +440,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
         var props = this.parseCSSProps(element.style, inheritMode);
-        this.addOldProperties(this.context, Xpath.getElementXPath(element), inheritMode, props);
+        this.addDisabledProperties(this.context, element, inheritMode, props);
 
         this.sortProperties(props);
 
@@ -450,8 +448,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         if (props.length)
         {
-            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
-                    selector: "element.style", props: props, inherited: inheritMode});
+            rules.unshift({rule: element, selector: "element.style",
+                props: props, inherited: inheritMode});
         }
     },
 
