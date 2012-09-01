@@ -40,6 +40,9 @@
 
         <!-- Context menu for the Command Editor -->
         <menupopup id="fbCommandEditorPopup" />
+
+        <!-- Context menu for the Script View -->
+        <menupopup id="fbScriptViewPopup" />
     </popupset>
 
     <!-- Main UI -->

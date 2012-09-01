@@ -6,8 +6,10 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/dom",
+    "firebug/chrome/menu",
 ],
-function (FBTrace, Obj) {
+function (FBTrace, Obj, Dom, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -103,7 +105,22 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onContextMenu: function(event)
     {
-        FBTrace.sysout("scriptView.onContextMenu", event);
+        var popup = document.getElementById("fbScriptViewPopup");
+        Dom.eraseNode(popup);
+
+        var browserWindow = Firebug.chrome.window;
+        var commandDispatcher = browserWindow.document.commandDispatcher;
+
+        var items = [];
+        this.dispatch("onContextMenu", [items]);
+
+        for (var i=0; i<items.length; i++)
+            Menu.createMenuItem(popup, items[i]);
+
+        if (!popup.childNodes.length)
+            return;
+
+        popup.openPopupAtScreen(event.screenX, event.screenY, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -199,6 +216,16 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         event.removed.forEach(function(bp) {
             this.dispatch("onBreakpointRemove", [bp]);
         }, this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Highlight Line
+
+    scrollToLine: function(href, lineNo, highlighter)
+    {
+        FBTrace.sysout("scriptView.scrollToLine; line: " + lineNo);
+
+        this.editor.setDebugLocation(lineNo - 1);
     },
 });
 

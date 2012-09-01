@@ -17,11 +17,37 @@ function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit, StackFrame, Stack
 // ********************************************************************************************* //
 // Debugger Tool
 
-var DebuggerTool = Obj.extend(new Firebug.EventSource(),
+var DebuggerTool = Obj.extend(Firebug.Module,
 {
     dispatchName: "JSD2.DebuggerTool",
 
     toolName: "debugger",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+
+        var chrome = Firebug.chrome;
+
+        // Hook XUL stepping buttons.
+        chrome.setGlobalAttribute("cmd_firebug_rerun", "oncommand",
+            "Firebug.DebuggerTool.rerun(Firebug.currentContext)");
+
+        chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "oncommand",
+            "Firebug.DebuggerTool.resume(Firebug.currentContext)");
+
+        chrome.setGlobalAttribute("cmd_firebug_stepOver", "oncommand",
+            "Firebug.DebuggerTool.stepOver(Firebug.currentContext)");
+
+        chrome.setGlobalAttribute("cmd_firebug_stepInto", "oncommand",
+            "Firebug.DebuggerTool.stepInto(Firebug.currentContext)");
+
+        chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
+            "Firebug.DebuggerTool.stepOut(Firebug.currentContext)");
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
@@ -100,7 +126,7 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
     {
     },
 
-    resume: function(contex, callback)
+    resume: function(context, callback)
     {
         return context.debuggerClient.activeThread.resume(callback);
     },
@@ -139,13 +165,24 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
         FBTrace.sysout("debuggerTool.paused; why: " + packet.why.type, packet);
 
         // @hack: shouldn't be only for breakpoints
-        if (packet.why.type == "breakpoint")
+        var type = packet.why.type;
+        if (type == "breakpoint" || type == "resumeLimit")
         {
+            context.stopped = true;
             context.debuggerClient.activeThread.fillFrames(50);
 
             var frame = StackFrame.buildStackFrame(packet.frame, context);
+            context.stopped = true;
+            context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
+            context.currentFrame = frame;  // the frame we show to user, depends on selection
+
             this.dispatch("onStartDebugging", [frame]);
         }
+    },
+
+    resumed: function(context, packet)
+    {
+        FBTrace.sysout("debuggerTool.resumed; " + packet, packet);
     },
 
     framesadded: function(context, frames)
@@ -166,6 +203,10 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
 // Registration
 
 Firebug.registerTool(DebuggerTool);
+Firebug.registerModule(DebuggerTool);
+
+// Expose to XUL stepping buttons
+Firebug.DebuggerTool = DebuggerTool;
 
 return DebuggerTool;
 

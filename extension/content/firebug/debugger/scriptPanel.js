@@ -145,6 +145,96 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
     },
 
+    showStackFrame: function(frame)
+    {
+        if (this.context.stopped)
+            this.showStackFrameTrue(frame);
+        else
+            this.showNoStackFrame();
+    },
+
+    showStackFrameTrue: function(frame)
+    {
+        // Make sure the current frame seen by the user is set (issue 4818)
+        // xxxHonza: Better solution (important for remoting)
+        // Set this.context.currentFrame = frame (meaning frameXB) and pass the value of
+        // frameXB during evaluation calls, causing the backend to select the appropriate
+        // frame for frame.eval().
+        //this.context.currentFrame = frame.nativeFrame;
+
+        var url = frame.getURL();
+        var lineNo = frame.getLineNumber();
+
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("showStackFrame: " + url + "@" + lineNo);
+
+        if (this.context.breakingCause)
+            this.context.breakingCause.lineNo = lineNo;
+
+        this.scrollToLine(url, lineNo/*, this.highlightLine(lineNo, this.context)*/);
+        //this.context.throttle(this.updateInfoTip, this);
+    },
+
+    showNoStackFrame: function()
+    {
+        if (this.selectedSourceBox)
+        {
+            this.removeExeLineHighlight(this.selectedSourceBox);
+
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
+        }
+
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
+        // Clear the stack on the panel toolbar
+        panelStatus.clear();
+        this.updateInfoTip();
+
+        var watchPanel = this.context.getPanel("watches", true);
+        if (watchPanel)
+            watchPanel.showEmptyMembers();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Selection
+
+    updateSelection: function(object)
+    {
+        if (FBTrace.DBG_PANELS)
+        {
+            FBTrace.sysout("script updateSelection object:" + object + " of type " +
+                typeof(object), object);
+
+            if (object instanceof CompilationUnit)
+                FBTrace.sysout("script updateSelection this.navigate(object)", object);
+            else if (object instanceof SourceLink)
+                FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
+            else if (typeof(object) == "function")
+                FBTrace.sysout("script updateSelection this.showFunction(object)", object);
+            else if (object instanceof StackFrame)
+                FBTrace.sysout("script updateSelection this.showStackFrame(object)", object);
+            else
+                FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
+        }
+
+        if (object instanceof CompilationUnit)
+            this.navigate(object);
+        else if (object instanceof SourceLink)
+            this.showSourceLink(object);
+        else if (typeof(object) == "function")
+            this.showFunction(object);
+        else if (object instanceof StackFrame)
+            this.showStackFrame(object);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Location List
+
+    scrollToLine: function(href, lineNo, highlighter)
+    {
+        this.scriptView.scrollToLine(href, lineNo, highlighter);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Location List
 
@@ -211,7 +301,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoints
+    // ScriptView Listener
 
     onBreakpointAdd: function(bp)
     {
@@ -227,6 +317,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     onBreakpointRemove: function(bp)
     {
         FBTrace.sysout("scriptPanel.onBreakpointRemove " + bp, bp);
+    },
+
+    onContextMenu: function(items)
+    {
+        var menuItems = this.getOptionsMenuItems();
+        items.push.apply(items, menuItems);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
