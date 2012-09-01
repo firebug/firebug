@@ -386,7 +386,7 @@ Str.unescapeForTextNode = function(str)
         str = escapeForElementAttribute(str);
 
     return str;
-}
+};
 
 Str.unescapeForURL = createSimpleEscape('text', 'reverse');
 
@@ -532,17 +532,17 @@ Str.splitLines = function(text)
 Str.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g, "");
-}
+};
 
 Str.trimLeft = function(text)
 {
     return text.replace(/^\s+/, "");
-}
+};
 
 Str.trimRight = function(text)
 {
     return text.replace(/\s+$/, "");
-}
+};
 
 Str.hasPrefix = function(hay, needle)
 {
@@ -591,13 +591,13 @@ Str.wrapText = function(text, noEscapeHTML)
     }
 
     return html;
-}
+};
 
 Str.insertWrappedText = function(text, textBox, noEscapeHTML)
 {
     var html = Str.wrapText(text, noEscapeHTML);
     textBox.innerHTML = "<pre role=\"list\">" + html.join("") + "</pre>";
-}
+};
 
 // ************************************************************************************************
 // Indent
@@ -625,11 +625,10 @@ Str.cleanIndentation = function(text)
             lines[i] = line.substr(minIndent);
     }
     return lines.join("");
-}
+};
 
 // ************************************************************************************************
 // Formatting
-
 
 //deprecated compatibility functions
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
@@ -674,7 +673,7 @@ Str.formatSize = function(bytes)
         result = (Math.round((bytes/(1024*1024))*a)/a).toLocaleString() + " MB";
 
     return negative ? "-" + result : result;
-}
+};
 
 Str.formatTime = function(elapsed)
 {
@@ -692,10 +691,32 @@ Str.formatTime = function(elapsed)
         var sec = (elapsed % 60000);
         return min + "m " + (Math.round((elapsed/1000)%60)) + "s";
     }
-}
+};
 
-//********************************************************************************************* //
-//Conversions
+/**
+ * Formats an IPv4 or IPv6 address incl. port
+ * @param {String} address IP address to format
+ * @param {String} [port] IP port to format
+ * @returns {String} Formatted IP address
+ */
+Str.formatIP = function(address, port)
+{
+    if (!address || address == "")
+        return "";
+
+    var result = address;
+    var isIPv6Address = address.indexOf(":") != -1;
+    if (isIPv6Address)
+        result = "["+result+"]";
+
+    if (port && port != "")
+        result += ":"+port;
+
+    return result;
+};
+
+// ********************************************************************************************* //
+// Conversions
 
 Str.convertToUnicode = function(text, charset)
 {

@@ -159,12 +159,12 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
             $insertInto: "$rule|isEditable",
             $editGroup: "$rule|isSelectorEditable",
             _repObject: "$rule.rule",
-            "ruleId": "$rule.id", role: "presentation"},
+            role: "presentation"},
             DIV({"class": "cssHead focusRow", role: "listitem"},
                 SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"},
                     "$rule.selector"),
-                    " {"
-                ),
+                " {"
+            ),
             DIV({role: "group"},
                 DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
                     FOR("prop", "$rule.props",
@@ -385,7 +385,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var rules = [];
         var appendRules = function(cssRules)
         {
-            var i, props, ruleId;
+            var i, props;
 
             if (!cssRules)
                 return;
@@ -396,14 +396,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 if (rule instanceof window.CSSStyleRule)
                 {
                     props = this.getRuleProperties(context, rule);
-                    ruleId = this.getRuleId(rule);
                     rules.push({
                         tag: CSSStyleRuleTag.tag,
                         rule: rule,
-                        id: ruleId,
-                        // Show universal selectors with pseudo-class
-                        // (http://code.google.com/p/fbug/issues/detail?id=3683)
-                        selector: rule.selectorText.replace(/ :/g, " *:"),
+                        selector: rule.selectorText.replace(/ :/g, " *:"), // (issue 3683)
                         props: props,
                         isSystemSheet: isSystemSheet,
                         isSelectorEditable: true
@@ -510,21 +506,34 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var props = this.parseCSSProps(rule.style, inheritMode);
 
-        var ruleId = this.getRuleId(rule);
-        this.addOldProperties(context, ruleId, inheritMode, props);
+        this.addDisabledProperties(context, rule, inheritMode, props);
         this.sortProperties(props);
 
         return props;
     },
 
-    addOldProperties: function(context, ruleId, inheritMode, props)
+    addDisabledProperties: function(context, rule, inheritMode, props)
     {
-        if (context.selectorMap && context.selectorMap.hasOwnProperty(ruleId) )
+        var disabledMap = this.getDisabledMap(context);
+        var moreProps = disabledMap.get(rule);
+        if (moreProps)
         {
-            var moreProps = context.selectorMap[ruleId];
+            var propMap = {};
+            for (var i = 0; i < props.length; ++i)
+                propMap[props[i].name] = true;
+
             for (var i = 0; i < moreProps.length; ++i)
             {
                 var prop = moreProps[i];
+                if (propMap.hasOwnProperty(prop.name))
+                {
+                    // A (probably enabled) property with the same name as this
+                    // disabled one has appeared - remove this one entirely.
+                    moreProps.splice(i, 1);
+                    --i;
+                    continue;
+                }
+                propMap[prop.name] = true;
                 this.addProperty(prop.name, prop.value, prop.important, true, inheritMode, props);
             }
         }
@@ -532,7 +541,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     addProperty: function(name, value, important, disabled, inheritMode, props)
     {
-        if (inheritMode && !Css.inheritedStyleNames[name])
+        if (inheritMode && !Dom.domUtils.isInheritedProperty(name))
             return;
 
         name = this.translateName(name, value);
@@ -587,6 +596,22 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getDisabledMap: function(context)
+    {
+        // Ideally, we'd use a WeakMap here, but WeakMaps don't allow CSS rules
+        // as keys before Firefox 17. A Map is used instead. (cf. bug 777373.)
+        if (!context.cssDisabledMap)
+            context.cssDisabledMap = new Map();
+        return context.cssDisabledMap;
+    },
+
+    remapRule: function(context, oldRule, newRule)
+    {
+        var map = this.getDisabledMap(context);
+        if (map.has(oldRule))
+            map.set(newRule, map.get(oldRule));
+    },
 
     editElementStyle: function()
     {
@@ -721,28 +746,36 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var rule = Firebug.getRepObject(row);
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-        CSSModule.deleteProperty(rule, propName, this.context);
 
-        // Remove the property from the selector map, if it was disabled
-        var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
-        if ( this.context.selectorMap && this.context.selectorMap.hasOwnProperty(ruleId) )
-        {
-            var map = this.context.selectorMap[ruleId];
-            for (var i = 0; i < map.length; ++i)
-            {
-                if (map[i].name == propName)
-                {
-                    map.splice(i, 1);
-                    break;
-                }
-            }
-        }
+        // Try removing the property from the "disabled" map.
+        var wasDisabled = this.removeDisabledProperty(rule, propName);
+
+        // If that fails, remove the actual property instead.
+        if (!wasDisabled)
+            CSSModule.deleteProperty(rule, propName, this.context);
 
         if (this.name == "stylesheet")
             Events.dispatch(this.fbListeners, "onInlineEditorClose", [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
+    },
+
+    removeDisabledProperty: function(rule, propName)
+    {
+        var disabledMap = this.getDisabledMap(this.context);
+        var map = disabledMap.get(rule);
+        if (!map)
+            return false;
+        for (var i = 0; i < map.length; ++i)
+        {
+            if (map[i].name === propName)
+            {
+                map.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
     },
 
     disablePropertyRow: function(row)
@@ -752,15 +785,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var rule = Firebug.getRepObject(row);
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
 
-        if (!this.context.selectorMap)
-            this.context.selectorMap = {};
+        var disabledMap = this.getDisabledMap(this.context);
+        if (!disabledMap.has(rule))
+            disabledMap.set(rule, []);
+        var map = disabledMap.get(rule);
 
-        // XXXjoe Generate unique key for elements too
-        var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
-        if (!(this.context.selectorMap.hasOwnProperty(ruleId)))
-            this.context.selectorMap[ruleId] = [];
-
-        var map = this.context.selectorMap[ruleId];
         var propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
@@ -1202,6 +1231,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         {
                             label: Locale.$STRF("DeleteProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
+                            id: "fbDeleteCSSProp",
                             nol10n: true,
                             command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
                         },
@@ -1591,16 +1621,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var props = this.getStyleDeclaration(cssSelector);
         System.copyToClipboard(props.join(Str.lineBreak()));
-    },
-
-    getRuleId: function(rule)
-    {
-        var line = Dom.domUtils.getRuleLine(rule);
-
-        // xxxjjb I hope % is invalid in selectortext
-        const reQuotes = /['"]/g;
-        var ruleId = rule.selectorText.replace(reQuotes,"%")+"/"+line;
-        return ruleId;
     }
 });
 
@@ -1639,13 +1659,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propValue, parsedValue, propName;
 
-        target.innerHTML = Str.escapeForCss(value);
-
-        var row = Dom.getAncestorByClass(target, "cssProp");
-        if (Css.hasClass(row, "disabledStyle"))
-            Css.toggleClass(row, "disabledStyle");
-
         var rule = Firebug.getRepObject(target);
+        var row = Dom.getAncestorByClass(target, "cssProp");
+
+        // If the property was previously disabled, remove it from the "disabled"
+        // map. (We will then proceed to enable the property.)
+        if (row && row.classList.contains("disabledStyle"))
+        {
+            row.classList.remove("disabledStyle");
+            propName = Dom.getChildByClass(row, "cssPropName").textContent;
+
+            this.panel.removeDisabledProperty(rule, propName);
+        }
+
+        target.textContent = value;
 
         if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
         {
@@ -1764,6 +1791,23 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSEditor.saveEdit (ending) " + this.panel.name, value);
+    },
+
+    beginEditing: function(target, value)
+    {
+        var row = Dom.getAncestorByClass(target, "cssProp");
+        this.initiallyDisabled = (row && row.classList.contains("disabledStyle"));
+    },
+
+    cancelEditing: function(target, value)
+    {
+        if (this.initiallyDisabled)
+        {
+            // Disable the property again.
+            var row = Dom.getAncestorByClass(target, "cssProp");
+            if (row && !row.classList.contains("disabledStyle"))
+                this.panel.disablePropertyRow(row);
+        }
     },
 
     advanceToNext: function(target, charCode)
@@ -2175,6 +2219,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
+        var context = this.panel.context;
+
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue +
                 "'", target);
@@ -2216,7 +2262,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 styleSheet = this.panel.location;
                 if (!styleSheet)
                 {
-                    var doc = this.panel.context.window.document;
+                    var doc = context.window.document;
                     this.panel.location = styleSheet =
                         CSSModule.getDefaultStyleSheet(doc);
                 }
@@ -2306,14 +2352,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         // Update the rep object
         row.repObject = rule;
-        if (!oldRule)
-        {
-            // Who knows what the domutils will return for rule line
-            // for a recently created rule. To be safe we just generate
-            // a unique value as this is only used as an internal key.
-            var ruleId = "new/"+value+"/"+(++CSSRuleEditor.uniquifier);
-            row.setAttribute("ruleId", ruleId);
-        }
+        if (oldRule)
+            this.panel.remapRule(context, oldRule, rule);
 
         this.panel.markChange(this.panel.name == "stylesheet");
     },
@@ -2541,7 +2581,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 // StyleSheetEditor
 
 /**
- * StyleSheetEditor represents an inline editor and is used when editing CSS
+ * StyleSheetEditor represents the full-sized editor used for Source/Live Edit
  * within the CSS panel.
  */
 function StyleSheetEditor(doc)

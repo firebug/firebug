@@ -4043,7 +4043,7 @@ var fbs =
 
                     // stack empty
                     if (unhookAtBottom && hookFrameCount == 0)
-                       this.unhookFunctions();
+                       fbs.unhookFunctions();
 
                     contextCached = callBack(contextCached, frame, hookFrameCount, false);
                     break;

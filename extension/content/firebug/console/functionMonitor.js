@@ -9,8 +9,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/url",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom) { with (Domplate) {
+function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) { with (Domplate) {
 
 // ********************************************************************************************* //
 // Function Monitor
@@ -49,11 +50,11 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         //var sourceFile = context.sourceFileMap[url];
         // Firebug.errorStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
         //var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
-        if (!Url.isSystemURL(Url.normalizeURL(frame.script.fileName)))
+        if (Url.isSystemURL(Url.normalizeURL(frame.script.fileName)))
             return;
 
         // xxxHonza: traceCall and traceCallAll need to be fixed yet.
-        FBTrace.sysout("console.onFunctionCall; ", sourceFile);
+        FBTrace.sysout("functionMonitor.onFunctionCall; ", sourceFile);
 
         if (calling)
             Firebug.Console.openGroup([frame, "depth:" + depth], context);
