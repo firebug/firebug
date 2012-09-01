@@ -174,7 +174,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
-        var currentFrame = this.tool.getCurrentFrame(context);
+        var currentFrame = this.tool.getCurrentFrame(this.context);
 
         if (!this.location)
         {
@@ -183,7 +183,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         // The selection object should be StackFrame
-        if (object instanceof StackFrame.StackFrame)
+        if (object instanceof StackFrame)
         {
             var trace = this.location;
             var frameIndex = object.getFrameIndex();
@@ -316,8 +316,14 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     onStackCreated: function(stackTrace)
     {
-        FBTrace.sysout("onStackCreated")
+        FBTrace.sysout("CallstackPanel.onStackCreated;", stackTrace);
+
         this.showStackTrace(stackTrace);
+    },
+
+    onStackCleared: function()
+    {
+        
     }
 });
 

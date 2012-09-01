@@ -515,9 +515,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     supportsObject: function(object, type)
     {
         if (object instanceof CompilationUnit
-            || (object instanceof SourceLink.SourceLink && object.type == "js")
+            || (object instanceof SourceLink && object.type == "js")
             || typeof(object) == "function"
-            || object instanceof StackFrame.StackFrame)
+            || object instanceof StackFrame)
         {
             // Higher priority than the DOM panel.
             return 2;

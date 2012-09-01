@@ -156,8 +156,12 @@ StackFrame.buildStackFrame = function(frame, context)
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 
+    var args = [];
+    for (var i=0; i<frame.arguments.length; i++)
+        args.push(frame.arguments[i].type);
+
     return new StackFrame(sourceFile, frame.where.line, frame.calleeName,
-        frame.arguments, frame, 0, context);
+        args, frame, 0, context);
 };
 
 // ********************************************************************************************* //

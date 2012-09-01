@@ -150,12 +150,15 @@ var DebuggerTool = Obj.extend(new Firebug.EventSource(),
 
     framesadded: function(context, frames)
     {
+        FBTrace.sysout("debuggerTool.framesadded", frames);
+
         var stackTrace = StackTrace.buildStackTrace(frames, context);
         this.dispatch("onStackCreated", [stackTrace]);
     },
 
     framescleared: function()
     {
+        this.dispatch("onStackCleared");
     }
 });
 
