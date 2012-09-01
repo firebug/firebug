@@ -187,6 +187,16 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
+    show: function(state)
+    {
+        Events.addEventListener(this.context.browser, "MozAfterPaint", Obj.bindFixed(this.refresh, this), true);
+    },
+
+    hide: function()
+    {
+        Events.removeEventListener(this.context.browser, "MozAfterPaint", Obj.bindFixed(this.refresh, this), true);
+    },
+    
     supportsObject: function(object, type)
     {
         return object instanceof window.Element ? 1 : 0;
