@@ -14,14 +14,16 @@ define([
     "firebug/debugger/stackTraceRep",
     "firebug/debugger/stackFrame",
     "firebug/debugger/stackTrace",
+    "firebug/debugger/watchPanel",
+    "firebug/debugger/gripClient",
 ],
 function(FBTrace) {
 
 // ********************************************************************************************* //
 // Debugger
 
-// This modules defines a list of dependencies for JS debugger so,
-// the list is part of the 'debugger' directory.
+// This module defines a list of dependencies for JS debugger so,
+// all necessary modules are properyly loaded.
 
 // ********************************************************************************************* //
 // Registration

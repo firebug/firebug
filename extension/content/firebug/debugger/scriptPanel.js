@@ -680,15 +680,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
 
-        /*try
+        try
         {
             var chrome = Firebug.chrome;
 
-            if (this.selectedSourceBox && this.selectedSourceBox.breakCauseBox)
+            /*if (this.selectedSourceBox && this.selectedSourceBox.breakCauseBox)
             {
                 this.selectedSourceBox.breakCauseBox.hide();
                 delete this.selectedSourceBox.breakCauseBox;
-            }
+            }*/
 
             this.syncCommands(this.context);
             this.syncListeners(this.context);
@@ -700,12 +700,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         catch (exc)
         {
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stopDebugging FAILS", exc);
-
-            // If the window is closed while the debugger is stopped,
-            // then all hell will break loose here
-            Debug.ERROR(exc);
-        }*/
+                FBTrace.sysout("scriptPanel.onStopDebugging; EXCEPTION " + exc, exc);
+        }
     },
 });
 
