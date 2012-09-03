@@ -41,31 +41,31 @@
 /*************************************************************************************************/
 /* Breakpoints */
 
-.annotation.breakpoint > DIV {
+.annotation.breakpoint > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/breakpoint.png);
     background-position: top !important;
 }
 
-.annotation.debugLocation > DIV {
+.annotation.debugLocation > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/exe.png);
     color: #000000;
 }
 
-.sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
+/*.sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/breakpointCondition.png);
 }
 
 .sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/breakpointDisabled.png);
-}
+}*/
 
-.annotation.breakpoint.debugLocation > DIV {
+.annotation.breakpoint.debugLocation > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/breakpointExe.png);
 }
 
-.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
+/*.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
-}
+}*/
 
 /* The current debug location */
 .annotationLine.debugLocation {
