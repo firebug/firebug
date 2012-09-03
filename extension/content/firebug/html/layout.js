@@ -205,7 +205,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     refresh: function()
     {
-        FBTrace.sysout("refresh layout");
         this.updateSelection(this.selection);
     },
 
