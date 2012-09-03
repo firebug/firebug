@@ -51,6 +51,8 @@ const mimeCategoryMap =
     "application/rss+xml": "html",
     "application/atom+xml": "html",
     "application/xhtml+xml": "html",
+    "application/mathml+xml": "html",
+    "application/rdf+xml": "html",
     "text/css": "css",
     "application/x-javascript": "js",
     "text/javascript": "js",
