@@ -167,6 +167,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.onMouseOver = Obj.bind(this.onMouseOver, this);
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
+        this.onAfterPaint = Obj.bind(this.refresh, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -189,12 +190,12 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     show: function(state)
     {
-        Events.addEventListener(this.context.browser, "MozAfterPaint", Obj.bindFixed(this.refresh, this), true);
+        Events.addEventListener(this.context.browser, "MozAfterPaint", this.onAfterPaint, true);
     },
 
     hide: function()
     {
-        Events.removeEventListener(this.context.browser, "MozAfterPaint", Obj.bindFixed(this.refresh, this), true);
+        Events.removeEventListener(this.context.browser, "MozAfterPaint", this.onAfterPaint, true);
     },
     
     supportsObject: function(object, type)
@@ -204,6 +205,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     refresh: function()
     {
+        FBTrace.sysout("refresh layout");
         this.updateSelection(this.selection);
     },
 
