@@ -167,7 +167,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.onMouseOver = Obj.bind(this.onMouseOver, this);
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
-        this.onAfterPaint = Obj.bind(this.refresh, this);
+        this.onAfterPaint = Obj.bindFixed(this.refresh, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
