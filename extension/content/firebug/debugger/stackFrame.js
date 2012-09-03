@@ -157,12 +157,32 @@ StackFrame.buildStackFrame = function(frame, context)
         sourceFile = {href: frame.where.url};
 
     var args = [];
-    for (var i=0; i<frame.arguments.length; i++)
-        args.push(frame.arguments[i].type);
+    var arguments = frame.environment.bindings.arguments;
+    for (var i=0; i<arguments.length; i++)
+    {
+        args.push({
+            name: getArgName(arguments[i]),
+            value: getArgValue(frame.arguments[i])
+        });
+    }
 
     return new StackFrame(sourceFile, frame.where.line, frame.calleeName,
         args, frame, 0, context);
 };
+
+// ********************************************************************************************* //
+// Helpers
+
+function getArgName(arg)
+{
+    for (var p in arg)
+        return p;
+}
+
+function getArgValue(arg)
+{
+    return arg["class"] ? arg["class"] : arg;
+}
 
 // ********************************************************************************************* //
 // Registration
