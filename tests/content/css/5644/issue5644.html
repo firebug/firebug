@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Issue 5644: Editing a disabled property makes another</title>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            #element1 {
+                color: #700020;
+                font: 1em Verdana;
+            }
+            span.ok {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5644">Issue 5644</a>: Editing a disabled property makes another</h1>
+        </header>
+        <div>
+            <section id="content">
+              <p id="element1">Inspect me</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Inspect the <code>&lt;p&gt;</code> above (<code>#element1</code>)</li>
+                    <li>
+                        Switch to the <em>Style</em> side panel
+                        <span class="ok">&rArr; The "#element1" rule should have two enabled properties - "font" and "color"</span>
+                    </li>
+                    <li>
+                        Disable both of them
+                        <span class="ok">&rArr; They should be grayed out</span>
+                    </li>
+                    <li>
+                        Rename the rule from "#element1" to "p#element1"
+                        <span class="ok">&rArr; The disabled properties should still be there</span>
+                    </li>
+                    <li>
+                        Start changing "color" to contain "gray", then press <code class="key">ESCAPE</code>
+                        <span class="ok">&rArr; It should revert to a disabled state containing "#700020"</span>
+                    </li>
+                    <li>
+                        Change "color" to contain "gray"
+                        <span class="ok">&rArr; It should change value and become enabled again</span>
+                    </li>
+                    <li>
+                        Start adding a new property "font" containing "gray", then press <code class="key">ESCAPE</code>
+                        <span class="ok">&rArr; Nothing should happen</span>
+                    </li>
+                    <li>
+                        Add a new property "font" containing "gray"
+                        <span class="ok">&rArr; The disabled "font" property should disappear</span>
+                    </li>
+                    <li>Disable the "color" property</li>
+                    <li>
+                        Right-click to edit the inline element style and add a property "padding: 1px", then disable that property
+                        <span class="ok">&rArr; It should succeed</span>
+                    </li>
+                    <li>
+                        In the command line, run "$0.style.margin = '1px';"
+                        <span class="ok">&rArr; "padding" should still remain, disabled</span>
+                    </li>
+                    <li>
+                        In order, right-click and choose "<code>Delete "&lt;property&gt;"</code>" on "margin", "padding", and "font".
+                        <span class="ok">&rArr; Property removal should work</span>
+                    </li>
+                </ol>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
