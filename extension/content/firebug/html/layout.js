@@ -401,7 +401,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 else
                     Css.removeClass(element.parentNode, "invisible");
             }
-            FBTrace.sysout("layout", args);
         }
         else
         {
