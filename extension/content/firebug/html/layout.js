@@ -52,21 +52,21 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                         )
                     ),
                     DIV({"class": "layoutLabelRight layoutLabel",
-                            $invisible: "$outerTop|isInvisible"},
+                            $invisible: "$outerRight|isInvisible"},
                         SPAN({"class": "layoutLabelOuterRight editable",
                                 "aria-label": Locale.$STR("a11y.layout.position right")},
                             "$outerRight"
                         )
                     ),
-                    DIV({"class": "layoutLabelBottom layoutLabel", $invisible:
-                            "$outerTop|isInvisible"},
+                    DIV({"class": "layoutLabelBottom layoutLabel",
+                            $invisible: "$outerBottom|isInvisible"},
                         SPAN({"class": "layoutLabelOuterBottom editable",
                                 "aria-label": Locale.$STR("a11y.layout.position bottom")},
                             "$outerBottom"
                         )
                     ),
                     DIV({"class": "layoutLabelLeft layoutLabel",
-                            $invisible: "$outerTop|isInvisible"},
+                            $invisible: "$outerLeft|isInvisible"},
                         SPAN({"class": "layoutLabelOuterLeft editable",
                                 "aria-label": Locale.$STR("a11y.layout.position left")},
                             "$outerLeft"
@@ -88,7 +88,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                         DIV({"class": "layoutLabelRight layoutLabel",
                                 $invisible: "$marginRight|isInvisible"},
                             SPAN({"class": "layoutLabelMarginRight editable",
-                                    "aria-label": Locale.$STR("a11y.layout..margin right")},
+                                    "aria-label": Locale.$STR("a11y.layout.margin right")},
                                 "$marginRight"
                             )
                         ),
@@ -396,7 +396,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 element.textContent = values[val].label ?
                     values[val].label+": "+args[values[val].value] : args[values[val].value];
 
-                if (args[values[val].value] == 0)
+                if (this.template.isInvisible(args[values[val].value]))
                     Css.setClass(element.parentNode, "invisible");
                 else
                     Css.removeClass(element.parentNode, "invisible");
