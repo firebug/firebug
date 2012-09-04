@@ -25,90 +25,170 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         tag:
             DIV({"class": "outerLayoutBox"},
-                DIV({"class": "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode focusGroup"},
+                DIV({"class": "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode "+
+                        "$outerLeftMode focusGroup"},
                     DIV({"class": "layoutEdgeTop layoutEdge"}),
                     DIV({"class": "layoutEdgeRight layoutEdge"}),
                     DIV({"class": "layoutEdgeBottom layoutEdge"}),
                     DIV({"class": "layoutEdgeLeft layoutEdge"}),
 
                     DIV({"class": "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({"class": "layoutPosition layoutCaption",
-                                    "aria-label": Locale.$STR("a11y.layout.position")},
-                                Locale.$STR("position") + ": " + "$position"),
-                            SPAN({"class": "layoutBoxSizing layoutCaption",
-                                    "aria-label": Locale.$STR("a11y.layout.box-sizing")},
-                                Locale.$STR("a11y.layout.box-sizing") + ": " + "$boxSizing"),
-                            SPAN({"class": "layoutZIndex v$zIndex",
-                                    "aria-label": Locale.$STR("a11y.layout.z-index")},
-                                "z: " + "$zIndex")
+                        SPAN({"class": "layoutPosition layoutCaption",
+                                "aria-label": Locale.$STR("a11y.layout.position")},
+                            Locale.$STR("position") + ": " + "$position"),
+                        SPAN({"class": "layoutBoxSizing layoutCaption",
+                                "aria-label": Locale.$STR("a11y.layout.box-sizing")},
+                            Locale.$STR("a11y.layout.box-sizing") + ": " + "$boxSizing"),
+                        SPAN({"class": "layoutZIndex", $invisible: "$zIndex|isInvisible",
+                                "aria-label": Locale.$STR("a11y.layout.z-index")},
+                            "z: " + "$zIndex")
                     ),
 
-                    DIV({"class": "layoutLabelTop layoutLabel v$outerTop"},
-                        SPAN({"class": "editable focusStart", 'aria-label' : Locale.$STR('a11y.layout.position top')}, '$outerTop')
+                    DIV({"class": "layoutLabelTop layoutLabel",
+                            $invisible: "$outerTop|isInvisible"},
+                        SPAN({"class": "layoutLabelOuterTop editable focusStart",
+                                "aria-label": Locale.$STR("a11y.layout.position top")},
+                            "$outerTop"
+                        )
                     ),
-                    DIV({"class": "layoutLabelRight layoutLabel v$outerRight"},
-                        SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.position right')}, '$outerRight')
+                    DIV({"class": "layoutLabelRight layoutLabel",
+                            $invisible: "$outerTop|isInvisible"},
+                        SPAN({"class": "layoutLabelOuterRight editable",
+                                "aria-label": Locale.$STR("a11y.layout.position right")},
+                            "$outerRight"
+                        )
                     ),
-                    DIV({"class": "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.position bottom')}, '$outerBottom')
+                    DIV({"class": "layoutLabelBottom layoutLabel", $invisible:
+                            "$outerTop|isInvisible"},
+                        SPAN({"class": "layoutLabelOuterBottom editable",
+                                "aria-label": Locale.$STR("a11y.layout.position bottom")},
+                            "$outerBottom"
+                        )
                     ),
-                    DIV({"class": "layoutLabelLeft layoutLabel v$outerLeft"},
-                        SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.position left')}, '$outerLeft')
+                    DIV({"class": "layoutLabelLeft layoutLabel",
+                            $invisible: "$outerTop|isInvisible"},
+                        SPAN({"class": "layoutLabelOuterLeft editable",
+                                "aria-label": Locale.$STR("a11y.layout.position left")},
+                            "$outerLeft"
+                        )
                     ),
 
-                    DIV({"class": "layoutCaption"}, '$outerLabel'),
+                    DIV({"class": "outerLabel layoutCaption"}, "$outerLabel"),
 
 
                     DIV({"class": "marginLayoutBox layoutBox editGroup focusGroup"},
                         DIV({"class": "layoutCaption"}, Locale.$STR("LayoutMargin")),
-                        DIV({"class": "layoutLabelTop layoutLabel v$marginTop"},
-                            SPAN({"class": "editable focusStart", 'aria-label' : Locale.$STR('a11y.layout.margin top')}, '$marginTop')
+                        DIV({"class": "layoutLabelTop layoutLabel",
+                                $invisible: "$marginTop|isInvisible"},
+                            SPAN({"class": "layoutLabelMarginTop editable focusStart",
+                                    "aria-label": Locale.$STR("a11y.layout.margin top")},
+                                "$marginTop"
+                            )
                         ),
-                        DIV({"class": "layoutLabelRight layoutLabel v$marginRight"},
-                            SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout..margin right')}, '$marginRight')
+                        DIV({"class": "layoutLabelRight layoutLabel",
+                                $invisible: "$marginRight|isInvisible"},
+                            SPAN({"class": "layoutLabelMarginRight editable",
+                                    "aria-label": Locale.$STR("a11y.layout..margin right")},
+                                "$marginRight"
+                            )
                         ),
-                        DIV({"class": "layoutLabelBottom layoutLabel v$marginBottom"},
-                            SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.margin bottom')}, '$marginBottom')
+                        DIV({"class": "layoutLabelBottom layoutLabel",
+                                $invisible: "$marginBottom|isInvisible"},
+                            SPAN({"class": "layoutLabelMarginBottom editable",
+                                    "aria-label": Locale.$STR("a11y.layout.margin bottom")},
+                                "$marginBottom"
+                            )
                         ),
-                        DIV({"class": "layoutLabelLeft layoutLabel v$marginLeft"},
-                            SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.margin left')}, '$marginLeft')
+                        DIV({"class": "layoutLabelLeft layoutLabel",
+                                $invisible: "$marginLeft|isInvisible"},
+                            SPAN({"class": "layoutLabelMarginLeft editable",
+                                    "aria-label": Locale.$STR("a11y.layout.margin left")},
+                                "$marginLeft"
+                            )
                         ),
 
                         DIV({"class": "borderLayoutBox layoutBox editGroup focusGroup"},
                             DIV({"class": "layoutCaption"}, Locale.$STR("LayoutBorder")),
-                            DIV({"class": "layoutLabelTop layoutLabel v$borderTop"},
-                                SPAN({"class": "editable  focusStart", 'aria-label' : Locale.$STR('a11y.layout.border top')}, '$borderTop')
+                            DIV({"class": "layoutLabelTop layoutLabel",
+                                    $invisible: "$borderTop|isInvisible"},
+                                SPAN({"class": "layoutLabelBorderTop editable  focusStart",
+                                        "aria-label": Locale.$STR("a11y.layout.border top")},
+                                    "$borderTop"
+                                )
                             ),
-                            DIV({"class": "layoutLabelRight layoutLabel v$borderRight"},
-                                SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.border right')}, '$borderRight')
+                            DIV({"class": "layoutLabelRight layoutLabel",
+                                    $invisible: "$borderRight|isInvisible"},
+                                SPAN({"class": "layoutLabelBorderRight editable",
+                                        "aria-label": Locale.$STR("a11y.layout.border right")},
+                                    "$borderRight"
+                                )
                             ),
-                            DIV({"class": "layoutLabelBottom layoutLabel v$borderBottom"},
-                                SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.border bottom')}, '$borderBottom')
+                            DIV({"class": "layoutLabelBottom layoutLabel",
+                                    $invisible: "$borderBottom|isInvisible"},
+                                SPAN({"class": "layoutLabelBorderBottom editable",
+                                        "aria-label": Locale.$STR("a11y.layout.border bottom")},
+                                    "$borderBottom"
+                                )
                             ),
-                            DIV({"class": "layoutLabelLeft layoutLabel v$borderLeft"},
-                                SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.border left')}, '$borderLeft')
+                            DIV({"class": "layoutLabelLeft layoutLabel",
+                                    $invisible: "$borderLeft|isInvisible"},
+                                SPAN({"class": "layoutLabelBorderLeft editable",
+                                        "aria-label": Locale.$STR("a11y.layout.border left")},
+                                    "$borderLeft"
+                                )
                             ),
 
                             DIV({"class": "paddingLayoutBox layoutBox editGroup focusGroup"},
                                 DIV({"class": "layoutCaption"}, Locale.$STR("LayoutPadding")),
-                                DIV({"class": "layoutLabelTop layoutLabel v$paddingTop"},
-                                    SPAN({"class": "editable focusStart", 'aria-label' : Locale.$STR('a11y.layout.padding top')}, '$paddingTop')
+                                DIV({"class": "layoutLabelTop layoutLabel",
+                                        $invisible: "$paddingTop|isInvisible"},
+                                    SPAN({"class": "layoutLabelPaddingTop editable focusStart",
+                                            "aria-label": Locale.$STR("a11y.layout.padding top")},
+                                        "$paddingTop"
+                                    )
                                 ),
-                                DIV({"class": "layoutLabelRight layoutLabel v$paddingRight"},
-                                    SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.padding right')}, '$paddingRight')
+                                DIV({"class": "layoutLabelRight layoutLabel",
+                                        $invisible: "$paddingRight|isInvisible"},
+                                    SPAN(
+                                        {
+                                            "class": "layoutLabelPaddingRight editable",
+                                            "aria-label":
+                                                Locale.$STR("a11y.layout.padding right")
+                                        },
+                                        "$paddingRight"
+                                    )
                                 ),
-                                DIV({"class": "layoutLabelBottom layoutLabel v$paddingBottom"},
-                                    SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.padding bottom')}, '$paddingBottom')
+                                DIV({"class": "layoutLabelBottom layoutLabel",
+                                        $invisible: "$paddingBottom|isInvisible"},
+                                    SPAN(
+                                        {
+                                            "class": "layoutLabelPaddingBottom editable",
+                                            "aria-label":
+                                                Locale.$STR("a11y.layout.padding bottom")
+                                        },
+                                        "$paddingBottom"
+                                    )
                                 ),
-                                DIV({"class": "layoutLabelLeft layoutLabel v$paddingLeft"},
-                                    SPAN({"class": "editable", 'aria-label' : Locale.$STR('a11y.layout.padding left')}, '$paddingLeft')
+                                DIV({"class": "layoutLabelLeft layoutLabel",
+                                        $invisible: "$paddingLeft|isInvisible"},
+                                    SPAN({"class": "layoutLabelPaddingLeft editable",
+                                            "aria-label": Locale.$STR("a11y.layout.padding left")},
+                                        "$paddingLeft"
+                                    )
                                 ),
 
                                 DIV({"class": "contentLayoutBox layoutBox editGroup focusGroup"},
                                     DIV({"class": "layoutLabelCenter layoutLabel"},
-                                        SPAN({"class": "layoutLabelWidth layoutLabel editable focusStart", 'aria-label' : Locale.$STR('a11y.layout.width')}, '$width'),
+                                        SPAN({"class": "layoutLabelWidth layoutLabel editable "+
+                                                "focusStart",
+                                                "aria-label": Locale.$STR("a11y.layout.width")},
+                                            "$width"
+                                        ),
                                         " x ",
-                                        SPAN({"class": "layoutLabelHeight layoutLabel editable", 'aria-label' : Locale.$STR('a11y.layout.height')}, '$height')
+                                        SPAN({"class": "layoutLabelHeight layoutLabel editable",
+                                                "aria-label": Locale.$STR("a11y.layout.height")},
+                                            "$height"
+                                        )
                                     )
                                 )
                             )
@@ -116,6 +196,11 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                     )
                 )
             ),
+
+        isInvisible: function(value)
+        {
+            return value == 0;
+        },
 
         getVerticalText: function(n)
         {
@@ -218,8 +303,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         var next = Dom.getNextElement(element.nextSibling);
 
         var style = view.getComputedStyle(element, "");
-        var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
-        var nextStyle = next ? view.getComputedStyle(next, "") : null;
 
         var args = Css.getBoxFromStyles(style, element);
 
@@ -233,7 +316,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
-        args.outerLabel = '';
+        args.outerLabel = "";
 
         if (Xml.isElementSVG(element) || Xml.isElementMathML(element) || Xml.isElementXUL(element))
         {
@@ -247,28 +330,87 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         // these Modes are classes on the domplate
-        args.outerLeftMode = args.outerRightMode = args.outerTopMode
-        = args.outerBottomMode = "blankEdge";
+        args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode =
+            "blankEdge";
 
         if (position == "absolute" || position == "fixed" || position == "relative")
         {
-            function getStyle(style, name) { var v = style.getPropertyCSSValue(name); return (v && v.cssText) ? parseInt(v.cssText) : ' '; }
+            function getStyle(style, name)
+            {
+                var value = style.getPropertyCSSValue(name);
+                return value && value.cssText ? parseInt(value.cssText) : " ";
+            }
 
             args.outerLabel = Locale.$STR("LayoutPosition");
 
-            args.outerLeft = getStyle(style,'left');
-            args.outerTop = getStyle(style,'top');
-            args.outerRight = getStyle(style,'right');
-            args.outerBottom = getStyle(style,'bottom');
+            args.outerLeft = getStyle(style, "left");
+            args.outerTop = getStyle(style, "top");
+            args.outerRight = getStyle(style, "right");
+            args.outerBottom = getStyle(style, "bottom");
 
-            args.outerLeftMode = args.outerRightMode = args.outerTopMode
-                = args.outerBottomMode = "absoluteEdge";
+            args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode =
+                "absoluteEdge";
         }
 
-        var node = this.template.tag.replace(args, this.panelNode);
+        var node;
+        // If the layout panel content was already created, just fill in the new values
+        if (this.panelNode.getElementsByClassName("outerLayoutBox").item(0))
+        {
+            // The styles for the positionLayoutBox need to be set manually
+            var positionLayoutBox = this.panelNode.getElementsByClassName("positionLayoutBox").
+                item(0);
+            positionLayoutBox.className = "positionLayoutBox "+args.outerTopMode+" "+
+                args.outerRightMode+" "+args.outerBottomMode+" "+args.outerLeftMode+" focusGroup";
+
+            var values =
+            {
+                layoutPosition: {label: Locale.$STR("position"), value: "position"},
+                layoutBoxSizing: {label: Locale.$STR("a11y.layout.box-sizing"),
+                    value: "boxSizing"},
+                layoutZIndex: {label: "z", value: "zIndex"},
+                layoutLabelOuterTop: {value: "outerTop"},
+                layoutLabelOuterRight: {value: "outerRight"},
+                layoutLabelOuterBottom: {value: "outerBottom"},
+                layoutLabelOuterLeft: {value: "outerLeft"},
+                layoutLabelMarginTop: {value: "marginTop"},
+                layoutLabelMarginRight: {value: "marginRight"},
+                layoutLabelMarginBottom: {value: "marginBottom"},
+                layoutLabelMarginLeft: {value: "marginLeft"},
+                layoutLabelBorderTop: {value: "borderTop"},
+                layoutLabelBorderRight: {value: "borderRight"},
+                layoutLabelBorderBottom: {value: "borderBottom"},
+                layoutLabelBorderLeft: {value: "borderLeft"},
+                layoutLabelPaddingTop: {value: "paddingTop"},
+                layoutLabelPaddingRight: {value: "paddingRight"},
+                layoutLabelPaddingBottom: {value: "paddingBottom"},
+                layoutLabelPaddingLeft: {value: "paddingLeft"},
+                layoutLabelWidth: {value: "width"},
+                layoutLabelHeight: {value: "height"},
+                outerLabel: {value: "outerLabel"},
+            }
+
+            for (val in values)
+            {
+                var element = this.panelNode.getElementsByClassName(val).item(0);
+
+                element.textContent = values[val].label ?
+                    values[val].label+": "+args[values[val].value] : args[values[val].value];
+
+                if (args[values[val].value] == 0)
+                    Css.setClass(element.parentNode, "invisible");
+                else
+                    Css.removeClass(element.parentNode, "invisible");
+            }
+            FBTrace.sysout("layout", args);
+        }
+        else
+        {
+            node = this.template.tag.replace(args, this.panelNode);
+        }
+
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
-        Events.dispatch(this.fbListeners, 'onLayoutBoxCreated', [this, node, args]);
+        Events.dispatch(this.fbListeners, "onLayoutBoxCreated", [this, node, args]);
     },
 
     /*
@@ -306,7 +448,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     adjustBoxWidth: function(node, boxName, width)
     {
         var box = node.getElementsByClassName(boxName).item(0);
-        box.style.cssText = "right: "+width + 'px;'+" left: "+width + 'px;';
+        box.style.cssText = "right: "+width + 'px;'+" left: "+width + "px;";
     },
 
     getMaxCharWidth: function(args, node)
@@ -386,11 +528,6 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             target.innerHTML = getVerticalText(intValue);
         else
             target.innerHTML = intValue;
-
-        if (previousValue == "0" && !!value)
-            Css.removeClass(target.parentNode, "v0");
-        else if (!value)
-            Css.setClass(target.parentNode, "v0");
     },
 
     endEditing: function(target, value, cancel)
