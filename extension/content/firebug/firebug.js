@@ -921,7 +921,8 @@ window.Firebug =
         //detached -> inbrowser
         if (!forceOpen && Firebug.isDetached())
         {
-            var topWin = Firebug.chrome.window.top;
+            // We need firebug.xul here so, don't use 'top' since it references browser.xul
+            var topWin = Firebug.chrome.window.parent;
             topWin.exportFirebug();
             topWin.close();
 
