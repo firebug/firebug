@@ -227,6 +227,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.editor.setDebugLocation(lineNo - 1);
     },
+
+    removeDebugLocation: function()
+    {
+        this.editor.setDebugLocation(-1);
+    }
 });
 
 // ********************************************************************************************* //

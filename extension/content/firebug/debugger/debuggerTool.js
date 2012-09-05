@@ -168,10 +168,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         var type = packet.why.type;
         if (type == "breakpoint" || type == "resumeLimit")
         {
-            context.stopped = true;
             context.debuggerClient.activeThread.fillFrames(50);
 
             var frame = StackFrame.buildStackFrame(packet.frame, context);
+
             context.stopped = true;
             context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
             context.currentFrame = frame;  // the frame we show to user, depends on selection
@@ -183,6 +183,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     resumed: function(context, packet)
     {
         FBTrace.sysout("debuggerTool.resumed; " + packet, packet);
+
+        context.stopped = false;
+        context.stoppedFrame = null;
+        context.currentFrame = null;
+
+        this.dispatch("onStopDebugging");
     },
 
     framesadded: function(context, frames)

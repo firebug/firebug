@@ -177,17 +177,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showNoStackFrame: function()
     {
-        if (this.selectedSourceBox)
-        {
-            this.removeExeLineHighlight(this.selectedSourceBox);
+        this.removeExeLineHighlight();
 
-            if (FBTrace.DBG_STACK)
-                FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
-        }
-
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
         // Clear the stack on the panel toolbar
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
         panelStatus.clear();
+
         this.updateInfoTip();
 
         var watchPanel = this.context.getPanel("watches", true);
@@ -217,6 +212,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
         }
 
+FBTrace.sysout("script panel update selection")
+
         if (object instanceof CompilationUnit)
             this.navigate(object);
         else if (object instanceof SourceLink)
@@ -228,11 +225,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Location List
+    // Scrolling & Highlighting
 
     scrollToLine: function(href, lineNo, highlighter)
     {
         this.scriptView.scrollToLine(href, lineNo, highlighter);
+    },
+
+    removeExeLineHighlight: function(href, lineNo, highlighter)
+    {
+        this.scriptView.removeDebugLocation();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -677,7 +679,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onStopDebugging: function()
     {
-        if (FBTrace.DBG_UI_LOOP)
+        //if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
 
         try
@@ -692,16 +694,118 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             this.syncCommands(this.context);
             this.syncListeners(this.context);
-            this.highlight(false);
+            this.showNoStackFrame();
 
             // After main panel is completely updated
             chrome.syncSidePanels();
         }
         catch (exc)
         {
-            if (FBTrace.DBG_UI_LOOP)
+            if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("scriptPanel.onStopDebugging; EXCEPTION " + exc, exc);
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Info Tips
+
+    updateInfoTip: function()
+    {
+        var infoTip = this.panelBrowser.infoTip;
+        if (infoTip && this.infoTipExpr)
+            this.populateInfoTip(infoTip, this.infoTipExpr);
+    },
+
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        var sourceLine = Dom.getAncestorByClass(target, "sourceLine");
+        if (sourceLine)
+            return this.populateBreakpointInfoTip(infoTip, sourceLine);
+
+        var frame = this.context.currentFrame;
+        if (!frame)
+            return;
+
+        var sourceRowText = Dom.getAncestorByClass(target, "sourceRowText");
+        if (!sourceRowText)
+            return;
+
+        // See http://code.google.com/p/fbug/issues/detail?id=889
+        // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
+        if (!rangeParent)
+            return;
+
+        rangeOffset = rangeOffset || 0;
+        var expr = getExpressionAt(rangeParent.data, rangeOffset);
+        if (!expr || !expr.expr)
+            return;
+
+        if (expr.expr == this.infoTipExpr)
+            return true;
+        else
+            return this.populateInfoTip(infoTip, expr.expr);
+    },
+
+    populateInfoTip: function(infoTip, expr)
+    {
+        if (!expr || Keywords.isJavaScriptKeyword(expr))
+            return false;
+
+        var self = this;
+
+        // If the evaluate fails, then we report an error and don't show the infotip
+        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
+            function success(result, context)
+            {
+                var rep = Firebug.getRep(result, context);
+                var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("populateInfoTip result is "+result, result);
+
+                tag.replace({object: result}, infoTip);
+
+                // If the menu is never displayed, the contextMenuObject is not reset
+                // (back to null) and is reused at the next time the user opens the
+                // context menu, which is wrong.
+                // This line was appended when fixing:
+                // http://code.google.com/p/fbug/issues/detail?id=1700
+                // The object should be returned by getPopupObject(),
+                // that is called when the context menu is showing.
+                // The problem is, that the "onContextShowing" event doesn't have the
+                // rangeParent field set and so it isn't possible to get the
+                // expression under the cursor (see getExpressionAt).
+                //Firebug.chrome.contextMenuObject = result;
+
+                self.infoTipExpr = expr;
+            },
+            function failed(result, context)
+            {
+                self.infoTipExpr = "";
+            }
+        );
+        return (self.infoTipExpr == expr);
+    },
+
+    populateBreakpointInfoTip: function(infoTip, sourceLine)
+    {
+        var sourceRow = Dom.getAncestorByClass(sourceLine, "sourceRow");
+        var condition = sourceRow.getAttribute("condition");
+        if (!condition)
+            return false;
+
+        var expr = sourceRow.breakpointCondition;
+        if (!expr)
+            return false;
+
+        if (expr == this.infoTipExpr)
+            return true;
+
+        Firebug.ScriptPanel.BreakpointInfoTip.render(infoTip, expr);
+
+        this.infoTipExpr = expr;
+
+        return true;
     },
 });
 

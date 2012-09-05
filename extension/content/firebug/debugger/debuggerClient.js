@@ -30,7 +30,7 @@ function DebuggerClient(context, connection)
 
     this.onTabNavigatedListener = this.onTabNavigated.bind(this);
     this.onTabDetachedListener = this.onTabDetached.bind(this);
-    this.onPausedListener = this.onPaused.bind(this);
+    this.onThreadStateListener = this.onThreadState.bind(this);
 }
 
 DebuggerClient.prototype = Obj.extend(Object,
@@ -56,7 +56,9 @@ DebuggerClient.prototype = Obj.extend(Object,
 
         this.connection.addListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.addListener("tabDetached", this.onTabDetachedListener);
-        this.connection.addListener("paused", this.onPausedListener);
+        this.connection.addListener("paused", this.onThreadStateListener);
+        this.connection.addListener("resumed", this.onThreadStateListener);
+        this.connection.addListener("detached", this.onThreadStateListener);
 
         var self = this;
         this.connection.listTabs(function(response)
@@ -79,7 +81,9 @@ DebuggerClient.prototype = Obj.extend(Object,
 
         this.connection.removeListener("tabNavigated", this.onTabNavigatedListener);
         this.connection.removeListener("tabDetached", this.onTabDetachedListener);
-        this.connection.removeListener("paused", this.onPausedListener);
+        this.connection.removeListener("paused", this.onThreadStateListener);
+        this.connection.removeListener("resumed", this.onThreadStateListener);
+        this.connection.removeListener("detached", this.onThreadStateListener);
 
         var self = this;
         var activeThread = this.activeThread;
@@ -114,7 +118,7 @@ DebuggerClient.prototype = Obj.extend(Object,
         FBTrace.sysout("debuggerClient.onTabDetached;");
     },
 
-    onPaused: function(type, packet)
+    onThreadState: function(type, packet)
     {
         // paused/resumed/detached get special treatment...
         if (packet.type in RDP.ThreadStateTypes && packet.from in this.threadClients)
