@@ -172,7 +172,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // @hack: shouldn't be only for breakpoints
         var type = packet.why.type;
-        if (type == "breakpoint" || type == "resumeLimit")
+        if (type == "breakpoint" || type == "resumeLimit" || type == "debuggerStatement")
         {
             context.debuggerClient.activeThread.fillFrames(50);
 
