@@ -115,6 +115,8 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
+        return;
+
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);
 

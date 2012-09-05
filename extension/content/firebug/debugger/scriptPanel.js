@@ -212,8 +212,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
         }
 
-FBTrace.sysout("script panel update selection")
-
         if (object instanceof CompilationUnit)
             this.navigate(object);
         else if (object instanceof SourceLink)

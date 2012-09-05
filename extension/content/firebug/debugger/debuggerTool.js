@@ -155,6 +155,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     getCurrentFrame: function(context)
     {
+        return context.currentFrame;
+    },
+
+    getCurrentTrace: function(context)
+    {
+        return context.currentTrace;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -187,6 +193,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.stopped = false;
         context.stoppedFrame = null;
         context.currentFrame = null;
+        context.currentTrace = null;
 
         this.dispatch("onStopDebugging");
     },
@@ -196,6 +203,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         FBTrace.sysout("debuggerTool.framesadded", frames);
 
         var stackTrace = StackTrace.buildStackTrace(frames, context);
+        context.currentTrace = stackTrace;
+
         this.dispatch("onStackCreated", [stackTrace]);
     },
 

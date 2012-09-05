@@ -114,18 +114,16 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     show: function(state)
     {
-        var currentFrame = null;//this.tool.getCurrentFrame(this.context);
-
         if (!this.location)
         {
-            this.location = StackTrace.buildStackTrace(currentFrame);
+            this.location = this.tool.getCurrentTrace(this.context);
             this.updateLocation(this.location);
         }
 
         if (FBTrace.DBG_STACK)
         {
-            FBTrace.sysout("callstack.show state: " + state + " this.location: " + this.location,
-                {state: state, panel: this, currentFrame: currentFrame});
+            FBTrace.sysout("callstack.show; state: " + state + ", location: " +
+                this.location, state);
         }
 
         if (state)
@@ -174,11 +172,12 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
-        var currentFrame = this.tool.getCurrentFrame(this.context);
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack.updateSelection; " + object, object);
 
         if (!this.location)
         {
-            this.location = StackFrame.buildStackTrace(currentFrame);
+            this.location = this.tool.getCurrentTrace(this.context);
             this.updateLocation(this.location);
         }
 
@@ -205,7 +204,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     updateLocation: function(object)
     {
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack; updateLocation " + object, object);
+            FBTrace.sysout("callstack.updateLocation; " + object, object);
 
         // All paths lead to showStackTrace
         if (object instanceof StackTrace)
