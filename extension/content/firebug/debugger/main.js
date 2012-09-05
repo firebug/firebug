@@ -16,6 +16,7 @@ define([
     "firebug/debugger/stackTrace",
     "firebug/debugger/watchPanel",
     "firebug/debugger/gripClient",
+    "firebug/debugger/gripCache",
 ],
 function(FBTrace) {
 

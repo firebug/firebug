@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/url",
     "firebug/lib/locale",
-    "firebug/js/sourceLink",
+    "firebug/debugger/sourceLink",
 ],
 function (FBTrace, Url, Locale, SourceLink) {
 
@@ -156,6 +156,8 @@ StackFrame.buildStackFrame = function(frame, context)
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 
+    var connection = context.getConnection();
+
     var args = [];
     var arguments = frame.environment.bindings.arguments;
     for (var i=0; i<arguments.length; i++)
@@ -163,6 +165,15 @@ StackFrame.buildStackFrame = function(frame, context)
         args.push({
             name: getArgName(arguments[i]),
             value: getArgValue(frame.arguments[i])
+        });
+
+        if (!frame.arguments[i].actor)
+            continue;
+
+        var gripCache = context.debuggerClient.activeThread.gripCache;
+        gripCache.getObject(connection, frame.arguments[i], function(object)
+        {
+            FBTrace.sysout("object " + JSON.stringify(object), object);
         });
     }
 

@@ -6,8 +6,9 @@ define([
     "firebug/debugger/sourceFile",
     "firebug/debugger/rdp",
     "firebug/debugger/breakpointClient",
+    "firebug/debugger/gripCache",
 ],
-function (Obj, Options, SourceFile, RDP, BreakpointClient) {
+function (Obj, Options, SourceFile, RDP, BreakpointClient, GripCache) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -26,6 +27,7 @@ function ThreadClient(connection, actor, debuggerClient)
     this.debuggerClient = debuggerClient;
     this.frameCache = [];
     this.scriptCache = {};
+    this.gripCache = new GripCache();
 }
 
 ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
@@ -484,6 +486,8 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         this.state = RDP.ThreadStateTypes[packet.type];
         this.clearFrames();
         this.clearPauseGrips();
+
+        this.gripCache.clear();
 
         if (this.connection.eventsEnabled)
             this.dispatch(packet.type, [this.debuggerClient.context, packet]);
