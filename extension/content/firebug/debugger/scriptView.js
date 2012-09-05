@@ -225,12 +225,20 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         FBTrace.sysout("scriptView.scrollToLine; line: " + lineNo);
 
+        //@hack xxxHonza: avoid exception
+        if (!this.editor._model)
+            return;
+
         this.editor.setDebugLocation(lineNo - 1);
         this.editor.setCaretPosition(lineNo - 1);
     },
 
     removeDebugLocation: function()
     {
+        //@hack xxxHonza: avoid exception
+        if (!this.editor._model)
+            return;
+
         this.editor.setDebugLocation(-1);
     }
 });
