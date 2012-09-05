@@ -11,8 +11,11 @@ define([
     "firebug/debugger/stackFrame",
     "firebug/chrome/reps",
     "firebug/debugger/sourceLink",
+    "firebug/lib/css",
 ],
-function(Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps, SourceLink) {
+function(Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
+    SourceLink, Css) {
+
 with (Domplate) {
 
 // ********************************************************************************************* //
