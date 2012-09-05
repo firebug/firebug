@@ -876,11 +876,11 @@ window.Firebug =
             // TODO reattach
 
             // window is closing in detached mode
-            if (Firebug.chrome.window.top)
+            var parent = this.getFirebugFrameParent();
+            if (parent)
             {
-                topWindow = Firebug.chrome.window.top;
-                topWindow.exportFirebug();
-                topWindow.close();
+                parent.exportFirebug();
+                parent.close();
             }
 
             Firebug.setPlacement("minimized");
@@ -921,10 +921,9 @@ window.Firebug =
         //detached -> inbrowser
         if (!forceOpen && Firebug.isDetached())
         {
-            // We need firebug.xul here so, don't use 'top' since it references browser.xul
-            var topWin = Firebug.chrome.window.parent;
-            topWin.exportFirebug();
-            topWin.close();
+            var parent = this.getFirebugFrameParent();
+            parent.exportFirebug();
+            parent.close();
 
             if (reopenInBrowser)
             {
@@ -969,7 +968,6 @@ window.Firebug =
         Firebug.StartButton.resetTooltip();
     },
 
-
     detachBar: function()
     {
         if (Firebug.isDetached())  // can be set true attachBrowser
@@ -980,8 +978,8 @@ window.Firebug =
 
         if (Firebug.chrome.waitingForDetach)
             return null;
-        Firebug.chrome.waitingForDetach = true;
 
+        Firebug.chrome.waitingForDetach = true;
         Firebug.chrome.toggleOpen(false);  // don't show in browser.xul now
 
         if (FBTrace.DBG_ACTIVATION)
@@ -1009,6 +1007,22 @@ window.Firebug =
     toggleCommandLine: function(showCommandEditor)
     {
         Options.set("commandEditor", showCommandEditor);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
+     * Returns parent of the firebugFrame.xul frame. The actual parent depends on whether
+     * Firebug is attached or detached.
+     *
+     * attached -> browser.xul
+     * detached -> firebug.xul
+     */
+    getFirebugFrameParent: function()
+    {
+        // We need firebug.xul in case of detached state. So, don't use 'top' since
+        // it references browser.xul
+        return Firebug.chrome.window.parent;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

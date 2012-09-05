@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("commandline.dirxml.START");
-    FBTest.openNewTab(basePath + "commandline/api/dirxml.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/api/dirxml.html", function(win)
     {
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
