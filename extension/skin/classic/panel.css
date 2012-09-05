@@ -9,10 +9,13 @@
 @import "chrome://firebug/skin/html.css";
 @import "chrome://firebug/skin/css.css";
 @import "chrome://firebug/skin/debugger.css";
-@import "chrome://firebug/skin/scriptPanel.css";
 @import "chrome://firebug/skin/balloonNote.css";
 @import "chrome://firebug/skin/callstack.css";
 @import "chrome://firebug/skin/layout.css";
 @import "chrome://firebug/skin/dom.css";
 @import "chrome://firebug/skin/tableRep.css";
 @import "chrome://firebug-os/skin/panel.css";
+
+/* JSD2 additions*/
+@import "chrome://firebug/skin/scriptPanel.css";
+@import "chrome://firebug/skin/callstackPanel.css";
