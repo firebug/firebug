@@ -226,6 +226,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         FBTrace.sysout("scriptView.scrollToLine; line: " + lineNo);
 
         this.editor.setDebugLocation(lineNo - 1);
+        this.editor.setCaretPosition(lineNo - 1);
     },
 
     removeDebugLocation: function()

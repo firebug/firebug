@@ -74,3 +74,14 @@
     padding-left: 10px;
     background-color: lightgoldenrodyellow;
 }
+
+/*************************************************************************************************/
+/* Caret Location */
+
+.annotationLine.currentLine {
+    background-color: transparent !important;
+}
+
+.annotationLine.currentLine.debugLocation {
+    background-color: lightgoldenrodyellow !important;
+}
