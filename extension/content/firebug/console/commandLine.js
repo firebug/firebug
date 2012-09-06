@@ -450,6 +450,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);
+
+        var consolePanel = Firebug.currentContext.panelMap.console;
+        if (consolePanel)
+            Dom.scrollToBottom(consolePanel.panelNode);
     },
 
     enterInspect: function(context)
@@ -882,7 +886,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var context = Firebug.currentContext;
 
-        if (!this.commandHistory.isShown())
+        var commandEditorOpen = (Firebug.commandEditor && context.panelName == "console");
+        if (!this.commandHistory.isShown() && !commandEditorOpen)
         {
             this.autoCompleter.complete(context);
         }

@@ -11,13 +11,20 @@ define([
     "firebug/lib/search",
     "firebug/chrome/menu",
     "firebug/lib/options",
+    "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options) {
+function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+    Wrapper, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
+
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -148,12 +155,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (state)
             wasScrolledToBottom = state.wasScrolledToBottom;
 
-        if (typeof(wasScrolledToBottom) == "boolean")
+        if (typeof wasScrolledToBottom == "boolean")
         {
             this.wasScrolledToBottom = wasScrolledToBottom;
             delete state.wasScrolledToBottom;
         }
-        else
+        else if (typeof this.wasScrolledToBottom != "boolean")
         {
             // If the previous state doesn't says where to scroll,
             // scroll to the bottom by default.
@@ -453,6 +460,27 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     appendObject: function(object, row, rep)
     {
+        // Issue 5712:  Firefox crashes when trying to log XMLHTTPRequest to console
+        // xxxHonza: should be removed as soon as Firefox 16 is the minimum version.
+        if (!firefox15AndHigher)
+        {
+            if (typeof(object) == "object")
+            {
+                try
+                {
+                    // xxxHonza: could we log directly the unwrapped object?
+                    var unwrapped = Wrapper.unwrapObject(object);
+                    if (unwrapped.constructor.name == "XMLHttpRequest") 
+                        object = object + "";
+                }
+                catch (e)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
+                }
+            }
+        }
+
         if (!rep)
             rep = Firebug.getRep(object, this.context);
 
@@ -561,7 +589,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
-            else
+            else 
                 this.appendObject(object, row);
         }
     },

@@ -95,11 +95,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         getSeparator: function(part)
         {
-            if (part.type == "otherProps")
-                return " ";
-
             if (part.lastFont || part.type == "important")
                 return "";
+
+            if (part.type == "otherProps")
+                return " ";
 
             return ",";
         },
@@ -511,8 +511,18 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        var result = CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
+        // If cleanupSheets returns false there was an exception thrown when accessing
+        // a styleshet (probably since it isn't fully loaded yet). So, delay the panel
+        // update and try it again a bit later (issue 5654).
+        if (!result)
+        {
+            this.context.setTimeout(Obj.bindFixed(this.updateView, this, element), 200);
+            return;
+        }
+
+        // All stylesheets should be ready now, update the view.
         this.updateCascadeView(element);
 
         if (Dom.domUtils)
@@ -633,7 +643,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         },
         {
             label: "AddRule",
-            tooltiptext: "style.tip.Add_Rule",
+            tooltiptext: "css.tip.AddRule",
             command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
@@ -672,6 +682,23 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Extends stylesheet (CSS Panel)
+
+    deleteRuleDeclaration: function(cssSelector)
+    {
+        var repObject = Firebug.getRepObject(cssSelector);
+
+        if (repObject instanceof window.Element)
+            CSSModule.deleteRule(repObject);
+        else
+            CSSStyleSheetPanel.prototype.deleteRuleDeclaration(cssSelector);
+
+        this.refresh();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     hasPseudoClassLock: function(pseudoClass)
     {
@@ -827,7 +854,11 @@ function getFontPropValueParts(element, value, propName)
         );
         var matches = rePreFont.exec(value);
         if (!matches)
-            return;
+        {
+            // Non-simple font value, like "inherit", "status-bar" or
+            // "-moz-calc(12px) Arial" - just return the whole text.
+            return [{type: "otherProps", value: value, lastFont: true}];
+        }
         var preProps = matches[0].slice(0, -1);
         parts.push({type: "otherProps", value: preProps});
         value = value.substr(matches[0].length);

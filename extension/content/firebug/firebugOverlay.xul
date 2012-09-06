@@ -36,8 +36,8 @@
             noautofocus="true">
         </panel>
 
-        <panel id="fbCommandHistory" noautofocus="true">
-        </panel>
+        <menupopup id="fbCommandHistory" noautofocus="true">
+        </menupopup>
 
         <!-- Context menu for the Command Editor -->
         <menupopup id="fbCommandEditorPopup" />
@@ -62,8 +62,8 @@
                                 <image src="chrome://firebug/skin/firebug.png"/>
 
                                 <menupopup id="menu_firebug_iconMenu" class="fbFirebugMenuPopup"
-                                    onpopupshowing="return Firebug.GlobalUI.onMenuShowing(this);"
-                                    onpopuphiding="return Firebug.GlobalUI.onMenuHiding(this);">
+                                    onpopupshowing="return Firebug.GlobalUI.onMenuShowing(this, event);"
+                                    onpopuphiding="return Firebug.GlobalUI.onMenuHiding(this, event);">
                                     <!-- Content comes from firebugMenuContent -->
                                 </menupopup>
                             </toolbarbutton>

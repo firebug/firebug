@@ -261,7 +261,8 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     height: 20px;
 }
 
-#fbLocationList.noTabStop> menupopup > arrowscrollbox> scrollbox {
+#fbLocationList.noTabStop > menupopup > arrowscrollbox > scrollbox,
+#fbCommandHistory > arrowscrollbox > scrollbox {
     overflow-y: auto;
 }
 

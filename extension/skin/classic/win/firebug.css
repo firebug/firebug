@@ -144,18 +144,6 @@
 
 /************************************************************************************************/
 
-#fbCommandHistory {
-    min-width: 200px;
-    cursor: default;
-    font-family: monospace;
-    white-space: pre;
-}
-
-.commandHistoryItem.selected {
-    background-color: highlight;
-    color: highlighttext;
-}
-
 #fbCommandEditor {
     -moz-appearance: none;
     border: none;

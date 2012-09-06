@@ -11,9 +11,11 @@ function(FBTrace, Options, Deprecated, Xpcom) {
 // ********************************************************************************************* //
 // Constants
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
+const Ci = Components.interfaces;
+const Cc = Components.classes;
+const Cu = Components.utils;
+
+const entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEntityConverter");
 
 const reNotWhitespace = /[^\s]/;
 
@@ -189,7 +191,6 @@ function createSimpleEscape(name, direction)
 
 function escapeEntityAsName(char)
 {
-    var entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEntityConverter");
     try
     {
         return entityConverter.ConvertToEntity(char, entityConverter.entityW3C);

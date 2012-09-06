@@ -24,7 +24,7 @@ Firebug.CommandHistory = function()
     const commandHistoryMax = 1000;
 
     var commandsPopup = Firebug.chrome.$("fbCommandHistory");
-    var commands = [];
+    var commands = this.commands = [];
     var commandPointer = 0;
     var commandInsertPointer = -1;
 
@@ -126,25 +126,28 @@ Firebug.CommandHistory = function()
         if(commands.length == 0)
             return;
 
-        var vbox = commandsPopup.ownerDocument.createElement("vbox");
+        var doc = commandsPopup.ownerDocument;
 
         for (var i = 0; i < commands.length; i++)
         {
-            var hbox = commandsPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml", "div");
+            var hbox = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
             hbox.classList.add("commandHistoryItem");
             var shortExpr = Str.cropString(Str.stripNewLines(commands[i]), 50);
             hbox.innerHTML = Str.escapeForTextNode(shortExpr);
             hbox.value = i;
-            vbox.appendChild(hbox);
+            commandsPopup.appendChild(hbox);
 
             if (i === commandPointer)
                 this.selectCommand(hbox);
         }
 
-        commandsPopup.appendChild(vbox);
         commandsPopup.openPopup(element, "before_start", 0, 0, false, false);
+
+        // make sure last element is visible
+        var box = doc.getAnonymousNodes(commandsPopup)[0];
+        var scrollBox = doc.getAnonymousNodes(box)[1];
+        scrollBox.scrollTop = scrollBox.scrollHeight;
 
         return true;
     };

@@ -671,7 +671,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     highlightObject: function(object, context, target)
     {
-        // Highlighting huge amount of elements on the page can cause sericous performance
+        // Highlighting huge amount of elements on the page can cause serious performance
         // problems (see issue 4736). So, avoid highlighting if the number of elements in
         // the array exceeds specified limit.
         var arr = this.getRealObject(object, context);
@@ -910,14 +910,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return elt.getAttribute("class")
-                ? ("." + elt.getAttribute("class").split(" ")[0])
-                : "";
+            return elt.classList.length > 0 ? ("." + elt.classList[0]) : "";
         }
         catch (err)
         {
+            return "";
         }
-        return "";
     },
 
     getValue: function(elt)
@@ -1111,6 +1109,10 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
+        // XXX: Temporary fix for issue 5577.
+        if (Dom.getAncestorByClass(target, "cssElementRuleContainer"))
+            return;
+
         var type;
         var monitored = EventMonitor.areEventsMonitored(elt, null, context);
         var items = [];

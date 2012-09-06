@@ -1303,6 +1303,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
                         return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
+                    break;
 
                 case "fontFamily":
                     return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
@@ -1311,6 +1312,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             delete this.infoTipType;
             delete this.infoTipValue;
             delete this.infoTipObject;
+
+            return false;
         }
     },
 
@@ -1575,17 +1578,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         CSSModule.deleteRule(styleSheet, ruleIndex);
 
-        if (this.context.panelName == "stylesheet")
-        {
-            var rule = Dom.getAncestorByClass(cssSelector, "cssRule");
-            if (rule)
-                rule.parentNode.removeChild(rule);
-        }
-        else
-        {
-            var sidePanel = Firebug.chrome.getSelectedSidePanel();
-            sidePanel.refresh();
-        }
+        var rule = Dom.getAncestorByClass(cssSelector, "cssRule");
+        if (rule)
+            rule.parentNode.removeChild(rule);
     },
 
     copyStyleDeclaration: function(cssSelector)

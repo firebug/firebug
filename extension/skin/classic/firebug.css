@@ -365,6 +365,23 @@ textbox[type="fbSearchBox"] > panel {
     list-style-image: url(chrome://firebug/skin/commandLineDisabled.png);
 }
 
+/************************************************************************************************/
+/* Command History panel */
+
+#fbCommandHistory {
+    min-width: 200px;
+    max-height: 400px;
+    cursor: default;
+    font-family: monospace;
+    white-space: pre;
+    -moz-appearance: none;
+}
+
+.commandHistoryItem.selected {
+    background-color: highlight;
+    color: highlighttext;
+}
+
 /*************************************************************************************************/
 
 #fbBreakOnErrors {
