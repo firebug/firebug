@@ -326,6 +326,15 @@ const eventTypes =
         "cut",
         "copy",
         "paste"
+    ],
+
+    touch: [
+        "touchstart",
+        "touchend",
+        "touchmove",
+        "touchenter",
+        "touchleave",
+        "touchcancel"
     ]
 };
 
