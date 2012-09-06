@@ -1854,6 +1854,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
             value = styleRule.style.getPropertyValue(propName);
+
+            if (Options.get("colorDisplay") == "hex")
+                value = Css.rgbToHex(value);
+            else if (Options.get("colorDisplay") == "hsl")
+                value = Css.rgbToHSL(value);
         }
         return value;
     },
