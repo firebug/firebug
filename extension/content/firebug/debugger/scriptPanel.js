@@ -4,6 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/dom",
     "firebug/debugger/scriptView",
     "arch/compilationunit",
     "firebug/debugger/debuggerTool",
@@ -11,7 +12,7 @@ define([
     "firebug/debugger/stackFrame",
     "firebug/debugger/sourceLink",
 ],
-function (Obj, Locale, Events, ScriptView, CompilationUnit, DebuggerTool, Menu,
+function (Obj, Locale, Events, Dom, ScriptView, CompilationUnit, DebuggerTool, Menu,
     StackFrame, SourceLink) {
 
 // ********************************************************************************************* //
@@ -709,7 +710,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateInfoTip: function()
     {
-        var infoTip = this.panelBrowser.infoTip;
+        var infoTip = this.panelBrowser ? this.panelBrowser.infoTip : null;
         if (infoTip && this.infoTipExpr)
             this.populateInfoTip(infoTip, this.infoTipExpr);
     },

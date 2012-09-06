@@ -18,20 +18,23 @@ function(Obj, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Loca
 // ********************************************************************************************* //
 // Watch Panel
 
-Firebug.WatchPanel = function()
+function WatchPanel()
 {
+    this.onMouseDown = Obj.bind(this.onMouseDown, this);
+    this.onMouseOver = Obj.bind(this.onMouseOver, this);
+    this.onMouseOut = Obj.bind(this.onMouseOut, this);
 }
 
 /**
  * Represents the Watch side panel available in the Script panel.
  */
-Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
+WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 /** @lends Firebug.WatchPanel */
 {
     tag: Firebug.DOMPanel.DirTable.watchTag,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
+    // Members
 
     dispatchName: "JSD2.WatchPanel",
 
@@ -42,15 +45,15 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     deriveA11yFrom: "console",
     remoteable: true,
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
     initialize: function()
     {
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onMouseOver = Obj.bind(this.onMouseOver, this);
-        this.onMouseOut = Obj.bind(this.onMouseOut, this);
+        Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
 
         Firebug.registerUIListener(this);
-
-        Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
+        Firebug.proxy.addListener(this);
     },
 
     destroy: function(state)
@@ -58,14 +61,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         state.watches = this.watches;
 
         Firebug.unregisterUIListener(this);
+        Firebug.proxy.removeListener(this);
 
         Firebug.DOMBasePanel.prototype.destroy.apply(this, arguments);
-    },
-
-    show: function(state)
-    {
-        if (state && state.watches)
-            this.watches = state.watches;
     },
 
     initializeNode: function(oldPanelNode)
@@ -86,6 +84,33 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Connection
+
+    onConnect: function(proxy)
+    {
+        this.tool = this.context.getTool("debugger");
+        this.tool.attach(this.context, proxy.connection, this);
+
+        FBTrace.sysout("WatchPanel.onConnect; " + this.tool);
+    },
+
+    onDisconnect: function(proxy)
+    {
+        FBTrace.sysout("WatchPanel.onDisconnect;");
+
+        // Detach from the current tool.
+        this.tool.detach(this.context, proxy.connection, this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    show: function(state)
+    {
+        if (state && state.watches)
+            this.watches = state.watches;
+    },
+
     refresh: function()
     {
         this.rebuild(true);
@@ -103,19 +128,17 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
-                FBTrace.sysout("updateSelection FAILS " + exc, exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("WatchPanel.updateSelection; EXCEPTION " + exc, exc);
         }
     },
 
     doUpdateSelection: function(frame)
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch panel updateSelection frame " + frame, frame);
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
-
-        return;
 
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);
@@ -126,7 +149,8 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             this.frameSignature = frame.signature();
         }
 
-        var scopes;
+        var scopes = [this.context.getGlobalScope()];
+/*
         if (frame instanceof StackFrame)
             scopes = frame.getScopes(Firebug.viewChrome);
         else
@@ -137,36 +161,30 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             FBTrace.sysout("dom watch frame isStackFrame " + (frame instanceof StackFrame) +
                 " updateSelection scopes " + scopes.length, scopes);
         }
-
+*/
         var members = [];
+
+        FBTrace.sysout("watches", this.watches);
 
         if (this.watches)
         {
-            for (var i = 0; i < this.watches.length; ++i)
+            for (var i=0; i<this.watches.length; ++i)
             {
                 var expr = this.watches[i];
                 var value = null;
 
-                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
-                    function success(result, context)
-                    {
-                        value = result;
-                    },
-                    function failed(result, context)
-                    {
-                        var exc = result;
-                        value = new FirebugReps.ErrorCopy(exc+"");
-                    }
-                );
+                var member = this.addMember(scopes[0], "watch", members, expr, value, 0);
+                this.evalExpression(frame, member);
 
-                this.addMember(scopes[0], "watch", members, expr, value, 0);
-
-                if (FBTrace.DBG_DOM)
+                if (FBTrace.DBG_WATCH)
+                {
                     FBTrace.sysout("watch.updateSelection " + expr + " = " + value,
                         {expr: expr, value: value, members: members})
+                }
             }
         }
 
+/*
         if (frame && frame instanceof StackFrame)
         {
             var thisVar = frame.getThisValue();
@@ -179,7 +197,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             for (var i=1; i<scopes.length; i++)
                 this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
         }
-
+*/
         this.expandMembers(members, this.toggles, 0, 0, this.context);
         this.showMembers(members, false);
 
@@ -187,10 +205,28 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             FBTrace.sysout("dom watch panel updateSelection members " + members.length, members);
     },
 
+    evalExpression: function(frame, member)
+    {
+        FBTrace.sysout("WatchPanel.evalExpression: ", frame);
+
+        var self = this;
+        this.tool.eval(this.context, frame, member.name, function(result)
+        {
+            FBTrace.sysout("evalExpression done: ", result);
+
+            var row = getWatchRow(member);
+            if (row)
+            {
+                self.setPropertyValue(row, value)
+                var result = rowTag.insertRows({members: slice}, tbody.lastChild);
+            }
+        });
+    },
+
     rebuild: function()
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.rebuild", this.selection);
+            FBTrace.sysout("WatchPanel.rebuild", this.selection);
 
         this.updateSelection(this.selection);
     },
@@ -210,12 +246,15 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         watchRow.style.direction = cs.direction;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Watch Actions
+
     addWatch: function(expression)
     {
         expression = Str.trim(expression);
 
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.addWatch; expression: "+expression);
+            FBTrace.sysout("WatchPanel.addWatch; expression: " + expression);
 
         if (!this.watches)
             this.watches = [];
@@ -233,7 +272,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     removeWatch: function(expression)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.removeWatch; expression: " + expression);
+            FBTrace.sysout("WatchPanel.removeWatch; expression: " + expression);
 
         if (!this.watches)
             return;
@@ -246,7 +285,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     editNewWatch: function(value)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.editNewWatch; value: " + value);
+            FBTrace.sysout("WatchPanel.editNewWatch; value: " + value);
 
         var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
@@ -256,7 +295,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     setWatchValue: function(row, value)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.setWatchValue", {row: row, value: value});
+            FBTrace.sysout("WatchPanel.setWatchValue", {row: row, value: value});
 
         var rowIndex = getWatchRowIndex(row);
         this.watches[rowIndex] = value;
@@ -266,7 +305,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     deleteWatch: function(row)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.deleteWatch", row);
+            FBTrace.sysout("WatchPanel.deleteWatch", row);
 
         var rowIndex = getWatchRowIndex(row);
         this.watches.splice(rowIndex, 1);
@@ -282,9 +321,11 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     deleteAllWatches: function()
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.deleteAllWatches");
+            FBTrace.sysout("WatchPanel.deleteAllWatches");
+
         this.watches = [];
         this.rebuild(true);
+
         this.context.setTimeout(Obj.bindFixed(function()
         {
             this.showToolbox(null);
@@ -410,7 +451,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         var deleteAllWatchesIndex = (deleteWatchIndex >= 0) ? deleteWatchIndex + 1 : 0;
 
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("insert DeleteAllWatches at: "+ deleteAllWatchesIndex);
+            FBTrace.sysout("insert DeleteAllWatches at: " + deleteAllWatchesIndex);
 
         // insert DeleteAllWatches after DeleteWatch
         items.splice(deleteAllWatchesIndex, 0, {
@@ -438,12 +479,28 @@ function getWatchRowIndex(row)
     return index;
 }
 
+function getWatchRow(member)
+{
+    for (; row; row = row.previousSibling)
+    {
+        if (row.domObject == member)
+            return row;
+    }
+
+    return null;
+}
+
+function updateRow(member)
+{
+    
+}
+
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.WatchPanel);
+Firebug.registerPanel(WatchPanel);
 
-return Firebug.WatchPanel;
+return WatchPanel;
 
 // ********************************************************************************************* //
 });

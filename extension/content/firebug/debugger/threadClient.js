@@ -197,12 +197,21 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         // further requests that should only be sent in the paused state.
         this.state = "resuming";
 
-        var self = this;
-        var request = { to: this.actor, type: RDP.DebugProtocolTypes.clientEvaluate,
-            frame: aFrame, expression: aExpression };
+        var request = {
+            to: this.actor,
+            type: RDP.DebugProtocolTypes.clientEvaluate,
+            frame: aFrame,
+            expression: aExpression
+        };
 
+        // Remember the callback. It'll be used to pass the result back.
+        this.debuggerClient.context.evalInProgress = true;
+
+        var self = this;
         this.connection.request(request, function(response)
         {
+            self.debuggerClient.context.evalInProgress = false;
+
             if (response.error)
             {
                 // There was an error resuming, back to paused state.
@@ -481,6 +490,10 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
      */
     onThreadState: function DebuggerClient_onThreadState(packet)
     {
+        // Ignore thread-state changes if server side evaluation is in progress.
+        if (this.debuggerClient.context.evalInProgress)
+            return;
+
         FBTrace.sysout("threadClient.onThreadState; type: " + packet.type, packet);
 
         this.state = RDP.ThreadStateTypes[packet.type];
@@ -492,6 +505,16 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         if (this.connection.eventsEnabled)
             this.dispatch(packet.type, [this.debuggerClient.context, packet]);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Objects
+
+    getObject: function(grip, callback)
+    {
+        this.assertPaused("getObject");
+
+        this.gripCache.getObject(this.connection, grip, callback);
+    }
 });
 
 // ********************************************************************************************* //

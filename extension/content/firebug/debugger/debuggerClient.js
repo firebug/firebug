@@ -219,6 +219,11 @@ SourceScripts.prototype =
 
     onNewScript: function(notification, packet)
     {
+        // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
+        // create as the user is evaluating expressions in the watch window.
+        if (aPacket.url == "debugger eval code")
+            return;
+
         FBTrace.sysout("SourceScripts.onNewScript; " + notification, packet);
     },
 

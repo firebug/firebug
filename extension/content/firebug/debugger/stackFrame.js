@@ -115,8 +115,13 @@ StackFrame.prototype =
 
     signature: function()
     {
-        return this.script.tag + "." + this.pc;
+        return this.getActor();
     },
+
+    getActor: function()
+    {
+        return this.nativeFrame.actor;
+    }
 };
 
 // ********************************************************************************************* //

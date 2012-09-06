@@ -83,13 +83,78 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoints
+    // Thread Listener
+
+    paused: function(context, packet)
+    {
+        FBTrace.sysout("debuggerTool.paused; why: " + packet.why.type, packet);
+
+        // @hack: all types should be supported?
+        var types = {
+            "breakpoint": 1,
+            "resumeLimit": 1,
+            "debuggerStatement": 1,
+        };
+
+        var type = packet.why.type;
+        if (types[type])
+        {
+            context.debuggerClient.activeThread.fillFrames(50);
+
+            var frame = StackFrame.buildStackFrame(packet.frame, context);
+
+            context.stopped = true;
+            context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
+            context.currentFrame = frame;  // the frame we show to user, depends on selection
+
+            this.dispatch("onStartDebugging", [frame]);
+        }
+        else if (type == "clientEvaluated" && this.evalCallback)
+        {
+            // Pause packet with 'clientEvaluated' type is sent when user expression
+            // has been evaluated on the server side. Let's pass the result to the
+            // registered callback.
+            var result = packet.why.frameFinished["return"];
+            this.evalCallback(result);
+            this.evalCallback = null
+        }
+    },
+
+    resumed: function(context, packet)
+    {
+        FBTrace.sysout("debuggerTool.resumed; " + packet, packet);
+
+        context.stopped = false;
+        context.stoppedFrame = null;
+        context.currentFrame = null;
+        context.currentTrace = null;
+
+        this.dispatch("onStopDebugging");
+    },
+
+    framesadded: function(context, frames)
+    {
+        FBTrace.sysout("debuggerTool.framesadded", frames);
+
+        var stackTrace = StackTrace.buildStackTrace(frames, context);
+        context.currentTrace = stackTrace;
+
+        this.dispatch("onStackCreated", [stackTrace]);
+    },
+
+    framescleared: function()
+    {
+        this.dispatch("onStackCleared");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoint API
 
     setBreakpoint: function(context, url, lineNumber, callback)
     {
         return context.debuggerClient.activeThread.setBreakpoint({
             url: url,
-            line: lineNumber
+            line: lineNumber + 1
         }, callback);
     },
 
@@ -120,7 +185,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Debugging
+    // Debugging API
 
     rerun: function(context)
     {
@@ -151,7 +216,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Stack Trace
+    // Stack Trace API
 
     getCurrentFrame: function(context)
     {
@@ -164,53 +229,25 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Thread Listener
+    // Expression API
 
-    paused: function(context, packet)
+    eval: function(context, frame, expr, callback)
     {
-        FBTrace.sysout("debuggerTool.paused; why: " + packet.why.type, packet);
-
-        // @hack: shouldn't be only for breakpoints
-        var type = packet.why.type;
-        if (type == "breakpoint" || type == "resumeLimit" || type == "debuggerStatement")
+        var self = this;
+        this.evalCallback = function(result)
         {
-            context.debuggerClient.activeThread.fillFrames(50);
+            context.debuggerClient.activeThread.getObject(result, callback);
+        };
 
-            var frame = StackFrame.buildStackFrame(packet.frame, context);
-
-            context.stopped = true;
-            context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
-            context.currentFrame = frame;  // the frame we show to user, depends on selection
-
-            this.dispatch("onStartDebugging", [frame]);
-        }
-    },
-
-    resumed: function(context, packet)
-    {
-        FBTrace.sysout("debuggerTool.resumed; " + packet, packet);
-
-        context.stopped = false;
-        context.stoppedFrame = null;
-        context.currentFrame = null;
-        context.currentTrace = null;
-
-        this.dispatch("onStopDebugging");
-    },
-
-    framesadded: function(context, frames)
-    {
-        FBTrace.sysout("debuggerTool.framesadded", frames);
-
-        var stackTrace = StackTrace.buildStackTrace(frames, context);
-        context.currentTrace = stackTrace;
-
-        this.dispatch("onStackCreated", [stackTrace]);
-    },
-
-    framescleared: function()
-    {
-        this.dispatch("onStackCleared");
+        // This operation causes the server side to:
+        // 1) Resume the current thread
+        // 2) Evaluate the expresion in a new frame
+        // 3) Remove the frame and pause
+        context.debuggerClient.activeThread.eval(frame.getActor(), expr, function(response)
+        {
+            // Not interested in 'resume' packet. The callback will be executed
+            // when 'pause' packet is received, see paused() method.
+        });
     }
 });
 
