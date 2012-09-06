@@ -1376,8 +1376,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     optionMenu: function(label, option)
     {
         var checked = Firebug.Options.get(option);
-        return {label: label, type: "checkbox", checked: checked,
-            command: Obj.bindFixed(Firebug.Options.set, Firebug, option, !checked) };
+        return {
+            label: label, type: "checkbox", checked: checked,
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                Firebug.Options.set(option, checked)
+            }
+        };
     },
 
     getContextMenuItems: function(fn, target)

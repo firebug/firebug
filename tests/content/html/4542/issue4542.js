@@ -58,8 +58,7 @@ function checkQuotesInOnClick(callback, panel, win)
                 !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
                     "to the next editable item when a single quote is entered"))
             {
-                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                    firstClientRect.top-boundingClientRect.top);
+                FBTest.synthesizeMouse(attribute);
                 editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
             }
 
@@ -77,8 +76,7 @@ function checkQuotesInOnClick(callback, panel, win)
                 !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
                     "to the next editable item when a double quote is entered"))
             {
-                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                    firstClientRect.top-boundingClientRect.top);
+                FBTest.synthesizeMouse(attribute);
                 editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
             }
 
@@ -118,8 +116,7 @@ function checkQuotesInStyle(callback, panel, win)
                 !FBTest.compare(/^var output/, editor.value, "Editor must not jump "+
                     "to the next editable item when a single quote is entered"))
             {
-                FBTest.synthesizeMouse(attribute, firstClientRect.left-boundingClientRect.left,
-                    firstClientRect.top-boundingClientRect.top);
+                FBTest.synthesizeMouse(attribute);
                 editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
             }
 
@@ -150,15 +147,7 @@ function clickAttributeValue(attributes, name, callback)
     }
     var attributeValue = attribute.getElementsByClassName("nodeValue").item(0);
 
-    // Click the attribute value to open the inline editor
-    var boundingClientRect = attributeValue.getBoundingClientRect();
-    var firstClientRect = attributeValue.getClientRects()[0];
-
-    if (FBTrace.DBG_FBTEST)
-        FBTrace.sysout("clientrect", {cr: firstClientRect, bcr: boundingClientRect});
-
-    FBTest.synthesizeMouse(attributeValue, firstClientRect.left-boundingClientRect.left,
-        firstClientRect.top-boundingClientRect.top);
+    FBTest.synthesizeMouse(attributeValue);
 
     var editor = FW.FBL.getAncestorByClass(attribute, "panelNode").
         getElementsByClassName("textEditorInner").item(0);

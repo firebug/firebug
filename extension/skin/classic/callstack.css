@@ -69,3 +69,11 @@
     display: none;
 }
 
+/*************************************************************************************************/
+/* FunctionCall log */
+
+.objectBox-functionCall {
+    padding-left: 17px;
+    cursor: default;
+    position: relative;
+}

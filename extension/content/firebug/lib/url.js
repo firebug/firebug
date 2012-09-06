@@ -313,6 +313,20 @@ Url.getPrettyDomain = function(url)
     return m ? m[2] : "";
 };
 
+/**
+ * Returns the base URL for a given window
+ * @param {Object} win DOM window
+ * @returns {String} Base URL
+ */
+Url.getBaseURL = function(win)
+{
+    if (!win)
+        return;
+
+    var base = win.document.getElementsByTagName("base").item(0);
+    return base ? base.href : win.location.href;
+};
+
 Url.absoluteURL = function(url, baseURL)
 {
     // Replace "/./" with "/" using regular expressions (don't use string since /./
@@ -506,6 +520,17 @@ Url.reEncodeURL = function(file, text, noLimit)
     url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
 
     return url;
+};
+
+/**
+ * Extracts the URL from a CSS URL definition.
+ * Example: url(../path/to/file) => ../path/to/file
+ * @param {String} url CSS URL definition
+ * @returns {String} Extracted URL
+ */
+Url.extractFromCSS = function(url)
+{
+    return url.replace(/^url\(["']?(.*?)["']?\)$/, "$1");
 };
 
 Url.makeURI = function(urlString)

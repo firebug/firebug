@@ -19,6 +19,7 @@ body {
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
+.objectBox-functionCall.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
@@ -36,6 +37,7 @@ body {
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
 .objectBox-stackFrame.hasTwisty.opened,
+.objectBox-functionCall.hasTwisty.opened,
 .netPageRow.opened > .netCol > .netPageTitle,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {

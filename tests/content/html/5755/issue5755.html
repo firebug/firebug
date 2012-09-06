@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5755: Inline editing of cropped attribute values shows the cropped value</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5755">Issue 5755</a>: Inline editing of cropped attribute values shows the cropped value</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id= "long-onclick" onclick = "try{if(isButtonLocked(this)){return false;}if (true) { if (checkAddressChanges(document.getElementById('__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:CONSIGNEE_ORIGCOUNTRY'), document.getElementById('__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:CITYPOST_SUGG_ADDRESS_TMPL_CONSIGNEE_CITYPOSTAL_COUNTRY')) || checkAddressChanges(jQuery('#CONSIGNOR_ORIGCOUNTRY').get(0), document.getElementById('__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:ADDRESS_TMPL_CONSIGNOR_COUNTRY_RO'))) {fadeInModalPanel(document.getElementById('__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:addressChange').component); return false; } else { return validatePresetProductsAndFeatures(); }};A4J.AJAX.Submit('__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM',event,{'status':'waitStatus','oncomplete':function(request,event,data){if (false) window.scrollTo(0,0);},'similarityGroupingId':'__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:ESHIPPINGPORTLET_CHOOSE_ADDRESSES_CONTINUE','parameters':{'__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:ESHIPPINGPORTLET_CHOOSE_ADDRESSES_CONTINUE':'__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot:FORM:ESHIPPINGPORTLET_CHOOSE_ADDRESSES_CONTINUE','org.ajax4jsf.portlet.NAMESPACE':'_EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_','javax.faces.portletbridge.STATE_ID':'88e7e753\x2Db78b\x2D47f5\x2D82cf\x2D2331e7092187:view:_EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_'} ,'containerId':'__EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_:_viewRoot','namespace':'_EShippingPortlet_WAR_EShippingPortlet_INSTANCE_gR6f_','actionUrl':'/EShippingPortlet/faces/xhtml/eShippingOrderNewForm.xhtml?javax.portlet.faces.DirectLink=true'} );return false;}catch(ex){alert('In fact, it does not matter how onclick of button works!\nPlease read the instruction on the page to run test');}">A long onclick</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Set the <code>displayedAttributeValueLimit</code> pref via <code>about:config</code> to 10</li>
+                    <li>Inspect the button <em>A long onclick</em> at the top of the page (<code>#long-onclick</code>)</li>
+                    <li>Click the value of the <code>onclick</code> attribute</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The inline editor should open and be filled with whole string of the <code>onclick</code> value.</li>
+                </ul>
+            </section>
+            <footer>Farshid Beheshti, farshid.beheshti@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -164,6 +164,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
+                currentEditor.cancelEditing(currentTarget, originalValue);
+
                 if (removeGroup && !originalValue && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
@@ -546,6 +548,10 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
     {
         // Remove empty groups by default
         return true;
+    },
+
+    cancelEditing: function(target, value)
+    {
     },
 
     insertNewRow: function(target, insertWhere)
@@ -1028,8 +1034,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             if(this.wrapped)
             {
-                var fixupL = clR[1].left - clR[0].left,
-                    fixupT = clR[1].top - clR[0].top;
+                var fixupL = clR[1].left - this.targetOffset.x,
+                    fixupT = clR[1].top - this.targetOffset.y;
             }
             else
             {

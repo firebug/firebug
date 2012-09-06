@@ -1,7 +1,7 @@
 {
   "name": "Firebug",
   "description": "Web Development Evolved.",
-  "version": "1.10.0a7",
+  "version": "1.11.0a2",
   "homepage" : "http://getfirebug.com/",
   "engines": {
     "node": ">= 0.6.6"

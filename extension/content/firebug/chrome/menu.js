@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/options",
-    "firebug/lib/css"
+    "firebug/lib/css",
+    "firebug/lib/deprecated"
 ],
-function(FBTrace, Locale, Options, Css) {
+function(FBTrace, Locale, Options, Css, Deprecated) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,23 +16,40 @@ var Menu = {};
 
 // ********************************************************************************************* //
 
-Menu.createMenu = function(popup, label)
+Menu.createMenu = function(popup, item)
 {
+    if (typeof item == "string")
+    {
+        return Deprecated.deprecated("The function's header changed to "+
+            "createMenu(popup, item)",
+            Menu.createMenu, [popup, {label: item}])();
+    }
+
     var menu = popup.ownerDocument.createElement("menu");
-    menu.setAttribute("label", label);
+
+    Menu.setItemIntoElement(menu, item);
 
     var menuPopup = popup.ownerDocument.createElement("menupopup");
 
     popup.appendChild(menu);
     menu.appendChild(menuPopup);
 
+    if (item.items)
+    {
+        for (var i = 0, len = item.items.length; i < len; ++i)
+            Menu.createMenuItem(menuPopup, item.items[i]);
+    }
+
     return menuPopup;
 };
 
 Menu.createMenuItem = function(popup, item, before)
 {
-    if (typeof(item) == "string" && item.charAt(0) == "-")
-        return Menu.createMenuSeparator(popup, before);
+    if ((typeof(item) == "string" && item == "-") || item.label == "-")
+        return Menu.createMenuSeparator(popup, item, before);
+
+    if (item.items)
+        return Menu.createMenu(popup, item);
 
     var menuitem = popup.ownerDocument.createElement("menuitem");
 
@@ -100,6 +118,9 @@ Menu.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
+    if (item.items && (item.command || item.commandID))
+        element.setAttribute("type", "splitmenu");
+
     return element;
 }
 
@@ -116,17 +137,30 @@ Menu.createMenuHeader = function(popup, item)
     return header;
 };
 
-Menu.createMenuSeparator = function(popup, before)
+Menu.createMenuSeparator = function(popup, item, before)
 {
+    if (item instanceof Node)
+    {
+        return Deprecated.deprecated("The function's header changed to "+
+            "createMenuSeparator(popup, item, before)",
+            Menu.createMenuSeparator, [popup, null, before])();
+    }
+
     if (!popup.firstChild)
         return;
 
-    var menuitem = popup.ownerDocument.createElement("menuseparator");
+    if (FBTrace.DBG_MENU)
+        FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
+
+    var menuItem = popup.ownerDocument.createElement("menuseparator");
+    if (typeof item == "object" && item.id)
+        menuItem.setAttribute("id", item.id);
+
     if (before)
-        popup.insertBefore(menuitem, before);
+        popup.insertBefore(menuItem, before);
     else
-        popup.appendChild(menuitem);
-    return menuitem;
+        popup.appendChild(menuItem);
+    return menuItem;
 };
 
 /**

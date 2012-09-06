@@ -491,14 +491,14 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TD({"class": "netCol netProtocolCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netDomainCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
-                DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
+                DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0 B")
             ),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role":
                 "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
                         "(",
-                        SPAN("0KB"),
+                        SPAN("0 B"),
                         SPAN(" " + Locale.$STR("FromCache")),
                         ")"
                     ),
@@ -684,24 +684,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getLocalAddress: function(file)
     {
-        var address = file.localAddress ? file.localAddress : "";
-        var port = file.localPort ? file.localPort : "";
-
-        var result = address;
-        result += result ? ":" : "";
-        result += port;
-        return result;
+        return Str.formatIP(file.localAddress, file.localPort);
     },
 
     getRemoteAddress: function(file)
     {
-        var address = file.remoteAddress ? file.remoteAddress : "";
-        var port = file.remotePort ? file.remotePort : "";
-
-        var result = address;
-        result += result ? ":" : "";
-        result += port;
-        return result;
+        return Str.formatIP(file.remoteAddress, file.remotePort);
     },
 
     getElapsedTime: function(file)
@@ -1646,8 +1634,8 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         else
         {
             var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
-            this.insertSource(netInfoBox, source, target.rowName);
-            target.innerHTML = Locale.$STR("net.headers.pretty print");
+            this.insertSource(netInfoBox, Str.escapeForTextNode(source), target.rowName);
+            target.textContent = Locale.$STR("net.headers.pretty print");
         }
 
         target.sourceDisplayed = !target.sourceDisplayed;
@@ -1965,7 +1953,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
     formatNumber: function(size)
     {
-        return size.size ? ("(" + Str.formatNumber(size.size) + ")") : "";
+        return size.size && size.size >= 1024 ? "(" + size.size.toLocaleString() + " B)" : "";
     },
 
     render: function(file, parentNode)

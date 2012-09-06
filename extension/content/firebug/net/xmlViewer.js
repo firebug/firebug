@@ -24,6 +24,7 @@ var xmlContentTypes =
     "application/rss+xml",
     "application/atom+xml",,
     "application/vnd.mozilla.maybe.feed",
+    "application/mathml+xml",
     "application/rdf+xml",
     "application/vnd.mozilla.xul+xml"
 ];

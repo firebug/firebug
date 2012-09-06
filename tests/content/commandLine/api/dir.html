@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Command Line API: dir</h1>
+
+<p>This test-case is intended for <b>dir</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Execute the following expression in the command line:<br/>
+<code style="color:green">dir({'a': {'b': {'c': 1}}});</code></li>
+<li>the console panel should display a log (one row) with variable a and value Object { b={...} }.</li>
+<li>Expand the object a, expand the object b, collapse b and collapse a. All should work as expected.</li>
+</ol>
+
+</body>
+</html>

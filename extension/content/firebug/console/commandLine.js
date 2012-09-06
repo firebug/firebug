@@ -878,7 +878,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 this.commandHistory.hide();
                 return true;
         }
-
+        if (this.commandHistory.isOpen && !event.metaKey && !event.ctrlKey && !event.altKey)
+            this.commandHistory.hide();
         return false;
     },
 

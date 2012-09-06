@@ -3763,7 +3763,7 @@ var fbs =
             var bps = breakpointStore.getItem(url);
 
             // Do not restore "Run unit this line" breakpoints. This should solve complaints
-            // about Firebug braking in the sourece even if there are no breakpoints in
+            // about Firebug breaking in the source even if there are no breakpoints in
             // Firebug UI.
             if (bps.type == BP_UNTIL)
                 continue;
@@ -4043,7 +4043,7 @@ var fbs =
 
                     // stack empty
                     if (unhookAtBottom && hookFrameCount == 0)
-                       this.unhookFunctions();
+                       fbs.unhookFunctions();
 
                     contextCached = callBack(contextCached, frame, hookFrameCount, false);
                     break;

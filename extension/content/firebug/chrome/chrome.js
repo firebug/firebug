@@ -1376,7 +1376,7 @@ var FirebugChrome =
 
             var sidePanel = panelBar2.selectedPanel;
             if (sidePanel)
-                sidePanel.select(object);
+                sidePanel.refresh();
         }
     },
 
@@ -1511,9 +1511,11 @@ var FirebugChrome =
         var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
         var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : null;
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+
-                " realObject: "+realObject+" realRep:"+realRep);
+        if (FBTrace.DBG_MENU)
+        {
+            FBTrace.sysout("chrome.onContextShowing object:"+object+", rep: "+rep+
+                ", realObject: "+realObject+", realRep:"+realRep);
+        }
 
         if (realObject && realRep)
         {

@@ -64,6 +64,8 @@ var contentTypes =
     "application/xhtml+xml": 1,
     "application/atom+xml": 1,
     "application/rss+xml": 1,
+    "application/mathml+xml": 1,
+    "application/rdf+xml": 1,
     "application/vnd.mozilla.maybe.feed": 1,
     "application/vnd.mozilla.xul+xml": 1,
     "application/javascript": 1,
