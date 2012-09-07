@@ -34,6 +34,8 @@ const filterByPath = "cookies.filterByPath";
 
 const panelName = "cookies";
 
+const idnService = Xpcom.CCSV("@mozilla.org/network/idn-service;1", "nsIIDNService");
+
 // ********************************************************************************************* //
 // Cookie observer
 
@@ -165,6 +167,15 @@ var CookieObserver = Obj.extend(BaseObserver,
     isHostFromContext: function(context, host, path)
     {
         var location;
+        try
+        {
+            host = idnService.convertACEtoUTF8(host);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COOKIES)
+                FBTrace.sysout("Host could not be converted to UTF-8", exc);
+        }
 
         // Invalid in Chromebug.
         try
