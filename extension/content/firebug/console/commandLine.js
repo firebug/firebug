@@ -1052,20 +1052,23 @@ function FirebugCommandLineAPI(context)
     this.$ = function(selector, start)  // returns unwrapped elements from the page
     {
         var result;
-        if (start && start.querySelector && (start.nodeType == Node.ELEMENT_NODE || start.nodeType == Node.DOCUMENT_NODE || start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
-            result = start.querySelector(selector);
-        else
+        if (start && start.querySelector && (
+                start.nodeType == Node.ELEMENT_NODE ||
+                start.nodeType == Node.DOCUMENT_NODE ||
+                start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
+            return start.querySelector(selector);
+        }
+        
+        result = Wrapper.unwrapObject(context.baseWindow.document).querySelector(selector);
+        if (result == null && (selector||"")[0] !== "#")
         {
-            result = Wrapper.unwrapObject(context.baseWindow.document).querySelector(selector);
-            if (result == null && (selector||"")[0] !== "#")
+            result = Wrapper.unwrapObject(context.baseWindow.document).querySelector("#" + selector);
+            if (result != null)
             {
-                result = Wrapper.unwrapObject(context.baseWindow.document).querySelector("#" + selector);
-                if (result != null)
-                {
-                    // This should be removed in the next minor (non-bugfix) version
-                    Firebug.Console.log("The console function $() has changed from $=getElementById(id) to $=querySelector(selector). You might try $(\"#" + selector + "\")", context, "warn");
-                    result = null;
-                }
+                // This should be removed in the next minor (non-bugfix) version
+                var msg = Locale.$STRF("warning.dollar_change", [selector]);
+                Firebug.Console.log(msg, context, "warn");
+                result = null;
             }
         }
         return result;
@@ -1074,8 +1077,9 @@ function FirebugCommandLineAPI(context)
     this.$$ = function(selector, start) // returns unwrapped elements from the page
     {
         var result;
-        if (start && start.querySelectorAll && (start.nodeType == Node.ELEMENT_NODE || start.nodeType == Node.DOCUMENT_NODE || start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        if (start && start.querySelectorAll && (start.nodeType == Node.ELEMENT_NODE || start.nodeType == Node.DOCUMENT_NODE || start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
             result = start.querySelectorAll(selector);
+        }
         else
             result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
         return Arr.cloneArray(result);
