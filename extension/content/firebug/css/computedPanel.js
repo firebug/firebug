@@ -142,6 +142,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             else if (Options.get("colorDisplay") == "hsl")
                 value = Css.rgbToHSL(value);
 
+            var limit = Options.get("stringCropLength");
+            if (limit > 0)
+                value = Str.cropString(value, limit);
+
             // Add a zero-width space after a comma to allow line breaking
             return value.replace(/,/g, ",\u200B");
         }
