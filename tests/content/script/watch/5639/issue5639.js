@@ -34,7 +34,7 @@ function testDeleteAllWatches(callback, panelNode, targetSelector, watchExpressi
     {
         FBTest.compare(watchExpressions.length, countWatches(panelNode), "all the watches must be added");
         var target = panelNode.querySelector(targetSelector);
-        FBTest.executeContextMenuCommand(target, "deleteAllWatches", function()
+        FBTest.executeContextMenuCommand(target, "fbDeleteAllWatches", function()
         {
             FBTest.compare(0, countWatches(panelNode), "There should not be any watch");
             callback();

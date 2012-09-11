@@ -5,14 +5,6 @@
         <title>Issue 5639: Allow deleting all watch expressions at once</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/> 
-        <script type="text/javascript">
-            window.addEventListener("load", function(){
-                var email = document.getElementById("email");
-                email.textContent = email.textContent
-                    .replace("__AT__", String.fromCharCode(64))
-                    .replace("__DOT__", ".");
-            }, false);
-        </script>
     </head>
     <body>
         <header>
@@ -28,19 +20,19 @@
                 <ol>
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>script</em> panel</li>
-                    <li>Switch to the <em>watches</em> side panel</li>
+                    <li>Switch to the <em>Watch</em> side panel</li>
                     <li>Add this watch expression (without the quotes): "a"</li>
                     <li>Add this watch expression: "b"</li>
                     <li>Right click on the "a" watch expression and click on "Delete All Watches"</li>
                     <li>Every watch should be removed</li>
                     <li>Redo steps 4 and 5</li>
-                    <li>Right click on an empty space of the <em>watches</em> panel</li>
+                    <li>Right click on an empty space of the <em>Watch</em> panel</li>
                     <li>Click on "Delete All Watches"</li>
                     <li>Every watch should be removed</li>
                 </ol>
             </section>
             <footer>
-                &lt;Florent FAYOLLE&gt;, <span id="email">&lt;florent.fayolle69__AT__gmail__DOT__com&gt;</span>
+                &lt;Florent FAYOLLE&gt;, <span id="email">&lt;florent.fayolle69@gmail.com&gt;</span>
             </footer>
         </div>
     </body>
