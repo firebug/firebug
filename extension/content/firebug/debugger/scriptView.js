@@ -223,8 +223,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     scrollToLine: function(href, lineNo, highlighter)
     {
-        FBTrace.sysout("scriptView.scrollToLine; line: " + lineNo);
-
         //@hack xxxHonza: avoid exception
         if (!this.editor._model)
             return;

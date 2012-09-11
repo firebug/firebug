@@ -229,8 +229,6 @@ SourceScripts.prototype =
 
     onScriptsAdded: function(scriptCache)
     {
-        FBTrace.sysout("SourceScripts.onScriptsAdded; ", scriptCache);
-
         for (var p in scriptCache)
         {
             var script = scriptCache[p];

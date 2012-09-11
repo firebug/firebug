@@ -87,8 +87,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     paused: function(context, packet)
     {
-        FBTrace.sysout("debuggerTool.paused; why: " + packet.why.type, packet);
-
         // @hack: all types should be supported?
         var types = {
             "breakpoint": 1,
@@ -122,8 +120,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     resumed: function(context, packet)
     {
-        FBTrace.sysout("debuggerTool.resumed; " + packet, packet);
-
         context.stopped = false;
         context.stoppedFrame = null;
         context.currentFrame = null;
@@ -134,8 +130,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     framesadded: function(context, frames)
     {
-        FBTrace.sysout("debuggerTool.framesadded", frames);
-
         var stackTrace = StackTrace.buildStackTrace(frames, context);
         context.currentTrace = stackTrace;
 
@@ -248,7 +242,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             // Not interested in 'resume' packet. The callback will be executed
             // when 'pause' packet is received, see paused() method.
         });
-    }
+    },
 });
 
 // ********************************************************************************************* //
