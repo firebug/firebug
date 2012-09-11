@@ -22,6 +22,10 @@ var consoleShortcuts = ["dir", "dirxml", "table"];
 // List of console variables.
 var props = ["$0", "$1", "help"];
 
+
+// xxxHonza: hack for JSD2 debugging
+commands.push("pauseGrip");
+
 // ********************************************************************************************* //
 // Command Line Implementation
 

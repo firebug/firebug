@@ -1247,6 +1247,33 @@ function FirebugCommandLineAPI(context)
         Firebug.MemoryProfiler.stop(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };*/
+
+    //xxxHonza: hack for JSD2 debugging, type not supported yet
+    this.pauseGrip = function(actor, type)
+    {
+        var context = Firebug.currentContext;
+        if (!context)
+            return "No current context";
+
+        var client = context.debuggerClient;
+        if (!client)
+            return "Debugger client not available";
+
+        var thread = client.activeThread;
+        if (!thread)
+            return "The debugger must be paused";
+
+        if (!actor)
+            return "No actor specified";
+
+        var grip = thread.pauseGrip({actor: actor});
+        grip.getPrototypeAndProperties(function(response)
+        {
+            Firebug.Console.log(response);
+        });
+
+        return Firebug.Console.getDefaultReturnValue(context.window);
+    };
 }
 
 // ********************************************************************************************* //
