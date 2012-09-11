@@ -7,8 +7,9 @@ define([
     "firebug/debugger/rdp",
     "firebug/debugger/breakpointClient",
     "firebug/debugger/gripCache",
+    "firebug/debugger/gripClient",
 ],
-function (Obj, Options, SourceFile, RDP, BreakpointClient, GripCache) {
+function (Obj, Options, SourceFile, RDP, BreakpointClient, GripCache, GripClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -44,7 +45,10 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     assertPaused: function DebuggerClientassertPaused(command)
     {
         if (!this.isPaused())
+        {
+            FBTrace.sysout("threadClient.assertPaused; EXCEPTION " + this.state, this);
             throw Error(command + " command sent while not paused.");
+        }
     },
 
     /**
@@ -137,8 +141,6 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         this.connection.request(packet, function(response)
         {
-            FBTrace.sysout("threadClient.interrupt; interrupted ", response);
-
             if (!response.error)
                 self.state = "paused";
 
