@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/url",
     "firebug/lib/locale",
+    "firebug/lib/string",
     "firebug/debugger/sourceLink",
 ],
-function (FBTrace, Url, Locale, SourceLink) {
+function (FBTrace, Url, Locale, Str, SourceLink) {
 
 // ********************************************************************************************* //
 // Stack Frame
@@ -121,7 +122,7 @@ StackFrame.prototype =
     getActor: function()
     {
         return this.nativeFrame.actor;
-    }
+    },
 };
 
 // ********************************************************************************************* //
@@ -164,7 +165,7 @@ StackFrame.buildStackFrame = function(frame, context)
     var connection = context.getConnection();
 
     var args = [];
-    var arguments = frame.environment.bindings.arguments;
+    var arguments = frame.arguments;
     for (var i=0; i<arguments.length; i++)
     {
         args.push({
