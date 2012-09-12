@@ -6,12 +6,14 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/debugger/sourceLink",
+    "firebug/debugger/grips",
 ],
-function (FBTrace, Url, Locale, Str, SourceLink) {
+function (FBTrace, Url, Locale, Str, SourceLink, Grips) {
 
 // ********************************************************************************************* //
 // Stack Frame
 
+// xxxHonza: should be derived from Grip
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
     // Essential fields
@@ -123,6 +125,23 @@ StackFrame.prototype =
     {
         return this.nativeFrame.actor;
     },
+
+    getScopes: function()
+    {
+        if (this.scopes)
+            return scopes;
+
+        this.scopes = [];
+
+        var scope = this.nativeFrame.environment;
+        while (scope)
+        {
+            this.scopes.push(Grips.Factory.createScope(scope));
+            scope = scope.parent;
+        }
+
+        return this.scopes;
+    }
 };
 
 // ********************************************************************************************* //
