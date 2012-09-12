@@ -1,6 +1,6 @@
 Firebug
 =======
-*Web Development Evolved* [getfirebug.com](getfirebug.com)
+*Web Development Evolved* [getfirebug.com](http://getfirebug.com)
 
 [Download](https://addons.mozilla.org/en-US/firefox/addon/firebug/)
 
