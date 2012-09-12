@@ -26,8 +26,12 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 {
     hasChildren: function(object)
     {
-        if (object instanceof StackFrame || object instanceof Grips.Scope)
+        if (object instanceof StackFrame)
             return this.getChildren(object).length > 0;
+
+        // xxxHonza: hack, the scope could be empty.
+        if (object instanceof Grips.Scope)
+            return true;
 
         return BaseProvider.hasChildren.apply(this, arguments);
     },
@@ -36,8 +40,9 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
     {
         if (object instanceof StackFrame)
             return object.getScopes();
-        else if (object instanceof Grips.Scope)
-            return object.getProperties();
+
+        if (object instanceof Grips.Scope)
+            return object.getProperties(this.cache);
 
         return BaseProvider.getChildren.apply(this, arguments);
     },

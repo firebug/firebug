@@ -148,21 +148,20 @@ Scope.prototype = Obj.extend(Grip.prototype,
         return label;
     },
 
-    getProperties: function(scope)
+    getProperties: function(cache)
     {
         if (this.properties)
             return this.properties;
-
-        this.properties = []
 
         switch (this.grip.type)
         {
             case "with":
             case "object":
-            break;
+                return cache.fetchProperties(this.grip.object);
 
             case "block":
             case "function":
+                this.properties = [];
                 this.properties.push.apply(this.properties, Factory.parseProperties(
                     this.grip.bindings.variables));
                 break;

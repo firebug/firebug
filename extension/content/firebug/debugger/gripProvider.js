@@ -55,36 +55,11 @@ GripProvider.prototype =
 
     getChildren: function(object)
     {
-        var children = [];
-
-        // A helper flag used to see if the data-fetch has been done synchronously.
-        var sync = true;
-
-        var grip = object;
-
         if (object instanceof Grips.Property)
-            grip = object.value;
+            object = object.value;
 
-        // The cache is using promises to return children sync or async.
-        var self = this;
-        this.cache.fetchProperties(grip).then(function onGetProperties(props)
-        {
-            // If properties are fetched synchronously, they will be immediatelly
-            // returned from this function. Otherwise, fire an update event and
-            // the associate viewer will ask for the children automatically again.
-            if (sync)
-                children = props;
-            else
-                self.updateListener.updateObject(object);
-
-            // Any network errors are passed to the error handler
-        }, this.onError.bind(this));
-
-        sync = false;
-
-        // Returns an empty array in case data are not in the cache and needs to be
-        // fetched from the server.
-        return children;
+        FBTrace.sysout("gripProvider.getChildren ", object);
+        return this.cache.fetchProperties(object);
     },
 
     getLabel: function(grip)
