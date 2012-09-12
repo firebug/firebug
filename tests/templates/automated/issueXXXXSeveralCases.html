@@ -2,16 +2,14 @@
 <html>
     <!--
         STEPS TO CREATE A TEST CASE:
-        1. Replace "xxxx" by number of your issue
-        2. Replace "Issue summary" by title of your issue
-        3. Put inspectable elements, form fields etc. into the "content" section
-        4. Add the exact steps to reproduce your issue under "Steps to reproduce"
-        5. Describe the currently seen result under "Observed result"
-        6. Describe what you would expect to see under "Expected result"
+        1. Replace "xxxx" by number of the issue
+        2. Replace "Issue summary" by title of the issue
+        3. Adjust the relative path to the testcase.css if needed
+        4. Put inspectable elements, form fields etc. into the "content" section
+        5. Add the exact steps to reproduce the test case under "Steps to reproduce"
+        6. Describe what is expected to see under "Expected result"
         7. Add your contact information
         8. Remove all template comments
-
-        Note: Make sure, the URL to testcase.css is https://getfirebug.com/tests/content/templates/default/testcase.css
      -->
     <head>
         <!--
@@ -19,7 +17,7 @@
          -->
         <title>Issue xxxx: Issue summary</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <link href="https://getfirebug.com/tests/head/_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link href=../../_common/testcase.css" type="text/css" rel="stylesheet"/>
     </head>
     <body>
         <header>
@@ -29,27 +27,40 @@
             <section id="content">
                 <!--
                     All inspectable elements, form fields etc. needed to execute the test should be placed here.
-                    If you generate output via JavaScript, put it into <section id="output"></section>.
+                    If you generate output via JavaScript, put it into the "output" section.
                     If you don't need any content, you can remove the "content" section.
                  -->
             </section>
             <section id="description">
                 <!--
                     The steps to reproduce the test case should be described here in detail.
+                    If you just have one test case, you can leave out the <h2> headline.
+                    If you want to give further information about this test case, please put 
+                    it should be put inside a <p> paragraph preceding the steps to reproduce 
+                    the test case.
                  -->
+                <p>Additional information</p>
+                <h2>Case 1</h2>
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Step 1</li>
                     <li>Step 2</li>
                     <li>Step 3</li>
                 </ol>
-                <h3>Observed result</h3>
+                <h3>Expected Result</h3>
                 <ul>
                     <li>Point 1</li>
                     <li>Point 2</li>
                     <li>Point 3</li>
                 </ul>
-                <h3>Expected result</h3>
+                <h2>Case 2</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Step 1</li>
+                    <li>Step 2</li>
+                    <li>Step 3</li>
+                </ol>
+                <h3>Expected Result</h3>
                 <ul>
                     <li>Point 1</li>
                     <li>Point 2</li>
@@ -59,7 +70,7 @@
             <footer>
                 <!--
                     Your name and your email address (or other contact information) should be placed here.
-                    This is important in the case we need to contact you for further reference. 
+                    This is important in the case we need to contact you for further reference.
                  -->
                 &lt;Author name&gt;, &lt;email address&gt;
             </footer>

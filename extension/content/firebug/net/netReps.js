@@ -1228,8 +1228,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             var object = {
                 text: Locale.$STR("net.responseSizeLimitMessage"),
                 onClickLink: function() {
-                    var panel = context.getPanel("net", true);
-                    panel.openResponseInTab(file);
+                    NetUtils.openResponseInTab(file);
                 }
             };
             Firebug.NetMonitor.ResponseSizeLimit.append(object, responseTextBox);
