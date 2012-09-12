@@ -159,7 +159,7 @@
 .watchEditCell {
     padding: 2px 18px;
     background-color: LightYellow;
-    /*border-bottom: 1px solid #BEBEBE;*/
+    border-bottom: 1px solid #BEBEBE;
     color: #666666;
     line-height: 14px;
     cursor: text;

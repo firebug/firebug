@@ -29,7 +29,7 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
         if (object instanceof StackFrame)
             return this.getChildren(object).length > 0;
 
-        // xxxHonza: hack, the scope could be empty.
+        // xxxHonza: hack, the scope could be empty (= no children).
         if (object instanceof Grips.Scope)
             return true;
 

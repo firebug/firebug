@@ -133,6 +133,12 @@ StackFrame.prototype =
 
         this.scopes = [];
 
+        // The first scope is 'this' by default.
+        var thisScope = Grips.Factory.createGrip(this.nativeFrame["this"]);
+        thisScope.name = "this";
+        this.scopes.push(thisScope);
+
+        // Now iterate all parents scopes.
         var scope = this.nativeFrame.environment;
         while (scope)
         {
@@ -141,7 +147,7 @@ StackFrame.prototype =
         }
 
         return this.scopes;
-    }
+    },
 };
 
 // ********************************************************************************************* //

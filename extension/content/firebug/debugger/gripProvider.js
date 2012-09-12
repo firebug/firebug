@@ -58,7 +58,6 @@ GripProvider.prototype =
         if (object instanceof Grips.Property)
             object = object.value;
 
-        FBTrace.sysout("gripProvider.getChildren ", object);
         return this.cache.fetchProperties(object);
     },
 
