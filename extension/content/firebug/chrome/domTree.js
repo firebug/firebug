@@ -163,7 +163,7 @@ DomTree.prototype = domplate(
                 // and wait for the update.
                 if (members && members.length)
                     this.loop.insertRows({members: members}, row, this);
-                else
+                else if (isPromise(members))
                     Css.setClass(row, "spinning");
             }
         }
@@ -184,7 +184,10 @@ DomTree.prototype = domplate(
         // Use data provider if it's available.
         if (this.provider)
         {
-            var children = this.provider.getChildren(object);
+            var children = this.fetchChildren(object);
+            if (isPromise(children))
+                return children;
+
             for (var i=0; i<children.length; i++)
             {
                 var child = children[i];
@@ -195,22 +198,71 @@ DomTree.prototype = domplate(
                 member.provider = this.provider;
                 members.push(member);
             }
-            return members;
         }
-
-        // If there is no provider, iterate the object properties. This iteration
-        // should be customizable.
-        for (var p in object)
+        else
         {
-            var value = object[p];
-            var valueType = typeof(value);
-            var hasChildren = this.hasProperties(value) && (valueType == "object");
-            var type = this.getType(value);
+            // If there is no provider, iterate the object properties.
+            // xxxHonza: Introduce an interator that is customizable (e.g. from derived objects)
+            for (var p in object)
+            {
+                var value = object[p];
+                var valueType = typeof(value);
+                var hasChildren = this.hasProperties(value) && (valueType == "object");
+                var type = this.getType(value);
 
-            members.push(this.createMember(type, p, value, level, hasChildren));
+                members.push(this.createMember(type, p, value, level, hasChildren));
+            }
         }
 
         return members;
+    },
+
+    fetchChildren: function(object)
+    {
+        var children = [];
+
+        try
+        {
+            children = this.provider.getChildren(object);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domTree.fetchChildren; EXCEPTION " + e, e);
+
+            return children;
+        }
+
+        // If it's an array, bail out. Otherwise it's a Promise and children will be
+        // returned asynchronously.
+        if (Arr.isArray(children))
+            return children;
+
+        // This flag is used to differentiate sync and async scenario. If it's
+        // still true when 'onFetchChildren' callback executes, it's synchronous.
+        var sync = true;
+
+        // The callback can be executed immediatelly if children are provided
+        // synchronously. In such case, 'arr' is immediatelly used as the result value.
+        // The object (i.e. the associated row) is updated later in asynchronous senario.
+        var self = this;
+        children.then(function onFetchChildren(arr)
+        {
+            if (FBTrace.DBG_DOMTREE)
+            {
+                FBTrace.sysout("domTree.onFetchChildren; sync: " + sync +
+                     ", count: " + arr.length, arr);
+            }
+
+            if (sync)
+                children = arr;
+            else
+                self.updateObject(object);
+        });
+
+        sync = false;
+
+        return children;
     },
 
     getType: function(object)
@@ -368,6 +420,14 @@ DomTree.prototype = domplate(
         }
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+function isPromise(object)
+{
+    return object ? typeof(object.then) == "function" : false;
+}
 
 // ********************************************************************************************* //
 // Registration
