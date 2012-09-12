@@ -21,11 +21,14 @@ function DomTree(provider)
 }
 
 /**
- * @domplate Represents a tree of properties/objects
+ * @domplate This object represents UI DomTree widget based on Domplate. You can use
+ * data provider to populate the tree with custom data. Or just pass a JS object as
+ * an input.
  */
 DomTree.prototype = domplate(
+/** @lends DomTree */
 {
-    sizerRow:
+    sizerRowTag:
         TR({role: "presentation"},
             TD(),
             TD({width: "30%"}),
@@ -35,13 +38,14 @@ DomTree.prototype = domplate(
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
-                FOR("member", "$object|memberIterator", 
+                TAG("$member|getSizerRowTag"),
+                FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
             )
         ),
 
     rowTag:
-        TR({"class": "memberRow $member.open $member.type\\Row $member|hasChildren", 
+        TR({"class": "memberRow $member.open $member.type\\Row",
             $hasChildren: "$member|hasChildren",
             _repObject: "$member", level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
@@ -57,7 +61,7 @@ DomTree.prototype = domplate(
             TAG("$member|getRowTag", {member: "$member"})),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Member Accessors
+    // Domplate Accessors
 
     hasChildren: function(member)
     {
@@ -98,8 +102,13 @@ DomTree.prototype = domplate(
         return this.rowTag;
     },
 
+    getSizerRowTag: function(member)
+    {
+        return this.sizerRowTag;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Evenet Handlers
+    // Domplate Event Handlers
 
     onClick: function(event)
     {
@@ -138,19 +147,24 @@ DomTree.prototype = domplate(
         }
         else
         {
-            Css.setClass(row, "opened");
-
             var member = row.repObject;
             if (member)
             {
+                // Do not expand if the member says there are no children.
                 if (!member.hasChildren)
                     return;
 
-                var members = this.getMembers(member.value, level+1);
-                if (members)
+                Css.setClass(row, "opened");
+
+                // Get children object for the next level.
+                var members = this.getMembers(member.value, level + 1);
+
+                // Insert rows if they are immediatelly available. Otherwise set a spinner
+                // and wait for the update.
+                if (members && members.length)
                     this.loop.insertRows({members: members}, row, this);
                 else
-                    Lib.setClass(row, "spinning");
+                    Css.setClass(row, "spinning");
             }
         }
     },
@@ -167,6 +181,7 @@ DomTree.prototype = domplate(
 
         var members = [];
 
+        // Use data provider if it's available.
         if (this.provider)
         {
             var children = this.provider.getChildren(object);
@@ -182,6 +197,8 @@ DomTree.prototype = domplate(
             return members;
         }
 
+        // If there is no provider, iterate the object properties. This iteration
+        // should be customizable.
         for (var p in object)
         {
             var value = object[p];
@@ -222,6 +239,28 @@ DomTree.prototype = domplate(
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getRow: function(object)
+    {
+        // If not rendered yet, bail out.
+        if (!this.element)
+            return;
+
+        // Iterate all existing rows and expand the one associated with specified object.
+        // The repObject is a "member" object created in createMember method.
+        var rows = Dom.getElementsByClass(this.element, "memberRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            var member = row.repObject;
+            if (member.value == object)
+                return row;
+        }
+
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public
 
     replace: function(parentNode, input)
@@ -247,39 +286,30 @@ DomTree.prototype = domplate(
             this.toggleRow(firstRow);
     },
 
-    expandRow: function(object)
+    expandObject: function(object)
     {
         var row = this.getRow(object);
         this.toggleRow(row, true);
         return row;
     },
 
-    getRow: function(object)
+    collapseObject: function(object)
     {
-        // If not rendered yet, bail out.
-        if (!this.element)
-            return;
-
-        // Iterate all existing rows and expand the one associated with specified object.
-        // The repObject is a "member" object created in createMember method.
-        var rows = Dom.getElementsByClass(this.element, "memberRow");
-        for (var i=0; i<rows.length; i++)
-        {
-            var row = rows[i];
-            var member = row.repObject;
-            if (member.value == object)
-                return row;
-        }
-
-        return null;
+        var row = this.getRow(object);
+        if (Css.hasClass(row, "opened"))
+            this.toggleRow(row);
+        return row;
     },
 
     updateObject: function(object)
     {
+        if (FBTrace.DBG_DOMTREE)
+            FBTrace.sysout("domTree.updateObject;", object);
+
         var row = this.getRow(object);
 
-        // The input object itself doesn't have a row.
-        if (this.input == object)
+        // The input.object itself (the root) doesn't have a row.
+        if (this.input.object == object)
         {
             var members = this.getMembers(object);
             if (members)
@@ -287,8 +317,12 @@ DomTree.prototype = domplate(
             return;
         }
 
+        // Root will always bail out.
         if (!row)
+        {
+            FBTrace.sysout("domTree.updateObject; This object can't be updated", object);
             return;
+        }
 
         var member = row.repObject;
         member.hasChildren = this.provider.hasChildren(object);
@@ -305,9 +339,14 @@ DomTree.prototype = domplate(
         row.parentNode.removeChild(row);
 
         if (expanded)
-            this.expandRow(object);
-
-        Css.removeClass(row, "spinning");
+        {
+            // Expand if it was expanded and the flag still says there are
+            // some children. Otherwise close the row.
+            if (member.hasChildren)
+                this.expandObject(object);
+            else
+                this.collapseObject(object);
+        }
     }
 });
 
