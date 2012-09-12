@@ -4,15 +4,18 @@ define([
     "firebug/lib/trace",
     "firebug/firebug",
     "firebug/lib/object",
+    "firebug/lib/promise",
     "firebug/debugger/gripClient",
+    "firebug/debugger/grips",
 ],
-function (FBTrace, Firebug, Obj, GripClient) {
+function (FBTrace, Firebug, Obj, Promise, GripClient, Grips) {
 
 // ********************************************************************************************* //
 // GripCache
 
-function GripCache()
+function GripCache(connection)
 {
+    this.connection = connection;
     this.grips = {};
 }
 
@@ -26,75 +29,47 @@ GripCache.prototype =
         this.grips = {};
     },
 
-    getObject: function(connection, grip, callback)
+    getObject: function(grip)
     {
+        if (!grip || !grip.actor)
+            return null;
+
         var object = this.grips[grip.actor];
         if (object)
-        {
-            callback(object);
-            return;
-        }
+            return object;
+
+        object = Grips.Factory.createGrip(grip);
+        this.grips[grip.actor] = object;
+
+        return object;
+    },
+
+    fetchProperties: function(grip)
+    {
+        if (FBTrace.DBG_GRIPCACHE)
+            FBTrace.sysout("gripCache.fetchProperties; ", grip);
+
+        var deferred = Promise.defer();
+        var object = this.getObject(grip);
+        if (object.loaded)
+            return Promise.resolve(object.properties);
 
         var self = this;
-        var gripClient = new GripClient(connection, grip);
+        var gripClient = new GripClient(this.connection, grip);
 
-        // Asynchronously fetch the grip from the server.
         gripClient.getPrototypeAndProperties(function(response)
         {
-            var object = createProxy(response);
-            self.grips[response.from] = object;
-            callback(object);
+            object.loaded = true;
+            object.properties = Grips.Factory.parseProperties(response.ownProperties);
+
+            FBTrace.sysout("gripCache.onFetchProperties;", object);
+
+            deferred.resolve(object.properties);
         });
+
+        return deferred.promise;
     },
 };
-
-// ********************************************************************************************* //
-// Proxy Factory
-
-function createProxy(response)
-{
-    return Proxy.create(
-    {
-        get: function(receiver, name)
-        {
-            if (!this.has(name))
-                return;
-
-            return response.ownProperties[name].value;
-        },
-
-        has: function(name)
-        {
-            return response.ownProperties.hasOwnProperty(name);
-        },
-
-        enumerate: function()
-        {
-            var props = [];
-            for (var name in response.ownProperties)
-                props.push(name);
-            return props;
-        },
-
-        iterate: function()
-        {
-            var props = this.enumerate();
-            var i = 0;
-            return {
-                next: function() {
-                    if (i === props.length)
-                        throw StopIteration;
-                    return props[i++];
-                }
-            }
-        },
-
-        keys: function()
-        {
-            return Object.keys(response.ownProperties);
-        },
-    });
-}
 
 // ********************************************************************************************* //
 // Registration
