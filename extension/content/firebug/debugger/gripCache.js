@@ -62,7 +62,8 @@ GripCache.prototype =
             object.loaded = true;
             object.properties = Grips.Factory.parseProperties(response.ownProperties);
 
-            FBTrace.sysout("gripCache.onFetchProperties;", object);
+            if (FBTrace.DBG_GRIPCACHE)
+                FBTrace.sysout("gripCache.onFetchProperties;", object);
 
             deferred.resolve(object.properties);
         });

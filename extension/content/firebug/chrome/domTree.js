@@ -189,8 +189,9 @@ DomTree.prototype = domplate(
             {
                 var child = children[i];
                 var hasChildren = this.provider.hasChildren(child);
+                var type = this.getType(child);
 
-                var member = this.createMember("dom", null, child, level, hasChildren);
+                var member = this.createMember(type, null, child, level, hasChildren);
                 member.provider = this.provider;
                 members.push(member);
             }
@@ -204,11 +205,29 @@ DomTree.prototype = domplate(
             var value = object[p];
             var valueType = typeof(value);
             var hasChildren = this.hasProperties(value) && (valueType == "object");
+            var type = this.getType(value);
 
-            members.push(this.createMember("dom", p, value, level, hasChildren));
+            members.push(this.createMember(type, p, value, level, hasChildren));
         }
 
         return members;
+    },
+
+    getType: function(object)
+    {
+        // Type is used for UI decoration of a tree row.
+        // A 'decorator' should be introduced for these things. This object should be
+        // used to change style of a row like for example: append icons, badges, prefixes, etc.
+        // xxxHonza: Use Decorator pattern and introduce a Decorator interface.
+        // var Decorator =
+        // {
+        //     decorateLabel: function(object),
+        //     decorateStyle: function(object),
+        // }
+        //
+        // return this.decorator.decorateStyle(object);
+
+        return "dom";
     },
 
     createMember: function(type, name, value, level, hasChildren)

@@ -10,8 +10,9 @@ define([
     "firebug/lib/array",
     "firebug/chrome/domTree",
     "firebug/lib/locale",
+    "firebug/debugger/grips",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, Grips) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -25,7 +26,8 @@ function WatchTree(provider)
 /**
  * @domplate Represents a tree of properties/objects
  */
-WatchTree.prototype = domplate(new DomTree(),
+BaseTree = DomTree.prototype
+WatchTree.prototype = domplate(BaseTree,
 {
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
@@ -42,7 +44,20 @@ WatchTree.prototype = domplate(new DomTree(),
                 FOR("member", "$object|memberIterator", 
                     TAG("$member|getRowTag", {member: "$member"}))
             )
-        )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getType: function(object)
+    {
+        // Customize CSS style for a memberRow. The type creates additional class name
+        // for the row: 'type' + Row. So, the following creates "scopesRow" class that
+        // decorates Scope rows.
+        if (object instanceof Grips.Scope)
+            return "scopes";
+
+        return BaseTree.getType.apply(this, arguments);
+    }
 });
 
 // ********************************************************************************************* //
