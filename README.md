@@ -57,4 +57,4 @@ Further Resources
 * Discussion Group: [https://groups.google.com/forum/?fromgroups#!forum/firebug](https://groups.google.com/forum/?fromgroups#!forum/firebug)
 * Wiki: [https://getfirebug.com/wiki](https://getfirebug.com/wiki/index.php/Main_Page)
 * Report an Issue: [http://code.google.com/p/fbug/issues/list](http://code.google.com/p/fbug/issues/list)
-* Firebug Extensions: [https://getfirebug.com/wiki/index.php/Firebug_Extensions](https://getfirebug.com/wiki/index.php/Firebug_Extensions)
+* Firebug Extensions: [https://getfirebug.com/extensions](https://getfirebug.com/wiki/index.php/Firebug_Extensions)
