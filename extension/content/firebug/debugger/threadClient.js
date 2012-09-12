@@ -28,7 +28,7 @@ function ThreadClient(connection, actor, debuggerClient)
     this.debuggerClient = debuggerClient;
     this.frameCache = [];
     this.scriptCache = {};
-    this.gripCache = new GripCache();
+    this.gripCache = new GripCache(connection);
 }
 
 ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),

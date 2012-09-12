@@ -92,6 +92,15 @@
     border-bottom: 1px solid #EFEFEF;
 }
 
+/*************************************************************************************************/
+/* Spinner (used for async fetch) */
+
+.memberRow.hasChildren.spinning > .memberLabelCell > .memberLabel {
+    background-image: url(chrome://firebug/skin/spinner.png) !important;
+    background-repeat: no-repeat;
+    background-position: 3px 3px;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .userLabel,

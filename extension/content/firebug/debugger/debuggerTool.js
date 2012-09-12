@@ -146,6 +146,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     setBreakpoint: function(context, url, lineNumber, callback)
     {
+        if (!context.debuggerClient.activeThread)
+        {
+            FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a braekpoint.");
+            return;
+        }
+
         return context.debuggerClient.activeThread.setBreakpoint({
             url: url,
             line: lineNumber + 1

@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/object",
+    "firebug/lib/domplate",
     "firebug/chrome/firefox",
     "firebug/firebug",
     "firebug/dom/toggleBranch",
@@ -11,15 +12,41 @@ define([
     "firebug/debugger/stackFrame",
     "firebug/lib/locale",
     "firebug/lib/string",
-    "firebug/dom/domPanel",     // Firebug.DOMBasePanel, Firebug.DOMPanel.DirTable
+    "firebug/debugger/watchEditor",
+    "firebug/debugger/watchTree",
+    "firebug/debugger/watchPanelProvider",
+    "firebug/debugger/grips",
 ],
-function(Obj, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str) {
+function(Obj, Domplate, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str,
+    WatchEditor, WatchTree, WatchPanelProvider, Grips) {
+
+with (Domplate) {
+
+// ********************************************************************************************* //
+// Domplate
+
+// Tree row decorator
+var ToolboxPlate = domplate(
+{
+    tag:
+        DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
+            IMG({"class": "watchDeleteButton closeButton", src: "blank.gif"})
+        ),
+
+    onClick: function(event)
+    {
+        var toolbox = event.currentTarget;
+        toolbox.domPanel.deleteWatch(toolbox.watchRow);
+    }
+});
 
 // ********************************************************************************************* //
 // Watch Panel
 
 function WatchPanel()
 {
+    this.tree = new WatchTree();
+
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
     this.onMouseOver = Obj.bind(this.onMouseOver, this);
     this.onMouseOut = Obj.bind(this.onMouseOut, this);
@@ -28,15 +55,14 @@ function WatchPanel()
 /**
  * Represents the Watch side panel available in the Script panel.
  */
-WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
-/** @lends Firebug.WatchPanel */
+var BasePanel = Firebug.Panel;
+WatchPanel.prototype = Obj.extend(BasePanel,
+/** @lends WatchPanel */
 {
-    tag: Firebug.DOMPanel.DirTable.watchTag,
+    dispatchName: "JSD2.WatchPanel",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
-
-    dispatchName: "JSD2.WatchPanel",
 
     name: "jsd2watches",
     order: 0,
@@ -50,7 +76,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     initialize: function()
     {
-        Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
+        BasePanel.initialize.apply(this, arguments);
 
         Firebug.registerUIListener(this);
         Firebug.proxy.addListener(this);
@@ -63,7 +89,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         Firebug.unregisterUIListener(this);
         Firebug.proxy.removeListener(this);
 
-        Firebug.DOMBasePanel.prototype.destroy.apply(this, arguments);
+        BasePanel.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -72,7 +98,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.DOMBasePanel.prototype.initializeNode.apply(this, arguments);
+        BasePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -81,7 +107,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
+        BasePanel.destroyNode.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,14 +117,10 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     {
         this.tool = this.context.getTool("debugger");
         this.tool.attach(this.context, proxy.connection, this);
-
-        FBTrace.sysout("WatchPanel.onConnect; " + this.tool);
     },
 
     onDisconnect: function(proxy)
     {
-        FBTrace.sysout("WatchPanel.onDisconnect;");
-
         // Detach from the current tool.
         this.tool.detach(this.context, proxy.connection, this);
     },
@@ -118,8 +140,6 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     updateSelection: function(frame)
     {
-        FBTrace.sysout("watchPanel.updateSelection; " + frame, frame);
-
         // this method is called while the debugger has halted JS,
         // so failures don't show up in FBS_ERRORS
         try
@@ -149,7 +169,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             this.frameSignature = frame.signature();
         }
 
-        var scopes = [this.context.getGlobalScope()];
+        var scope = {};
 /*
         if (frame instanceof StackFrame)
             scopes = frame.getScopes(Firebug.viewChrome);
@@ -164,16 +184,17 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 */
         var members = [];
 
-        FBTrace.sysout("watches", this.watches);
-
-        if (this.watches)
+        /*if (this.watches)
         {
             for (var i=0; i<this.watches.length; ++i)
             {
                 var expr = this.watches[i];
                 var value = null;
 
-                var member = this.addMember(scopes[0], "watch", members, expr, value, 0);
+                scope[expr] = {};
+                var member = this.addMember(scope, "watch", expr, value, 0);
+                members.push(member);
+
                 this.evalExpression(frame, member);
 
                 if (FBTrace.DBG_WATCH)
@@ -182,7 +203,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                         {expr: expr, value: value, members: members})
                 }
             }
-        }
+        }*/
 
 /*
         if (frame && frame instanceof StackFrame)
@@ -198,29 +219,50 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                 this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
         }
 */
-        this.expandMembers(members, this.toggles, 0, 0, this.context);
-        this.showMembers(members, false);
+        //this.expandMembers(members, this.toggles, 0, 0, this.context);
+        //this.showMembers(members, false);
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch panel updateSelection members " + members.length, members);
+        var object = frame;
+
+        var input = {
+            toggles: this.toggles,
+            object: object,
+            domPanel: this,
+        };
+
+        if (object instanceof StackFrame)
+        {
+            var cache = this.context.debuggerClient.activeThread.gripCache;
+
+            this.tree.provider = new WatchPanelProvider(cache);
+            this.tree.provider.setUpdateListener(this.tree);
+        }
+
+        this.tree.replace(this.panelNode, input);
+    },
+
+    showMembers: function(members, update, scrollTop)
+    {
     },
 
     evalExpression: function(frame, member)
     {
-        FBTrace.sysout("WatchPanel.evalExpression: ", frame);
-
         var self = this;
         this.tool.eval(this.context, frame, member.name, function(result)
         {
-            FBTrace.sysout("evalExpression done: ", result);
-
-            var row = getWatchRow(member);
-            if (row)
-            {
-                self.setPropertyValue(row, value)
-                var result = rowTag.insertRows({members: slice}, tbody.lastChild);
-            }
+            self.refreshMember(member, result);
         });
+    },
+
+    refreshMember: function(member, value)
+    {
+        var self = this;
+
+        // xxxHonza: make the async op slow for now.
+        setTimeout(function()
+        {
+            self.tree.updateMember(member, value);
+        }, 1500);
     },
 
     rebuild: function()
@@ -233,8 +275,12 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     showEmptyMembers: function()
     {
-        var domTable = this.tag.replace({domPanel: this, toggles: new ToggleBranch.ToggleBranch()},
-            this.panelNode);
+        var input = {
+            domPanel: this,
+            toggles: new ToggleBranch.ToggleBranch()
+        };
+
+        var domTable = WatchTree.prototype.tag.replace(input, this.panelNode, this);
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
@@ -247,7 +293,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Watch Actions
+    // Watches
 
     addWatch: function(expression)
     {
@@ -265,7 +311,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                 return;
         }
 
-        this.watches.splice(0, 0, expression);
+        this.watches.push(expression);
         this.rebuild(true);
     },
 
@@ -297,7 +343,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (FBTrace.DBG_WATCH)
             FBTrace.sysout("WatchPanel.setWatchValue", {row: row, value: value});
 
-        var rowIndex = getWatchRowIndex(row);
+        var rowIndex = this.getWatchRowIndex(row);
         this.watches[rowIndex] = value;
         this.rebuild(true);
     },
@@ -307,7 +353,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (FBTrace.DBG_WATCH)
             FBTrace.sysout("WatchPanel.deleteWatch", row);
 
-        var rowIndex = getWatchRowIndex(row);
+        var rowIndex = this.getWatchRowIndex(row);
         this.watches.splice(rowIndex, 1);
         this.rebuild(true);
 
@@ -361,8 +407,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     {
         if (!this.toolbox)
         {
-            this.toolbox = Firebug.DOMBasePanel.ToolboxPlate.tag.replace(
-                {domPanel: this}, this.document);
+            this.toolbox = ToolboxPlate.tag.replace({domPanel: this}, this.document);
         }
 
         return this.toolbox;
@@ -435,7 +480,7 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     getContextMenuItems: function(object, target)
     {
-        var items = Firebug.DOMBasePanel.prototype.getContextMenuItems.apply(this, arguments);
+        var items = BasePanel.getContextMenuItems.apply(this, arguments);
 
         if (!this.watches || this.watches.length == 0)
             return items;
@@ -462,38 +507,56 @@ WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         });
 
         return items;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getWatchRowIndex: function(row)
+    {
+        var index = -1;
+        for (; row; row = row.previousSibling)
+        {
+            if (Css.hasClass(row, "watchRow"))
+                ++index;
+        }
+        return index;
+    },
+
+    getWatchRow: function(member)
+    {
+        var rows = this.panelNode.getElementsByClassName("watchRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            if (row.domObject == member)
+                return row;
+        }
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editor
+
+    editProperty: function(row, editValue)
+    {
+        var member = row.domObject;
+        if (member && member.readOnly)
+            return;
+
+        if (Css.hasClass(row, "watchNewRow"))
+        {
+            Firebug.Editor.startEditing(row, "");
+        }
+    },
+
+    getEditor: function(target, value)
+    {
+        if (!this.editor)
+            this.editor = new WatchEditor(this.document);
+
+        return this.editor;
     }
 });
-
-// ********************************************************************************************* //
-// Local Helpers
-
-function getWatchRowIndex(row)
-{
-    var index = -1;
-    for (; row; row = row.previousSibling)
-    {
-        if (Css.hasClass(row, "watchRow"))
-            ++index;
-    }
-    return index;
-}
-
-function getWatchRow(member)
-{
-    for (; row; row = row.previousSibling)
-    {
-        if (row.domObject == member)
-            return row;
-    }
-
-    return null;
-}
-
-function updateRow(member)
-{
-    
-}
 
 // ********************************************************************************************* //
 // Registration
@@ -503,4 +566,4 @@ Firebug.registerPanel(WatchPanel);
 return WatchPanel;
 
 // ********************************************************************************************* //
-});
+}});
