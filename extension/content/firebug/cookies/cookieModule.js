@@ -686,17 +686,17 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         {
             var cookieEnumerator = cookieManager.getCookiesFromHost(host);
 
-            while(cookieEnumerator.hasMoreElements())
+            while (cookieEnumerator.hasMoreElements())
             {
-                var cookie = cookieEnumerator.getNext();
-                cookie = cookie.QueryInterface(Ci.nsICookie2);
-                var sessionCookieToRemove = typeof filter.session != "undefined" && filter.session &&
-                    cookie.isSession;
+                var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
+
+                var sessionCookieToRemove = filter && filter.session && cookie.isSession;
+                var remove = !filter || sessionCookieToRemove;
+
+                if (remove && !cookies[cookie.name])
+                    cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
             }
         }
-
-        /*for (var i=0; i<cookies.length; i++)
-            CookieReps.CookieRow.onRemove(cookies[i]);*/
     },
 
     onRemoveAll: function(context)
@@ -719,7 +719,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeConfirmation, !check.value);
         }
 
-        Firebug.CookieModule.removeCookies(context, false);
+        Firebug.CookieModule.removeCookies(context);
     },
 
     onRemoveAllSession: function(context)
@@ -742,7 +742,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value)
         }
 
-        Firebug.CookieModule.removeCookies(context, true);
+        Firebug.CookieModule.removeCookies(context, {session: true});
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)
