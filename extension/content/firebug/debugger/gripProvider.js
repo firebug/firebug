@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/string",
+    "firebug/lib/array",
     "firebug/debugger/grips",
 ],
-function (FBTrace, Obj, Str, Grips) {
+function (FBTrace, Obj, Str, Arr, Grips) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -55,18 +56,31 @@ GripProvider.prototype =
 
     getChildren: function(object)
     {
+        // Support of arrays (the root or children can be instances of Array)
+        if (Arr.isArray(object))
+            return object;
+
         if (object instanceof Grips.Property)
             object = object.value;
+
+        if (!object.actor)
+            return [];
 
         return this.cache.fetchProperties(object);
     },
 
-    getLabel: function(grip)
+    getLabel: function(object)
     {
+        var text = object.name;
+
+        // Support for string type (children are String instances).
+        if (typeof(object) == "string")
+            text = object;
+
         // Cropping is usyally based on extensions.firebug.stringCropLength pref
         // But 50 chars (default value) is not short enough. We need a new pref
         // extensions.firebug.stringCropLengthSmall? (see issue 5898)
-        return Str.cropString(grip.name, 25);
+        return Str.cropString(text, 25);
     },
 
     getValue: function(grip)
@@ -86,22 +100,6 @@ GripProvider.prototype =
             return {type: grip.value["class"]};
 
         return grip.value;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Internals
-
-    onError: function(response)
-    {
-        FBTrace.sysout("gripProvider.onError; ERROR " + response, response);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Listeners
-
-    setUpdateListener: function(listener)
-    {
-        this.updateListener = listener;
     },
 }
 
