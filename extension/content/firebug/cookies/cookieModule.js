@@ -682,7 +682,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (!panel)
             return;
 
-        FBTrace.sysout("cookies", {ctx: context, activeHosts: context.cookies.activeHosts.length});
         for (var host in context.cookies.activeHosts)
         {
             var cookieEnumerator = cookieManager.getCookiesFromHost(host);
@@ -691,7 +690,6 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             {
                 var cookie = cookieEnumerator.getNext();
                 cookie = cookie.QueryInterface(Ci.nsICookie2);
-                FBTrace.sysout("cookie " + cookie.name + ", " + cookie.host, cookie);
                 var sessionCookieToRemove = typeof filter.session != "undefined" && filter.session &&
                     cookie.isSession;
             }
