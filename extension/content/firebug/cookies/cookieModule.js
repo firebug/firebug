@@ -676,6 +676,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
+    /**
+     * Removes cookies defined for a website
+     * @param {Object} context context, in which the cookies are defined
+     * @param {Object} [filter] filter to define, which cookies should be removed
+     *   (format: {session: true/false, host: string})
+     */
     removeCookies: function(context, filter)
     {
         var panel = context.getPanel(panelName, true);
@@ -690,10 +696,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             {
                 var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
 
-                var sessionCookieToRemove = filter && filter.session && cookie.isSession;
-                var remove = !filter || sessionCookieToRemove;
-
-                if (remove && !cookies[cookie.name])
+                if (!filter || ((!filter.session || cookie.isSession) && (!filter.host || filter.host == cookie.host)))
                     cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
             }
         }
@@ -705,23 +708,23 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         {
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
-
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeall"), flags, "", "", "",
                 Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
-
+            
             // Update 'Remove Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
             Options.set(removeConfirmation, !check.value);
         }
-
+        
         Firebug.CookieModule.removeCookies(context);
     },
-
+    
     onRemoveAllSession: function(context)
     {
         if (Options.get(removeSessionConfirmation))
@@ -743,6 +746,29 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         }
 
         Firebug.CookieModule.removeCookies(context, {session: true});
+    },
+
+    onRemoveAllFromHost: function(context, host)
+    {
+        if (Options.get(removeConfirmation))
+        {
+            var check = {value: false};
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
+                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+
+            if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
+                Locale.$STRF("cookies.confirm.Remove_All_From_Host", [host]), flags, "", "", "",
+                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
+            {
+                return;
+            }
+
+            // Update 'Remove Cookies' confirmation option according to the value
+            // of the dialog's "do not show again" checkbox.
+            Options.set(removeConfirmation, !check.value);
+        }
+
+        Firebug.CookieModule.removeCookies(context, {host: host});
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)
