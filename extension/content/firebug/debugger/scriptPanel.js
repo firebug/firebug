@@ -186,7 +186,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.updateInfoTip();
 
-        var watchPanel = this.context.getPanel("watches", true);
+        var watchPanel = this.context.getPanel("jsd2watches", true);
         if (watchPanel)
             watchPanel.showEmptyMembers();
     },

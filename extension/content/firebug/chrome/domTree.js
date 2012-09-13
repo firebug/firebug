@@ -181,9 +181,9 @@ DomTree.prototype = domplate(
 
         var members = [];
 
-        // Use data provider if it's available.
         if (this.provider)
         {
+            // Use data provider if it's available.
             var children = this.fetchChildren(object);
             if (isPromise(children))
                 return children;
@@ -233,7 +233,7 @@ DomTree.prototype = domplate(
             return children;
         }
 
-        // If it's an array, bail out. Otherwise it's a Promise and children will be
+        // If it's an array, bail out. Otherwise it's a Promise and children can be
         // returned asynchronously.
         if (Arr.isArray(children))
             return children;
@@ -257,7 +257,12 @@ DomTree.prototype = domplate(
             if (sync)
                 children = arr;
             else
-                self.updateObject(object);
+                self.updateObject(object); // xxxHonza: arr should be passed to the callback
+
+        },
+        function onError(err)
+        {
+            FBTrace.sysout("domTree.onFetchChildren; ERROR " + err, err);
         });
 
         sync = false;
@@ -382,7 +387,7 @@ DomTree.prototype = domplate(
         // The input.object itself (the root) doesn't have a row.
         if (this.input.object == object)
         {
-            var members = this.getMembers(object);
+            var members = this.getMembers(object); // xxxHonza: what about level?
             if (members)
                 this.loop.insertRows({members: members}, this.element.firstChild);
             return;
@@ -426,7 +431,7 @@ DomTree.prototype = domplate(
 
 function isPromise(object)
 {
-    return object ? typeof(object.then) == "function" : false;
+    return object && typeof(object.then) == "function";
 }
 
 // ********************************************************************************************* //

@@ -277,10 +277,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         var input = {
             domPanel: this,
+            object: this.context.getGlobalScope(),
             toggles: new ToggleBranch.ToggleBranch()
         };
 
-        var domTable = WatchTree.prototype.tag.replace(input, this.panelNode, this);
+        // Remove the provider, global scope is currently the local window object.
+        this.tree.provider = null;
+        this.tree.replace(this.panelNode, input);
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
@@ -288,7 +291,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // This requires more adjustments related for rtl user agents.
         var mainFrame = Firefox.getElementById("fbMainFrame");
         var cs = mainFrame.ownerDocument.defaultView.getComputedStyle(mainFrame);
-        var watchRow = domTable.getElementsByClassName("watchNewRow").item(0);
+        var watchRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         watchRow.style.direction = cs.direction;
     },
 
