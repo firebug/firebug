@@ -30,7 +30,6 @@ DomTree.prototype = domplate(
 {
     sizerRowTag:
         TR({role: "presentation"},
-            TD(),
             TD({width: "30%"}),
             TD({width: "70%"})
         ),
@@ -38,7 +37,6 @@ DomTree.prototype = domplate(
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
-                TAG("$member|getSizerRowTag"),
                 FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
             )
@@ -102,7 +100,7 @@ DomTree.prototype = domplate(
         return this.rowTag;
     },
 
-    getSizerRowTag: function(member)
+    getSizerRowTag: function()
     {
         return this.sizerRowTag;
     },

@@ -29,22 +29,38 @@ function WatchTree(provider)
 BaseTree = DomTree.prototype
 WatchTree.prototype = domplate(BaseTree,
 {
+    watchNewRowTag:
+        TR({"class": "watchNewRow", level: 0},
+            TD({"class": "watchEditCell", colspan: 2},
+                DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
+                    "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
+                        Locale.$STR("NewWatch")
+                )
+            )
+        ),
+
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
                _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
             TBODY({role: "presentation"},
-                TR({"class": "watchNewRow", level: 0},
-                    TD({"class": "watchEditCell", colspan: 3},
-                        DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
-                            "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
-                                Locale.$STR("NewWatch")
-                        )
-                    )
-                ),
+                TAG("$watchNewRow|getWatchNewRowTag"),
                 FOR("member", "$object|memberIterator", 
                     TAG("$member|getRowTag", {member: "$member"}))
             )
         ),
+
+    emptyTag:
+        TR(
+            TD({colspan: 2})
+        ),
+ 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getWatchNewRowTag: function(show)
+    {
+        FBTrace.sysout("getWatchNewRowTag " + show);
+        return show ? this.watchNewRowTag : this.emptyTag;
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +71,8 @@ WatchTree.prototype = domplate(BaseTree,
         // decorates Scope rows.
         if (object instanceof Grips.Scope)
             return "scopes";
+        else if (object instanceof Grips.WatchExpression)
+            return "watch";
 
         return BaseTree.getType.apply(this, arguments);
     }
