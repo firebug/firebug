@@ -391,7 +391,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (!this.watches || this.watches.length == 0)
             return items;
 
-        // find the index of "DeleteWatch" in the items: 
+        // find the index of "DeletePropery" in the items:
         var deleteWatchIndex = items.map(function(item)
         {
             return item.id;
@@ -406,7 +406,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
         // insert DeleteAllWatches after DeleteWatch
         items.splice(deleteAllWatchesIndex, 0, {
-            id: "deleteAllWatches",
+            id: "fbDeleteAllWatches",
             label: "DeleteAllWatches",
             tooltiptext: "watch.tip.Delete_All_Watches",
             command: Obj.bindFixed(this.deleteAllWatches, this)

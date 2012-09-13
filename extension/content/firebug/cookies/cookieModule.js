@@ -676,29 +676,30 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
+    /**
+     * Removes cookies defined for a website
+     * @param {Object} context context, in which the cookies are defined
+     * @param {Object} [filter] filter to define, which cookies should be removed
+     *   (format: {session: true/false, host: string})
+     */
     removeCookies: function(context, filter)
     {
         var panel = context.getPanel(panelName, true);
         if (!panel)
             return;
 
-        FBTrace.sysout("cookies", {ctx: context, activeHosts: context.cookies.activeHosts.length});
         for (var host in context.cookies.activeHosts)
         {
             var cookieEnumerator = cookieManager.getCookiesFromHost(host);
 
-            while(cookieEnumerator.hasMoreElements())
+            while (cookieEnumerator.hasMoreElements())
             {
-                var cookie = cookieEnumerator.getNext();
-                cookie = cookie.QueryInterface(Ci.nsICookie2);
-                FBTrace.sysout("cookie " + cookie.name + ", " + cookie.host, cookie);
-                var sessionCookieToRemove = typeof filter.session != "undefined" && filter.session &&
-                    cookie.isSession;
+                var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
+
+                if (!filter || ((!filter.session || cookie.isSession) && (!filter.host || filter.host == cookie.host)))
+                    cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
             }
         }
-
-        /*for (var i=0; i<cookies.length; i++)
-            CookieReps.CookieRow.onRemove(cookies[i]);*/
     },
 
     onRemoveAll: function(context)
@@ -707,23 +708,23 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         {
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
-
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeall"), flags, "", "", "",
                 Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
-
+            
             // Update 'Remove Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
             Options.set(removeConfirmation, !check.value);
         }
-
-        Firebug.CookieModule.removeCookies(context, false);
+        
+        Firebug.CookieModule.removeCookies(context);
     },
-
+    
     onRemoveAllSession: function(context)
     {
         if (Options.get(removeSessionConfirmation))
@@ -744,7 +745,30 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value)
         }
 
-        Firebug.CookieModule.removeCookies(context, true);
+        Firebug.CookieModule.removeCookies(context, {session: true});
+    },
+
+    onRemoveAllFromHost: function(context, host)
+    {
+        if (Options.get(removeConfirmation))
+        {
+            var check = {value: false};
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
+                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+
+            if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
+                Locale.$STRF("cookies.confirm.Remove_All_From_Host", [host]), flags, "", "", "",
+                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
+            {
+                return;
+            }
+
+            // Update 'Remove Cookies' confirmation option according to the value
+            // of the dialog's "do not show again" checkbox.
+            Options.set(removeConfirmation, !check.value);
+        }
+
+        Firebug.CookieModule.removeCookies(context, {host: host});
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)

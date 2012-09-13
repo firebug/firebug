@@ -264,29 +264,29 @@ this.manualVerify = function(verifyMsg, instructions)
 // ********************************************************************************************* //
 // Event automation
 
-this.click = function(node)
+this.click = function(node, win)
 {
-    this.sendMouseEvent({type: "click"}, node);
+    this.sendMouseEvent({type: "click"}, node, win);
 };
 
-this.dblclick = function(node)
+this.dblclick = function(node, win)
 {
-    this.sendMouseEvent({type: "click", detail: 2}, node);
+    this.sendMouseEvent({type: "click", detail: 2}, node, win);
 };
 
-this.rightClick = function(node)
+this.rightClick = function(node, win)
 {
-    this.sendMouseEvent({type: "click", button: 2}, node);
+    this.sendMouseEvent({type: "click", button: 2}, node, win);
 };
 
-this.mouseDown = function(node)
+this.mouseDown = function(node, win)
 {
-    this.sendMouseEvent({type: "mousedown"}, node);
+    this.sendMouseEvent({type: "mousedown"}, node, win);
 };
 
-this.mouseUp = function(node)
+this.mouseUp = function(node, win)
 {
-    this.sendMouseEvent({type: "mouseup"}, node);
+    this.sendMouseEvent({type: "mouseup"}, node, win);
 };
 
 this.mouseOver = function(node, offsetX, offsetY)

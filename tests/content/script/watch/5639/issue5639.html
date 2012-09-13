@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5639: Allow deleting all watch expressions at once</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/> 
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5639">Issue 5639</a>: Allow deleting all watch expressions at once</h1>
+        </header>
+        <div>
+            <section id="content">
+               <script>
+                    var a = 1, b = 2;
+               </script>
+            </section>
+            <section id="description">
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>script</em> panel</li>
+                    <li>Switch to the <em>Watch</em> side panel</li>
+                    <li>Add this watch expression (without the quotes): "a"</li>
+                    <li>Add this watch expression: "b"</li>
+                    <li>Right click on the "a" watch expression and click on "Delete All Watches"</li>
+                    <li>Every watch should be removed</li>
+                    <li>Redo steps 4 and 5</li>
+                    <li>Right click on an empty space of the <em>Watch</em> panel</li>
+                    <li>Click on "Delete All Watches"</li>
+                    <li>Every watch should be removed</li>
+                </ol>
+            </section>
+            <footer>
+                &lt;Florent FAYOLLE&gt;, <span id="email">&lt;florent.fayolle69@gmail.com&gt;</span>
+            </footer>
+        </div>
+    </body>
+</html>
