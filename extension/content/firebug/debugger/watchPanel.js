@@ -9,6 +9,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/array",
     "firebug/debugger/stackFrame",
     "firebug/lib/locale",
     "firebug/lib/string",
@@ -17,8 +18,8 @@ define([
     "firebug/debugger/watchPanelProvider",
     "firebug/debugger/grips",
 ],
-function(Obj, Domplate, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale, Str,
-    WatchEditor, WatchTree, WatchPanelProvider, Grips) {
+function(Obj, Domplate, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, StackFrame,
+    Locale, Str, WatchEditor, WatchTree, WatchPanelProvider, Grips) {
 
 with (Domplate) {
 
@@ -45,6 +46,7 @@ var ToolboxPlate = domplate(
 
 function WatchPanel()
 {
+    this.watches = [];
     this.tree = new WatchTree();
 
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
@@ -160,6 +162,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
+        Dom.clearNode(this.panelNode);
+
+        var cache = this.context.debuggerClient.activeThread.gripCache;
+
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);
 
@@ -169,89 +175,26 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.frameSignature = frame.signature();
         }
 
-        var scope = {};
-/*
-        if (frame instanceof StackFrame)
-            scopes = frame.getScopes(Firebug.viewChrome);
-        else
-            scopes = [this.context.getGlobalScope()];
-
-        if (FBTrace.DBG_STACK)
-        {
-            FBTrace.sysout("dom watch frame isStackFrame " + (frame instanceof StackFrame) +
-                " updateSelection scopes " + scopes.length, scopes);
-        }
-*/
-        var members = [];
-
-        /*if (this.watches)
-        {
-            for (var i=0; i<this.watches.length; ++i)
-            {
-                var expr = this.watches[i];
-                var value = null;
-
-                scope[expr] = {};
-                var member = this.addMember(scope, "watch", expr, value, 0);
-                members.push(member);
-
-                this.evalExpression(frame, member);
-
-                if (FBTrace.DBG_WATCH)
-                {
-                    FBTrace.sysout("watch.updateSelection " + expr + " = " + value,
-                        {expr: expr, value: value, members: members})
-                }
-            }
-        }*/
-
-/*
-        if (frame && frame instanceof StackFrame)
-        {
-            var thisVar = frame.getThisValue();
-            if (thisVar)
-                this.addMember(scopes[0], "user", members, "this", thisVar, 0);
-
-            // locals, pre-expanded
-            members.push.apply(members, this.getMembers(scopes[0], 0, this.context));
-
-            for (var i=1; i<scopes.length; i++)
-                this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
-        }
-*/
-        //this.expandMembers(members, this.toggles, 0, 0, this.context);
-        //this.showMembers(members, false);
-
         var object = frame;
-
         var input = {
             toggles: this.toggles,
             object: object,
             domPanel: this,
+            watchNewRow: true,
         };
 
         if (object instanceof StackFrame)
-        {
-            var cache = this.context.debuggerClient.activeThread.gripCache;
+            this.tree.provider = new WatchPanelProvider(this);
 
-            this.tree.provider = new WatchPanelProvider(cache);
-            this.tree.provider.setUpdateListener(this.tree);
-        }
+        //xxxHonza: Pre-expand local variables
+        this.tree.append(this.panelNode, input);
 
-        this.tree.replace(this.panelNode, input);
+        // Asynchronoysly eval all user-expressions
+        this.evalWatches(this.watches);
     },
 
     showMembers: function(members, update, scrollTop)
     {
-    },
-
-    evalExpression: function(frame, member)
-    {
-        var self = this;
-        this.tool.eval(this.context, frame, member.name, function(result)
-        {
-            self.refreshMember(member, result);
-        });
     },
 
     refreshMember: function(member, value)
@@ -278,7 +221,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var input = {
             domPanel: this,
             object: this.context.getGlobalScope(),
-            toggles: new ToggleBranch.ToggleBranch()
+            toggles: this.toggles,
+            watchNewRow: true,
         };
 
         // Remove the provider, global scope is currently the local window object.
@@ -303,18 +247,18 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         expression = Str.trim(expression);
 
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.addWatch; expression: " + expression);
+            FBTrace.sysout("WatchPanel.addWatch; expression: " + expression, this.watches);
 
         if (!this.watches)
             this.watches = [];
 
         for (var i=0; i<this.watches.length; i++)
         {
-            if (expression == this.watches[i])
+            if (expression == this.watches[i].expr)
                 return;
         }
 
-        this.watches.push(expression);
+        this.watches.push(new Grips.WatchExpression(expression));
         this.rebuild(true);
     },
 
@@ -366,7 +310,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }, this));
     },
 
-    // deletes all the watches
     deleteAllWatches: function()
     {
         if (FBTrace.DBG_WATCH)
@@ -379,6 +322,53 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         {
             this.showToolbox(null);
         }, this));
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Watches Evaluation
+
+    // xxxHonza: should this be done throug promise-chain?
+    evalWatches: function(watches)
+    {
+        if (watches)
+            this.watchesToEval = Arr.cloneArray(watches);
+
+        var watch = this.watchesToEval.shift();
+        if (!watch)
+            return;
+
+        this.evalWatch(watch);
+    },
+
+    evalWatch: function(watch)
+    {
+        var expr = watch.expr;
+
+        var self = this;
+        this.tool.eval(this.context, this.context.currentFrame, expr, function(grip)
+        {
+            FBTrace.sysout("watchPanel.evalWatch; " + grip, grip);
+
+            // If grip is not defined an exception has been thrown.
+            if (grip)
+            {
+                var thread = self.context.debuggerClient.activeThread;
+                watch.value = thread.getObject(grip);
+
+                //xxxHonza: this should be in the cache/factory probably.
+                if (grip.type == "undefined")
+                    delete watch.value;
+                else if (grip.type == "null")
+                    watch.value = null;
+
+                self.tree.updateObject(watch);
+            }
+
+            // Eval another watch in the queue.
+            setTimeout(function() {
+                self.evalWatches();
+            });
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

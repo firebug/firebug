@@ -175,6 +175,16 @@ Scope.prototype = Obj.extend(Grip.prototype,
 // Frame
 
 // ********************************************************************************************* //
+// Expression
+
+// xxxHonza: should this be derived from Grip?
+function WatchExpression(expr)
+{
+    this.expr = expr;
+    this.value = undefined; // will be set after evaluation
+}
+
+// ********************************************************************************************* //
 // Registration
 
 return {
@@ -182,6 +192,7 @@ return {
     Grip: Grip,
     Scope: Scope,
     Factory: Factory,
+    WatchExpression: WatchExpression,
 };
 
 // ********************************************************************************************* //

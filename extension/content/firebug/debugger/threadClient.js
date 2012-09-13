@@ -511,11 +511,10 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Objects
 
-    getObject: function(grip, callback)
+    getObject: function(grip)
     {
         this.assertPaused("getObject");
-
-        this.gripCache.getObject(this.connection, grip, callback);
+        this.gripCache.getObject(grip);
     }
 });
 

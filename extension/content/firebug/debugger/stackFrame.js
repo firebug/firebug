@@ -129,7 +129,7 @@ StackFrame.prototype =
     getScopes: function()
     {
         if (this.scopes)
-            return scopes;
+            return this.scopes;
 
         this.scopes = [];
 

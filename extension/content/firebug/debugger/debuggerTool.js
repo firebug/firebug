@@ -234,10 +234,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     eval: function(context, frame, expr, callback)
     {
         var self = this;
-        this.evalCallback = function(result)
-        {
-            context.debuggerClient.activeThread.getObject(result, callback);
-        };
+        this.evalCallback = callback;
 
         // This operation causes the server side to:
         // 1) Resume the current thread

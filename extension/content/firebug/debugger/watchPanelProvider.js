@@ -12,9 +12,10 @@ function (FBTrace, Obj, GripProvider, Grips, StackFrame) {
 // ********************************************************************************************* //
 // Watch Panel Provider
 
-function WatchPanelProvider(cache)
+function WatchPanelProvider(panel)
 {
-    this.cache = cache;
+    this.panel = panel;
+    this.cache = panel.context.debuggerClient.activeThread.gripCache;
 }
 
 /**
@@ -33,23 +34,36 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
         if (object instanceof Grips.Scope)
             return true;
 
-        return BaseProvider.hasChildren.apply(this, arguments);
+        if (object instanceof Grips.WatchExpression)
+            object = object.value;
+
+        return BaseProvider.hasChildren.call(this, object);
     },
 
     getChildren: function(object)
     {
         if (object instanceof StackFrame)
-            return object.getScopes();
+        {
+            var children = [];
+            children.push.apply(children, this.panel.watches);
+            children.push.apply(children, object.getScopes());
+            return children;
+        }
 
         if (object instanceof Grips.Scope)
             return object.getProperties(this.cache);
 
-        return BaseProvider.getChildren.apply(this, arguments);
+        if (object instanceof Grips.WatchExpression)
+            object = object.value;
+
+        return BaseProvider.getChildren.call(this, object);
     },
 
     getLabel: function(object)
     {
-        if (object instanceof Grips.Scope)
+        if (object instanceof Grips.WatchExpression)
+            return object.expr;
+        else if (object instanceof Grips.Scope)
             return object.getName();
 
         return BaseProvider.getLabel.apply(this, arguments);
@@ -57,7 +71,9 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 
     getValue: function(object)
     {
-        if (object instanceof Grips.Scope)
+        if (object instanceof Grips.WatchExpression)
+            return object.value;
+        else if (object instanceof Grips.Scope)
             return object.getValue();
 
         return BaseProvider.getValue.apply(this, arguments);
