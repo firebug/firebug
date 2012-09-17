@@ -10,9 +10,10 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/options",
-    "firebug/lib/array"
+    "firebug/lib/array",
+    "firebug/editor/editorSelector"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -89,9 +90,10 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 
     deleteRule: function(src, ruleIndex)
     {
+        var inlineStyle = (src instanceof window.Element);
         if (FBTrace.DBG_CSS)
         {
-            if (src instanceof window.Element)
+            if (inlineStyle)
             {
                 FBTrace.sysout("deleteRule: element.style", src);
             }
@@ -102,12 +104,18 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             }
         }
 
+        var rule = (inlineStyle ? src : src.cssRules[ruleIndex]);
+        var afterParams = [src, rule.style.cssText];
+        afterParams.push(inlineStyle ? "" : rule.selectorText);
+
         Events.dispatch(this.fbListeners, "onCSSDeleteRule", [src, ruleIndex]);
 
         if (src instanceof window.Element)
             src.removeAttribute("style");
         else
             src.deleteRule(ruleIndex);
+
+        Events.dispatch(this.fbListeners, "onAfterCSSDeleteRule", afterParams);
     },
 
     setProperty: function(rule, propName, propValue, propPriority)
