@@ -33,6 +33,22 @@ var Factory =
         return result;
     },
 
+    parseArguments: function(args)
+    {
+        var result = [];
+
+        if (!args)
+            return result;
+
+        for (var i=0; i<args.length; i++)
+        {
+            var arg = args[i];
+            for (var name in arg)
+                result.push(this.createProperty(name, arg[name]));
+        }
+        return result;
+    },
+
     createScope: function(grip)
     {
         return new Scope(grip);
@@ -161,9 +177,9 @@ Scope.prototype = Obj.extend(Grip.prototype,
 
             case "block":
             case "function":
-                this.properties = [];
-                this.properties.push.apply(this.properties, Factory.parseProperties(
-                    this.grip.bindings.variables));
+                var ps = this.properties = [];
+                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables));
+                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments));
                 break;
         }
 
@@ -172,16 +188,14 @@ Scope.prototype = Obj.extend(Grip.prototype,
 });
 
 // ********************************************************************************************* //
-// Frame
-
-// ********************************************************************************************* //
 // Expression
 
-// xxxHonza: should this be derived from Grip?
 function WatchExpression(expr)
 {
     this.expr = expr;
-    this.value = undefined; // will be set after evaluation
+
+    // The value is set after the expression is evaluated on the back-end.
+    this.value = undefined;
 }
 
 // ********************************************************************************************* //

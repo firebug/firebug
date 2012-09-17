@@ -197,15 +197,6 @@ StackFrame.buildStackFrame = function(frame, context)
             name: getArgName(arguments[i]),
             value: getArgValue(frame.arguments[i])
         });
-
-        if (!frame.arguments[i].actor)
-            continue;
-
-        /*var gripCache = context.debuggerClient.activeThread.gripCache;
-        gripCache.getObject(connection, frame.arguments[i], function(object)
-        {
-            FBTrace.sysout("object " + JSON.stringify(object), object);
-        });*/
     }
 
     return new StackFrame(sourceFile, frame.where.line, frame.calleeName,
