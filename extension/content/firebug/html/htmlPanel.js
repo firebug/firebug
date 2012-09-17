@@ -20,6 +20,7 @@ define([
     "firebug/lib/persist",
     "firebug/chrome/menu",
     "firebug/lib/url",
+    "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
@@ -30,7 +31,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSInfoTip) {
+    Url, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -1182,6 +1183,74 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // CSS Listener
+
+    updateVisibilitiesForSelectorInSheet: function(sheet, selector)
+    {
+        if (!selector)
+            return;
+        var doc = (sheet && sheet.ownerNode && sheet.ownerNode.ownerDocument);
+        if (!doc)
+            return;
+
+        var affected = doc.querySelectorAll(selector);
+        if (!affected.length || !this.ioBox.isInExistingRoot(affected[0]))
+            return;
+
+        for (var i = 0; i < affected.length; ++i)
+        {
+            var node = this.ioBox.findObjectBox(affected[i]);
+            if (node)
+                this.updateNodeVisibility(node);
+        }
+    },
+
+    updateVisibilitiesForRule: function(rule)
+    {
+        this.updateVisibilitiesForSelectorInSheet(rule.parentStyleSheet, rule.selectorText);
+    },
+
+    cssPropAffectsVisibility: function(propName)
+    {
+        // Pretend that "display" is the only property which affects visibility,
+        // which is a half-truth. We could make this more technically correct
+        // by unconditionally returning true, but forcing a synchronous reflow
+        // and computing offsetWidth/Height on up to every element on the page
+        // isn't worth it.
+        return (propName === "display");
+    },
+
+    cssTextAffectsVisibility: function(cssText)
+    {
+        return (cssText.indexOf("display:") !== -1);
+    },
+
+    onAfterCSSDeleteRule: function(styleSheet, cssText, selector)
+    {
+        if (this.cssTextAffectsVisibility(cssText))
+            this.updateVisibilitiesForSelectorInSheet(styleSheet, selector);
+    },
+
+    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
+    {
+        if (this.cssTextAffectsVisibility(cssText))
+            this.updateVisibilitiesForRule(styleSheet.cssRules[ruleIndex]);
+    },
+
+    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue,
+        prevPriority, rule, baseText)
+    {
+        if (this.cssPropAffectsVisibility(propName))
+            this.updateVisibilitiesForRule(rule);
+    },
+
+    onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
+    {
+        if (this.cssPropAffectsVisibility(propName))
+            this.updateVisibilitiesForRule(rule);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "html",
@@ -1202,6 +1271,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.onKeyPress = Obj.bind(this.onKeyPress, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.CSSModule.addListener(this);
     },
 
     destroy: function(state)
@@ -1220,6 +1290,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
 
+        Firebug.CSSModule.removeListener(this);
         this.unregisterMutationListeners();
     },
 

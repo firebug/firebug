@@ -115,8 +115,8 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 
 /**
  * Parses the CSS properties of a CSSStyleRule
- * @param style CSSStyleRule to get the properties of
- * @param element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @param {Object} style CSSStyleRule to get the properties of
+ * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
  * @returns {Array} Properties represented by {name, value, priority, longhandProps}
  */
 Css.parseCSSProps = function(style, element)
