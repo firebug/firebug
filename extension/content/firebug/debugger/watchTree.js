@@ -58,7 +58,6 @@ WatchTree.prototype = domplate(BaseTree,
 
     getWatchNewRowTag: function(show)
     {
-        FBTrace.sysout("getWatchNewRowTag " + show);
         return show ? this.watchNewRowTag : this.emptyTag;
     },
 

@@ -1682,7 +1682,7 @@ FirebugReps.EventLog = domplate(FirebugReps.Event,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Firebug.EventMonitor.EventLog;
+        return object instanceof EventMonitor.EventLog;
     },
 });
 
