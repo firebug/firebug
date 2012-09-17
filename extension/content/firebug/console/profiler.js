@@ -513,10 +513,36 @@ function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTim
 }
 
 // ********************************************************************************************* //
+// CommandLine Support
+
+function profile(context, args)
+{
+    var title = args[0];
+    Firebug.Profiler.startProfiling(context, title);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+};
+
+function profileEnd(context)
+{
+    Firebug.Profiler.stopProfiling(context);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+};
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Profiler);
 Firebug.registerRep(Firebug.Profiler.ProfileCall);
+
+Firebug.registerCommand("profile", {
+    handler: profile.bind(this),
+    description: Locale.$STR("console.cmd.help.profile")
+})
+
+Firebug.registerCommand("profileEnd", {
+    handler: profileEnd.bind(this),
+    description: Locale.$STR("console.cmd.help.profileEnd")
+})
 
 return Firebug.Profiler;
 

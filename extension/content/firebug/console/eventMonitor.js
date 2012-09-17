@@ -5,13 +5,14 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/events",
+    "firebug/lib/locale",
 ],
-function(Obj, Firebug, FBTrace, Events) {
+function(Obj, Firebug, FBTrace, Events, Locale) {
 
 // ********************************************************************************************* //
 // EventMonitor Module
 
-Firebug.EventMonitor = Obj.extend(Firebug.Module,
+var EventMonitor = Obj.extend(Firebug.Module,
 {
     dispatchName: "eventMonitor",
 
@@ -157,14 +158,14 @@ Firebug.EventMonitor = Obj.extend(Firebug.Module,
 
     onMonitorEvent: function(event, context)
     {
-        var obj = new Firebug.EventMonitor.EventLog(event);
+        var obj = new EventMonitor.EventLog(event);
         Firebug.Console.log(obj, context);
     }
 });
 
 // ********************************************************************************************* //
 
-Firebug.EventMonitor.EventLog = function(event)
+EventMonitor.EventLog = function(event)
 {
     this.event = event;
 }
@@ -207,11 +208,42 @@ function getMonitoredEventTypes(types)
 }
 
 // ********************************************************************************************* //
-// Registration & Export
+// CommandLine Support
 
-Firebug.registerModule(Firebug.EventMonitor);
+function monitorEvents(context, args)
+{
+    var object = args[0];
+    var types = args[1];
 
-return Firebug.EventMonitor;
+    EventMonitor.monitorEvents(object, types, context);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+function unmonitorEvents(context, args)
+{
+    var object = args[0];
+    var types = args[1];
+
+    EventMonitor.unmonitorEvents(object, types, context);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
+// Registration
+
+Firebug.registerModule(EventMonitor);
+
+Firebug.registerCommand("monitorEvents", {
+    handler: monitorEvents.bind(this),
+    description: Locale.$STR("console.cmd.help.monitorEvents")
+})
+
+Firebug.registerCommand("unmonitorEvents", {
+    handler: unmonitorEvents.bind(this),
+    description: Locale.$STR("console.cmd.help.unmonitorEvents")
+})
+
+return EventMonitor;
 
 // ********************************************************************************************* //
 });

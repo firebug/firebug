@@ -18,7 +18,6 @@ define([
     "firebug/lib/xml",
     "firebug/lib/array",
     "firebug/lib/persist",
-    "firebug/console/eventMonitor",
     "firebug/lib/keywords",
     "firebug/console/console",
     "firebug/console/commandLineHelp",
@@ -27,7 +26,8 @@ define([
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console, CommandLineHelp) {
+    Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp,
+    CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1199,39 +1199,9 @@ function FirebugCommandLineAPI(context)
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.monitorEvents = function(object, types)
-    {
-        EventMonitor.monitorEvents(object, types, context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.unmonitorEvents = function(object, types)
-    {
-        EventMonitor.unmonitorEvents(object, types, context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.profile = function(title)
-    {
-        Firebug.Profiler.startProfiling(context, title);
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.profileEnd = function()
-    {
-        Firebug.Profiler.stopProfiling(context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
     this.copy = function(x)
     {
         System.copyToClipboard(x);
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.help = function()
-    {
-        CommandLineHelp.render(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
@@ -1247,6 +1217,35 @@ function FirebugCommandLineAPI(context)
         Firebug.MemoryProfiler.stop(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };*/
+
+    function createHandler(config, name)
+    {
+        return function()
+        {
+            try
+            {
+                return config.handler.call(null, context, arguments);
+            }
+            catch (err)
+            {
+                Firebug.Console.log(err, context, "errorMessage");
+
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("commandLine.api; EXCEPTION when executing " +
+                        "a command: " + name + ", " + err, err);
+                }
+            }
+        }
+    }
+
+    // Register user commands.
+    var commands = CommandLineExposed.userCommands;
+    for (var name in commands)
+    {
+        var config = commands[name];
+        this[name] = createHandler(config, name);
+    }
 }
 
 // ********************************************************************************************* //

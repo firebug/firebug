@@ -86,7 +86,12 @@ var HelpEntry = domplate(
     onClick: function(event)
     {
         var object = Firebug.getRepObject(event.target);
-        Win.openNewTab("http://getfirebug.com/wiki/index.php/" + object.name);
+
+        var helpUrl = "http://getfirebug.com/wiki/index.php/" + object.name;
+        if (object.helpUrl)
+            helpUrl = object.helpUrl;
+
+        Win.openNewTab(helpUrl);
     },
 
     getName: function(object)
@@ -99,6 +104,9 @@ var HelpEntry = domplate(
 
     getDesc: function(object)
     {
+        if (object.nol10n)
+            return object.desc;
+
         return Locale.$STR(object.desc);
     }
 });
@@ -147,6 +155,18 @@ var CommandLineHelp = domplate(
             })
         }
 
+        for (var name in CommandLineExposed.userCommands)
+        {
+            var config = CommandLineExposed.userCommands[name];
+            commands.push({
+                name: name,
+                desc: config.description,
+                nol10n: true,
+                helpUrl: config.helpUrl ? config.helpUrl: null,
+                type: config.getter ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
+            })
+        }
+
         HelpEntry.tag.insertRows({commands: commands}, tBody);
 
         return row;
@@ -154,7 +174,22 @@ var CommandLineHelp = domplate(
 });
 
 // ********************************************************************************************* //
+// Command Implementation
+
+function onExecuteCommand(context)
+{
+    CommandLineHelp.render(context);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
 // Registration
+
+Firebug.registerCommand("help", {
+    getter: true,
+    handler: onExecuteCommand.bind(this),
+    description: Locale.$STR("console.cmd.help.help")
+});
 
 return CommandLineHelp;
 
