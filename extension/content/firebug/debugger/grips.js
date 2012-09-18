@@ -6,120 +6,150 @@ define([
     "firebug/lib/string",
     "firebug/lib/locale",
     "firebug/lib/promise",
+    "firebug/debugger/rdp",
 ],
-function (FBTrace, Obj, Str, Locale, Promise) {
+function (FBTrace, Obj, Str, Locale, Promise, RDP) {
 
 // ********************************************************************************************* //
-// Factory
+// Object Grip
 
-var Factory =
+function Grip(grip, cache)
 {
-    createProperty: function(name, packet)
-    {
-        return new Property(name, packet);
-    },
-
-    createGrip: function(grip)
-    {
-        var result = new Grip(grip);
-        return result;
-    },
-
-    parseProperties: function(ownProperties)
-    {
-        var result = [];
-        for (var name in ownProperties)
-            result.push(this.createProperty(name, ownProperties[name]));
-        return result;
-    },
-
-    parseArguments: function(args)
-    {
-        var result = [];
-
-        if (!args)
-            return result;
-
-        for (var i=0; i<args.length; i++)
-        {
-            var arg = args[i];
-            for (var name in arg)
-                result.push(this.createProperty(name, arg[name]));
-        }
-        return result;
-    },
-
-    createScope: function(grip)
-    {
-        return new Scope(grip);
-    }
-}
-
-// ********************************************************************************************* //
-// Property
-
-function Property(name, desc)
-{
-    this.name = name;
-    this.value = desc.value;
-    this.enumerable = desc.enumerable;
-    this.configurable = desc.configurable;
-    this.writable = desc.writable;
-}
-
-Property.prototype =
-{
-    hasProperties: function()
-    {
-        // There are properties only if the value is an object (grip)
-        return this.value instanceof Grip;
-    },
-
-    getProperties: function()
-    {
-        if (this.hasProperties())
-            return this.value.getPrototypeAndProperties();
-
-        return [];
-    },
-
-    getValue: function()
-    {
-        return this.value;
-    }
-}
-// ********************************************************************************************* //
-// Grip
-
-function Grip(grip)
-{
-    this.actor = grip.actor;
-    this.className = grip["class"];
-    this.type = grip.type;
-
-    this.loaded = false;
-    this.properties = [];
-    this.value = null;
+    this.grip = grip;
+    this.cache = cache;
+    this.properties = null;
 }
 
 Grip.prototype =
 {
-    isLoaded: function()
+    getActor: function()
     {
-        return this.loaded;
+        return this.grip.actor;
     },
 
-    getPrototypeAndProperties: function()
+    getType: function()
     {
-        if (!this.loaded)
-            return [];
+        return this.grip["class"];
+    },
 
-        var result = [];
-        for (var prop in this.value)
-            result.push(this.value[prop]);
+    getValue: function()
+    {
+        switch (this.grip.type)
+        {
+            case "null":
+                return null;
+            case "undefined":
+                return;
 
+            default:
+                return {type: this.grip.type};
+        }
+    },
+
+    hasProperties: function()
+    {
+        var result = true;
+
+        // If the value isn't an object, but a primitive there are no children.
+        if (this.grip.type != "object")
+            result = false;;
+
+        // It could happen that some loaded objects dosn't have any properties
+        // (even if at least prototype should be always there). In this case
+        // Expanding such object in the UI will just remove the toggle button.
+        if (this.properties && !this.properties.length)
+            result = false;
+
+        //FBTrace.sysout("Grip.hasProperties; " + result, this);
+
+        // It looks like the object has children, but we'll see for sure as soon
+        // as its children are actualy fetched from the server.
         return result;
     },
+
+    getProperties: function()
+    {
+        if (this.properties)
+            return this.properties;
+
+        var packet = {
+            to: this.getActor(),
+            type: RDP.DebugProtocolTypes.prototypeAndProperties
+        };
+
+        var self = this;
+        return this.cache.request(packet).then(function(response)
+        {
+            self.properties = Factory.parseProperties(response.ownProperties, self.cache);
+            return self.properties;
+        });
+    },
+}
+
+// ********************************************************************************************* //
+// Function Grip
+
+function FunctionGrip(grip, cache)
+{
+    this.grip = grip;
+    this.cache = cache;
+    this.signature = null;
+}
+
+FunctionGrip.prototype = Obj.descend(new Grip(),
+{
+    toString: function()
+    {
+        return this.getSignature();
+    },
+
+    hasProperties: function()
+    {
+        return false;
+    },
+
+    getSignature: function()
+    {
+        if (this.signature)
+            return this.signature;
+
+        var packet = {
+            to: this.getActor(),
+            type: RDP.DebugProtocolTypes.nameAndParameters
+        };
+
+        var self = this;
+        return this.cache.request(packet).then(function(response)
+        {
+            var r = response;
+            self.signature = r.name + "(" + r.parameters.join(", ") + ")";
+            return self.signature;
+        });
+    },
+
+    getType: function()
+    {
+        return "function";
+    },
+
+    getValue: function()
+    {
+        //xxxHonza: This method is executed 2x more than it should be, why?
+        //FBTrace.sysout("FunctionGrip.getValue; " + this.signature)
+
+        if (!this.signature)
+            return this.getSignature();
+
+        return this;
+    }
+});
+
+// ********************************************************************************************* //
+// LongString Grip
+
+function LongString()
+{
+    // TODO
 }
 
 // ********************************************************************************************* //
@@ -131,13 +161,8 @@ function Scope(grip)
     this.properties = null;
 }
 
-Scope.prototype = Obj.extend(Grip.prototype,
+Scope.prototype = Obj.descend(new Grip(),
 {
-    getValue: function()
-    {
-        return {type: this.grip.type};
-    },
-
     getName: function()
     {
         // Construct the scope name.
@@ -178,14 +203,64 @@ Scope.prototype = Obj.extend(Grip.prototype,
             case "block":
             case "function":
                 var ps = this.properties = [];
-                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables));
-                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments));
+                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables, cache));
+                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments, cache));
                 break;
         }
 
         return this.properties;
     },
 });
+
+// ********************************************************************************************* //
+// Property
+
+function Property(name, desc, cache)
+{
+    this.name = name;
+    this.value = cache.getObject(desc.value);
+    this.desc = desc;
+    this.cache = cache;
+}
+
+Property.prototype =
+{
+    hasChildren: function()
+    {
+        var result = false;
+
+        if (this.value instanceof Grip)
+            result = this.value.hasProperties();
+
+        //FBTrace.sysout("Property.hasProperties; " + this.name + ", " + result);
+
+        return result;
+    },
+
+    getChildren: function()
+    {
+        if (this.value instanceof Grip)
+            return this.value.getProperties();
+
+        return [];
+    },
+
+    getValue: function()
+    {
+        if (this.value instanceof Grip)
+            return this.value.getValue();
+
+        return this.value;
+    },
+
+    getType: function()
+    {
+        if (this.value instanceof Grip)
+            return this.value.getType();
+
+        return typeof(this.value);
+    }
+}
 
 // ********************************************************************************************* //
 // Expression
@@ -196,6 +271,56 @@ function WatchExpression(expr)
 
     // The value is set after the expression is evaluated on the back-end.
     this.value = undefined;
+}
+
+// ********************************************************************************************* //
+// Factory
+
+var Factory =
+{
+    createProperty: function(name, packet, cache)
+    {
+        return new Property(name, packet, cache);
+    },
+
+    createGrip: function(grip, cache)
+    {
+        switch (grip["class"])
+        {
+            case "Function":
+                return new FunctionGrip(grip, cache);
+        }
+        return new Grip(grip, cache);
+    },
+
+    parseProperties: function(ownProperties, cache)
+    {
+        var result = [];
+        for (var name in ownProperties)
+            result.push(this.createProperty(name, ownProperties[name], cache));
+        return result;
+    },
+
+    parseArguments: function(args, cache)
+    {
+        var result = [];
+
+        if (!args)
+            return result;
+
+        for (var i=0; i<args.length; i++)
+        {
+            var arg = args[i];
+            for (var name in arg)
+                result.push(this.createProperty(name, arg[name], cache));
+        }
+        return result;
+    },
+
+    createScope: function(grip)
+    {
+        return new Scope(grip);
+    }
 }
 
 // ********************************************************************************************* //

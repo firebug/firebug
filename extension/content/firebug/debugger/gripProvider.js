@@ -28,28 +28,11 @@ GripProvider.prototype =
 
     hasChildren: function(object)
     {
-        if (object instanceof Grips.Property)
-        {
-            // If the object is a Property than its value (a grip) needs to be investigated.
-            object = this.cache.getObject(object.value);
-            return object ? this.hasChildren(object) : false;
-        }
-        else if (object instanceof Grips.Grip)
-        {
-            // If the value isn't an object, but a primitive there are no children.
-            if (typeof(object.value) != "object")
-                return false;
+        if (Obj.isFunction(object.hasChildren))
+            return object.hasChildren();
 
-            // It could happen that some loaded objects dosn't have any properties
-            // (even if at least prototype should be always there). In this case
-            // Expanding such object in the UI will just remove the toggle button.
-            if (object.loaded && !object.properties.length)
-                return false;
-
-            // It looks like the object has children, but we'll see for sure as soon
-            // as its children are actualy fetched from the server.
-            return true;
-        }
+        if (Obj.isFunction(object.hasProperties))
+            return object.hasProperties();
 
         return false;
     },
@@ -60,13 +43,13 @@ GripProvider.prototype =
         if (Arr.isArray(object))
             return object;
 
-        if (object instanceof Grips.Property)
-            object = object.value;
+        if (Obj.isFunction(object.getChildren))
+            return object.getChildren();
 
-        if (!object.actor)
-            return [];
+        if (Obj.isFunction(object.getProperties))
+            return object.getProperties();
 
-        return this.cache.fetchProperties(object);
+        return [];
     },
 
     getLabel: function(object)
@@ -77,29 +60,21 @@ GripProvider.prototype =
         if (typeof(object) == "string")
             text = object;
 
-        // Cropping is usyally based on extensions.firebug.stringCropLength pref
+        // Make sure it's a string
+        text += "";
+
+        // Cropping is usually based on extensions.firebug.stringCropLength pref
         // But 50 chars (default value) is not short enough. We need a new pref
         // extensions.firebug.stringCropLengthSmall? (see issue 5898)
         return Str.cropString(text, 25);
     },
 
-    getValue: function(grip)
+    getValue: function(object)
     {
-        if (grip.value && grip.value.type)
-        {
-            if (grip.value.type == "null")
-                return null;
-            else if (grip.value.type == "undefined")
-                return; // return undefined value
-        }
+        if (Obj.isFunction(object.getValue))
+            return object.getValue();
 
-        if (!grip.value)
-            return null;
-
-        if (typeof(grip.value) == "object")
-            return {type: grip.value["class"]};
-
-        return grip.value;
+        return object.value;
     },
 }
 
