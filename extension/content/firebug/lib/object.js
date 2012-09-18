@@ -55,6 +55,13 @@ Obj.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
+Obj.isFunction = function(ob)
+{
+    return typeof(ob) == "function";
+}
+
+// ************************************************************************************************
+
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
  *
