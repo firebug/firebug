@@ -6,8 +6,11 @@ define([
     "firebug/lib/dom",
     "firebug/console/commandLineExposed",
     "firebug/chrome/window",
+    "firebug/lib/Xpcom",
+    "firebug/lib/events",
 ],
-function(Domplate, Locale, Dom, CommandLineExposed, Win) { with (Domplate) {
+function(Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,6 +21,8 @@ const Ci = Components.interfaces;
 var CMD_TYPE_COMMAND = 1;
 var CMD_TYPE_SHORTCUT = 2;
 var CMD_TYPE_PROPERTY = 3;
+
+const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // ********************************************************************************************* //
 // Domplates
@@ -85,7 +90,16 @@ var HelpEntry = domplate(
 
     onClick: function(event)
     {
+        Events.cancelEvent(event);
+
         var object = Firebug.getRepObject(event.target);
+
+        if (object.noUserHelpUrl)
+        {
+            prompts.alert(null, Locale.$STR("Firebug"),
+                Locale.$STR("console.cmd.helpUrlNotAvailable"));
+            return;
+        }
 
         var helpUrl = "http://getfirebug.com/wiki/index.php/" + object.name;
         if (object.helpUrl)
@@ -162,6 +176,7 @@ var CommandLineHelp = domplate(
                 name: name,
                 desc: config.description,
                 nol10n: true,
+                noUserHelpUrl: !config.helpUrl,
                 helpUrl: config.helpUrl ? config.helpUrl: null,
                 type: config.getter ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
             })
@@ -187,6 +202,7 @@ function onExecuteCommand(context)
 
 Firebug.registerCommand("help", {
     getter: true,
+    helpUrl: "http://getfirebug.com/wiki/index.php/help",
     handler: onExecuteCommand.bind(this),
     description: Locale.$STR("console.cmd.help.help")
 });
