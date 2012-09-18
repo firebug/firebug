@@ -127,7 +127,7 @@ function createFirebugCommandLine(context, win)
         else
         {
             commandLine[name] = createCommandHandler(name);
-            commandLine.__exposedProps__[name] = "rw";
+            commandLine.__exposedProps__[name] = "r";
         }
     }
 
