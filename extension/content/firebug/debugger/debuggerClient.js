@@ -6,9 +6,8 @@ define([
     "firebug/debugger/sourceFile",
     "firebug/debugger/rdp",
     "firebug/debugger/threadClient",
-    "firebug/debugger/breakpointClient",
 ],
-function (Obj, Options, SourceFile, RDP, ThreadClient, BreakpointClient) {
+function (Obj, Options, SourceFile, RDP, ThreadClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
