@@ -514,7 +514,7 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     getObject: function(grip)
     {
         this.assertPaused("getObject");
-        this.gripCache.getObject(grip);
+        return this.gripCache.getObject(grip);
     }
 });
 

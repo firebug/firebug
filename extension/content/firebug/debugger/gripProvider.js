@@ -28,6 +28,9 @@ GripProvider.prototype =
 
     hasChildren: function(object)
     {
+        if (!object)
+            return false;
+
         if (Obj.isFunction(object.hasChildren))
             return object.hasChildren();
 
