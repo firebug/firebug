@@ -91,7 +91,6 @@ window.Firebug =
     earlyRegPanelTypes: earlyRegPanelTypes,
     uiListeners: [],
     reps: reps,
-    commands: {},
 
     stringCropLength: 50,
 
