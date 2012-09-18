@@ -133,12 +133,14 @@ StackFrame.prototype =
 
         this.scopes = [];
 
-        // The first scope is 'this' by default.
+        // Append 'this' as the first scope. This is not a real 'scope',
+        // but useful for debugging.
         var thisScope = Grips.Factory.createGrip(this.nativeFrame["this"]);
         thisScope.name = "this";
         this.scopes.push(thisScope);
 
-        // Now iterate all parents scopes.
+        // Now iterate all parent scopes. This represents the chain of scopes
+        // in the Watch panel.
         var scope = this.nativeFrame.environment;
         while (scope)
         {
@@ -148,6 +150,12 @@ StackFrame.prototype =
 
         return this.scopes;
     },
+
+    getTopScope: function()
+    {
+        var scopes = this.getScopes();
+        return (scopes.length > 1) ? scopes[1] : null;
+    }
 };
 
 // ********************************************************************************************* //

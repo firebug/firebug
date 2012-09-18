@@ -186,10 +186,16 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (object instanceof StackFrame)
             this.tree.provider = new WatchPanelProvider(this);
 
-        //xxxHonza: Pre-expand local variables
         this.tree.append(this.panelNode, input);
 
-        // Asynchronoysly eval all user-expressions
+        // Pre-expand the first top scope.
+        if (object instanceof StackFrame)
+        {
+            var scope = object.getTopScope();
+            this.tree.expandObject(scope);
+        }
+
+        // Asynchronously eval all user-expressions
         this.evalWatches(this.watches);
     },
 
