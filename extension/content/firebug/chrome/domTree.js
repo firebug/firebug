@@ -85,7 +85,7 @@ DomTree.prototype = domplate(
         {
             var value = member.provider.getValue(member.value);
             if (isPromise(value))
-                return this.resolvePromise(value, member.value);
+                return member.tree.resolvePromise(value, member.value);
 
             return value;
         }
@@ -95,6 +95,8 @@ DomTree.prototype = domplate(
 
     getValueTag: function(member)
     {
+        // xxxHonza: |this| is wrong at this moment (callback from Domplate uses wrong context).
+
         // Get proper UI template for the value.
         // xxxHonza: The value can be fetched asynchronously so, the value tag
         // should be also provided (by a decorator or provider).
@@ -202,6 +204,7 @@ DomTree.prototype = domplate(
 
                 var member = this.createMember(type, null, child, level, hasChildren);
                 member.provider = this.provider;
+                member.tree = this; // Domplate derivation doesn't work properly
                 members.push(member);
             }
         }
@@ -325,7 +328,10 @@ DomTree.prototype = domplate(
         var promise = promise.then(function onThen(value)
         {
             if (FBTrace.DBG_DOMTREE)
-                FBTrace.sysout("domTree.onThen; sync: " + sync, value);
+            {
+                FBTrace.sysout("domTree.onThen; sync: " + sync,
+                    {value: value, object: object});
+            }
 
             if (sync)
                 result = value;
@@ -393,6 +399,18 @@ DomTree.prototype = domplate(
 
     updateObject: function(object)
     {
+        try
+        {
+            this.doUpdateObject(object);
+        }
+        catch (e)
+        {
+            FBTrace.sysout("domTree.updateObject; EXCEPTION " + e, e);
+        }
+    },
+
+    doUpdateObject: function(object)
+    {
         if (FBTrace.DBG_DOMTREE)
             FBTrace.sysout("domTree.updateObject;", object);
 
@@ -403,7 +421,7 @@ DomTree.prototype = domplate(
         {
             var members = this.getMembers(object); // xxxHonza: what about level?
             if (members)
-                this.loop.insertRows({members: members}, this.element.firstChild);
+                this.loop.insertRows({members: members}, this.element.firstChild, this);
             return;
         }
 
