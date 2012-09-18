@@ -29,7 +29,23 @@ function pauseGrip(context, args)
         return "No actor specified";
 
     var grip = thread.pauseGrip({actor: actor});
-    grip.getPrototypeAndProperties(function(response)
+    var handler = grip.getPrototypeAndProperties;
+    switch (type)
+    {
+        case "object":
+            handler = grip.getPrototypeAndProperties;
+            break;
+
+        case "function":
+            handler = grip.getSignature;
+            break;
+
+        case "decompile":
+            handler = grip.getSource;
+            break;
+    }
+
+    handler.call(grip, function(response)
     {
         Firebug.Console.log(response);
     });
