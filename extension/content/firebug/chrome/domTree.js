@@ -82,7 +82,13 @@ DomTree.prototype = domplate(
     getValue: function(member)
     {
         if (member.provider)
-            return member.provider.getValue(member.value);
+        {
+            var value = member.provider.getValue(member.value);
+            if (isPromise(value))
+                return this.resolvePromise(value, member.value);
+
+            return value;
+        }
 
         return member.value;
     },
@@ -90,6 +96,8 @@ DomTree.prototype = domplate(
     getValueTag: function(member)
     {
         // Get proper UI template for the value.
+        // xxxHonza: The value can be fetched asynchronously so, the value tag
+        // should be also provided (by a decorator or provider).
         var value = this.getValue(member);
         var valueTag = Firebug.getRep(value);
         return valueTag.tag;
@@ -231,39 +239,8 @@ DomTree.prototype = domplate(
             return children;
         }
 
-        // If it's an array, bail out. Otherwise it's a Promise and children can be
-        // returned asynchronously.
-        if (Arr.isArray(children))
-            return children;
-
-        // This flag is used to differentiate sync and async scenario. If it's
-        // still true when 'onFetchChildren' callback executes, it's synchronous.
-        var sync = true;
-
-        // The callback can be executed immediatelly if children are provided
-        // synchronously. In such case, 'arr' is immediatelly used as the result value.
-        // The object (i.e. the associated row) is updated later in asynchronous senario.
-        var self = this;
-        children.then(function onFetchChildren(arr)
-        {
-            if (FBTrace.DBG_DOMTREE)
-            {
-                FBTrace.sysout("domTree.onFetchChildren; sync: " + sync +
-                     ", count: " + arr.length, arr);
-            }
-
-            if (sync)
-                children = arr;
-            else
-                self.updateObject(object); // xxxHonza: arr should be passed to the callback
-
-        },
-        function onError(err)
-        {
-            FBTrace.sysout("domTree.onFetchChildren; ERROR " + err, err);
-        });
-
-        sync = false;
+        if (isPromise(children))
+            return this.resolvePromise(children, object);
 
         return children;
     },
@@ -334,6 +311,38 @@ DomTree.prototype = domplate(
         return null;
     },
 
+    resolvePromise: function(promise, object)
+    {
+        var result;
+
+        // This flag is used to differentiate sync and async scenario.
+        var sync = true;
+
+        // The callback can be executed immediatelly if children are provided
+        // synchronously. In such case, 'arr' is immediatelly used as the result value.
+        // The object (i.e. the associated row) is updated later in asynchronous senario.
+        var self = this;
+        var promise = promise.then(function onThen(value)
+        {
+            if (FBTrace.DBG_DOMTREE)
+                FBTrace.sysout("domTree.onThen; sync: " + sync, value);
+
+            if (sync)
+                result = value;
+            else
+                self.updateObject(object); // xxxHonza: value should be passed too
+
+        },
+        function onError(err)
+        {
+            FBTrace.sysout("domTree.onResolvePromise; ERROR " + err, err);
+        });
+
+        sync = false;
+
+        return result || promise;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public
 
@@ -363,6 +372,13 @@ DomTree.prototype = domplate(
     expandObject: function(object)
     {
         var row = this.getRow(object);
+        if (!row)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domTree.expandObject; ERROR no such object", object);
+            return;
+        }
+
         this.toggleRow(row, true);
         return row;
     },
