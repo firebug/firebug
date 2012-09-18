@@ -1245,6 +1245,10 @@ window.Firebug =
         if (type == 'object' && object instanceof String)
             type = 'string';
 
+        // Support for objects with dynamic type info.
+        if (object && Obj.isFunction(object.getType))
+            type = object.getType();
+
         for (var i = 0; i < reps.length; ++i)
         {
             var rep = reps[i];
