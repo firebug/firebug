@@ -235,11 +235,13 @@ Firebug.registerModule(EventMonitor);
 
 Firebug.registerCommand("monitorEvents", {
     handler: monitorEvents.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/monitorEvents",
     description: Locale.$STR("console.cmd.help.monitorEvents")
 })
 
 Firebug.registerCommand("unmonitorEvents", {
     handler: unmonitorEvents.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/unmonitorEvents",
     description: Locale.$STR("console.cmd.help.unmonitorEvents")
 })
 

@@ -536,11 +536,13 @@ Firebug.registerRep(Firebug.Profiler.ProfileCall);
 
 Firebug.registerCommand("profile", {
     handler: profile.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/profile",
     description: Locale.$STR("console.cmd.help.profile")
 })
 
 Firebug.registerCommand("profileEnd", {
     handler: profileEnd.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/profileEnd",
     description: Locale.$STR("console.cmd.help.profileEnd")
 })
 

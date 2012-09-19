@@ -96,7 +96,7 @@ function createFirebugCommandLine(context, win)
             continue;
 
         commandLine[command] = createShortcutHandler(command);
-        commandLine.__exposedProps__[command] = "rw";
+        commandLine.__exposedProps__[command] = "r";
     }
 
     // Define console variables.
@@ -127,7 +127,7 @@ function createFirebugCommandLine(context, win)
         else
         {
             commandLine[name] = createCommandHandler(name);
-            commandLine.__exposedProps__[name] = "rw";
+            commandLine.__exposedProps__[name] = "r";
         }
     }
 
