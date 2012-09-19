@@ -50,14 +50,6 @@ var CSSDomplateBase =
     isSelectorEditable: function(rule)
     {
         return rule.isSelectorEditable && this.isEditable(rule);
-    },
-
-    getPropertyValue: function(prop)
-    {
-        var limit = Options.get("stringCropLength");
-        if (limit > 0)
-            return Str.cropString(prop.value, limit);
-        return prop.value;
     }
 };
 
@@ -78,7 +70,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
-                "$prop|getPropertyValue$prop.important"
+                "$prop.value$prop.important"
             ),
             SPAN({"class": "cssSemi"}, ";"
         )
@@ -1294,11 +1286,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
-            var styleRule = Firebug.getRepObject(propValue);
+            var text = propValue.textContent;
             var prop = Dom.getAncestorByClass(target, "cssProp");
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
-            var text = styleRule.style.getPropertyValue(propName);
             var cssValue;
 
             if (propName == "font" || propName == "font-family")
@@ -1681,11 +1672,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             this.panel.removeDisabledProperty(rule, propName);
         }
 
+        target.textContent = value;
+
         if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
         {
             if (Css.hasClass(target, "cssPropName"))
             {
-                target.textContent = value;
   
                 if (value && previousValue != value)  // name of property has changed.
                 {
@@ -1724,9 +1716,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             else if (Dom.getAncestorByClass(target, "cssPropValue"))
             {
-                var limit = Options.get("stringCropLength");
-                target.textContent = limit > 0 ? Str.cropString(value, limit) : value;
-
                 propName = Dom.getChildByClass(row, "cssPropName").textContent;
                 propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
   
@@ -1772,8 +1761,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
         {
-            target.textContent = value;
-
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @import media query: " +
@@ -1792,8 +1779,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (rule instanceof window.CSSCharsetRule)
         {
-            target.textContent = value;
-            
             if (FBTrace.DBG_CSS)
                 FBTrace.sysout("CSSEditor.saveEdit: @charset: " + previousValue + "->" + value);
 
@@ -1839,28 +1824,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             return !isValueInString;
         }
-    },
-
-    getInitialValue: function(target, value)
-    {
-        if (value == "")
-            return value;
-
-        var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        if (propValue)
-        {
-            var styleRule = Firebug.getRepObject(propValue);
-            var prop = Dom.getAncestorByClass(target, "cssProp");
-            var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
-            var propName = propNameNode.textContent.toLowerCase();
-            value = styleRule.style.getPropertyValue(propName);
-
-            if (Options.get("colorDisplay") == "hex")
-                value = Css.rgbToHex(value);
-            else if (Options.get("colorDisplay") == "hsl")
-                value = Css.rgbToHSL(value);
-        }
-        return value;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
