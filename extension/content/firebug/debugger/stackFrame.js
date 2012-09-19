@@ -133,13 +133,13 @@ StackFrame.prototype =
 
         this.scopes = [];
 
+        var cache = this.context.debuggerClient.activeThread.gripCache;
+
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.
-        var thisScope = Grips.Factory.createGrip(this.nativeFrame["this"]);
+        var thisScope = Grips.Factory.createGrip(this.nativeFrame["this"], cache);
         thisScope.name = "this";
         this.scopes.push(thisScope);
-
-        var cache = this.context.debuggerClient.activeThread.gripCache;
 
         // Now iterate all parent scopes. This represents the chain of scopes
         // in the Watch panel.
