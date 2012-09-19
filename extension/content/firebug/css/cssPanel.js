@@ -1300,7 +1300,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var propName = propNameNode.textContent.toLowerCase();
             var priority = styleRule.style.getPropertyPriority(propName);
             var text = styleRule.style.getPropertyValue(propName) +
-                (priority ? " " + priority : "");
+                (priority ? "!" + priority : "");
 
             if (text != "")
             {
@@ -2374,7 +2374,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     cssText.push(propName);
                     cssText.push(":");
                     cssText.push(rule.style.getPropertyValue(propName) +
-                        rule.style.getPropertyValue(propName));
+                        rule.style.getPropertyPriority(propName) ? "!important" : "");
                     cssText.push(";");
                 }
             }
