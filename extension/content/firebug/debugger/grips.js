@@ -195,7 +195,13 @@ Scope.prototype = Obj.descend(new ObjectGrip(),
         return label;
     },
 
-    getProperties: function(cache)
+    hasProperties: function()
+    {
+        // xxxHonza: hack, the scope could be empty (= no children).
+        return true;
+    },
+
+    getProperties: function()
     {
         if (this.properties)
             return this.properties;
@@ -210,8 +216,8 @@ Scope.prototype = Obj.descend(new ObjectGrip(),
             case "block":
             case "function":
                 var ps = this.properties = [];
-                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables, cache));
-                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments, cache));
+                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables, this.cache));
+                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments, this.cache));
                 break;
         }
 
@@ -225,7 +231,10 @@ Scope.prototype = Obj.descend(new ObjectGrip(),
 function Property(name, desc, cache)
 {
     this.name = name;
-    this.value = cache.getObject(desc.value);
+
+    if (desc)
+        this.value = cache ? cache.getObject(desc.value) : desc;
+
     this.desc = desc;
     this.cache = cache;
 }
@@ -279,6 +288,14 @@ function WatchExpression(expr)
     // The value is set after the expression is evaluated on the back-end.
     this.value = undefined;
 }
+
+WatchExpression.prototype = Obj.descend(new Property(),
+{
+    getName: function()
+    {
+        return this.expr;
+    }
+});
 
 // ********************************************************************************************* //
 // Factory

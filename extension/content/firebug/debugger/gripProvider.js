@@ -37,7 +37,8 @@ GripProvider.prototype =
         if (Obj.isFunction(object.hasProperties))
             return object.hasProperties();
 
-        return false;
+        var children = this.getChildren();
+        return children && children.length > 0;
     },
 
     getChildren: function(object)
@@ -58,6 +59,9 @@ GripProvider.prototype =
     getLabel: function(object)
     {
         var text = object.name;
+
+        if (Obj.isFunction(object.getName))
+            text = object.getName();
 
         // Support for string type (children are String instances).
         if (typeof(object) == "string")
