@@ -15,7 +15,6 @@ define([
     "firebug/debugger/stackFrame",
     "firebug/debugger/stackTrace",
     "firebug/debugger/watchPanel",
-    "firebug/debugger/gripClient",
     "firebug/debugger/gripCache",
     "firebug/debugger/commands",
 ],

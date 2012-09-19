@@ -7,9 +7,8 @@ define([
     "firebug/debugger/rdp",
     "firebug/debugger/breakpointClient",
     "firebug/debugger/gripCache",
-    "firebug/debugger/gripClient",
 ],
-function (Obj, Options, SourceFile, RDP, BreakpointClient, GripCache, GripClient) {
+function (Obj, Options, SourceFile, RDP, BreakpointClient, GripCache) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -457,36 +456,6 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     /**
-     * Return a GripClient object for the given object grip.
-     *
-     * @param aGrip object
-     *        A pause-lifetime object grip returned by the protocol.
-     */
-    pauseGrip: function DebuggerClient_pauseGrip(aGrip)
-    {
-        if (!this.pauseGrips)
-            this.pauseGrips = {};
-
-        if (aGrip.actor in this.pauseGrips)
-            return this.pauseGrips[aGrip.actor];
-
-        var client = new GripClient(this.connection, aGrip);
-        this.pauseGrips[aGrip.actor] = client;
-        return client;
-    },
-
-    /**
-     * Invalidate pause-lifetime grip clients and clear the list of
-     * current grip clients.
-     */
-    clearPauseGrips: function DebuggerClient_clearPauseGrips(aPacket)
-    {
-        for each (var grip in this.pauseGrips)
-            grip.valid = false;
-        this.pauseGrips = null;
-    },
-
-    /**
      * Handle thread state change by doing necessary cleanup and notifying all
      * registered listeners.
      */
@@ -499,9 +468,8 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
         FBTrace.sysout("threadClient.onThreadState; type: " + packet.type, packet);
 
         this.state = RDP.ThreadStateTypes[packet.type];
-        this.clearFrames();
-        this.clearPauseGrips();
 
+        this.clearFrames();
         this.gripCache.clear();
 
         if (this.connection.eventsEnabled)

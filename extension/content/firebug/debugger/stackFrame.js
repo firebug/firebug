@@ -139,12 +139,14 @@ StackFrame.prototype =
         thisScope.name = "this";
         this.scopes.push(thisScope);
 
+        var cache = this.context.debuggerClient.activeThread.gripCache;
+
         // Now iterate all parent scopes. This represents the chain of scopes
         // in the Watch panel.
         var scope = this.nativeFrame.environment;
         while (scope)
         {
-            this.scopes.push(Grips.Factory.createScope(scope));
+            this.scopes.push(Grips.Factory.createScope(scope, cache));
             scope = scope.parent;
         }
 

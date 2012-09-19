@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/debugger/rdp",
 ],
-function(FBTrace) {
+function(FBTrace, RDP) {
 
 // ********************************************************************************************* //
 // Constants
@@ -28,24 +29,14 @@ function pauseGrip(context, args)
     if (!actor)
         return "No actor specified";
 
-    var grip = thread.pauseGrip({actor: actor});
-    var handler = grip.getPrototypeAndProperties;
-    switch (type)
-    {
-        case "object":
-            handler = grip.getPrototypeAndProperties;
-            break;
+    var cache = context.debuggerClient.activeThread.gripCache;
 
-        case "function":
-            handler = grip.getSignature;
-            break;
+    var packet = {
+        to: actor,
+        type: type || RDP.DebugProtocolTypes.prototypeAndProperties
+    };
 
-        case "decompile":
-            handler = grip.getSource;
-            break;
-    }
-
-    handler.call(grip, function(response)
+    cache.request(packet).then(function(response)
     {
         Firebug.Console.log(response);
     });

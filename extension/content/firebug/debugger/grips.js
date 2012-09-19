@@ -13,14 +13,14 @@ function (FBTrace, Obj, Str, Locale, Promise, RDP) {
 // ********************************************************************************************* //
 // Object Grip
 
-function Grip(grip, cache)
+function ObjectGrip(grip, cache)
 {
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
 }
 
-Grip.prototype =
+ObjectGrip.prototype =
 {
     getActor: function()
     {
@@ -69,11 +69,16 @@ Grip.prototype =
 
     getProperties: function()
     {
+        return this.getPrototypeAndProperties(this.getActor());
+    },
+
+    getPrototypeAndProperties: function(actor)
+    {
         if (this.properties)
             return this.properties;
 
         var packet = {
-            to: this.getActor(),
+            to: actor,
             type: RDP.DebugProtocolTypes.prototypeAndProperties
         };
 
@@ -96,7 +101,7 @@ function FunctionGrip(grip, cache)
     this.signature = null;
 }
 
-FunctionGrip.prototype = Obj.descend(new Grip(),
+FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
 {
     toString: function()
     {
@@ -155,13 +160,14 @@ function LongString()
 // ********************************************************************************************* //
 // Scope
 
-function Scope(grip)
+function Scope(grip, cache)
 {
     this.grip = grip;
+    this.cache = cache;
     this.properties = null;
 }
 
-Scope.prototype = Obj.descend(new Grip(),
+Scope.prototype = Obj.descend(new ObjectGrip(),
 {
     getName: function()
     {
@@ -198,7 +204,8 @@ Scope.prototype = Obj.descend(new Grip(),
         {
             case "with":
             case "object":
-                return cache.fetchProperties(this.grip.object);
+                var actor = this.grip.object.actor;
+                return ObjectGrip.prototype.getPrototypeAndProperties.call(this, actor);
 
             case "block":
             case "function":
@@ -229,7 +236,7 @@ Property.prototype =
     {
         var result = false;
 
-        if (this.value instanceof Grip)
+        if (this.value instanceof ObjectGrip)
             result = this.value.hasProperties();
 
         //FBTrace.sysout("Property.hasProperties; " + this.name + ", " + result);
@@ -239,7 +246,7 @@ Property.prototype =
 
     getChildren: function()
     {
-        if (this.value instanceof Grip)
+        if (this.value instanceof ObjectGrip)
             return this.value.getProperties();
 
         return [];
@@ -247,7 +254,7 @@ Property.prototype =
 
     getValue: function()
     {
-        if (this.value instanceof Grip)
+        if (this.value instanceof ObjectGrip)
             return this.value.getValue();
 
         return this.value;
@@ -255,7 +262,7 @@ Property.prototype =
 
     getType: function()
     {
-        if (this.value instanceof Grip)
+        if (this.value instanceof ObjectGrip)
             return this.value.getType();
 
         return typeof(this.value);
@@ -290,7 +297,7 @@ var Factory =
             case "Function":
                 return new FunctionGrip(grip, cache);
         }
-        return new Grip(grip, cache);
+        return new ObjectGrip(grip, cache);
     },
 
     parseProperties: function(ownProperties, cache)
@@ -317,9 +324,9 @@ var Factory =
         return result;
     },
 
-    createScope: function(grip)
+    createScope: function(grip, cache)
     {
-        return new Scope(grip);
+        return new Scope(grip, cache);
     }
 }
 
@@ -328,7 +335,7 @@ var Factory =
 
 return {
     Property: Property,
-    Grip: Grip,
+    ObjectGrip: ObjectGrip,
     Scope: Scope,
     Factory: Factory,
     WatchExpression: WatchExpression,
