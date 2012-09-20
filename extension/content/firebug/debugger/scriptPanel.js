@@ -11,9 +11,11 @@ define([
     "firebug/chrome/menu",
     "firebug/debugger/stackFrame",
     "firebug/debugger/sourceLink",
+    "firebug/debugger/breakpoint",
+    "firebug/debugger/breakpointStore",
 ],
 function (Obj, Locale, Events, Dom, ScriptView, CompilationUnit, DebuggerTool, Menu,
-    StackFrame, SourceLink) {
+    StackFrame, SourceLink, Breakpoint, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -306,13 +308,27 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onBreakpointAdd: function(bp)
     {
-        var self = this;
-        function callback()
+        var url = this.location.href;
+        var line = bp.line;
+
+        function callback(response)
         {
-            FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", arguments);
+            if (response.error)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("scriptPanel.onBreakpointAdd; ERROR " + response, response);
+                return;
+            }
+
+            // Persist the breakpoint on the client side
+            BreakpointStore.addBreakpoint(url, line, {actor: response.actor});
+
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bp);
         }
 
-        this.tool.setBreakpoint(this.context, this.location.href, bp.line, callback);
+        FBTrace.sysout("scriptPanel.onBreakpointAdd; set a breakpoint", bp);
+        this.tool.setBreakpoint(this.context, url, line, callback);
     },
 
     onBreakpointRemove: function(bp)

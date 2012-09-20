@@ -32,7 +32,7 @@ function DebuggerClient(context, connection)
     this.onThreadStateListener = this.onThreadState.bind(this);
 }
 
-DebuggerClient.prototype = Obj.extend(Object,
+DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
 {
     dispatchName: "DebuggerClient",
 
@@ -149,7 +149,7 @@ DebuggerClient.prototype = Obj.extend(Object,
                 this.activeThread = threadClient;
 
                 // Connect script manager
-                this.scripts = new SourceScripts(this.connection, this.activeThread);
+                this.scripts = new SourceScripts(this);
                 this.scripts.connect();
 
                 // Resume remote thread.
@@ -192,10 +192,11 @@ DebuggerClient.prototype = Obj.extend(Object,
  * Keeps the source script list up-to-date, using the thread client's
  * source script cache.
  */
-function SourceScripts(connection, thread)
+function SourceScripts(debuggerClient)
 {
-    this.connection = connection;
-    this.thread = thread;
+    this.debuggerClient = debuggerClient;
+    this.connection = debuggerClient.connection;
+    this.thread = debuggerClient.activeThread;
 }
 
 SourceScripts.prototype =
@@ -207,11 +208,16 @@ SourceScripts.prototype =
         // Retrieve the list of scripts known to the server from before the client
         // was ready to handle new script notifications.
         this.thread.fillScripts();
+
+        this.onNewScript = this.onNewScript.bind();
+
+        this.debuggerClient.addListener("newScript", this.onNewScript);
     },
 
     disconnect: function()
     {
-        
+        this.thread.removeListener(this);
+        this.debuggerClient.removeListener("newScript", this.onNewScript);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -228,6 +234,8 @@ SourceScripts.prototype =
 
     onScriptsAdded: function(scriptCache)
     {
+        FBTrace.sysout("SourceScripts.onScriptsAdded; ", scriptCache);
+
         for (var p in scriptCache)
         {
             var script = scriptCache[p];

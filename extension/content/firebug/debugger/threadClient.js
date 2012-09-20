@@ -275,13 +275,13 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
                 // dead script that will reappear on a page reload.
                 if (onResponse)
                 {
-                    var bpClient = new BreakpointClient(this.connection, response.actor,
-                        location);
+                    //var bpClient = new BreakpointClient(this.connection, response.actor,
+                    //    location);
 
                     if (callback)
-                        callback(onResponse(response, bpClient));
+                        callback(onResponse(response));
                     else
-                        onResponse(response, bpClient);
+                        onResponse(response);
                 }
             }.bind(this));
         }.bind(this);
