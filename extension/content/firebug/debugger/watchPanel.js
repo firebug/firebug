@@ -205,13 +205,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     refreshMember: function(member, value)
     {
-        var self = this;
-
-        // xxxHonza: make the async op slow for now.
-        setTimeout(function()
-        {
-            self.tree.updateMember(member, value);
-        }, 1500);
+        this.tree.updateMember(member, value);
     },
 
     rebuild: function()

@@ -150,12 +150,15 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
 });
 
 // ********************************************************************************************* //
-// LongString Grip
+// LongString
 
 function LongString()
 {
-    // TODO
 }
+
+LongString.prototype = Obj.descend(new ObjectGrip(),
+{
+});
 
 // ********************************************************************************************* //
 // Scope
@@ -197,6 +200,10 @@ Scope.prototype = Obj.descend(new ObjectGrip(),
 
     hasProperties: function()
     {
+        // If properties are loaded, but there are none return false.
+        if (this.properties && !this.properties.length)
+            return false;
+
         // xxxHonza: hack, the scope could be empty (= no children).
         return true;
     },

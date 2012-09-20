@@ -17,7 +17,9 @@ function WatchPanelProvider(panel)
 }
 
 /**
- * @provider
+ * @provider The object represent a custom provider for the Watch panel.
+ * The provider is responsible for joing list of user-expressions with the
+ * list of the current scopes.
  */
 var BaseProvider = GripProvider.prototype;
 WatchPanelProvider.prototype = Obj.extend(BaseProvider,
