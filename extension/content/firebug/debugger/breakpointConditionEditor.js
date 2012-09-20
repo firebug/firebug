@@ -114,4 +114,4 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 return ConditionEditor;
 
 // ********************************************************************************************* //
-});
+}});

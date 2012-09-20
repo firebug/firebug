@@ -45,6 +45,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         this.groupOpened = [];
 
         Firebug.Panel.initialize.apply(this, arguments);
+
+        BreakpointStore.addListener(this);
     },
 
     destroy: function(state)
@@ -52,6 +54,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         state.groupOpened = this.groupOpened;
 
         Firebug.Panel.destroy.apply(this, arguments);
+
+        BreakpointStore.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -382,6 +386,19 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     onStartDebugging: function(frame)
     {
         FBTrace.sysout("breakpointPanel.onStartDebugging;");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BreakpointStore Listener
+
+    onBreakpointAdded: function(bp)
+    {
+        this.refresh();
+    },
+
+    onBreakpointRemoved: function(bp)
+    {
+        this.refresh();
     },
 });
 

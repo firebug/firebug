@@ -67,19 +67,118 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             var url = urls[i];
             var bps = this.storage.getItem(url);
 
-            // Do not restore "Run unit this line" breakpoints. This should solve complaints
+            // Do not restore "Run until this line" breakpoints. This should solve complaints
             // about Firebug breaking in the source even if there are no breakpoints in
             // Firebug UI.
-            if (bps.type == BP_UNTIL)
-                continue;
+            bps = bps.filter(function(element, index, array)
+            {
+                return (element.type != BP_UNTIL);
+            });
 
             this.breakpoints[url] = bps;
         }
     },
 
-    save: function()
+    save: function(url)
     {
-        
+        var bps = this.getBreakpoints(url);
+        if (!bps)
+            return;
+
+        var cleanBPs = [];
+        for (var i=0; i<bps.length; i++)
+        {
+            var bp = bps[i];
+
+            if (bp.type == BP_UNTIL)
+                continue;
+
+            var cleanBP = {};
+            for (var p in bp)
+                cleanBP[p] = bp[p];
+
+            delete cleanBP.params;
+
+            cleanBPs.push(cleanBP);
+        }
+
+        this.storage.setItem(url, cleanBPs);
+
+        FBTrace.sysout("breakpointStore.save;", this.storage);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    addBreakpoint: function(url, lineNo, params)
+    {
+        if (this.findBreakpoint(url, lineNo))
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("breakpointStore.addBreakpoint; ERROR There is alread a bp");
+            return;
+        }
+
+        if (!this.breakpoints[url])
+            this.breakpoints[url] = [];
+
+        var bp = {
+            href: url,
+            lineNo: lineNo,
+            type: BP_NORMAL,
+            disabled: false,
+            hitCount: -1,
+            hit: 0,
+            params: params,
+        };
+
+        this.breakpoints[url].push(bp);
+
+        this.save(url);
+
+        this.dispatch("onBreakpointAdded", [bp]);
+    },
+
+    removeBreakpoint: function(url, lineNo)
+    {
+        var bps = this.getBreakpoints(url);
+        if (!bps)
+            return null;
+
+        var removedBp = null;
+        for (var i=0; i<bps.length; i++)
+        {
+            var bp = bps[i];
+            if (bp.lineNumber === lineNo)
+            {
+                bps.splice(i, 1);
+                removedBp = bp;
+                break;
+            }
+        }
+
+        if (!removedBp)
+            return;
+
+        this.dispatch("onBreakpointRemoved", [removedBp]);
+        this.save(url);
+
+        return removedBp;
+    },
+
+    findBreakpoint: function(url, lineNo)
+    {
+        var bps = this.getBreakpoints(url);
+        if (!bps)
+            return null;
+
+        for (var i=0; i<bps.length; i++)
+        {
+            var bp = bps[i];
+            if (bp.lineNumber === lineNo)
+                return bp;
+        }
+
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

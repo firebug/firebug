@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/debugger/debugger",
     "firebug/debugger/scriptPanel",
+    "firebug/debugger/breakpointStore",
     "firebug/debugger/breakpointModule",
     "firebug/debugger/breakpointPanel",
     "firebug/debugger/debuggerTool",

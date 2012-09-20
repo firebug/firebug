@@ -88,7 +88,7 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                 "aria-checked": "$bp.checked", _repObject: "$bp", onclick: "$onClick"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : '-1'}),
+                    _checked: "$bp|isEnabled", tabindex : '-1'}),
                 SPAN({"class": "breakpointName"}, "$bp.name"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
                 IMG({"class": "closeButton", src: "blank.gif"})
@@ -121,9 +121,14 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         FBS.disableBreakpoint(href, lineNumber);
     },
 
+    isEnabled: function(bp)
+    {
+        return !bp.disabled;
+    },
+
     isDisabled: function(bp)
     {
-        return !bp.checked;
+        return bp.disabled;
     },
 
     getContextMenuItems: function(breakpoint, target)
