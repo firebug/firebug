@@ -40,10 +40,12 @@ ObjectGrip.prototype =
                 return null;
             case "undefined":
                 return;
-
-            default:
-                return {type: this.grip.type};
         }
+
+        if (this.properties)
+            return createGripProxy(this);
+
+        return {type: this.grip.type};
     },
 
     hasProperties: function()
@@ -352,6 +354,23 @@ var Factory =
     {
         return new Scope(grip, cache);
     }
+}
+
+// ********************************************************************************************* //
+// ProxyGrip
+
+function createGripProxy(grip)
+{
+    // xxxHonza: this is the place where we can use proxies so, Grips are working
+    // in DOM panel automatically
+    var obj = {};
+    for (var i=0; i<grip.properties.length; i++)
+    {
+        var prop = grip.properties[i];
+        obj[prop.name] = prop.value;
+    }
+
+    return obj;
 }
 
 // ********************************************************************************************* //
