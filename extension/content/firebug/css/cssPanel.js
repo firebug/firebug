@@ -1743,7 +1743,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                             parsedValue.priority);
                         propName = value;
                     }
-
                     Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
                         previousValue, baseText]);
                 }
@@ -1784,12 +1783,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             if (value)
             {
-                var saveSuccess = !!rule.style.getPropertyValue(propName || value);
-                if(!saveSuccess && !propName)
+                var saveSuccess = !!rule.style.getPropertyValue(propName);
+                if (!saveSuccess && Css.hasClass(target, "cssPropName"))
                 {
                     propName = value.replace(/-./g, function(match)
                     {
-                        return match[1].toUpperCase()
+                        return match[1].toUpperCase();
                     });
 
                     if (propName in rule.style || propName == "float")
