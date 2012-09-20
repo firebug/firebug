@@ -27,6 +27,7 @@ Cu["import"]("resource:///modules/source-editor.jsm");
 function ScriptView()
 {
     this.editor = null;
+    this.skipEditorBreakpointChange = false;
 }
 
 ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
@@ -74,6 +75,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (this.defaultSource)
             this.showSource(this.defaultSource);
+
+        // xxxHonza: Breakpoints appear and disappear if it's done without
+        // a timetou, why? Ask Mihai.
+        var self = this;
+        setTimeout(function() {
+            self.initBreakpoints();
+        }, 500);
     },
 
     destroy: function()
@@ -206,6 +214,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onBreakpointChange: function(event)
     {
+        FBTrace.sysout("scriptView.onBreakpointChange " + this.skipEditorBreakpointChange);
+
         if (this.skipEditorBreakpointChange)
             return;
 
@@ -216,6 +226,28 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         event.removed.forEach(function(bp) {
             this.dispatch("onBreakpointRemove", [bp]);
         }, this);
+    },
+
+    initBreakpoints: function()
+    {
+        var bps = [];
+        this.dispatch("onGetBreakpoints", [bps]);
+
+        FBTrace.sysout("scriptView.initBreakpoints; " + bps.length, bps);
+
+        if (!bps.length)
+            return;
+
+        // Ignore events about breakpoint changes.
+        this.skipEditorBreakpointChange = true;
+
+        for (var i=0; i<bps.length; i++)
+        {
+            var bp = bps[i];
+            this.editor.addBreakpoint(bp.lineNo);
+        }
+
+        this.skipEditorBreakpointChange = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -194,6 +194,7 @@ DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
  */
 function SourceScripts(debuggerClient)
 {
+    this.context = debuggerClient.context;
     this.debuggerClient = debuggerClient;
     this.connection = debuggerClient.connection;
     this.thread = debuggerClient.activeThread;

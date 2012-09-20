@@ -342,6 +342,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         items.push.apply(items, menuItems);
     },
 
+    onGetBreakpoints: function(breakpoints)
+    {
+        if (!this.location)
+            return;
+
+        var url = this.location.href;
+        var bps = BreakpointStore.getBreakpoints(url);
+        if (!bps || !bps.length)
+            return;
+
+        breakpoints.push.apply(breakpoints, bps);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 
