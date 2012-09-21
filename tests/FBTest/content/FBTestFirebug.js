@@ -1124,9 +1124,12 @@ this.OneShotHandler = function(eventTarget, eventName, onEvent, capturing)
  * Notice that FBTest automatically resets all preferences before every single test is executed.
  * @param {Object} value New value of the preference.
  */
-this.setPref = function(pref, value)
+this.setPref = function(pref, value, prefDomain)
 {
-    FW.Firebug.setPref(FW.Firebug.prefDomain, pref, value);
+    if (!prefDomain)
+        prefDomain = FW.Firebug.prefDomain;
+
+    FW.Firebug.setPref(prefDomain, pref, value);
 };
 
 /**

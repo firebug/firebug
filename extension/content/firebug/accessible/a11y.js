@@ -1237,6 +1237,11 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
     onObjectBoxSelected: function(objectBox, forceFocus)
     {
         var panel = Firebug.getElementPanel(objectBox);
+
+        // See issue 5934
+        if (panel.editing)
+            return;
+
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;

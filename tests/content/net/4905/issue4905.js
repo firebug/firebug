@@ -5,6 +5,12 @@ function runTest()
     FBTest.openNewTab(basePath + "net/4905/issue4905.html", function(win)
     {
         FBTest.openFirebug();
+
+        // Enable browser cache
+        var browserCache = FW.Firebug.NetMonitor.BrowserCache;
+        var browserCacheEnabled = browserCache.isEnabled();
+        browserCache.toggle(true);
+        
         FBTest.selectPanel("net");
         FBTest.enableNetPanel();
 
@@ -15,7 +21,7 @@ function runTest()
             counter: 2
         };
 
-        FBTest.waitForDisplayedElement("net", options, function(row)
+        var callbackFunction = function(row)
         {
             var panelNode = FBTest.selectPanel("net").panelNode;
 
@@ -36,8 +42,14 @@ function runTest()
                     "Cached response headers must include 'Cache-Control' header");
             }
 
+            // Disable browser cache again if it was disabled before
+            if (!browserCacheEnabled)
+                browserCache.toggle(false);
+
             FBTest.testDone("issue4905.DONE");
-        });
+        };
+
+        FBTest.waitForDisplayedElement("net", options, callbackFunction);
 
         FBTest.reload();
     });

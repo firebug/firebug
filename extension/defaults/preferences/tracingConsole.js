@@ -72,3 +72,4 @@ pref("extensions.firebug.DBG_MENU", false);             // Menus and context men
 pref("extensions.firebug.DBG_BTI", false);              // Browser Tools Interface
 pref("extensions.firebug.DBG_DOMTREE", false);          // DomTree Widget
 pref("extensions.firebug.DBG_GRIPCACHE", false);        // Cache for remote objects - grips (comes over RDP)
+pref("extensions.firebug.DBG_SELECTOR", false);         // Selector side panel (in the CSS panel)
