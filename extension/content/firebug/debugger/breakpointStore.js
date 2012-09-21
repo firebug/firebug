@@ -76,6 +76,9 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             });
 
             this.breakpoints[url] = bps;
+
+            for (var j=0; j<bps.length; j++)
+                bps[j].params = {};
         }
     },
 
@@ -109,7 +112,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addBreakpoint: function(url, lineNo, params)
+    addBreakpoint: function(url, lineNo)
     {
         if (this.findBreakpoint(url, lineNo))
         {
@@ -128,14 +131,17 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             disabled: false,
             hitCount: -1,
             hit: 0,
-            params: params,
+            params: {},
         };
 
         this.breakpoints[url].push(bp);
-
         this.save(url);
 
+        FBTrace.sysout("breakpointStore.addBreakpoint; " + url + " (" + lineNo + ")", bp);
+
         this.dispatch("onBreakpointAdded", [bp]);
+
+        return bp;
     },
 
     removeBreakpoint: function(url, lineNo)
@@ -148,19 +154,22 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-            if (bp.lineNumber === lineNo)
+            if (bp.lineNo === lineNo)
             {
                 bps.splice(i, 1);
                 removedBp = bp;
-                break;
             }
         }
 
         if (!removedBp)
             return;
 
-        this.dispatch("onBreakpointRemoved", [removedBp]);
         this.save(url);
+
+        FBTrace.sysout("breakpointStore.removeBreakpoint; " + url +
+            " (" + lineNo + ")", removedBp);
+
+        this.dispatch("onBreakpointRemoved", [removedBp]);
 
         return removedBp;
     },
@@ -185,7 +194,15 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     getBreakpoints: function(url)
     {
-        return this.breakpoints[url];
+        if (url)
+            return this.breakpoints[url] || [];
+
+        var bps = [];
+        var urls = this.getBreakpointURLs();
+        for (var i=0; i<urls.length; i++)
+            bps.push.apply(this.breakpoints[urls[i]] || []);
+
+        return bps;
     },
 
     getBreakpointURLs: function()
@@ -210,22 +227,11 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 for (var i=0; i<urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if (bp.type & BP_NORMAL && !(bp.type & BP_ERROR) )
+                    if (bp.type & BP_NORMAL && !(bp.type & BP_ERROR))
                     {
-                        if (bp.scriptsWithBreakpoint && bp.scriptsWithBreakpoint.length > 0)
-                        {
-                            var rc = cb.call.apply(bp, [url, bp.lineNo, bp,
-                                bp.scriptsWithBreakpoint]);
-
-                            if (rc)
-                                return [bp];
-                        }
-                        else
-                        {
-                            var rc = cb.call.apply(bp, [url, bp.lineNo, bp]);
-                            if (rc)
-                                return [bp];
-                        }
+                        var rc = cb.call.apply(bp, [url, bp.lineNo, bp]);
+                        if (rc)
+                            return [bp];
                     }
                 }
             }
@@ -233,8 +239,8 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         else
         {
             var bps = [];
-            var urls = fbs.getBreakpointURLs();
-            for (var i = 0; i < urls.length; i++)
+            var urls = this.getBreakpointURLs();
+            for (var i=0; i<urls.length; i++)
                 bps.push(this.enumerateBreakpoints(urls[i], cb));
 
             return bps;
