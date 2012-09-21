@@ -222,6 +222,8 @@ Css.copyTextStyles = function(fromNode, toNode, style)
         toNode.style.fontSize = style.getPropertyCSSValue("font-size").cssText;
         toNode.style.fontWeight = style.getPropertyCSSValue("font-weight").cssText;
         toNode.style.fontStyle = style.getPropertyCSSValue("font-style").cssText;
+        toNode.style.fontSizeAdjust = style.getPropertyCSSValue("font-size-adjust").cssText;
+        toNode.style.fontStretch = style.getPropertyCSSValue("font-stretch").cssText;
 
         return style;
     }
