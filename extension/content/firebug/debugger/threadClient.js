@@ -305,7 +305,78 @@ ThreadClient.prototype = Obj.extend(new Firebug.EventSource(),
 
             doSetBreakpoint(this.resume.bind(this));
         }.bind(this));
-  },
+    },
+
+    setBreakpoints: function(arr, onResponse)
+    {
+
+        // A helper function that sets the breakpoint.
+        var doSetBreakpoints = function _doSetBreakpoint(callback)
+        {
+            var responses = [];
+
+            for (var i=0; i<arr.length; i++)
+            {
+                var bp = arr[i];
+                var packet = {
+                    to: this.actor,
+                    type: RDP.DebugProtocolTypes.setBreakpoint,
+                    location: {
+                        url: bp.href,
+                        line: bp.lineNo,
+                    }
+                };
+
+                this.connection.request(packet, function(response)
+                {
+                    responses.push(response);
+
+                    // Ignoring errors, since the user may be setting a breakpoint in a
+                    // dead script that will reappear on a page reload.
+                }.bind(this));
+            }
+
+            if (callback)
+                callback(onResponse(responses));
+            else
+                onResponse(responses);
+
+        }.bind(this);
+
+        // If the debuggee is paused, just set the breakpoint.
+        if (this.isPaused())
+        {
+            doSetBreakpoints();
+            return;
+        }
+
+        // Otherwise, force a pause in order to set the breakpoint.
+        this.interrupt(function(response)
+        {
+            if (response.error)
+            {
+                // Can't set the breakpoint if pausing failed.
+                onResponse(response);
+                return;
+            }
+
+            doSetBreakpoints(this.resume.bind(this));
+        }.bind(this));
+    },
+
+    removeBreakpoint: function(actor, onResponse)
+    {
+        var packet = {
+            to: actor,
+            type: RDP.DebugProtocolTypes["delete"]
+        };
+
+        this.connection.request(packet, function(response)
+        {
+            if (onResponse)
+                onResponse(response);
+        });
+    },
 
     /**
      * Request the loaded scripts for the current thread.
