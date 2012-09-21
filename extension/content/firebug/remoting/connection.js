@@ -248,7 +248,7 @@ Connection.prototype =
         {
             if (!packet.from)
             {
-                FBTrace.sysout("Connection.onPacket; ERROR Server did not specify an actor, " +
+                FBTrace.sysout("connection.onPacket; ERROR Server did not specify an actor, " +
                     "dropping packet: " + JSON.stringify(packet));
                 return;
             }
@@ -270,7 +270,7 @@ Connection.prototype =
             this.notify(packet.type, packet);
 
             if (packet.error)
-                FBTrace.sysout("debuggerClient.attachThread; ERROR: " + packet.error, packet);
+                FBTrace.sysout("connection.onPacket; ERROR: " + packet.error, packet);
 
             if (onResponse)
                 onResponse(packet);
