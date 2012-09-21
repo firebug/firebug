@@ -52,7 +52,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    attach: function(context, connection, listener)
+    attach: function(context, connection, listener, callback)
     {
         this.addListener(listener);
 
@@ -66,6 +66,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.debuggerClient.attach(function(activeThread)
         {
             activeThread.addListener(self);
+
+            if (callback)
+                callback(activeThread);
         });
     },
 
@@ -73,6 +76,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         this.removeListener(listener);
 
+        // More panels using this tool can call detach. So, check first if we are 
+        // detached already before sending the 'detach' packet.
+        // xxxHonza: we need to count listeners and detach when there is none.
         if (!context.debuggerClient)
             return;
 
@@ -80,6 +86,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         {
             activeThread.removeListener(this);
         });
+
+        context.debuggerClient = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -141,6 +149,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.dispatch("onStackCleared");
     },
 
+    newScript: function(sourceFile)
+    {
+        this.dispatch("newScript", [sourceFile]);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoint API
 
@@ -148,20 +161,44 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         if (!context.debuggerClient.activeThread)
         {
-            FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a braekpoint.");
+            FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a breakpoint.");
             return;
         }
 
         return context.debuggerClient.activeThread.setBreakpoint({
             url: url,
-            line: lineNumber + 1
+            line: lineNumber
         }, callback);
     },
 
-    clearBreakpoint: function(context, url, lineNumber)
+    setBreakpoints: function(context, arr, callback)
     {
-        // This is more correct, but bypasses Debugger
-        //JSDebugger.fbs.clearBreakpoint(url, lineNumber);
+        if (!context.debuggerClient.activeThread)
+        {
+            FBTrace.sysout("debuggerTool.setBreakpoints; Can't set breakpoints.");
+            return;
+        }
+
+        return context.debuggerClient.activeThread.setBreakpoints(arr, callback);
+    },
+
+    removeBreakpoint: function(context, bp, callback)
+    {
+        if (!context.debuggerClient.activeThread)
+        {
+            FBTrace.sysout("debuggerTool.removeBreakpoint; Can't remove breakpoints.");
+            return;
+        }
+
+        if (!bp)
+        {
+            FBTrace.sysout("debuggerTool.removeBreakpoint; No breakpoint specified.");
+            return;
+        }
+
+        var actor = bp.params.actor;
+        if (actor)
+            return context.debuggerClient.activeThread.removeBreakpoints(arr, callback);
     },
 
     enableBreakpoint: function(context, url, lineNumber)

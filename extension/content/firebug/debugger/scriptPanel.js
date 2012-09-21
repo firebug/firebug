@@ -5,6 +5,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
+    "firebug/lib/array",
     "firebug/debugger/scriptView",
     "arch/compilationunit",
     "firebug/debugger/debuggerTool",
@@ -14,7 +15,7 @@ define([
     "firebug/debugger/breakpoint",
     "firebug/debugger/breakpointStore",
 ],
-function (Obj, Locale, Events, Dom, ScriptView, CompilationUnit, DebuggerTool, Menu,
+function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, DebuggerTool, Menu,
     StackFrame, SourceLink, Breakpoint, BreakpointStore) {
 
 // ********************************************************************************************* //
@@ -80,7 +81,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Depending on the current tool the communication can be local or remote.
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
         this.tool = this.context.getTool("debugger");
-        this.tool.attach(this.context, proxy.connection, this);
+        this.tool.attach(this.context, proxy.connection, this, function(activeThread)
+        {
+            // Backend thread attached.
+        });
     },
 
     onDisconnect: function(proxy)
@@ -309,7 +313,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     onBreakpointAdd: function(bp)
     {
         var url = this.location.href;
-        var line = bp.line;
+        var line = bp.line + 1;
+
+        // Persist the breakpoint on the client side
+        var bp = BreakpointStore.addBreakpoint(url, line);
 
         function callback(response)
         {
@@ -320,8 +327,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 return;
             }
 
-            // Persist the breakpoint on the client side
-            BreakpointStore.addBreakpoint(url, line, {actor: response.actor});
+            bp.params.actor = {actor: response.actor};
 
             if (FBTrace.DBG_BP)
                 FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bp);
@@ -333,7 +339,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onBreakpointRemove: function(bp)
     {
-        FBTrace.sysout("scriptPanel.onBreakpointRemove " + bp, bp);
+        var url = this.location.href;
+        var line = bp.line + 1;
+
+        function callback(response)
+        {
+            FBTrace.sysout("scriptPanel.onBreakpointRemoved; ", response);
+        }
+
+        var bp = BreakpointStore.findBreakpoint(url, line);
+        this.tool.removeBreakpoint(this.context, bp, callback);
+
+        // Remove the breakpoint from the client side store.
+        BreakpointStore.removeBreakpoint(url, line);
     },
 
     onContextMenu: function(items)
@@ -732,6 +750,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("scriptPanel.onStopDebugging; EXCEPTION " + exc, exc);
         }
+    },
+
+    newScript: function(sourceFile)
+    {
+        FBTrace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+
+        // Initialize existing breakpoints
+        //var bps = BreakpointStore.getBreakpoints(sourceFile.href);
+        //self.tool.setBreakpoints(self.context, bps, function(response){});
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

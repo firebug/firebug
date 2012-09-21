@@ -3,11 +3,11 @@
 define([
     "firebug/lib/object",
     "firebug/lib/options",
-    "firebug/debugger/sourceFile",
+    "firebug/debugger/sourceScripts",
     "firebug/debugger/rdp",
     "firebug/debugger/threadClient",
 ],
-function (Obj, Options, SourceFile, RDP, ThreadClient) {
+function (Obj, Options, SourceScripts, RDP, ThreadClient) {
 
 // ********************************************************************************************* //
 // Constants and Services
@@ -124,6 +124,14 @@ DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
             this.threadClients[packet.from].onThreadState(packet);
     },
 
+    onNewScript: function(type, packet)
+    {
+        FBTrace.sysout("debuggerClient.onNewScript", arguments);
+
+        if (this.scripts)
+            this.scripts.onNewScript(packet);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     startDebugging: function(tabGrip, callback)
@@ -145,6 +153,8 @@ DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
                     Cu.reportError("Couldn't attach to thread: " + response.error);
                     return;
                 }
+
+                FBTrace.sysout("debuggerClient.onAttachThread; Thread attached.");
 
                 this.activeThread = threadClient;
 
@@ -182,98 +192,6 @@ DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
         });
     },
 });
-
-// ********************************************************************************************* //
-// Source Scripts
-
-//xxxHonza: This entire object should be refactored.
-
-/**
- * Keeps the source script list up-to-date, using the thread client's
- * source script cache.
- */
-function SourceScripts(debuggerClient)
-{
-    this.context = debuggerClient.context;
-    this.debuggerClient = debuggerClient;
-    this.connection = debuggerClient.connection;
-    this.thread = debuggerClient.activeThread;
-}
-
-SourceScripts.prototype =
-{
-    connect: function(callback)
-    {
-        this.thread.addListener(this);
-
-        // Retrieve the list of scripts known to the server from before the client
-        // was ready to handle new script notifications.
-        this.thread.fillScripts();
-
-        this.onNewScript = this.onNewScript.bind();
-
-        this.debuggerClient.addListener("newScript", this.onNewScript);
-    },
-
-    disconnect: function()
-    {
-        this.thread.removeListener(this);
-        this.debuggerClient.removeListener("newScript", this.onNewScript);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onNewScript: function(notification, packet)
-    {
-        // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
-        // create as the user is evaluating expressions in the watch window.
-        if (aPacket.url == "debugger eval code")
-            return;
-
-        FBTrace.sysout("SourceScripts.onNewScript; " + notification, packet);
-    },
-
-    onScriptsAdded: function(scriptCache)
-    {
-        FBTrace.sysout("SourceScripts.onScriptsAdded; ", scriptCache);
-
-        for (var p in scriptCache)
-        {
-            var script = scriptCache[p];
-            var sourceFile = new SourceFile(script.url, script.startLine, script.lineCount);
-            this.watchSourceFile(sourceFile);
-        }
-    },
-
-    onScriptsCleared: function()
-    {
-    },
-
-    watchSourceFile: function(sourceFile)
-    {
-        // @hack
-        // xxxHonza: the Script panel update should happen from within the Script panel
-        // The DebuggerClient (or SourceScripts) should just fire an event to the panel.
-
-        var context = Firebug.currentContext;
-
-        // store in the context and notify listeners
-        context.addSourceFile(sourceFile);
-
-        // Update the Script panel, this script could have been loaded asynchronously
-        // and perhaps is the only one that should be displayed (otherwise the panel
-        // would show: No Javascript on this page). See issue 4932
-        var panel = context.getPanel("jsd2script", true);
-        if (!panel)
-            return;
-
-        context.invalidatePanels("jsd2script");
-        context.invalidatePanels("jsd2breakpoints");
-
-        if (!panel.location)
-            panel.navigate(null);
-    },
-};
 
 // ********************************************************************************************* //
 // Registration

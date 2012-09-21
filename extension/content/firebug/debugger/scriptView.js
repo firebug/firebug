@@ -83,12 +83,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (this.defaultSource)
             this.showSource(this.defaultSource);
 
-        // xxxHonza: Breakpoints appear and disappear if it's done without
-        // a timeout, why? Ask Mihai.
-        var self = this;
-        setTimeout(function() {
-            self.initBreakpoints();
-        }, 500);
+        this.initBreakpoints();
     },
 
     destroy: function()
@@ -109,10 +104,22 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     showSource: function(source)
     {
-        if (this.initialized)
-            this.editor.setText(source);
-        else
+        FBTrace.sysout("scriptView.showSource; initialized: " + this.initialized, source);
+
+        if (!this.initialized)
+        {
             this.defaultSource = source;
+            return;
+        }
+
+        var text = this.editor.getText();
+        if (text == source)
+            return;
+
+        this.editor.setText(source);
+
+        // Breakpoints and annotations in general must be set again after setText.
+        this.initBreakpoints();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -238,8 +245,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var bps = [];
         this.dispatch("onGetBreakpoints", [bps]);
 
-        FBTrace.sysout("scriptView.initBreakpoints; " + bps.length, bps);
-
         if (!bps.length)
             return;
 
@@ -249,7 +254,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-            this.editor.addBreakpoint(bp.lineNo);
+            this.editor.addBreakpoint(bp.lineNo - 1);
         }
 
         this.skipEditorBreakpointChange = false;
