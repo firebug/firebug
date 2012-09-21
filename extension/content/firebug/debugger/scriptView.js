@@ -32,7 +32,12 @@ function ScriptView()
     this.skipEditorBreakpointChange = false;
 }
 
+/**
+ * ScriptView wraps SourceEditor component that is built on top of Orion editor.
+ * This object is responsible for displaying JS source code in the debugger panel.
+ */
 ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
+/** @lends ScriptView */
 {
     dispatchName: "ScriptView",
     initialized: false,
@@ -79,7 +84,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.showSource(this.defaultSource);
 
         // xxxHonza: Breakpoints appear and disappear if it's done without
-        // a timetou, why? Ask Mihai.
+        // a timeout, why? Ask Mihai.
         var self = this;
         setTimeout(function() {
             self.initBreakpoints();
