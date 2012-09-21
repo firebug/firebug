@@ -21,6 +21,8 @@ var Cu = Components.utils;
 // Introduced in Firefox 8
 Cu["import"]("resource:///modules/source-editor.jsm");
 
+FBTrace = FBTrace.to("DBG_SCRIPTVIEW");
+
 // ********************************************************************************************* //
 // Source View
 
@@ -214,8 +216,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onBreakpointChange: function(event)
     {
-        FBTrace.sysout("scriptView.onBreakpointChange " + this.skipEditorBreakpointChange);
-
         if (this.skipEditorBreakpointChange)
             return;
 

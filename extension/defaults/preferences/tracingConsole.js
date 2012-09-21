@@ -73,3 +73,4 @@ pref("extensions.firebug.DBG_BTI", false);              // Browser Tools Interfa
 pref("extensions.firebug.DBG_DOMTREE", false);          // DomTree Widget
 pref("extensions.firebug.DBG_GRIPCACHE", false);        // Cache for remote objects - grips (comes over RDP)
 pref("extensions.firebug.DBG_SELECTOR", false);         // Selector side panel (in the CSS panel)
+pref("extensions.firebug.DBG_SCRIPTVIEW", false);       // Script view is responsible for displaying JS source.
