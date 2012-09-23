@@ -393,18 +393,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return object.getId();
 
         // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
-<<<<<<< HEAD
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         if (object instanceof Object && typeof object[0] != "undefined")
             return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-=======
-        else if (typeof object == "string")
-            return object;
-        else if (object instanceof Object && typeof object[0] != "undefined")
-            return object[0];
->>>>>>> Quick fix of getMessageId() for groupped logging, should be yet verified
 
         // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
@@ -444,8 +437,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var msgId = this.getMessageId(objects, sourceLink);
             var previousMsgId = this.lastLogRow ?
                 this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
-
-FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
 
             if (msgId && msgId == previousMsgId)
             {
