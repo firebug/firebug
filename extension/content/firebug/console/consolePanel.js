@@ -384,17 +384,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(object)
+    getMessageId: function(object, sourceLink)
     {
         // The object could provide it's own custom ID.
         if (object instanceof Object && typeof(object.getId) == "function")
             return object.getId();
 
         // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
-        else if (typeof object == "string")
-            return object;
-        else if (object instanceof Object && typeof object[0] != "undefined")
-            return object[0];
+        if (typeof object == "string")
+            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+
+        if (object instanceof Object && typeof object[0] != "undefined")
+            return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         // Group messages coming from the same location.
         if (object instanceof Object && object.href && object.lineNo && object.message)
@@ -432,8 +433,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(objects);
-            var previousMsgId = this.getMessageId(this.lastLogObjects);
+            var msgId = this.getMessageId(objects, sourceLink);
+            var previousMsgId = this.lastLogRow ?
+                this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
 
 FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
 
@@ -458,7 +460,7 @@ FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
                 container.appendChild(row);
             }
 
-            this.lastLogObjects = objects;
+            this.lastLogRow = {objects: objects, sourceLink: sourceLink};
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -488,7 +490,7 @@ FBTrace.sysout("previousMsgId " + previousMsgId + ", " + msgId);
             // Don't forget to clear opened groups, if any.
             this.groups = null;
 
-            this.lastLogObjects = null;
+            this.lastLogRow = null;
         }
     },
 
