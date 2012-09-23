@@ -1723,7 +1723,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     // point for diffing purposes
                     var baseText = rule.style ? rule.style.cssText : rule.cssText;
 
-                    propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
+                    propValue = Firebug.getRepObject(Dom.getChildByClass(row,"cssPropValue"));
                     parsedValue = parsePriority(propValue);
 
                     if (FBTrace.DBG_CSS)
