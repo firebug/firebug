@@ -1,11 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firebug",
     "firebug/lib/wrapper",
     "firebug/lib/events",
 ],
-function(Firebug, Wrapper, Events) {
+function(Wrapper, Events) {
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -13,14 +12,16 @@ function(Firebug, Wrapper, Events) {
 // List of command line APIs
 var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-    "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
-    "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+    "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
 
 // List of shortcuts for some console methods
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1", "help"];
+var props = ["$0", "$1"];
+
+// Registered commands, name -> config object.
+var userCommands = {};
 
 // ********************************************************************************************* //
 // Command Line Implementation
@@ -52,6 +53,24 @@ function createFirebugCommandLine(context, win)
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Exposed Properties
 
+    function createCommandHandler(cmd) {
+        return function() {
+            return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
+        }
+    }
+
+    function createShortcutHandler(cmd) {
+        return function() {
+            return console[cmd].apply(console, arguments);
+        }
+    }
+
+    function createVariableHandler(prop) {
+        return function() {
+            return notifyFirebug(arguments, prop, "firebugExecuteCommand");
+        }
+    }
+
     // Define command line methods
     for (var i=0; i<commands.length; i++)
     {
@@ -60,12 +79,6 @@ function createFirebugCommandLine(context, win)
         // If the method is already defined, don't override it.
         if (command in contentView)
             continue;
-
-        function createCommandHandler(cmd) {
-            return function() {
-                return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
-            }
-        }
 
         commandLine[command] = createCommandHandler(command);
         commandLine.__exposedProps__[command] = "rw";
@@ -82,14 +95,8 @@ function createFirebugCommandLine(context, win)
         if (command in contentView)
             continue;
 
-        function createShortcutHandler(cmd) {
-            return function() {
-                return console[cmd].apply(console, arguments);
-            }
-        }
-
         commandLine[command] = createShortcutHandler(command);
-        commandLine.__exposedProps__[command] = "rw";
+        commandLine.__exposedProps__[command] = "r";
     }
 
     // Define console variables.
@@ -99,14 +106,29 @@ function createFirebugCommandLine(context, win)
         if (prop in contentView)
             continue;
 
-        function createVariableHandler(prop) {
-            return function() {
-                return notifyFirebug(arguments, prop, "firebugExecuteCommand");
-            }
-        }
-
         commandLine.__defineGetter__(prop, createVariableHandler(prop));
         commandLine.__exposedProps__[prop] = "r";
+    }
+
+    // Define user registered commands.
+    for (var name in userCommands)
+    {
+        // If the method is already defined, don't override it.
+        if (name in contentView)
+            continue;
+
+        var config = userCommands[name];
+
+        if (config.getter)
+        {
+            commandLine.__defineGetter__(name, createVariableHandler(name));
+            commandLine.__exposedProps__[name] = "r";
+        }
+        else
+        {
+            commandLine[name] = createCommandHandler(name);
+            commandLine.__exposedProps__[name] = "r";
+        }
     }
 
     attachCommandLine();
@@ -247,6 +269,43 @@ document.documentElement.appendChild(script);
 */
 
 // ********************************************************************************************* //
+// User Commands
+
+function registerCommand(name, config)
+{
+    if (commands[name] || consoleShortcuts[name] || props[name] || userCommands[name])
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("firebug.registerCommand; ERROR This command is already " +
+                "registered: " + name);
+        }
+
+        return false;
+    }
+
+    userCommands[name] = config;
+    return true;
+}
+
+function unregisterCommand(name)
+{
+    if (!userCommands[name])
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("firebug.unregisterCommand; ERROR This command is not " +
+                "registered: " + name);
+        }
+
+        return false;
+    }
+
+    delete userCommands[name];
+    return true;
+}
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.CommandLineExposed =
@@ -255,6 +314,9 @@ Firebug.CommandLineExposed =
     commands: commands,
     consoleShortcuts: consoleShortcuts,
     properties: props,
+    userCommands: userCommands,
+    registerCommand: registerCommand,
+    unregisterCommand: unregisterCommand,
 };
 
 return Firebug.CommandLineExposed;

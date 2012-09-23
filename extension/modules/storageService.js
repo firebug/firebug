@@ -12,7 +12,9 @@ const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsI
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
-Components.utils["import"]("resource://firebug/firebug-trace-service.js");
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+
 var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 // ********************************************************************************************* //
@@ -92,7 +94,7 @@ Storage.prototype =
     {
         this.objectTable = {};
         StorageService.setStorage(this, now);
-    },
+    }
 };
 
 // ********************************************************************************************* //
@@ -139,7 +141,7 @@ var StorageService =
     removeStorage: function(leafName)
     {
         ObjectPersister.deleteObject(leafname);
-    },
+    }
 };
 
 // ********************************************************************************************* //
@@ -150,39 +152,12 @@ var StorageService =
  */
 var ObjectPersister =
 {
-    getProfileDirectory: function()
-    {
-        var file = dirService.get("ProfD", Ci.nsIFile);
-        return file;
-    },
-
-    getFileInDirectory: function(file, path)  // forward slash separated
-    {
-        var segs = path.split('/');
-        for (var i = 0; i < segs.length; i++)
-        {
-            file.append(segs[i]);
-        }
-        return file;
-    },
-
-    getFileInProfileDirectory: function(path)
-    {
-        // Get persistence file stored within the profile directory.
-        var file = ObjectPersister.getProfileDirectory();
-        file = ObjectPersister.getFileInDirectory(file, path);
-        if (FBTrace.DBG_STORAGE)
-            FBTrace.sysout("ObjectPersister getFileInProfileDirectory("+path+")="+file.path);
-
-        return file;
-    },
-
     readObject: function(leafName)
     {
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister read from leafName "+leafName);
 
-        var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
+        var file = FileUtils.getFile("ProfD", ["firebug", leafName]);
 
         if (!file.exists())
         {
@@ -283,7 +258,7 @@ var ObjectPersister =
         {
             // Convert data to JSON.
             var jsonString = JSON.stringify(obj);
-            var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
+            var file = FileUtils.getFile("ProfD", ["firebug", leafName]);
             ObjectPersister.writeTextToFile(file, jsonString);
         }
         catch(exc)
@@ -345,9 +320,7 @@ var ObjectPersister =
 var TextService =
 {
     readText: ObjectPersister.readTextFromFile,
-    writeText: ObjectPersister.writeTextToFile,
-    getProfileDirectory: ObjectPersister.getProfileDirectory,
-    getFileInDirectory: ObjectPersister.getFileInDirectory,
+    writeText: ObjectPersister.writeTextToFile
 };
 
 // ********************************************************************************************* //

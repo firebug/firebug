@@ -22,9 +22,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/http",
     "firebug/trace/traceListener",
+    "firebug/console/commandLineExposed",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -650,6 +651,16 @@ window.Firebug =
         var listener = Firebug.TraceModule.getListenerByPrefix(prefix);
         if (listener)
             Firebug.TraceModule.removeListener(listener);
+    },
+
+    registerCommand: function(name, config)
+    {
+        return CommandLineExposed.registerCommand(name, config);
+    },
+
+    unregistereCommand: function(name)
+    {
+        return CommandLineExposed.unregisterCommand(name);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

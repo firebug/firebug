@@ -113,6 +113,68 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
     return category;
 };
 
+/**
+ * Parses the CSS properties of a CSSStyleRule
+ * @param {Object} style CSSStyleRule to get the properties of
+ * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @returns {Array} Properties represented by {name, value, priority, longhandProps}
+ */
+Css.parseCSSProps = function(style, element)
+{
+    var props = [];
+
+    if (!element)
+    {
+        for (var i = 0, len = style.length; i < len; ++i)
+        {
+            var prop = style.item(i);
+            props.push({name: prop,
+                value: style.getPropertyValue(prop),
+                priority: style.getPropertyPriority(longhandProp)});
+        }
+    }
+    else
+    {
+        var lineRE = /(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g;
+        var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(?:! (important))?;?$/;
+        var lines = style.cssText.match(lineRE);
+        for (var i = 0, len = lines.length; i < len; ++i)
+        {
+            var match = propRE.exec(lines[i]);
+            if (!match)
+                continue;
+
+            if (match[2])
+            {
+                var prop = {name: match[1], value: match[2], priority: match[3] || ""};
+
+                // Add longhand properties to shorthand property
+                var doc = element.ownerDocument;
+                var dummyElement = doc.createElementNS(element.namespaceURI, element.tagName);
+                var dummyStyle = dummyElement.style;
+                dummyStyle.cssText = "";
+                dummyStyle.setProperty(prop.name, prop.value, prop.priority);
+
+                if (dummyStyle.length > 1)
+                {
+                    prop.longhandProps = [];
+                    for (var j = 0, propLen = dummyStyle.length; j < propLen; ++j)
+                    {
+                        var longhandProp = dummyStyle.item(j);
+                        prop.longhandProps.push({name: longhandProp,
+                            value: dummyStyle.getPropertyValue(longhandProp),
+                            priority: dummyStyle.getPropertyPriority(longhandProp)});
+                    }
+                }
+
+                props.push(prop);
+            }
+        }
+    }
+
+    return props;
+};
+
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
@@ -160,6 +222,10 @@ Css.copyTextStyles = function(fromNode, toNode, style)
         toNode.style.fontSize = style.getPropertyCSSValue("font-size").cssText;
         toNode.style.fontWeight = style.getPropertyCSSValue("font-weight").cssText;
         toNode.style.fontStyle = style.getPropertyCSSValue("font-style").cssText;
+        toNode.style.fontSizeAdjust = style.getPropertyCSSValue("font-size-adjust").cssText;
+        toNode.style.fontStretch = style.getPropertyCSSValue("font-stretch").cssText;
+        toNode.style.fontVariant = style.getPropertyCSSValue("font-variant").cssText;
+        toNode.style.MozFontFeatureSettings = style.getPropertyCSSValue("-moz-font-feature-settings").cssText;
 
         return style;
     }
