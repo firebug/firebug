@@ -124,12 +124,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                     if (oldContext.window && oldContext.window.document)
                     {
                         highlighter.unhighlight(oldContext);
-
-                        if (oldContext.inspectorMouseMove)
-                        {
-                            Events.removeEventListener(oldContext.window.document, "mousemove",
-                                oldContext.inspectorMouseMove, true);
-                        }
                     }
                 }, inspectDelay);
             }
