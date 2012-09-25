@@ -218,10 +218,14 @@ Css.copyTextStyles = function(fromNode, toNode, style)
         if (!style)
             style = view.getComputedStyle(fromNode, "");
 
-        toNode.style.fontFamily = style.getPropertyCSSValue("font-family").cssText;
-        toNode.style.fontSize = style.getPropertyCSSValue("font-size").cssText;
-        toNode.style.fontWeight = style.getPropertyCSSValue("font-weight").cssText;
-        toNode.style.fontStyle = style.getPropertyCSSValue("font-style").cssText;
+        toNode.style.fontFamily = style.fontFamily;
+        toNode.style.fontSize = style.fontSize;
+        toNode.style.fontWeight = style.fontWeight;
+        toNode.style.fontStyle = style.fontStyle;
+        toNode.style.fontSizeAdjust = style.fontSizeAdjust;
+        toNode.style.fontStretch = style.fontStretch;
+        toNode.style.fontVariant = style.fontVariant;
+        toNode.style.MozFontFeatureSettings = style.MozFontFeatureSettings;
 
         return style;
     }
