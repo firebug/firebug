@@ -2291,11 +2291,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         // so let's try to skip those
         if (error.source)
             return "syntax";
-        else if (error.lineNo == 1 && Url.getFileExtension(error.href) != "js")
-            return "none";
         else if (error.category == "css")
             return "show";
         else if (!error.href || !error.lineNo)
+            return "none";
+        // Why do we have that at all?
+        else if (error.lineNo == 1 && Url.getFileExtension(error.href) != "js")
             return "none";
         else
             return "show";
