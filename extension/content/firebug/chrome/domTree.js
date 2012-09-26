@@ -321,9 +321,9 @@ DomTree.prototype = domplate(
         // This flag is used to differentiate sync and async scenario.
         var sync = true;
 
-        // The callback can be executed immediatelly if children are provided
-        // synchronously. In such case, 'arr' is immediatelly used as the result value.
-        // The object (i.e. the associated row) is updated later in asynchronous senario.
+        // The callback can be executed immediately if children are provided
+        // synchronously. In such case, 'arr' is immediately used as the result value.
+        // The object (i.e. the associated row) is updated later in asynchronous scenario.
         var self = this;
         var promise = promise.then(function onThen(value)
         {

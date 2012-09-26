@@ -104,7 +104,7 @@ DebuggerClient.prototype = Obj.extend(new Firebug.EventSource(),
         FBTrace.sysout("debuggerClient.onTabNavigated;");
 
         // xxxHonza: for local debugging we have TabWatcher
-        // for remote debugging tab-navitated shoud be handler by TabClient
+        // for remote debugging tab-navigated should be handler by TabClient
         /*var self = this;
         this.detach(function()
         {
