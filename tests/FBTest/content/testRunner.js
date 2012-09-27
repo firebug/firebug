@@ -108,12 +108,12 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
                 {
                     setTimeout(function()
                     {
-                        scrollIntoCenterView(testRow);
+                        scrollIntoCenterView(testRow, null, true);
                     }, 500);
                 }
                 else if (this.shouldScroll(testRow))
                 {
-                    scrollIntoCenterView(testRow);
+                    scrollIntoCenterView(testRow, null, true);
                 }
             }
 
@@ -298,7 +298,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         var scrollCurrentTestIntoView = Firebug.getPref(FBTestApp.prefDomain,
             "scrollCurrentTestIntoView");
         if (scrollCurrentTestIntoView)
-            scrollIntoCenterView(verify);
+            scrollIntoCenterView(verify, null, true);
 
         this.currentTest.onManualVerify(verifyMsg, instructions);
     },
