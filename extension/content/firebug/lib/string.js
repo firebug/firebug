@@ -433,7 +433,7 @@ Str.cropString = function(text, limit, alterText)
     if (limit <= 0)
         return text;
 
-    var halfLimit = (limit / 2);
+    var halfLimit = Math.floor(limit / 2);
     halfLimit -= 2; // adjustment for alterText's increase in size
 
     if (text.length > limit)

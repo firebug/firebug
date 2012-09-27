@@ -55,9 +55,16 @@ var CSSDomplateBase =
     getPropertyValue: function(prop)
     {
         var limit = Options.get("stringCropLength");
+        var value = prop.value;
         if (limit > 0)
-            return Str.cropString(prop.value, limit);
-        return prop.value;
+        {
+            var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
+            value = value.replace(pattern, function(match, $1)
+            {
+                return '"' + Str.cropString($1, limit) + '"';
+            });
+        }
+        return value;
     }
 };
 
@@ -1337,6 +1344,43 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
+                // The pattern is the same as that is used to crop
+                // property values in getPropertyValue() and saveEdit().
+                var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
+                var limit = Options.get("stringCropLength");
+                var alterText = "...";
+                if (limit > 0)
+                {
+                    while (true)
+                    {
+                        var matches = pattern.exec(text);
+                        if (matches)
+                        {
+                            var croppedText = Str.cropString(matches[0], limit);
+
+                            // calcaute lenght of all cropped string before target (if any)
+                            if ((matches.index + croppedText.length) < rangeOffset)
+                            {
+                                var croppedStrLen =
+                                    // The length of one side of the cropped string
+                                    Math.floor(limit / 2)
+                                    * 2 // there are two sides with same length
+                                    - 2 // minus the increased size that is made by alter text
+                                    + alterText.length; // between two sides of crpped string
+
+                                // length of intact string is added after subtracting
+                                // the length of cropped string
+                                rangeOffset = rangeOffset + matches[0].length - croppedStrLen;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+
                 cssValue = CSSModule.parseCSSValue(text, rangeOffset);
             }
 
@@ -1755,7 +1799,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             else if (Dom.getAncestorByClass(target, "cssPropValue"))
             {
                 var limit = Options.get("stringCropLength");
-                target.textContent = limit > 0 ? Str.cropString(value, limit) : value;
+                if (limit > 0)
+                {
+                    var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
+                    var croppedValue = value.replace(pattern, function(match, $1)
+                    {
+                        return '"' + Str.cropString($1, limit) + '"';
+                    });
+
+                    target.textContent = croppedValue;
+                }
+                else
+                {
+                    target.textContent = value;
+                }
 
                 propName = Dom.getChildByClass(row, "cssPropName").textContent;
                 propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
