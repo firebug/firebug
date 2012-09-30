@@ -59,7 +59,7 @@ var Server =
     },
 
     /**
-     * Just for debuggin purposes only. Hook server side packet communication
+     * Just for debugging purposes only. Hook server side packet communication
      * and log it into the tracing console.
      */
     hookPackets: function()

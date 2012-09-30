@@ -57,14 +57,14 @@ Connection.prototype =
         host = host || Options.get("serverHost");
         port = port || Options.get("serverPort");
 
-        // Initialize the server to allow connections throug pipe transport.
+        // Initialize the server to allow connections through pipe transport.
         if (this.local)
         {
             DebuggerServer.init(function () { return true; });
             DebuggerServer.addBrowserActors();
         }
 
-        // This objet should be probably created somewhere else and passed as an argument
+        // This object should be probably created somewhere else and passed as an argument
         // to this method. Depending on whether Firebug want to connect remote browser
         // instance or the one it's running within.
         this.transport = this.local ? DebuggerServer.connectPipe() :
@@ -211,7 +211,15 @@ Connection.prototype =
         this.pendingRequests = this.pendingRequests.filter(function(request)
         {
             if (request.to in self.activeRequests)
+            {
+                if (FBTrace.DBG_CONNECTION)
+                {
+                    FBTrace.sysout("connection.send; already active request " +
+                        JSON.stringify(request), {newrequest: request, oldrequest:
+                        self.activeRequests[request.to]});
+                }
                 return true;
+            }
 
             self.activeRequests[request.to] = request;
 

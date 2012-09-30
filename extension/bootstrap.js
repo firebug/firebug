@@ -158,9 +158,19 @@ function loadServer()
     {
         if (serverMode)
         {
-            Services.scriptloader.loadSubScript(
-                "chrome://firebug/content/server/main.js",
-                serverScope);
+            var event =
+            {
+                notify: function(timer)
+                {
+                    Services.scriptloader.loadSubScript(
+                        "chrome://firebug/content/server/main.js",
+                        serverScope);
+                }
+            }
+
+            // xxxHonza: hack, must be removed.
+            var timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+            timer.initWithCallback(event, 2000, Ci.nsITimer.TYPE_ONE_SHOT);
         }
     }
     catch (e)
