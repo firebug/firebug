@@ -69,6 +69,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             if (callback)
                 callback(activeThread);
+
+            self.dispatch("onThreadAttached", [activeThread]);
         });
     },
 
