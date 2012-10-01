@@ -100,6 +100,9 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                     SPAN({"class": "cookieDomainLabel cookieLabel", onclick: "$onClickDomain"}, 
                         "$cookie|getDomain")
                 ),
+                TD({"class": "cookieRawSizeCol cookieCol"},
+                    DIV({"class": "cookieRawSizeLabel cookieLabel"}, "$cookie|getRawSize")
+                ),
                 TD({"class": "cookieSizeCol cookieCol"},
                     DIV({"class": "cookieSizeLabel cookieLabel"}, "$cookie|getSize")
                 ),
@@ -231,6 +234,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     isRejected: function(cookie)
     {
         return !!cookie.cookie.rejected;
+    },
+    
+    getRawSize: function(cookie)
+    {
+        var size = cookie.cookie.name.length + cookie.cookie.rawValue.length;
+        return Str.formatSize(size);
     },
 
     getSize: function(cookie)
@@ -1014,6 +1023,12 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                         DIV({"class": "cookieHeaderCellBox",
                             title: Locale.$STR("cookies.header.domain.tooltip")}, 
                         Locale.$STR("cookies.header.domain"))
+                    ),
+                    TD({id: "colRawSize", role: "columnheader",
+                        "class": "cookieHeaderCell a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("cookies.header.size.tooltip")}, 
+                        Locale.$STR("cookies.header.rawSize"))
                     ),
                     TD({id: "colSize", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
