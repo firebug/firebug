@@ -1059,11 +1059,10 @@ function FirebugCommandLineAPI(context)
             return start.querySelector(selector);
         }
         
-        result = Wrapper.unwrapObject(context.baseWindow.document).querySelector(selector);
+        result = context.baseWindow.document.querySelector(selector);
         if (result == null && (selector||"")[0] !== "#")
         {
-            result = Wrapper.unwrapObject(context.baseWindow.document).querySelector("#" + selector);
-            if (result != null)
+            if (context.baseWindow.document.getElementById(selector))
             {
                 // This should be removed in the next minor (non-bugfix) version
                 var msg = Locale.$STRF("warning.dollar_change", [selector]);
@@ -1081,7 +1080,7 @@ function FirebugCommandLineAPI(context)
             result = start.querySelectorAll(selector);
         }
         else
-            result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+            result = context.baseWindow.document.querySelectorAll(selector);
         return Arr.cloneArray(result);
     };
 
