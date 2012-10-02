@@ -6,13 +6,13 @@ Firebug Contributing Guidelines
 
 Guides
 ------
-Pleae read following guides before contributing to the Firebug project.
+Please read the following guides before contributing to the Firebug project.
 
 * [Firebug Source Structure](https://getfirebug.com/wiki/index.php/Source)
 * [Build Firebug XPI](https://getfirebug.com/wiki/index.php/Simple_Firebug_build)
 * [Hacking on Firebug](http://www.softwareishard.com/blog/firebug/hacking-on-firebug/)
 * [Firebug Coding Style](https://getfirebug.com/wiki/index.php/Firebug_Coding_Style)
-* [Firebug FAQ] https://getfirebug.com/wiki/index.php/FAQ
+* [Firebug FAQ](https://getfirebug.com/wiki/index.php/FAQ)
 
 Further Resources
 -----------------
