@@ -1040,27 +1040,31 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 });
 
 // ********************************************************************************************* //
-// Command line APIs definition
-//
-// These functions will be called in the extension like this:
-//   subHandler.apply(api, userObjects);
-// where subHandler is one of the entries below, api is this object and userObjects are entries in
-// an array we created in the web page.
+// Command Line APIs Definition
 
+/**
+ * These functions will be called in the extension like this:
+ *
+ * subHandler.apply(api, userObjects);
+ *
+ * Where subHandler is one of the entries below, api is this object and userObjects
+ * are entries in an array we created in the web page.
+ */
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(selector, start)  // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$ = function(selector, start)
     {
-        var result;
         if (start && start.querySelector && (
-                start.nodeType == Node.ELEMENT_NODE ||
-                start.nodeType == Node.DOCUMENT_NODE ||
-                start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
             return start.querySelector(selector);
         }
-        
-        result = context.baseWindow.document.querySelector(selector);
-        if (result == null && (selector||"")[0] !== "#")
+
+        var result = context.baseWindow.document.querySelector(selector);
+        if (result == null && (selector || "")[0] !== "#")
         {
             if (context.baseWindow.document.getElementById(selector))
             {
@@ -1070,21 +1074,32 @@ function FirebugCommandLineAPI(context)
                 result = null;
             }
         }
+
         return result;
     };
 
-    this.$$ = function(selector, start) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$$ = function(selector, start)
     {
         var result;
-        if (start && start.querySelectorAll && (start.nodeType == Node.ELEMENT_NODE || start.nodeType == Node.DOCUMENT_NODE || start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
+
+        if (start && start.querySelectorAll && (
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
             result = start.querySelectorAll(selector);
         }
         else
+        {
             result = context.baseWindow.document.querySelectorAll(selector);
+        }
+
         return Arr.cloneArray(result);
     };
 
-    this.$x = function(xpath, contextNode, resultType) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$x = function(xpath, contextNode, resultType)
     {
         var XPathResultType = XPathResult.ANY_TYPE;
 
@@ -1116,7 +1131,8 @@ function FirebugCommandLineAPI(context)
         return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
     };
 
-    this.$n = function(index) // values from the extension space
+    // values from the extension space
+    this.$n = function(index)
     {
         var htmlPanel = context.getPanel("html", true);
         if (!htmlPanel)
