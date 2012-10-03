@@ -13,7 +13,7 @@ function runTest()
                 "[\"Current window:\", Window cdFrame.html]",
                 "pre", "objectBox objectBox-array");
 
-            tasks.push(FBTest.executeCommandAndVerify, "$(\"test-iframe-1\")",
+            tasks.push(FBTest.executeCommandAndVerify, "$(\"#test-iframe-1\")",
                 /<div\s*id=\"test-iframe-1\">/,
                 "a", "objectLink objectLink-element");
 

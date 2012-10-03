@@ -1049,14 +1049,38 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(id)  // returns unwrapped elements from the page
+    this.$ = function(selector, start)  // returns unwrapped elements from the page
     {
-        return Wrapper.unwrapObject(context.baseWindow.document).getElementById(id);
+        var result;
+        if (start && start.querySelector && (
+                start.nodeType == Node.ELEMENT_NODE ||
+                start.nodeType == Node.DOCUMENT_NODE ||
+                start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
+            return start.querySelector(selector);
+        }
+        
+        result = context.baseWindow.document.querySelector(selector);
+        if (result == null && (selector||"")[0] !== "#")
+        {
+            if (context.baseWindow.document.getElementById(selector))
+            {
+                // This should be removed in the next minor (non-bugfix) version
+                var msg = Locale.$STRF("warning.dollar_change", [selector]);
+                Firebug.Console.log(msg, context, "warn");
+                result = null;
+            }
+        }
+        return result;
     };
 
-    this.$$ = function(selector) // returns unwrapped elements from the page
+    this.$$ = function(selector, start) // returns unwrapped elements from the page
     {
-        var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result;
+        if (start && start.querySelectorAll && (start.nodeType == Node.ELEMENT_NODE || start.nodeType == Node.DOCUMENT_NODE || start.nodeType == Node.DOCUMENT_FRAGMENT_NODE)) {
+            result = start.querySelectorAll(selector);
+        }
+        else
+            result = context.baseWindow.document.querySelectorAll(selector);
         return Arr.cloneArray(result);
     };
 
