@@ -851,51 +851,6 @@ FirebugReps.ArrayishObject = domplate(FirebugReps.ArrBase,
 
 // ********************************************************************************************* //
 
-FirebugReps.NodeCollection = domplate(FirebugReps.Arr,
-{
-    tag:
-        OBJECTBOX({_repObject: "$object",
-            $hasTwisty: "$object|hasSpecialProperties",
-            onclick: "$onToggleProperties"},
-            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "&lt;["),
-            FOR("item", "$object|longArrayIterator",
-                TAG("$item.tag", {object: "$item.object"}),
-                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
-            ),
-            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]&gt;"),
-            SPAN({"class": "arrayProperties", role: "group"})
-        ),
-
-    shortTag:
-        OBJECTBOX({_repObject: "$object",
-            $hasTwisty: "$object|hasSpecialProperties",
-            onclick: "$onToggleProperties"},
-            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "&lt;["),
-            FOR("item", "$object|shortArrayIterator",
-                TAG("$item.tag", {object: "$item.object"}),
-                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
-            ),
-            SPAN({"class": "arrayRightBracket"}, "]&gt;"),
-            SPAN({"class": "arrayProperties", role: "group"})
-        ),
-
-    isArray: function(obj, win)
-    {
-        if (mightBeArray(obj, win))
-        {
-            var view = Wrapper.getContentView(win || window);
-            if (obj instanceof view.HTMLCollection)
-                return true;
-            else if (obj instanceof view.NodeList)
-                return true;
-        }
-
-        return false;
-    },
-});
-
-// ********************************************************************************************* //
-
 FirebugReps.Property = domplate(Firebug.Rep,
 {
     supportsObject: function(object, type)
@@ -3287,7 +3242,6 @@ Firebug.registerRep(
     FirebugReps.Except,
     FirebugReps.XML,
     FirebugReps.Arr,
-    FirebugReps.NodeCollection,
     FirebugReps.ArrayishObject,
     FirebugReps.XPathResult,
     FirebugReps.Storage,
