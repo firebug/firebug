@@ -568,7 +568,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
 
-        if (saveMultiLine)  // we are just closing the view
+        // we are just closing the view
+        if (saveMultiLine)
         {
             commandLine.value = commandEditor.value;
             return;
@@ -878,8 +879,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 this.commandHistory.hide();
                 return true;
         }
+
         if (this.commandHistory.isOpen && !event.metaKey && !event.ctrlKey && !event.altKey)
             this.commandHistory.hide();
+
         return false;
     },
 
@@ -1040,7 +1043,7 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 });
 
 // ********************************************************************************************* //
-// Command Line APIs Definition
+// Command Line API
 
 /**
  * These functions will be called in the extension like this:
@@ -1127,7 +1130,6 @@ function FirebugCommandLineAPI(context)
         }
 
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
-        
         return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
     };
 
@@ -1169,13 +1171,15 @@ function FirebugCommandLineAPI(context)
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.clear = function()  // no web page interaction
+    // no web page interaction
+    this.clear = function()
     {
         Firebug.Console.clear(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.inspect = function(obj, panelName)  // no web page interaction
+    // no web page interaction
+    this.inspect = function(obj, panelName)
     {
         Firebug.chrome.select(obj, panelName);
         return Firebug.Console.getDefaultReturnValue(context.window);
@@ -1183,12 +1187,14 @@ function FirebugCommandLineAPI(context)
 
     this.keys = function(o)
     {
-        return Arr.keys(o);  // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.keys(o);
     };
 
     this.values = function(o)
     {
-        return Arr.values(o); // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.values(o);
     };
 
     this.debug = function(fn)
@@ -1395,15 +1401,19 @@ Firebug.CommandLine.injector =
             delete context.activeCommandLineHandlers[consoleHandler.token];
 
             if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
-                    " in window with console "+win.location);
+            {
+                FBTrace.sysout("commandLine.detachCommandLineListener " + boundHandler +
+                    " in window with console " + win.location);
+            }
         }
         else
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            {
                 FBTrace.sysout("commandLine.removeCommandLineListener; ERROR no handler! " +
                     "This could cause memory leaks, please report an issue if you see this. " +
                     context.getName());
+            }
         }
     },
 
@@ -1465,7 +1475,8 @@ function CommandLineHandler(context, win)
                 }
             }
 
-            this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?
+            // XXXjjb should these be removed?
+            this.api[prop] = createHandler(prop);
         }
 
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
