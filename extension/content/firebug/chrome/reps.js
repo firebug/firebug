@@ -794,13 +794,18 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
 
 // ********************************************************************************************* //
 
-FirebugReps.ArrayishObject = domplate(FirebugReps.ArrBase,
+/**
+ * Any arrayish object that is not directly Array type (e.g. HTMLCollection, NodeList, etc.)
+ */
+FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 {
     tag:
         OBJECTBOX({_repObject: "$object",
             $hasTwisty: "$object|hasSpecialProperties",
             onclick: "$onToggleProperties"},
-            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
             SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
             FOR("item", "$object|longArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
@@ -814,7 +819,9 @@ FirebugReps.ArrayishObject = domplate(FirebugReps.ArrBase,
         OBJECTBOX({_repObject: "$object",
             $hasTwisty: "$object|hasSpecialProperties",
             onclick: "$onToggleProperties"},
-            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
             SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
@@ -823,6 +830,12 @@ FirebugReps.ArrayishObject = domplate(FirebugReps.ArrBase,
             SPAN({"class": "arrayRightBracket"}, "]"),
             SPAN({"class": "arrayProperties", role: "group"})
         ),
+
+    onClickTitle: function(event)
+    {
+        var obj = Firebug.getRepObject(event.target);
+        Firebug.chrome.select(obj);
+    },
 
     getTitle: function(object, context)
     {
@@ -3242,7 +3255,7 @@ Firebug.registerRep(
     FirebugReps.Except,
     FirebugReps.XML,
     FirebugReps.Arr,
-    FirebugReps.ArrayishObject,
+    FirebugReps.ArrayLikeObject,
     FirebugReps.XPathResult,
     FirebugReps.Storage,
     FirebugReps.Attr,
