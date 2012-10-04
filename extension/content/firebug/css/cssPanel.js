@@ -195,7 +195,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
-const reUrlCrop = /url\("?((?:\\\\|\\\"|\\\)|\\\(|[^"\)])+)?"?\)/g;
+const reCropURL = /url\("?((?:\\\\|\\\"|\\\)|\\\(|[^"\)])+)?"?\)/g;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 const reSelectorChar = /[-_0-9a-zA-Z]/;
 
@@ -1319,7 +1319,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 if (limit > 0)
                 {
                     var matches;
-                    while (matches = reUrlCrop.exec(text))
+                    while (matches = reCropURL.exec(text))
                     {
                         var $1 = matches[1];
                         var croppedText = matches[0].replace($1, Str.cropString($1, limit));
@@ -2843,7 +2843,7 @@ function stripCompletedParens(list, postExpr)
 
 function getCroppedUrlValue(value, length)
 {
-    value = value.replace(reUrlCrop, function(match, $1)
+    value = value.replace(reCropURL, function(match, $1)
     {
         return match.replace($1, Str.cropString($1, length));
     });
