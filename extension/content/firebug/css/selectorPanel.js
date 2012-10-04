@@ -159,6 +159,11 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var root = this.context.window.document.documentElement;
         this.selection = this.mainPanel.selection;
+
+        // Use trial selector if there is no selection in the CSS panel.
+        if (!this.selection)
+            this.selection = this.trialSelector;
+
         this.rebuild(true);
     },
 
