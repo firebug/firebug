@@ -559,7 +559,6 @@ function mightBeArray(obj, win)
 FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 {
     className: "array",
-
     toggles: new ToggleBranch.ToggleBranch(),
 
     titleTag:
@@ -579,12 +578,12 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 
     longArrayIterator: function(array)
     {
-       return this.arrayIterator(array, 300);
+        return this.arrayIterator(array, 300);
     },
 
     shortArrayIterator: function(array)
     {
-       return this.arrayIterator(array, Options.get("ObjectShortIteratorMax"));
+        return this.arrayIterator(array, Options.get("ObjectShortIteratorMax"));
     },
 
     arrayIterator: function(array, max)
@@ -838,10 +837,11 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
         Firebug.chrome.select(obj);
     },
 
-    getTitle: function(object, context)
+    getTitle: function(obj, context)
     {
+        var arr = Wrapper.unwrapObject(obj);
         const re =/\[object ([^\]]*)/;
-        var label = Str.safeToString(object);
+        var label = Str.safeToString(arr);
         var m = re.exec(label);
         return m[1] || label;
     },
@@ -850,12 +850,14 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
     {
         if (mightBeArray(obj, win))
         {
+            var view = Wrapper.getContentView(win || window);
+            var arr = Wrapper.unwrapObject(obj);
+
             if (isFinite(obj.length) && typeof obj.splice === "function" && obj.length)
                 return true;
-            var view = Wrapper.getContentView(win || window);
-            if (obj instanceof view.HTMLCollection)
+            else if (arr instanceof view.HTMLCollection)
                 return true;
-            else if (obj instanceof view.NodeList)
+            else if (arr instanceof view.NodeList)
                 return true;
         }
 
