@@ -55,14 +55,9 @@ var CSSDomplateBase =
     getPropertyValue: function(prop)
     {
         var limit = Options.get("stringCropLength");
-        var value = prop.value;
         if (limit > 0)
         {
-            var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
-            value = value.replace(pattern, function(match, $1)
-            {
-                return '"' + Str.cropString($1, limit) + '"';
-            });
+            return getCroppedUrlValue(prop.value, limit);
         }
         return value;
     }
@@ -200,6 +195,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
+const reUrlCrop = /url\("?((?:\\\\|\\\"|\\\)|\\\(|[^"\)])+)?"?\)/g;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 const reSelectorChar = /[-_0-9a-zA-Z]/;
 
@@ -1305,34 +1301,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var styleRule = Firebug.getRepObject(prop);
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
-            var priority = styleRule.style.getPropertyPriority(propName);
-            var text = styleRule.style.getPropertyValue(propName) +
-                (priority ? " !" + priority : "");
 
-            if (text != "")
-            {
-                if (Options.get("colorDisplay") == "hex")
-                    text = Css.rgbToHex(text);
-                else if (Options.get("colorDisplay") == "hsl")
-                    text = Css.rgbToHSL(text);
-            }
-            else
-            {
-                var disabledMap = this.getDisabledMap(this.context);
-                var disabledProps = disabledMap.get(styleRule);
-                if (disabledProps)
-                {
-                    for (var i = 0, len = disabledProps.length; i < len; ++i)
-                    {
-                        if (disabledProps[i].name == propName)
-                        {
-                            priority = disabledProps[i].important;
-                            text = disabledProps[i].value + (priority ? " !" + priority : "");
-                            break;
-                        }
-                    }
-                }
-            }
+            var text = Firebug.getRepObject(propValue);
+
             var cssValue;
 
             if (propName == "font" || propName == "font-family")
@@ -1344,42 +1315,20 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
-                // The pattern is the same as that is used to crop
-                // property values in getPropertyValue() and saveEdit().
-                var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
                 var limit = Options.get("stringCropLength");
-                var alterText = "...";
                 if (limit > 0)
                 {
-                    while (true)
+                    var matches;
+                    while (matches = reUrlCrop.exec(text))
                     {
-                        var matches = pattern.exec(text);
-                        if (matches)
-                        {
-                            var croppedText = Str.cropString(matches[0], limit);
+                        var $1 = matches[1];
+                        var croppedText = matches[0].replace($1, Str.cropString($1, limit));
 
-                            // calcaute lenght of all cropped string before target (if any)
-                            if ((matches.index + croppedText.length) < rangeOffset)
-                            {
-                                var croppedStrLen =
-                                    // The length of one side of the cropped string
-                                    Math.floor(limit / 2)
-                                    * 2 // there are two sides with same length
-                                    - 2 // minus the increased size that is made by alter text
-                                    + alterText.length; // between two sides of crpped string
-
-                                // length of intact string is added after subtracting
-                                // the length of cropped string
-                                rangeOffset = rangeOffset + matches[0].length - croppedStrLen;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        // Calculate the length of all cropped strings before the target (if any)
+                        if (matches.index + croppedText.length < rangeOffset)
+                            rangeOffset += matches[0].length - croppedText.length;
                     }
                 }
-
 
                 cssValue = CSSModule.parseCSSValue(text, rangeOffset);
             }
@@ -1742,6 +1691,19 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var propValue, parsedValue, propName;
 
         var row = Dom.getAncestorByClass(target, "cssProp");
+        if (!row)
+        {
+            row = Dom.getAncestorByClass(target, "importRule");
+            if (!row)
+            {
+                var row = Dom.getAncestorByClass(target, "cssCharsetRule");
+            }
+        }
+        else
+        {
+            var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        }
+
         var rule = Firebug.getRepObject(row);
         var propName = Dom.getChildByClass(row, "cssPropName").textContent;
 
@@ -1801,13 +1763,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 var limit = Options.get("stringCropLength");
                 if (limit > 0)
                 {
-                    var pattern = /\"((?:\\\\|\\\"|[^\"])*)\"/g;
-                    var croppedValue = value.replace(pattern, function(match, $1)
-                    {
-                        return '"' + Str.cropString($1, limit) + '"';
-                    });
-
-                    target.textContent = croppedValue;
+                    target.textContent = getCroppedUrlValue(value, limit);
                 }
                 else
                 {
@@ -2883,6 +2839,15 @@ function stripCompletedParens(list, postExpr)
     {
         return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
     });
+}
+
+function getCroppedUrlValue(value, length)
+{
+    value = value.replace(reUrlCrop, function(match, $1)
+    {
+        return match.replace($1, Str.cropString($1, length));
+    });
+    return value;
 }
 
 function parsePriority(value)
