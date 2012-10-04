@@ -360,24 +360,34 @@ var SelectorTemplate = domplate(BaseRep,
 var WarningTemplate = domplate(Firebug.Rep,
 {
     noSelectionTag:
-        TR({"class": "selectbugWarning "},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelection"))
         ),
 
     noSelectionResultsTag:
-        TR({"class": "selectbugWarning "},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelectionResults"))
         ),
 
     selectErrorTag:
-        TR({"class": "selectbugWarning"},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.selectorError"))
         ),
 
     selectErrorTextTag:
-        TR({"class": "selectbugWarning"},
-            TD({"class": "selectionErrorText selectionElement"}, SPAN("$object"))
+        TR({"class": "selectorWarning"},
+            TD({"class": "selectionErrorText selectionElement"},
+                SPAN("$object|getErrorMessage")
+            )
         ),
+
+    getErrorMessage: function(object)
+    {
+        if (object.message)
+            return object.message;
+
+        return Locale.$STR("css.selector.unknownErrorMessage");
+    }
 });
 
 // ********************************************************************************************* //
