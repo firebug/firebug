@@ -556,9 +556,10 @@ function mightBeArray(obj, win)
 
 // ********************************************************************************************* //
 
-FirebugReps.ArrBase = domplate(Firebug.Rep,
+FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 {
     className: "array",
+
     toggles: new ToggleBranch.ToggleBranch(),
 
     titleTag:
