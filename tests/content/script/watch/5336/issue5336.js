@@ -15,7 +15,7 @@ function runTest()
                 var row = FBTest.getWatchExpressionRow(null, "elements");
                 FBTest.ok(row, "The 'elements' expression must be in the watch panel.");
 
-                var expected = /\s*elements\[\s*div\.test\,\s*div\.test\s*\]\s*/;
+                var expected = /\s*elements\s*HTMLCollection\s*\[\s*div\.test\,\s*div\.test\s*\]\s*/;
                 FBTest.compare(expected, row.textContent,
                     "Value of 'elements' must not be undefined.");
 
