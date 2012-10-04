@@ -11,9 +11,13 @@ function runTest()
         var nodeBox = getSelectedNodeBox();
         FBTest.executeContextMenuCommand(nodeBox, "htmlNewAttribute", function()
         {
-            var editor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
-            FBTest.compare("", editor.value, "The default value must be an empty string");
-            FBTest.testDone("issue5504.DONE");
+            // Wait till the inline editor is available.
+            var config = {tagName: "input", classes: "textEditorInner"};
+            FBTest.waitForDisplayedElement("html", config, function(editor)
+            {
+                FBTest.compare("", editor.value, "The default value must be an empty string");
+                FBTest.testDone("issue5504.DONE");
+            });
         });
     });
 }
