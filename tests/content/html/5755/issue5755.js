@@ -11,18 +11,24 @@ function runTest()
             FBTest.setPref("displayedAttributeValueLimit", 10);
             var longOnclickValue = win.document.getElementById("long-onclick").
                 getAttribute("onclick");
+
             FBTest.selectElementInHtmlPanel("long-onclick", function (nodes)
             {
                 // getting onclick attribute's value
                 var onclickValue = nodes.getElementsByClassName("nodeValue").item(1);
                 FBTest.synthesizeMouse(onclickValue);
-                var texteditor = panel.panelNode.getElementsByClassName("textEditorInner").item(0);
-                if (FBTest.ok(texteditor, "Editor must be loaded now."))
+
+                // Wait till the inline editor is available.
+                var config = {tagName: "input", classes: "textEditorInner"};
+                FBTest.waitForDisplayedElement("html", config, function(texteditor)
                 {
-                    FBTest.compare(longOnclickValue, texteditor.value,
-                        "Inline editor must contain whole string of onclick value.");
-                }
-                FBTest.testDone("issue5755.DONE");
+                    if (FBTest.ok(texteditor, "Editor must be loaded now."))
+                    {
+                        FBTest.compare(longOnclickValue, texteditor.value,
+                            "Inline editor must contain whole string of onclick value.");
+                    }
+                    FBTest.testDone("issue5755.DONE");
+                });
             });
         }
         else

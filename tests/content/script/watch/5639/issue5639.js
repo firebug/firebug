@@ -36,8 +36,15 @@ function testDeleteAllWatches(callback, panelNode, targetSelector, watchExpressi
         var target = panelNode.querySelector(targetSelector);
         FBTest.executeContextMenuCommand(target, "fbDeleteAllWatches", function()
         {
-            FBTest.compare(0, countWatches(panelNode), "There should not be any watch");
-            callback();
+            // xxxHonza: needs to be done properly.
+            // The code should handle a mutation event or periodically check (for
+            // limited amount of time) if the watch window is empty.
+            // See: http://code.google.com/p/fbug/issues/detail?id=5958
+            setTimeout(function()
+            {
+                FBTest.compare(0, countWatches(panelNode), "There should not be any watch");
+                callback();
+            }, 1000);
         });
     });
 }
