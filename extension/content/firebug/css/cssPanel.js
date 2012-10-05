@@ -1244,6 +1244,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                             command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
                         },
                         {
+                            id: "fbDisableCSSProp",
                             label: Locale.$STRF("DisableProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Disable_Prop", [propName]),
                             nol10n: true,
@@ -1271,6 +1272,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
+                id: "fbRefresh",
                 label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
