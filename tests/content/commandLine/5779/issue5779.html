@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5779: Allow to set the root element in $ and $$</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5779">Issue 5779</a>:
+        Allow to set the root element in $ and $$</h1>
+</header>
+<div class="test">
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Select and enable the Console panel</li>
+            <li>Execute following expressions in the command line and check the results<br/>
+                <i>'expression' -> 'result'</i>
+            </li>
+            <ol>
+                <li><code>$('div') -> &lt;div class="test"&gt;</code></li>
+                <li><code>$$('div') -> [div.test, div#root, div.rootdiv1, div.rootdiv2]</code></li>
+                <li><code>$('div', document.getElementById('root')); -> &lt;div class="rootdiv1"&gt;</code></li>
+                <li><code>$$('div', document.getElementById('root')); -> [div.rootdiv1, div.rootdiv2]</code></li>
+            </ol>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+
+<div id="root">
+    <div class="rootdiv1"></div>
+    <div class="rootdiv2"></div>
+</div>
+</body>
+</html>

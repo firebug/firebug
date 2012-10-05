@@ -7,9 +7,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/domplate",
+    "firebug/chrome/menu",
     "firebug/css/selectorEditor",
+    "firebug/css/selectorModule",
 ],
-function(Firebug, Obj, Locale, Events, Dom, Domplate, SelectorEditor) {
+function(Firebug, Obj, Locale, Events, Dom, Domplate, Menu, SelectorEditor) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -44,6 +46,11 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
+    shutdown: function(context, doc)
+    {
+        Firebug.Panel.shutdown.apply(this, arguments);
+    },
+
     initializeNode: function(oldPanelNode)
     {
         Firebug.Panel.initializeNode.apply(this, arguments);
@@ -53,17 +60,18 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         this.lockSelection = Obj.bind(this.lockSelection, this);
 
         var panelNode = this.mainPanel.panelNode;
-        Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
+        // See: http://code.google.com/p/fbug/issues/detail?id=5931
+        //Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
     },
 
     destroyNode: function()
     {
         var panelNode = this.mainPanel.panelNode;
-        Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
+        //Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
     },
@@ -91,6 +99,13 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
             element = element.parentNode;
 
         return element;
+    },
+
+    getMatchingElements: function(rule)
+    {
+        this.trialSelector = rule.selectorText;
+        this.selection = rule;
+        this.rebuild();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -159,6 +174,11 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var root = this.context.window.document.documentElement;
         this.selection = this.mainPanel.selection;
+
+        // Use trial selector if there is no selection in the CSS panel.
+        if (!this.selection)
+            this.selection = this.trialSelector;
+
         this.rebuild(true);
     },
 
@@ -360,24 +380,34 @@ var SelectorTemplate = domplate(BaseRep,
 var WarningTemplate = domplate(Firebug.Rep,
 {
     noSelectionTag:
-        TR({"class": "selectbugWarning "},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelection"))
         ),
 
     noSelectionResultsTag:
-        TR({"class": "selectbugWarning "},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelectionResults"))
         ),
 
     selectErrorTag:
-        TR({"class": "selectbugWarning"},
+        TR({"class": "selectorWarning"},
             TD({"class": "selectionElement"}, Locale.$STR("css.selector.selectorError"))
         ),
 
     selectErrorTextTag:
-        TR({"class": "selectbugWarning"},
-            TD({"class": "selectionErrorText selectionElement"}, SPAN("$object"))
+        TR({"class": "selectorWarning"},
+            TD({"class": "selectionErrorText selectionElement"},
+                SPAN("$object|getErrorMessage")
+            )
         ),
+
+    getErrorMessage: function(object)
+    {
+        if (object.message)
+            return object.message;
+
+        return Locale.$STR("css.selector.unknownErrorMessage");
+    }
 });
 
 // ********************************************************************************************* //

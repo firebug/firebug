@@ -100,7 +100,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             else
             {
                 FBTrace.sysout("deleteRule: " + ruleIndex + " " + src.cssRules.length,
-                    styleSheet.cssRules);
+                    src.cssRules);
             }
         }
 

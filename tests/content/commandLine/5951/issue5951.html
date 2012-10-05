@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5951: Title of array-like objects should be clickable</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5951">Issue 5951</a>:
+        Title of array-like objects should be clickable</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Select and enable the Console panel</li>
+            <li>Execute following expression in the command line: <br/>
+                <code>document.getElementsByTagName("span")</code>
+            </li>
+            <li>The result should be: <br/>
+                <code>HTMLCollection[span.test, span#root]</code>
+            </li>
+            <li>Click the <code>HTMLCollection</code> title. You should be
+            navigated to the DOM panel.</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+
+<span class="test"></span>
+<span id="root"></span>
+
+</body>
+</html>

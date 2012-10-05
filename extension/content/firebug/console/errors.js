@@ -146,6 +146,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     startObserving: function()
     {
+        if (this.isObserving)
+            return;
+
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("Errors.startObserving");
 
@@ -157,6 +160,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     stopObserving: function()
     {
+        if (!this.isObserving)
+            return;
+
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("Errors.stopObserving");
 

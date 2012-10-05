@@ -568,7 +568,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
 
-        if (saveMultiLine)  // we are just closing the view
+        // we are just closing the view
+        if (saveMultiLine)
         {
             commandLine.value = commandEditor.value;
             return;
@@ -878,8 +879,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 this.commandHistory.hide();
                 return true;
         }
+
         if (this.commandHistory.isOpen && !event.metaKey && !event.ctrlKey && !event.altKey)
             this.commandHistory.hide();
+
         return false;
     },
 
@@ -1040,27 +1043,66 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 });
 
 // ********************************************************************************************* //
-// Command line APIs definition
-//
-// These functions will be called in the extension like this:
-//   subHandler.apply(api, userObjects);
-// where subHandler is one of the entries below, api is this object and userObjects are entries in
-// an array we created in the web page.
+// Command Line API
 
+/**
+ * These functions will be called in the extension like this:
+ *
+ * subHandler.apply(api, userObjects);
+ *
+ * Where subHandler is one of the entries below, api is this object and userObjects
+ * are entries in an array we created in the web page.
+ */
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(id)  // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$ = function(selector, start)
     {
-        return Wrapper.unwrapObject(context.baseWindow.document).getElementById(id);
+        if (start && start.querySelector && (
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
+            return start.querySelector(selector);
+        }
+
+        var result = context.baseWindow.document.querySelector(selector);
+        if (result == null && (selector || "")[0] !== "#")
+        {
+            if (context.baseWindow.document.getElementById(selector))
+            {
+                // This should be removed in the next minor (non-bugfix) version
+                var msg = Locale.$STRF("warning.dollar_change", [selector]);
+                Firebug.Console.log(msg, context, "warn");
+                result = null;
+            }
+        }
+
+        return result;
     };
 
-    this.$$ = function(selector) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$$ = function(selector, start)
     {
-        var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result;
+
+        if (start && start.querySelectorAll && (
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
+            result = start.querySelectorAll(selector);
+        }
+        else
+        {
+            result = context.baseWindow.document.querySelectorAll(selector);
+        }
+
         return Arr.cloneArray(result);
     };
 
-    this.$x = function(xpath, contextNode, resultType) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$x = function(xpath, contextNode, resultType)
     {
         var XPathResultType = XPathResult.ANY_TYPE;
 
@@ -1088,11 +1130,11 @@ function FirebugCommandLineAPI(context)
         }
 
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
-        
         return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
     };
 
-    this.$n = function(index) // values from the extension space
+    // values from the extension space
+    this.$n = function(index)
     {
         var htmlPanel = context.getPanel("html", true);
         if (!htmlPanel)
@@ -1129,13 +1171,15 @@ function FirebugCommandLineAPI(context)
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.clear = function()  // no web page interaction
+    // no web page interaction
+    this.clear = function()
     {
         Firebug.Console.clear(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.inspect = function(obj, panelName)  // no web page interaction
+    // no web page interaction
+    this.inspect = function(obj, panelName)
     {
         Firebug.chrome.select(obj, panelName);
         return Firebug.Console.getDefaultReturnValue(context.window);
@@ -1143,12 +1187,14 @@ function FirebugCommandLineAPI(context)
 
     this.keys = function(o)
     {
-        return Arr.keys(o);  // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.keys(o);
     };
 
     this.values = function(o)
     {
-        return Arr.values(o); // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.values(o);
     };
 
     this.debug = function(fn)
@@ -1355,15 +1401,19 @@ Firebug.CommandLine.injector =
             delete context.activeCommandLineHandlers[consoleHandler.token];
 
             if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
-                    " in window with console "+win.location);
+            {
+                FBTrace.sysout("commandLine.detachCommandLineListener " + boundHandler +
+                    " in window with console " + win.location);
+            }
         }
         else
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            {
                 FBTrace.sysout("commandLine.removeCommandLineListener; ERROR no handler! " +
                     "This could cause memory leaks, please report an issue if you see this. " +
                     context.getName());
+            }
         }
     },
 
@@ -1425,7 +1475,8 @@ function CommandLineHandler(context, win)
                 }
             }
 
-            this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?
+            // XXXjjb should these be removed?
+            this.api[prop] = createHandler(prop);
         }
 
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))

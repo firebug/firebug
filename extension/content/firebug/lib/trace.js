@@ -36,7 +36,7 @@ catch (err)
 // Wrapper
 
 /**
- * Wraps tracer for given option. Logs made throug the wrapper will automatially
+ * Wraps tracer for given option. Logs made through the wrapper will automatically
  * be checked against the option and only displayed if the option is true.
  * If FBTrace console isn't installed all options are false and there is no
  * additional performance penalty.
