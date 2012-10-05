@@ -53,17 +53,18 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         this.lockSelection = Obj.bind(this.lockSelection, this);
 
         var panelNode = this.mainPanel.panelNode;
-        Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
+        // See: http://code.google.com/p/fbug/issues/detail?id=5931
+        //Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
     },
 
     destroyNode: function()
     {
         var panelNode = this.mainPanel.panelNode;
-        Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
+        //Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
     },
