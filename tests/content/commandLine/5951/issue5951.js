@@ -7,8 +7,8 @@ function runTest()
         FBTest.clearCache();
         FBTest.enableConsolePanel(function(win)
         {
-            var expression = "document.getElementsByTagName('div')";
-            var expected = "HTMLCollection[div.test, div#root]";
+            var expression = "document.getElementsByTagName('span')";
+            var expected = "HTMLCollection[span.test, span#root]";
 
             var config = {tagName: "pre", classes: "objectBox-array"};
             FBTest.waitForDisplayedElement("console", config, function(row)
