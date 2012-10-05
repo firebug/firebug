@@ -7,9 +7,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/domplate",
+    "firebug/chrome/menu",
     "firebug/css/selectorEditor",
 ],
-function(Firebug, Obj, Locale, Events, Dom, Domplate, SelectorEditor) {
+function(Firebug, Obj, Locale, Events, Dom, Domplate, Menu, SelectorEditor) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -42,6 +43,15 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
     initialize: function(context, doc)
     {
         Firebug.Panel.initialize.apply(this, arguments);
+
+        Firebug.registerUIListener(this);
+    },
+
+    shutdown: function(context, doc)
+    {
+        Firebug.Panel.shutdown.apply(this, arguments);
+
+        Firebug.unregisterUIListener(this);
     },
 
     initializeNode: function(oldPanelNode)
@@ -53,17 +63,18 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         this.lockSelection = Obj.bind(this.lockSelection, this);
 
         var panelNode = this.mainPanel.panelNode;
-        Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
+        // See: http://code.google.com/p/fbug/issues/detail?id=5931
+        //Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
     },
 
     destroyNode: function()
     {
         var panelNode = this.mainPanel.panelNode;
-        Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
-        Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
-        Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
+        //Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
+        //Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
+        //Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
     },
@@ -91,6 +102,42 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
             element = element.parentNode;
 
         return element;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
+    onContextMenu: function(items, object, target, context, panel, popup)
+    {
+        if (panel.name != "stylesheet")
+            return;
+
+        var cssRule = Dom.getAncestorByClass(target, "cssRule");
+        if (!cssRule)
+            return;
+
+        var rule = cssRule.repObject;
+        if (!rule)
+            return;
+
+        var item = {
+           id: "fbGetMatchingElements",
+           nol10n: true,
+           label: Locale.$STR("css.selector.cmd.getMatchingElements"),
+           command: Obj.bindFixed(this.getMatchingElements, this, rule)
+        };
+
+        var refreshMenuItem = popup.querySelector("#fbRefresh");
+        Menu.createMenuItem(popup, item, refreshMenuItem);
+
+        return [];
+    },
+
+    getMatchingElements: function(rule)
+    {
+        this.trialSelector = rule.selectorText;
+        this.selection = rule;
+        this.rebuild();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

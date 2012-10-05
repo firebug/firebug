@@ -43,7 +43,7 @@ SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     endEditing: function(target, value, cancel)
     {
-        if (cancel || value == "")
+        if (cancel)
             return;
 
         this.panel.setTrialSelector(target, value);
