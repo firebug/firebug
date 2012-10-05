@@ -9,6 +9,7 @@ define([
     "firebug/lib/domplate",
     "firebug/chrome/menu",
     "firebug/css/selectorEditor",
+    "firebug/css/selectorModule",
 ],
 function(Firebug, Obj, Locale, Events, Dom, Domplate, Menu, SelectorEditor) {
 with (Domplate) {
@@ -43,15 +44,11 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
     initialize: function(context, doc)
     {
         Firebug.Panel.initialize.apply(this, arguments);
-
-        Firebug.registerUIListener(this);
     },
 
     shutdown: function(context, doc)
     {
         Firebug.Panel.shutdown.apply(this, arguments);
-
-        Firebug.unregisterUIListener(this);
     },
 
     initializeNode: function(oldPanelNode)
@@ -102,35 +99,6 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
             element = element.parentNode;
 
         return element;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Context Menu
-
-    onContextMenu: function(items, object, target, context, panel, popup)
-    {
-        if (panel.name != "stylesheet")
-            return;
-
-        var cssRule = Dom.getAncestorByClass(target, "cssRule");
-        if (!cssRule)
-            return;
-
-        var rule = cssRule.repObject;
-        if (!rule)
-            return;
-
-        var item = {
-           id: "fbGetMatchingElements",
-           nol10n: true,
-           label: Locale.$STR("css.selector.cmd.getMatchingElements"),
-           command: Obj.bindFixed(this.getMatchingElements, this, rule)
-        };
-
-        var refreshMenuItem = popup.querySelector("#fbRefresh");
-        Menu.createMenuItem(popup, item, refreshMenuItem);
-
-        return [];
     },
 
     getMatchingElements: function(rule)
