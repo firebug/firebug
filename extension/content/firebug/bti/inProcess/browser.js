@@ -773,9 +773,18 @@ var TabWatchListener =
         }
 
         var browser = context.browser;
+
         // Persist remnants of the context for restoration if the user reloads
-        browser.panelName = context.panelName;
-        browser.sidePanelNames = context.sidePanelNames;
+        try
+        {
+            browser.panelName = context.panelName;
+            browser.sidePanelNames = context.sidePanelNames;
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("browser.destroyContext; " + e, e);
+        }
 
         // next the context is deleted and removed from the Firebug.TabWatcher,
         // we clean up in unWatchBrowser
