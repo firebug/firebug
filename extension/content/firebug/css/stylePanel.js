@@ -874,6 +874,9 @@ function getFontPropValueParts(element, value, propName)
     clonedElement.removeAttribute("name");
     clonedElement.removeAttribute("id");
 
+    // Workaround for issue 5905
+    clonedElement.style.position = "absolute";
+
     clonedElement.textContent = element.textContent;
     Firebug.setIgnored(clonedElement);
     element.parentNode.appendChild(clonedElement);
