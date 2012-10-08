@@ -869,6 +869,11 @@ function getFontPropValueParts(element, value, propName)
 
     // Clone the element to just get the fonts used in it and not its descendants
     var clonedElement = element.cloneNode(false);
+
+    // Workaround for issue 5744
+    clonedElement.removeAttribute("name");
+    clonedElement.removeAttribute("id");
+
     clonedElement.textContent = element.textContent;
     Firebug.setIgnored(clonedElement);
     element.parentNode.appendChild(clonedElement);
