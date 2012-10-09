@@ -12,7 +12,7 @@ function runTest()
                 "Commandline API should not be available now.");
 
             var tasks = new FBTest.TaskList();
-            tasks.push(executeAndVerify, '$("testElement")', /\<div\s*id\=\"testElement\"\>/,
+            tasks.push(executeAndVerify, '$("#testElement")', /\<div\s*id\=\"testElement\"\>/,
                 "a", "objectLink objectLink-element");
             tasks.push(loadjQuery, win);
             tasks.push(executeAndVerify, '$("#testElement")', /div\#testElement/,

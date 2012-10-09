@@ -689,6 +689,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 {
                     this.ioBox.removeChildBox(parentNodeBox, target);
 
+                    // Special case for docType.
+                    if (target instanceof HTMLHtmlElement)
+                        this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
+
                     this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
                 }
                 else
@@ -715,6 +719,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
+
+                    // Special case for docType.
+                    if (target instanceof HTMLHtmlElement)
+                    {
+                        this.ioBox.insertChildBoxBefore(parentNodeBox,
+                            target.parentNode.doctype, target);
+                    }
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }

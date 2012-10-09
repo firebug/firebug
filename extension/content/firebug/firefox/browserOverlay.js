@@ -9,7 +9,11 @@ var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
-Cu.import("resource://firebug/prefLoader.js");
+
+// Make sure PrefLoader variable doesn't leak into the global scope.
+var prefLoaderScope = {};
+Cu.import("resource://firebug/prefLoader.js", prefLoaderScope);
+var PrefLoader = prefLoaderScope.PrefLoader;
 
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 
@@ -557,6 +561,51 @@ Firebug.GlobalUI =
         });
 
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Page Context Menu Overlay
+
+    loadContextMenuOverlay: function(win)
+    {
+        if (typeof(win.nsContextMenu) == "undefined")
+            return;
+
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+        var setTargetOriginal = this.setTargetOriginal = win.nsContextMenu.prototype.setTarget;
+        win.nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+        {
+            setTargetOriginal.apply(this, arguments);
+
+            if (this.isTargetAFormControl(aNode))
+                this.shouldDisplay = true;
+        };
+
+        // Hide built-in inspector if the pref says so.
+        var initItemsOriginal = this.initItemsOriginal = win.nsContextMenu.prototype.initItems;
+        win.nsContextMenu.prototype.initItems = function()
+        {
+            initItemsOriginal.apply(this, arguments);
+
+            // Hide built-in inspector menu item if the pref "extensions.firebug.hideDefaultInspector"
+            // says so. Note that there is also built-in preference "devtools.inspector.enable" that
+            // can be used for the same purpose.
+            var hideInspect = PrefLoader.getPref("hideDefaultInspector");
+            if (hideInspect)
+            {
+                this.showItem("inspect-separator", false);
+                this.showItem("context-inspect", false);
+            }
+        }
+    },
+
+    unloadContextMenuOverlay: function(win)
+    {
+        if (typeof(win.nsContextMenu) == "undefined")
+            return;
+
+        win.nsContextMenu.prototype.setTarget = this.setTargetOriginal;
+        win.nsContextMenu.prototype.initItems = this.initItemsOriginal;
     }
 }
 
@@ -1264,38 +1313,6 @@ if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
             {
                 clearTimeout(timeout);
             }, false);
-        }
-    }
-}
-
-// ********************************************************************************************* //
-// Firefox Page Context Menu
-
-if (typeof(nsContextMenu) != "undefined")
-{
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
-    var setTargetOriginal = nsContextMenu.prototype.setTarget;
-    nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
-    {
-        setTargetOriginal.apply(this, arguments);
-        if (this.isTargetAFormControl(aNode))
-            this.shouldDisplay = true;
-    };
-
-    // Hide built-in inspector if the pref says so.
-    var initItemsOriginal = nsContextMenu.prototype.initItems;
-    nsContextMenu.prototype.initItems = function()
-    {
-        initItemsOriginal.apply(this, arguments);
-
-        // Hide built-in inspector menu item if the pref "extensions.firebug.hideDefaultInspector"
-        // says so. Note that there is also built-in preference "devtools.inspector.enable" that
-        // can be used for the same purpose.
-        var hideInspect = PrefLoader.getPref("hideDefaultInspector");
-        if (hideInspect)
-        {
-            this.showItem("inspect-separator", false);
-            this.showItem("context-inspect", false);
         }
     }
 }

@@ -1,4 +1,5 @@
-/* Rules for selectbug's Selector panel elements */
+/* Rules for Selector panel elements */
+
 .cssSelectionTable {
     width: 100%;
 }
@@ -6,7 +7,7 @@
     padding: 0 0 0 1ex;
 }
 
-.selectbugWarning {
+.selectorWarning {
     font-size: 11px;
     color: gray;
     padding: 2px 0 0 1ex;
@@ -18,7 +19,7 @@
     background-color: #FFEBEB;
 }
 
-/* Rules for selectbug's effect on CSS stylesheet panel */
+/* Rules for select panel's effect on CSS stylesheet panel */
 .selectedSelectorRule {
     border-color: Highlight !important;
     background-color: #EBF5FF !important;

@@ -32,13 +32,32 @@ function testDeleteAllWatches(callback, panelNode, targetSelector, watchExpressi
 {
     addWatches(watchExpressions.slice(0), function()
     {
-        FBTest.compare(watchExpressions.length, countWatches(panelNode), "all the watches must be added");
+        FBTest.compare(watchExpressions.length, countWatches(panelNode),
+            "all the watches must be added");
         var target = panelNode.querySelector(targetSelector);
-        FBTest.executeContextMenuCommand(target, "fbDeleteAllWatches", function()
+
+        var timeout, compareAndCallback, observer;
+        compareAndCallback = function()
         {
             FBTest.compare(0, countWatches(panelNode), "There should not be any watch");
+            clearTimeout(timeout);
+            observer.disconnect();
             callback();
+        };
+        // the timeout is triggered if the MutationObserver has not detected 
+        // the deletion of the watch expressions
+        timeout = setTimeout(compareAndCallback, 1000);
+
+        observer = new MutationObserver(function(mutations)
+        {
+            // if there is no watch any more, we run compareAndCallback now
+            // otherwise, we wait for another mutation or for the timeout
+            if (countWatches(panelNode) === 0)
+                compareAndCallback();
         });
+        observer.observe(panelNode, {childList: true});
+
+        FBTest.executeContextMenuCommand(target, "fbDeleteAllWatches");
     });
 }
 
