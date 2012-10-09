@@ -9,7 +9,11 @@ var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");
-Cu.import("resource://firebug/prefLoader.js");
+
+// Make sure PrefLoader variable doesn't leak into the global scope.
+var prefLoaderScope = {};
+Cu.import("resource://firebug/prefLoader.js", prefLoaderScope);
+var PrefLoader = prefLoaderScope.PrefLoader;
 
 const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
 

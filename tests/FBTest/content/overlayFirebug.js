@@ -22,7 +22,10 @@ var cmdLineHandler = Cc["@mozilla.org/commandlinehandler/general-startup;1?type=
 
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
-Cu.import("resource://firebug/prefLoader.js");
+// Make sure PrefLoader variable doesn't leak into the global scope.
+var prefLoaderScope = {};
+Cu.import("resource://firebug/prefLoader.js", prefLoaderScope);
+var PrefLoader = prefLoaderScope.PrefLoader;
 var getPref = PrefLoader.getPref;
 
 Cu.import("resource://firebug/fbtrace.js");
