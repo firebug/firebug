@@ -64,7 +64,7 @@ const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPrompt
 // Preferences
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefService = PrefService.getService(Ci.nsIPrefService);
-const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefs = PrefService.getService(Ci.nsIPrefBranch);
 
 // Cookie panel ID.
 const panelName = "cookies";
