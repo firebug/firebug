@@ -20,6 +20,7 @@ function runTest()
                 // toggle breakpoint
                 FBTest.click(errBP);
 
+                // xxxHonza: the timeout is a hack (but should fix test-bot failure)
                 setTimeout(function()
                 {
                     // test checked
@@ -32,7 +33,7 @@ function runTest()
                         FBTest.ok(!hasClass(objBox, "breakForError"), "Must be unchecked again");
                         FBTest.testDone();
                     });
-                });
+                }, 2000);
             });
 
             FBTest.progress("waiting for an error to appear");
