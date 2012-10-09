@@ -100,6 +100,10 @@ var CookieClipboard = Obj.extend(Object,
     {
         var trans = Xpcom.CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
 
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=722872
+        if (typeof(trans.init) == "function")
+            trans.init(null);
+
         var json = cookie.toJSON();
         var wrapper1 = Xpcom.CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
         wrapper1.data = json;
@@ -124,6 +128,11 @@ var CookieClipboard = Obj.extend(Object,
     getTransferData: function()
     {
         var trans = Xpcom.CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
+
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=722872
+        if (typeof(trans.init) == "function")
+            trans.init(null);
+
         trans.addDataFlavor(this.cookieFlavour);
 
         clipboard.getData(trans, Ci.nsIClipboard.kGlobalClipboard);
