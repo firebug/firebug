@@ -2,6 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/2279/testErrorBreakpoints.html", function(win)
     {
+        // xxxHonza: enable also the Script panel so, response cache is activated.
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
@@ -33,7 +35,7 @@ function runTest()
                         FBTest.ok(!hasClass(objBox, "breakForError"), "Must be unchecked again");
                         FBTest.testDone();
                     });
-                }, 2000);
+                });
             });
 
             FBTest.progress("waiting for an error to appear");
