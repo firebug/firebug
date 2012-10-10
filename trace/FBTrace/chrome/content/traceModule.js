@@ -18,7 +18,7 @@ var clipboard = XPCOM.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 var wm = XPCOM.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 
 var PrefService = Cc["@mozilla.org/preferences-service;1"];
-var prefs = PrefService.getService(Ci.nsIPrefBranch2);
+var prefs = PrefService.getService(Ci.nsIPrefBranch);
 var prefService = PrefService.getService(Ci.nsIPrefService);
 
 var reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;

@@ -34,7 +34,16 @@ function runTest()
                 FBTest.testDone("issue3363.DONE");
             });
 
-            FBTest.executeCommand(command);
+            // xxxHonza: the method uses internaly sendChare to type the
+            // command char by char. But, the command is this case is too long
+            // and it causes timout.
+            //FBTest.executeCommand(command);
+
+            // xxxHonza: Set the text directly, there could be better FBTest API for it.
+            FBTest.clearCommand();
+            var cmdLine = FW.Firebug.CommandLine.getSingleRowCommandLine();
+            cmdLine.value = command;
+            FBTest.sendKey("RETURN", "fbCommandLine");
         });
     });
 }

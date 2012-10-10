@@ -13,7 +13,7 @@ const Cr = Components.results;
 var EXPORTED_SYMBOLS = ["traceConsoleService"];
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 const appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);

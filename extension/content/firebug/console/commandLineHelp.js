@@ -1,15 +1,16 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/console/commandLineExposed",
     "firebug/chrome/window",
-    "firebug/lib/Xpcom",
+    "firebug/lib/xpcom",
     "firebug/lib/events",
 ],
-function(Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
+function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
 with (Domplate) {
 
 // ********************************************************************************************* //

@@ -642,6 +642,11 @@
     padding-left: 18px;
 }
 
+.objectBox-array > .objectTitle {
+    font-weight: bold;
+    color: DarkGreen;
+}
+
 /*****************************************************************************************/
 
 .logRow-spy,

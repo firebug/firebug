@@ -17,7 +17,7 @@ function(Obj, Firebug, Firefox, Locale, Domplate, Url, Dom) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 
 
 /**

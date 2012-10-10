@@ -2,6 +2,8 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/2279/testErrorBreakpoints.html", function(win)
     {
+        // xxxHonza: enable also the Script panel so, response cache is activated.
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
@@ -20,6 +22,7 @@ function runTest()
                 // toggle breakpoint
                 FBTest.click(errBP);
 
+                // xxxHonza: the timeout is a hack (but should fix test-bot failure)
                 setTimeout(function()
                 {
                     // test checked

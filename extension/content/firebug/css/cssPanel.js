@@ -1244,6 +1244,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                             command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
                         },
                         {
+                            id: "fbDisableCSSProp",
                             label: Locale.$STRF("DisableProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Disable_Prop", [propName]),
                             nol10n: true,
@@ -1271,6 +1272,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
+                id: "fbRefresh",
                 label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
@@ -1754,8 +1756,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             else if (Dom.getAncestorByClass(target, "cssPropValue"))
             {
-                var limit = Options.get("stringCropLength");
-                target.textContent = limit > 0 ? Str.cropString(value, limit) : value;
+                target.textContent = CSSDomplateBase.getPropertyValue({value: value});
 
                 propName = Dom.getChildByClass(row, "cssPropName").textContent;
                 propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
@@ -2291,7 +2292,6 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = Dom.getAncestorByClass(target, "cssRule");
-
         var rule = Firebug.getRepObject(target);
 
         var searchRule = rule || Firebug.getRepObject(row.nextSibling);
@@ -2342,6 +2342,14 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             ruleIndex = cssRules.length;
         }
 
+        // Delete in all cases except for new add
+        // We want to do this before the insert to ease change tracking
+        if (oldRule)
+        {
+            CSSModule.deleteRule(styleSheet, ruleIndex);
+        }
+
+        var doMarkChange = true;
 
         // Firefox does not follow the spec for the update selector text case.
         // When attempting to update the value, firefox will silently fail.
@@ -2360,24 +2368,14 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 if (!Css.hasClass(propEl, "disabledStyle"))
                 {
                     var propName = Dom.getChildByClass(propEl, "cssPropName").textContent;
-                    cssText.push(propName);
-                    cssText.push(":");
-                    cssText.push(rule.style.getPropertyValue(propName) +
-                        (rule.style.getPropertyPriority(propName) ? " !important" : ""));
-                    cssText.push(";");
+                    var propValue = Dom.getChildByClass(propEl, "cssPropValue").repObject;
+                    cssText.push(propName + ":" + propValue + ";");
                 }
             }
 
             cssText.push("}");
             cssText = cssText.join("");
             
-            // Delete in all cases except for new add
-            // We want to do this before the insert to ease change tracking
-            if (oldRule)
-            {
-                CSSModule.deleteRule(styleSheet, ruleIndex);
-            }
-
             try
             {
                 var insertLoc = CSSModule.insertRule(styleSheet, cssText, ruleIndex);
@@ -2408,27 +2406,23 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
                 this.box.setAttribute('saveSuccess', false);
 
-                row.repObject = rule;
-                return;
+                doMarkChange = false;
             }
         }
         else
         {
-            if (oldRule)
-            {
-                CSSModule.deleteRule(styleSheet, ruleIndex);
-            }
+            // XXX There is currently no way to re-add the rule after this happens.
             rule = undefined;
         }
 
         // Update the rep object
         row.repObject = rule;
-        if (oldRule)
+        if (oldRule && rule)
             this.panel.remapRule(context, oldRule, rule);
 
-        this.panel.markChange(this.panel.name == "stylesheet");
+        if (doMarkChange)
+            this.panel.markChange(this.panel.name == "stylesheet");
     },
-
 
     getAutoCompleteRange: function(value, offset)
     {

@@ -619,7 +619,7 @@ FBTestApp.TestConsole =
         var scrollCurrentTestIntoView = Firebug.getPref(FBTestApp.prefDomain,
             "scrollCurrentTestIntoView");
         if (scrollCurrentTestIntoView && testQueue.length > 0)
-            scrollIntoCenterView(testQueue[0].row);
+            scrollIntoCenterView(testQueue[0].row, null, true);
 
         var finalQueue = testQueue;
 
