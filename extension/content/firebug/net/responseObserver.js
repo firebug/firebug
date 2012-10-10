@@ -15,7 +15,7 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 const Cu = Components.utils;
 
-const PrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const PrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
 
 // ********************************************************************************************* //

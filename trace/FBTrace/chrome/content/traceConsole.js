@@ -19,7 +19,7 @@ catch (err)
 var traceService = traceConsoleService;
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const directoryService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 

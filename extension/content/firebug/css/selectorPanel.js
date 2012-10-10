@@ -20,7 +20,7 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 
 // ********************************************************************************************* //
 // CSS Selector Panel

@@ -24,7 +24,7 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 try
 {
     // xxxHonza: temporary hack for Crossfire to provide custom set of modules.
-    var prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+    var prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
     var value = prefService.getCharPref("extensions.firebug.defaultModuleList");
     if (value)
     {
