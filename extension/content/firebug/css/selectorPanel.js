@@ -187,23 +187,32 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
      */
     getSelectedElements: function(selectorText)
     {
-        var selections = Firebug.currentContext.window.document.querySelectorAll(selectorText);
+        var elements = [];
 
-        // For some reason the return value of querySelectorAll()
-        // is not recognized as a NodeList anymore since Firefox 10.0.
-        // See issue 5442.
-        if (selections)
+        // Execute the query also in all iframes (see issue 5962)
+        var windows = this.context.windows;
+        for (var i=0; i<windows.length; i++)
         {
-            var elements = [];
-            for (var i=0; i<selections.length; i++)
-                elements.push(selections[i]);
+            var win = windows[i];
+            var selections = win.document.querySelectorAll(selectorText);
 
-            return elements;
+            // For some reason the return value of querySelectorAll()
+            // is not recognized as a NodeList anymore since Firefox 10.0.
+            // See issue 5442.
+            // But since there can be more iframes we need to collect all matching
+            // elements in an extra array anyway.
+            if (selections)
+            {
+                for (var j=0; j<selections.length; j++)
+                    elements.push(selections[j]);
+            }
+            else
+            {
+                throw new Error("Selection Failed: " + selections);
+            }
         }
-        else
-        {
-            throw new Error("Selection Failed: " + selections);
-        }
+
+        return elements;
     },
 
     /**

@@ -272,9 +272,10 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
 
         // TEMP; Watch also all iframes. Firebug has been initialized when the page is already
         // loaded and so, we can't rely on auto-registration done by FrameProgressListener.
-        var iframes = topWindow.document.getElementsByTagName("iframe");
-        for (var i=0; i<iframes.length; i++)
-            TabWatcher.watchWindow(iframes[i].contentWindow, null, false);
+        Win.iterateWindows(context.window, function (win)
+        {
+            TabWatcher.watchWindow(win, context, false);
+        });
 
         browser.showFirebug = true;
 
