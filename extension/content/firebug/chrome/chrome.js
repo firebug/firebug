@@ -1111,6 +1111,7 @@ var FirebugChrome =
         var vertical = pos == "top" || pos == "bottom";
         var after = pos == "bottom" || pos == "right";
 
+        // xxxHonza: shouldn't this be rather: window.parent.document?
         var document = window.top.document;
         var container = document.getElementById(vertical ? "appcontent" : "browser");
 
