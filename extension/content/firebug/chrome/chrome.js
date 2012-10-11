@@ -537,7 +537,8 @@ var FirebugChrome =
         {
             Firebug.chrome.toggleOpen(false);
             Dom.collapse(resumeBox, false);
-            Firebug.chrome.window.top.document.title =
+
+            Firebug.chrome.window.parent.document.title =
                 Locale.$STR("Firebug - inactive for current website");
         }
     },
