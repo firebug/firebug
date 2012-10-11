@@ -144,6 +144,11 @@ function setPref(name, value)
     return value;
 }
 
+function forceSave()
+{
+    Services.prefs.savePrefFile(null);
+}
+
 // ********************************************************************************************* //
 // Registration
 
@@ -151,5 +156,6 @@ PrefLoader.loadDefaultPrefs = loadDefaultPrefs;
 PrefLoader.clearDefaultPrefs = clearDefaultPrefs;
 PrefLoader.getPref = getPref;
 PrefLoader.setPref = setPref;
+PrefLoader.forceSave = forceSave;
 
 // ********************************************************************************************* //

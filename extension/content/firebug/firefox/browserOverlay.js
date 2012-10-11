@@ -509,13 +509,6 @@ Firebug.GlobalUI =
         });
     },
 
-    openFirstRunPage: function()
-    {
-        var version = Firebug.GlobalUI.getVersion();
-        url = firstRunPage + version;
-        gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
-    },
-
     setPosition: function(newPosition)
     {
         // todo
@@ -606,7 +599,64 @@ Firebug.GlobalUI =
 
         win.nsContextMenu.prototype.setTarget = this.setTargetOriginal;
         win.nsContextMenu.prototype.initItems = this.initItemsOriginal;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // First Run Page
+
+    loadFirstRunPage: function(win, reason)
+    {
+        if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) <= 0)
+            return;
+
+        // Do not show the first run page when Firebug is being updated. It'll be displayed
+        // the next time the browser is restarted
+        // # ADDON_UPGRADE == 7
+        if (reason == 7)
+            return;
+
+        // Open the page in the top most window, so the user can see it immediately.
+        var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+        if (wm.getMostRecentWindow("navigator:browser") == win.top)
+        {
+            // Update the preference to make sure the page is not displayed again.
+            // To avoid being annoying when Firefox crashes, forcibly save it, too.
+            var version = Firebug.GlobalUI.getVersion();
+            PrefLoader.setPref("currentVersion", version);
+
+            if (PrefLoader.getPref("showFirstRunPage"))
+            {
+                var timeout = setTimeout(function()
+                {
+                    if (window.closed)
+                        return;
+
+                    Firebug.GlobalUI.openFirstRunPage();
+                }, 1000);
+
+                window.addEventListener("unload", function()
+                {
+                    clearTimeout(timeout);
+                }, false);
+            }
+        }
+    },
+
+    openFirstRunPage: function()
+    {
+        var version = Firebug.GlobalUI.getVersion();
+        url = firstRunPage + version;
+
+        // Open the firstRunPage in background
+        /*gBrowser.selectedTab = */gBrowser.addTab(url, null, null, null);
+
+        // Make sure prefs are stored, otherwise the firstRunPage would be displayed
+        // again if Firefox crashes.
+        setTimeout(function()
+        {
+            PrefLoader.forceSave();
+        }, 400);
+    },
 }
 
 // ********************************************************************************************* //
@@ -1273,9 +1323,7 @@ var elements = cloneArray(document.getElementsByClassName("fbInternational"));
 Locale.internationalizeElements(document, elements, ["label", "tooltiptext", "aria-label"]);
 
 // ********************************************************************************************* //
-// First Run Page
-
-var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+// Version Checker
 
 function checkFirebugVersion(currentVersion)
 {
@@ -1288,33 +1336,6 @@ function checkFirebugVersion(currentVersion)
     var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
         getService(Ci.nsIVersionComparator);
     return versionChecker.compare(version, currentVersion);
-}
-
-if (checkFirebugVersion(PrefLoader.getPref("currentVersion")) > 0)
-{
-    // Open the page in the top most window, so the user can see it immediately.
-    if (wm.getMostRecentWindow("navigator:browser") == window.top)
-    {
-        // Don't forget to update the preference, so the page is not displayed again
-        var version = Firebug.GlobalUI.getVersion();
-        PrefLoader.setPref("currentVersion", version);
-
-        if (PrefLoader.getPref("showFirstRunPage"))
-        {
-            var timeout = setTimeout(function()
-            {
-                if (window.closed)
-                    return;
-
-                Firebug.GlobalUI.openFirstRunPage();
-            }, 1000);
-
-            window.addEventListener("unload", function()
-            {
-                clearTimeout(timeout);
-            }, false);
-        }
-    }
 }
 
 // ********************************************************************************************* //

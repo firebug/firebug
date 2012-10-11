@@ -67,7 +67,7 @@ function startup(params, reason)
     // Load Firebug into all existing browser windows.
     var enumerator = Services.wm.getEnumerator("navigator:browser");
     while (enumerator.hasMoreElements())
-        FirebugLoader.loadIntoWindow(enumerator.getNext());
+        FirebugLoader.loadIntoWindow(enumerator.getNext(), reason);
 
     // Listen for new windows, Firebug must be loaded into them too.
     Services.obs.addObserver(windowWatcher, "chrome-document-global-created", false);
