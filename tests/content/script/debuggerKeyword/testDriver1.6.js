@@ -17,6 +17,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.clearCache();
         FBTest.selectPanel("script");
+        FBTest.enableConsolePanel();
         FBTest.enableScriptPanel(function(win)
         {
             var doc = win.document;
