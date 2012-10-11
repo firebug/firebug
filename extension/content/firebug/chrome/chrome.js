@@ -936,11 +936,11 @@ var FirebugChrome =
         if (Firebug.currentContext)
         {
             var title = Firebug.currentContext.getTitle();
-            win.top.document.title = Locale.$STRF("WindowTitle", [title]);
+            win.parent.document.title = Locale.$STRF("WindowTitle", [title]);
         }
         else
         {
-            win.top.document.title = Locale.$STR("Firebug");
+            win.parent.document.title = Locale.$STR("Firebug");
         }
     },
 
