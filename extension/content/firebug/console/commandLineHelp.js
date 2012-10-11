@@ -41,6 +41,7 @@ var HelpCaption = domplate(
         )
 });
 
+// The table UI should be based on tableRep
 var HelpTable = domplate(
 {
     tag:
@@ -183,6 +184,10 @@ var CommandLineHelp = domplate(
             })
         }
 
+        // Sort commands
+        commands.sort(function sortName(a, b) { return a.name > b.name ? 1 : -1; });
+
+        // Generate table
         HelpEntry.tag.insertRows({commands: commands}, tBody);
 
         return row;
