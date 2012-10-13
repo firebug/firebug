@@ -1506,8 +1506,7 @@ var LinkType = {
     "PROPERTY": 0,
     "INDEX": 1,
     "CALL": 2,
-    "SAFECALL": 3,
-    "RETVAL_HEURISTIC": 4
+    "RETVAL_HEURISTIC": 3
 };
 
 function getKnownType(t)
@@ -1789,14 +1788,18 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                 tempExpr.thisCommand = "window";
                 tempExpr.command += "[" + link.cont + "]";
             }
-            else if (type === LinkType.SAFECALL)
-            {
-                tempExpr.thisCommand = "window";
-                tempExpr.command += "(" + link.origCont + ")";
-            }
             else if (type === LinkType.CALL)
             {
-                if (link.name === "")
+                if (link.origCont !== null &&
+                     (link.name.substr(0, 3) === "get" ||
+                      (link.name.charAt(0) === "$" && link.cont.indexOf(",") === -1)))
+                {
+                    // Names beginning with get or $ are almost always getters, so
+                    // assume we can safely just call it.
+                    tempExpr.thisCommand = "window";
+                    tempExpr.command += "(" + link.origCont + ")";
+                }
+                else if (link.name === "")
                 {
                     // We cannot know about functions without name; try the
                     // heuristic directly.
@@ -1804,22 +1807,14 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     evalPropChainStep(step, tempExpr, evalChain, out, context);
                     return;
                 }
-
-                funcCommand = getTypeExtractionExpression(tempExpr.thisCommand);
-                break;
+                else
+                {
+                    funcCommand = getTypeExtractionExpression(tempExpr.thisCommand);
+                    break;
+                }
             }
             else if (type === LinkType.RETVAL_HEURISTIC)
             {
-                if (link.origCont !== null &&
-                     (link.name.substr(0, 3) === "get" ||
-                      (link.name.charAt(0) === "$" && link.cont.indexOf(",") === -1)))
-                {
-                    // Names beginning with get or $ are almost always getters, so
-                    // assume it is a safecall and start over.
-                    link.type = LinkType.SAFECALL;
-                    evalPropChainStep(step, tempExpr, evalChain, out, context);
-                    return;
-                }
                 funcCommand = "Function.prototype.toString.call(" + tempExpr.command + ")";
                 break;
             }
