@@ -23,6 +23,10 @@
     border: none;
 }
 
+.logGroupLabel {
+    border: none;
+}
+
 .logGroupBody {
     display: none;
     margin-left: 16px;
