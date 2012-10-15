@@ -353,7 +353,7 @@ function performanceTiming(context, timing)
         var startTime = t[p] ? (t[p] - t.navigationStart) : 0;
         var timing = {
             name: p,
-            timeLabel: startTime ? "+ " + Str.formatTime(startTime) : 0,
+            timeLabel: startTime ? "+" + Str.formatTime(startTime) : 0,
             desc: Locale.$STR("perftiming." + p),
             time: startTime,
         }
