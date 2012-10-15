@@ -110,8 +110,12 @@ var PerformanceTimingRep = domplate(Firebug.Rep,
 
     showInfoTip: function(infoTip, target, x, y)
     {
-        var panel = Firebug.getElementPanel(target);
-        return PerfInfoTip.render(panel.context, infoTip);
+        var table = Dom.getAncestorByClass(target, "perfTimingTable");
+        if (!table)
+            return false;
+
+        var timingObj = table.repObject;
+        return PerfInfoTip.render(timingObj.timing, infoTip);
     }
 });
 
@@ -198,7 +202,7 @@ var PerfInfoTip = domplate(Firebug.Rep,
         return obj.name;
     },
 
-    render: function(context, parentNode)
+    render: function(timing, parentNode)
     {
         var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
 
@@ -207,10 +211,10 @@ var PerfInfoTip = domplate(Firebug.Rep,
             infoTip.firstChild);
 
         // Insert request timing info.
-        var bars = calculateBars(context);
+        var bars = calculateBars(timing);
         this.timingsTag.insertRows({bars: bars}, infoTip.firstChild);
 
-        var t = context.window.performance.timing;
+        var t = timing;
 
         var events = [];
         events.push({
@@ -275,11 +279,9 @@ var ConsoleListener =
         if (!context || !object)
             return;
 
-        // xxxHonza: how to properly check the type?
-        if (typeof(object.domContentLoadedEventStart) == "undefined")
-            return;
-
-        performanceTiming(context);
+        var type = Object.prototype.toString.call(object);
+        if (type === "[object PerformanceTiming]")
+            performanceTiming(context, object);
     },
 
     logFormatted: function(context, objects, className, sourceLink)
@@ -293,14 +295,14 @@ var ConsoleListener =
 /**
  * This function is responsible for inserting the waterfall graph into the Console panel.
  */
-function performanceTiming(context, args)
+function performanceTiming(context, timing)
 {
-    var t = context.window.performance.timing;
+    var t = timing;
     var elapsed = t.loadEventEnd - t.navigationStart;
 
     var objects = [];
     var rep = PerformanceTimingRep;
-    var bars = calculateBars(context);
+    var bars = calculateBars(t);
 
     var result = []
     for (var i=0; i<bars.length; i++)
@@ -507,10 +509,10 @@ function calculatePos(time, elapsed)
     return Math.round((time / elapsed) * 100);
 }
 
-function calculateBars(context)
+function calculateBars(timing)
 {
     var result = [];
-    var t = context.window.performance.timing;
+    var t = timing;
 
     // Page Load bar
     result.push({
@@ -593,12 +595,6 @@ function calculateBars(context)
 
 Firebug.registerRep(PerformanceTimingRep);
 Firebug.registerModule(PerformanceTimingModule);
-
-Firebug.registerCommand("performanceTiming", {
-    handler: performanceTiming.bind(this),
-    helpUrl: "http://getfirebug.com/wiki/index.php/performanceTiming",
-    description: Locale.$STR("console.cmd.help.performanceTiming")
-})
 
 return PerformanceTimingModule;
 
