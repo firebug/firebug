@@ -341,7 +341,7 @@
     padding-bottom: 4px;
 }
 
-.profilerRunning > .logRow {
+.profilerRunning .logRow {
     background: transparent url(chrome://firebug/skin/loading.svg) no-repeat 2px 0 !important;
     padding-left: 22px !important;
 }
@@ -353,8 +353,8 @@
 }
 
 .logGroup .profileTable {
-    border: none;
-    border-left: 1px solid #D7D7D7;
+    border: 1px solid #D7D7D7;
+    border-right: none;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
