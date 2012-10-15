@@ -751,6 +751,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var object = Firebug.getRepObject(target);
+        var rep = Firebug.getRep(object, this.context);
+        if (!rep)
+            return false;
+
+        return rep.showInfoTip(infoTip, target, x, y);
+    }
 });
 
 // ********************************************************************************************* //

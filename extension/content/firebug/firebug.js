@@ -2530,6 +2530,11 @@ Firebug.Rep = domplate(
             return m ? m[1] : label;
     },
 
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        return false;
+    },
+
     getTooltip: function(object)
     {
         return null;
