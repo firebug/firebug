@@ -87,6 +87,16 @@
     z-index: 3;
 }
 
+#fbCommandLineMeasurer {
+    margin: 0;
+    padding: 0;
+    border: none;
+    position: absolute;
+    z-index: -1;
+    visibility: hidden;
+    width: auto;
+}
+
 #fbCommandEditor {
     margin: 0;
     font-family: monospace;

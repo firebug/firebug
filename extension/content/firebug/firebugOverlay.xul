@@ -489,6 +489,9 @@
                             type="text" maxlength="2048" autocomplete="off" tabindex="-1" />
                         <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
                             aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
+                        <!-- font width measurer, contains 60 arbitrary characters -->
+                        <html:span id="fbCommandLineMeasurer" class="fbCommandLine"
+                            >aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</html:span>
                     </html:div>
                 </vbox>
             </hbox>

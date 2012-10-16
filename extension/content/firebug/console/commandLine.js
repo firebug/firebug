@@ -660,6 +660,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             var options = {
                 showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
                 completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
+                popupMeasurer: Firebug.chrome.$("fbCommandLineMeasurer"),
                 tabWarnings: true,
                 includeCurrentScope: true
             };

@@ -17,6 +17,7 @@
 #fbCommandLine,
 #fbCommandEditor,
 #fbCommandLineCompletion,
+#fbCommandLineMeasurer,
 .fbCommandLineCompletions {
     font-family: Monaco, monospace;
 }
