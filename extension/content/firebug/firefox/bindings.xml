@@ -1258,8 +1258,9 @@
 
                 for (var j = 0; j < urls.length; ++j)
                 {
+                    var label = urls[j].fileName != path ? urls[j].fileName : "Inline";
                     var menuInfo = {
-                        label: urls[j].fileName != path ? urls[j].fileName : "Inline",
+                        label: FBL.cropString(label, Firebug.Options.get("stringCropLength")),
                         tooltiptext: path + urls[j].fileName,
                         nol10n: true
                     };
