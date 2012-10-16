@@ -18,7 +18,7 @@
     top: 1px;
     bottom: 1px;
     background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
-    min-width: 3px;
+    min-width: 2px;
     z-index: 10;
 }
 
@@ -187,6 +187,6 @@
 .perfTimingEvent.cursor {
     background-color: gray;
     visibility: hidden;
-    width: 1px;
+    width: 2px;
     z-index: 40;
 }
