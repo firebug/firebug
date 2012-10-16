@@ -46,7 +46,7 @@
 
 .perfTimingBar.pageLoad,
 .timeInfoTipBar.pageLoad {
-    background-color: #EBE1D2;
+    background-color: rgb(217, 179, 147);
 }
 
 .perfTimingBar.redirect,
@@ -108,6 +108,10 @@
     top: 1px;
 }
 
+.perfTimingTable TR:last-child .perfTimingEvent {
+    bottom: 1px;
+}
+
 .perfTimingEvent.domInteractive,
 .timeInfoTipEventBar.domInteractive {
     background-color: rgb(126, 146, 126);
@@ -133,6 +137,8 @@
 
 .logRow-perfTimingDetails .logGroupBody {
     border-bottom: 1px solid #D7D7D7;
+    overflow-y: auto;
+    height: 200px;
 }
 
 .logRow-perfTimingDetails .logGroupLabel {
