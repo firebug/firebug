@@ -2070,7 +2070,7 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
         {
             // Complete variables from the local scope
 
-            var contentView = Wrapper.getContentView(context.window);
+            var contentView = Wrapper.getContentView(context.baseWindow || context.window);
             if (context.stopped && includeCurrentScope)
             {
                 out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
