@@ -26,6 +26,7 @@ var FIREBUG_MODULES = [
     "resource://firebug/storageService.js"
 ];
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
 // ********************************************************************************************* //
@@ -70,10 +71,10 @@ function startup(params, reason)
     // Load Firebug into all existing browser windows.
     var enumerator = Services.wm.getEnumerator("navigator:browser");
     while (enumerator.hasMoreElements())
-        FirebugLoader.loadIntoWindow(enumerator.getNext());
+        FirebugLoader.loadIntoWindow(enumerator.getNext(), reason);
 
     // Listen for new windows, Firebug must be loaded into them too.
-    Services.ww.registerNotification(windowWatcher);
+    Services.obs.addObserver(windowWatcher, "chrome-document-global-created", false);
 
     // GCLI commands
     Cu.import("resource://firebug/gcli.js");
@@ -90,7 +91,7 @@ function shutdown(params, reason)
     unloadServer();
 
     // Remove "new window" listener.
-    Services.ww.unregisterNotification(windowWatcher);
+    Services.obs.removeObserver(windowWatcher, "chrome-document-global-created");
 
     // remove from all windows
     try
@@ -129,18 +130,25 @@ function shutdown(params, reason)
 // ********************************************************************************************* //
 // Window Listener
 
-var windowWatcher = function windowWatcher(win, topic)
+var windowWatcher =
 {
-    if (topic != "domwindowopened")
-        return;
-
-    win.addEventListener("load", function onLoad()
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
+    observe: function windowWatcher(win, topic, data)
     {
-        win.removeEventListener("load", onLoad, false);
-        if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
-            FirebugLoader.loadIntoWindow(win);
-    }, false);
-}
+        if (win.location.href !== "about:blank")
+        {
+            // https://bugzil.la/795961 ?
+            win.addEventListener("load", function onLoad(evt)
+            { 
+                // load listener not necessary once https://bugzil.la/800677 is fixed
+                var win = evt.currentTarget;
+                win.removeEventListener("load", onLoad, false);
+                if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
+                    FirebugLoader.loadIntoWindow(win);
+            }, false);
+        }
+    }
+};
 
 // ********************************************************************************************* //
 // Server

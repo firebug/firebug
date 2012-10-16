@@ -9,7 +9,7 @@ function runTest()
             var panel = FW.Firebug.chrome.selectPanel("console");
 
             FBTest.clearAndTypeCommand("loc");
-            FBTest.synthesizeKey("VK_TAB", null, win); // 9 == tab
+            FBTest.synthesizeKey("VK_TAB", null, win);
 
             var doc = FW.Firebug.chrome.window.document;
             var cmdLine = doc.getElementById("fbCommandLine");

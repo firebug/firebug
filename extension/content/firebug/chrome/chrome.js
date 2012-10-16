@@ -537,7 +537,8 @@ var FirebugChrome =
         {
             Firebug.chrome.toggleOpen(false);
             Dom.collapse(resumeBox, false);
-            Firebug.chrome.window.top.document.title =
+
+            Firebug.chrome.window.parent.document.title =
                 Locale.$STR("Firebug - inactive for current website");
         }
     },
@@ -936,11 +937,11 @@ var FirebugChrome =
         if (Firebug.currentContext)
         {
             var title = Firebug.currentContext.getTitle();
-            win.top.document.title = Locale.$STRF("WindowTitle", [title]);
+            win.parent.document.title = Locale.$STRF("WindowTitle", [title]);
         }
         else
         {
-            win.top.document.title = Locale.$STR("Firebug");
+            win.parent.document.title = Locale.$STR("Firebug");
         }
     },
 
@@ -1110,7 +1111,7 @@ var FirebugChrome =
         var vertical = pos == "top" || pos == "bottom";
         var after = pos == "bottom" || pos == "right";
 
-        var document = window.top.document;
+        var document = window.parent.document;
         var container = document.getElementById(vertical ? "appcontent" : "browser");
 
         var splitter = Firefox.getElementById("fbContentSplitter");

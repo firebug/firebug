@@ -19,7 +19,7 @@ function runTest()
                 cmdLine.value = expr.slice(0, -1);
                 FBTest.synthesizeKey(expr.slice(-1), null, win);
 
-                var hasCompletion = (completionBox.value.length > cmdLine.value.length);
+                var hasCompletion = (completionBox.value.length > expr.length);
                 FBTest.compare(shouldComplete, hasCompletion,
                     "Completions should " + (shouldComplete ? "" : "not ") +
                     "appear for: " + expr);
@@ -88,6 +88,9 @@ function runTest()
                 ["id(eval('window')).i", false],
                 ["String.prototype.ch", true],
                 ["new Date().g", true],
+
+                ["anArray.0", false],
+                ["htmlCollection.0", false],
 
                 // currently not handled
                 ["(window).i", false],

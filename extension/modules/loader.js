@@ -132,7 +132,7 @@ var FirebugLoader =
         delete win.FBL;
     },
 
-    loadIntoWindow: function(win)
+    loadIntoWindow: function(win, reason)
     {
         // This is the place where the global Firebug object is created. This object represents
         // the entire application and all consequently created namespaces and variables should be
@@ -144,6 +144,7 @@ var FirebugLoader =
         loadSubscript("chrome://firebug/content/firefox/browserOverlay.js", win);
 
         win.Firebug.GlobalUI.loadContextMenuOverlay(win);
+        win.Firebug.GlobalUI.loadFirstRunPage(win, reason);
 
         // Firebug extensions should initialize here.
         this.dispatchToScopes("topWindowLoad", [win]);

@@ -500,9 +500,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         function logText(text, row)
         {
-            Css.setClass(row, "logRowHint");
+            var nodeSpan = row.ownerDocument.createElement("span");
+            Css.setClass(nodeSpan, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(node);
+            row.appendChild(nodeSpan);
+            nodeSpan.appendChild(node);
         }
 
         function logTextNode(text, row)
@@ -751,6 +753,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var object = Firebug.getRepObject(target);
+        var rep = Firebug.getRep(object, this.context);
+        if (!rep)
+            return false;
+
+        return rep.showInfoTip(infoTip, target, x, y);
+    }
 });
 
 // ********************************************************************************************* //

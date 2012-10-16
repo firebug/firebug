@@ -3,6 +3,10 @@
 <head>
   <title>Test Case for Issue #4233</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<script>
+var htmlCollection = document.getElementsByTagName("html");
+var anArray = [1,2,3,4];
+</script>
 </head>
 <body>
 
@@ -80,6 +84,8 @@ and doesn't appear for:
     <li><code style="color:green">function([i</code></li>
     <li><code style="color:green">[{set a([i</code></li>
     <li><code style="color:green">id(eval('window')).i</code></li>
+    <li><code style="color:green">anArray.0</code></li>
+    <li><code style="color:green">htmlCollection.0</code></li>
     <li><code style="color:green">(window).i</code></li>
     <li><code style="color:green">q='';q.s</code></li>
 </ul>

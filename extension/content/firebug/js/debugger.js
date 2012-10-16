@@ -124,7 +124,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     /**
      * Used by autocomplete in commandLine
-     * @return array of global property names
+     * @return array of locally visible property names for each scope we are in
      */
     getCurrentFrameKeys: function(context)  // TODO remote, on bti
     {

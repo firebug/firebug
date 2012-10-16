@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 959: Enable auto-completion of built-in members</title>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+
+obj1 = Object.create(null, {
+    aa1: { enumerable: false, configurable: false, set: function() { for (;;) { /* break everything */ } }},
+    aa2: { value: 1 }
+});
+obj2 = Object.create({}, {
+    aa1: { enumerable: false, configurable: false, set: function() { for (;;) { /* break everything */ } }},
+    aa2: { value: 1 }
+});
+        </script>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=959">Issue 959</a>: Enable auto-completion of built-in members</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Verify the following completions:
+                        <ul>
+                            <li><code>Object.prototype.</code> -&gt; <code>toString</code> (with popup)</li>
+                            <li><code>Object.</code> -&gt; <code>prototype</code> (with popup)</li>
+                            <li><code>Object.getOwn</code> -&gt; <code>propertyNames</code> (with popup)</li>
+                            <li><code>do</code> -&gt; <code>cument</code> (without popup)</li>
+                            <li><code>document._</code> -&gt; <code>_proto__</code> (without popup)</li>
+                            <li><code>obj1.</code> -&gt; <code>aa1</code> (with popup)</li>
+                            <li><code>obj2.</code> -&gt; <code>aa1</code> (with popup)</li>
+                        </ul>
+                    </li>
+                    <li>Verify that the following completions are avoided unless they are the only
+                    option (e.g. by creating a similar property in the console)</li>
+                        <ul>
+                            <li><code>String.prototype.toLocaleUpperCase</code></li>
+                            <li><code>''.toLocaleUpperCase</code></li>
+                            <li><code>tostring</code></li>
+                            <li><code>alert.arguments</code></li>
+                            <li><code>document.body.__lookupGetter__</code></li>
+                            <li><code>document.body.vLink</code></li>
+                        </ul>
+                    </li>
+                </ol>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>All properties should be completeable.</li>
+                    <li>A subset of annoying properties should never appear in completion popups
+                    (except on Ctrl+Space), nor be findable with up/down as long as there are
+                    properties not from that subset.</li>
+                    <li><code>Object.prototype.</code> should show every Object-general property,
+                    but e.g. <code>document.</code> should not.</li>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
