@@ -44,6 +44,17 @@ function runTest()
                 FBTest.synthesizeKey(expr.slice(-1), null, win);
                 FBTest.compare("closed", popup.state, "Completion box should not open.");
 
+                if (expr === "tos") {
+                    // Temporary logging.
+                    var scopes = [];
+                    var w = win.wrappedJSObject;
+                    while (w) {
+                        scopes.push(Object.getOwnPropertyNames(w).filter(function(x) /tos/i.test(x.substr(0,3))).join(","));
+                        w = Object.getPrototypeOf(w);
+                    }
+                    FBTest.progress("matches: " + scopes.join("|"));
+                }
+
                 callback();
             }
 
