@@ -34,7 +34,7 @@
             noautofocus="true">
         </panel>
 
-        <menupopup id="fbCommandHistory" noautofocus="true" ignorekeys='true'>
+        <menupopup id="fbCommandHistory" noautofocus="true" ignorekeys="true">
         </menupopup>
 
         <!-- Context menu for the Command Editor -->
@@ -487,8 +487,6 @@
                         <!-- completion text -->
                         <html:input id="fbCommandLineCompletion" class="fbCommandLine"
                             type="text" maxlength="2048" autocomplete="off" tabindex="-1" />
-                        <!-- holds the misspelling and a red squiggly line -->
-                        <html:div id="misspell" class="lst"></html:div>
                         <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
                             aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
                     </html:div>
