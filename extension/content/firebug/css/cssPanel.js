@@ -1323,8 +1323,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     var matches;
                     while (matches = reCropURL.exec(text))
                     {
-                        var $1 = matches[1];
-                        var croppedText = matches[0].replace($1, Str.cropString($1, limit));
+                        var urlValue = matches[1];
+                        var croppedText = matches[0].replace(urlValue, Str.cropString(urlValue, limit));
 
                         // Calculate the length of all cropped strings before the target (if any)
                         if (matches.index + croppedText.length < rangeOffset)
@@ -1692,22 +1692,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propValue, parsedValue, propName;
 
+        var rule = Firebug.getRepObject(target);
         var row = Dom.getAncestorByClass(target, "cssProp");
-        if (!row)
-        {
-            row = Dom.getAncestorByClass(target, "importRule");
-            if (!row)
-            {
-                var row = Dom.getAncestorByClass(target, "cssCharsetRule");
-            }
-        }
-        else
-        {
-            var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-        }
 
-        var rule = Firebug.getRepObject(row);
-        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
+        if (row && !(rule instanceof window.CSSStyleRule ||
+            rule instanceof window.CSSImportRule || 
+            rule instanceof window.CSSCharsetRule))
+        {
+            rule = Firebug.getRepObject(row);
+        }
 
         // If the property was previously disabled, remove it from the "disabled"
         // map. (We will then proceed to enable the property.)
@@ -2838,11 +2831,10 @@ function stripCompletedParens(list, postExpr)
 
 function getCroppedUrlValue(value, length)
 {
-    value = value.replace(reCropURL, function(match, $1)
+    return value.replace(reCropURL, function(match, p1)
     {
-        return match.replace($1, Str.cropString($1, length));
+        return match.replace(p1, Str.cropString(p1, length));
     });
-    return value;
 }
 
 function parsePriority(value)
