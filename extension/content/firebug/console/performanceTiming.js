@@ -26,6 +26,31 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+// List of timing properties in performance.timing structure.
+var timingProps = [
+    "connectEnd",
+    "connectStart",
+    "domComplete",
+    "domContentLoadedEventEnd",
+    "domContentLoadedEventStart",
+    "domInteractive",
+    "domLoading",
+    "domainLookupEnd",
+    "domainLookupStart",
+    "fetchStart",
+    "loadEventEnd",
+    "loadEventStart",
+    "navigationStart",
+    "redirectCount",
+    "redirectEnd",
+    "redirectStart",
+    "requestStart",
+    "responseEnd",
+    "responseStart",
+    "unloadEventEnd",
+    "unloadEventStart",
+];
+
 // ********************************************************************************************* //
 // Module
 
@@ -347,14 +372,17 @@ function performanceTiming(context, timing)
     var table = DetailsTable.tag.replace({object: t}, logGroupBody);
     var tBody = table.lastChild;
 
+    // Iterate only known properties (these are also localized).
     var timings = [];
-    for (var p in t)
+    for (var i=0; i<timingProps.length; i++)
     {
-        var startTime = t[p] ? (t[p] - t.navigationStart) : 0;
+        var name = timingProps[i];
+        var value = t[name];
+        var startTime = value ? (value - t.navigationStart) : 0;
         var timing = {
-            name: p,
+            name: name,
             timeLabel: startTime ? "+" + Str.formatTime(startTime) : 0,
-            desc: Locale.$STR("perftiming." + p),
+            desc: Locale.$STR("perftiming." + name),
             time: startTime,
         }
         timings.push(timing);
