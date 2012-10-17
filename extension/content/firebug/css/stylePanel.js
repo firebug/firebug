@@ -538,7 +538,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         if (sothinkInstalled)
         {
             var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);
-            div.innerHTML = Locale.$STR("SothinkWarning");
+            div.textContent = Locale.$STR("SothinkWarning");
             return;
         }
 

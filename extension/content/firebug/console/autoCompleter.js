@@ -682,7 +682,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var title = this.completionPopup.ownerDocument.
             createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = Locale.$STR("console.Use Arrow keys, Tab or Enter");
+        title.textContent = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
 

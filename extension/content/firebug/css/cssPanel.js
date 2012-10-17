@@ -1820,7 +1820,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             rule.parentStyleSheet.disabled = false;
 
             row = Dom.getAncestorByClass(target, "importRule");
-            row.getElementsByClassName("separator").item(0).innerHTML = 
+            row.getElementsByClassName("separator").item(0).textContent = 
                 value == "" ? "" : "&nbsp;";
         }
         else if (rule instanceof window.CSSCharsetRule)
