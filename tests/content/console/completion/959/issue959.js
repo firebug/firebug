@@ -58,7 +58,7 @@ function runTest()
 
             tasks.push(testHidden, "String.prototype.toLocaleU");
             tasks.push(testHidden, "''.toLocaleU");
-            tasks.push(testHidden, "tos");
+            tasks.push(testHidden, "propertyis");
             tasks.push(testHidden, "document.body.__lo");
             tasks.push(testHidden, "alert.arg");
             tasks.push(testHidden, "document.body.vLin");

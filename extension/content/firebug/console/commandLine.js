@@ -1167,7 +1167,8 @@ function FirebugCommandLineAPI(context)
         if (entry)
             context.baseWindow = entry.win;
 
-        Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
+        var format = Locale.$STR("commandline.CurrentWindow") + " %o";
+        Firebug.Console.logFormatted([format, context.baseWindow], context, "info");
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 

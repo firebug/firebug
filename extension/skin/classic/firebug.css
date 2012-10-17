@@ -375,6 +375,7 @@ textbox[type="fbSearchBox"] > panel {
     font-family: monospace;
     white-space: pre;
     -moz-appearance: none;
+    background-color: -moz-dialog;
 }
 
 .commandHistoryItem.selected {
