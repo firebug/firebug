@@ -297,7 +297,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var view = element ? element.ownerDocument.defaultView : null;
         if (!view)
-            return this.panelNode.innerHTML = "";
+            return this.panelNode.textContent = "";
 
         var prev = Dom.getPreviousElement(element.previousSibling);
         var next = Dom.getNextElement(element.nextSibling);
@@ -526,7 +526,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (Css.hasClass(target, "layoutVerticalText"))
             target.innerHTML = getVerticalText(intValue);
         else
-            target.innerHTML = intValue;
+            target.textContent = intValue;
     },
 
     endEditing: function(target, value, cancel)

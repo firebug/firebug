@@ -154,7 +154,7 @@ Dom.addScript = function(doc, id, src)
     if (!FBTrace.DBG_CONSOLE)
         Firebug.setIgnored(element);
 
-    element.innerHTML = src;
+    element.textContent = src;
 
     if (doc.documentElement)
     {
@@ -244,7 +244,7 @@ Dom.hide = function(elt, hidden)
 
 Dom.clearNode = function(node)
 {
-    node.innerHTML = "";
+    node.textContent = "";
 };
 
 Dom.eraseNode = function(node)

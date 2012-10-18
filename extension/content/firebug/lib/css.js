@@ -535,7 +535,7 @@ Css.createStyleSheet = function(doc, url)
         var expr = /url\(([\'"]?)(?![\'"]?(?:[a-z]+:|\/))/gi;
         cssText = cssText.replace(expr, "url($1" + absURL);
 
-        style.innerHTML = cssText;
+        style.textContent = cssText;
     }
 
     Firebug.setIgnored(style);
