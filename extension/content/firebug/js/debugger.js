@@ -2556,56 +2556,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
         */
 
-        // context.watchScriptAdditions = Obj.bind(this.watchScriptAdditions, this, context);
-        // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
-
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger("+this.debuggerName+").loadedContext enabled on load: "+
                 context.onLoadWindowContent+" context.sourceFileMap", context.sourceFileMap);
-    },
-
-    /*
-     * A DOM Mutation Event handler for script tag additions
-     * FAILS see http://code.google.com/p/fbug/issues/detail?id=2912
-     */
-    watchScriptAdditions: function(event, context)
-    {
-        if (event.type !== "DOMNodeInserted")
-            return;
-
-        if (event.target.tagName.toLowerCase() !== "script")
-            return;
-
-        FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
-        var location = Win.safeGetWindowLocation(context.window);
-
-        jsd.enumerateScripts({enumerateScript: function(script)
-        {
-            if (Url.normalizeURL(script.fileName) === location)
-            {
-                var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
-                FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+
-                    (sourceFile?sourceFile.href:"NONE")+" "+script.functionSource,
-                    script.functionSource);
-                // The dynamically added script tags via element.appendChild do not show up.
-            }
-        }});
-
-        if (context.pendingScriptTagSourceFile)
-        {
-            var sourceFile = context.pendingScriptTagSourceFile;
-            sourceFile.scriptTag = event.target;
-            sourceFile.source = Str.splitLines(event.target.innerHTML);
-
-            var panel = context.getPanel("script", true);
-            if (panel)
-                panel.removeSourceBoxBySourceFile(sourceFile);
-
-            FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile",
-                sourceFile);
-
-            delete context.pendingScriptTagSourceFile;
-        }
     },
 
     // clean up the source file map in case the frame is being reloaded.
@@ -2633,9 +2586,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     destroyContext: function(context, persistedState)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
-
-        Events.removeEventListener(context.window.document, "DOMNodeInserted",
-            context.watchScriptAdditions, false);
 
         if (context.stopped)
         {
