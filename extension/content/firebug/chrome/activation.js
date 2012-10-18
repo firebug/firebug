@@ -234,6 +234,11 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 if (shortURI.scheme === "file")
                     return shortURI;
 
+                return shortURI;
+
+                // This makes a.co.uk -> co.uk, mail.cn.mozilla.com -> cn.mozilla.com and 
+                // blog.getfirebug.com -> getfirebug.com, which is wrong. See issue 2202.)
+                /*
                 var host = shortURI.host;
                 if (host)
                 {
@@ -242,14 +247,13 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                     // 1) www.google.com -> google.com
                     // 2) www.stuff.co.nz -> stuff.co.nz
                     // 3) getfirebug.com -> getfirebug.com
-                    // (XXX: This makes a.co.uk -> co.uk and mail.cn.mozilla.com -> cn.mozilla.com,
-                    // which is wrong. See issue 2202.)
                     var levels = host.split('.');
                     if (levels.length > 2)
                         levels = levels.slice(1);
                     shortURI.host = levels.join('.');
                     return shortURI;
                 }
+                */
             }
             catch (exc)
             {
@@ -261,6 +265,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 return uri;
             }
         }
+
         return uri;
     },
 
