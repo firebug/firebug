@@ -1697,110 +1697,112 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSEditor.saveEdit", arguments);
 
-        var propValue, parsedValue, propName;
-
-        var row = Dom.getAncestorByClass(target, "cssProp");
-        var rule = Firebug.getRepObject(row);
-        var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-
-        // If the property was previously disabled, remove it from the "disabled"
-        // map. (We will then proceed to enable the property.)
-        if (row && row.classList.contains("disabledStyle"))
-        {
-            row.classList.remove("disabledStyle");
-
-            this.panel.removeDisabledProperty(rule, propName);
-        }
-
+        var cssRule = Dom.getAncestorByClass(target, "cssRule");
+        var rule = Firebug.getRepObject(cssRule);
 
         if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
         {
-            if (Css.hasClass(target, "cssPropName"))
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+
+            if (prop)
             {
-                target.textContent = value;
-
-                if (value && previousValue != value)  // name of property has changed.
+                var propName = Dom.getChildByClass(prop, "cssPropName").textContent;
+                // If the property was previously disabled, remove it from the "disabled"
+                // map. (We will then proceed to enable the property.)
+                if (prop && prop.classList.contains("disabledStyle"))
                 {
-                    // Record the original CSS text for the inline case so we can reconstruct at a later
-                    // point for diffing purposes
-                    var baseText = rule.style ? rule.style.cssText : rule.cssText;
-
-                    propValue = Firebug.getRepObject(Dom.getChildByClass(row,"cssPropValue"));
-                    parsedValue = parsePriority(propValue);
-
-                    if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                            " = " + propValue);
-
-                    if (propValue && propValue != "undefined")
+                    prop.classList.remove("disabledStyle");
+    
+                    this.panel.removeDisabledProperty(rule, propName);
+                }
+    
+                if (Css.hasClass(target, "cssPropName"))
+                {
+                    target.textContent = value;
+    
+                    if (value && previousValue != value)  // name of property has changed.
                     {
+                        // Record the original CSS text for the inline case so we can reconstruct at a later
+                        // point for diffing purposes
+                        var baseText = rule.style ? rule.style.cssText : rule.cssText;
+    
+                        var propValue = Firebug.getRepObject(Dom.getChildByClass(prop, "cssPropValue"));
+                        var parsedValue = parsePriority(propValue);
+    
                         if (FBTrace.DBG_CSS)
                             FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
                                 " = " + propValue);
-
-                        if (previousValue)
-                            CSSModule.removeProperty(rule, previousValue);
-
-                        CSSModule.setProperty(rule, value, parsedValue.value,
-                            parsedValue.priority);
-                        propName = value;
+    
+                        if (propValue && propValue != "undefined")
+                        {
+                            if (FBTrace.DBG_CSS)
+                                FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
+                                    " = " + propValue);
+    
+                            if (previousValue)
+                                CSSModule.removeProperty(rule, previousValue);
+    
+                            CSSModule.setProperty(rule, value, parsedValue.value,
+                                parsedValue.priority);
+                            propName = value;
+                        }
+                        Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                            previousValue, baseText]);
                     }
-                    Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
-                        previousValue, baseText]);
-                }
-                else if (!value)
-                {
-                    // name of the property has been deleted, so remove the property.
-                    CSSModule.removeProperty(rule, previousValue);
-                }
-            }
-            else if (Dom.getAncestorByClass(target, "cssPropValue"))
-            {
-                target.textContent = CSSDomplateBase.getPropertyValue({value: value});
-
-                propName = Dom.getChildByClass(row, "cssPropName").textContent;
-                propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
-
-                if (FBTrace.DBG_CSS)
-                {
-                    FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
-                        " = "+propValue+"\n");
-                   // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
-                }
-
-                if (value && value != "null")
-                {
-                    parsedValue = parsePriority(value);
-                    CSSModule.setProperty(rule, propName, parsedValue.value,
-                        parsedValue.priority);
-                    // Save in rep object.
-                    Dom.getAncestorByClass(target, "cssPropValue").repObject = value;
-                }
-                else if (previousValue && previousValue != "null")
-                {
-                    CSSModule.removeProperty(rule, propName);
-                }
-            }
-
-            if (value)
-            {
-                var saveSuccess = !!rule.style.getPropertyValue(propName);
-                if (!saveSuccess && Css.hasClass(target, "cssPropName"))
-                {
-                    propName = value.replace(/-./g, function(match)
+                    else if (!value)
                     {
-                        return match[1].toUpperCase();
-                    });
-
-                    if (propName in rule.style || propName == "float")
-                        saveSuccess = "almost";
+                        // name of the property has been deleted, so remove the property.
+                        CSSModule.removeProperty(rule, previousValue);
+                    }
                 }
-
-                this.box.setAttribute("saveSuccess", saveSuccess);
-            }
-            else
-            {
-                this.box.removeAttribute("saveSuccess");
+                else if (Dom.getAncestorByClass(target, "cssPropValue"))
+                {
+                    target.textContent = CSSDomplateBase.getPropertyValue({value: value});
+    
+                    propName = Dom.getChildByClass(prop, "cssPropName").textContent;
+                    var propValue = Dom.getChildByClass(prop, "cssPropValue").textContent;
+    
+                    if (FBTrace.DBG_CSS)
+                    {
+                        FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
+                            " = "+propValue+"\n");
+                       // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
+                    }
+    
+                    if (value && value != "null")
+                    {
+                        var parsedValue = parsePriority(value);
+                        CSSModule.setProperty(rule, propName, parsedValue.value,
+                            parsedValue.priority);
+                        // Save in rep object.
+                        Dom.getAncestorByClass(target, "cssPropValue").repObject = value;
+                    }
+                    else if (previousValue && previousValue != "null")
+                    {
+                        CSSModule.removeProperty(rule, propName);
+                    }
+                }
+    
+                if (value)
+                {
+                    var saveSuccess = !!rule.style.getPropertyValue(propName);
+                    if (!saveSuccess && Css.hasClass(target, "cssPropName"))
+                    {
+                        propName = value.replace(/-./g, function(match)
+                        {
+                            return match[1].toUpperCase();
+                        });
+    
+                        if (propName in rule.style || propName == "float")
+                            saveSuccess = "almost";
+                    }
+    
+                    this.box.setAttribute("saveSuccess", saveSuccess);
+                }
+                else
+                {
+                    this.box.removeAttribute("saveSuccess");
+                }
             }
         }
         else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
@@ -1819,7 +1821,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             rule.parentStyleSheet.disabled = true;
             rule.parentStyleSheet.disabled = false;
 
-            row = Dom.getAncestorByClass(target, "importRule");
+            var row = Dom.getAncestorByClass(target, "importRule");
             row.getElementsByClassName("separator").item(0).textContent = 
                 value == "" ? "" : String.fromCharCode(160);
         }
