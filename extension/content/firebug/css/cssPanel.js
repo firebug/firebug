@@ -1821,7 +1821,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             row = Dom.getAncestorByClass(target, "importRule");
             row.getElementsByClassName("separator").item(0).textContent = 
-                value == "" ? "" : "&nbsp;";
+                value == "" ? "" : String.fromCharCode(160);
         }
         else if (rule instanceof window.CSSCharsetRule)
         {
