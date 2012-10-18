@@ -1824,6 +1824,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var row = Dom.getAncestorByClass(target, "importRule");
             row.getElementsByClassName("separator").item(0).textContent = 
                 value == "" ? "" : String.fromCharCode(160);
+
+            var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
+            this.box.setAttribute("saveSuccess", saveSuccess);
         }
         else if (rule instanceof window.CSSCharsetRule)
         {
