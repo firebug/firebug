@@ -237,11 +237,17 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         var item = doc.createElement("menu");
         item.setAttribute("type", "splitmenu");
         item.setAttribute("iconic", "true");
-        item.setAttribute("oncommand", "Firebug.ExternalEditors.onContextMenuCommand(event)");
+
+        item.addEventListener("command", function(event)
+        {
+            Firebug.ExternalEditors.onContextMenuCommand(event);
+        });
 
         var menupopup = doc.createElement("menupopup");
-        menupopup.setAttribute("onpopupshowing",
-            "return Firebug.ExternalEditors.onEditorsShowing(this)");
+        menupopup.addEventListener("popupshowing", function(event)
+        {
+            return Firebug.ExternalEditors.onEditorsShowing(this)
+        });
 
         item.appendChild(menupopup);
         return item;
