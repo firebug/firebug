@@ -866,7 +866,10 @@ this.setPanelState = function(model, panelName, callbackTriggersReload, enable)
         }
 
         if (!panelTab)
+        {
+            this.ok(panelTab, "Such panel doesn't exist! " + panelName + ", " + enable);
             return;
+        }
 
         // Execute directly menu commands.
         if (enable)
