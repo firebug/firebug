@@ -1261,7 +1261,7 @@ window.Firebug =
             if (Css.hasClass(child, "repTarget"))
                 target = child;
 
-            if (child.repObject)
+            if (child.repObject != null)
             {
                 if (!target && Css.hasClass(child, "repIgnore"))
                     break;
@@ -1278,7 +1278,7 @@ window.Firebug =
     {
         for (var child = node; child; child = child.parentNode)
         {
-            if (child.repObject)
+            if (child.repObject != null)
                 return child;
         }
     },
@@ -1287,7 +1287,7 @@ window.Firebug =
     {
         for (var child = element.firstChild; child; child = child.nextSibling)
         {
-            if (child.repObject == object)
+            if (child.repObject === object)
                 return child;
         }
     },
