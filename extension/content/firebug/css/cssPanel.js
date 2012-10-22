@@ -78,11 +78,10 @@ var CSSPropTag = domplate(CSSDomplateBase,
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable",
-                _repObject: "$prop.value$prop.important"},"$prop|getPropertyValue$prop.important"
+                _repObject: "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
             ),
-            SPAN({"class": "cssSemi"}, ";"
+            SPAN({"class": "cssSemi"}, ";")
         )
-    )
 });
 
 var CSSRuleTag =
@@ -1718,54 +1717,18 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     
                 if (Css.hasClass(target, "cssPropName"))
                 {
+                    // Actual saving is done in endEditing, see the comment there.
                     target.textContent = value;
-    
-                    if (value && previousValue != value)  // name of property has changed.
-                    {
-                        // Record the original CSS text for the inline case so we can reconstruct at a later
-                        // point for diffing purposes
-                        var baseText = rule.style ? rule.style.cssText : rule.cssText;
-    
-                        var propValue = Firebug.getRepObject(Dom.getChildByClass(prop, "cssPropValue"));
-                        var parsedValue = parsePriority(propValue);
-    
-                        if (FBTrace.DBG_CSS)
-                            FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                                " = " + propValue);
-    
-                        if (propValue && propValue != "undefined")
-                        {
-                            if (FBTrace.DBG_CSS)
-                                FBTrace.sysout("CSSEditor.saveEdit : " + previousValue + "->" + value +
-                                    " = " + propValue);
-    
-                            if (previousValue)
-                                CSSModule.removeProperty(rule, previousValue);
-    
-                            CSSModule.setProperty(rule, value, parsedValue.value,
-                                parsedValue.priority);
-                            propName = value;
-                        }
-                        Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
-                            previousValue, baseText]);
-                    }
-                    else if (!value)
-                    {
-                        // name of the property has been deleted, so remove the property.
-                        CSSModule.removeProperty(rule, previousValue);
-                    }
                 }
                 else if (Dom.getAncestorByClass(target, "cssPropValue"))
                 {
                     target.textContent = CSSDomplateBase.getPropertyValue({value: value});
     
                     propName = Dom.getChildByClass(prop, "cssPropName").textContent;
-                    var propValue = Dom.getChildByClass(prop, "cssPropValue").textContent;
     
                     if (FBTrace.DBG_CSS)
                     {
-                        FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
-                            " = "+propValue+"\n");
+                        FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" + value + "\"");
                        // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
                     }
     
@@ -1785,16 +1748,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     
                 if (value)
                 {
-                    var saveSuccess = !!rule.style.getPropertyValue(propName);
-                    if (!saveSuccess && Css.hasClass(target, "cssPropName"))
+                    var saveSuccess = false;
+                    if (Css.hasClass(target, "cssPropName"))
                     {
-                        propName = value.replace(/-./g, function(match)
+                        var propName = value.replace(/-./g, function(match)
                         {
                             return match[1].toUpperCase();
                         });
     
                         if (propName in rule.style || propName == "float")
                             saveSuccess = "almost";
+                    }
+                    else
+                    {
+                        saveSuccess = !!rule.style.getPropertyValue(propName);
                     }
     
                     this.box.setAttribute("saveSuccess", saveSuccess);
@@ -1849,7 +1816,41 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     beginEditing: function(target, value)
     {
         var row = Dom.getAncestorByClass(target, "cssProp");
+        this.initialValue = value;
         this.initiallyDisabled = (row && row.classList.contains("disabledStyle"));
+    },
+
+    endEditing: function(target, value, cancel)
+    {
+        if (!cancel && target.classList.contains("cssPropName"))
+        {
+            // Save changed property names here instead of in saveEdit, because otherwise
+            // unrelated properties might get discarded (see issue 5204).
+            var previous = this.initialValue;
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.endEditing: renaming property " + previous + " -> " + value);
+            }
+
+            var cssRule = Dom.getAncestorByClass(target, "cssRule");
+            var rule = Firebug.getRepObject(cssRule);
+            var baseText = rule.style ? rule.style.cssText : rule.cssText;
+            var prop = Dom.getAncestorByClass(target, "cssProp");
+            var propValue = Firebug.getRepObject(Dom.getChildByClass(prop, "cssPropValue"));
+            var parsedValue = parsePriority(propValue);
+
+            if (previous)
+                CSSModule.removeProperty(rule, previous);
+            if (propValue)
+                CSSModule.setProperty(rule, value, parsedValue.value, parsedValue.priority);
+
+            Events.dispatch(CSSModule.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                    previous, baseText]);
+
+            Firebug.Inspector.repaint();
+            this.panel.markChange(this.panel.name == "stylesheet");
+        }
+        return true;
     },
 
     cancelEditing: function(target, value)
