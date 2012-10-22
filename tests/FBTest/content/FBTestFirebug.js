@@ -2602,7 +2602,7 @@ this.saveWindowImageToFile = function(win, width, height, destFile)
     var canvas = this.getCanvasFromWindow(win, width, height);
 
     // convert string filepath to an nsIFile
-    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
     file.initWithPath(destFile);
 
     // create a data url from the canvas and then create URIs of the source and targets

@@ -77,14 +77,14 @@ FBTestApp.TestLogger =
         {
             // Create default folder for automated logs.
             var dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
-            var dir = dirService.get("ProfD", Ci.nsILocalFile);
+            var dir = dirService.get("ProfD", Ci.nsIFile);
             dir.append("firebug");
             dir.append("fbtest");
             dir.append("logs");
         }
         else
         {
-            dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+            dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
             dir.initWithPath(path);
         }
 
