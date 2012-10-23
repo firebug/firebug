@@ -938,7 +938,6 @@ function addParts(val, delim, block, info, escapeIt)
             var part = val.parts[i];
             if (part instanceof Variables)
             {
-                // Only grap one variable.
                 // This is fine as we are not passing it to a function and only displaying it.
                 var partName = part.names.join(",");
                 if (part.format)
