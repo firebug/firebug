@@ -283,7 +283,7 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    tryASelector:function(element)
+    tryASelector: function(element)
     {
         if (!this.trialSelector)
             this.trialSelector = this.selection ? this.selection.selectorText : "";
@@ -299,7 +299,7 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
     getEditor: function(target, value)
     {
         if (!this.editor)
-            this.editor = new SelectorEditor(this);
+            this.editor = new SelectorPanelEditor(this.document);
 
         return this.editor;
     },
@@ -325,6 +325,35 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         trialSelectorDiv.textContent = trialSelector;
         Dom.collapse(trialSelectorDiv, !show);
     },
+});
+
+function SelectorPanelEditor(doc)
+{
+    this.box = this.tag.replace({}, doc, this);
+    this.input = this.box;
+
+    Firebug.InlineEditor.prototype.initialize.call(this);
+    this.tabNavigation = false;
+    this.fixedWidth = true;
+}
+
+SelectorPanelEditor.prototype = domplate(SelectorEditor.prototype,
+{
+    tag:
+        INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
+            type: "text",
+            title: Locale.$STR("Selector"),
+            oninput: "$onInput",
+            onkeypress: "$onKeyPress"}
+        ),
+
+    endEditing: function(target, value, cancel)
+    {
+        if (cancel)
+            return;
+
+        this.panel.setTrialSelector(target, value);
+    }
 });
 
 // ********************************************************************************************* //
