@@ -553,6 +553,14 @@ Str.hasPrefix = function(hay, needle)
     return hay.lastIndexOf(needle, 0) === 0;
 };
 
+Str.endsWith = function(str, suffix)
+{
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+// ************************************************************************************************
+// HTML Wrap
+
 Str.wrapText = function(text, noEscapeHTML)
 {
     var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
