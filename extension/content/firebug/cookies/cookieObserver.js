@@ -128,29 +128,27 @@ var CookieObserver = Obj.extend(BaseObserver,
     {
         var pathFilter = Options.get(filterByPath);
 
-        // Get directory path (without the file name)
-        var queryStringPos = activeUri.path.lastIndexOf("?");
-
-        // Get the current active path.
-        var ap = queryStringPos != -1 ? activeUri.path.substr(0, queryStringPos) : activeUri.path;
-
-        // Steps 2,3 of RFC 6265 section 5.1.4
-        if (ap.length == 0 || ap.charAt(0) != "/" || ap.lastIndexOf("/") == 0)
+        // Compute the default path of the cookie according to the algorithm
+        // defined in RFC 6265 section 5.1.4
+        //
+        // Steps 2 and 3 (output "/" in case the cookie path is empty, its first
+        // character is "/" or there is no more than one "/")
+        if (cookiePath.length == 0 || cookiePath.charAt(0) != "/" ||
+            cookiePath.lastIndexOf("/") == 0)
         {
-            ap = "/";
+            cookiePath = "/";
         }
         else
         {
-            // Remove slash at the end of the active path according to
-            // step 4 of RFC 6265 section 5.1.4
-            if (Str.endsWith(ap, "/"))
-                ap = ap.substr(0, ap.length - 1);
+            // Step 4 (remove slash at the end of the active path according to)
+            cookiePath = cookiePath.substr(0, cookiePath.lastIndexOf("/"));
         }
 
         // If the path filter is on, only cookies that match given path
         // according to RFC 6265 section 5.1.4 will be displayed.
-        if (pathFilter && (ap != cookiePath && !(Str.hasPrefix(ap, cookiePath) &&
-            (Str.endsWith(cookiePath, "/") || ap.substr(cookiePath.length, 1) == "/"))))
+        var requestPath = activeUri.path;
+        if (pathFilter && (cookiePath != requestPath && !(Str.hasPrefix(requestPath, cookiePath) &&
+            (Str.endsWith(cookiePath, "/") || requestPath.substr(cookiePath.length, 1) == "/"))))
         {
             return false;
         }
