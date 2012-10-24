@@ -154,7 +154,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         Dom.clearNode(this.panelNode);
 
-        var cache = this.context.activeThread.gripCache;
+        var cache = this.context.gripCache;
 
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);

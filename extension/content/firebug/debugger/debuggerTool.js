@@ -11,8 +11,10 @@ define([
     "firebug/debugger/stackFrame",
     "firebug/debugger/stackTrace",
     "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/gripCache",
 ],
-function (Obj, Firebug, Tool, CompilationUnit, StackFrame, StackTrace, DebuggerClientModule) {
+function (Obj, Firebug, Tool, CompilationUnit, StackFrame, StackTrace,
+    DebuggerClientModule, GripCache) {
 
 // ********************************************************************************************* //
 // Constants
@@ -65,10 +67,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     onThreadAttached: function(context)
     {
         context.activeThread.addListener("paused", this.paused.bind(this, context));
+        context.activeThread.addListener("detached", this.detached.bind(this, context));
         context.activeThread.addListener("resumed", this.resumed.bind(this, context));
         context.activeThread.addListener("framesadded", this.framesadded.bind(this, context));
         context.activeThread.addListener("framescleared", this.framescleared.bind(this, context));
         context.activeThread.addListener("newScript", this.newScript.bind(this, context));
+
+        context.gripCache = new GripCache(DebuggerClientModule.client);
     },
 
     onThreadDetached: function(context)
@@ -86,6 +91,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             "resumeLimit": 1,
             "debuggerStatement": 1,
         };
+
+        context.gripCache.clear();
 
         var type = packet.why.type;
         if (types[type])
@@ -111,8 +118,17 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         }
     },
 
+    detached: function(context)
+    {
+        FBTrace.sysout("debuggerTool.detached; ", arguments);
+
+        context.gripCache.clear();
+    },
+
     resumed: function(context, event, packet)
     {
+        context.gripCache.clear();
+
         context.stopped = false;
         context.stoppedFrame = null;
         context.currentFrame = null;

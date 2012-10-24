@@ -24,14 +24,12 @@ function pauseGrip(context, args)
     if (!actor)
         return "No actor specified";
 
-    var cache = context.activeThread.gripCache;
-
     var packet = {
         to: actor,
         type: type || RDP.DebugProtocolTypes.prototypeAndProperties
     };
 
-    cache.request(packet).then(function(response)
+    context.gripCache.request(packet).then(function(response)
     {
         Firebug.Console.log(response);
     });

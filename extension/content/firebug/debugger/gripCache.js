@@ -18,9 +18,9 @@ var gripUndefined = new Grips.ObjectGrip({type: "undefined"});
 // ********************************************************************************************* //
 // GripCache
 
-function GripCache(connection)
+function GripCache(debuggerClient)
 {
-    this.connection = connection;
+    this.debuggerClient = debuggerClient;
 
     // Initialization
     this.clear();
@@ -74,7 +74,7 @@ GripCache.prototype =
         //xxxHonza: packets should be also cached.
 
         var deferred = Promise.defer();
-        this.connection.request(packet, function(response)
+        this.debuggerClient.request(packet, function(response)
         {
             deferred.resolve(response);
         });

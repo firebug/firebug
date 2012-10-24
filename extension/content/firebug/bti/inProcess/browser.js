@@ -11,9 +11,8 @@ define([
     "arch/webApp",
     "firebug/lib/options",
     "firebug/chrome/tabWatcher",
-    "firebug/remoting/connection",
 ],
-function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher, Connection) {
+function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
 
 // ********************************************************************************************* //
 // Browser

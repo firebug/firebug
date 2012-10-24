@@ -5,10 +5,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/lib/events",
-    "firebug/remoting/connection",
     "firebug/lib/dom",
 ],
-function(FBTrace, Obj, Options, Events, Connection, Dom) {
+function(FBTrace, Obj, Options, Events, Dom) {
 
 // ********************************************************************************************* //
 // Module
