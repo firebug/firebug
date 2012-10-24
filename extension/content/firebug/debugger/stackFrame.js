@@ -133,7 +133,7 @@ StackFrame.prototype =
 
         this.scopes = [];
 
-        var cache = this.context.debuggerClient.activeThread.gripCache;
+        var cache = this.context.activeThread.gripCache;
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.

@@ -59,25 +59,6 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onConnect: function(proxy)
-    {
-        FBTrace.sysout("BreakpointPanel.onConnect;");
-
-        this.tool = this.context.getTool("debugger");
-        this.tool.attach(this.context, proxy.connection, this);
-    },
-
-    onDisconnect: function(proxy)
-    {
-        FBTrace.sysout("BreakpointPanel.onDisconnect;");
-
-        // Detach from the current tool.
-        this.tool.detach(this.context, proxy.connection, this);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     show: function(state)
     {

@@ -17,22 +17,14 @@ function pauseGrip(context, args)
     var actor = args[0];
     var type = args[1];
 
-    var context = Firebug.currentContext;
-    if (!context)
-        return "No current context";
-
-    var client = context.debuggerClient;
-    if (!client)
-        return "Debugger client not available";
-
-    var thread = client.activeThread;
+    var thread = context.activeThread;
     if (!thread)
-        return "The debugger must be paused";
+        return "The debugger must be attached to a thread";
 
     if (!actor)
         return "No actor specified";
 
-    var cache = context.debuggerClient.activeThread.gripCache;
+    var cache = context.activeThread.gripCache;
 
     var packet = {
         to: actor,
@@ -52,10 +44,6 @@ function tabGrip(context, args)
     var actor = args[0];
     var type = args[1];
 
-    var context = Firebug.currentContext;
-    if (!context)
-        return "No current context";
-
     if (!actor)
         return "No actor specified";
 
@@ -67,7 +55,7 @@ function tabGrip(context, args)
         type: type
     };
 
-    Firebug.proxy.connection.request(packet, function(response)
+    Firebug.debuggerClient.request(packet, function(response)
     {
         Firebug.Console.log(response);
     });

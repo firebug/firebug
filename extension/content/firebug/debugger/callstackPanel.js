@@ -57,33 +57,15 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
-        Firebug.proxy.addListener(this);
+        this.tool = this.context.getTool("debugger");
+        this.tool.addListener(this);
     },
 
     destroy: function(state)
     {
-        Firebug.proxy.removeListener(this);
+        this.tool.removeListener(this);
 
         Firebug.Panel.destroy.apply(this, arguments);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onConnect: function(proxy)
-    {
-        FBTrace.sysout("CallstackPanel.onConnect;");
-
-        this.tool = this.context.getTool("debugger");
-        this.tool.attach(this.context, proxy.connection, this);
-    },
-
-    onDisconnect: function(proxy)
-    {
-        FBTrace.sysout("CallstackPanel.onDisconnect;");
-
-        // Detach from the current tool.
-        this.tool.detach(this.context, proxy.connection, this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

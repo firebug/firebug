@@ -7,12 +7,15 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/tool",
-    "firebug/debugger/debuggerClient",
     "arch/compilationunit",
     "firebug/debugger/stackFrame",
     "firebug/debugger/stackTrace",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (Obj, Firebug, Tool, DebuggerClient, CompilationUnit, StackFrame, StackTrace) {
+function (Obj, Firebug, Tool, CompilationUnit, StackFrame, StackTrace, DebuggerClientModule) {
+
+// ********************************************************************************************* //
+// Constants
 
 // ********************************************************************************************* //
 // Debugger Tool
@@ -29,6 +32,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
+
+        DebuggerClientModule.addListener(this);
 
         var chrome = Firebug.chrome;
 
@@ -49,53 +54,31 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             "Firebug.DebuggerTool.stepOut(Firebug.currentContext)");
     },
 
+    destroy: function()
+    {
+        DebuggerClientModule.removeListener(this);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    attach: function(context, connection, listener, callback)
+    onThreadAttached: function(context)
     {
-        this.addListener(listener);
-
-        if (context.debuggerClient)
-            return;
-
-        var self = this;
-
-        // Attach the debugger.
-        context.debuggerClient = new DebuggerClient(context, connection);
-        context.debuggerClient.attach(function(activeThread)
-        {
-            activeThread.addListener(self);
-
-            if (callback)
-                callback(activeThread);
-
-            self.dispatch("onThreadAttached", [activeThread]);
-        });
+        context.activeThread.addListener("paused", this.paused.bind(this, context));
+        context.activeThread.addListener("resumed", this.resumed.bind(this, context));
+        context.activeThread.addListener("framesadded", this.framesadded.bind(this, context));
+        context.activeThread.addListener("framescleared", this.framescleared.bind(this, context));
+        context.activeThread.addListener("newScript", this.newScript.bind(this, context));
     },
 
-    detach: function(context, connection, listener)
+    onThreadDetached: function(context)
     {
-        this.removeListener(listener);
-
-        // More panels using this tool can call detach. So, check first if we are 
-        // detached already before sending the 'detach' packet.
-        // xxxHonza: we need to count listeners and detach when there is none.
-        if (!context.debuggerClient)
-            return;
-
-        context.debuggerClient.detach(function(activeThread)
-        {
-            activeThread.removeListener(this);
-        });
-
-        context.debuggerClient = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Thread Listener
 
-    paused: function(context, packet)
+    paused: function(context, event, packet)
     {
         // @hack: all types should be supported?
         var types = {
@@ -107,7 +90,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         var type = packet.why.type;
         if (types[type])
         {
-            context.debuggerClient.activeThread.fillFrames(50);
+            context.activeThread.fillFrames(50);
 
             var frame = StackFrame.buildStackFrame(packet.frame, context);
 
@@ -128,7 +111,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         }
     },
 
-    resumed: function(context, packet)
+    resumed: function(context, event, packet)
     {
         context.stopped = false;
         context.stoppedFrame = null;
@@ -138,21 +121,24 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.dispatch("onStopDebugging");
     },
 
-    framesadded: function(context, frames)
+    framesadded: function(context)
     {
+        var frames = context.activeThread.cachedFrames;
         var stackTrace = StackTrace.buildStackTrace(frames, context);
         context.currentTrace = stackTrace;
 
         this.dispatch("onStackCreated", [stackTrace]);
     },
 
-    framescleared: function()
+    framescleared: function(context)
     {
         this.dispatch("onStackCleared");
     },
 
-    newScript: function(sourceFile)
+    newScript: function(context, sourceFile)
     {
+        FBTrace.sysout("debuggerTool.newScript; ", arguments);
+
         this.dispatch("newScript", [sourceFile]);
     },
 
@@ -161,13 +147,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     setBreakpoint: function(context, url, lineNumber, callback)
     {
-        if (!context.debuggerClient.activeThread)
+        if (!context.activeThread)
         {
             FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a breakpoint.");
             return;
         }
 
-        return context.debuggerClient.activeThread.setBreakpoint({
+        return context.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
         }, callback);
@@ -175,18 +161,18 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     setBreakpoints: function(context, arr, callback)
     {
-        if (!context.debuggerClient.activeThread)
+        if (!context.activeThread)
         {
             FBTrace.sysout("debuggerTool.setBreakpoints; Can't set breakpoints.");
             return;
         }
 
-        return context.debuggerClient.activeThread.setBreakpoints(arr, callback);
+        return context.activeThread.setBreakpoints(arr, callback);
     },
 
     removeBreakpoint: function(context, bp, callback)
     {
-        if (!context.debuggerClient.activeThread)
+        if (!context.activeThread)
         {
             FBTrace.sysout("debuggerTool.removeBreakpoint; Can't remove breakpoints.");
             return;
@@ -200,7 +186,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         var actor = bp.params.actor;
         if (actor)
-            return context.debuggerClient.activeThread.removeBreakpoints(arr, callback);
+            return context.activeThread.removeBreakpoints(arr, callback);
     },
 
     enableBreakpoint: function(context, url, lineNumber)
@@ -232,22 +218,22 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     resume: function(context, callback)
     {
-        return context.debuggerClient.activeThread.resume(callback);
+        return context.activeThread.resume(callback);
     },
 
     stepOver: function(context, callback)
     {
-        return context.debuggerClient.activeThread.stepOver(callback);
+        return context.activeThread.stepOver(callback);
     },
 
     stepInto: function(context, callback)
     {
-        return context.debuggerClient.activeThread.stepIn(callback);
+        return context.activeThread.stepIn(callback);
     },
 
     stepOut: function(context, callback)
     {
-        return context.debuggerClient.activeThread.stepOut(callback);
+        return context.activeThread.stepOut(callback);
     },
 
     runUntil: function(context, compilationUnit, lineNumber, callback)
@@ -279,7 +265,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // 1) Resume the current thread
         // 2) Evaluate the expresion in a new frame
         // 3) Remove the frame and pause
-        context.debuggerClient.activeThread.eval(frame.getActor(), expr, function(response)
+        context.activeThread.eval(frame.getActor(), expr, function(response)
         {
             // Not interested in 'resume' packet. The callback will be executed
             // when 'pause' packet is received, see paused() method.

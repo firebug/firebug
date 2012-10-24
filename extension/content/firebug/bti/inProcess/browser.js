@@ -817,22 +817,7 @@ Browser.prototype.connect = function ()
     TabWatcher.initialize();
     TabWatcher.addListener(TabWatchListener);
 
-    var self = this;
-
-    function _onConnect()
-    {
-        self._setConnected(true);
-    }
-
-    function _onDisconnect()
-    {
-        self._setConnected(false);
-    }
-
-    // Create connection and connect by default.
-    // xxxHonza: use devtools.debugger.remote-autoconnect pref?
-    this.connection = new Connection(_onConnect, _onDisconnect);
-    this.connection.open();
+    this._setConnected(true);
 }
 
 /**
@@ -850,7 +835,7 @@ Browser.prototype.disconnect = function()
     // consequently to all registered modules.
     TabWatcher.removeListener(this);
 
-    this.connection.close();
+    this._setConnected(false);
 }
 
 /**

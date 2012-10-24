@@ -18,6 +18,7 @@ define([
     "firebug/debugger/watchPanel",
     "firebug/debugger/gripCache",
     "firebug/debugger/commands",
+    "firebug/remoting/debuggerClientModule",
 ],
 function(FBTrace) {
 

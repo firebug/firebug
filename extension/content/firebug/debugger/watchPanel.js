@@ -81,7 +81,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.initialize.apply(this, arguments);
 
         Firebug.registerUIListener(this);
-        Firebug.proxy.addListener(this);
+
+        this.tool = this.context.getTool("debugger");
+        this.tool.addListener(this);
     },
 
     destroy: function(state)
@@ -89,10 +91,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         state.watches = this.watches;
 
         Firebug.unregisterUIListener(this);
-        Firebug.proxy.removeListener(this);
+
+        this.tool.removeListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     initializeNode: function(oldPanelNode)
     {
@@ -110,21 +115,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
         BasePanel.destroyNode.apply(this, arguments);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onConnect: function(proxy)
-    {
-        this.tool = this.context.getTool("debugger");
-        this.tool.attach(this.context, proxy.connection, this);
-    },
-
-    onDisconnect: function(proxy)
-    {
-        // Detach from the current tool.
-        this.tool.detach(this.context, proxy.connection, this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -164,7 +154,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         Dom.clearNode(this.panelNode);
 
-        var cache = this.context.debuggerClient.activeThread.gripCache;
+        var cache = this.context.activeThread.gripCache;
 
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);
@@ -352,7 +342,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             // If grip is not defined an exception has been thrown.
             if (grip)
             {
-                var thread = self.context.debuggerClient.activeThread;
+                var thread = self.context.activeThread;
                 watch.value = thread.getObject(grip);
 
                 //xxxHonza: this should be in the cache/factory probably.

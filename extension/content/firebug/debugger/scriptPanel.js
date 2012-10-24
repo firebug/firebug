@@ -53,46 +53,25 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
-        Firebug.connection.addListener(this);
-
         this.scriptView = new ScriptView();
         this.scriptView.addListener(this);
         this.scriptView.initialize(this.panelNode);
+
+        // The tool/controller (serves as a proxy to the backend service) is registered dynamicaly.
+        // Depending on the current tool the communication can be local or remote.
+        // Access to the back-end debugger service (JSD2) must always be done through the tool.
+        this.tool = this.context.getTool("debugger");
+        this.tool.addListener(this);
     },
 
     destroy: function(state)
     {
-        Firebug.connection.removeListener(this);
-
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
 
+        this.tool.removeListener(this);
+
         BasePanel.destroy.apply(this, arguments);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onConnect: function(proxy)
-    {
-        FBTrace.sysout("JSD2ScriptPanel.onConnect;");
-
-        // The tool (serves as a proxy to the backend service) is registered dynamicaly.
-        // Depending on the current tool the communication can be local or remote.
-        // Access to the back-end debugger service (JSD2) must always be done through the tool.
-        this.tool = this.context.getTool("debugger");
-        this.tool.attach(this.context, proxy.connection, this, function(activeThread)
-        {
-            // Backend thread attached.
-        });
-    },
-
-    onDisconnect: function(proxy)
-    {
-        FBTrace.sysout("JSD2ScriptPanel.onDisconnect;");
-
-        // Detach from the current tool.
-        this.tool.detach(this.context, proxy.connection, this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -675,7 +654,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(frame)
     {
-        if (FBTrace.DBG_UI_LOOP)
+        //if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.startDebugging enter context: " + this.context.getName(), frame);
 
         try
