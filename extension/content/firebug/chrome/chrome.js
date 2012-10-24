@@ -58,10 +58,12 @@ const statusCropSize = 20;
 
 // ********************************************************************************************* //
 
-var ChromeFactory =  // factory is global in module loading window
+// factory is global in module loading window
+var ChromeFactory =
 {
 
-createFirebugChrome: function(win)  // chrome is created in caller window.
+// chrome is created in caller window.
+createFirebugChrome: function(win)
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private
@@ -77,7 +79,6 @@ createFirebugChrome: function(win)  // chrome is created in caller window.
 var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title, focusedElement, setter popup
-
     dispatchName: "FirebugChrome",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -156,13 +157,14 @@ var FirebugChrome =
                 (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
 
         // At this point both panelBars can be loaded already, since the src is specified
-        // in firebugOveralay.xul (asynchronously loaded). If yes, start up
-        // the initialization sequence now.
+        // in firebugOverlay.xul (asynchronously loaded). If yes, start up the initialization
+        // sequence now.
         if (browser1Complete && browser2Complete)
         {
             setTimeout(function()
             {
-                FirebugChrome.initializeUI();  // the chrome bound into this scope
+                // chrome bound into this scope
+                FirebugChrome.initializeUI();
             })
         }
     },
@@ -175,7 +177,7 @@ var FirebugChrome =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initializeUI;");
 
-        // we listen for panel update
+        // listen for panel updates
         Firebug.registerUIListener(this);
 
         try
@@ -210,7 +212,7 @@ var FirebugChrome =
             var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
             Events.addEventListener(mainTabBox, "mousedown", onMainTabBoxMouseDown, false);
 
-            // The side panel bar doesn't care about this event.  It must, however,
+            // The side panel bar doesn't care about this event. It must, however,
             // prevent it from bubbling now that we allow the side panel bar to be
             // *inside* the main panel bar.
             Events.addEventListener(panelBar2, "selectingPanel", stopBubble, false);
@@ -225,11 +227,11 @@ var FirebugChrome =
             Firebug.internationalizeUI(win.document);
             Firebug.internationalizeUI(top.document);
 
-            // xxxHonza: Is there any reason why we don't distribute "initializeUI"
+            // xxxHonza: Is there any reason why we don't distribute "initializeUI"?
             // event to modules?
             Firebug.initializeUI();
 
-            // Append all registered stylesheets into Firebug UI.
+            // Append all registered stylesheets into Firebug UI
             for (var i=0; i<Firebug.stylesheets.length; i++)
             {
                 var uri = Firebug.stylesheets[i];
@@ -240,7 +242,7 @@ var FirebugChrome =
                 FBTrace.sysout("chrome.initializeUI; Custom stylesheet appended " +
                     Firebug.stylesheets.length, Firebug.stylesheets);
 
-            // Fire event for window event listeners.
+            // Fire event for window event listeners
             Firebug.sendLoadEvent();
         }
         catch (exc)
@@ -311,7 +313,7 @@ var FirebugChrome =
     },
 
     /**
-     * Checking first window in back order, (Most recent window). is itself firebug ?
+     * Checks if the Firebug window has the focus (is the most recent window)
      */
     hasFocus: function()
     {
@@ -363,7 +365,7 @@ var FirebugChrome =
 
     disableOff: function(collapse)
     {
-        // disable/enable this button in the Firebug.chrome window.
+        // disable/enable this button in the Firebug.chrome window
         Dom.collapse(FirebugChrome.$("fbCloseButton"), collapse);
     },
 
@@ -376,7 +378,8 @@ var FirebugChrome =
 
         // Command Line Popup can be displayed for all the other panels
         // (except for the Console panel)
-        // XXXjjb, xxxHonza: this should be somehow better, more generic and extensible...
+        // XXXjjb, xxxHonza, xxxsz: this should be somehow better, more generic and extensible,
+        // e.g. by asking each panel if it supports the Command Line Popup 
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
@@ -415,16 +418,20 @@ var FirebugChrome =
            .getService(Components.interfaces.nsIProperties)
            .get("TmpD", Components.interfaces.nsIFile);
 
-        file.append("firebug");   // extensions sub-directory
+        // extensions sub-directory
+        file.append("firebug");
         file.append("panelSave.html");
         file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
-        foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);   // write, create, truncate
-        serializer.serializeToStream(doc, foStream, "");   // rememeber, doc is the DOM tree
+        // write, create, truncate
+        foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);
+        // remember, doc is the DOM tree
+        serializer.serializeToStream(doc, foStream, "");
         foStream.close();
         return file.path;
     },
 
-    updatePanelBar1: function(panelTypes)  // part of initializeUI
+    // part of initializeUI
+    updatePanelBar1: function(panelTypes)
     {
         var mainPanelTypes = [];
         for (var i = 0; i < panelTypes.length; ++i)
@@ -501,7 +508,10 @@ var FirebugChrome =
         {
             this.positionInitialzed = true;
             if (Firebug.framePosition != "detached" && Firebug.framePosition != "bottom")
-                this.setPosition(); // null only updates frame position without side effects
+            {
+                // null only updates frame position without side effects
+                this.setPosition();
+            }
         }
     },
 
@@ -519,11 +529,12 @@ var FirebugChrome =
         Dom.collapse(Firebug.chrome.$("fbContentBox"), false);
     },
 
-    syncResumeBox: function(context)  // only called when detached
+    // only called when detached
+    syncResumeBox: function(context)
     {
         var resumeBox = Firebug.chrome.$('fbResumeBox');
 
-        // xxxHonza: Don't focus Firebug window now. It would bring Firebug detached window
+        // xxxHonza: Don't focus the Firebug window now. It would bring the detached Firebug window
         // to the top every time the attached Firefox page is refreshed, which is annoying.
         //this.focus();  // bring to users attention
 
@@ -571,7 +582,7 @@ var FirebugChrome =
         var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
         var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
 
-        // Get current panel's index (is there a simpler way for this?
+        // get the current panel's index (is there a simpler way for this?)
         for (i = 0; i < panelTypes.length; i++)
         {
             if (panelTypes[i].prototype.name === currentPanel.name)
@@ -629,10 +640,10 @@ var FirebugChrome =
     /**
      * Set this.location on the current panel or one given by name.
      * The location object should be known to the caller to be of the correct type for the panel,
-     * eg SourceFile for Script panel
-     * @param object the location object, null selects default location
-     * @param panelName the .name field for the desired panel, null means current panel
-     * @param sidePanelName I don't know how this affects the outcome
+     * e.g. SourceFile for Script panel
+     * @param object location object, null selects default location
+     * @param panelName name of the panel to select, null means current panel
+     * @param sidePanelName name of the side panel to select
      */
     navigate: function(object, panelName, sidePanelName)
     {
@@ -649,9 +660,9 @@ var FirebugChrome =
     /**
      *  Set this.selection by object type analysis, passing the object to all panels to
      *      find the best match
-     *  @param object the new this.selection object
-     *  @param panelName matching panel.name will be used, if its supportsObject returns true value
-     *  @param sidePanelName default side panel name used, if its supportsObject returns true value
+     *  @param object new this.selection object
+     *  @param panelName matching panel.name will be used, if its supportsObject returns true
+     *  @param sidePanelName default side panel name used, if its supportsObject returns true
      *  @param forceUpdate if true, then (object === this.selection) is ignored and
      *      updateSelection is called
      */
@@ -663,7 +674,7 @@ var FirebugChrome =
 
         var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
 
-        // Allow refresh if needed (the last argument).
+        // allow refresh if needed (last argument)
         var panel = this.selectPanel(bestPanelName, sidePanelName/*, true*/);
         if (panel)
             panel.select(object, forceUpdate);
@@ -713,7 +724,7 @@ var FirebugChrome =
 
     switchToPanel: function(context, switchToPanelName)
     {
-        // Remember the previous panel and bar state so we can revert if the user cancels
+        // Remember the previous panel and bar state so we can revert if the user cancels.
         this.previousPanelName = context.panelName;
         this.previousSidePanelName = context.sidePanelName;
         this.previouslyCollapsed = FirebugChrome.$("fbContentBox").collapsed;
@@ -851,7 +862,7 @@ var FirebugChrome =
             if (!panelName)
                 panelName = context.panelName? context.panelName : Firebug.defaultPanelName;
 
-            // Make HTML panel the default panel, which is displayed
+            // Make the HTML panel the default panel, which is displayed
             // to the user the very first time.
             if (!panelName || !Firebug.getPanelType(panelName))
                 panelName = "html";
@@ -875,7 +886,7 @@ var FirebugChrome =
             var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
             panelBar1.updatePanels(panelTypes);
 
-            // Upadate also BON tab flag (orange background if BON is active)
+            // Update also BON tab flag (orange background if BON is active)
             // every time the user changes the current tab in Firefox.
             Firebug.Breakpoint.updatePanelTabs(Firebug.currentContext);
         }
@@ -914,7 +925,7 @@ var FirebugChrome =
             }
             else
             {
-                // if the context changes we need to refresh the panel
+                // If the context changes, we need to refresh the panel.
                 panelBar2.selectPanel(panelBar2.selectedPanel.name, true);
             }
         }
@@ -995,8 +1006,8 @@ var FirebugChrome =
             }
             else
             {
-                // Alright, let's update visibility of the separator. The separator
-                // is displayed only, if there are some other buttons on the left side.
+                // Update the visibility of the separator. The separator
+                // is displayed only if there are some other buttons on the left side.
                 // Before showing the status separator let's see whether there are any other
                 // buttons on the left.
                 var hide = true;
@@ -1017,7 +1028,7 @@ var FirebugChrome =
 
                 panelStatus.lastPanelName = panel.name;
 
-                // If the object already exists in the list, just select it and keep the path
+                // If the object already exists in the list, just select it and keep the path.
                 var selection = panel.selection;
                 var existingItem = panelStatus.getItemByObject(panel.selection);
                 if (existingItem)
@@ -1152,7 +1163,7 @@ var FirebugChrome =
     swapBrowsers: function(oldBrowser, newBrowser)
     {
         var oldDoc = oldBrowser.contentDocument
-        // Panels remember top window, for which they were first opened.
+        // Panels remember the top window, for which they were first opened.
         // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
         var rulePos = styleSheet.cssRules.length;
@@ -1232,8 +1243,8 @@ var FirebugChrome =
 
     setChromeDocumentAttribute: function(id, name, value)
     {
-        // Call as Firebug.chrome.setChromeDocumentAttribute() to set attributes
-        // in another window.
+        // call as Firebug.chrome.setChromeDocumentAttribute() to set attributes
+        // in another window
         var elt = FirebugChrome.$(id);
         if (elt)
             elt.setAttribute(name, value);
@@ -1297,7 +1308,7 @@ var FirebugChrome =
 
     getElementById: function(id)
     {
-        // The document we close over not the global.
+        // The document we close over, not the global.
         return win.document.getElementById(id);
     },
 
@@ -1311,7 +1322,9 @@ var FirebugChrome =
         var zoom = Firebug.Options.getZoomByTextSize(value);
         var zoomString = (zoom * 100) + "%";
 
-        var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
+        // scale the aspect relative to 11pt Lucida Grande
+        // xxxsz: The magic number 0.547 should be replaced some logic retrieving this value.
+        var fontSizeAdjust = zoom * 0.547;
         var contentBox = Firebug.chrome.$("fbContentBox");
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
 
@@ -1381,12 +1394,12 @@ var FirebugChrome =
         }
     },
 
-    // called on setTimeout after sourceBox viewport has been repainted
+    // called on setTimeout() after sourceBox viewport has been repainted
     onApplyDecorator: function(sourceBox)
     {
     },
 
-    // called on scrollTo, passing in the selected line
+    // called on scrollTo() passing in the selected line
     onViewportChange: function(sourceLink)
     {
     },
@@ -1428,7 +1441,7 @@ var FirebugChrome =
               toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Minimize_Firebug"));
             }
 
-            // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
+            // If Firebug is detached, hide the menu. ('Open Firebug' shortcut doesn't hide
             // but just focuses the external window)
             if (Firebug.isDetached())
                 toggleFirebug.setAttribute("collapsed", (collapsed == "true" ? "false" : "true"));
@@ -1466,7 +1479,7 @@ var FirebugChrome =
 
     onContextShowing: function(event)
     {
-        // xxxHonza: This context-menu support can be used even in a separate window, which
+        // xxxHonza: This context menu support can be used even in a separate window, which
         // doesn't contain the Firebug UI (panels).
         //if (!panelBar1.selectedPanel)
         //    return false;
@@ -1478,13 +1491,13 @@ var FirebugChrome =
         var target = win.document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
-        // the event must be on our chrome not inside the panel
+        // The event must be on our chrome not inside the panel.
         if (!panel)
             panel = panelBar1 ? panelBar1.selectedPanel : null;
 
         Dom.eraseNode(popup);
 
-        // Make sure the Copy action is only available if there is actually someting
+        // Make sure the Copy action is only available if there is actually something
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
         if (!this.contextMenuObject &&
@@ -1503,7 +1516,7 @@ var FirebugChrome =
         else if (target && panel)
             object = panel.getPopupObject(target);
         else if (target)
-            // xxxHonza: What about a node from different document? Is that OK?
+            // xxxHonza: What about a node from a different document? Is that OK?
             object = Firebug.getRepObject(target);
 
         this.contextMenuObject = null;
@@ -1518,9 +1531,9 @@ var FirebugChrome =
                 ", realObject: "+realObject+", realRep:"+realRep);
         }
 
+        // 1. Add the custom menu items from the realRep
         if (realObject && realRep)
         {
-            // 1. Add the custom menu items from the realRep
             var menu = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
             if (menu)
             {
@@ -1529,9 +1542,9 @@ var FirebugChrome =
             }
         }
 
+        // 2. Add the custom menu items from the original rep
         if (object && rep && rep != realRep)
         {
-            // 1. Add the custom menu items from the original rep
             var items = rep.getContextMenuItems(object, target, Firebug.currentContext);
             if (items)
             {
@@ -1540,7 +1553,7 @@ var FirebugChrome =
             }
         }
 
-        // 1. Add the custom menu items from the panel
+        // 3. Add the custom menu items from the panel
         if (panel)
         {
             var items = panel.getContextMenuItems(realObject, target);
@@ -1551,7 +1564,7 @@ var FirebugChrome =
             }
         }
 
-        // 2. Add the inspect menu items
+        // 4. Add the inspect menu items
         if (realObject && rep && rep.inspectable)
         {
             var separator = null;
@@ -1566,7 +1579,7 @@ var FirebugChrome =
             }
         }
 
-        // 3. Add menu items from uiListeners
+        // 5. Add menu items from uiListeners
         var items = [];
         Events.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
             Firebug.currentContext, panel, popup]);
@@ -1627,14 +1640,14 @@ var FirebugChrome =
 
         var object;
 
-        /* XXXjjb This causes the Script panel to show the function body over and over.
-         * We need to clear it at least, but really we need to understand why the tooltip
+        /* XXXjjb: This causes the Script panel to show the function body over and over.
+         * We need to clear it at least, but actually we need to understand why the tooltip
          * should show the context menu object at all. One thing the contextMenuObject supports
          * is peeking at function bodies when stopped at a breakpoint.
          * That case could be supported with clearing the contextMenuObject, but we don't
-         * know, if that breaks something else. So maybe a popupMenuObject should be set
-         * on the context if that is what we want to support
-         * The other complication is, that there seems to be another tooltip.
+         * know if that breaks something else. So maybe a popupMenuObject should be set
+         * on the context if that is what we want to support.
+         * The other complication is that there seems to be another tooltip.
         if (this.contextMenuObject)
         {
             object = this.contextMenuObject;
@@ -1711,7 +1724,7 @@ var FirebugChrome =
 
     breakOnNext: function(context, event)
     {
-        // Avoid bubbling from associated options.
+        // avoid bubbling from associated options
         if (event.target.id != "cmd_firebug_toggleBreakOn")
             return;
 
@@ -1767,9 +1780,8 @@ var FirebugChrome =
                 break;
             }
         }
-    },
-
-};  // end of FirebugChrome
+    }
+};
 
 // ********************************************************************************************* //
 // Local Helpers
@@ -1779,7 +1791,7 @@ function panelSupportsObject(panelType, object, context)
     if (panelType)
     {
         try {
-            // This tends to throw exceptions often, because some objects are weird
+            // This tends to throw exceptions often because some objects are weird
             return panelType.prototype.supportsObject(object, typeof object, context)
         } catch (exc) {}
     }
@@ -1792,7 +1804,7 @@ function getBestPanelName(object, context, panelName)
     if (!panelName && context)
         panelName = context.panelName;
 
-    // Check if the panel type of the suggested panel supports the object, and if so, go with it
+    // Check if the panel type of the suggested panel supports the object, and if so, go with it.
     if (panelName)
     {
         var panelType = Firebug.getPanelType(panelName);
@@ -1801,7 +1813,7 @@ function getBestPanelName(object, context, panelName)
     }
 
     // The suggested name didn't pan out, so search for the panel type with the
-    // most specific level of support
+    // most specific level of support.
     return getBestPanelSupportingObject(object, context);
 }
 
@@ -1837,7 +1849,7 @@ function getBestSidePanelName(sidePanelName, panelTypes)
 {
     if (sidePanelName)
     {
-        // Verify, that the suggested panel name is in the acceptable list
+        // Verify, that the suggested panel name is in the acceptable list.
         for (var i = 0; i < panelTypes.length; ++i)
         {
             if (panelTypes[i].prototype.name == sidePanelName)
@@ -1845,7 +1857,7 @@ function getBestSidePanelName(sidePanelName, panelTypes)
         }
     }
 
-    // Default to the first panel type in the list
+    // Default to the first panel type in the list.
     return panelTypes.length ? panelTypes[0].prototype.name : null;
 }
 
@@ -1866,10 +1878,11 @@ function browser1Loaded()
 
     if (browser1.complete && browser2.complete)
     {
-        // initializeUI is executed asynchronously, which solves the issue 3442
-        // The problem has been introduced (from unknown reason) by revision R12210
+        // initializeUI() is executed asynchronously (solves issue 3442)
+        // The problem has been introduced (for an unknown reason) by revision R12210
         setTimeout(function() {
-            FirebugChrome.initializeUI();  // the chrome bound into this scope
+            // chrome bound into this scope
+            FirebugChrome.initializeUI();
         });
     }
 
@@ -1893,7 +1906,8 @@ function browser2Loaded()
     {
         // See browser1Loaded for more info.
         setTimeout(function() {
-            FirebugChrome.initializeUI();  // the chrome bound into this scope
+            // chrome bound into this scope
+            FirebugChrome.initializeUI();
         });
     }
 
@@ -1903,11 +1917,10 @@ function browser2Loaded()
 
 function onBlur(event)
 {
-    // XXXjjb this seems like a waste: called continuously to clear possible highlight I guess.
-    // XXXhh Is this really necessary? I disabled it for now as this was preventing me
+    // XXXjjb: this seems like a waste: called continuously to clear possible highlight I guess.
+    // XXXhh: Is this really necessary? I disabled it for now as this was preventing me
     // to show highlights on focus
     //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
-
 }
 
 function onSelectLocation(event)
@@ -1943,9 +1956,9 @@ function onSelectingPanel(event)
         panel.navigate(panel.location);
 
     // Hide all toolbars now. It's a responsibility of the new selected panel to show
-    // those toolbars, that are necessary. This avoids the situation, when naughty panel
-    // doesn't clean up its toolbars. This must be done before 'showPanel', where visibility
-    // of the BON buttons is managed.
+    // those toolbars, that are necessary. This avoids the situation when a naughty panel
+    // doesn't clean up its toolbars. This must be done before 'showPanel' is dispatched,
+    // where the visibility of the BON buttons is managed.
     var toolbar = FirebugChrome.$("fbToolbarInner");
     var child = toolbar.firstChild;
     while (child)
@@ -1954,14 +1967,14 @@ function onSelectingPanel(event)
         child = child.nextSibling;
     }
 
-    // Those extensions that don't use XUL overlays (e.g. bootstrapped extensions)
+    // Those extensions that don't use XUL overlays (i.e. bootstrapped extensions)
     // can provide toolbar buttons throug Firebug APIs.
     var panelToolbar = FirebugChrome.$("fbPanelToolbar");
     Dom.eraseNode(panelToolbar);
 
     if (panel)
     {
-        // Get buttons from the current panel.
+        // get buttons from current panel
         var buttons;
         if (panel.getPanelToolbarButtons)
             buttons = panel.getPanelToolbarButtons();
@@ -1987,7 +2000,7 @@ function onSelectingPanel(event)
     Firebug.chrome.syncLocationList();
     Firebug.chrome.syncStatusPath();
 
-    //xxxjjb unfortunately the callstack side panel depends on the status path (sync after.)
+    //xxxjjb: unfortunately the Stack side panel depends on the status path (sync after.)
     Firebug.chrome.syncSidePanels();
 }
 
