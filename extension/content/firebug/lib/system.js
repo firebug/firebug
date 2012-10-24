@@ -37,7 +37,7 @@ System.launchProgram = function(exePath, args)
 {
     try
     {
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(exePath);
         if (System.getPlatformName() == "Darwin" && file.isDirectory())
         {
@@ -65,7 +65,7 @@ System.getIconURLForFile = function(path)
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     try
     {
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(path);
         if ((System.getPlatformName() == "Darwin") && !file.isDirectory() && (path.indexOf(".app/") != -1))
         {

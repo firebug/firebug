@@ -295,9 +295,9 @@ DomplateTag.prototype =
             {
                 for (var i = 0; i < child.parts.length; ++i)
                 {
-                    if (child.parts[i] instanceof Variable)
+                    if (child.parts[i] instanceof Variables)
                     {
-                        var name = child.parts[i].name;
+                        var name = child.parts[i].names[0];
                         var names = name.split(".");
                         args.push(names[0]);
                     }
@@ -422,10 +422,8 @@ DomplateTag.prototype =
         var nodeCount = this.generateDOM(path, blocks, this.domArgs);
 
         var fnBlock = ['(function (root, context, o'];
-
         for (var i = 0; i < path.staticIndex; ++i)
             fnBlock.push(', ', 's'+i);
-
         for (var i = 0; i < path.renderIndex; ++i)
             fnBlock.push(', ', 'd'+i);
 
@@ -442,9 +440,9 @@ DomplateTag.prototype =
 
         fnBlock.push(blocks.join(""));
 
-        if (this.subject)
-            fnBlock.push('}\n');
         if (this.context)
+            fnBlock.push('}\n');
+        if (this.subject)
             fnBlock.push('}\n');
 
         fnBlock.push('return ', nodeCount, ';\n');
@@ -499,6 +497,7 @@ DomplateTag.prototype =
             for (var i = 2; i < arguments.length; ++i)
             {
                 var index = arguments[i];
+
                 if (i == 3)
                     index += offset;
 
@@ -534,7 +533,6 @@ DomplateTag.prototype =
             chained.cause = {exc:exc, js: js};
             throw chained;
         }
-
     },
 
     generateDOM: function(path, blocks, args)
@@ -735,12 +733,25 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
     {
         this.addCode(topBlock, topOuts, blocks);
 
+        // We are in a FOR loop and our this.iter property contains
+        // either a simple function name as a string or a Parts object
+        // with only ONE Variables object. There is only one variables object
+        // as the FOR argument can contain only ONE valid function callback
+        // with optional arguments or just one variable. Allowed arguments are
+        // func or $var or $var.sub or $var|func or $var1,$var2|func or $var|func1|func2 or $var1,$var2|func1|func2
         var iterName;
         if (this.iter instanceof Parts)
         {
+            // We have a function with optional aruments or just one variable
             var part = this.iter.parts[0];
-            iterName = part.name;
+            
+            // Join our function arguments or variables
+            // If the user has supplied multiple variables without a function
+            // this will create an invalid result and we should probably add an
+            // error message here or just take the first variable
+            iterName = part.names.join(",");
 
+            // Nest our functions
             if (part.format)
             {
                 for (var i = 0; i < part.format.length; ++i)
@@ -749,12 +760,12 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         }
         else
         {
+            // We have just a simple function name without any arguments
             iterName = this.iter;
         }
 
         blocks.push('__loop__.apply(this, [', iterName, ', __out__, function(',
             this.varName, ', __out__) {\n');
-
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         this.addCode(topBlock, topOuts, blocks);
 
@@ -809,9 +820,9 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-function Variable(name, format)
+function Variables(names, format)
 {
-    this.name = name;
+    this.names = names;
     this.format = format;
 }
 
@@ -824,7 +835,8 @@ function Parts(parts)
 
 function parseParts(str)
 {
-    var re = /\$([_A-Za-z][_A-Za-z0-9.|]*)/g;
+    // Match $var or $var.sub or $var|func or $var1,$var2|func or $var|func1|func2 or $var1,$var2|func1|func2
+    var re = /\$([_A-Za-z][_A-Za-z0-9.]*(,\$[_A-Za-z][_A-Za-z0-9.]*)*([_A-Za-z0-9.|]*))/g;
     var index = 0;
     var parts = [];
 
@@ -835,14 +847,20 @@ function parseParts(str)
         if (pre)
             parts.push(pre);
 
-        var expr = m[1].split("|");
-        parts.push(new Variable(expr[0], expr.slice(1)));
+        var segs = m[1].split("|");
+        var vars = segs[0].split(",$");
+
+        // Assemble the variables object and append to buffer
+        parts.push(new Variables(vars, segs.slice(1)));
+
         index = re.lastIndex;
     }
 
+    // No matches found at all so we return the whole string
     if (!index)
         return str;
 
+    // If we have data after our last matched index we append it here as the final step
     var post = str.substr(index);
     if (post)
         parts.push(post);
@@ -872,8 +890,8 @@ function readPartNames(val, vars)
         for (var i = 0; i < val.parts.length; ++i)
         {
             var part = val.parts[i];
-            if (part instanceof Variable)
-                vars.push(part.name);
+            if (part instanceof Variables)
+                vars.push(part.names[0]);
         }
     }
 }
@@ -886,7 +904,7 @@ function generateArg(val, path, args)
         for (var i = 0; i < val.parts.length; ++i)
         {
             var part = val.parts[i];
-            if (part instanceof Variable)
+            if (part instanceof Variables)
             {
                 var varName = 'd'+path.renderIndex++;
                 if (part.format)
@@ -918,9 +936,9 @@ function addParts(val, delim, block, info, escapeIt)
         for (var i = 0; i < val.parts.length; ++i)
         {
             var part = val.parts[i];
-            if (part instanceof Variable)
+            if (part instanceof Variables)
             {
-                var partName = part.name;
+                var partName = part.names.join(",");
                 if (part.format)
                 {
                     for (var j = 0; j < part.format.length; ++j)

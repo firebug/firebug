@@ -1628,7 +1628,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         {
             var headers = requestHeaders ? file.requestHeaders : file.responseHeaders;
             this.insertHeaderRows(netInfoBox, headers, target.rowName);
-            target.innerHTML = Locale.$STR("net.headers.view source");
+            target.textContent = Locale.$STR("net.headers.view source");
         }
         else
         {

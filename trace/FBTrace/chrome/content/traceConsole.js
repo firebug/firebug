@@ -394,8 +394,8 @@ var TraceConsole =
     openProfileDir: function(context)
     {
         var profileFolder = directoryService.get("ProfD", Ci.nsIFile);
-        var path = profileFolder.QueryInterface(Ci.nsILocalFile).path;
-        var fileLocal = Cc["@mozilla.org/file/local;1"].getService(Ci.nsILocalFile);
+        var path = profileFolder.QueryInterface(Ci.nsIFile).path;
+        var fileLocal = Cc["@mozilla.org/file/local;1"].getService(Ci.nsIFile);
         fileLocal.initWithPath(path);
         fileLocal.launch();
     },
@@ -428,7 +428,7 @@ var TraceConsole =
         var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm");
         var id = "firebug@software.joehewitt.com";
         var XPIProvider = XPIProviderBP.XPIProvider;
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.persistentDescriptor = XPIProvider.bootstrappedAddons[id].descriptor;
 
         var t1 = Date.now();

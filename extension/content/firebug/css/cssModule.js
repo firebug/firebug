@@ -226,7 +226,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
         /*if (!Xml.isXMLPrettyPrint(context))
         {
             var style = Css.createStyleSheet(doc);
-            style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+            style.textContent = "#fbIgnoreStyleDO_NOT_USE {}";
             Css.addStyleSheet(doc, style);
 
             if (style.parentNode)

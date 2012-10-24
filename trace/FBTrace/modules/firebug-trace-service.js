@@ -37,7 +37,7 @@ var traceConsoleService =
 
         if (toLogFile)
         {
-            this.file = dirService.get("ProfD", Ci.nsILocalFile);
+            this.file = dirService.get("ProfD", Ci.nsIFile);
             this.file.append("firebug");
             this.file.append("fbtrace");
             this.file.append("lastlog.ftl");

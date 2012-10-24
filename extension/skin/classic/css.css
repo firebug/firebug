@@ -128,15 +128,13 @@
     padding-bottom: 2px;
 }
 
-.computedStyleRow > td:first-child {
-    width: 160px;
-}
-
 .selectorName {
+    width: 160px;
     -moz-padding-start: 24px;
 }
 
 .stylePropName {
+    width: 160px;
     vertical-align: top;
     font-weight: bold;
     padding: 0 4px 0 24px;
@@ -146,11 +144,7 @@
     padding-left: 3px;
 }
 
-.styleSelector > td:first-child {
-    width: 160px;
-}
-
-.styleSelector > td:n-th-child(2) {
+.propValue {
     width: 140px;
 }
 

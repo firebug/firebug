@@ -963,10 +963,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
 
             var remoteIPLabel = row.querySelector(".netRemoteAddressCol .netAddressLabel");
-            remoteIPLabel.innerHTML = NetRequestEntry.getRemoteAddress(file);
+            remoteIPLabel.textContent = NetRequestEntry.getRemoteAddress(file);
 
             var localIPLabel = row.querySelector(".netLocalAddressCol .netAddressLabel");
-            localIPLabel.innerHTML = NetRequestEntry.getLocalAddress(file);
+            localIPLabel.textContent = NetRequestEntry.getLocalAddress(file);
 
             if (file.requestHeaders)
                 Css.setClass(row, "hasHeaders");
@@ -988,7 +988,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             var netBar = Dom.getChildByClass(row, "netTimeCol").childNodes[1];
             var timeLabel = Dom.getChildByClass(netBar, "netReceivingBar").firstChild;
-            timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
+            timeLabel.textContent = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
 
             if (file.loaded)
                 Css.setClass(row, "loaded");
@@ -1189,7 +1189,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             timeText += " (onload: " + NetRequestEntry.formatTime(loadTime) + ")";
         }
 
-        timeLabel.innerHTML = timeText;
+        timeLabel.textContent = timeText;
     },
 
     summarizePhase: function(phase, rightNow)

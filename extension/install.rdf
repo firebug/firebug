@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.11.0a4</em:version>
+    <em:version>1.11.0a5</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -13,7 +13,7 @@
     <em:targetApplication>
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
-        <em:minVersion>13.0</em:minVersion>
+        <em:minVersion>16.0</em:minVersion>
         <em:maxVersion>19.*</em:maxVersion>
       </Description>
     </em:targetApplication>
@@ -22,7 +22,7 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>13.0</em:minVersion>
+        <em:minVersion>16.0</em:minVersion>
         <em:maxVersion>19.*</em:maxVersion>
       </Description>
     </em:targetApplication>

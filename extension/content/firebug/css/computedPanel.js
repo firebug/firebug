@@ -97,7 +97,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                                 _repObject: "$selector"},
                             TD({"class": "selectorName", role: "presentation"},
                                 "$selector.selector.text"),
-                            TD({role: "presentation"},
+                            TD({"class": "propValue", role: "presentation"},
                                 SPAN({"class": "stylePropValue"}, "$selector.value|formatValue")),
                             TD({"class": "styleSourceLink", role: "presentation"},
                                 TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
