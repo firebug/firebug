@@ -6,6 +6,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/tool",
     "arch/compilationunit",
     "firebug/debugger/stackFrame",
@@ -13,11 +14,13 @@ define([
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/gripCache",
 ],
-function (Obj, Firebug, Tool, CompilationUnit, StackFrame, StackTrace,
+function (Obj, Firebug, FBTrace, Tool, CompilationUnit, StackFrame, StackTrace,
     DebuggerClientModule, GripCache) {
 
 // ********************************************************************************************* //
 // Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Debugger Tool
@@ -175,15 +178,56 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         }, callback);
     },
 
-    setBreakpoints: function(context, arr, callback)
+    setBreakpoints: function(context, arr, cb)
     {
-        if (!context.activeThread)
+        var thread = context.activeThread;
+        if (!thread)
         {
-            FBTrace.sysout("debuggerTool.setBreakpoints; Can't set breakpoints.");
+            TraceError.sysout("debuggerTool.setBreakpoints; Can't set breakpoints " +
+                "if there is no active thread");
             return;
         }
 
-        return context.activeThread.setBreakpoints(arr, callback);
+        var self = this;
+        var doSetBreakpoints = function _doSetBreakpoints(callback)
+        {
+            // Iterate all breakpoints and set them step by step. The thread is
+            // paused at this point.
+            for (var i=0; i<arr.length; i++)
+            {
+                var bp = arr[i];
+                self.setBreakpoint(context, bp.href, bp.lineNo, function(response, bpClient)
+                {
+                    // TODO: error logging.
+                });
+            }
+
+            if (callback)
+                callback(cb());
+            else
+                cb();
+        };
+
+        // If the thread is currently paused, go to set all the breakpoints.
+        if (thread.paused)
+        {
+            doSetBreakpoints();
+            return;
+        }
+
+        // ... otherwise we need to interupt the thread first.
+        thread.interrupt(function(response)
+        {
+            if (response.error)
+            {
+                TraceError.sysout("debuggerTool.setBreakpoints; Can't set breakpoints: " +
+                    response.error);
+                return;
+            }
+
+            // When the thread is interrupted, we can set all the breakpoints.
+            doSetBreakpoints(this.resume.bind(this));
+        });
     },
 
     removeBreakpoint: function(context, bp, callback)

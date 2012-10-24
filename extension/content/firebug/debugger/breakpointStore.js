@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/firebug",
     "firebug/lib/object",
+    "firebug/remoting/debuggerClientModule",
 ],
-function(FBTrace, Firebug, Obj) {
+function(FBTrace, Firebug, Obj, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -39,6 +40,8 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
+        DebuggerClientModule.addListener(this);
+
         // Restore breakpoints from a file. This should be done only if it's necessary
         // (i.e. when the Debugger tool is actually activated.
         this.storage = StorageService.getStorage("breakpoints.json");
@@ -51,7 +54,27 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
         Firebug.Module.destroy.apply(this, arguments);
 
+        DebuggerClientModule.removeListener(this);
+
         this.storage = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerClientModule Events
+
+    onThreadAttached: function(context)
+    {
+        // Get all breakpoints
+        // xxxHonza: do we have to send all the breakpoints to the server?
+        // Could we optimize this somehow?
+        var bps = this.getBreakpoints();
+
+        // Set breakpoints on the server side.
+        var tool = context.getTool("debugger");
+        tool.setBreakpoints(context, bps, function()
+        {
+            FBTrace.sysout("breakpointStore.onThreadAttached; Server initialized", bps);
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -200,7 +223,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         var bps = [];
         var urls = this.getBreakpointURLs();
         for (var i=0; i<urls.length; i++)
-            bps.push.apply(this.breakpoints[urls[i]] || []);
+            bps.push.apply(bps, this.breakpoints[urls[i]] || []);
 
         return bps;
     },
