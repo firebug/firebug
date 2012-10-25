@@ -56,7 +56,11 @@ var CSSDomplateBase =
 
     getPropertyValue: function(prop)
     {
+        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
+        /*
         var limit = Options.get("stringCropLength");
+        */
+        var limit = 0;
         if (limit > 0)
             return Str.cropString(prop.value, limit);
         return prop.value;
