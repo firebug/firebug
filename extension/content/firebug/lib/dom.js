@@ -145,6 +145,12 @@ Dom.getBody = function(doc)
 // ********************************************************************************************* //
 // DOM Modification
 
+Dom.insertAfter = function(newNode, referenceNode)
+{
+    if (referenceNode.parentNode)
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
 Dom.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
