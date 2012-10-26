@@ -224,6 +224,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return;
         }
 
+        var mustMatchFirstLetter = (this.completionBase.expr === "");
         var clist = [
             this.completionBase.candidates,
             this.completionBase.hiddenCandidates
@@ -236,9 +237,14 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             for (var i = 0; i < candidates.length; ++i)
             {
                 // Mark a candidate as matching if it matches the prefix case-
-                // insensitively, and shares its upper-case characters.
+                // insensitively, and shares its upper-case characters. The
+                // exception to this is that for global completions, the first
+                // character must match exactly (see issue 6030).
                 var name = candidates[i];
                 if (!Str.hasPrefix(name.toLowerCase(), lowPrefix))
+                    continue;
+
+                if (mustMatchFirstLetter && name.charAt(0) !== prefix.charAt(0))
                     continue;
 
                 var fail = false;
@@ -1616,17 +1622,6 @@ function propertiesToHide(expr, obj)
         ret.push("toLocaleLowerCase", "toLocaleUpperCase", "quote", "bold",
             "italics", "fixed", "fontsize", "fontcolor", "link", "anchor",
             "strike", "small", "big", "blink", "sup", "sub");
-    }
-
-    // Annoying when typing 'document'/'window'.
-    if (expr === "")
-    {
-        ret.push("Document", "DocumentType", "DocumentFragment",
-            "DocumentTouch", "DocumentXBL", "DOMTokenList",
-            "DOMConstructor", "DOMError", "DOMException",
-            "DOMImplementation", "DOMRequest", "DOMSettableTokenList",
-            "DOMStringMap", "DOMStringList", "Window", "WindowInternal",
-            "WindowCollection", "WindowUtils", "WindowPerformance");
     }
 
     if (expr === "" || expr === "window.")
