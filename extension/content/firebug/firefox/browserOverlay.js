@@ -7,7 +7,11 @@
 
 var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-Cu.import("resource://firebug/fbtrace.js");
+// Get FBTrace and make sure it doesn't leak into the global space (browser.xul)
+var scope = {};
+Cu.import("resource://firebug/fbtrace.js", scope);
+var FBTrace = scope.FBTrace;
+
 Cu.import("resource://firebug/loader.js");
 
 // Make sure PrefLoader variable doesn't leak into the global scope.
@@ -314,8 +318,8 @@ Firebug.GlobalUI =
         var container = $("appcontent");
 
         // List of Firebug scripts that must be loaded into the global scope (browser.xul)
+        // FBTrace is no longer loaded into the global space.
         var scriptSources = [
-            "chrome://firebug/content/trace.js",
             "chrome://firebug/content/legacy.js",
             "chrome://firebug/content/moduleConfig.js"
         ]
