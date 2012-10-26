@@ -3,6 +3,8 @@
 // ********************************************************************************************* //
 // Module Loader Implementation
 
+var EXPORTED_SYMBOLS = ["require", "define"];
+
 var require, define;
 
 (function() {
@@ -15,6 +17,11 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
+
+if (typeof(FBTrace) == "undefined")
+{
+    FBTrace = {sysout: function(){}}
+}
 
 // ********************************************************************************************* //
 // Module Loader implementation

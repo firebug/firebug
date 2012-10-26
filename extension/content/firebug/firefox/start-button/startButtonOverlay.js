@@ -7,9 +7,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
-    "firebug/lib/options"
+    "firebug/lib/options",
+    "firebug/firefox/globalOverlayLib",
 ],
-function(Obj, Firebug, Firefox, Locale, Events, Dom, Options) {
+function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, GlobalOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -60,7 +61,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         var tooltip = event.target;
         Dom.eraseNode(tooltip);
 
-        with (Firebug.GlobalUI)
+        with (GlobalOverlayLib)
         {
             tooltip.appendChild($label({
                 "class": "version",

@@ -1,0 +1,521 @@
+/* See license.txt for terms of usage */
+
+define([
+    "firebug/lib/trace",
+    "firebug/lib/options",
+    "firebug/lib/locale",
+    "firebug/lib/array",
+    "firebug/firefox/globalOverlayLib",
+    "firebug/firefox/globalCommands",
+    "firebug/firefox/globalMenu",
+    "firebug/firefox/globalToolbar",
+],
+function(FBTrace, Options, Locale, Arr, GlobalOverlayLib, GlobalCommands, GlobalMenu,
+    GlobalToolbar) {
+
+with (GlobalOverlayLib) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
+Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
+
+Cu.import("resource://firebug/loader.js");
+
+// ********************************************************************************************* //
+// GlobalUI Implementation
+
+function GlobalUI(win)
+{
+    this.win = win;
+    this.doc = win.document;
+    this.Firebug = win.Firebug;
+}
+
+GlobalUI.prototype =
+{
+    nodesToRemove: [],
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initialize: function(reason)
+    {
+        /**
+         * This element (a broadcaster) is storing Firebug state information. Other elements
+         * (like for example the Firebug start button) can watch it and display the info to
+         * the user.
+         */
+        $el(this.doc, "broadcaster", {id: "firebugStatus", suspended: true},
+            $(this.doc, "mainBroadcasterSet"));
+
+        this.loadContextMenuOverlay();
+        this.loadFirstRunPage(reason);
+
+        var version = this.getVersion();
+
+        GlobalCommands.overlay(this.doc);
+        GlobalMenu.overlay(this.doc);
+        GlobalToolbar.overlay(this.doc, version);
+
+        this.internationalize();
+        this.allPagesActivation();
+    },
+
+    internationalize: function()
+    {
+        // Internationalize all elements with 'fbInternational' class. Clone
+        // before internationalizing.
+        var elements = Arr.cloneArray(this.doc.getElementsByClassName("fbInternational"));
+        Locale.internationalizeElements(this.doc, elements, ["label", "tooltiptext", "aria-label"]);
+    },
+
+    allPagesActivation: function()
+    {
+        // Load Firebug by default if activation is on for all pages (see issue 5522)
+        if (Options.get("allPagesActivation") == "on" || !Options.get("delayLoad"))
+        {
+            var self = this;
+            this.startFirebug(function(Firebug)
+            {
+                var browser = Firebug.Firefox.getBrowserForWindow(this.win);
+                var uri = Firebug.Firefox.getCurrentURI();
+
+                // Open Firebug UI (e.g. if the annotations say so, issue 5623)
+                if (uri && Firebug.TabWatcher.shouldCreateContext(browser, uri.spec, null))
+                    Firebug.toggleBar(true);
+
+                FBTrace.sysout("Firebug loaded by default since 'allPagesActivation' is on " +
+                    "or 'delayLoad' is false");
+            });
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Helpers
+
+    $stylesheet: function(href)
+    {
+        var s = this.doc.createProcessingInstruction("xml-stylesheet", 'href="' + href + '"');
+        this.doc.insertBefore(s, this.doc.documentElement);
+        this.nodesToRemove.push(s);
+    },
+
+    $script: function(src)
+    {
+        var script = this.doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+        script.src = src;
+        script.type = "text/javascript";
+        script.setAttribute("firebugRootNode", true);
+        this.doc.documentElement.appendChild(script);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Load Rest of Firebug
+
+    /**
+     * This method is called by the Fremework to load entire Firebug. It's executed when
+     * the user requires Firebug for the first time.
+     *
+     * @param {Object} callback Executed when Firebug is fully loaded
+     */
+    startFirebug: function(callback)
+    {
+        if (this.Firebug.waitingForFirstLoad)
+            return;
+
+        if (this.Firebug.isInitialized)
+            return callback && callback(this.Firebug);
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
+
+        this.Firebug.waitingForFirstLoad = true;
+
+        var container = $(this.doc, "appcontent");
+
+        // List of Firebug scripts that must be loaded into the global scope (browser.xul)
+        // FBTrace is no longer loaded into the global space.
+        var scriptSources = [
+            "chrome://firebug/content/legacy.js",
+            "chrome://firebug/content/moduleConfig.js"
+        ]
+
+        // Create script elements.
+        var self = this;
+        scriptSources.forEach(function(url)
+        {
+            self.$script(url);
+        });
+
+        // Create Firebug splitter element.
+        $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
+
+        // Create Firebug main frame and container.
+        $el(this.doc, "vbox", {id: "fbMainFrame", collapsed: "true", persist: "height,width"}, [
+            $el(this.doc, "browser", {
+                id: "fbMainContainer",
+                flex: "2",
+                src: "chrome://firebug/content/firefox/firebugFrame.xul",
+                disablehistory: "true"
+            })
+        ], container);
+
+        // When Firebug is fully loaded and initialized it fires a "FirebugLoaded"
+        // event to the browser document (browser.xul scope). Wait for that to happen.
+        this.doc.addEventListener("FirebugLoaded", function onLoad()
+        {
+            self.doc.removeEventListener("FirebugLoaded", onLoad, false);
+            self.Firebug.waitingForFirstLoad = false;
+
+            // xxxHonza: TODO find a better place for notifying extensions
+            FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.Firebug]);
+            callback && callback(self.Firebug);
+        }, false);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug Menu Handlers
+
+    onOptionsShowing: function(popup)
+    {
+        for (var child = popup.firstChild; child; child = child.nextSibling)
+        {
+            if (child.localName == "menuitem")
+            {
+                var option = child.getAttribute("option");
+                if (option)
+                {
+                    var checked = Options.get(option);
+
+                    // xxxHonza: I belive that allPagesActivation could be simple boolean option.
+                    if (option == "allPagesActivation")
+                        checked = (checked == "on") ? true : false;
+
+                    child.setAttribute("checked", checked);
+                }
+            }
+        }
+    },
+
+    onToggleOption: function(menuItem)
+    {
+        var option = menuItem.getAttribute("option");
+        var checked = menuItem.getAttribute("checked") == "true";
+
+        Options.set(option, checked);
+    },
+
+    onMenuShowing: function(popup, event)
+    {
+        // If the event comes from a sub menu, just ignore it.
+        if (popup != event.target)
+            return;
+
+        while (popup.lastChild)
+            popup.removeChild(popup.lastChild);
+
+        // Generate dynamic content.
+        for (var i=0; i<GlobalMenu.firebugMenuContent.length; i++)
+            popup.appendChild(GlobalMenu.firebugMenuContent[i].cloneNode(true));
+
+        var collapsed = "true";
+        if (this.Firebug.chrome)
+        {
+            var fbContentBox = Firebug.chrome.$("fbContentBox");
+            collapsed = fbContentBox.getAttribute("collapsed");
+        }
+
+        var currPos = Options.get("framePosition");
+        var placement = this.Firebug.getPlacement ? this.Firebug.getPlacement() : "";
+
+        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu.
+        var toggleFirebug = popup.querySelector("#menu_firebug_toggleFirebug");
+        if (toggleFirebug)
+        {
+            var hiddenUI = (collapsed == "true" || placement == "minimized");
+            toggleFirebug.setAttribute("label", (hiddenUI ?
+                Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
+
+            toggleFirebug.setAttribute("tooltiptext", (hiddenUI ?
+                Locale.$STR("firebug.menu.tip.Open_Firebug") :
+                Locale.$STR("firebug.menu.tip.Minimize_Firebug")));
+
+            var currentLocation = toggleFirebug.ownerDocument.defaultView.top.location.href;
+            var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
+
+            // If Firebug is detached, use "Focus Firebug Window" label
+            // instead of "Hide Firebug" when the menu isn't opened from
+            // within the detached Firebug window. the 'placement' is used
+            // to ensure Firebug isn't closed with close button of detached window
+            // and 'inDetachedWindow' variable is also used to ensure the menu is
+            // opened from within the detached window.
+            if (currPos == "detached" && this.Firebug.currentContext &&
+                placement != "minimized" && !inDetachedWindow)
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
+                toggleFirebug.setAttribute("tooltiptext",
+                    Locale.$STR("firebug.menu.tip.Focus_Firebug"));
+            }
+        }
+
+        // Hide "Deactivate Firebug" menu if Firebug is not active.
+        var closeFirebug = popup.querySelector("#menu_firebug_closeFirebug");
+        if (closeFirebug)
+        {
+            closeFirebug.setAttribute("collapsed",
+                (this.Firebug.currentContext ? "false" : "true"));
+        }
+
+        // Update About Menu
+        var version = this.getVersion();
+        if (version)
+        {
+            var node = popup.getElementsByClassName("firebugAbout")[0];
+            var aboutLabel = node.getAttribute("label");
+            node.setAttribute("label", aboutLabel + " " + version);
+            node.classList.remove("firebugAbout");
+        }
+
+        // Allow Firebug menu customization (see FBTest and FBTrace as an example).
+        var event = new this.win.CustomEvent("firebugMenuShowing", {detail: popup});
+        this.doc.dispatchEvent(event);
+    },
+
+    onMenuHiding: function(popup, event)
+    {
+        if (popup != event.target)
+            return;
+
+        // xxxHonza: I don't know why the timeout must be here, but if it isn't
+        // the icon menu is broken (see issue 5427)
+        this.win.setTimeout(function()
+        {
+            while (popup.lastChild)
+                popup.removeChild(popup.lastChild);
+        });
+    },
+
+    onPositionPopupShowing: function(popup)
+    {
+        while (popup.lastChild)
+            popup.removeChild(popup.lastChild);
+
+        // Load Firebug before the position is changed.
+        var oncommand = "Firebug.globalUI.startFirebug(function(){" +
+            "Firebug.chrome.setPosition('%pos%')" + "})";
+
+        var items = [];
+        var currPos = Options.get("framePosition");
+        for each (var pos in ["detached", "top", "bottom", "left", "right"])
+        {
+            var label = pos.charAt(0).toUpperCase() + pos.slice(1);
+            var item = $menuitem(this.doc, {
+                label: Locale.$STR("firebug.menu." + label),
+                tooltiptext: Locale.$STR("firebug.menu.tip." + label),
+                type: "radio",
+                oncommand: oncommand.replace("%pos%", pos),
+                checked: (currPos == pos)
+            });
+
+            if (pos == "detached")
+                items.key = "key_firebug_detachFirebug";
+
+            popup.appendChild(item);
+        }
+
+        return true;
+    },
+
+    openAboutDialog: function()
+    {
+        // Firefox 4.0+
+        Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
+        this.win.AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon)
+        {
+            openDialog("chrome://mozapps/content/extensions/about.xul", "",
+                "chrome,centerscreen,modal", addon);
+        });
+    },
+
+    setPosition: function(newPosition)
+    {
+        // todo
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug Version
+
+    getVersion: function()
+    {
+        var versionURL = "chrome://firebug/content/branch.properties";
+        var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
+        var channel = ioService.newChannel(versionURL, null, null);
+        var input = channel.open();
+        var sis = Cc["@mozilla.org/scriptableinputstream;1"].
+            createInstance(Ci.nsIScriptableInputStream);
+        sis.init(input);
+
+        var content = sis.readBytes(input.available());
+        sis.close();
+
+        var m = /RELEASE=(.*)/.exec(content);
+        if (m)
+            var release = m[1];
+        else
+            return "no RELEASE in " + versionURL;
+
+        m = /VERSION=(.*)/.exec(content);
+        if (m)
+            var version = m[1];
+        else
+            return "no VERSION in " + versionURL;
+
+        return version+""+release;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // External Editors
+
+    onEditorsShowing: function(popup)
+    {
+        var self = this;
+        this.startFirebug(function()
+        {
+            self.Firebug.ExternalEditors.onEditorsShowing(popup);
+        });
+
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Page Context Menu Overlay
+
+    loadContextMenuOverlay: function()
+    {
+        if (typeof(this.win.nsContextMenu) == "undefined")
+            return;
+
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+        var setTargetOriginal = this.setTargetOriginal = this.win.nsContextMenu.prototype.setTarget;
+        this.win.nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+        {
+            setTargetOriginal.apply(this, arguments);
+
+            if (this.isTargetAFormControl(aNode))
+                this.shouldDisplay = true;
+        };
+
+        // Hide built-in inspector if the pref says so.
+        var initItemsOriginal = this.initItemsOriginal = this.win.nsContextMenu.prototype.initItems;
+        this.win.nsContextMenu.prototype.initItems = function()
+        {
+            initItemsOriginal.apply(this, arguments);
+
+            // Hide built-in inspector menu item if the pref "extensions.firebug.hideDefaultInspector"
+            // says so. Note that there is also built-in preference "devtools.inspector.enable" that
+            // can be used for the same purpose.
+            var hideInspect = Options.get("hideDefaultInspector");
+            if (hideInspect)
+            {
+                this.showItem("inspect-separator", false);
+                this.showItem("context-inspect", false);
+            }
+        }
+    },
+
+    unloadContextMenuOverlay: function()
+    {
+        if (typeof(this.win.nsContextMenu) == "undefined")
+            return;
+
+        this.win.nsContextMenu.prototype.setTarget = this.setTargetOriginal;
+        this.win.nsContextMenu.prototype.initItems = this.initItemsOriginal;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // First Run Page
+
+    loadFirstRunPage: function(reason)
+    {
+        if (this.checkFirebugVersion(Options.get("currentVersion")) <= 0)
+            return;
+
+        // Do not show the first run page when Firebug is being updated. It'll be displayed
+        // the next time the browser is restarted
+        // # ADDON_UPGRADE == 7
+        if (reason == 7)
+            return;
+
+        // Open the page in the top most window, so the user can see it immediately.
+        var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+        if (wm.getMostRecentWindow("navigator:browser") == this.win.top)
+        {
+            // Update the preference to make sure the page is not displayed again.
+            // To avoid being annoying when Firefox crashes, forcibly save it, too.
+            var version = this.getVersion();
+            Options.set("currentVersion", version);
+
+            if (Options.get("showFirstRunPage"))
+            {
+                var self = this;
+                var timeout = this.win.setTimeout(function()
+                {
+                    if (this.win.closed)
+                        return;
+
+                    self.openFirstRunPage();
+                }, 1000);
+
+                this.win.addEventListener("unload", function()
+                {
+                    clearTimeout(timeout);
+                }, false);
+            }
+        }
+    },
+
+    openFirstRunPage: function()
+    {
+        var version = this.getVersion();
+        var url = firstRunPage + version;
+
+        // Open the firstRunPage in background
+        /*gBrowser.selectedTab = */gBrowser.addTab(url, null, null, null);
+
+        // Make sure prefs are stored, otherwise the firstRunPage would be displayed
+        // again if Firefox crashes.
+        this.win.setTimeout(function()
+        {
+            Options.forceSave();
+        }, 400);
+    },
+
+    checkFirebugVersion: function(currentVersion)
+    {
+        if (!currentVersion)
+            return 1;
+
+        var version = this.getVersion();
+
+        // Use Firefox comparator service.
+        var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
+            getService(Ci.nsIVersionComparator);
+
+        return versionChecker.compare(version, currentVersion);
+    }
+}
+
+// ********************************************************************************************* //
+// Registration
+
+return GlobalUI;
+
+// ********************************************************************************************* //
+}});

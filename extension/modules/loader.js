@@ -118,14 +118,14 @@ var FirebugLoader =
         }
 
         [getRoots(win.document), getRoots(win.gNavToolbox.palette),
-            fbug.GlobalUI.nodesToRemove].forEach(function(list)
+            fbug.globalUI.nodesToRemove].forEach(function(list)
         {
             for each(var el in list)
                 if (el && el.parentNode)
                     el.parentNode.removeChild(el);
         });
 
-        win.Firebug.GlobalUI.unloadContextMenuOverlay(win);
+        win.Firebug.globalUI.unloadContextMenuOverlay(win);
 
         delete win.Firebug;
         delete win.FBTrace;
@@ -140,11 +140,23 @@ var FirebugLoader =
         // In the future, there should *not* be any other globals except of the Firebug object.
         win.Firebug = {};
 
-        // Apply all Firefox/SeaMonkey overlays to the browser window.
-        loadSubscript("chrome://firebug/content/firefox/browserOverlay.js", win);
+        var requireScope = {};
+        Cu.import("resource://firebug/mini-require.js", requireScope);
+        var require = requireScope.require;
 
-        win.Firebug.GlobalUI.loadContextMenuOverlay(win);
-        win.Firebug.GlobalUI.loadFirstRunPage(win, reason);
+        var config = {
+            baseUrl: "resource://",
+            paths: {"firebug": "chrome://firebug/content"}
+        };
+
+        require(config, [
+            "firebug/firefox/globalUI"
+        ],
+        function(GlobalUI)
+        {
+            var globalUI = win.Firebug.globalUI = new GlobalUI(win);
+            globalUI.initialize(reason);
+        });
 
         // Firebug extensions should initialize here.
         this.dispatchToScopes("topWindowLoad", [win]);

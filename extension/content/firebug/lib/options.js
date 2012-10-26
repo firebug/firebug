@@ -96,6 +96,8 @@ var optionUpdateMap = {};
 var Options =
 /** @lends Options */
 {
+    prefDomain: "extensions.firebug",
+
     getPrefDomain: function()
     {
         return this.prefDomain;
@@ -346,7 +348,7 @@ var Options =
         if (prefs.prefHasUserValue(prefName))
             prefs.clearUserPref(prefName);
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug UI text zoom
 
@@ -411,6 +413,11 @@ var Options =
             }
         }
     },
+
+    forceSave: function()
+    {
+        prefs.savePrefFile(null);
+    }
 };
 
 // ********************************************************************************************* //
