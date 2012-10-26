@@ -7,14 +7,15 @@
 
 var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-// Get FBTrace and make sure it doesn't leak into the global space (browser.xul)
-var scope = {};
-Cu.import("resource://firebug/fbtrace.js", scope);
-var FBTrace = scope.FBTrace;
+// Load modules and make sure that none of the importent objects leak into the global scope.
+var fbTraceScope = {};
+Cu.import("resource://firebug/fbtrace.js", fbTraceScope);
+var FBTrace = fbTraceScope.FBTrace;
 
-Cu.import("resource://firebug/loader.js");
+var loaderScope = {};
+Cu.import("resource://firebug/loader.js", loaderScope);
+var FirebugLoader = loaderScope.FirebugLoader;
 
-// Make sure PrefLoader variable doesn't leak into the global scope.
 var prefLoaderScope = {};
 Cu.import("resource://firebug/prefLoader.js", prefLoaderScope);
 var PrefLoader = prefLoaderScope.PrefLoader;
