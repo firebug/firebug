@@ -7,8 +7,8 @@ content firebug content/firebug/ contentaccessible=yes
 # Maps resource://moduleloader/* to files in modules/*
 # resource moduleloader modules/
 
-skin    firebug classic/1.0 skin/classic/
-skin    firebug-os  classic/1.0 skin/classic/win/
+skin firebug classic/1.0 skin/classic/
+skin firebug-os  classic/1.0 skin/classic/win/
 
 locale  firebug bg          locale/bg/
 locale  firebug ca-AD       locale/ca-AD/
@@ -45,16 +45,6 @@ locale  firebug uk-UA       locale/uk-UA/
 locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
-
-#overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
-#overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
-
-#overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
-#overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul
-
-# Sea Monkey
-#overlay chrome://navigator/content/navigator.xul               chrome://firebug/content/browserOverlay.xul
-#overlay chrome://navigator/content/navigator.xul                chrome://firebug/content/firefox/browserOverlayWithFrame.xul
 
 # Support for Mac
 override chrome://firebug/skin/debugger.css    chrome://firebug/skin/mac/debugger.css os=Darwin
