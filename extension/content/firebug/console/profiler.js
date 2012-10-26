@@ -172,7 +172,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
         var sourceFileMap = context.sourceFileMap;
         if (FBTrace.DBG_PROFILER)
         {
-            for (url in sourceFileMap)
+            for (var url in sourceFileMap)
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
         }
 

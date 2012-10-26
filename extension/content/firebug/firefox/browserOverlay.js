@@ -645,7 +645,7 @@ Firebug.GlobalUI =
     openFirstRunPage: function()
     {
         var version = Firebug.GlobalUI.getVersion();
-        url = firstRunPage + version;
+        var url = firstRunPage + version;
 
         // Open the firstRunPage in background
         /*gBrowser.selectedTab = */gBrowser.addTab(url, null, null, null);
