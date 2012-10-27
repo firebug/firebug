@@ -930,8 +930,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Events.cancelEvent(event);
         }
         else if (this.numeric && event.charCode &&
-            (event.charCode < KeyEvent.DOM_VK_0 || event.charCode > KeyEvent.DOM_VK_9) &&
-            event.charCode != KeyEvent.DOM_VK_INSERT && event.charCode != KeyEvent.DOM_VK_DELETE)
+            !(event.ctrlKey || event.metaKey || event.altKey) &&
+            !(KeyEvent.DOM_VK_0 <= event.charCode && event.charCode <= KeyEvent.DOM_VK_9) &&
+            event.charCode !== KeyEvent.DOM_VK_INSERT && event.charCode !== KeyEvent.DOM_VK_DELETE)
         {
             Events.cancelEvent(event);
         }
