@@ -135,6 +135,8 @@ var FirebugLoader =
         // the entire application and all consequently created namespaces and variables should be
         // injected into it.
         // In the future, there should *not* be any other globals except of the Firebug object.
+        // xxxHonza: properties from this object are copied into the new Firebug obect that is
+        // created within "firebug/firebug" module (a hack).
         win.Firebug = {};
 
         var requireScope = {};
@@ -155,12 +157,8 @@ var FirebugLoader =
             overlay.initialize(reason);
         });
 
-        // Just for debugging purposes.
-        /*var text = "";
-        var deps = require.Loader.getDeps();
-        for (var p in deps)
-            text += p + "\n";
-        FBTrace.sysout(text);*/
+        if (FBTrace.DBG_MODULES)
+            FBTrace.sysout("Basic loader dependencies: " + require.Loader.getDepDesc());
 
         // Firebug extensions should initialize here.
         this.dispatchToScopes("topWindowLoad", [win]);

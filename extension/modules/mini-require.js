@@ -17,11 +17,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
-
-if (typeof(FBTrace) == "undefined")
-{
-    FBTrace = {sysout: function(){}}
-}
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 // Module Loader implementation
@@ -203,7 +199,16 @@ var Loader =
         }
 
         return deps;
-    }
+    },
+
+    getDepDesc: function()
+    {
+        var desc = "";
+        var deps = this.getDeps();
+        for (var p in deps)
+            desc += p + "\n";
+        return desc;
+    },
 }
 
 // ********************************************************************************************* //
