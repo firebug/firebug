@@ -10,9 +10,6 @@ function(FBTrace, Options, Locale, GlobalOverlayLib) {
 with (GlobalOverlayLib) {
 
 // ********************************************************************************************* //
-// Constants
-
-// ********************************************************************************************* //
 // GlobalCommands Implementation
 
 var GlobalMenu =

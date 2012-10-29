@@ -212,6 +212,7 @@ var Loader =
 require = Loader.require.bind(Loader);
 define = Loader.define.bind(Loader);
 require.load = Loader.load.bind(Loader);
+require.Loader = Loader;
 
 // ********************************************************************************************* //
 })();

@@ -10,10 +10,7 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
-
-// xxxHonza: this breaks tracing, needs to be fixed.
-//Components.utils.import("resource://firebug/fbtrace.js");
-var FBTrace = {};
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 
@@ -157,6 +154,13 @@ var FirebugLoader =
             var globalUI = win.Firebug.globalUI = new GlobalUI(win);
             globalUI.initialize(reason);
         });
+
+        // Just for debugging purposes.
+        /*var text = "";
+        var deps = require.Loader.getDeps();
+        for (var p in deps)
+            text += p + "\n";
+        FBTrace.sysout(text);*/
 
         // Firebug extensions should initialize here.
         this.dispatchToScopes("topWindowLoad", [win]);

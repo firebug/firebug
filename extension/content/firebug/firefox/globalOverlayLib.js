@@ -11,6 +11,7 @@ function(FBTrace, Locale) {
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
+var Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Overlay Helpers
@@ -205,7 +206,26 @@ var GlobalOverlayLib =
     $label: function(doc, attrs)
     {
         return this.$el(doc, "label", attrs);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stylesheets & Scripts
+
+    $stylesheet: function(doc, href)
+    {
+        var s = doc.createProcessingInstruction("xml-stylesheet", 'href="' + href + '"');
+        doc.insertBefore(s, doc.documentElement);
+        return s;
+    },
+
+    $script: function(doc, src)
+    {
+        var script = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+        script.src = src;
+        script.type = "text/javascript";
+        script.setAttribute("firebugRootNode", true);
+        doc.documentElement.appendChild(script);
+    },
 }
 
 // ********************************************************************************************* //

@@ -26,6 +26,7 @@ Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 
 Cu.import("resource://firebug/loader.js");
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 // GlobalUI Implementation
@@ -34,11 +35,12 @@ function GlobalUI(win)
 {
     this.win = win;
     this.doc = win.document;
-    this.Firebug = win.Firebug;
 }
 
 GlobalUI.prototype =
 {
+    // When Firebug is disabled or unistalled this elements must be removed from
+    // chrome UI (XUL).
     nodesToRemove: [],
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,13 +48,14 @@ GlobalUI.prototype =
 
     initialize: function(reason)
     {
-        /**
-         * This element (a broadcaster) is storing Firebug state information. Other elements
-         * (like for example the Firebug start button) can watch it and display the info to
-         * the user.
-         */
+        // This element (a broadcaster) is storing Firebug state information. Other elements
+        // (like for example the Firebug start button) can watch it and display the info to
+        // the user.
         $el(this.doc, "broadcaster", {id: "firebugStatus", suspended: true},
             $(this.doc, "mainBroadcasterSet"));
+
+        var node = $stylesheet(this.doc, "chrome://firebug/content/firefox/browserOverlay.css");
+        this.nodesToRemove.push(node);
 
         this.loadContextMenuOverlay();
         this.loadFirstRunPage(reason);
@@ -97,25 +100,6 @@ GlobalUI.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Helpers
-
-    $stylesheet: function(href)
-    {
-        var s = this.doc.createProcessingInstruction("xml-stylesheet", 'href="' + href + '"');
-        this.doc.insertBefore(s, this.doc.documentElement);
-        this.nodesToRemove.push(s);
-    },
-
-    $script: function(src)
-    {
-        var script = this.doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
-        script.src = src;
-        script.type = "text/javascript";
-        script.setAttribute("firebugRootNode", true);
-        this.doc.documentElement.appendChild(script);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Load Rest of Firebug
 
     /**
@@ -126,16 +110,16 @@ GlobalUI.prototype =
      */
     startFirebug: function(callback)
     {
-        if (this.Firebug.waitingForFirstLoad)
+        if (this.win.Firebug.waitingForFirstLoad)
             return;
 
-        if (this.Firebug.isInitialized)
-            return callback && callback(this.Firebug);
+        if (this.win.Firebug.isInitialized)
+            return callback && callback(this.win.Firebug);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
 
-        this.Firebug.waitingForFirstLoad = true;
+        this.win.Firebug.waitingForFirstLoad = true;
 
         var container = $(this.doc, "appcontent");
 
@@ -150,7 +134,7 @@ GlobalUI.prototype =
         var self = this;
         scriptSources.forEach(function(url)
         {
-            self.$script(url);
+            $script(self.doc, url);
         });
 
         // Create Firebug splitter element.
@@ -171,11 +155,11 @@ GlobalUI.prototype =
         this.doc.addEventListener("FirebugLoaded", function onLoad()
         {
             self.doc.removeEventListener("FirebugLoaded", onLoad, false);
-            self.Firebug.waitingForFirstLoad = false;
+            self.win.Firebug.waitingForFirstLoad = false;
 
             // xxxHonza: TODO find a better place for notifying extensions
-            FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.Firebug]);
-            callback && callback(self.Firebug);
+            FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.win.Firebug]);
+            callback && callback(self.win.Firebug);
         }, false);
     },
 
@@ -225,14 +209,14 @@ GlobalUI.prototype =
             popup.appendChild(GlobalMenu.firebugMenuContent[i].cloneNode(true));
 
         var collapsed = "true";
-        if (this.Firebug.chrome)
+        if (this.win.Firebug.chrome)
         {
-            var fbContentBox = Firebug.chrome.$("fbContentBox");
+            var fbContentBox = this.win.Firebug.chrome.$("fbContentBox");
             collapsed = fbContentBox.getAttribute("collapsed");
         }
 
         var currPos = Options.get("framePosition");
-        var placement = this.Firebug.getPlacement ? this.Firebug.getPlacement() : "";
+        var placement = this.win.Firebug.getPlacement ? this.win.Firebug.getPlacement() : "";
 
         // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu.
         var toggleFirebug = popup.querySelector("#menu_firebug_toggleFirebug");
@@ -255,7 +239,7 @@ GlobalUI.prototype =
             // to ensure Firebug isn't closed with close button of detached window
             // and 'inDetachedWindow' variable is also used to ensure the menu is
             // opened from within the detached window.
-            if (currPos == "detached" && this.Firebug.currentContext &&
+            if (currPos == "detached" && this.win.Firebug.currentContext &&
                 placement != "minimized" && !inDetachedWindow)
             {
                 toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
@@ -269,7 +253,7 @@ GlobalUI.prototype =
         if (closeFirebug)
         {
             closeFirebug.setAttribute("collapsed",
-                (this.Firebug.currentContext ? "false" : "true"));
+                (this.win.Firebug.currentContext ? "false" : "true"));
         }
 
         // Update About Menu
@@ -334,11 +318,13 @@ GlobalUI.prototype =
 
     openAboutDialog: function()
     {
+        var self = this;
+
         // Firefox 4.0+
-        Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
+        Cu["import"]("resource://gre/modules/AddonManager.jsm");
         this.win.AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon)
         {
-            openDialog("chrome://mozapps/content/extensions/about.xul", "",
+            self.win.openDialog("chrome://mozapps/content/extensions/about.xul", "",
                 "chrome,centerscreen,modal", addon);
         });
     },
@@ -388,7 +374,7 @@ GlobalUI.prototype =
         var self = this;
         this.startFirebug(function()
         {
-            self.Firebug.ExternalEditors.onEditorsShowing(popup);
+            self.win.Firebug.ExternalEditors.onEditorsShowing(popup);
         });
 
         return true;
