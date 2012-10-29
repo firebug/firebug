@@ -65,6 +65,7 @@ var panelTypeMap = {};
 
 // ********************************************************************************************* //
 
+//xxxHonza: we should use the existing Firebug object.
 if (window.Firebug)
 {
     // Stow the pre-load properties, add them back at the end

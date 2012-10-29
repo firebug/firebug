@@ -48,6 +48,9 @@ BrowserOverlay.prototype =
 
     initialize: function(reason)
     {
+        // Expose BrowserOverlayLib object to extensions.
+        this.win.Firebug.BrowserOverlayLib = BrowserOverlayLib;
+
         // This element (a broadcaster) is storing Firebug state information. Other elements
         // (like for example the Firebug start button) can watch it and display the info to
         // the user.

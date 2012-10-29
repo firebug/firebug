@@ -36,20 +36,21 @@ this.initialize = function()
 
 this.onFirebugMenuShowing = function(event)
 {
-    if (!Firebug.GlobalUI)
+    if (!Firebug.BrowserOverlayLib)
         return;
 
     var parent = event.detail;
+    var doc = parent.ownerDocument;
 
     // Extend Firebug menu
-    with (Firebug.GlobalUI)
+    with (Firebug.BrowserOverlayLib)
     {
         // Open Test Console
-        $menupopupOverlay(parent, [
-            $menuseparator({
+        $menupopupOverlay(doc, parent, [
+            $menuseparator(doc, {
                 insertbefore: "menu_firebug_aboutSeparator",
             }),
-            $menuitem({
+            $menuitem(doc, {
                 id: "menu_openTraceConsole",
                 label: "Open_Firebug_Tracing",
                 command: "cmd_openTraceConsole",
@@ -61,8 +62,8 @@ this.onFirebugMenuShowing = function(event)
 
         // Always Open Test Console (option)
         var optionsPopup = parent.querySelector("#FirebugMenu_OptionsPopup");
-        $menupopupOverlay(optionsPopup, [
-            $menuitem({
+        $menupopupOverlay(doc, optionsPopup, [
+            $menuitem(doc, {
                 id: "FirebugMenu_Options_alwaysOpenTraceConsole",
                 type: "checkbox",
                 label: "Always_Open_Firebug_Tracing",
@@ -77,7 +78,7 @@ this.onFirebugMenuShowing = function(event)
 this.onToggleOption = function(target)
 {
     var self = this;
-    Firebug.GlobalUI.startFirebug(function()
+    Firebug.browserOverlay.startFirebug(function()
     {
         Firebug.chrome.onToggleOption(target);
 
