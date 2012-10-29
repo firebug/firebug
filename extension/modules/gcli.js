@@ -103,7 +103,7 @@ var FirebugController =
         if (!Firebug)
             return;
 
-        Firebug.GlobalUI.startFirebug(function(Firebug) {
+        Firebug.browserOverlay.startFirebug(function(Firebug) {
             callback(Firebug);
         });
     },

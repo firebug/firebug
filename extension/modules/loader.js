@@ -115,14 +115,14 @@ var FirebugLoader =
         }
 
         [getRoots(win.document), getRoots(win.gNavToolbox.palette),
-            fbug.globalUI.nodesToRemove].forEach(function(list)
+            fbug.browserOverlay.nodesToRemove].forEach(function(list)
         {
             for each(var el in list)
                 if (el && el.parentNode)
                     el.parentNode.removeChild(el);
         });
 
-        win.Firebug.globalUI.unloadContextMenuOverlay(win);
+        win.Firebug.browserOverlay.unloadContextMenuOverlay(win);
 
         delete win.Firebug;
         delete win.FBTrace;
@@ -147,12 +147,12 @@ var FirebugLoader =
         };
 
         require(config, [
-            "firebug/firefox/globalUI"
+            "firebug/firefox/browserOverlay"
         ],
-        function(GlobalUI)
+        function(BrowserOverlay)
         {
-            var globalUI = win.Firebug.globalUI = new GlobalUI(win);
-            globalUI.initialize(reason);
+            var overlay = win.Firebug.browserOverlay = new BrowserOverlay(win);
+            overlay.initialize(reason);
         });
 
         // Just for debugging purposes.

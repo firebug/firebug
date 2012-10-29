@@ -16,7 +16,7 @@ var Cu = Components.utils;
 // ********************************************************************************************* //
 // Overlay Helpers
 
-var GlobalOverlayLib =
+var BrowserOverlayLib =
 {
     $: function(doc, id)
     {
@@ -74,7 +74,7 @@ var GlobalOverlayLib =
     {
         // Wrap the command within a startFirebug call. If Firebug isn't yet loaded
         // this will force it to load.
-        oncommand = "Firebug.globalUI.startFirebug(function(){" + oncommand + "})";
+        oncommand = "Firebug.browserOverlay.startFirebug(function(){" + oncommand + "})";
         if (arg)
             oncommand = "void function(arg){" + oncommand + "}(" + arg + ")";
 
@@ -259,7 +259,7 @@ function updatePersistedValues(doc, options)
 // ********************************************************************************************* //
 // Registration
 
-return GlobalOverlayLib;
+return BrowserOverlayLib;
 
 // ********************************************************************************************* //
 });

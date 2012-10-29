@@ -4,15 +4,15 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/locale",
-    "firebug/firefox/globalOverlayLib",
+    "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, GlobalOverlayLib) {
-with (GlobalOverlayLib) {
+function(FBTrace, Options, Locale, BrowserOverlayLib) {
+with (BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
 
-var globalShortcuts = [
+var shortcuts = [
     "toggleFirebug",
     "toggleInspecting",
     "focusCommandLine",
@@ -21,7 +21,7 @@ var globalShortcuts = [
     "toggleBreakOn"
 ]
 
-/* Used by the global menu, but should be really global shortcuts?
+/* Used by the browser menu, but should be really global shortcuts?
 key_increaseTextSize
 key_decreaseTextSize
 key_normalTextSize
@@ -32,9 +32,9 @@ key_customizeFBKeys
 */
 
 // ********************************************************************************************* //
-// GlobalCommands Implementation
+// BrowserCommands Implementation
 
-var GlobalCommands =
+var BrowserCommands =
 {
     overlay: function(doc)
     {
@@ -72,9 +72,9 @@ var GlobalCommands =
     {
         var keyset = $(doc, "mainKeyset");
 
-        for (var i=0; i<globalShortcuts.length ; i++)
+        for (var i=0; i<shortcuts.length ; i++)
         {
-            var id = globalShortcuts[i];
+            var id = shortcuts[i];
             var shortcut = Options.get("key.shortcut." + id);
             var tokens = shortcut.split(" ");
             var key = tokens.pop();
@@ -101,7 +101,7 @@ var GlobalCommands =
 // ********************************************************************************************* //
 // Registration
 
-return GlobalCommands;
+return BrowserCommands;
 
 // ********************************************************************************************* //
 }});

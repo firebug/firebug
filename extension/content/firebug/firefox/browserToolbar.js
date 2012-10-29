@@ -4,10 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/locale",
-    "firebug/firefox/globalOverlayLib",
+    "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, GlobalOverlayLib) {
-with (GlobalOverlayLib) {
+function(FBTrace, Options, Locale, BrowserOverlayLib) {
+with (BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,7 +15,7 @@ with (GlobalOverlayLib) {
 // ********************************************************************************************* //
 // Firefox Toolbar Buttons
 
-var GlobalToolbar =
+var BrowserToolbar =
 {
     overlay: function(doc, version)
     {
@@ -130,7 +130,7 @@ var GlobalToolbar =
 // ********************************************************************************************* //
 // Registration
 
-return GlobalToolbar;
+return BrowserToolbar;
 
 // ********************************************************************************************* //
 }});

@@ -5,15 +5,15 @@ define([
     "firebug/lib/options",
     "firebug/lib/locale",
     "firebug/lib/array",
-    "firebug/firefox/globalOverlayLib",
-    "firebug/firefox/globalCommands",
-    "firebug/firefox/globalMenu",
-    "firebug/firefox/globalToolbar",
+    "firebug/firefox/browserOverlayLib",
+    "firebug/firefox/browserCommands",
+    "firebug/firefox/browserMenu",
+    "firebug/firefox/browserToolbar",
 ],
-function(FBTrace, Options, Locale, Arr, GlobalOverlayLib, GlobalCommands, GlobalMenu,
-    GlobalToolbar) {
+function(FBTrace, Options, Locale, Arr, BrowserOverlayLib, BrowserCommands, BrowserMenu,
+    BrowserToolbar) {
 
-with (GlobalOverlayLib) {
+with (BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,15 +29,15 @@ Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
-// GlobalUI Implementation
+// BrowserOverlay Implementation
 
-function GlobalUI(win)
+function BrowserOverlay(win)
 {
     this.win = win;
     this.doc = win.document;
 }
 
-GlobalUI.prototype =
+BrowserOverlay.prototype =
 {
     // When Firebug is disabled or unistalled this elements must be removed from
     // chrome UI (XUL).
@@ -62,9 +62,9 @@ GlobalUI.prototype =
 
         var version = this.getVersion();
 
-        GlobalCommands.overlay(this.doc);
-        GlobalMenu.overlay(this.doc);
-        GlobalToolbar.overlay(this.doc, version);
+        BrowserCommands.overlay(this.doc);
+        BrowserMenu.overlay(this.doc);
+        BrowserToolbar.overlay(this.doc, version);
 
         this.internationalize();
         this.allPagesActivation();
@@ -205,8 +205,8 @@ GlobalUI.prototype =
             popup.removeChild(popup.lastChild);
 
         // Generate dynamic content.
-        for (var i=0; i<GlobalMenu.firebugMenuContent.length; i++)
-            popup.appendChild(GlobalMenu.firebugMenuContent[i].cloneNode(true));
+        for (var i=0; i<BrowserMenu.firebugMenuContent.length; i++)
+            popup.appendChild(BrowserMenu.firebugMenuContent[i].cloneNode(true));
 
         var collapsed = "true";
         if (this.win.Firebug.chrome)
@@ -291,7 +291,7 @@ GlobalUI.prototype =
             popup.removeChild(popup.lastChild);
 
         // Load Firebug before the position is changed.
-        var oncommand = "Firebug.globalUI.startFirebug(function(){" +
+        var oncommand = "Firebug.BrowserOverlay.startFirebug(function(){" +
             "Firebug.chrome.setPosition('%pos%')" + "})";
 
         var items = [];
@@ -501,7 +501,7 @@ GlobalUI.prototype =
 // ********************************************************************************************* //
 // Registration
 
-return GlobalUI;
+return BrowserOverlay;
 
 // ********************************************************************************************* //
 }});

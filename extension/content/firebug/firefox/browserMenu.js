@@ -4,15 +4,15 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/locale",
-    "firebug/firefox/globalOverlayLib",
+    "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, GlobalOverlayLib) {
-with (GlobalOverlayLib) {
+function(FBTrace, Options, Locale, BrowserOverlayLib) {
+with (BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // GlobalCommands Implementation
 
-var GlobalMenu =
+var BrowserMenu =
 {
     overlay: function(doc)
     {
@@ -30,7 +30,7 @@ var GlobalMenu =
             $menupopup(doc, 
             {
                 id: "fbStatusContextMenu",
-                onpopupshowing: "Firebug.globalUI.onOptionsShowing(this)"
+                onpopupshowing: "Firebug.browserOverlay.onOptionsShowing(this)"
             },
             [
                 $menu(doc, 
@@ -41,7 +41,7 @@ var GlobalMenu =
                 },
                 [
                     $menupopup(doc, {
-                        onpopupshowing: "Firebug.globalUI.onPositionPopupShowing(this)"
+                        onpopupshowing: "Firebug.browserOverlay.onPositionPopupShowing(this)"
                     })
                 ]),
                 $menuseparator(doc),
@@ -57,7 +57,7 @@ var GlobalMenu =
                     type: "checkbox",
                     label: "firebug.Show_Error_Count",
                     tooltiptext: "firebug.menu.tip.Show_Error_Count",
-                    oncommand: "Firebug.globalUI.onToggleOption(this)",
+                    oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                     option: "showErrorCount"
                 }),
                 $menuseparator(doc),
@@ -140,7 +140,7 @@ var GlobalMenu =
             },
             [
                 $menupopup(doc, {
-                    onpopupshowing: "Firebug.globalUI.onPositionPopupShowing(this)"
+                    onpopupshowing: "Firebug.browserOverlay.onPositionPopupShowing(this)"
                 })
             ]),
 
@@ -159,7 +159,7 @@ var GlobalMenu =
             },
             [
                 $menupopup(doc,{id:"fbFirebugMenu_OpenWith",
-                    onpopupshowing: "return Firebug.globalUI.onEditorsShowing(this);"})
+                    onpopupshowing: "return Firebug.browserOverlay.onEditorsShowing(this);"})
             ]),
 
             // Text Size
@@ -215,7 +215,7 @@ var GlobalMenu =
                 $menupopup(doc,
                 {
                     id: "FirebugMenu_OptionsPopup",
-                    onpopupshowing: "return Firebug.globalUI.onOptionsShowing(this);"
+                    onpopupshowing: "return Firebug.browserOverlay.onOptionsShowing(this);"
                 },
                 [
                     $menuitem(doc,
@@ -224,7 +224,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "firebug.Show_Error_Count",
                         tooltiptext: "firebug.menu.tip.Show_Error_Count",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "showErrorCount",
                         "class": "fbInternational"
                     }),
@@ -234,7 +234,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "firebug.menu.Show_Info_Tips",
                         tooltiptext: "firebug.menu.tip.Show_Info_Tips",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "showInfoTips",
                         "class": "fbInternational"
                     }),
@@ -244,7 +244,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "ShadeBoxModel",
                         tooltiptext: "inspect.option.tip.Shade_Box_Model",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "shadeBoxModel",
                         "class": "fbInternational"
                     }),
@@ -254,7 +254,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "ShowQuickInfoBox",
                         tooltiptext: "inspect.option.tip.Show_Quick_Info_Box",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "showQuickInfoBox",
                         "class": "fbInternational"
                     }),
@@ -264,7 +264,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "firebug.menu.Enable_Accessibility_Enhancements",
                         tooltiptext: "firebug.menu.tip.Enable_Accessibility_Enhancements",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "a11y.enable",
                         "class": "fbInternational"
                     }),
@@ -274,7 +274,7 @@ var GlobalMenu =
                         type: "checkbox",
                         label: "firebug.menu.Activate_Same_Origin_URLs2",
                         tooltiptext: "firebug.menu.tip.Activate_Same_Origin_URLs",
-                        oncommand: "Firebug.globalUI.onToggleOption(this)",
+                        oncommand: "Firebug.browserOverlay.onToggleOption(this)",
                         option: "activateSameOrigin",
                         "class": "fbInternational"
                     }),
@@ -401,7 +401,7 @@ var GlobalMenu =
                 id: "menu_firebug_about",
                 label: "firebug.About",
                 tooltiptext: "firebug.menu.tip.About",
-                oncommand: "Firebug.globalUI.openAboutDialog()",
+                oncommand: "Firebug.browserOverlay.openAboutDialog()",
                 "class": "firebugAbout fbInternational"
             }),
         ];
@@ -460,8 +460,8 @@ var GlobalMenu =
                 $menupopup(doc, {
                     id: "menu_firebug_firebugMenuPopup",
                     "class": "fbFirebugMenuPopup",
-                    onpopupshowing: "return Firebug.globalUI.onMenuShowing(this, event);",
-                    onpopuphiding: "return Firebug.globalUI.onMenuHiding(this, event);"
+                    onpopupshowing: "return Firebug.browserOverlay.onMenuShowing(this, event);",
+                    onpopuphiding: "return Firebug.browserOverlay.onMenuHiding(this, event);"
                 })
             ]),
             $menuseparator(doc, {
@@ -483,8 +483,8 @@ var GlobalMenu =
                 $menupopup(doc, {
                     id: "appmenu_firebugMenuPopup",
                     "class": "fbFirebugMenuPopup",
-                    onpopupshowing: "return Firebug.globalUI.onMenuShowing(this, event);",
-                    onpopuphiding: "return Firebug.globalUI.onMenuHiding(this, event);"
+                    onpopupshowing: "return Firebug.browserOverlay.onMenuShowing(this, event);",
+                    onpopuphiding: "return Firebug.browserOverlay.onMenuHiding(this, event);"
                 })
             ]),
             $menuseparator(doc, {
@@ -505,8 +505,8 @@ var GlobalMenu =
                 $menupopup(doc, {
                     id: "toolsmenu_firebugMenuPopup",
                     "class": "fbFirebugMenuPopup",
-                    onpopupshowing: "return Firebug.globalUI.onMenuShowing(this, event);",
-                    onpopupshowing: "return Firebug.globalUI.onMenuHiding(this, event);"
+                    onpopupshowing: "return Firebug.browserOverlay.onMenuShowing(this, event);",
+                    onpopupshowing: "return Firebug.browserOverlay.onMenuHiding(this, event);"
                 })
             ])
         ]);
@@ -516,7 +516,7 @@ var GlobalMenu =
 // ********************************************************************************************* //
 // Registration
 
-return GlobalMenu;
+return BrowserMenu;
 
 // ********************************************************************************************* //
 }});
