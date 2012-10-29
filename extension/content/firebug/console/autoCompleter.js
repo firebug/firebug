@@ -1715,7 +1715,14 @@ function propChainBuildComplete(out, context, tempExpr, result)
     var done = function(result)
     {
         if (result !== undefined && result !== null)
-            setCompletionsFromObject(out, Object(result), context);
+        {
+            if (typeof result !== "object" && typeof result !== "function")
+            {
+                // Convert the primitive into its scope's matching object type.
+                result = Wrapper.getContentView(out.window).Object(result);
+            }
+            setCompletionsFromObject(out, result, context);
+        }
     };
 
     if (tempExpr.fake)
@@ -2025,7 +2032,8 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
     var out = {
         spreExpr: spreExpr,
         completions: [],
-        hiddenCompletions: []
+        hiddenCompletions: [],
+        window: context.baseWindow || context.window
     };
     var indexCompletion = false;
 
@@ -2070,7 +2078,7 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
         {
             // Complete variables from the local scope
 
-            var contentView = Wrapper.getContentView(context.baseWindow || context.window);
+            var contentView = Wrapper.getContentView(out.window);
             if (context.stopped && includeCurrentScope)
             {
                 out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
