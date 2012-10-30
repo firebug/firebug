@@ -6,16 +6,15 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
-Components.utils.import("resource://firebug/firebug-trace-service.js");
-Components.utils.import("resource://gre/modules/FileUtils.jsm");
-
-var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+Cu.import("resource://firebug/fbtrace.js");
+Cu.import("resource://gre/modules/FileUtils.jsm");
 
 // ********************************************************************************************* //
 // Implementation

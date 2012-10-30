@@ -146,7 +146,7 @@ var errorInfo = null;
 var timer = Timer.createInstance(nsITimer);
 var waitingForTimer = false;
 
-var FBTrace = null;
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 
@@ -728,10 +728,6 @@ var fbs =
 {
     initialize: function()
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
-
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-
         if (FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.FirebugService Starting");
 

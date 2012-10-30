@@ -2,35 +2,13 @@
 
 define([], function() {
 
-//********************************************************************************************* //
-//Constants
+// ********************************************************************************************* //
+// Constants
 
 const Cu = Components.utils;
 
-// ********************************************************************************************* //
-// Firebug Trace - FBTrace
-
-var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
-
 var scope = {};
-
-try
-{
-    Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
-}
-catch (err)
-{
-    scope.traceConsoleService =
-    {
-        getTracer: function(prefDomain)
-        {
-            var TraceObj = {};
-            for (var i=0; i<TraceAPI.length; i++)
-                TraceObj[TraceAPI[i]] = function() {};
-            return TraceObj;
-        }
-    };
-}
+Cu["import"]("resource://firebug/fbtrace.js", scope);
 
 // ********************************************************************************************* //
 // Wrapper
@@ -62,7 +40,7 @@ function TraceWrapper(tracer, option)
 
 // ********************************************************************************************* //
 
-var tracer = scope.traceConsoleService.getTracer("extensions.firebug");
+var tracer = scope.FBTrace;
 
 /**
  * Support for scoped logging.
