@@ -24,7 +24,10 @@ catch (err)
         FBTrace.sysout("GCLI not available");
 }
 
+// Load the Locale module and make sure Firebug string bundle is registered
+// (GCLI commands needs to be localized)
 var Locale = Cu.import("resource://firebug/locale.js").Locale;
+Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 
 if (scope.gcli) {
 
