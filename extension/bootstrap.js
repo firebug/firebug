@@ -128,18 +128,15 @@ var windowWatcher =
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
     observe: function windowWatcher(win, topic, data)
     {
-        if (win.location.href !== "about:blank")
-        {
-            // https://bugzil.la/795961 ?
-            win.addEventListener("load", function onLoad(evt)
-            { 
-                // load listener not necessary once https://bugzil.la/800677 is fixed
-                var win = evt.currentTarget;
-                win.removeEventListener("load", onLoad, false);
-                if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
-                    FirebugLoader.loadIntoWindow(win);
-            }, false);
-        }
+        // https://bugzil.la/795961 ?
+        win.addEventListener("load", function onLoad(evt)
+        { 
+            // load listener not necessary once https://bugzil.la/800677 is fixed
+            var win = evt.currentTarget;
+            win.removeEventListener("load", onLoad, false);
+            if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
+                FirebugLoader.loadIntoWindow(win);
+        }, false);
     }
 };
 
