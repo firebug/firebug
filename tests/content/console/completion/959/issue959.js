@@ -64,6 +64,7 @@ function runTest()
             tasks.push(testWithPopup, "obj2.", "aa1", true);
             tasks.push(testWithPopup, "obj3.", "", false);
             tasks.push(testWithPopup, "obj3.t", "oString", false);
+            tasks.push(testWithPopup, "false.he", "llo", true);
 
             tasks.push(testHidden, "String.prototype.toLocaleU");
             tasks.push(testHidden, "''.toLocaleU");
