@@ -89,7 +89,7 @@ BrowserOverlay.prototype =
             var self = this;
             this.startFirebug(function(Firebug)
             {
-                var browser = Firebug.Firefox.getBrowserForWindow(this.win);
+                var browser = Firebug.Firefox.getBrowserForWindow(self.win);
                 var uri = Firebug.Firefox.getCurrentURI();
 
                 // Open Firebug UI (e.g. if the annotations say so, issue 5623)

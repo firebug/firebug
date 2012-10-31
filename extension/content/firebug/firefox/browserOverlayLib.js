@@ -30,6 +30,13 @@ var BrowserOverlayLib =
 
     $el: function(doc, name, attributes, children, parent)
     {
+        if (!(doc instanceof Ci.nsIDOMDocument))
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("browserOvelayLib.$el; No document!")
+            return;
+        }
+
         attributes = attributes || {};
 
         if (!Array.isArray(children) && !parent)
