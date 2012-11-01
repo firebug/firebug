@@ -14,7 +14,7 @@ var FBTrace = {};
 try
 {
     var scope = {};
-    Components.utils["import"]("resource://firebug/fbtrace", scope);
+    Components.utils["import"]("resource://firebug/fbtrace.js", scope);
     FBTrace = scope.FBTrace;
     FBTrace.setScope(window);
 
@@ -29,7 +29,7 @@ try
 }
 catch (err)
 {
-    dump("FBTrace; " + err);
+    Components.utils.reportError(err);
 }
 
 // ********************************************************************************************* //
