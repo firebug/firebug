@@ -391,15 +391,20 @@ BrowserOverlay.prototype =
         if (typeof(this.win.nsContextMenu) == "undefined")
             return;
 
+        // isTargetAFormControl is removed, see:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
-        var setTargetOriginal = this.setTargetOriginal = this.win.nsContextMenu.prototype.setTarget;
-        this.win.nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+        if (typeof(this.win.nsContextMenu.prototype.isTargetAFormControl) != "undefined")
         {
-            setTargetOriginal.apply(this, arguments);
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+            var setTargetOriginal = this.setTargetOriginal = this.win.nsContextMenu.prototype.setTarget;
+            this.win.nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+            {
+                setTargetOriginal.apply(this, arguments);
 
-            if (this.isTargetAFormControl(aNode))
-                this.shouldDisplay = true;
-        };
+                if (this.isTargetAFormControl(aNode))
+                    this.shouldDisplay = true;
+            };
+        }
 
         // Hide built-in inspector if the pref says so.
         var initItemsOriginal = this.initItemsOriginal = this.win.nsContextMenu.prototype.initItems;
