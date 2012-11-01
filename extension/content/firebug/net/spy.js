@@ -526,6 +526,16 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
 {
     var spy = null;
 
+    if (!context.spies)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("spy.getSpyForXHR; ERROR no spies array " +
+                Http.safeGetRequestName(request));
+        }
+        return;
+    }
+
     // Iterate all existing spy objects in this context and look for one that is
     // already created for this request.
     var length = context.spies.length;
