@@ -215,6 +215,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completions = null;
             return;
         }
+        if (!this.completionBase.candidates.length && !prefix)
+        {
+            // Don't complete empty objects -> toString.
+            this.completions = null;
+            return;
+        }
 
         var clist = [
             this.completionBase.candidates,

@@ -14,6 +14,9 @@ obj2 = Object.create({}, {
     aa1: { enumerable: false, configurable: false, set: function() { for (;;) { /* break everything */ } }},
     aa2: { value: 1 }
 });
+obj3 = Object.create({});
+Boolean.prototype.hello = function() { alert("Hi!"); };
+Boolean.prototype.hello2 = function() { alert("Yo"); };
         </script>
     </head>
     <body>
@@ -28,11 +31,13 @@ obj2 = Object.create({}, {
                         <ul>
                             <li><code>Object.prototype.</code> -&gt; <code>toString</code> (with popup)</li>
                             <li><code>Object.</code> -&gt; <code>prototype</code> (with popup)</li>
-                            <li><code>Object.getOwn</code> -&gt; <code>propertyNames</code> (with popup)</li>
+                            <li><code>Object.getOwn</code> -&gt; <code>PropertyNames</code> (with popup)</li>
                             <li><code>do</code> -&gt; <code>cument</code> (without popup)</li>
                             <li><code>document._</code> -&gt; <code>_proto__</code> (without popup)</li>
                             <li><code>obj1.</code> -&gt; <code>aa1</code> (with popup)</li>
                             <li><code>obj2.</code> -&gt; <code>aa1</code> (with popup)</li>
+                            <li><code>obj3.</code> -&gt; (no completion)</li>
+                            <li><code>obj3.t</code> -&gt; <code>oString</code> (without popup)</li>
                         </ul>
                     </li>
                     <li>Verify that the following completions are avoided unless they are the only
