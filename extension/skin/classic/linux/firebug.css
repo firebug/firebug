@@ -1,0 +1,6 @@
+@import "chrome://firebug/skin/win/firebug.css";
+
+/* Add some basic padding to the completion popup (missing on Linux). */
+.userTypedText {
+    margin-left: 1px;
+}

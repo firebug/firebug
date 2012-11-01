@@ -79,6 +79,7 @@ textbox#fbCommandEditor {
 
 .completionText {
     color: #666666;
+    margin-right: 1px;
 }
 [selected="true"] > .completionText {
     background-color: highlight;

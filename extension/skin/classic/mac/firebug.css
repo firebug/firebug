@@ -22,6 +22,11 @@
     font-family: Monaco, monospace;
 }
 
+/* Add some more padding to the completion popup */
+.userTypedText {
+    margin-left: 1px;
+}
+
 #fbCommandEditor {
     -moz-appearance: none;
     border: none;
