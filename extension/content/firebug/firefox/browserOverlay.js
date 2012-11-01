@@ -388,16 +388,17 @@ BrowserOverlay.prototype =
 
     loadContextMenuOverlay: function()
     {
-        if (typeof(this.win.nsContextMenu) == "undefined")
+        var contextMenu = this.win.nsContextMenu;
+        if (typeof(contextMenu) == "undefined")
             return;
 
         // isTargetAFormControl is removed, see:
         // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
-        if (typeof(this.win.nsContextMenu.prototype.isTargetAFormControl) != "undefined")
+        if (typeof(contextMenu.prototype.isTargetAFormControl) != "undefined")
         {
             // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
-            var setTargetOriginal = this.setTargetOriginal = this.win.nsContextMenu.prototype.setTarget;
-            this.win.nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+            var setTargetOriginal = this.setTargetOriginal = contextMenu.prototype.setTarget;
+            contextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
             {
                 setTargetOriginal.apply(this, arguments);
 
@@ -407,8 +408,8 @@ BrowserOverlay.prototype =
         }
 
         // Hide built-in inspector if the pref says so.
-        var initItemsOriginal = this.initItemsOriginal = this.win.nsContextMenu.prototype.initItems;
-        this.win.nsContextMenu.prototype.initItems = function()
+        var initItemsOriginal = this.initItemsOriginal = contextMenu.prototype.initItems;
+        contextMenu.prototype.initItems = function()
         {
             initItemsOriginal.apply(this, arguments);
 
@@ -426,11 +427,12 @@ BrowserOverlay.prototype =
 
     unloadContextMenuOverlay: function()
     {
-        if (typeof(this.win.nsContextMenu) == "undefined")
+        var contextMenu = this.win.nsContextMenu;
+        if (typeof(contextMenu) == "undefined")
             return;
 
-        this.win.nsContextMenu.prototype.setTarget = this.setTargetOriginal;
-        this.win.nsContextMenu.prototype.initItems = this.initItemsOriginal;
+        contextMenu.prototype.setTarget = this.setTargetOriginal;
+        contextMenu.prototype.initItems = this.initItemsOriginal;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
