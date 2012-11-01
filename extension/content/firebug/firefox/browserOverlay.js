@@ -294,7 +294,7 @@ BrowserOverlay.prototype =
             popup.removeChild(popup.lastChild);
 
         // Load Firebug before the position is changed.
-        var oncommand = "Firebug.BrowserOverlay.startFirebug(function(){" +
+        var oncommand = "Firebug.browserOverlay.startFirebug(function(){" +
             "Firebug.chrome.setPosition('%pos%')" + "})";
 
         var items = [];
