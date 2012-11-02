@@ -1321,11 +1321,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     rangeParent.parentNode.previousSibling :
                     rangeParent.previousSibling;
 
-                while(previousNode)
+                while (previousNode)
                 {
-                    if (previousNode.nodeType == 1)
-                        rangeOffset += previousNode.innerHTML.length;
-                    else if (previousNode.nodeType == 3)
+                    if (previousNode.nodeType == Node.ELEMENT_NODE)
+                        rangeOffset += previousNode.textContent.length;
+                    else if (previousNode.nodeType == Node.TEXT_NODE)
                         rangeOffset += previousNode.nodeValue.length;
 
                     previousNode = previousNode.previousSibling;
