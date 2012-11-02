@@ -559,11 +559,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         name = this.translateName(name, value);
         if (name)
         {
-            if (Options.get("colorDisplay") == "hex")
-                value = Css.rgbToHex(value);
-            else if (Options.get("colorDisplay") == "hsl")
-                value = Css.rgbToHSL(value);
-            value = Css.stripUnits(value);
+            value = Css.stripUnits(formatColor(value));
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -1310,10 +1306,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (text != "")
             {
-                if (Options.get("colorDisplay") == "hex")
-                    text = Css.rgbToHex(text);
-                else if (Options.get("colorDisplay") == "hsl")
-                    text = Css.rgbToHSL(text);
+                text = formatColor(text);
             }
             else
             {
@@ -1623,8 +1616,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var prop = cssRules.props[p];
             if (!(prop.disabled || prop.overridden))
-                props.push(prop.name + ": " + rule.style.getPropertyValue(prop.name) +
-                    prop.important + ";");
+            {
+                var value = rule.style.getPropertyValue(prop.name);
+                value = formatColor(value);
+                props.push(prop.name + ": " + value + prop.important + ";");
+            }
         }
 
         return props;
@@ -2633,6 +2629,23 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
+}
+
+function formatColor(color)
+{
+    var colorDisplay = Options.get("colorDisplay");
+
+    switch (colorDisplay)
+    {
+        case "hex":
+            return Css.rgbToHex(color);
+
+        case "hsl":
+            return Css.rgbToHSL(color);
+            
+        default:
+            return color;
+    }
 }
 
 function getRuleLine(rule)
