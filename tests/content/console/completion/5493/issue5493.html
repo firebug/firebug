@@ -29,8 +29,9 @@
                         <li>"obj.abx&lt;backspace&gt;" <span class="ok">&rArr; "obj.AbcD"</span></li>
                         <li>"obj.Abcd" <span class="ok">&rArr; "obj.AbcD"</span></li>
                     </ul>
-                    <li>Verify that when typing " obj.ab", the completion text starts
-                    with that, but the popup has the correct case.</li>
+                    <li>Verify that when typing ";obj.ab", the completion text starts
+                    with that, but the popup has the correct case (and excludes the
+                    semicolon, as per issue 5999).</li>
                 </ul>
                 <h3>Expected Results</h3>
                 <ul>
