@@ -1611,8 +1611,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var prop = cssRules.props[p];
             if (!(prop.disabled || prop.overridden))
-                props.push(prop.name + ": " + rule.style.getPropertyValue(prop.name) +
-                    prop.important + ";");
+                props.push(prop.name + ": " + prop.value + prop.important + ";");
         }
 
         return props;
