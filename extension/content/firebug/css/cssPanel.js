@@ -58,9 +58,8 @@ var CSSDomplateBase =
     {
         var limit = Options.get("stringCropLength");
         if (limit > 0)
-        {
             return getCroppedUrlValue(prop.value, limit);
-        }
+
         return value;
     }
 };
@@ -82,7 +81,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable",
-                _repObject: "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
+                _repObject: "$prop.value$prop.important", _innerHTML: "$prop|getPropertyValue$prop.important"}
             ),
             SPAN({"class": "cssSemi"}, ";"
         )
@@ -1296,7 +1295,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
-    {
+    { 
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
@@ -1318,21 +1317,20 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
-                var limit = Options.get("stringCropLength");
-                if (limit > 0)
+                var previousNode = Css.hasClass(rangeParent.parentNode, "alterText") ?
+                    rangeParent.parentNode.previousSibling :
+                    rangeParent.previousSibling;
+
+                while(previousNode)
                 {
-                    var matches;
-                    while (matches = reCropURL.exec(text))
-                    {
-                        var urlValue = matches[1];
-                        var croppedText = matches[0].replace(urlValue, Str.cropString(urlValue, limit));
+                    if (previousNode.nodeType == 1)
+                        rangeOffset += previousNode.innerHTML.length;
+                    else if (previousNode.nodeType == 3)
+                        rangeOffset += previousNode.nodeValue.length;
 
-                        // Calculate the length of all cropped strings before the target (if any)
-                        if (matches.index + croppedText.length < rangeOffset)
-                            rangeOffset += matches[0].length - croppedText.length;
-                    }
+                    previousNode = previousNode.previousSibling;
                 }
-
+                
                 cssValue = CSSModule.parseCSSValue(text, rangeOffset);
             }
 
@@ -1577,7 +1575,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             // though first jumpHighlightFactory() has to be adjusted to
             // remove the current highlighting when called again
             Dom.scrollIntoCenterView(row, this.panelNode);
-            this.highlightNode(row.parentNode);
+            this.highlightNode(Dom.getAncestorByClass(row, "cssProp") || Dom.getAncestorByClass(row, "cssRule"));
 
             Events.dispatch(this.fbListeners, "onCSSSearchMatchFound", [this, text, row]);
             return this.currentSearch.wrapped ? "wraparound" : true;
@@ -2635,7 +2633,16 @@ function getCroppedUrlValue(value, length)
 {
     return value.replace(reCropURL, function(match, p1)
     {
-        return match.replace(p1, Str.cropString(p1, length));
+        if (p1.length <= length)
+            return value;
+
+        var firstPartLen = Math.floor(length / 2) - 2;
+        var endPartLen = p1.length - firstPartLen;
+        var replacement = p1.substring(0, firstPartLen) +
+            "<span class=\"alterText\">" + p1.substring(firstPartLen, endPartLen) + "</span>" +
+            p1.substring(endPartLen);
+
+        return match.replace(p1, replacement);
     });
 }
 
