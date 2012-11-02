@@ -41,7 +41,8 @@ catch(ex)
     // Scratchpad does not exists (when using Seamonkey ...)
 }
 
-Cu.import("resource://firebug/storageService.js");
+var storageScope = {};
+Cu.import("resource://firebug/storageService.js", storageScope);
 
 // ********************************************************************************************* //
 // Implementation
@@ -323,7 +324,7 @@ var CommandLineInclude =
     getStore: function()
     {
         if (!this.store)
-            this.store = StorageService.getStorage("includeAliases.json");
+            this.store = storageScope.StorageService.getStorage("includeAliases.json");
         return this.store;
     },
 
