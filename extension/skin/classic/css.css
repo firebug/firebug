@@ -44,6 +44,15 @@
     color: darkgreen;
 }
 
+.cssPropValue > .alterText {
+    font-size: 0;
+}
+
+.cssPropValue > .alterText::after {
+    content: '...';
+    font-size: 11px;
+}
+
 .cssPropValue,
 .cssFontPropValue {
     color: darkblue;
