@@ -56,14 +56,12 @@ var CSSDomplateBase =
 
     getPropertyValue: function(prop)
     {
-        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
-        /*
         var limit = Options.get("stringCropLength");
-        */
-        var limit = 0;
         if (limit > 0)
-            return Str.cropString(prop.value, limit);
-        return prop.value;
+        {
+            return getCroppedUrlValue(prop.value, limit);
+        }
+        return value;
     }
 };
 
@@ -86,8 +84,9 @@ var CSSPropTag = domplate(CSSDomplateBase,
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable",
                 _repObject: "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
             ),
-            SPAN({"class": "cssSemi"}, ";")
+            SPAN({"class": "cssSemi"}, ";"
         )
+    )
 });
 
 var CSSRuleTag =
@@ -198,6 +197,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
+const reCropURL = /url\("?((?:\\\\|\\\"|\\\)|\\\(|[^"\)])+)?"?\)/g;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
@@ -1304,34 +1304,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var styleRule = Firebug.getRepObject(prop);
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
             var propName = propNameNode.textContent.toLowerCase();
-            var priority = styleRule.style.getPropertyPriority(propName);
-            var text = styleRule.style.getPropertyValue(propName) +
-                (priority ? " !" + priority : "");
 
-            if (text != "")
-            {
-                if (Options.get("colorDisplay") == "hex")
-                    text = Css.rgbToHex(text);
-                else if (Options.get("colorDisplay") == "hsl")
-                    text = Css.rgbToHSL(text);
-            }
-            else
-            {
-                var disabledMap = this.getDisabledMap(this.context);
-                var disabledProps = disabledMap.get(styleRule);
-                if (disabledProps)
-                {
-                    for (var i = 0, len = disabledProps.length; i < len; ++i)
-                    {
-                        if (disabledProps[i].name == propName)
-                        {
-                            priority = disabledProps[i].important;
-                            text = disabledProps[i].value + (priority ? " !" + priority : "");
-                            break;
-                        }
-                    }
-                }
-            }
+            var text = Firebug.getRepObject(propValue);
+
             var cssValue;
 
             if (propName == "font" || propName == "font-family")
@@ -1343,6 +1318,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             }
             else
             {
+                var limit = Options.get("stringCropLength");
+                if (limit > 0)
+                {
+                    var matches;
+                    while (matches = reCropURL.exec(text))
+                    {
+                        var urlValue = matches[1];
+                        var croppedText = matches[0].replace(urlValue, Str.cropString(urlValue, limit));
+
+                        // Calculate the length of all cropped strings before the target (if any)
+                        if (matches.index + croppedText.length < rangeOffset)
+                            rangeOffset += matches[0].length - croppedText.length;
+                    }
+                }
+
                 cssValue = CSSModule.parseCSSValue(text, rangeOffset);
             }
 
@@ -1727,15 +1717,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
                 else if (Dom.getAncestorByClass(target, "cssPropValue"))
                 {
-                    target.textContent = CSSDomplateBase.getPropertyValue({value: value});
+                    var limit = Options.get("stringCropLength");
+                    target.textContent = limit > 0 ? getCroppedUrlValue(value, limit) : value;
     
                     propName = Dom.getChildByClass(prop, "cssPropName").textContent;
     
                     if (FBTrace.DBG_CSS)
-                    {
                         FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" + value + "\"");
-                       // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
-                    }
     
                     if (value && value != "null")
                     {
@@ -2625,6 +2613,31 @@ Firebug.CSSDirtyListener.prototype =
 
 // ********************************************************************************************* //
 // Local Helpers
+
+// Transform completions so that they don't add additional parentheses when
+// ones already exist.
+function stripCompletedParens(list, postExpr)
+{
+    var c = postExpr.charAt(0), rem = 0;
+    if (c === "(")
+        rem = 2;
+    else if (c === ")")
+        rem = 1;
+    else
+        return list;
+    return list.map(function(cl)
+    {
+        return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
+    });
+}
+
+function getCroppedUrlValue(value, length)
+{
+    return value.replace(reCropURL, function(match, p1)
+    {
+        return match.replace(p1, Str.cropString(p1, length));
+    });
+}
 
 function parsePriority(value)
 {
