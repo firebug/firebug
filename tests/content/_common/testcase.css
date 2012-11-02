@@ -114,6 +114,10 @@ code.key {
     color: #0000DC;
 }
 
+code.result {
+    color: #000088;
+}
+
 input, button {
     border: 1px solid #AAAAAA;
     border-radius: 5px;

@@ -19,10 +19,10 @@ with (Domplate) {
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
-
+    tableClassName: "dataTable",
     tag:
         DIV({"class": "dataTableSizer", "tabindex": "-1" },
-            TABLE({"class": "dataTable", cellspacing: 0, cellpadding: 0, width: "100%",
+            TABLE({"class": "$tableClassName", cellspacing: 0, cellpadding: 0, width: "100%",
                 "role": "grid"},
                 THEAD({"class": "dataTableThead", "role": "presentation"},
                     TR({"class": "headerRow focusRow dataTableRow subFocusRow", "role": "row",
@@ -194,7 +194,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Console logging
 
-    log: function(data, cols, context)
+    log: function(data, cols, context, object)
     {
         // No arguments passed into console.table method, bail out for now,
         // but some error message could be displayed in the future.
@@ -211,7 +211,12 @@ FirebugReps.Table = domplate(Firebug.Rep,
         try
         {
             this.columns = columns;
-            var row = Firebug.Console.log({data: data, columns: columns}, context, "table", this, true);
+
+            var object = object || {};
+            object.data = data;
+            object.columns = columns;
+
+            var row = Firebug.Console.log(object, context, "table", this, true);
 
             // Set vertical height for scroll bar.
             var tBody = row.querySelector(".dataTableTbody");

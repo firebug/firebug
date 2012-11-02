@@ -159,9 +159,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var browserWindow = Firebug.chrome.window;
-        var commandDispatcher = browserWindow.document.commandDispatcher;
-
         var items = Firebug.CommandEditor.getContextMenuItems();
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);

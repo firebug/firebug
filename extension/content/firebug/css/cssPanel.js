@@ -1616,7 +1616,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var prop = cssRules.props[p];
             if (!(prop.disabled || prop.overridden))
-                props.push(prop.name + ": " + formatColor(prop.value) + prop.important + ";");
+            {
+                var value = rule.style.getPropertyValue(prop.name);
+                value = formatColor(value);
+                props.push(prop.name + ": " + value + prop.important + ";");
+            }
         }
 
         return props;
