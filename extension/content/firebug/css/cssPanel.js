@@ -1608,22 +1608,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getStyleDeclaration: function(cssSelector)
     {
         var cssRule = Dom.getAncestorByClass(cssSelector, "cssRule");
-        var cssRules = cssRule.getElementsByClassName("cssPropertyListBox")[0].rule;
-        var rule = Firebug.getRepObject(cssRule);
-        var props = [];
+        var propRows = cssRule.getElementsByClassName("cssProp");
 
-        for (var p in cssRules.props)
+        var lines = [];
+        for (var i = 0; i < propRows.length; ++i)
         {
-            var prop = cssRules.props[p];
-            if (!(prop.disabled || prop.overridden))
-            {
-                var value = rule.style.getPropertyValue(prop.name);
-                value = formatColor(value);
-                props.push(prop.name + ": " + value + prop.important + ";");
-            }
+            var row = propRows[i];
+            if (row.classList.contains("disabledStyle"))
+                continue;
+
+            var name = Dom.getChildByClass(row, "cssPropName").textContent;
+            var value = Firebug.getRepObject(Dom.getChildByClass(row, "cssPropValue"));
+            lines.push(name + ": " + value + ";");
         }
 
-        return props;
+        return lines;
     },
 
     copyRuleDeclaration: function(cssSelector)
