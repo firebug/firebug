@@ -24,7 +24,8 @@ function runTest()
                 {
                     contextMenuTarget = row;
                     FBTest.compare(expectedMyScriptURL, url,
-                        "The alias should redirect to " + expectedMyScriptURL);
+                        "The alias should redirect to " + expectedMyScriptURL +
+                        ", not to: " + url);
                 }
             });
             // test context menu: 
