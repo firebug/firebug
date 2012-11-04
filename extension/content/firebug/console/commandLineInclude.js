@@ -69,7 +69,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
             return FirebugReps.Table.getValueTag(object);
     },
 
-    getUrlTag: function(href, aliasName, context)
+    getUrlTag: function(href, aliasName)
     {
         var urlTag =
             SPAN({style:"height:100%"},
@@ -123,9 +123,9 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
             prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
-            if  (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
+            if  (prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("commandline.include.confirmDelete"), flags, "", "", "",
-                Locale.$STR("Do_not_show_this_message_again"), check) == 0)
+                Locale.$STR("Do_not_show_this_message_again"), check) > 0)
             {
                 return;
             }
@@ -298,12 +298,12 @@ function CommandLineIncludeObject()
 
 var CommandLineInclude =
 {
-    onSuccess: function(aliases, newAlias, context, loadingMsgRow, xhr)
+    onSuccess: function(newAlias, context, loadingMsgRow, xhr)
     {
         var urlComponent = xhr.channel.URI.QueryInterface(Ci.nsIURL);
-        var msg, filename = urlComponent.fileName, url = urlComponent.spec;
+        var filename = urlComponent.fileName, url = urlComponent.spec;
         // clear the message saying "loading..."
-        loadingMsgRow.parentNode.removeChild(loadingMsgRow);
+        this.clearLoadingMessage(loadingMsgRow);
 
         if (newAlias)
         {
@@ -315,10 +315,16 @@ var CommandLineInclude =
         this.log("includeSuccess", [filename], [context, "info"]);
     },
 
-    onError: function(context, url)
+    onError: function(context, url, loadingMsgRow)
     {
-        loadingMsgRow.parentNode.removeChild(loadingMsgRow);
+        this.clearLoadingMessage(loadingMsgRow);
         this.log("loadFail", [url], [context, "error"]);
+    },
+
+    clearLoadingMessage: function(loadingMsgRow)
+    {
+        if (loadingMsgRow && loadingMsgRow.parentNode)
+            loadingMsgRow.parentNode.removeChild(loadingMsgRow);
     },
 
     getStore: function()
@@ -328,9 +334,11 @@ var CommandLineInclude =
         return this.store;
     },
 
-    log: function(localeStr, localeArgs, logArgs)
+    log: function(localeStr, localeArgs, logArgs, noAutoPrefix)
     {
-        var msg = Locale.$STRF("commandline.include."+localeStr, localeArgs);
+        var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include."+localeStr);
+
+        var msg = Locale.$STRF(prefixedLocaleStr, localeArgs);
         logArgs.unshift([msg]);
         return Firebug.Console.logFormatted.apply(Firebug.Console, logArgs);
     },
@@ -341,17 +349,20 @@ var CommandLineInclude =
     {
         var reNotAlias = /[\.\/]/;
         var urlIsAlias = url !== null && !reNotAlias.test(url);
-        var aliases;
         var returnValue = Firebug.Console.getDefaultReturnValue(context.window);
-        var acceptedSchemes = ["http", "https"];
-        var msg;
 
         // checking arguments:
-        if (newAlias !== undefined && typeof newAlias !== "string")
-            throw "wrong alias argument; expected string";
+        if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
+        {
+            this.log("wrongAliasArgument", [], [context, "error"]);
+            return returnValue;
+        }
 
-        if (url !== null && typeof url !== "string")
-            throw "wrong url argument; expected string or null";
+        if (url !== null && typeof url !== "string" || !url && !newAlias)
+        {
+            this.log("wrongUrlArgument", [], [context, "error"]);
+            return returnValue;
+        }
 
         if (newAlias !== undefined)
             newAlias = newAlias.toLowerCase();
@@ -394,16 +405,15 @@ var CommandLineInclude =
             this.log("aliasRemoved", [newAlias], [context, "info"]);
             return returnValue;
         }
-        var loadingMsg = Locale.$STR("Loading");
-        var loadingMsgRow = Firebug.Console.logFormatted([loadingMsg], context, "loading", true);
-        var onSuccess = this.onSuccess.bind(this, aliases, newAlias, context, loadingMsgRow);
-        var onError = this.onError.bind(this, context, loadingMsgRow);
-        this.evaluateRemoteScript(url, context, onSuccess, onError);
+        var loadingMsgRow = this.log("Loading", [], [context, "loading", true], true);
+        var onSuccess = this.onSuccess.bind(this, newAlias, context, loadingMsgRow);
+        var onError = Obj.bindFixed(this.onError, this, context, url, loadingMsgRow);
+        this.evaluateRemoteScript(url, context, onSuccess, onError, loadingMsgRow);
 
         return returnValue;
     },
 
-    evaluateRemoteScript: function(url, context, successFunction, errorFunction)
+    evaluateRemoteScript: function(url, context, successFunction, errorFunction, loadingMsgRow)
     {
         var xhr = new XMLHttpRequest({ mozAnon: true, timeout:30});
         var acceptedSchemes = ["http", "https"];
@@ -411,9 +421,7 @@ var CommandLineInclude =
 
         xhr.onload = function()
         {
-            var contentType = xhr.getResponseHeader("Content-Type").split(";")[0];
             var codeToEval = xhr.responseText;
-            var headerMatch;
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
                 successFunction(xhr);
@@ -421,17 +429,23 @@ var CommandLineInclude =
 
         if (errorFunction)
         {
-            xhr.ontimeout = xhr.onerror = function()
-            {
-                errorFunction(url);
-            }
+            xhr.ontimeout = xhr.onerror = errorFunction;
         }
 
-        xhr.open("GET", absoluteURL, true);
+        try
+        {
+            xhr.open("GET", absoluteURL, true);
+        }
+        catch(ex)
+        {
+            this.clearLoadingMessage(loadingMsgRow);
+            throw ex;
+        }
 
         if (!~acceptedSchemes.indexOf(xhr.channel.URI.scheme))
         {
             this.log("invalidRequestProtocol", [], [context, "error"]);
+            this.clearLoadingMessage(loadingMsgRow);
             return ;
         }
 
