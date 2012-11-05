@@ -148,7 +148,9 @@ window.Firebug =
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
-        Firebug.Options.addListener(this);
+        // Firebug is getting option-updates from the connection so,
+        // do not register it again here (see issue 6035)
+        //Firebug.Options.addListener(this);
 
         this.isInitialized = true;
 
