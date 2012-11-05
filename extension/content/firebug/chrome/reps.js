@@ -1729,6 +1729,8 @@ FirebugReps.Event = domplate(Firebug.Rep,
             info.push("clientX=", event.clientX, ", clientY=", event.clientY);
         else if (eventFamily == "key")
             info.push("charCode=", event.charCode, ", keyCode=", event.keyCode);
+        else if (event.type == "message")
+            info.push("origin=", event.origin, ", data=", event.data);
 
         return info.join("");
     },
