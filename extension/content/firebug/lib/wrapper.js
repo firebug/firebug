@@ -101,7 +101,6 @@ Wrapper.ignoreVars =
 
     // We are forced to ignore Java-related variables, because
     // trying to access them causes browser freeze
-    "java": 1,
     "sun": 1,
     "Packages": 1,
     "JavaArray": 1,
@@ -109,6 +108,7 @@ Wrapper.ignoreVars =
     "JavaObject": 1,
     "JavaClass": 1,
     "JavaPackage": 1,
+
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
     "_createFirebugConsole": 1,

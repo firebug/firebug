@@ -847,8 +847,8 @@ const styleGroups =
         "overflow-x",  // http://www.w3.org/TR/2002/WD-css3-box-20021024/#overflow
         "overflow-y",
         "overflow-clip",
-        "-moz-transform",
-        "-moz-transform-origin",
+        "transform",
+        "transform-origin",
         "white-space",
         "clip",
         "float",
