@@ -24,8 +24,7 @@ function runTest()
                 {
                     contextMenuTarget = row;
                     FBTest.compare(expectedMyScriptURL, url,
-                        "The alias should redirect to " + expectedMyScriptURL +
-                        ", not to: " + url);
+                        "The alias should redirect to " + expectedMyScriptURL);
                 }
             });
             // test context menu: 
@@ -43,7 +42,7 @@ function runTest()
                 FBTest.executeContextMenuCommand(contextMenuTarget, "fbCopyLocation", function()
                 {
                     FBTest.compare(FBTest.getClipboardText(), expectedMyScriptURL,
-                        "The copied location should be: "+expectedMyScriptURL);
+                        "The copied location should be: " + expectedMyScriptURL);
                     callback();
                 });
             });
@@ -55,7 +54,7 @@ function runTest()
                 {
                     var expectedURL = basePath5878 + "myOtherScript.js";
                     FBTest.compare(expectedURL, url, 
-                        "The alias should redirect to " + basePath5878);
+                        "The alias should redirect to " + expectedURL);
                 }
             });
             tasks.push(executeIncludeCommand, 'include(null, "myScript");');
@@ -88,7 +87,7 @@ function checkTableContent(callback, expectedAliasName, checkFunction)
         {
             var row = FW.FBL.getAncestorByTagName(aliasNameCell, "tr");
             var aliasValueCell = row.querySelector(".url");
-            checkFunction(table, row, aliasNameCell.textContent, aliasValueCell.textContent);
+            checkFunction(table, row, aliasNameCell.dataset.aliasname, aliasValueCell.href);
         }
         callback();
     });
