@@ -174,7 +174,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             // the Script panel itself is deactivated (i.e. because the Console
             // panel is enabled). See issue 2582 for more details.
             var enabled = this.isEnabled();
-            firebugStatus.setAttribute("script", enabled ? "on" : "off");
+            firebugStatus.setAttribute("script", (enabled && active) ? "on" : "off");
         }
 
         if (Firebug.StartButton)
