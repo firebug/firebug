@@ -56,6 +56,7 @@
 .logRow-error,
 .logRow-assert,
 .logRow-warningMessage,
+.logRow-loading,
 .logRow-errorMessage {
     padding-left: 22px;
     background-repeat: no-repeat;
@@ -97,6 +98,10 @@
 
 .logRow-info {
     background-image: url(chrome://firebug/skin/info.svg);
+}
+
+.logRow-loading {
+    background-image: url(chrome://firebug/skin/loading.svg);
 }
 
 .logRow-warn,
@@ -786,4 +791,29 @@
     font-style: italic;
     color: gray;
     padding-left: 5px;
+}
+
+
+/************************************************************************************************/
+/* include */
+.tableCommandLineInclude td{
+    height: 17px;
+}
+.tableCommandLineInclude .closeButton{
+    display: none;
+}
+
+.tableCommandLineInclude tr:hover .closeButton{
+    display: block;
+}
+.tableCommandLineInclude .url{ float: left; }
+
+.tableCommandLineInclude .commands{ 
+    float: right;
+    height:100%;
+}
+.tableCommandLineInclude td:last-child
+{
+    width: 75%;
+    padding-right: 0 !important; 
 }

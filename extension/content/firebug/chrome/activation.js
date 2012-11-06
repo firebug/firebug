@@ -65,7 +65,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        // if about:blank gets thru, 1483 fails
+        // if about:blank gets through, issue 1483 fails
         if (Firebug.filterSystemURLs && Url.isSystemURL(url))
             return false;
 
@@ -96,7 +96,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             if (hasAnnotation)
                 return this.checkAnnotation(browser, uri);
 
-            if (browser.FirebugLink) // then Firebug.TabWatcher found a connection
+            // Then Firebug.TabWatcher found a connection.
+            if (browser.FirebugLink)
             {
                 var dst = browser.FirebugLink.dst;
                 var dstURI = this.convertToURIKey(dst.spec, Firebug.activateSameOrigin);
@@ -107,7 +108,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                         dstURI.spec, browser.FirebugLink);
                 }
 
-                if (dstURI && dstURI.equals(uri)) // and it matches us now
+                // And it matches us now.
+                if (dstURI && dstURI.equals(uri))
                 {
                     var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec,
                         Firebug.activateSameOrigin);
@@ -120,15 +122,20 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                                 srcURI.spec, browser.FirebugLink);
                         }
 
-                        // and it's on the same domain
+                        // And it's on the same domain.
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host))
                         {
                             hasAnnotation = Annotations.pageHasAnnotation(srcURI);
-                            if (hasAnnotation) // and the source page was annotated.
+                            // And the source page was annotated.
+                            if (hasAnnotation)
                             {
                                 var srcShow = this.checkAnnotation(browser, srcURI);
-                                if (srcShow)  // and the source annotation said show it
-                                    this.watchBrowser(browser);  // so we show dst as well.
+                                // And the source annotation said show it.
+                                if (srcShow)
+                                {
+                                    // So we show dst as well.
+                                    this.watchBrowser(browser);
+                                }
                                 return srcShow;
                             }
                         }
@@ -152,10 +159,14 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                         browser.contentWindow.opener.location);
 
                 if (openerContext)
-                    return true;  // popup windows of Firebugged windows are Firebugged
+                {
+                    // popup windows of Firebugged windows are Firebugged
+                    return true;
+                }
             }
 
-            return false;   // don't createContext
+            // don't createContext
+            return false;
         }
         catch (exc)
         {
@@ -170,7 +181,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         return this.shouldCreateContext(context.browser, context.getWindowLocation().toString());
     },
 
-    // Firebug is opened in browser
+    // Firebug is opened in the browser.
     watchBrowser: function(browser)
     {
         try
@@ -185,14 +196,20 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         }
     },
 
-    // Firebug closes in browser
+    // Firebug closes in the browser.
     unwatchBrowser: function(browser, userCommands)
     {
         var uri = browser.currentURI.spec;
-        if (userCommands)  // then mark to not open virally.
+        // Then mark to not open virally.
+        if (userCommands)
+        {
             this.setPageAnnotation(uri, "firebugged.closed");
+        }
         else
-            this.removePageAnnotation(uri); // unmark this URI
+        {
+            // unmark this URI
+            this.removePageAnnotation(uri);
+        }
     },
 
     clearAnnotations: function()
@@ -203,10 +220,10 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         Firebug.connection.dispatch("onClearAnnotations", []);
     },
 
-    // process the URL to canonicalize it. Need not be reversible.
+    // Process the URL to canonicalize it. This needs not be reversible.
     convertToURIKey: function(url, sameOrigin)
     {
-        // Remove fragment, it shouldn't have any impact on the activation.
+        // Remove the fragment. It shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
 
         var uri = Url.makeURI(Url.normalizeURL(url));
@@ -214,20 +231,21 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         if (Firebug.filterSystemURLs && Url.isSystemURL(url))
             return uri;
 
-        if (url == "about:blank")  // avoid exceptions.
+        // avoid exceptions
+        if (url == "about:blank")
             return uri;
 
         if (uri && sameOrigin)
         {
             try
             {
-                // returns the string before the path (such as "scheme://user:password@host:port").
+                // Returns the string before the path (such as "scheme://user:password@host:port").
                 var prePath = uri.prePath;
                 var shortURI = Url.makeURI(prePath);
                 if (!shortURI)
                     return uri;
 
-                // annoying "about" URIs throw if you access .host
+                // Annoying "about" URIs throw if .host is accessed
                 if (shortURI.scheme === "about")
                     return shortURI;
 
@@ -277,11 +295,17 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             FBTrace.sysout("shouldCreateContext read back annotation " + annotation +
                 " for uri " + uri.spec);
 
-        // then the user closed Firebug on this page last time
+        // Then the user closed Firebug on this page last time.
         if ((Firebug.allPagesActivation != "on") && (annotation.indexOf("closed") > 0))
-            return false;   // annotated as 'closed', don't create
+        {
+            // annotated as 'closed', don't create
+            return false;
+        }
         else
-            return true;    // annotated, createContext
+        {
+            // annotated, createContext
+            return true;
+        }
     },
 
     setPageAnnotation: function(currentURI, annotation)
@@ -323,7 +347,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             FBTrace.sysout("Firebug.Activation.unwatchBrowser untagged "+uri.spec);
     },
 
-    // stops at the first fn(uri) that returns a true value
+    // Stops at the first fn(uri) that returns a true value.
     iterateAnnotations: function(fn)
     {
         var annotations = Annotations.getAnnotations(this.annotationName);

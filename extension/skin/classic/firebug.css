@@ -75,7 +75,7 @@
 
 .fbCommandLine {
     -moz-appearance: none;
-    margin: 4px 0 0 0;
+    margin: 2px 0 0 0;
     padding: 0 4px;
     border: none;
     font-family: monospace;
@@ -85,6 +85,16 @@
     background: none repeat scroll 0% 0% transparent;
     position: relative;
     z-index: 3;
+}
+
+#fbCommandLineMeasurer {
+    margin: 0;
+    padding: 0;
+    border: none;
+    position: absolute;
+    z-index: -1;
+    visibility: hidden;
+    width: auto;
 }
 
 #fbCommandEditor {
@@ -121,10 +131,6 @@
     max-width: 3000px;
     overflow: hidden;
     width: auto;
-}
-
-#misspell {
-    display: none !important;
 }
 
 /*************************************************************************************************/

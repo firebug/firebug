@@ -10,9 +10,11 @@ function runTest()
         {
             var panel = FBTest.selectSidePanel("css");
             var value = panel.panelNode.querySelector(".cssPropValue");
-            var getElement = function() { return win.document.getElementById("element1"); };
+
             // Click the CSS value to open the inline editor
-            FBTest.synthesizeMouse(value);
+            // Click at the left-top corner of the first client rect (see issue 6049).
+            var rects = node.getClientRects();
+            FBTest.synthesizeMouse(value, rects[0].left, rects[0].top);
   
             var editor = panel.panelNode.querySelector(".textEditorInner");
             if (FBTest.ok(editor, "editor must be available now"))

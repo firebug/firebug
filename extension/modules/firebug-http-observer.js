@@ -1,21 +1,22 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 var EXPORTED_SYMBOLS = ["httpRequestObserver"];
 
 var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
 
-// ************************************************************************************************
-// HTTP Request Observer implementation
+Cu["import"]("resource://firebug/fbtrace.js");
 
-var FBTrace = null;
+// ********************************************************************************************* //
+// HTTP Request Observer implementation
 
 /**
  * @service This service is intended as the only HTTP observer registered by Firebug.
@@ -33,12 +34,6 @@ var httpRequestObserver =
     {
         this.observers = [];
         this.observing = 0;
-
-        // Get firebug-trace service for logging (the service should be already
-        // registered at this moment).
-        Components.utils["import"]("resource://firebug/firebug-trace-service.js");
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-
         this.initialize();
     },
 
@@ -185,7 +180,7 @@ var httpRequestObserver =
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Request helpers
 
 function safeGetName(request)
@@ -201,9 +196,9 @@ function safeGetName(request)
     return null;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Debugging Helpers
 
-// Debugging helper.
 function dumpStack(message)
 {
     dump(message + "\n");
@@ -220,7 +215,9 @@ function dumpStack(message)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Initialization
 
 httpRequestObserver.preInitialize();
+
+// ********************************************************************************************* //

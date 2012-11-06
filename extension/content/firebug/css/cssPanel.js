@@ -56,7 +56,11 @@ var CSSDomplateBase =
 
     getPropertyValue: function(prop)
     {
+        // Disabled, see http://code.google.com/p/fbug/issues/detail?id=5880
+        /*
         var limit = Options.get("stringCropLength");
+        */
+        var limit = 0;
         if (limit > 0)
             return Str.cropString(prop.value, limit);
         return prop.value;
@@ -555,11 +559,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         name = this.translateName(name, value);
         if (name)
         {
-            if (Options.get("colorDisplay") == "hex")
-                value = Css.rgbToHex(value);
-            else if (Options.get("colorDisplay") == "hsl")
-                value = Css.rgbToHSL(value);
-            value = Css.stripUnits(value);
+            value = Css.stripUnits(formatColor(value));
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -1306,10 +1306,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (text != "")
             {
-                if (Options.get("colorDisplay") == "hex")
-                    text = Css.rgbToHex(text);
-                else if (Options.get("colorDisplay") == "hsl")
-                    text = Css.rgbToHSL(text);
+                text = formatColor(text);
             }
             else
             {
@@ -1611,19 +1608,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getStyleDeclaration: function(cssSelector)
     {
         var cssRule = Dom.getAncestorByClass(cssSelector, "cssRule");
-        var cssRules = cssRule.getElementsByClassName("cssPropertyListBox")[0].rule;
-        var rule = Firebug.getRepObject(cssRule);
-        var props = [];
+        var propRows = cssRule.getElementsByClassName("cssProp");
 
-        for (var p in cssRules.props)
+        var lines = [];
+        for (var i = 0; i < propRows.length; ++i)
         {
-            var prop = cssRules.props[p];
-            if (!(prop.disabled || prop.overridden))
-                props.push(prop.name + ": " + rule.style.getPropertyValue(prop.name) +
-                    prop.important + ";");
+            var row = propRows[i];
+            if (row.classList.contains("disabledStyle"))
+                continue;
+
+            var name = Dom.getChildByClass(row, "cssPropName").textContent;
+            var value = Firebug.getRepObject(Dom.getChildByClass(row, "cssPropValue"));
+            lines.push(name + ": " + value + ";");
         }
 
-        return props;
+        return lines;
     },
 
     copyRuleDeclaration: function(cssSelector)
@@ -2629,6 +2628,23 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
+}
+
+function formatColor(color)
+{
+    var colorDisplay = Options.get("colorDisplay");
+
+    switch (colorDisplay)
+    {
+        case "hex":
+            return Css.rgbToHex(color);
+
+        case "hsl":
+            return Css.rgbToHSL(color);
+            
+        default:
+            return color;
+    }
 }
 
 function getRuleLine(rule)

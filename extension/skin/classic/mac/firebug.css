@@ -17,8 +17,14 @@
 #fbCommandLine,
 #fbCommandEditor,
 #fbCommandLineCompletion,
+#fbCommandLineMeasurer,
 .fbCommandLineCompletions {
     font-family: Monaco, monospace;
+}
+
+/* Add some more padding to the completion popup */
+.userTypedText {
+    margin-left: 1px;
 }
 
 #fbCommandEditor {

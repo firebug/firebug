@@ -98,7 +98,9 @@ var Annotations = Obj.extend(Firebug.Module,
             // Initialize output stream.
             var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
                 .createInstance(Ci.nsIFileOutputStream);
-            outputStream.init(this.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+            // write, create, truncate
+            // see https://developer.mozilla.org/en-US/docs/PR_Open#Parameters
+            outputStream.init(this.file, 0x02 | 0x08 | 0x20, 0666, 0);
 
             // Convert data to JSON.
             var arr = [];
@@ -112,7 +114,7 @@ var Annotations = Obj.extend(Firebug.Module,
 
             var jsonString = JSON.stringify(arr);
 
-            // Store annotations.
+            // Store annotations
             outputStream.write(jsonString, jsonString.length);
             outputStream.close();
 
@@ -151,11 +153,12 @@ var Annotations = Obj.extend(Firebug.Module,
             var cstream = Cc["@mozilla.org/intl/converter-input-stream;1"]
                 .createInstance(Ci.nsIConverterInputStream);
 
-            // loadAnnotations input stream.
-            inputStream.init(this.file, 0x01 | 0x08, 0666, 0); // read, create
+            // loadAnnotations input stream
+            // read, create
+            inputStream.init(this.file, 0x01 | 0x08, 0666, 0);
             cstream.init(inputStream, "UTF-8", 0, 0);
 
-            // Load annotations.
+            // Load annotations
             var json = "";
             var data = {};
             while (cstream.readString(-1, data) != 0)
@@ -168,7 +171,7 @@ var Annotations = Obj.extend(Firebug.Module,
             if (!arr)
                 return;
 
-            // Convert to map for faster lookup.
+            // convert to map for faster lookup
             for (var i=0; i<arr.length; i++)
                 this.annotations[arr[i].uri] = arr[i].value;
 

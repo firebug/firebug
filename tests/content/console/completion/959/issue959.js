@@ -22,10 +22,17 @@ function runTest()
                 cmdLine.value = expr.slice(0, -1);
                 FBTest.synthesizeKey(expr.slice(-1), null, win);
 
-                FBTest.compare(expr + wanted, completionBox.value,
-                    "Completing \"" + expr + "|" + wanted + "\"");
-                FBTest.compare(wantedPopup, (popup.state !== "closed"),
-                    "Completion box should " + (wantedPopup ? "" : "not ") + " open.");
+                if (wanted)
+                {
+                    FBTest.compare(expr + wanted, completionBox.value,
+                        "Completing \"" + expr + "|" + wanted + "\"");
+                    FBTest.compare(wantedPopup, (popup.state !== "closed"),
+                        "Completion box should " + (wantedPopup ? "" : "not ") + " open.");
+                }
+                else
+                {
+                    FBTest.compare("", completionBox.value, "\"" + expr + "\" should not complete.");
+                }
 
                 callback();
             }
@@ -55,6 +62,9 @@ function runTest()
             tasks.push(testWithPopup, "document._", "_proto__", false);
             tasks.push(testWithPopup, "obj1.", "aa1", true);
             tasks.push(testWithPopup, "obj2.", "aa1", true);
+            tasks.push(testWithPopup, "obj3.", "", false);
+            tasks.push(testWithPopup, "obj3.t", "oString", false);
+            tasks.push(testWithPopup, "false.he", "llo", true);
 
             tasks.push(testHidden, "String.prototype.toLocaleU");
             tasks.push(testHidden, "''.toLocaleU");

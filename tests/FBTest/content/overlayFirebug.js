@@ -70,20 +70,21 @@ this.onLoad = function()
 
 this.onFirebugMenuShowing = function(event)
 {
-    if (!Firebug.GlobalUI)
+    if (!Firebug.BrowserOverlayLib)
         return;
 
     var parent = event.detail;
+    var doc = parent.ownerDocument;
 
     // Extend Firebug menu
-    with (Firebug.GlobalUI)
+    with (Firebug.BrowserOverlayLib)
     {
         // Open Test Console
-        $menupopupOverlay(parent, [
-            $menuseparator({
+        $menupopupOverlay(doc, parent, [
+            $menuseparator(doc, {
                 insertbefore: "menu_firebug_aboutSeparator",
             }),
-            $menuitem({
+            $menuitem(doc, {
                 id: "menu_openTestConsole",
                 label: "Open Test Console",
                 command: "cmd_openTestConsole",
@@ -94,8 +95,8 @@ this.onFirebugMenuShowing = function(event)
 
         // Always Open Test Console (option)
         var optionsPopup = parent.querySelector("#FirebugMenu_OptionsPopup");
-        $menupopupOverlay(optionsPopup, [
-            $menuitem({
+        $menupopupOverlay(doc, optionsPopup, [
+            $menuitem(doc, {
                 id: "FirebugMenu_Options_alwaysOpenTestConsole",
                 type: "checkbox",
                 label: "Always Open Test Console",
@@ -110,7 +111,7 @@ this.onFirebugMenuShowing = function(event)
 this.onToggleOption = function(target)
 {
     var self = this;
-    window.Firebug.GlobalUI.startFirebug(function()
+    window.Firebug.browserOverlay.startFirebug(function()
     {
         Firebug.chrome.onToggleOption(target);
 
@@ -144,7 +145,7 @@ this.open = function(testListURI)
 
     // Load Firebug
     var self = this;
-    window.Firebug.GlobalUI.startFirebug(function()
+    window.Firebug.browserOverlay.startFirebug(function()
     {
         // Get the right firebug window. It can be browser.xul or fbMainFrame <iframe>
         var firebugWindow;

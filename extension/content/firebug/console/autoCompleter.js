@@ -24,6 +24,8 @@ const reCloseBracket = /[\]\)\}]/;
 const reJSChar = /[a-zA-Z0-9$_]/;
 const reLiteralExpr = /^[ "0-9,]*$/;
 
+var measureCache = {};
+
 // ********************************************************************************************* //
 // JavaScript auto-completion
 
@@ -212,6 +214,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (!this.completionBase.expr && !prefix)
         {
             // Don't complete "".
+            this.completions = null;
+            return;
+        }
+        if (!this.completionBase.candidates.length && !prefix)
+        {
+            // Don't complete empty objects -> toString.
             this.completions = null;
             return;
         }
@@ -677,11 +685,11 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         this.selectedPopupElement = null;
 
         var vbox = this.completionPopup.ownerDocument.createElement("vbox");
-        this.completionPopup.appendChild(vbox);
         vbox.classList.add("fbCommandLineCompletions");
+        this.completionPopup.appendChild(vbox);
 
         var title = this.completionPopup.ownerDocument.
-            createElementNS("http://www.w3.org/1999/xhtml","div");
+            createElementNS("http://www.w3.org/1999/xhtml", "div");
         title.textContent = Locale.$STR("console.Use Arrow keys, Tab or Enter");
         title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
@@ -733,25 +741,23 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
-            var completion = list[i];
             var prefixLen = this.completions.prefix.length;
+            var completion = list[i];
 
             var hbox = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml","div");
+                createElementNS("http://www.w3.org/1999/xhtml", "div");
             hbox.completionIndex = i;
 
             var pre = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml","span");
-            var preText = this.textBox.value;
-            if (prefixLen)
-                preText = preText.slice(0, -prefixLen) + completion.slice(0, prefixLen);
-            pre.innerHTML = Str.escapeForTextNode(preText);
+                createElementNS("http://www.w3.org/1999/xhtml", "span");
+            var preText = this.completionBase.expr + completion.substr(0, prefixLen);
+            pre.textContent = preText;
             pre.classList.add("userTypedText");
 
             var post = this.completionPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml","span");
+                createElementNS("http://www.w3.org/1999/xhtml", "span");
             var postText = completion.substr(prefixLen);
-            post.innerHTML = Str.escapeForTextNode(postText);
+            post.textContent = postText;
             post.classList.add("completionText");
 
             if (i === selIndex)
@@ -765,7 +771,24 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (this.selectedPopupElement)
             this.selectedPopupElement.setAttribute("selected", "true");
 
-        this.completionPopup.openPopup(this.textBox, "before_start", 0, 0, false, false);
+        // Open the popup at the pixel position of the start of the completed
+        // expression. The text length times the width of a single character,
+        // plus apparent padding, is a good enough approximation of this.
+        var chWidth = this.getCharWidth(this.completionBase.pre);
+        var offsetX = Math.round(this.completionBase.pre.length * chWidth) + 2;
+        this.completionPopup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
+    };
+
+    this.getCharWidth = function(text)
+    {
+        var size = Firebug.textSize;
+        if (!measureCache[size])
+        {
+            var measurer = this.options.popupMeasurer;
+            measurer.style.fontSizeAdjust = this.textBox.style.fontSizeAdjust;
+            measureCache[size] = measurer.offsetWidth / 60;
+        }
+        return measureCache[size];
     };
 
     this.isPopupOpen = function()
@@ -1715,7 +1738,14 @@ function propChainBuildComplete(out, context, tempExpr, result)
     var done = function(result)
     {
         if (result !== undefined && result !== null)
-            setCompletionsFromObject(out, Object(result), context);
+        {
+            if (typeof result !== "object" && typeof result !== "function")
+            {
+                // Convert the primitive into its scope's matching object type.
+                result = Wrapper.getContentView(out.window).Object(result);
+            }
+            setCompletionsFromObject(out, result, context);
+        }
     };
 
     if (tempExpr.fake)
@@ -2025,7 +2055,8 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
     var out = {
         spreExpr: spreExpr,
         completions: [],
-        hiddenCompletions: []
+        hiddenCompletions: [],
+        window: context.baseWindow || context.window
     };
     var indexCompletion = false;
 
@@ -2070,7 +2101,7 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
         {
             // Complete variables from the local scope
 
-            var contentView = Wrapper.getContentView(context.baseWindow || context.window);
+            var contentView = Wrapper.getContentView(out.window);
             if (context.stopped && includeCurrentScope)
             {
                 out.completions = Firebug.Debugger.getCurrentFrameKeys(context);

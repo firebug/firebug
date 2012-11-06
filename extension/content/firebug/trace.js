@@ -14,22 +14,22 @@ var FBTrace = {};
 try
 {
     var scope = {};
-    Components.utils["import"]("resource://firebug/firebug-trace-service.js", scope);
-    FBTrace = scope.traceConsoleService.getTracer("extensions.firebug");
+    Components.utils["import"]("resource://firebug/fbtrace.js", scope);
+    FBTrace = scope.FBTrace;
     FBTrace.setScope(window);
 
     function clearFBTraceScope()
     {
-        window.removeEventListener('unload', clearFBTraceScope, true);
+        window.removeEventListener("unload", clearFBTraceScope, true);
         FBTrace.setScope(null);
     }
 
-    window.addEventListener('unload', clearFBTraceScope, true);
+    window.addEventListener("unload", clearFBTraceScope, true);
     FBTrace.time("SCRIPTTAG_TIME");
 }
 catch (err)
 {
-    dump("FBTrace; " + err);
+    Components.utils.reportError(err);
 }
 
 // ********************************************************************************************* //

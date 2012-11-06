@@ -7,9 +7,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
-    "firebug/lib/options"
+    "firebug/lib/options",
+    "firebug/firefox/browserOverlayLib",
 ],
-function(Obj, Firebug, Firefox, Locale, Events, Dom, Options) {
+function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,20 +59,22 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
     onTooltipShowing: function(event)
     {
         var tooltip = event.target;
+        var doc = tooltip.ownerDocument;
+
         Dom.eraseNode(tooltip);
 
-        with (Firebug.GlobalUI)
+        with (BrowserOverlayLib)
         {
-            tooltip.appendChild($label({
+            tooltip.appendChild($label(doc, {
                 "class": "version",
                 value: "Firebug " + Firebug.getVersion()
             }));
 
-            var status = $el("hbox");
+            var status = $el(doc, "hbox");
             tooltip.appendChild(status);
 
             var suspended = Firebug.getSuspended();
-            status.appendChild($label({
+            status.appendChild($label(doc, {
                 "class": "status",
                 value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
                     Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
@@ -80,14 +83,14 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             if (suspended)
                 return;
 
-            status.appendChild($label({
+            status.appendChild($label(doc, {
                 "class": "placement",
                 value: "(" + Locale.$STR(Firebug.getPlacement()) + ")"
             }));
 
             if (Firebug.allPagesActivation == "on")
             {
-                tooltip.appendChild($label({
+                tooltip.appendChild($label(doc, {
                     "class": "alwaysOn",
                     value: Locale.$STR("enablement.on") + " " +
                         Locale.$STR("enablement.for_all_pages")
@@ -95,7 +98,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             }
 
             // Panel enablement status info
-            tooltip.appendChild($label({
+            tooltip.appendChild($label(doc, {
                 "class": "enablement",
                 value: Locale.$STR("enablement.Panel_activation_status")
             }));
@@ -104,15 +107,15 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             for (var i=0; i<statuses.length; i++)
             {
                 var status = statuses[i];
-                var parent = $el("hbox");
+                var parent = $el(doc, "hbox");
                 tooltip.appendChild(parent);
 
-                parent.appendChild($label({
+                parent.appendChild($label(doc, {
                     "class": "panelName " + status.status,
                     value: status.name + ":"
                 }));
 
-                parent.appendChild($label({
+                parent.appendChild($label(doc, {
                     "class": "panelStatus " + status.status,
                     value: status.statusLabel
                 }));

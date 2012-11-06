@@ -39,14 +39,14 @@ function runTest()
             function testVisibleCase(callback)
             {
                 cmdLine.value = "";
-                FBTest.typeCommand(" obj.ab");
-                FBTest.compare(" obj.abcdE", completionBox.value,
+                FBTest.typeCommand(";obj.ab");
+                FBTest.compare(";obj.abcdE", completionBox.value,
                     "Completion box should retain the exact prefix");
                 waitForOpen(function()
                 {
                     var el = popup.querySelector("div[selected=true]");
                     FBTest.ok(el, "The completion popup should open, with something selected");
-                    FBTest.compare(" obj.aBcdE", el.textContent,
+                    FBTest.compare("obj.aBcdE", el.textContent,
                         "Completion popup should show the case of the completion");
                     callback();
                 });

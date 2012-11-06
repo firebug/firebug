@@ -57,7 +57,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         this.onNetFocus = Obj.bind(this.onNetFocus, this);
         this.onNetBlur = Obj.bind(this.onNetBlur, this);
 
-        // mark ourselves disabled so we don't performDisable() if we are not enabled.
+        // Mark ourselves disabled, so we don't performDisable() if we are not enabled.
         Firebug.chrome.window.a11yEnabled = false;
 
         Firebug.connection.addListener(this);
@@ -98,7 +98,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         {
             // Update for current chrome
             this.set(value, Firebug.chrome);
-            // If the current chrome is external window, update also original chrome.
+            // If the current chrome is an external window, update also the original chrome.
             if (Firebug.chrome != Firebug.originalChrome)
             {
                 this.set(value, Firebug.originalChrome);
@@ -584,7 +584,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
     ensurePanelTabStops: function()
     {
-        // XXXjjb: seems like this shoudl be !Firebug.chrome
+        // XXXjjb: seems like this should be !Firebug.chrome
         if (!Firebug.currentContext || !Firebug.currentContext.chrome)
             return;
         var panel = Firebug.chrome.getSelectedPanel();
@@ -1037,7 +1037,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 cell = Dom.getChildByClass(cell, "a11yFocus");
             this.focus(cell);
         }
-        // for Net Panel. Focus selected tab rather than the tablist
+        // for Net Panel. Focus selected tab rather than the tab list
         else if (Css.hasClass(row, "netInfoTabs"))
         {
             var tabs = row.getElementsByClassName("netInfoTab");
@@ -1552,7 +1552,8 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
     onBeforeCSSRulesAdded: function(panel)
     {
         // Panel content is about to be recreated, possibly wiping out focus.
-        // Use the focused element's xpath to remember which rule had focus so that it can be refocused when the panel content is drawn again
+        // Use the focused element's xpath to remember which rule had focus,
+        // so that it can be refocused when the panel content is drawn again
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !this.panelHasFocus(panel))
             return;
@@ -2290,7 +2291,8 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
         var node = line.getElementsByClassName("sourceRowText").item(0);
         this.insertCaretToNode(panel, node);
-        this.focus(focusElem); // move focus back to where it was
+        // move focus back to where it was
+        this.focus(focusElem);
     },
 
     insertCaretToNode: function(panel, node, startOffset)
@@ -2633,10 +2635,12 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         }
         var rangeParent = Dom.getAncestorByClass(target, "netRow");
         var browser = Firebug.chrome.getPanelBrowser(panel);
-        // these two lines are necessary, because otherwise the infoTip will not have the correct dimensions when it's positioned, and the contents
-        // could be placed outside FB's viewport (making it impossible to read for keyboard users)
+        // these two lines are necessary, because otherwise the info tip will not have the correct
+        // dimensions when it's positioned, and the contentscould be placed outside of Firebug's
+        // viewport (making it impossible to read for keyboard users)
+        // This will be called again in showInfoTip
         panel.showInfoTip(browser.infoTip, target, target.offsetLeft, target.offsetTop,
-            rangeParent, 0); //will be called again in showInfoTip
+            rangeParent, 0);
         browser.infoTip.setAttribute("active", "true");
         var left = Css.hasClass(target, "netTimeCol") ?
             target.offsetLeft - browser.infoTip.offsetWidth - 12 :
@@ -3024,8 +3028,8 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
     },
 
     // These utils are almost the same as their DOM namesakes,
-    // except that that the routine skips containers that are not visible
-    // (rather than wasting time on their childnodes)
+    // except that the routine skips invisible containers
+    // (rather than wasting time on their child nodes)
     getPreviousByClass: function (node, className, downOnly, maxRoot)
     {
         if (!node)

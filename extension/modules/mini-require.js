@@ -3,7 +3,7 @@
 // ********************************************************************************************* //
 // Module Loader Implementation
 
-var EXPORTED_SYMBOLS = ["require"];
+var EXPORTED_SYMBOLS = ["require", "define"];
 
 var require, define;
 
@@ -17,6 +17,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://firebug/fbtrace.js");
 
 // xxxHonza: why FBTrace is undefined?
 if (typeof(FBTrace) == "undefined")
@@ -202,7 +203,16 @@ var Loader =
         }
 
         return deps;
-    }
+    },
+
+    getDepDesc: function()
+    {
+        var desc = "";
+        var deps = this.getDeps();
+        for (var p in deps)
+            desc += p + "\n";
+        return desc;
+    },
 }
 
 // ********************************************************************************************* //
@@ -211,6 +221,7 @@ var Loader =
 require = Loader.require.bind(Loader);
 define = Loader.define.bind(Loader);
 require.load = Loader.load.bind(Loader);
+require.Loader = Loader;
 
 // ********************************************************************************************* //
 })();

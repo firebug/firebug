@@ -10,10 +10,7 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
-
-// xxxHonza: this breaks tracing, needs to be fixed.
-//Components.utils.import("resource://firebug/fbtrace.js");
-var FBTrace = {};
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 
@@ -118,14 +115,14 @@ var FirebugLoader =
         }
 
         [getRoots(win.document), getRoots(win.gNavToolbox.palette),
-            fbug.GlobalUI.nodesToRemove].forEach(function(list)
+            fbug.browserOverlay.nodesToRemove].forEach(function(list)
         {
             for each(var el in list)
                 if (el && el.parentNode)
                     el.parentNode.removeChild(el);
         });
 
-        win.Firebug.GlobalUI.unloadContextMenuOverlay(win);
+        win.Firebug.browserOverlay.unloadContextMenuOverlay(win);
 
         delete win.Firebug;
         delete win.FBTrace;
@@ -138,13 +135,30 @@ var FirebugLoader =
         // the entire application and all consequently created namespaces and variables should be
         // injected into it.
         // In the future, there should *not* be any other globals except of the Firebug object.
+        // xxxHonza: properties from this object are copied into the new Firebug obect that is
+        // created within "firebug/firebug" module (a hack).
         win.Firebug = {};
 
-        // Apply all Firefox/SeaMonkey overlays to the browser window.
-        loadSubscript("chrome://firebug/content/firefox/browserOverlay.js", win);
+        var requireScope = {};
+        Cu.import("resource://firebug/mini-require.js", requireScope);
+        var require = requireScope.require;
 
-        win.Firebug.GlobalUI.loadContextMenuOverlay(win);
-        win.Firebug.GlobalUI.loadFirstRunPage(win, reason);
+        var config = {
+            baseUrl: "resource://",
+            paths: {"firebug": "chrome://firebug/content"}
+        };
+
+        require(config, [
+            "firebug/firefox/browserOverlay"
+        ],
+        function(BrowserOverlay)
+        {
+            var overlay = win.Firebug.browserOverlay = new BrowserOverlay(win);
+            overlay.initialize(reason);
+        });
+
+        if (FBTrace.DBG_MODULES)
+            FBTrace.sysout("Basic loader dependencies: " + require.Loader.getDepDesc());
 
         // Firebug extensions should initialize here.
         this.dispatchToScopes("topWindowLoad", [win]);
