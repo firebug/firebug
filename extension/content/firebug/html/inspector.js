@@ -1239,19 +1239,19 @@ Firebug.Inspector.FrameHighlighter.prototype =
             {
                 cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-                if (cs.MozTransform && cs.MozTransform != "none")
-                    css += "-moz-transform: "+cs.MozTransform+"!important;" +
-                           "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
+                if (cs.transform && cs.transform != "none")
+                    css += "transform: " + cs.transform + " !important;" +
+                           "transform-origin: " + cs.transformOrigin + " !important;";
                 if (cs.borderRadius)
-                    css += "border-radius: "+cs.borderRadius+"!important;";
+                    css += "border-radius: " + cs.borderRadius + " !important;";
                 if (cs.borderTopLeftRadius)
-                    css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
+                    css += "border-top-left-radius: " + cs.borderTopLeftRadius + " !important;";
                 if (cs.borderTopRightRadius)
-                    css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
+                    css += "border-top-right-radius: " + cs.borderTopRightRadius + " !important;";
                 if (cs.borderBottomRightRadius)
-                    css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
+                    css += "border-bottom-right-radius: " + cs.borderBottomRightRadius + " !important;";
                 if (cs.borderBottomLeftRadius)
-                    css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
+                    css += "border-bottom-left-radius: " + cs.borderBottomLeftRadius + " !important;";
             }
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
@@ -1677,9 +1677,9 @@ function createProxiesForDisabledElements(body)
         div.className = "firebugResetStyles fbProxyElement";
 
         css = moveImp(null, rect.left, rect.top + body.scrollTop) + resizeImp(null, rect.width, rect.height);
-        if (cs.MozTransform && cs.MozTransform != "none")
-          css += "-moz-transform:" + cs.MozTransform + "!important;" +
-                 "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
+        if (cs.transform && cs.transform != "none")
+            css += "transform:" + cs.transform + " !important;" +
+                   "transform-origin:" + cs.transformOrigin + " !important;";
         if (cs.borderRadius)
             css += "border-radius:" + cs.borderRadius + " !important;";
         if (cs.borderTopLeftRadius)

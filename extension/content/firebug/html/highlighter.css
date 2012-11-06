@@ -14,8 +14,8 @@
     min-height: 0 !important;
     max-height: none !important;
     position: fixed !important;
-    -moz-transform: rotate(0deg) !important;
-    -moz-transform-origin: 50% 50% !important;
+    transform: rotate(0deg) !important;
+    transform-origin: 50% 50% !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: transparent none !important;

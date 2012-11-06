@@ -160,7 +160,7 @@
 
 .fbsearch-textbox[status="wraparound"] {
     background-image: url(chrome://global/skin/icons/wrap.png);
-    background-position: -moz-calc(100% - 5px) center;
+    background-position: calc(100% - 5px) center;
     background-repeat: no-repeat;
 }
 
