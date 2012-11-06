@@ -148,7 +148,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (Firebug.CommandEditor.ignoreChanges)
             return;
 
-        Firebug.CommandLine.onCommandLineInput(event);
+        var context = Firebug.currentContext;
+        Firebug.CommandLine.update(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

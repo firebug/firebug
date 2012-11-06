@@ -885,25 +885,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 // ********************************************************************************************* //
 
 /**
- * A dummy auto-completer, set as current by CommandLine.setAutoCompleter when
- * no completion is supposed to be done (such as in the large command line,
- * currently, or when there is no context).
- */
-Firebug.EmptyJSAutoCompleter = function()
-{
-    this.empty = true;
-    this.shutdown = function() {};
-    this.hide = function() {};
-    this.complete = function() {};
-    this.acceptReturn = function() { return true; };
-    this.revert = function() { return false; };
-    this.handleKeyDown = function() {};
-    this.handleKeyPress = function() {};
-};
-
-// ********************************************************************************************* //
-
-/**
  * An (abstract) editor with simple JavaScript auto-completion.
  */
 Firebug.JSEditor = function()
@@ -1829,7 +1810,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     tempExpr.thisCommand = "window";
                     tempExpr.command += "(" + link.origCont + ")";
                 }
-                else if (link.name === "")
+                else if (!link.name)
                 {
                     // We cannot know about functions without name; try the
                     // heuristic directly.

@@ -158,7 +158,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
         // If all the visual parts are already visible then bail out.
         if (visible && !Dom.isCollapsed(popup) && !Dom.isCollapsed(splitter) &&
-            !Dom.isCollapsed(cmdbox) && !Dom.isCollapsed(toggle))
+            !Dom.isCollapsed(cmdbox) && Dom.isCollapsed(toggle))
             return;
 
         Dom.collapse(popup, !visible);
