@@ -21,7 +21,7 @@ function runTest()
             range.setEnd(endNode, 1);
             doc.getSelection().addRange(range);
 
-            FBTest.sendShortcut("F", {ctrlKey: true});
+            FBTest.sendShortcut("F", {accelKey: true});
             FBTest.compare("color: blue", FBTest.getSearchFieldText(),
                 "The value inside the search field much match the selection.");
         }
