@@ -71,6 +71,8 @@ function createFirebugCommandLine(context, win)
         commandLine.__exposedProps__[command] = "rw";
     }
 
+    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
+
     // Define shortcuts for some console methods
     for (var i=0; i<consoleShortcuts.length; i++)
     {
@@ -82,7 +84,7 @@ function createFirebugCommandLine(context, win)
 
         function createShortcutHandler(cmd) {
             return function() {
-                return contentView.console[cmd].apply(contentView.console, arguments);
+                return console[cmd].apply(console, arguments);
             }
         }
 
