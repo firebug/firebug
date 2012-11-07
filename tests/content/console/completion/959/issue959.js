@@ -58,7 +58,7 @@ function runTest()
             tasks.push(testWithPopup, "Object.prototype.", "toString", true);
             tasks.push(testWithPopup, "Object.", "prototype", true);
             tasks.push(testWithPopup, "Object.getOwn", "PropertyNames", true);
-            tasks.push(testWithPopup, "doc", "ument", false);
+            tasks.push(testWithPopup, "do", "cument", false);
             tasks.push(testWithPopup, "document._", "_proto__", false);
             tasks.push(testWithPopup, "obj1.", "aa1", true);
             tasks.push(testWithPopup, "obj2.", "aa1", true);
