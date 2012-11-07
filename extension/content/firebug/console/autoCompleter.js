@@ -313,11 +313,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         // Special-case certain expressions.
         var special = {
-            "": ["document", "console", "frames", "window", "parseInt", "undefined"],
+            "": ["document", "console", "frames", "window", "parseInt", "undefined",
+                "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
             "document.": ["getElementById", "addEventListener", "createElement",
-                "documentElement"]
+                "documentElement"],
+            "Object.prototype.toString": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
         {
@@ -1628,9 +1630,17 @@ function propertiesToHide(expr, obj)
     {
         // Internal Firefox things.
         ret.push("getInterface", "Components", "XPCNativeWrapper",
-            "InstallTrigger", "netscape",
+            "InstallTrigger", "WindowInternal", "DocumentXBL",
             "startProfiling", "stopProfiling", "pauseProfilers",
-            "resumeProfilers", "dumpProfile");
+            "resumeProfilers", "dumpProfile", "netscape",
+            "BoxObject", "BarProp", "BrowserFeedWriter", "ChromeWindow",
+            "ElementCSSInlineStyle", "JSWindow", "NSEditableElement",
+            "NSRGBAColor", "NSEvent", "NSXPathExpression", "ToString",
+            "OpenWindowEventDetail", "Parser", "ParserJS", "Rect",
+            "RGBColor", "ROCSSPrimitiveValue", "RequestService",
+            "PaintRequest", "PaintRequestList", "WindowUtils",
+            "GlobalPropertyInitializer", "GlobalObjectConstructor"
+        );
 
         // Hide ourselves.
         ret.push("_FirebugCommandLine", "_firebug");
@@ -1686,11 +1696,12 @@ function setCompletionsFromObject(out, object, context)
             var hideMap = Object.create(null);
             for (var i = 0; i < hide.length; ++i)
                 hideMap[hide[i]] = 1;
+            var hideRegex = /^XUL[A-Za-z]+$/;
 
             var newCompletions = [];
             out.completions.forEach(function(prop)
             {
-                if (prop in hideMap)
+                if (prop in hideMap || hideRegex.test(prop))
                     out.hiddenCompletions.push(prop);
                 else
                     newCompletions.push(prop);
