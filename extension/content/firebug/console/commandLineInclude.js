@@ -312,7 +312,7 @@ var CommandLineInclude =
             this.log("aliasCreated", [newAlias], [context, "info"]);
         }
 
-        this.log("includeSuccess", [filename], [context, "info"]);
+        this.log("includeSuccess", [filename], [context, "info", true]);
     },
 
     onError: function(context, url, loadingMsgRow)
@@ -439,6 +439,11 @@ var CommandLineInclude =
         catch(ex)
         {
             this.clearLoadingMessage(loadingMsgRow);
+            if (ex.name === "NS_ERROR_UNKNOWN_PROTOCOL")
+            {
+                this.log("invalidRequestProtocol", [], [context, "error"]);
+                return;
+            }
             throw ex;
         }
 
@@ -446,13 +451,12 @@ var CommandLineInclude =
         {
             this.log("invalidRequestProtocol", [], [context, "error"]);
             this.clearLoadingMessage(loadingMsgRow);
-            return ;
+            return;
         }
 
         xhr.send(null);
 
         // xxxFlorent: TODO show XHR progress
-        return xhr;
     }
 };
 
