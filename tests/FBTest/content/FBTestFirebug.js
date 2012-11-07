@@ -2789,4 +2789,14 @@ this.isInspectorActive = function()
 };
 
 // ********************************************************************************************* //
+// OS
+
+this.isMac = function()
+{
+    var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+        .getService(Ci.nsIAppShellService).hiddenDOMWindow;
+    return (hiddenWindow.navigator.platform.indexOf("Mac") >= 0);
+}
+
+// ********************************************************************************************* //
 }).apply(FBTest);
