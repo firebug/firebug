@@ -161,8 +161,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         Dom.eraseNode(popup);
 
         var items = Firebug.CommandEditor.getContextMenuItems();
-        for (var i=0; i<items.length; i++)
-            Menu.createMenuItem(popup, items[i]);
+        Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
             return;

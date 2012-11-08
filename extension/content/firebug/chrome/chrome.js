@@ -1536,10 +1536,7 @@ var FirebugChrome =
         {
             var menu = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
             if (menu)
-            {
-                for (var i = 0; i < menu.length; ++i)
-                    Menu.createMenuItem(popup, menu[i]);
-            }
+                Menu.createMenuItems(popup, menu);
         }
 
         // 2. Add the custom menu items from the original rep
@@ -1547,10 +1544,7 @@ var FirebugChrome =
         {
             var items = rep.getContextMenuItems(object, target, Firebug.currentContext);
             if (items)
-            {
-                for (var i = 0; i < items.length; ++i)
-                    Menu.createMenuItem(popup, items[i]);
-            }
+                Menu.createMenuItems(popup, items);
         }
 
         // 3. Add the custom menu items from the panel
@@ -1558,10 +1552,7 @@ var FirebugChrome =
         {
             var items = panel.getContextMenuItems(realObject, target);
             if (items)
-            {
-                for (var i = 0; i < items.length; ++i)
-                    Menu.createMenuItem(popup, items[i]);
-            }
+                Menu.createMenuItems(popup, items);
         }
 
         // 4. Add the inspect menu items
@@ -1570,13 +1561,9 @@ var FirebugChrome =
             var separator = null;
 
             var items = this.getInspectMenuItems(realObject);
-            for (var i = 0; i < items.length; ++i)
-            {
-                if (popup.firstChild && !separator)
-                    separator = Menu.createMenuSeparator(popup);
-
-                Menu.createMenuItem(popup, items[i]);
-            }
+            if (popup.firstChild && items.length > 0)
+                Menu.createMenuSeparator(popup);
+            Menu.createMenuItems(popup, items);
         }
 
         // 5. Add menu items from uiListeners
@@ -1585,10 +1572,7 @@ var FirebugChrome =
             Firebug.currentContext, panel, popup]);
 
         if (items)
-        {
-            for (var i = 0; i < items.length; ++i)
-                Menu.createMenuItem(popup, items[i]);
-        }
+            Menu.createMenuItems(popup, items);
 
         if (!popup.firstChild)
             return false;
