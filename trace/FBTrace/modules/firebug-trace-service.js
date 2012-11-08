@@ -398,10 +398,19 @@ function writeTextToFile(file, string)
         // Initialize output stream.
         var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
             .createInstance(Ci.nsIFileOutputStream);
-        outputStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+        outputStream.init(file, 0x02 | 0x10, 0666, 0); // write, create, truncate
 
-        outputStream.write(string, string.length);
-        outputStream.close();
+        var converter = Cc["@mozilla.org/intl/converter-output-stream;1"]
+            .createInstance(Ci.nsIConverterOutputStream);
+
+        converter.init(outputStream, "UTF-8", 0, 0);
+        converter.writeString("- " + string);
+
+        var stack = getStackDump();
+        converter.writeString(stack + "\n\n");
+
+        // this closes foStream
+        converter.close();
     }
     catch (err)
     {
