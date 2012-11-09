@@ -12,7 +12,7 @@ function runTest()
 
             var options = {
                 tagName: "tr",
-                classes: "netRow category-html hasHeaders responseError loaded"
+                classes: "netRow responseError"
             };
 
             FBTest.waitForDisplayedElement("net", options, function(netRow)
@@ -20,9 +20,10 @@ function runTest()
                 FBTest.progress("Error request displayed");
 
                 var panelNode = FBTest.getPanel("net").panelNode;
-                FBTest.click(netRow);
+                var row = panelNode.querySelector(".netRow.category-html");
+                FBTest.click(row);
 
-                var panelNode = FBTest.getPanel("net").panelNode;
+                var netInfoRow = row.nextSibling;
                 FBTest.expandElements(panelNode, "netInfoHtmlTab");
 
                 // If the test fails there would be an alert dialog that

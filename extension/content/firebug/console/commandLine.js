@@ -792,6 +792,11 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineKeyDown: function(event)
     {
+        // XXX: Temporary hack to make FireClosure work (until that gets a new
+        // release out)
+        if (!this.autoCompleter.shouldIncludeHint && Firebug.JSAutoCompleter.transformScopeExpr)
+            this.setAutoCompleter();
+
         var context = Firebug.currentContext;
 
         this.autoCompleter.handleKeyDown(event, context);

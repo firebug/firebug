@@ -224,6 +224,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             return;
         }
 
+        var mustMatchFirstLetter = (this.completionBase.expr === "");
         var clist = [
             this.completionBase.candidates,
             this.completionBase.hiddenCandidates
@@ -236,9 +237,14 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             for (var i = 0; i < candidates.length; ++i)
             {
                 // Mark a candidate as matching if it matches the prefix case-
-                // insensitively, and shares its upper-case characters.
+                // insensitively, and shares its upper-case characters. The
+                // exception to this is that for global completions, the first
+                // character must match exactly (see issue 6030).
                 var name = candidates[i];
                 if (!Str.hasPrefix(name.toLowerCase(), lowPrefix))
+                    continue;
+
+                if (mustMatchFirstLetter && name.charAt(0) !== prefix.charAt(0))
                     continue;
 
                 var fail = false;
@@ -307,11 +313,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         // Special-case certain expressions.
         var special = {
-            "": ["document", "console", "frames", "window", "parseInt", "undefined"],
+            "": ["document", "console", "frames", "window", "parseInt", "undefined",
+                "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
             "document.": ["getElementById", "addEventListener", "createElement",
-                "documentElement"]
+                "documentElement"],
+            "Object.prototype.toString": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
         {
@@ -1618,24 +1626,21 @@ function propertiesToHide(expr, obj)
             "strike", "small", "big", "blink", "sup", "sub");
     }
 
-    // Annoying when typing 'document'/'window'.
-    if (expr === "")
-    {
-        ret.push("Document", "DocumentType", "DocumentFragment",
-            "DocumentTouch", "DocumentXBL", "DOMTokenList",
-            "DOMConstructor", "DOMError", "DOMException",
-            "DOMImplementation", "DOMRequest", "DOMSettableTokenList",
-            "DOMStringMap", "DOMStringList", "Window", "WindowInternal",
-            "WindowCollection", "WindowUtils", "WindowPerformance");
-    }
-
     if (expr === "" || expr === "window.")
     {
         // Internal Firefox things.
         ret.push("getInterface", "Components", "XPCNativeWrapper",
-            "InstallTrigger", "netscape",
+            "InstallTrigger", "WindowInternal", "DocumentXBL",
             "startProfiling", "stopProfiling", "pauseProfilers",
-            "resumeProfilers", "dumpProfile");
+            "resumeProfilers", "dumpProfile", "netscape",
+            "BoxObject", "BarProp", "BrowserFeedWriter", "ChromeWindow",
+            "ElementCSSInlineStyle", "JSWindow", "NSEditableElement",
+            "NSRGBAColor", "NSEvent", "NSXPathExpression", "ToString",
+            "OpenWindowEventDetail", "Parser", "ParserJS", "Rect",
+            "RGBColor", "ROCSSPrimitiveValue", "RequestService",
+            "PaintRequest", "PaintRequestList", "WindowUtils",
+            "GlobalPropertyInitializer", "GlobalObjectConstructor"
+        );
 
         // Hide ourselves.
         ret.push("_FirebugCommandLine", "_firebug");
@@ -1691,11 +1696,12 @@ function setCompletionsFromObject(out, object, context)
             var hideMap = Object.create(null);
             for (var i = 0; i < hide.length; ++i)
                 hideMap[hide[i]] = 1;
+            var hideRegex = /^XUL[A-Za-z]+$/;
 
             var newCompletions = [];
             out.completions.forEach(function(prop)
             {
-                if (prop in hideMap)
+                if (prop in hideMap || hideRegex.test(prop))
                     out.hiddenCompletions.push(prop);
                 else
                     newCompletions.push(prop);

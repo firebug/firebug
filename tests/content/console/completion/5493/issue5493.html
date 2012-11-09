@@ -28,6 +28,10 @@
                         <li>"obj.ab" <span class="ok">&rArr; "obj.aBdeE"</span></li>
                         <li>"obj.abx&lt;backspace&gt;" <span class="ok">&rArr; "obj.AbcD"</span></li>
                         <li>"obj.Abcd" <span class="ok">&rArr; "obj.AbcD"</span></li>
+                        <li>"document.gete" <span class="ok">&rArr; "document.getElementById"</span></li>
+                        <li>"decodeu" <span class="ok">&rArr; "decodeURI"</span></li>
+                        <li>"obje" <span class="ok">&rArr; "obje"</span></li>
+                        <li>"Obje" <span class="ok">&rArr; "Object"</span></li>
                     </ul>
                     <li>Verify that when typing ";obj.ab", the completion text starts
                     with that, but the popup has the correct case (and excludes the
@@ -40,6 +44,8 @@
                     <li>Completions that match case should be preferred as defaults.</li>
                     <li>When typing another letter, the completion should remain unless
                     another completion suddenly appears better at matching case.</li>
+                    <li>For global completions, the first letter should not be matched
+                    case-insensitively.</li>
                 </ul>
             </section>
             <footer>

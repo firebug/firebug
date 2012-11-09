@@ -4,43 +4,29 @@
         <title>Issue 4553: iframe should be content-primary</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
-        <script type="text/javascript">
-        function showError()
-        {
-            var output = document.getElementById("output");
-            output.textContent = "The image couldn't be loaded.";
-            output.style.display = "block";
-        }
-        </script>
     </head>
     <body>
         <header>
-            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4553">Issue 4553</a>: iframe should be content-primary</h1>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4553">Issue 4553</a>:
+                iframe should be content-primary</h1>
         </header>
         <div>
             <section id="content">
-                <img src="a404.png" onerror="showError();" alt=""/>
+                <img src="a404.png" onerror="alert(Components.classes);" alt=""/>
                 <section id="output"></section>
             </section>
             <section id="description">
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>
-                    <li>Enable the <em>Net</em> and <em>Console</em> panel and switch to the <em>Net</em> panel</li>
+                    <li>Switch to the Net panel and enable it</li>
                     <li>Reload the page</li>
                     <li>
-                        Expand the request for <code>iframeContentPrimary.html</code><br/>
+                        Expand the request for <code>issue4553.html</code><br/>
                         <span class="ok">&rArr; An <em>HTML</em> tab should be shown for the request</span>
                     </li>
-                    <li>asdf</li>
+                    <li>Select the HTML tab. At this moment alert dialog MUST NOT be displayed.</li>
                 </ol>
-                <h3>Expected result</h3>
-                <ul>
-                    <li>
-                        The <em>Console</em> panel should show an error message:
-                        <code>Permission denied for &lt;...&gt; to get property XPCComponents.classes</code>
-                    </li>
-                </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
         </div>

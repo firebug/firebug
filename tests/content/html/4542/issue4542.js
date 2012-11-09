@@ -44,10 +44,14 @@ function checkQuotesInOnClick(callback, panel, win)
     {
         var attributes = node.getElementsByClassName("nodeAttr");
 
-        clickAttributeValue(attributes, "onclick", function(attribute, editor) {
+        clickAttributeValue(attributes, "onclick", function(attribute, editor)
+        {
+            // Move text cursor at the beginning of the input field.
+            var key = FBTest.isMac() ? "LEFT" : "HOME";
+            FBTest.sendKey(key, editor);
+
             // Move text cursor between the opening bracket and 'output' of
             // 'getElementById(output')'
-            FBTest.sendKey("HOME", editor);
             for (var i=0; i<37; i++)
                 FBTest.sendKey("RIGHT", editor);
 
@@ -86,7 +90,9 @@ function checkQuotesInOnClick(callback, panel, win)
             FBTest.synthesizeMouse(panel.panelNode, 0, 0);
 
             FBTest.click(win.document.getElementById("sayHi"));
-            FBTest.compare("Hi there, tester!", win.document.getElementById("output").textContent, "Changes in panel must effect page content");
+            FBTest.compare("Hi there, tester!",
+                win.document.getElementById("output").textContent,
+                "Changes in panel must effect page content");
 
             callback();
         });
@@ -101,11 +107,17 @@ function checkQuotesInStyle(callback, panel, win)
     {
         var attributes = node.getElementsByClassName("nodeAttr");
 
-        clickAttributeValue(attributes, "style", function(attribute, editor) {
-            var buttonDisplayBefore = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
+        clickAttributeValue(attributes, "style", function(attribute, editor)
+        {
+            var buttonDisplayBefore = FBTest.getImageDataFromNode(
+                win.document.getElementById("sayHi"));
 
-            // Move text cursor after the opening bracket of 'background-image: url(firebug.png');'
-            FBTest.sendKey("HOME", editor);
+            // Move text cursor at the beginning of the input field.
+            var key = FBTest.isMac() ? "LEFT" : "HOME";
+            FBTest.sendKey(key, editor);
+
+            // Move text cursor after the opening bracket of
+            // 'background-image: url(firebug.png');'
             for (var i=0; i<22; i++)
                 FBTest.sendKey("RIGHT", editor);
 
@@ -126,15 +138,17 @@ function checkQuotesInStyle(callback, panel, win)
             // Click outside the CSS selector to stop inline editing
             FBTest.synthesizeMouse(panel.panelNode, 0, 0);
 
-            var buttonDisplayAfter = FBTest.getImageDataFromNode(win.document.getElementById("sayHi"));
-            FBTest.ok(buttonDisplayBefore != buttonDisplayAfter, "The button display must have changed");
+            var buttonDisplayAfter = FBTest.getImageDataFromNode(
+                win.document.getElementById("sayHi"));
+            FBTest.ok(buttonDisplayBefore != buttonDisplayAfter,
+                "The button display must have changed");
 
             callback();
         });
     });
 }
 
-//************************************************************************************************
+// ********************************************************************************************* //
 
 function clickAttributeValue(attributes, name, callback)
 {
@@ -145,12 +159,14 @@ function clickAttributeValue(attributes, name, callback)
         if (attribute.getElementsByClassName("nodeName").item(0).textContent == name)
             break;
     }
+
     var attributeValue = attribute.getElementsByClassName("nodeValue").item(0);
 
     FBTest.synthesizeMouse(attributeValue);
 
     var editor = FW.FBL.getAncestorByClass(attribute, "panelNode").
         getElementsByClassName("textEditorInner").item(0);
+
     if (FBTest.ok(editor, "Editor must be available now"))
         callback(attribute, editor);
 }
