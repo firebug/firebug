@@ -2300,6 +2300,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             getElementById("contentAreaContextMenu");
 
     var self = this;
+
     function onPopupShown(event)
     {
         contextMenu.removeEventListener("popupshown", onPopupShown, false);
@@ -2331,6 +2332,20 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             {
                 contextMenu.hidePopup();
                 return;
+            }
+
+            var menupopup = FW.FBL.getAncestorByTagName(menuItem, "menupopup");
+            // if the item appears in a sub-menu:
+            if (menupopup && menupopup.parentNode.tagName === "menu")
+            {
+                var isMenuEnabled = menupopup.parentNode.disabled === false;
+                self.ok(isMenuEnabled, "the sub-menu must be enabled");
+                if (!isMenuEnabled)
+                {
+                    contextMenu.hidePopup();
+                    return;
+                }
+                menupopup.showPopup();
             }
 
             // Click on specified menu item.

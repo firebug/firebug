@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5358: Issue summary</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5358">Issue 5358</a>: Allow pasting HTML into the HTML panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                 <iframe src="./content.xml"></iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug and switch to the HTML panel</li>
+                    <li>Copy this text: <code>&lt;item id="3"&gt;Item Number&lt;/item&gt;</code></li>
+                    <li>In the node tree, right-click on the #onlyContent element, and select
+                        Paste &gt; Replace Node</li>
+                    <li>Copy this text: <code>3</code></li>
+                    <li>In the node tree, right-click on the #3 element, and select
+                        Paste &gt; Replace Content</li>
+                    <li>Copy this text: <code>&lt;item id="2"&gt;2&lt;/item&gt;</code></li>
+                    <li>In the node tree, right-click on the &lt;root&gt; element, and select
+                        Paste &gt; As First Child</li>
+                    <li>Copy this text: <code>&lt;item id="4"&gt;4&lt;/item&gt;</code></li>
+                    <li>In the node tree, right-click on the &lt;root&gt; element, and select
+                        Paste &gt; As Last Child</li>
+                    <li>Copy this text: <code>&lt;item id="1"&gt;1&lt;/item&gt;</code></li>
+                    <li>In the node tree, right-click on the #2 element, and select
+                        Paste &gt; Before </li>
+                    <li>Copy this text: <code>&lt;item id="5"&gt;5&lt;/item&gt;</code></li>
+                    <li>In the node tree, right-click on the #4 element, and select
+                        Paste &gt; After </li>
+                </ol>
+                <h3>Expected result</h3>
+                <p>The iframe should contain this code: </p>
+                <textarea style="width: 300px; height:150px;">
+<?xml version="1.0"?>
+<root>
+    <item>1</item>
+    <item>2</item>
+    <item>3</item>
+    <item>4</item>
+    <item>5</item>
+</root>
+                </textarea>
+            </section>
+            <footer>
+                <!--
+                    Your name and your email address (or other contact information) should be placed here.
+                    This is important in the case we need to contact you for further reference.
+                 -->
+                Florent FAYOLLE, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

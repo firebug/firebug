@@ -92,6 +92,43 @@ System.copyToClipboard = function(string)
         FBTrace.sysout("system.copyToClipboard; " + string, string);
 };
 
+System.getStringDataFromClipboard = function()
+{
+    // https://developer.mozilla.org/en-US/docs/Using_the_Clipboard#Pasting_Clipboard_Contents
+    var clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
+    if (!clip)
+        return false;
+
+    var trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+    if (!trans)
+        return false;
+
+    if  ('init' in trans)
+        trans.init(null);
+
+    trans.addDataFlavor("text/unicode");
+
+    clip.getData(trans, clip.kGlobalClipboard);
+
+    var str = {};
+    var strLength = {};
+
+    try
+    {
+        trans.getTransferData("text/unicode", str, strLength);
+
+        if (str)
+        {
+            str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+            return str.data.substring(0, strLength.value / 2);
+        }
+    }
+    catch (ex)
+    {
+    }
+    return false;
+}
+
 // ********************************************************************************************* //
 // Firebug Version Comparator
 
