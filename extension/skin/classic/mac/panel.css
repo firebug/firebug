@@ -38,6 +38,7 @@ body {
 .netRow.opened > .netCol > .netHrefLabel,
 .objectBox-stackFrame.hasTwisty.opened,
 .objectBox-functionCall.hasTwisty.opened,
+.computedStylesGroup.opened > .cssComputedHeader > .twisty,
 .netPageRow.opened > .netCol > .netPageTitle,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
