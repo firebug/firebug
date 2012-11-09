@@ -4,8 +4,12 @@ function runTest()
 
     FBTest.openNewTab(basePath + "firebug/4553/issue4553.html", function(win)
     {
+        FBTest.progress("New tab opened");
+
         FBTest.openFirebug();
         FBTest.selectPanel("net");
+
+        FBTest.progress("Net panel selected");
         FBTest.enableNetPanel(function(win)
         {
             FBTest.progress("Net panel enabled");
