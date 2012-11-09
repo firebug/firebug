@@ -1167,7 +1167,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     paste: function(elt, clipboardContent, mode)
     {
-        if (elt instanceof HTMLElement)
+        if (elt instanceof window.HTMLElement)
             return this.pasteHTML.apply(this, arguments);
         else
             return this.pasteXML.apply(this, arguments);
@@ -1190,6 +1190,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             contextNode = parentNode;
         else
             contextNode = elt;
+
         var pastedElements = Dom.markupToDocFragment(clipboardContent, contextNode);
         switch (mode)
         {

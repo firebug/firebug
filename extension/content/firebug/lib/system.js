@@ -62,19 +62,23 @@ System.launchProgram = function(exePath, args)
 
 System.getIconURLForFile = function(path)
 {
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
+    var fileHandler = ioService.getProtocolHandler("file")
+        .QueryInterface(Ci.nsIFileProtocolHandler);
+
     try
     {
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(path);
-        if ((System.getPlatformName() == "Darwin") && !file.isDirectory() && (path.indexOf(".app/") != -1))
+        if ((System.getPlatformName() == "Darwin") && !file.isDirectory() &&
+            (path.indexOf(".app/") != -1))
         {
             path = path.substr(0,path.lastIndexOf(".app/")+4);
             file.initWithPath(path);
         }
+
         return "moz-icon://" + fileHandler.getURLSpecFromFile(file) + "?size=16";
     }
-    catch(exc)
+    catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
@@ -103,7 +107,7 @@ System.getStringDataFromClipboard = function()
     if (!trans)
         return false;
 
-    if  ('init' in trans)
+    if ("init" in trans)
         trans.init(null);
 
     trans.addDataFlavor("text/unicode");
@@ -119,13 +123,14 @@ System.getStringDataFromClipboard = function()
 
         if (str)
         {
-            str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+            str = str.value.QueryInterface(Ci.nsISupportsString);
             return str.data.substring(0, strLength.value / 2);
         }
     }
     catch (ex)
     {
     }
+
     return false;
 }
 

@@ -1534,9 +1534,9 @@ var FirebugChrome =
         // 1. Add the custom menu items from the realRep
         if (realObject && realRep)
         {
-            var menu = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
-            if (menu)
-                Menu.createMenuItems(popup, menu);
+            var items = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
+            if (items)
+                Menu.createMenuItems(popup, items);
         }
 
         // 2. Add the custom menu items from the original rep
@@ -1558,11 +1558,12 @@ var FirebugChrome =
         // 4. Add the inspect menu items
         if (realObject && rep && rep.inspectable)
         {
-            var separator = null;
-
             var items = this.getInspectMenuItems(realObject);
+
+            // Separate existing menu items from 'inspect' menu items.
             if (popup.firstChild && items.length > 0)
                 Menu.createMenuSeparator(popup);
+
             Menu.createMenuItems(popup, items);
         }
 
