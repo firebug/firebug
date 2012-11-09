@@ -181,11 +181,8 @@ Dom.setOuterHTML = function(element, html)
 {
     try
     {
-        var doc = element.ownerDocument;
-        var range = doc.createRange();
-        range.selectNode(element || doc.documentElement);
+        var fragment = DOM.markupToDocFragment(html, element);
 
-        var fragment = range.createContextualFragment(html);
         var first = fragment.firstChild;
         var last = fragment.lastChild;
         element.parentNode.replaceChild(fragment, element);
@@ -195,6 +192,15 @@ Dom.setOuterHTML = function(element, html)
     {
         return [element, element];
     }
+};
+
+Dom.markupToDocFragment = function(markup, parent)
+{
+    var doc = parent.ownerDocument;
+    var range = doc.createRange();
+    range.selectNode(parent || doc.documentElement);
+
+    return range.createContextualFragment(markup);
 };
 
 Dom.appendInnerHTML = function(element, html, referenceElement)
