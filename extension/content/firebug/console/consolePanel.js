@@ -595,6 +595,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // Apply custom style if available.
             if (lastStyle && node)
                 node.setAttribute("style", lastStyle);
+
+            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
