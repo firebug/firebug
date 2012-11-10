@@ -120,6 +120,10 @@ function checkTableContent(callback)
     );
     FBTest.compare(5, childrenOk.length, 
         "the table should contain 5 cells: Top, Left, Middle, Right and Bottom");
+    Array.forEach(childrenOk, function(e)
+    {
+        FBTest.ok(true, "found element: #"+e.id);
+    });
     callback();
 }
 
