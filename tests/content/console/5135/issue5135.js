@@ -14,7 +14,8 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 var expected = "message origin=http://legoas, data=test » Window iframe.html";
-                FBTest.compare(expected, row.textContent, "The proper message must be displayed.");
+                FBTest.compare(expected, row.textContent,
+                    "The proper message must be displayed. " + row.textContent);
                 FBTest.testDone("issue5135.DONE");
             });
 
