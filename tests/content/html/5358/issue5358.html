@@ -4,7 +4,7 @@
         <title>Issue 5358: Allow pasting HTML into the HTML panel</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
-        <style>
+        <style type="text/css">
         table tr, table td
         {
             border: solid 1px;
@@ -34,27 +34,28 @@
                 <ol>
                     <li>Open Firebug and switch to the HTML panel</li>
                     <li>Copy this text: <code>&lt;td id="middleCell"&gt;Foo!&lt;/td&gt;</code></li>
-                    <li>In the node tree, right-click on the #onlyContent element, and select
-                        Paste &gt; Replace Node</li>
+                    <li>In the node tree right-click on the <code>#onlyCell</code> element and select
+                        <em>Paste HTML &gt; Replace Node</em></li>
                     <li>Copy this text: <code>&lt;b&gt;Middle&lt;/b&gt;</code></li>
-                    <li>In the node tree, right-click on the #middleContent element, and select
-                        Paste &gt; Replace Content</li>
+                    <li>In the node tree right-click on the <code>#middleCell</code> element and select
+                        <em>Paste &gt; Replace Content</em></li>
                     <li>Copy this text: <code>&lt;td&gt;Left&lt;/td&gt;</code></li>
-                    <li>In the node tree, right-click on the #middle<b>Row</b> element, and select
-                        Paste &gt; As First Child</li>
+                    <li>In the node tree right-click on the <code>#middleRow</code> element and select
+                        <em>Paste &gt; As First Child</em></li>
                     <li>Copy this text: <code>&lt;td&gt;Right&lt;/td&gt;</code></li>
-                    <li>In the node tree, right-click on the #middleRow element, and select
-                        Paste &gt; As Last Child</li>
+                    <li>In the node tree right-click on the <code>#middleRow</code> element and select
+                        <em>Paste &gt; As Last Child</em></li>
                     <li>Copy this text: <code>&lt;tr&gt;&lt;td colspan="3"&gt;Top&lt;/td&gt;&lt;/tr&gt;</code></li>
-                    <li>In the node tree, right-click on the #middleRow element, and select
-                        Paste &gt; Before </li>
+                    <li>In the node tree right-click on the <code>#middleRow</code> element, and select
+                        <em>Paste &gt; Before</em></li>
                     <li>Copy this text: <code>&lt;tr&gt;&lt;td colspan="3"&gt;Bottom&lt;/td&gt;&lt;/tr&gt;</code></li>
-                    <li>In the node tree, right-click on the #middleRow element, and select
-                        Paste &gt; After </li>
-                    <li>In the node tree, right-click on the <b>&lt;html&gt;</b> element, ans select
-                        Paste: the "Replace Node", "After" and "Before" items should be disabled<br></li>
-                    <li>Check the result (see below) and go on to 
-                        <a href="issue5358_xml.html">issue5358_xml.html</a></li>
+                    <li>In the node tree right-click on the <code>#middleRow</code> element and select
+                        <em>Paste &gt; After</em></li>
+                    <li>
+                        In the node tree right-click on the <em>&lt;html&gt;</em> element and select <em>Paste</em><br/>
+                        <span class="ok">&rArr; The <em>Replace Node</em>, <em>After</em> and <em>Before</em> items should be disabled.</span>
+                    </li>
+                    <li>Check the result (see below) and go on to <a href="issue5358_xml.html">issue5358_xml.html</a></li>
                 </ol>
                 <h3>Expected result</h3>
                 <p>You should see this on the top of the page: </p>
