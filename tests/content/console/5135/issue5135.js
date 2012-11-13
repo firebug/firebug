@@ -13,7 +13,10 @@ function runTest()
             var config = {tagName: "div", classes: "logRow"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
-                var expected = "message origin=http://legoas, data=test » Window iframe.html";
+                var iframe = win.wrappedJSObject.document.getElementById("iframe");
+                var origin = iframe.contentWindow.testOrigin;
+
+                var expected = "message origin=" + origin +", data=test » Window iframe.html";
                 FBTest.compare(expected, row.textContent,
                     "The proper message must be displayed. " + row.textContent);
                 FBTest.testDone("issue5135.DONE");
