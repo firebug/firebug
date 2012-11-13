@@ -2239,11 +2239,9 @@ this.selectElementInHtmlPanel = function(element, callback)
         var id = element;
         element = FW.Firebug.currentContext.window.document.getElementById(id);
 
-        // FIXME: xxxpedro place a more friendly warning after fixing all test cases
-        if (!element)
+        if (!FBTest.ok(element, "the element #"+id+" must exist in the document"))
         {
-            var loc = FW.Firebug.currentContext ? FW.FBL.getFileName(FW.Firebug.currentContext.window.location.href) : "NULL";
-            FBTrace.sysout("[" + id + " | " + loc + "] ???????????????????????????????????????????????????????????????????????????????????????");
+            return;
         }
     }
 
@@ -2334,18 +2332,19 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 return;
             }
 
-            var menupopup = FW.FBL.getAncestorByTagName(menuItem, "menupopup");
+            var submenupopup = FW.FBL.getAncestorByTagName(menuItem, "menupopup");
             // if the item appears in a sub-menu:
-            if (menupopup && menupopup.parentNode.tagName === "menu")
+            if (submenupopup && submenupopup.parentNode.tagName === "menu")
             {
-                var isMenuEnabled = menupopup.parentNode.disabled === false;
-                self.ok(isMenuEnabled, "the sub-menu must be enabled");
-                if (!isMenuEnabled)
+                var isParentEnabled = submenupopup.parentNode.disabled === false;
+                self.ok(isParentEnabled, "the parent \""+submenupopup.parentNode.label+
+                    "\" of the sub-menu must be enabled");
+                if (!isParentEnabled)
                 {
                     contextMenu.hidePopup();
                     return;
                 }
-                menupopup.showPopup();
+                submenupopup.showPopup();
             }
 
             // Click on specified menu item.
@@ -2400,7 +2399,7 @@ this.setClipboardText = function(text)
 
         var string = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
         string.data = text;
-        trans.setTransferData("text/unicode", string, text.length + 2);
+        trans.setTransferData("text/unicode", string, text.length * 2);
 
         clipboard.setData(trans, null, Ci.nsIClipboard.kGlobalClipboard);
     }
