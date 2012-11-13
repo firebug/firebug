@@ -96,6 +96,7 @@ function checkTableContent(callback, expectedAliasName, checkFunction)
 
 function executeIncludeCommand(callback, includeCommand)
 {
+    FBTest.clearConsole();
     var config = {tagName: "div", classes: "logRow-info"};
     FBTest.waitForDisplayedElement("console", config, function()
     {
