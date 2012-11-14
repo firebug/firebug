@@ -148,7 +148,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (Firebug.CommandEditor.ignoreChanges)
             return;
 
-        Firebug.CommandLine.onCommandLineInput(event);
+        var context = Firebug.currentContext;
+        Firebug.CommandLine.update(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -160,8 +161,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         Dom.eraseNode(popup);
 
         var items = Firebug.CommandEditor.getContextMenuItems();
-        for (var i=0; i<items.length; i++)
-            Menu.createMenuItem(popup, items[i]);
+        Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
             return;

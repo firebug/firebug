@@ -137,7 +137,10 @@ this.editCookie = function(cookie, callback)
                         dialog.document.location.href, "The editCookie.xul is opened.");
                     FBTest.ok(dialog.EditCookie, "The EditCookie varible must exist");
                     callback(dialog);
-                }, 300);
+
+                //xxxHonza: increasing from 300 to 500ms to see
+                // if it helps to solve Mac failures.
+                }, 500); 
             }
         }
     };

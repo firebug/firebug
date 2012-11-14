@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.11.0a6</em:version>
+    <em:version>1.11.0b1</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -28,7 +28,7 @@
     </em:targetApplication>
 
     <em:name>Firebug</em:name>
-    <em:description>Web Development Evolved.</em:description>
+    <em:description>Web Development Evolved. Firebug is free and open source software distributed under the BSD License.</em:description>
     <em:creator>Joe Hewitt</em:creator>
     <em:contributor>John J. Barton (IBM Almaden)</em:contributor>
     <em:contributor>Jan Odvarko (Mozilla Corp.)</em:contributor>

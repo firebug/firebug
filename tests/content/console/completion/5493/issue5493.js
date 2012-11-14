@@ -66,6 +66,10 @@ function runTest()
                 var test = tests[i];
                 tasks.push(testExpression, "obj."+test[0], "obj."+test[1]);
             }
+            tasks.push(testExpression, "document.gete", "document.getElementById");
+            tasks.push(testExpression, "decodeu", "decodeURI");
+            tasks.push(testExpression, "obje", "obje");
+            tasks.push(testExpression, "Obje", "Object");
             tasks.push(testVisibleCase);
 
             tasks.run(function()

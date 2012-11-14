@@ -32,6 +32,8 @@ Locale.registerStringBundle("chrome://firebug/locale/firebug-jsd2.properties");
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
 
+const firstRunPage = "https://getfirebug.com/firstrun#Firebug ";
+
 // ********************************************************************************************* //
 // BrowserOverlay Implementation
 
@@ -467,10 +469,10 @@ BrowserOverlay.prototype =
                 var self = this;
                 var timeout = this.win.setTimeout(function()
                 {
-                    if (this.win.closed)
+                    if (self.win.closed)
                         return;
 
-                    self.openFirstRunPage();
+                    self.openFirstRunPage(self.win);
                 }, 1000);
 
                 this.win.addEventListener("unload", function()
@@ -481,13 +483,20 @@ BrowserOverlay.prototype =
         }
     },
 
-    openFirstRunPage: function()
+    openFirstRunPage: function(win)
     {
         var version = this.getVersion();
         var url = firstRunPage + version;
 
+        var browser = win.gBrowser;
+        if (!browser)
+        {
+            FBTrace.sysout("browserOverlay.openFirstRunPage; ERROR there is no gBrowser!");
+            return;
+        }
+
         // Open the firstRunPage in background
-        /*gBrowser.selectedTab = */gBrowser.addTab(url, null, null, null);
+        /*gBrowser.selectedTab = */browser.addTab(url, null, null, null);
 
         // Make sure prefs are stored, otherwise the firstRunPage would be displayed
         // again if Firefox crashes.

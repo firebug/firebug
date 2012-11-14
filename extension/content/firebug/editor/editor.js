@@ -972,12 +972,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         Dom.eraseNode(popup);
 
         var target = event.target;
-        var menu = this.getContextMenuItems(target);
-        if (menu)
-        {
-            for (var i = 0; i < menu.length; ++i)
-                Menu.createMenuItem(popup, menu[i]);
-        }
+        var items = this.getContextMenuItems(target);
+        if (items)
+            Menu.createMenuItems(popup, items);
 
         if (!popup.firstChild)
             return false;

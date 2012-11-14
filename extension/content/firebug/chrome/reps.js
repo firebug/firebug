@@ -1165,6 +1165,57 @@ FirebugReps.Element = domplate(Firebug.Rep,
         System.copyToClipboard(csspath);
     },
 
+    paste: function(elt, clipboardContent, mode)
+    {
+        if (elt instanceof window.HTMLElement)
+            return this.pasteHTML.apply(this, arguments);
+        else
+            return this.pasteXML.apply(this, arguments);
+    },
+
+    pasteHTML: function(elt, clipboardContent, mode)
+    {
+        if (mode === "replaceInner")
+            elt.innerHTML = clipboardContent;
+        else if (mode === "replaceOuter")
+            elt.outerHTML = clipboardContent;
+        else
+            elt.insertAdjacentHTML(mode, clipboardContent);
+    },
+
+    pasteXML: function(elt, clipboardContent, mode)
+    {
+        var contextNode, parentNode = elt.parentNode;
+        if (["beforeBegin", "afterEnd", "replaceOuter"].indexOf(mode) >= 0)
+            contextNode = parentNode;
+        else
+            contextNode = elt;
+
+        var pastedElements = Dom.markupToDocFragment(clipboardContent, contextNode);
+        switch (mode)
+        {
+            case "beforeBegin":
+                parentNode.insertBefore(pastedElements, elt);
+                break;
+            case "afterBegin":
+                elt.insertBefore(pastedElements, elt.firstChild);
+                break;
+            case "beforeEnd":
+                elt.appendChild(pastedElements);
+                break;
+            case "afterEnd":
+                Dom.insertAfter(pastedElements, elt);
+                break;
+            case "replaceInner":
+                Dom.eraseNode(elt);
+                elt.appendChild(pastedElements);
+                break;
+            case "replaceOuter":
+                parentNode.replaceChild(pastedElements, elt);
+                break;
+        }
+    },
+
     persistor: function(context, xpath)
     {
         var elts = xpath
@@ -1228,6 +1279,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
         var type;
         var items = [];
+        var clipboardContent = System.getStringDataFromClipboard();
+        var isEltRoot = (elt === elt.ownerDocument.documentElement);
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
             type = "HTML";
@@ -1269,6 +1322,57 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Copy_CSS_Path",
                 id: "fbCopyCSSPath",
                 command: Obj.bindFixed(this.copyCSSPath, this, elt)
+            },
+            {
+                label: Locale.$STRF("html.menu.Paste", [type]),
+                tooltiptext: Locale.$STRF("html.tip.Paste", [type]),
+                disabled: !clipboardContent,
+                id: "fbPaste",
+                items: [
+                    {
+                        label: "html.menu.Paste_Replace_Content",
+                        tooltiptext: "html.tip.Paste_Replace_Content",
+                        id: "fbPasteReplaceInner",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                            "replaceInner")
+                    },
+                    {
+                        label: "html.menu.Paste_Replace_Node",
+                        tooltiptext: "html.tip.Paste_Replace_Node",
+                        id: "fbPasteReplaceOuter",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                            "replaceOuter")
+                    },
+                    {
+                        label: "html.menu.Paste_AsFirstChild",
+                        tooltiptext: "html.tip.Paste_AsFirstChild",
+                        id: "fbPasteFirstChild",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
+                            "afterBegin")
+                    },
+                    {
+                        label: "html.menu.Paste_AsLastChild",
+                        tooltiptext: "html.tip.Paste_AsLastChild",
+                        id: "fbPasteLastChild",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, "beforeEnd")
+                    },
+                    {
+                        label: "html.menu.Paste_Before",
+                        tooltiptext: "html.tip.Paste_Before",
+                        id: "fbPasteBefore",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
+                            "beforeBegin")
+                    },
+                    {
+                        label: "html.menu.Paste_After",
+                        tooltiptext: "html.tip.Paste_After",
+                        id: "fbPasteAfter",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, "afterEnd")
+                    }
+                ]
             }
         ]);
 

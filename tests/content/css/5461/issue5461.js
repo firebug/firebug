@@ -12,7 +12,7 @@ function runTest()
             var panel = FBTest.selectSidePanel("css");
 
             FBTest.synthesizeMouse(panel.panelNode);
-            FBTest.sendShortcut("a", {ctrlKey: true});
+            FBTest.sendShortcut("a", {accelKey: true});
 
             // Reset clipboard content
             FBTest.clearClipboard();
@@ -36,7 +36,7 @@ function runTest()
                 FBTest.testDone("issue5461.DONE");
             });
 
-            FBTest.sendShortcut("c", {ctrlKey: true});
+            FBTest.sendShortcut("c", {accelKey: true});
         });
     });
 }

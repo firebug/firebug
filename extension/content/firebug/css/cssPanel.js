@@ -1361,7 +1361,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     if (Css.isImageRule(Xml.getElementSimpleType(Firebug.getRepObject(target)),
                         propNameNode.textContent))
                     {
-                        var rule = Firebug.getRepObject(target);
+                        var prop = Dom.getAncestorByClass(target, "cssProp");
+                        var rule = Firebug.getRepObject(prop);
                         var baseURL = this.getStylesheetURL(rule, true);
                         var relURL = CSSModule.parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);

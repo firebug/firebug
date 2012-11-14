@@ -76,7 +76,7 @@ function runTest()
         tasks.run(function()
         {
             FBTest.testDone("changeUILocation.DONE");
-        });
+        }, 400);
     });
 };
 

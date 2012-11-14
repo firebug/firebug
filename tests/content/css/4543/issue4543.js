@@ -19,8 +19,12 @@ function runTest()
             var editor = panel.panelNode.querySelector(".textEditorInner");
             if (FBTest.ok(editor, "editor must be available now"))
             {
+                // DOM_VK_HOME key doesn't work on Mac and we need to use DOM_VK_LEFT
+                // to move the cursor at the beginning of the inline editor.
+                var key = FBTest.isMac() ? "LEFT" : "HOME";
+                FBTest.sendKey(key, editor);
+
                 // Move text cursor between 'g' and 'b' of 'pngbase64'
-                FBTest.sendKey("HOME", editor);
                 for (var i=0; i<19; i++)
                     FBTest.sendKey("RIGHT", editor);
   

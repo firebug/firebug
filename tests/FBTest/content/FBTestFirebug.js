@@ -1481,7 +1481,9 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
         var panel = chrome.getSelectedPanel();
         if (panel)
         {
-            onPanelReady(sourceRow);
+            setTimeout(function() {
+                onPanelReady(sourceRow);
+            }, 200);
             return;
         }
 
@@ -2237,11 +2239,9 @@ this.selectElementInHtmlPanel = function(element, callback)
         var id = element;
         element = FW.Firebug.currentContext.window.document.getElementById(id);
 
-        // FIXME: xxxpedro place a more friendly warning after fixing all test cases
-        if (!element)
+        if (!FBTest.ok(element, "the element #"+id+" must exist in the document"))
         {
-            var loc = FW.Firebug.currentContext ? FW.FBL.getFileName(FW.Firebug.currentContext.window.location.href) : "NULL";
-            FBTrace.sysout("[" + id + " | " + loc + "] ???????????????????????????????????????????????????????????????????????????????????????");
+            return;
         }
     }
 
@@ -2298,6 +2298,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             getElementById("contentAreaContextMenu");
 
     var self = this;
+
     function onPopupShown(event)
     {
         contextMenu.removeEventListener("popupshown", onPopupShown, false);
@@ -2331,6 +2332,21 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 return;
             }
 
+            var submenupopup = FW.FBL.getAncestorByTagName(menuItem, "menupopup");
+            // if the item appears in a sub-menu:
+            if (submenupopup && submenupopup.parentNode.tagName === "menu")
+            {
+                var isParentEnabled = submenupopup.parentNode.disabled === false;
+                self.ok(isParentEnabled, "the parent \""+submenupopup.parentNode.label+
+                    "\" of the sub-menu must be enabled");
+                if (!isParentEnabled)
+                {
+                    contextMenu.hidePopup();
+                    return;
+                }
+                submenupopup.showPopup();
+            }
+
             // Click on specified menu item.
             self.synthesizeMouse(menuItem);
 
@@ -2341,10 +2357,11 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             {
                 // Since the command is dispatched asynchronously,
                 // execute the callback using timeout.
+                // Especially Mac OS needs this.
                 setTimeout(function()
                 {
                     callback();
-                }, 10);
+                }, 250);
             }
         }, 10);
     }
@@ -2382,7 +2399,7 @@ this.setClipboardText = function(text)
 
         var string = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
         string.data = text;
-        trans.setTransferData("text/unicode", string, text.length + 2);
+        trans.setTransferData("text/unicode", string, text.length * 2);
 
         clipboard.setData(trans, null, Ci.nsIClipboard.kGlobalClipboard);
     }
@@ -2784,6 +2801,16 @@ this.isInspectorActive = function()
 {
     return FW.Firebug.Inspector.inspecting;
 };
+
+// ********************************************************************************************* //
+// OS
+
+this.isMac = function()
+{
+    var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+        .getService(Ci.nsIAppShellService).hiddenDOMWindow;
+    return (hiddenWindow.navigator.platform.indexOf("Mac") >= 0);
+}
 
 // ********************************************************************************************* //
 }).apply(FBTest);

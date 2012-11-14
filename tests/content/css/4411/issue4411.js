@@ -69,6 +69,7 @@ function executeTest(elementID, expectedValue, callback)
 
         var rule = FW.FBL.getAncestorByClass(node, "cssRule");
         var propValue = rule.getElementsByClassName("cssPropValue").item(0);
+        var propName = rule.getElementsByClassName("cssPropName").item(0);
 
         var config = {tagName: "div", classes: "infoTipColorBox"};
         FBTest.waitForDisplayedElement("stylesheet", config, function (infoTip)
@@ -83,6 +84,11 @@ function executeTest(elementID, expectedValue, callback)
                     "The infotip must contain the same color as specified in the " +
                     "rule '" + elementID + "'.");
             }
+
+            // Hide the info tip by moving mouse over the CSS prop name,
+            // otherwise it could block the mouse-move over the next CSS value.
+            // (fixex failure on Mac).
+            FBTest.mouseOver(propName);
 
             callback();
         });

@@ -1,9 +1,5 @@
-var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-var FF4OrHigher = versionChecker.compare(appInfo.version, "4.0b8") >= 0;
-
-var expectedValue = /[style=\"color:\s*green\", name=\"testName\", id=\"testId\"]/;
-var expectedValue2 = /style=\"color:\s*green\"/;
+var expectedValue = /\[style="color:\s*green", name="testName", id="testId"\]/;
+var expectedValue2 = /style="color:\s*green"/;
 
 function runTest()
 {
@@ -23,8 +19,7 @@ function runTest()
                 "a", "objectLink objectLink-NamedNodeMap");
 
             tasks.push(executeCommandAndVerify,
-                "$('#testId').attributes[0]",
-                expectedValue2,
+                "$('#testId').attributes[0]", expectedValue2,
                 "a", "objectLink objectLink-Attr");
 
             tasks.run(function() {
