@@ -7,7 +7,7 @@ Firebug
 License
 -------
 Firebug is free and open source software distributed under the
-[BSD License](https://github.com/firebug/firebug).
+[BSD License](https://github.com/firebug/firebug/blob/master/extension/license.txt).
 
 
 Source Repository Structure
