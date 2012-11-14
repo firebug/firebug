@@ -7,8 +7,9 @@ FBTestApp.ns( /** @scope _testResultRep_ */ function() { with (FBL) {
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
+var Cu = Components.utils;
 
-Components.utils["import"]("resource://fbtest/FBTestIntegrate.js");
+Cu["import"]("resource://fbtest/FBTestIntegrate.js");
 
 // ************************************************************************************************
 // Domplate for tests results
@@ -596,8 +597,10 @@ FBTestApp.TestResultTabView = domplate(
         // Generate UI. Get appropriate domplate tag for every element that is found
         // within the helper <wrapper> and append it into the parent container.
         for (var i=0; i<docElem.childNodes.length; i++)
-            Firebug.HTMLPanel.CompleteElement.getNodeTag(docElem.childNodes[i]).
-                append({object: docElem.childNodes[i]}, parentNode);
+        {
+            FBTestApp.FBTest.FirebugWindow.Firebug.HTMLPanel.CompleteElement.getNodeTag(
+                docElem.childNodes[i]).append({object: docElem.childNodes[i]}, parentNode);
+        }
     },
 
     insertText: function(data, parentNode)
