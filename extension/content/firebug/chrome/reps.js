@@ -103,6 +103,17 @@ FirebugReps.Null = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
+FirebugReps.Hint = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX("$object"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "hint",
+});
+
+// ********************************************************************************************* //
+
 FirebugReps.Nada = domplate(Firebug.Rep,
 {
     tag: SPAN(""),

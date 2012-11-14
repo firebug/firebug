@@ -96,6 +96,14 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         var store = CommandLineInclude.getStore();
         var keys = store.getKeys();
         var arrayToDisplay = [];
+        var returnValue = Firebug.Console.getDefaultReturnValue(context.window);
+
+        if (keys.length === 0)
+        {
+            var msg = Locale.$STR("commandline.include.noDefinedAlias");
+            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
+            return returnValue;
+        }
 
         for (var i=0; i<keys.length; i++)
         {
@@ -108,7 +116,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
 
         var input = new CommandLineIncludeObject();
         this.log(arrayToDisplay, ["alias", "URL"], context, input);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return returnValue;
     },
 
     deleteAlias: function(aliasName, ev)
