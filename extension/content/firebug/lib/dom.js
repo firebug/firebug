@@ -414,7 +414,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Graphics
 
 Dom.getClientOffset = function(elt)
@@ -436,7 +436,10 @@ Dom.getClientOffset = function(elt)
                 addOffset(p, coords, view);
         }
         else if (elt.ownerDocument.defaultView.frameElement)
-            addOffset(elt.ownerDocument.defaultView.frameElement, coords, elt.ownerDocument.defaultView);
+        {
+            addOffset(elt.ownerDocument.defaultView.frameElement, coords,
+                elt.ownerDocument.defaultView);
+        }
     }
 
     var coords = {x: 0, y: 0};
@@ -457,8 +460,8 @@ Dom.getClientOffset = function(elt)
  */
 Dom.getLTRBWH = function(elt)
 {
-    var bcrect,
-        dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
+    var bcrect;
+    var dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
 
     if (elt)
     {
@@ -499,7 +502,8 @@ Dom.getOffsetSize = function(elt)
  */
 Dom.getOverflowParent = function(element)
 {
-    for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
+    for (var scrollParent = element.parentNode; scrollParent;
+        scrollParent = scrollParent.offsetParent)
     {
         if (scrollParent.scrollHeight > scrollParent.offsetHeight)
             return scrollParent;
@@ -516,9 +520,11 @@ Dom.isScrolledToBottom = function(element)
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
 
     if (FBTrace.DBG_CONSOLE)
+    {
         FBTrace.sysout("Dom.isScrolledToBottom offsetHeight: " + element.offsetHeight +
             ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
             ", onBottom: " + onBottom);
+    }
 
     return onBottom;
 };
@@ -534,9 +540,14 @@ Dom.scrollToBottom = function(element)
 
     if (FBTrace.DBG_CONSOLE)
     {
-        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+        FBTrace.sysout("scrollToBottom reset scrollTop " + element.scrollTop + " = " +
+            element.scrollHeight);
+
         if (element.scrollHeight == element.offsetHeight)
-            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+        {
+            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element " +
+                element, element);
+        }
     }
 
     return (element.scrollTop == element.scrollHeight);
@@ -577,8 +588,8 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     var offset = Dom.getClientOffset(element);
 
     var topSpace = offset.y - scrollBox.scrollTop;
-    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
-        - (offset.y + element.offsetHeight);
+    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight) -
+        (offset.y + element.offsetHeight);
 
     if (topSpace < 0 || bottomSpace < 0)
     {
@@ -586,7 +597,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
         var centerY = offset.y - split;
         scrollBox.scrollTop = centerY;
         topSpace = split;
-        bottomSpace = split -  element.offsetHeight;
+        bottomSpace = split - element.offsetHeight;
     }
 
     return {
@@ -704,29 +715,39 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
  */
 Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
-    Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft", notY ? "none" : "centerOrTop");
+    Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft",
+        notY ? "none" : "centerOrTop");
 };
 
-Dom.scrollMenupopup = function(popup, item) {
+Dom.scrollMenupopup = function(popup, item)
+{
     var doc = popup.ownerDocument;
     var box = doc.getAnonymousNodes(popup)[0];
     var scrollBox = doc.getAnonymousNodes(box)[1];
-    if (item == undefined) {
+
+    if (item == undefined)
+    {
         scrollBox.scrollTop = scrollBox.scrollHeight + 100;
-    } else if (item == 0) {
+    }
+    else if (item == 0)
+    {
         scrollBox.scrollTop = 0;
-    } else {
+    }
+    else
+    {
         var popupRect = popup.getBoundingClientRect();
         var itemRect = item.getBoundingClientRect();
 
-        if (itemRect.top < popupRect.top + itemRect.height) {
+        if (itemRect.top < popupRect.top + itemRect.height)
+        {
             scrollBox.scrollTop += itemRect.top - popupRect.top - itemRect.height;
-        } else if (itemRect.bottom + itemRect.height > popupRect.bottom) {
+        }
+        else if (itemRect.bottom + itemRect.height > popupRect.bottom)
+        {
             scrollBox.scrollTop -= popupRect.bottom - itemRect.bottom - itemRect.height;
         }
     }
 }
-
 
 // ********************************************************************************************* //
 // DOM Members

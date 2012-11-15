@@ -96,6 +96,7 @@ Firebug.InsideOutBox.prototype =
     {
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("insideOutBox.select object:"+object, object);
+
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
 
