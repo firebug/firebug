@@ -598,6 +598,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     }
                 }
             );
+
             if (Dom.domUtils.hasPseudoClassLock)
             {
                 items.push(
@@ -665,7 +666,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         var prop = Dom.getAncestorByClass(target, "cssProp");
         if (prop)
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
-  
+
         if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
             propNameNode.textContent.toLowerCase() == "font-family"))
         {
@@ -677,7 +678,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
+        return CSSStyleSheetPanel.prototype.showInfoTip.call(
+            this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -882,15 +884,26 @@ function getFontPropValueParts(element, value, propName)
         testElement.style.border = "0";
     testElement.style.overflow = "hidden";
 
+    // Fix for issue 6048
+    testElement.style.visibility = "hidden";
+    testElement.style.display = "none";
+
     if (propName === "font-family")
     {
         // The font-family property doesn't specify a font on its own - we
         // also need some additional related text styles.
         Css.copyTextStyles(element, testElement);
     }
+
     var nonImportant = origValue.replace(/ !important$/, "");
     testElement.style.setProperty(propName, nonImportant);
 
+    // xxxHonza: modification of the target page document is rather a hack
+    // and should be avoided. This in particular is often source of problems
+    // for the Inspector (see issues: 5744, 5905, 6048)
+    // In case of 6048 it causes reflows and generates additional mouseover events,
+    // which confuses the Inspector (onInspectingMouseOver is called for parent
+    // elements and selecting them).
     element.parentNode.appendChild(testElement);
     var usedFonts = Fonts.getFonts(testElement).slice();
     testElement.parentNode.removeChild(testElement);
