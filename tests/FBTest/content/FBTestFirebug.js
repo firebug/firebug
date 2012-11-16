@@ -1999,7 +1999,8 @@ this.waitForDisplayedElement = function(panelName, config, callback)
             if (nodes.length < config.counter)
                 FBTest.waitForDisplayedElement(panelName, config, callback);
             else
-                callback(element);
+                // wwwFlorent: oddly, element != nodes[config.counter - 1]
+                callback(nodes[config.counter - 1]);
         };
     }
 
