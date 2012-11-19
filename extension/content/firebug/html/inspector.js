@@ -24,6 +24,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
+const Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Globals
@@ -1635,7 +1636,8 @@ function getNonFrameBody(elt)
 function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
-    if (!context.highlightStyle)
+
+    if (!context.highlightStyle || Cu.isDeadWrapper(context.highlightStyle))
         context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
