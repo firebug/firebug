@@ -876,9 +876,13 @@ function getFontPropValueParts(element, value, propName)
     var child = element.firstChild;
     do
     {
+        if (!child)
+            break;
+
         if (child.nodeType == Node.TEXT_NODE)
             usedFonts = Arr.extendArray(usedFonts, Fonts.getFonts(child));
-    } while (child = child.nextSibling);
+    }
+    while (child = child.nextSibling);
 
     var genericFontUsed = false;
     for (var i = 0; i < fonts.length; ++i)
