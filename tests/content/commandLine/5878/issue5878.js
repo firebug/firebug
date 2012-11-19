@@ -53,7 +53,7 @@ function runTest()
                 if (aliasName)
                 {
                     var expectedURL = basePath5878 + "myOtherScript.js";
-                    FBTest.compare(expectedURL, url, 
+                    FBTest.compare(expectedURL, url,
                         "The alias should redirect to " + expectedURL);
                 }
             });
@@ -77,11 +77,14 @@ function runTest()
 
 function checkTableContent(callback, expectedAliasName, checkFunction)
 {
-    var config = {tagName: "table", classes: "tableCommandLineInclude"};
-    FBTest.waitForDisplayedElement("console", config, function(table)
+    FBTest.clearConsole();
+
+    var config = {tagName: "div", classes: "logRow", counter: 2};
+    FBTest.waitForDisplayedElement("console", config, function(element)
     {
-        var aliasNameCell = table.querySelector("*[data-aliasname='myscript']");
-        if (!aliasNameCell)
+        var table = element.querySelector(".tableCommandLineInclude");
+        var aliasNameCell = table && table.querySelector("*[data-aliasname='myscript']");
+        if (!table || !aliasNameCell)
             checkFunction(table, null, null);
         else
         {
