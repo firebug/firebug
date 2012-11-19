@@ -2082,14 +2082,30 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Called when "Options" clicked. Return array of
-    // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>,
-    //      command:function to set <value>}
+    /**
+     * Returns the panel options for an activated panel
+     * Called when the options menu of a panel is opened
+     * @returns {Array} Array of options with each option looking like this:
+     *   {label: 'name', nol10n: true,  type: "checkbox", checked: <value>,
+     *     command:function to set <value>}
+     */
     getOptionsMenuItems: function()
     {
         return null;
     },
 
+    /**
+     * Returns the panel options for a deactivated panel
+     * Called when the options menu of a panel is opened
+     * @returns {Array} Array of options with each option looking like this:
+     *   {label: 'name', nol10n: true,  type: "checkbox", checked: <value>,
+     *     command:function to set <value>}
+     */
+    getDisabledOptionsMenuItems: function()
+    {
+        return null;
+    },
+    
     /**
      * Called by chrome.onContextMenu to build the context menu when this panel has focus.
      * See also FirebugRep for a similar function also called by onContextMenu

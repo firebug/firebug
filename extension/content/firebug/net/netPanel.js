@@ -301,6 +301,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         ];
     },
 
+    getDisabledOptionsMenuItems: function()
+    {
+        return [this.disableCacheOption()];
+    },
+
     disableCacheOption: function()
     {
         var BrowserCache = Firebug.NetMonitor.BrowserCache;

@@ -832,13 +832,16 @@
 
         <method name="getOptionsMenuItems">
             <parameter name="panel"/>
+            <parameter name="enabled"/>
             <body><![CDATA[
                 if (!panel)
                     return null;
 
                 // Get menu items from the current panel.
                 var context = Firebug.currentContext;
-                var items = panel.getOptionsMenuItems(context);
+                var items = enabled ?
+                    panel.getOptionsMenuItems(context) :
+                    panel.getDisabledOptionsMenuItems(context);
 
                 // Distribute to listeners so, other modules/extensions can extend the menu.
                 Firebug.dispatch(Firebug.uiListeners, "onOptionsMenu", [context, panel, items]);
@@ -872,16 +875,12 @@
                     "panel.tip.Enabled"));
             }
 
-            // force creating panel only if it's not disabled
-            var panel = Firebug.currentContext.getPanelByType(panelType, !enabled);
+            var panel = Firebug.currentContext.getPanelByType(panelType);
 
-            if (panel)
-            {
-                // Get panel's option items
-                var panelItems = this.getOptionsMenuItems(panel);
-                if (panelItems && panelItems.length > 0)
-                    items.push("-");
-            }
+            // Get panel's option items
+            var panelItems = this.getOptionsMenuItems(panel, enabled);
+            if (panelItems && panelItems.length > 0)
+                items.push("-");
 
             var menu = FBL.extendArray(items, panelItems);
             for (var i = 0; i < menu.length; ++i)
