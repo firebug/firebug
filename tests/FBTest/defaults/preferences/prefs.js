@@ -32,4 +32,5 @@ pref("extensions.firebug.DBG_TESTCASE_MUTATION", false); // Tracing from unit-te
 pref("extensions.firebug.key.shortcut.openTestConsole", "shift t");
 
 // Database URL for manual test result upload
-pref("extensions.fbtest.databaseURL", "http://firebug.couchone.com/firebug/");
+pref("extensions.fbtest.databaseURL", "http://firebug.couchone.com/");  // Must end with slash
+pref("extensions.fbtest.databaseName", "firebug");                      // Must *not* end with slash
