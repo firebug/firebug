@@ -212,7 +212,7 @@ Css.isImageRule = function(nodeType,rule)
 
 Css.copyTextStyles = function(fromNode, toNode, style)
 {
-    var view = fromNode.ownerDocument.defaultView;
+    var view = fromNode ? fromNode.ownerDocument.defaultView : null;
     if (view)
     {
         if (!style)
