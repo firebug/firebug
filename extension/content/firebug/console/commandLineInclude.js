@@ -429,6 +429,8 @@ var CommandLineInclude =
 
         xhr.onload = function()
         {
+            if (xhr.status !== 200)
+                return errorFunction.apply(this, arguments);
             var codeToEval = xhr.responseText;
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
@@ -534,7 +536,7 @@ Firebug.registerCommand("include", {
 
 Firebug.registerRep(CommandLineIncludeRep);
 
-return CommandLineIncludeRep;
+return CommandLineInclude;
 
 // ********************************************************************************************* //
 }});
