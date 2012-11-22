@@ -546,6 +546,9 @@ Str.trimRight = function(text)
 
 Str.hasPrefix = function(hay, needle)
 {
+    if (!hay || !needle)
+        return false;
+
     // This is the fastest way of testing for prefixes - (hay.indexOf(needle) === 0)
     // can be O(|hay|) in the worst case, and (hay.substr(0, needle.length) === needle)
     // unnecessarily creates a new string and might be O(|needle|) in some JavaScript

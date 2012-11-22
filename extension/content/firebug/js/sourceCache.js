@@ -170,7 +170,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 
     removeAnchor: function(url)
     {
-        var index = url.indexOf("#");
+        var index = url ? url.indexOf("#") : -1;
         if (index < 0)
             return url;
 
