@@ -350,7 +350,7 @@ Firebug.TabContext.prototype =
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabContext.destroy FAILS "+exc, exc);
+                FBTrace.sysout("tabContext.destroy FAILS (" + panelName + ") " + exc, exc);
 
             // the destroy failed, don't keep the bad state
             delete state.panelState[panelName];

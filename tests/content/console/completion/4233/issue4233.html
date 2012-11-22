@@ -3,6 +3,10 @@
 <head>
   <title>Test Case for Issue #4233</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<script>
+var htmlCollection = document.getElementsByTagName("html");
+var anArray = [1,2,3,4];
+</script>
 </head>
 <body>
 
@@ -16,8 +20,8 @@
 
 <ol>
 <li>Open Firebug and enable the Console panel.</li>
-<li>Step by step type following expressions in the the command line
-and verify that the autocompletion popup window<br/> appears for:</li>
+<li>Step by step type the following expressions in the command line and verify
+that completions appear for:</li>
 <ul>
     <li><code style="color:green">i</code></li>
     <li><code style="color:green">document.q</code></li>
@@ -57,7 +61,7 @@ and verify that the autocompletion popup window<br/> appears for:</li>
     <li><code style="color:green">new Date().g</code></li>
 </ul>
 
-and doesn't appear for:
+and don't appear for:
 <ul>
     <li><code style="color:green">if(1)/i</code></li>
     <li><code style="color:green">if(0);else/i</code></li>
@@ -80,6 +84,8 @@ and doesn't appear for:
     <li><code style="color:green">function([i</code></li>
     <li><code style="color:green">[{set a([i</code></li>
     <li><code style="color:green">id(eval('window')).i</code></li>
+    <li><code style="color:green">anArray.0</code></li>
+    <li><code style="color:green">htmlCollection.0</code></li>
     <li><code style="color:green">(window).i</code></li>
     <li><code style="color:green">q='';q.s</code></li>
 </ul>

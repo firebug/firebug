@@ -930,8 +930,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Events.cancelEvent(event);
         }
         else if (this.numeric && event.charCode &&
-            (event.charCode < KeyEvent.DOM_VK_0 || event.charCode > KeyEvent.DOM_VK_9) &&
-            event.charCode != KeyEvent.DOM_VK_INSERT && event.charCode != KeyEvent.DOM_VK_DELETE)
+            !(event.ctrlKey || event.metaKey || event.altKey) &&
+            !(KeyEvent.DOM_VK_0 <= event.charCode && event.charCode <= KeyEvent.DOM_VK_9) &&
+            event.charCode !== KeyEvent.DOM_VK_INSERT && event.charCode !== KeyEvent.DOM_VK_DELETE)
         {
             Events.cancelEvent(event);
         }
@@ -971,12 +972,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         Dom.eraseNode(popup);
 
         var target = event.target;
-        var menu = this.getContextMenuItems(target);
-        if (menu)
-        {
-            for (var i = 0; i < menu.length; ++i)
-                Menu.createMenuItem(popup, menu[i]);
-        }
+        var items = this.getContextMenuItems(target);
+        if (items)
+            Menu.createMenuItems(popup, items);
 
         if (!popup.firstChild)
             return false;

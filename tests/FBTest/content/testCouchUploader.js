@@ -107,7 +107,14 @@ FBTestApp.TestCouchUploader =
         var remoteFBL = FBTestApp.FBTest.FirebugWindow.FBL;
         //remoteFBL.openNewTab("http://legoas/firebug/tests/content/testbot/results/?userheaderid=" + headerid);
         //remoteFBL.openNewTab("http://getfirebug.com/tests/content/testbot/results/?userheaderid=" + headerid);
-        remoteFBL.openNewTab("http://getfirebug.com/testresults/?userheaderid=" + headerid);
+
+        var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
+        var name = Firebug.getPref("extensions.fbtest", "databaseName");
+
+        remoteFBL.openNewTab("http://getfirebug.com/testresults/" +
+            "?dburi=" + uri +
+            "&dbname=" + name +
+            "&userheaderid=" + headerid);
     },
 
     onStatusBarPopupShowing: function(event)
@@ -253,14 +260,15 @@ FBTestApp.TestCouchUploader =
 /** @namespace */
 var CouchDB =
 {
-    uri: Firebug.getPref("extensions.fbtest", "databaseURL"),
-
     saveDoc: function(doc, options)
     {
+        var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
+        var name = Firebug.getPref("extensions.fbtest", "databaseName");
+
         options = options || {};
         this.ajax({
             type: "POST",
-            url: this.uri,
+            url: uri + name,
             contentType: "application/json",
             data: toJSON(doc),
             complete: function(req)
@@ -287,10 +295,13 @@ var CouchDB =
 
     bulkSave: function(docs, options)
     {
+        var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
+        var name = Firebug.getPref("extensions.fbtest", "databaseName");
+
         extend(options, {successStatus: 201});
         this.ajax({
             type: "POST",
-            url: this.uri + "_bulk_docs",
+            url: uri + name + "/_bulk_docs",
             contentType: "application/json",
             data: toJSON(docs),
             complete: function(req)

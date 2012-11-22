@@ -13,7 +13,7 @@ const Cr = Components.results;
 var EXPORTED_SYMBOLS = ["traceConsoleService"];
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 const appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
@@ -37,7 +37,7 @@ var traceConsoleService =
 
         if (toLogFile)
         {
-            this.file = dirService.get("ProfD", Ci.nsILocalFile);
+            this.file = dirService.get("ProfD", Ci.nsIFile);
             this.file.append("firebug");
             this.file.append("fbtrace");
             this.file.append("lastlog.ftl");
@@ -398,10 +398,19 @@ function writeTextToFile(file, string)
         // Initialize output stream.
         var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
             .createInstance(Ci.nsIFileOutputStream);
-        outputStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+        outputStream.init(file, 0x02 | 0x10, 0666, 0); // write, create, truncate
 
-        outputStream.write(string, string.length);
-        outputStream.close();
+        var converter = Cc["@mozilla.org/intl/converter-output-stream;1"]
+            .createInstance(Ci.nsIConverterOutputStream);
+
+        converter.init(outputStream, "UTF-8", 0, 0);
+        converter.writeString("- " + string);
+
+        var stack = getStackDump();
+        converter.writeString(stack + "\n\n");
+
+        // this closes foStream
+        converter.close();
     }
     catch (err)
     {

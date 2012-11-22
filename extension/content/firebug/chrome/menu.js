@@ -43,6 +43,13 @@ Menu.createMenu = function(popup, item)
     return menuPopup;
 };
 
+// Menu.createMenuItems(popup, items[, before])
+Menu.createMenuItems = function(popup, items, before)
+{
+    for (var i=0; i<items.length; i++)
+        Menu.createMenuItem(popup, items[i], before);
+};
+
 Menu.createMenuItem = function(popup, item, before)
 {
     if ((typeof(item) == "string" && item == "-") || item.label == "-")

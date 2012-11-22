@@ -202,7 +202,7 @@ var TraceCommandLine =
     getStorageFile: function()
     {
         var dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
-        var file = dirService.get("ProfD", Ci.nsILocalFile);
+        var file = dirService.get("ProfD", Ci.nsIFile);
         file.append("firebug");
         file.append("fbtrace");
         file.append("commandLine.txt");

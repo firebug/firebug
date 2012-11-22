@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5878: proposal for  a command line method: include(url)</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5878">Issue 5878</a>: proposal for a command line method: include(url)</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Type: <code>include("./myScript.js");</code></li>
+                    <li>Type: <code>window.a</code></li>
+                    <li>The console should display: <code class="result">1</code></li>
+                    <li>Type: <code>include("./myScript.js", "myScript");</code></li>
+                    <li>Type: <code>window.a</code></li>
+                    <li>The console should display: <code class="result">2</code></li>
+                    <li>Type: <code>include()</code></li>
+                    <li>The console should display a table containing at least this line:<br/><img src="./result_step10.png" alt="result step 10"/></li>
+                    <li>Right-click on "myScript" and select "Import myScript"</li>
+                    <li>Type: <code>window.a</code></li>
+                    <li>The console should display: <code class="result">3</code></li>
+                    <li>Right-click on "myScript" and select "Copy Location"</li>
+                    <li>The location of the script should be copied</li>
+                    <li>Type: <code>include("./myOtherScript.js", "myScript");</code></li>
+                    <li>Type: <code>include();</code></li>
+                    <li>The line of step 10 should be replaced by this one:<br/><img src="./result_step18.png" alt="result step 18"/></li>
+                    <li>Type: <code>include(null, "myscript");</code></li>
+                    <li>Type: <code>include()</code></li>
+                    <li>The line of step 18 should have disappeared</li>
+                </ol>
+            </section>
+            <footer>
+                Florent FAYOLLE, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

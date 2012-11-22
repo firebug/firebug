@@ -3,6 +3,8 @@
 // ********************************************************************************************* //
 // Module Loader Implementation
 
+var EXPORTED_SYMBOLS = ["require", "define"];
+
 var require, define;
 
 (function() {
@@ -15,6 +17,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 // Module Loader implementation
@@ -196,7 +199,16 @@ var Loader =
         }
 
         return deps;
-    }
+    },
+
+    getDepDesc: function()
+    {
+        var desc = "";
+        var deps = this.getDeps();
+        for (var p in deps)
+            desc += p + "\n";
+        return desc;
+    },
 }
 
 // ********************************************************************************************* //
@@ -205,6 +217,7 @@ var Loader =
 require = Loader.require.bind(Loader);
 define = Loader.define.bind(Loader);
 require.load = Loader.load.bind(Loader);
+require.Loader = Loader;
 
 // ********************************************************************************************* //
 })();

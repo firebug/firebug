@@ -8,7 +8,7 @@ FBTestApp.ns( /** @scope _testRunner_ */ function() { with (FBL) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 
 // ************************************************************************************************
 // TestRunner

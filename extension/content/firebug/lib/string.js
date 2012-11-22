@@ -546,12 +546,23 @@ Str.trimRight = function(text)
 
 Str.hasPrefix = function(hay, needle)
 {
+    if (!hay || !needle)
+        return false;
+
     // This is the fastest way of testing for prefixes - (hay.indexOf(needle) === 0)
     // can be O(|hay|) in the worst case, and (hay.substr(0, needle.length) === needle)
     // unnecessarily creates a new string and might be O(|needle|) in some JavaScript
     // implementations. See the discussion in issue 3071.
     return hay.lastIndexOf(needle, 0) === 0;
 };
+
+Str.endsWith = function(str, suffix)
+{
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+// ************************************************************************************************
+// HTML Wrap
 
 Str.wrapText = function(text, noEscapeHTML)
 {

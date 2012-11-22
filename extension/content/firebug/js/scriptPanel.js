@@ -169,7 +169,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // Front side UI mark
         var firebugStatus = Firefox.getElementById("firebugStatus");
         if (firebugStatus)
-            firebugStatus.setAttribute("script", active ? "on" : "off");
+        {
+            // Use enabled state for the status flag. JSD can be active even if
+            // the Script panel itself is deactivated (i.e. because the Console
+            // panel is enabled). See issue 2582 for more details.
+            var enabled = this.isEnabled();
+            firebugStatus.setAttribute("script", (enabled && active) ? "on" : "off");
+        }
 
         if (Firebug.StartButton)
             Firebug.StartButton.resetTooltip();
@@ -181,8 +187,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_ACTIVATION)
         {
-            FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+
-                Firefox.getElementById('firebugStatus').getAttribute("script"));
+            FBTrace.sysout("script.onJavaScriptDebugging " + active + " icon attribute: " +
+                Firefox.getElementById("firebugStatus").getAttribute("script"));
         }
     },
 

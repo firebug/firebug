@@ -21,13 +21,14 @@ define([
     "firebug/lib/keywords",
     "firebug/console/console",
     "firebug/console/commandLineHelp",
+    "firebug/console/commandLineInclude",
     "firebug/console/commandLineExposed",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
     Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp,
-    CommandLineExposed) {
+    CommandLineInclude, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -351,7 +352,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     evaluateInWebPage: function(expr, context, targetWindow)
     {
-        var win = targetWindow || context.window;
+        var win = targetWindow ? targetWindow :
+            (context.baseWindow ? context.baseWindow : context.window);
         var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
         if (!element)
             return;
@@ -568,7 +570,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
 
-        if (saveMultiLine)  // we are just closing the view
+        // we are just closing the view
+        if (saveMultiLine)
         {
             commandLine.value = commandEditor.value;
             return;
@@ -583,8 +586,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 commandEditor.value = Str.cleanIndentation(text);
             else
                 commandLine.value = Str.stripNewLines(text);
-
-            this.setAutoCompleter();
         }
         // else we may be hiding a panel while turning Firebug off
     },
@@ -627,56 +628,40 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.autoCompleter = new Firebug.EmptyJSAutoCompleter();
+        this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();
 
         if (Firebug.commandEditor)
             this.setMultiLine(true, Firebug.chrome);
     },
 
+    // (Re)create the auto-completer for the small command line.
     setAutoCompleter: function()
     {
-        var context = Firebug.currentContext;
-
-        // xxxHonza: see http://code.google.com/p/fbug/issues/detail?id=4901#c21
         if (this.autoCompleter)
             this.autoCompleter.shutdown();
 
-        // Set the auto-completer even if the command-editor is currently displayed
-        // in the Console panel. This is to make the auto-completion work even in
-        // the small-command-line available on other panels (see issue 5006).
+        var commandLine = this.getSingleRowCommandLine();
+        var completionBox = this.getCompletionBox();
 
-        if (!context/* || Firebug.commandEditor*/)
-        {
-            this.autoCompleter = new Firebug.EmptyJSAutoCompleter();
-        }
-        else
-        {
-            // Always create the auto-completer for the single command line.
-            var commandLine = this.getSingleRowCommandLine();
-            var completionBox = this.getCompletionBox();
+        var options = {
+            showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+            completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
+            popupMeasurer: Firebug.chrome.$("fbCommandLineMeasurer"),
+            tabWarnings: true,
+            includeCurrentScope: true
+        };
 
-            var options = {
-                showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
-                completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
-                tabWarnings: true,
-                includeCurrentScope: true
-            };
-
-            this.autoCompleter = new Firebug.JSAutoCompleter(commandLine,
-                completionBox, options);
-        }
+        this.autoCompleter = new Firebug.JSAutoCompleter(commandLine, completionBox, options);
     },
 
     initializeUI: function()
     {
-        this.onCommandLineFocus = Obj.bind(this.onCommandLineFocus, this);
         this.onCommandLineInput = Obj.bind(this.onCommandLineInput, this);
-        this.onCommandLineBlur = Obj.bind(this.onCommandLineBlur, this);
+        this.onCommandLineOverflow = Obj.bind(this.onCommandLineOverflow, this);
         this.onCommandLineKeyUp = Obj.bind(this.onCommandLineKeyUp, this);
         this.onCommandLineKeyDown = Obj.bind(this.onCommandLineKeyDown, this);
         this.onCommandLineKeyPress = Obj.bind(this.onCommandLineKeyPress, this);
-        this.onCommandLineOverflow = Obj.bind(this.onCommandLineOverflow, this);
         this.attachListeners();
     },
 
@@ -684,35 +669,28 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var commandLine = this.getSingleRowCommandLine();
 
-        Events.addEventListener(commandLine, "focus", this.onCommandLineFocus, true);
         Events.addEventListener(commandLine, "input", this.onCommandLineInput, true);
         Events.addEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
         Events.addEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
         Events.addEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
         Events.addEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
-        Events.addEventListener(commandLine, "blur", this.onCommandLineBlur, true);
-
-        Firebug.Console.addListener(this);  // to get onConsoleInjected
     },
 
     shutdown: function()
     {
         var commandLine = this.getSingleRowCommandLine();
 
-        // Make sure all listeners registered by the auto completer are removed.
         if (this.autoCompleter)
             this.autoCompleter.shutdown();
 
         if (this.commandHistory)
             this.commandHistory.detachListeners();
 
-        Events.removeEventListener(commandLine, "focus", this.onCommandLineFocus, true);
         Events.removeEventListener(commandLine, "input", this.onCommandLineInput, true);
         Events.removeEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
         Events.removeEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
         Events.removeEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
         Events.removeEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
-        Events.removeEventListener(commandLine, "blur", this.onCommandLineBlur, true);
     },
 
     destroyContext: function(context, persistedState)
@@ -814,6 +792,11 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineKeyDown: function(event)
     {
+        // XXX: Temporary hack to make FireClosure work (until that gets a new
+        // release out)
+        if (!this.autoCompleter.shouldIncludeHint && Firebug.JSAutoCompleter.transformScopeExpr)
+            this.setAutoCompleter();
+
         var context = Firebug.currentContext;
 
         this.autoCompleter.handleKeyDown(event, context);
@@ -878,8 +861,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 this.commandHistory.hide();
                 return true;
         }
+
         if (this.commandHistory.isOpen && !event.metaKey && !event.ctrlKey && !event.altKey)
             this.commandHistory.hide();
+
         return false;
     },
 
@@ -887,31 +872,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var context = Firebug.currentContext;
 
-        var commandEditorOpen = (Firebug.commandEditor && context.panelName == "console");
-        if (!this.commandHistory.isShown() && !commandEditorOpen)
-        {
-            this.autoCompleter.complete(context);
-        }
-
-        // Always update the buffer in context, even if command line is empty.
+        this.autoCompleter.complete(context);
         this.update(context);
-    },
-
-    onCommandLineBlur: function(event)
-    {
-    },
-
-    onCommandLineFocus: function(event)
-    {
-        if (FBTrace.DBG_COMMANDLINE)
-        {
-            var context = Firebug.currentContext;
-            FBTrace.sysout("commandLine.onCommandLineFocus; for: " +
-                (context ? context.getName() : "no context"));
-        }
-
-        if (this.autoCompleter.empty)
-            this.setAutoCompleter();
     },
 
     isAttached: function(context, win)
@@ -939,20 +901,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
         Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
         Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Firebug.Console listener
-
-    onConsoleInjected: function(context, win)
-    {
-        // for some reason the console has been injected. If the user had focus in the command
-        // line they want it added in the page also. If the user has the cursor in the command
-        // line and reloads, the focus will already be there. issue 1339
-        var isFocused = Firebug.CommandEditor.hasFocus();
-        isFocused = isFocused || (this.getSingleRowCommandLine().getAttribute("focused") == "true");
-        if (isFocused)
-            setTimeout(this.onCommandLineFocus);
     },
 
     getCommandLine: function(context)
@@ -1040,27 +988,66 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 });
 
 // ********************************************************************************************* //
-// Command line APIs definition
-//
-// These functions will be called in the extension like this:
-//   subHandler.apply(api, userObjects);
-// where subHandler is one of the entries below, api is this object and userObjects are entries in
-// an array we created in the web page.
+// Command Line API
 
+/**
+ * These functions will be called in the extension like this:
+ *
+ * subHandler.apply(api, userObjects);
+ *
+ * Where subHandler is one of the entries below, api is this object and userObjects
+ * are entries in an array we created in the web page.
+ */
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(id)  // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$ = function(selector, start)
     {
-        return Wrapper.unwrapObject(context.baseWindow.document).getElementById(id);
+        if (start && start.querySelector && (
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
+            return start.querySelector(selector);
+        }
+
+        var result = context.baseWindow.document.querySelector(selector);
+        if (result == null && (selector || "")[0] !== "#")
+        {
+            if (context.baseWindow.document.getElementById(selector))
+            {
+                // This should be removed in the next minor (non-bugfix) version
+                var msg = Locale.$STRF("warning.dollar_change", [selector]);
+                Firebug.Console.log(msg, context, "warn");
+                result = null;
+            }
+        }
+
+        return result;
     };
 
-    this.$$ = function(selector) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$$ = function(selector, start)
     {
-        var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result;
+
+        if (start && start.querySelectorAll && (
+            start.nodeType == Node.ELEMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_NODE ||
+            start.nodeType == Node.DOCUMENT_FRAGMENT_NODE))
+        {
+            result = start.querySelectorAll(selector);
+        }
+        else
+        {
+            result = context.baseWindow.document.querySelectorAll(selector);
+        }
+
         return Arr.cloneArray(result);
     };
 
-    this.$x = function(xpath, contextNode, resultType) // returns unwrapped elements from the page
+    // returns unwrapped elements from the page
+    this.$x = function(xpath, contextNode, resultType)
     {
         var XPathResultType = XPathResult.ANY_TYPE;
 
@@ -1081,18 +1068,18 @@ function FirebugCommandLineAPI(context)
             case "node":
                 XPathResultType = XPathResult.FIRST_ORDERED_NODE_TYPE;
                 break;
-                
+
             case "nodes":
                 XPathResultType = XPathResult.UNORDERED_NODE_ITERATOR_TYPE;
                 break;
         }
 
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
-        
         return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
     };
 
-    this.$n = function(index) // values from the extension space
+    // values from the extension space
+    this.$n = function(index)
     {
         var htmlPanel = context.getPanel("html", true);
         if (!htmlPanel)
@@ -1125,17 +1112,20 @@ function FirebugCommandLineAPI(context)
         if (entry)
             context.baseWindow = entry.win;
 
-        Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
+        var format = Locale.$STR("commandline.CurrentWindow") + " %o";
+        Firebug.Console.logFormatted([format, context.baseWindow], context, "info");
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.clear = function()  // no web page interaction
+    // no web page interaction
+    this.clear = function()
     {
         Firebug.Console.clear(context);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
-    this.inspect = function(obj, panelName)  // no web page interaction
+    // no web page interaction
+    this.inspect = function(obj, panelName)
     {
         Firebug.chrome.select(obj, panelName);
         return Firebug.Console.getDefaultReturnValue(context.window);
@@ -1143,12 +1133,14 @@ function FirebugCommandLineAPI(context)
 
     this.keys = function(o)
     {
-        return Arr.keys(o);  // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.keys(o);
     };
 
     this.values = function(o)
     {
-        return Arr.values(o); // the object is from the page, unwrapped
+        // the object is from the page, unwrapped
+        return Arr.values(o);
     };
 
     this.debug = function(fn)
@@ -1355,15 +1347,19 @@ Firebug.CommandLine.injector =
             delete context.activeCommandLineHandlers[consoleHandler.token];
 
             if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
-                    " in window with console "+win.location);
+            {
+                FBTrace.sysout("commandLine.detachCommandLineListener " + boundHandler +
+                    " in window with console " + win.location);
+            }
         }
         else
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            {
                 FBTrace.sysout("commandLine.removeCommandLineListener; ERROR no handler! " +
                     "This could cause memory leaks, please report an issue if you see this. " +
                     context.getName());
+            }
         }
     },
 
@@ -1410,7 +1406,7 @@ function CommandLineHandler(context, win)
 
         // Appends variables into the api.
         var htmlPanel = context.getPanel("html", true);
-        var vars = htmlPanel ? htmlPanel.getInspectorVars():null;
+        var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
 
         for (var prop in vars)
         {
@@ -1425,7 +1421,8 @@ function CommandLineHandler(context, win)
                 }
             }
 
-            this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?
+            // XXXjjb should these be removed?
+            this.api[prop] = createHandler(prop);
         }
 
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
@@ -1453,6 +1450,7 @@ function getNoScript()
             Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
     return this.noscript;
 }
+
 
 // ********************************************************************************************* //
 // Registration

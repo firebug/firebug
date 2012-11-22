@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5135: Display window.postMessage() calls in console</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function postMessage()
+{
+    var iframe = document.getElementById("iframe");
+    var value = document.getElementById("value").value;
+    iframe.contentWindow.postMessage(value, "*");
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5135">Issue 5135</a>:
+        Display window.postMessage() calls in console</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to follow</h3>
+        <ol>
+            <li>Open Firebug, enable the Console and Script panels and reload.</li>
+            <li>Monitor "message" events sent to <i>iframe</i> on this page by
+                executing this expression on the command line:
+                <code>monitorEvents($("iframe").contentWindow, "message")</code></li>
+            <li>You can modify a message send to the iframe:<br/>
+                <input value="test" id="value"></li>
+            <li>Click this button to send the message to the iframe:<br/>
+                <button id="testButton" onclick="postMessage()">Post Message</button></li>
+            <iframe id="iframe" src="iframe.html" style="width:450px; height: 100px"></iframe>
+            <li>The Console panel should display an info about the message
+            <code>message origin=http://legoas, data=test » Window iframe.html</code>
+            </li>
+        </ol>
+        <br/>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+
+
+
+</body>
+</html>

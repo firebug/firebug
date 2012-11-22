@@ -34,7 +34,7 @@
             noautofocus="true">
         </panel>
 
-        <menupopup id="fbCommandHistory" noautofocus="true" ignorekeys='true'>
+        <menupopup id="fbCommandHistory" noautofocus="true" ignorekeys="true">
         </menupopup>
 
         <!-- Context menu for the Command Editor -->
@@ -60,8 +60,8 @@
                                 <image src="chrome://firebug/skin/firebug.png"/>
 
                                 <menupopup id="menu_firebug_iconMenu" class="fbFirebugMenuPopup"
-                                    onpopupshowing="return Firebug.GlobalUI.onMenuShowing(this, event);"
-                                    onpopuphiding="return Firebug.GlobalUI.onMenuHiding(this, event);">
+                                    onpopupshowing="return Firebug.browserOverlay.onMenuShowing(this, event);"
+                                    onpopuphiding="return Firebug.browserOverlay.onMenuHiding(this, event);">
                                     <!-- Content comes from firebugMenuContent -->
                                 </menupopup>
                             </toolbarbutton>
@@ -115,7 +115,7 @@
                     <!-- Open In New Window & Minimize & Close -->
                     <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar"
                         aria-label="firebug window" context="_child">
-                        <menupopup onpopupshowing="Firebug.GlobalUI.onPositionPopupShowing(this)"/>
+                        <menupopup onpopupshowing="Firebug.browserOverlay.onPositionPopupShowing(this)"/>
                         <toolbarbutton id="fbMinimizeButton"
                             class="toolbarbutton-iconic fbInternational"
                             tooltiptext="Minimize Firebug" command="cmd_firebug_minimizeFirebug"/>
@@ -487,10 +487,11 @@
                         <!-- completion text -->
                         <html:input id="fbCommandLineCompletion" class="fbCommandLine"
                             type="text" maxlength="2048" autocomplete="off" tabindex="-1" />
-                        <!-- holds the misspelling and a red squiggly line -->
-                        <html:div id="misspell" class="lst"></html:div>
                         <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
                             aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
+                        <!-- font width measurer, contains 60 arbitrary characters -->
+                        <html:span id="fbCommandLineMeasurer" class="fbCommandLine"
+                            >aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</html:span>
                     </html:div>
                 </vbox>
             </hbox>

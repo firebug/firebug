@@ -99,7 +99,16 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         var tabBrowser = Firefox.getElementById("content");
         if (tabBrowser)
         {
-            tabBrowser.removeProgressListener(TabProgressListener);
+            try
+            {
+                // Exception thrown: tabBrowser.removeProgressListener is not a function
+                // when Firebug is in detached state and the origin browser window is closed.
+                tabBrowser.removeProgressListener(TabProgressListener);
+            }
+            catch (e)
+            {
+                FBTrace.sysout("tabWatcher.destroy; EXCEPTION " + e, e);
+            }
 
             var browsers = Firefox.getBrowsers();
             for (var i = 0; i < browsers.length; ++i)

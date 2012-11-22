@@ -500,9 +500,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         function logText(text, row)
         {
-            Css.setClass(row, "logRowHint");
+            var nodeSpan = row.ownerDocument.createElement("span");
+            Css.setClass(nodeSpan, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(node);
+            row.appendChild(nodeSpan);
+            nodeSpan.appendChild(node);
         }
 
         function logTextNode(text, row)
@@ -566,23 +568,35 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
+        // Last CSS style defined using "%c" that should be applied on
+        // created log-row parts (elements). See issue 6064.
+        // Example: console.log('%cred-text %cgreen-text', 'color:red', 'color:green');
+        var lastStyle;
+
         for (var i = 0; i < parts.length; ++i)
         {
+            var node;
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
                 var object = objects[objIndex++];
                 if (part.type == "%c")
-                    row.setAttribute("style", object.toString());
+                    lastStyle = object.toString();
                 else if (typeof(object) != "undefined")
-                    this.appendObject(object, row, part.rep);
+                    node = this.appendObject(object, row, part.rep);
                 else
-                    this.appendObject(part.type, row, FirebugReps.Text);
+                    node = this.appendObject(part.type, row, FirebugReps.Text);
             }
             else
             {
-                FirebugReps.Text.tag.append({object: part}, row);
+                node = FirebugReps.Text.tag.append({object: part}, row);
             }
+
+            // Apply custom style if available.
+            if (lastStyle && node)
+                node.setAttribute("style", lastStyle);
+
+            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
@@ -751,6 +765,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var object = Firebug.getRepObject(target);
+        var rep = Firebug.getRep(object, this.context);
+        if (!rep)
+            return false;
+
+        return rep.showInfoTip(infoTip, target, x, y);
+    }
 });
 
 // ********************************************************************************************* //

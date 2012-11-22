@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<!-- See license.txt for terms of usage -->
-
-<overlay id="FirebugAboutOverlay"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    <script type="application/x-javascript" src="chrome://firebug/content/firefox/aboutOverlay.js"/>
-</overlay>

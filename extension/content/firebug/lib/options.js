@@ -13,12 +13,11 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
-const prefs = PrefService.getService(nsIPrefBranch2);
+const prefs = PrefService.getService(nsIPrefBranch);
 
 const prefNames =  // XXXjjb TODO distribute to modules
 [
@@ -97,6 +96,8 @@ var optionUpdateMap = {};
 var Options =
 /** @lends Options */
 {
+    prefDomain: "extensions.firebug",
+
     getPrefDomain: function()
     {
         return this.prefDomain;
@@ -347,7 +348,7 @@ var Options =
         if (prefs.prefHasUserValue(prefName))
             prefs.clearUserPref(prefName);
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug UI text zoom
 
@@ -412,6 +413,11 @@ var Options =
             }
         }
     },
+
+    forceSave: function()
+    {
+        prefs.savePrefFile(null);
+    }
 };
 
 // ********************************************************************************************* //

@@ -103,6 +103,17 @@ FirebugReps.Null = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
+FirebugReps.Hint = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX("$object"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "hint",
+});
+
+// ********************************************************************************************* //
+
 FirebugReps.Nada = domplate(Firebug.Rep,
 {
     tag: SPAN(""),
@@ -513,43 +524,77 @@ FirebugReps.Reference = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// Array Helpers
 
-FirebugReps.Arr = domplate(Firebug.Rep,
+function mightBeArray(obj, win)
 {
-    tag:
-        OBJECTBOX({_repObject: "$object",
-            $hasTwisty: "$object|hasSpecialProperties",
-            onclick: "$onToggleProperties"},
-            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
-            FOR("item", "$object|longArrayIterator",
-                TAG("$item.tag", {object: "$item.object"}),
-                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
-            ),
-            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
-            SPAN({"class": "arrayProperties", role: "group"})
-        ),
+    try
+    {
+        if (!obj)
+            return false;
+        // do this first to avoid security 1000 errors
+        else if (obj instanceof Ci.nsIDOMHistory)
+            return false;
 
-    shortTag:
-        OBJECTBOX({_repObject: "$object",
-            $hasTwisty: "$object|hasSpecialProperties",
-            onclick: "$onToggleProperties"},
-            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
-            FOR("item", "$object|shortArrayIterator",
-                TAG("$item.tag", {object: "$item.object"}),
-                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
-            ),
-            SPAN({"class": "arrayRightBracket"}, "]"),
-            SPAN({"class": "arrayProperties", role: "group"})
-        ),
+        var view = Wrapper.getContentView(win || window);
+
+        // do this first to avoid security 1000 errors
+        if ("StorageList" in view && obj instanceof view.StorageList)
+            return false;
+        // do this first to avoid exceptions
+        else if (obj.toString() === "[xpconnect wrapped native prototype]")
+            return false;
+    }
+    catch (exc)
+    {
+        try
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                // Something weird: without the try/catch, OOM, with no exception??
+                FBTrace.sysout("mightBeArray FAILS: " + exc, exc);
+                FBTrace.sysout("mightBeArray Fails on obj " + obj);
+            }
+        }
+        catch (exexc)
+        {
+            FBTrace.sysout("mightBeArray double ERROR " + exexc, exexc);
+        }
+    }
+
+    return true;
+}
+
+// ********************************************************************************************* //
+
+FirebugReps.ArrBase = domplate(FirebugReps.Obj,
+{
+    className: "array",
+    toggles: new ToggleBranch.ToggleBranch(),
+
+    titleTag:
+        SPAN({"class": "objectTitle"}, "$object|getTitleTag"),
+
+    getTitle: function(object, context)
+    {
+        return "[" + object.length + "]";
+    },
+
+    supportsObject: function(object, type, context)
+    {
+        return this.isArray(object, context ? context.window : null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     longArrayIterator: function(array)
     {
-       return this.arrayIterator(array, 300);
+        return this.arrayIterator(array, 300);
     },
 
     shortArrayIterator: function(array)
     {
-       return this.arrayIterator(array, Options.get("ObjectShortIteratorMax"));
+        return this.arrayIterator(array, Options.get("ObjectShortIteratorMax"));
     },
 
     arrayIterator: function(array, max)
@@ -590,8 +635,6 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
         return items;
     },
-
-    toggles: new ToggleBranch.ToggleBranch(),
 
     getItemIndex: function(child)
     {
@@ -667,13 +710,6 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    className: "array",
-
-    supportsObject: function(object, type, context)
-    {
-        return this.isArray(object, context ? context.window : null);
-    },
-
     highlightObject: function(object, context, target)
     {
         // Highlighting huge amount of elements on the page can cause serious performance
@@ -701,14 +737,9 @@ FirebugReps.Arr = domplate(Firebug.Rep,
     },
 
     // http://code.google.com/p/fbug/issues/detail?id=874
-    // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
     isArray: function(obj, win)
     {
-        win = win || window;
-
-        var view = Wrapper.getContentView(win);
-
-        try
+        if (mightBeArray(obj, win))
         {
             if (!obj)
                 return false;
@@ -720,38 +751,129 @@ FirebugReps.Arr = domplate(Firebug.Rep,
                 return false;
             else if (isFinite(obj.length) && typeof obj.splice === "function")
                 return true;
-            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
+            else if (Arr.isArray(obj))
                 return true;
-            else if (obj instanceof view.HTMLCollection)
-                return true;
-            else if (obj instanceof view.NodeList)
-                return true;
-        }
-        catch (exc)
-        {
-            try
-            {
-                if (FBTrace.DBG_ERRORS)
-                {
-                    // Something weird: without the try/catch, OOM, with no exception??
-                    FBTrace.sysout("isArray FAILS: " + exc, exc);
-                    FBTrace.sysout("isArray Fails on obj " + obj);
-                }
-            }
-            catch (exexc)
-            {
-                FBTrace.sysout("isArray double ERROR " + exexc, exexc);
-            }
         }
 
         return false;
     },
-    // END Yahoo BSD SOURCE See license below.
+});
 
-    getTitle: function(object, context)
+// ********************************************************************************************* //
+
+FirebugReps.Arr = domplate(FirebugReps.ArrBase,
+{
+    tag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|longArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    shortTag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|shortArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    // http://code.google.com/p/fbug/issues/detail?id=874
+    isArray: function(obj, win)
     {
-        return "[" + object.length + "]";
+        if (mightBeArray(obj, win))
+        {
+            if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
+                return true;
+            else if (Arr.isArray(obj))
+                return true;
+        }
+        return false;
     }
+});
+
+// ********************************************************************************************* //
+
+/**
+ * Any arrayish object that is not directly Array type (e.g. HTMLCollection, NodeList, etc.)
+ */
+FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
+{
+    tag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|longArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    shortTag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|shortArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    onClickTitle: function(event)
+    {
+        var obj = Firebug.getRepObject(event.target);
+        Firebug.chrome.select(obj);
+    },
+
+    getTitle: function(obj, context)
+    {
+        var arr = Wrapper.unwrapObject(obj);
+        const re =/\[object ([^\]]*)/;
+        var label = Str.safeToString(arr);
+        var m = re.exec(label);
+        return m[1] || label;
+    },
+
+    isArray: function(obj, win)
+    {
+        if (mightBeArray(obj, win))
+        {
+            var view = Wrapper.getContentView(win || window);
+            var arr = Wrapper.unwrapObject(obj);
+
+            if (isFinite(obj.length) && typeof obj.splice === "function" && obj.length)
+                return true;
+            else if (arr instanceof view.HTMLCollection)
+                return true;
+            else if (arr instanceof view.NodeList)
+                return true;
+        }
+
+        return false;
+    },
 });
 
 // ********************************************************************************************* //
@@ -1054,6 +1176,57 @@ FirebugReps.Element = domplate(Firebug.Rep,
         System.copyToClipboard(csspath);
     },
 
+    paste: function(elt, clipboardContent, mode)
+    {
+        if (elt instanceof window.HTMLElement)
+            return this.pasteHTML.apply(this, arguments);
+        else
+            return this.pasteXML.apply(this, arguments);
+    },
+
+    pasteHTML: function(elt, clipboardContent, mode)
+    {
+        if (mode === "replaceInner")
+            elt.innerHTML = clipboardContent;
+        else if (mode === "replaceOuter")
+            elt.outerHTML = clipboardContent;
+        else
+            elt.insertAdjacentHTML(mode, clipboardContent);
+    },
+
+    pasteXML: function(elt, clipboardContent, mode)
+    {
+        var contextNode, parentNode = elt.parentNode;
+        if (["beforeBegin", "afterEnd", "replaceOuter"].indexOf(mode) >= 0)
+            contextNode = parentNode;
+        else
+            contextNode = elt;
+
+        var pastedElements = Dom.markupToDocFragment(clipboardContent, contextNode);
+        switch (mode)
+        {
+            case "beforeBegin":
+                parentNode.insertBefore(pastedElements, elt);
+                break;
+            case "afterBegin":
+                elt.insertBefore(pastedElements, elt.firstChild);
+                break;
+            case "beforeEnd":
+                elt.appendChild(pastedElements);
+                break;
+            case "afterEnd":
+                Dom.insertAfter(pastedElements, elt);
+                break;
+            case "replaceInner":
+                Dom.eraseNode(elt);
+                elt.appendChild(pastedElements);
+                break;
+            case "replaceOuter":
+                parentNode.replaceChild(pastedElements, elt);
+                break;
+        }
+    },
+
     persistor: function(context, xpath)
     {
         var elts = xpath
@@ -1117,6 +1290,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
         var type;
         var items = [];
+        var clipboardContent = System.getStringDataFromClipboard();
+        var isEltRoot = (elt === elt.ownerDocument.documentElement);
 
         if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
             type = "HTML";
@@ -1158,6 +1333,57 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Copy_CSS_Path",
                 id: "fbCopyCSSPath",
                 command: Obj.bindFixed(this.copyCSSPath, this, elt)
+            },
+            {
+                label: Locale.$STRF("html.menu.Paste", [type]),
+                tooltiptext: Locale.$STRF("html.tip.Paste", [type]),
+                disabled: !clipboardContent,
+                id: "fbPaste",
+                items: [
+                    {
+                        label: "html.menu.Paste_Replace_Content",
+                        tooltiptext: "html.tip.Paste_Replace_Content",
+                        id: "fbPasteReplaceInner",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                            "replaceInner")
+                    },
+                    {
+                        label: "html.menu.Paste_Replace_Node",
+                        tooltiptext: "html.tip.Paste_Replace_Node",
+                        id: "fbPasteReplaceOuter",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                            "replaceOuter")
+                    },
+                    {
+                        label: "html.menu.Paste_AsFirstChild",
+                        tooltiptext: "html.tip.Paste_AsFirstChild",
+                        id: "fbPasteFirstChild",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
+                            "afterBegin")
+                    },
+                    {
+                        label: "html.menu.Paste_AsLastChild",
+                        tooltiptext: "html.tip.Paste_AsLastChild",
+                        id: "fbPasteLastChild",
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, "beforeEnd")
+                    },
+                    {
+                        label: "html.menu.Paste_Before",
+                        tooltiptext: "html.tip.Paste_Before",
+                        id: "fbPasteBefore",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
+                            "beforeBegin")
+                    },
+                    {
+                        label: "html.menu.Paste_After",
+                        tooltiptext: "html.tip.Paste_After",
+                        id: "fbPasteAfter",
+                        disabled: isEltRoot,
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, "afterEnd")
+                    }
+                ]
             }
         ]);
 
@@ -1618,6 +1844,8 @@ FirebugReps.Event = domplate(Firebug.Rep,
             info.push("clientX=", event.clientX, ", clientY=", event.clientY);
         else if (eventFamily == "key")
             info.push("charCode=", event.charCode, ", keyCode=", event.keyCode);
+        else if (event.type == "message")
+            info.push("origin=", event.origin, ", data=", event.data);
 
         return info.join("");
     },
@@ -3147,6 +3375,7 @@ Firebug.registerRep(
     FirebugReps.Except,
     FirebugReps.XML,
     FirebugReps.Arr,
+    FirebugReps.ArrayLikeObject,
     FirebugReps.XPathResult,
     FirebugReps.Storage,
     FirebugReps.Attr,

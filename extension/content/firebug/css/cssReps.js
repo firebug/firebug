@@ -115,7 +115,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
                 }
             }
 
-            caption.innerHTML = Locale.$STRF("Dimensions", [w, h]);
+            caption.textContent = Locale.$STRF("Dimensions", [w, h]);
 
             Css.removeClass(innerBox, "infoTipLoading");
         },
@@ -131,9 +131,9 @@ var CSSInfoTip = Obj.extend(InfoTip,
 
             // Display an error in the caption (instead of dimensions).
             if (Str.hasPrefix(img.src, "moz-filedata"))
-                caption.innerHTML = Locale.$STR("firebug.failedToPreviewObjectURL");
+                caption.textContent = Locale.$STR("firebug.failedToPreviewObjectURL");
             else
-                caption.innerHTML = Locale.$STR("firebug.failedToPreviewImageURL");
+                caption.textContent = Locale.$STR("firebug.failedToPreviewImageURL");
 
             var innerBox = img.parentNode;
             Css.removeClass(innerBox, "infoTipLoading");
@@ -162,7 +162,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
             fontObject: fontObject}, infoTip);
         var styleNode = node.getElementsByClassName("infoTipFontFamilyStyle").item(0);
 
-        styleNode.innerHTML = getFontFaceCSS(fontObject ? fontObject : fontName);
+        styleNode.textContent = getFontFaceCSS(fontObject ? fontObject : fontName);
         return true;
     },
 

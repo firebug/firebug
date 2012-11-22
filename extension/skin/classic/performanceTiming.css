@@ -1,0 +1,192 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+
+.logRow-perfTiming {
+}
+
+/*************************************************************************************************/
+
+.perfTimingBox {
+    position: relative;
+    height: 17px;
+    border-right: 130px solid transparent;
+}
+
+.perfTimingBar {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    min-width: 2px;
+    z-index: 10;
+}
+
+.perfTimingBarLabel {
+    -moz-box-sizing: padding-box;
+    position: absolute;
+    top: 1px;
+    left: 100%;
+    padding-left: 6px;
+    color: #808080;
+    min-width: 16px;
+    white-space: nowrap;
+    z-index: 30;
+}
+
+/*************************************************************************************************/
+/* Info Tip */
+
+.timeInfoTipRow .timeInfoTipBar {
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+}
+
+/*************************************************************************************************/
+/* Bars */
+
+.perfTimingBar.pageLoad,
+.timeInfoTipBar.pageLoad {
+    background-color: rgb(217, 179, 147);
+}
+
+.perfTimingBar.redirect,
+.timeInfoTipBar.redirect {
+    background-color: rgb(0, 148, 87);
+}
+
+.perfTimingBar.dns,
+.timeInfoTipBar.dns {
+    background-color: #91D2DC;
+}
+
+.perfTimingBar.connecting,
+.timeInfoTipBar.connecting {
+    background-color: #B9E164;
+}
+
+.perfTimingBar.waiting,
+.timeInfoTipBar.waiting {
+    background-color: #B4A5D2;
+}
+
+.perfTimingBar.response,
+.timeInfoTipBar.response {
+    background-color: #78E17D;
+}
+
+.perfTimingBar.processing,
+.timeInfoTipBar.processing {
+    background-color: rgb(202, 206, 168);
+}
+
+.perfTimingBar.DOMContentLoaded,
+.timeInfoTipBar.DOMContentLoaded {
+    background-color: rgb(179, 184, 118);
+}
+
+.perfTimingBar.onLoad,
+.timeInfoTipBar.onLoad {
+    background-color: rgb(168, 194, 196);
+}
+
+/*************************************************************************************************/
+/* DOM Events */
+
+.perfTimingBar.event {
+    width: 1px;
+}
+
+.perfTimingEvent {
+    position: absolute;
+    width: 1px;
+    z-index: 20;
+    top: 0;
+    bottom: 0;
+}
+
+.perfTimingTable TR:first-child .perfTimingEvent {
+    top: 1px;
+}
+
+.perfTimingTable TR:last-child .perfTimingEvent {
+    bottom: 1px;
+}
+
+.perfTimingEvent.domInteractive,
+.timeInfoTipEventBar.domInteractive {
+    background-color: rgb(126, 146, 126);
+}
+
+.perfTimingEvent.domLoading,
+.timeInfoTipEventBar.domLoading {
+    background-color: rgb(155, 133, 155);
+}
+
+.perfTimingEvent.domContentLoaded,
+.timeInfoTipEventBar.domContentLoaded {
+    background-color: rgb(152, 152, 255);
+}
+
+.perfTimingEvent.onLoad,
+.timeInfoTipEventBar.onLoad {
+    background-color: rgb(255, 152, 152);
+}
+
+/*************************************************************************************************/
+/* Details */
+
+.logRow-perfTimingDetails .logGroupBody {
+    border-bottom: 1px solid #D7D7D7;
+    overflow-y: auto;
+    height: 200px;
+}
+
+.logRow-perfTimingDetails .logGroupLabel {
+    text-decoration: none !important;
+}
+
+.logRow-perfTimingDetails > .logRow {
+    background-position: 2px 3px !important;
+}
+
+.logRow-perfTimingDetails .timingCaptionDesc {
+    color: gray;
+    font-weight: normal;
+    padding-left: 10px;
+}
+
+.logRow-perfTimingDetails .timingTable {
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.logRow-perfTimingDetails .timingCell {
+    padding: 2px 4px 2px 4px;
+}
+
+.logRow-perfTimingDetails .timingTable tr:nth-child(even) {
+    background-color: #EFEFEF;
+}
+
+.logRow-perfTimingDetails .timingName {
+    color: green;
+    font-family: monospace;
+}
+
+.logRow-perfTimingDetails .timingRow:hover .timingName {
+    text-decoration: underline;
+}
+
+.logRow-perfTimingDetails .timingDesc {
+    color: gray
+}
+
+/*************************************************************************************************/
+/* Cursor */
+
+.perfTimingEvent.cursor {
+    background-color: gray;
+    visibility: hidden;
+    width: 2px;
+    z-index: 40;
+}

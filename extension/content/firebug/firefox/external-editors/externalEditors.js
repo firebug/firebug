@@ -30,7 +30,6 @@ const DirService = Xpcom.CCSV("@mozilla.org/file/directory_service;1",
     "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
-const nsILocalFile = Ci.nsILocalFile;
 const nsISafeOutputStream = Ci.nsISafeOutputStream;
 const nsIURI = Ci.nsIURI;
 
@@ -237,11 +236,17 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         var item = doc.createElement("menu");
         item.setAttribute("type", "splitmenu");
         item.setAttribute("iconic", "true");
-        item.setAttribute("oncommand", "Firebug.ExternalEditors.onContextMenuCommand(event)");
+
+        item.addEventListener("command", function(event)
+        {
+            Firebug.ExternalEditors.onContextMenuCommand(event);
+        });
 
         var menupopup = doc.createElement("menupopup");
-        menupopup.setAttribute("onpopupshowing",
-            "return Firebug.ExternalEditors.onEditorsShowing(this)");
+        menupopup.addEventListener("popupshowing", function(event)
+        {
+            return Firebug.ExternalEditors.onEditorsShowing(this)
+        });
 
         item.appendChild(menupopup);
         return item;
@@ -535,7 +540,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         if (System.getPlatformName() == "WINNT")
             lpath = lpath.replace(/\//g, "\\");
 
-        var file = Xpcom.QI(temporaryDirectory.clone(), nsILocalFile);
+        var file = Xpcom.QI(temporaryDirectory.clone(), nsIFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
@@ -561,7 +566,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         try
         {
-            var file = Xpcom.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+            var file = Xpcom.CCIN("@mozilla.org/file/local;1", "nsIFile");
             for (var i = 0; i < temporaryFiles.length; ++i)
             {
                 file.initWithPath(temporaryFiles[i]);

@@ -24,6 +24,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
+const Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Globals
@@ -1634,12 +1635,25 @@ function getNonFrameBody(elt)
 
 function attachStyles(context, body)
 {
+    if (FBTrace.DBG_ERRORS && context.highlightStyle && Cu.isDeadWrapper(context.highlightStyle))
+        FBTrace.sysout("inspector.attachStyles; ERROR can't access dead object");
+
     var doc = body.ownerDocument;
+
     if (!context.highlightStyle)
         context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
 
-    if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-        Css.addStyleSheet(body.ownerDocument, context.highlightStyle);
+    var parentNode = context.highlightStyle.parentNode;
+    if (!parentNode || context.highlightStyle.ownerDocument != doc)
+    {
+        // Clone the <style> element so, it doesn't adopt the new document as parent.
+        // The other doc (except of the original one that is always the top doc) comes
+        // from an iframe, which can be reloaded (within the context life-time) and
+        // consequent access to context.highlightStyle would fire "can't access dead object"
+        // exception (see issue 6013).
+        var style = parentNode ? context.highlightStyle.cloneNode(true) : context.highlightStyle;
+        Css.addStyleSheet(body.ownerDocument, style);
+    }
 }
 
 function createProxiesForDisabledElements(body)

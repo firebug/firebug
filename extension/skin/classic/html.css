@@ -58,6 +58,7 @@
 .nodeComment {
     margin: 0 2px;
     vertical-align: top;
+    unicode-bidi: embed;
 }
 
 .nodeText {

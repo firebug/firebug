@@ -6,11 +6,11 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 var EXPORTED_SYMBOLS = ["fbObserverService"];
 
-Components.utils.import("resource://firebug/firebug-trace-service.js");
-var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 // Observer implementation

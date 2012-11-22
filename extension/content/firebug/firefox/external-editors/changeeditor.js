@@ -29,7 +29,7 @@ function onLoad()
         origImage = FBL.getIconURLForFile(item.executable);
         try
         {
-            var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+            var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
             file.initWithPath(item.executable);
             document.getElementById("executable").file = file;
             origLabel = file.leafName.replace(".exe","");
@@ -123,7 +123,7 @@ function onAccept()
 
     try
     {
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(item.executable);
         if (!file.isExecutable())
            throw "NotAnExecutable";

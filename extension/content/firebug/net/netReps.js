@@ -641,8 +641,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getHref: function(file)
     {
-        return (file.method ? file.method.toUpperCase() : "?") + " " +
-            Str.cropString(Url.getFileName(file.href), 40);
+        var fileName = Url.getFileName(file.href);
+        var limit = Options.get("stringCropLength");
+        if (limit > 0)
+            fileName = Str.cropString(fileName, limit);
+        return (file.method ? file.method.toUpperCase() : "?") + " " + fileName;
     },
 
     getProtocol: function(file)
@@ -1628,7 +1631,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         {
             var headers = requestHeaders ? file.requestHeaders : file.responseHeaders;
             this.insertHeaderRows(netInfoBox, headers, target.rowName);
-            target.innerHTML = Locale.$STR("net.headers.view source");
+            target.textContent = Locale.$STR("net.headers.view source");
         }
         else
         {

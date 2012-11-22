@@ -1258,8 +1258,9 @@
 
                 for (var j = 0; j < urls.length; ++j)
                 {
+                    var label = urls[j].fileName != path ? urls[j].fileName : "Inline";
                     var menuInfo = {
-                        label: urls[j].fileName != path ? urls[j].fileName : "Inline",
+                        label: FBL.cropString(label, Firebug.Options.get("stringCropLength")),
                         tooltiptext: path + urls[j].fileName,
                         nol10n: true
                     };
@@ -1293,14 +1294,14 @@
             this.filter.filterString = "";
 
             this.onkeypress = FBL.bind(this.onKeyPress, this);
-            window.top.addEventListener("keypress", this.onkeypress, true);
+            window.parent.addEventListener("keypress", this.onkeypress, true);
 
             this.onclick = FBL.bind(this.onClick, this);
             this.popup.addEventListener("click", this.onclick, true);
         ]]></handler>
 
         <handler event="popuphidden"><![CDATA[
-            window.top.removeEventListener("keypress", this.onkeypress, true);
+            window.parent.removeEventListener("keypress", this.onkeypress, true);
             this.popup.removeEventListener("click", this.onclick, true);
 
             delete this.onkeypress;

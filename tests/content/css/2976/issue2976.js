@@ -17,7 +17,7 @@ function runTest()
                 var cssSelector = stylePanel.panelNode.querySelector(".cssSelector");
                 FBTest.executeContextMenuCommand(cssSelector, "fbCopyStyleDeclaration", function()
                 {
-                    var expected = /background-color: LightYellow;\s*color: red;\s*font-weight: bold;/;
+                    var expected = /background-color: LightYellow;\s*color: red !important;\s*font-weight: bold;/;
                     FBTest.waitForClipboard(expected, function(cssDecl)
                     {
                         FBTest.compare(expected, cssDecl,

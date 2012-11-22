@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript">
+var testOrigin;
+function log(e)
+{
+    var node = document.createElement("div");
+    node.textContent = e.data;
+    document.getElementById("content").appendChild(node);
+    testOrigin = e.origin;
+}
+window.addEventListener("message", log, false);
+</script>
+</head>
+<body>
+    <div id="content"></div>
+</body>
+</html>

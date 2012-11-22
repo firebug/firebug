@@ -65,6 +65,7 @@ var panelTypeMap = {};
 
 // ********************************************************************************************* //
 
+//xxxHonza: we should use the existing Firebug object.
 if (window.Firebug)
 {
     // Stow the pre-load properties, add them back at the end
@@ -147,7 +148,9 @@ window.Firebug =
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
-        Firebug.Options.addListener(this);
+        // Firebug is getting option-updates from the connection so,
+        // do not register it again here (see issue 6035)
+        //Firebug.Options.addListener(this);
 
         this.isInitialized = true;
 
@@ -393,23 +396,29 @@ window.Firebug =
         var contextURLSet = [];
 
         // create a list of all unique activeContexts
-        Firebug.connection.eachContext( function createActiveContextList(context)
+        Firebug.connection.eachContext(function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("context "+context.getName());
+                FBTrace.sysout("context " + context.getName());
 
             try
             {
                 var cw = context.window;
                 if (cw)
                 {
+                    var url;
                     if (cw.closed)
+                    {
                         url = "about:closed";
+                    }
                     else
-                        if ('location' in cw)
-                            var url = cw.location.toString();
+                    {
+                        if ("location" in cw)
+                            url = cw.location.toString();
                         else
-                            var url = context.getName();
+                            url = context.getName();
+                    }
+
                     if (url)
                     {
                         if (contextURLSet.indexOf(url) == -1)
@@ -1261,7 +1270,7 @@ window.Firebug =
             if (Css.hasClass(child, "repTarget"))
                 target = child;
 
-            if (child.repObject)
+            if (child.repObject != null)
             {
                 if (!target && Css.hasClass(child, "repIgnore"))
                     break;
@@ -1278,7 +1287,7 @@ window.Firebug =
     {
         for (var child = node; child; child = child.parentNode)
         {
-            if (child.repObject)
+            if (child.repObject != null)
                 return child;
         }
     },
@@ -1287,7 +1296,7 @@ window.Firebug =
     {
         for (var child = element.firstChild; child; child = child.nextSibling)
         {
-            if (child.repObject == object)
+            if (child.repObject === object)
                 return child;
         }
     },
@@ -2528,6 +2537,11 @@ Firebug.Rep = domplate(
             return n[1];  // eg foo
         else
             return m ? m[1] : label;
+    },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        return false;
     },
 
     getTooltip: function(object)

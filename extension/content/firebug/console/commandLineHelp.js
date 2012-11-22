@@ -1,15 +1,16 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/console/commandLineExposed",
     "firebug/chrome/window",
-    "firebug/lib/Xpcom",
+    "firebug/lib/xpcom",
     "firebug/lib/events",
 ],
-function(Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
+function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -40,6 +41,7 @@ var HelpCaption = domplate(
         )
 });
 
+// The table UI should be based on tableRep
 var HelpTable = domplate(
 {
     tag:
@@ -182,6 +184,10 @@ var CommandLineHelp = domplate(
             })
         }
 
+        // Sort commands
+        commands.sort(function sortName(a, b) { return a.name > b.name ? 1 : -1; });
+
+        // Generate table
         HelpEntry.tag.insertRows({commands: commands}, tBody);
 
         return row;

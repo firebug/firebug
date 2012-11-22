@@ -30,7 +30,6 @@ const jsdIErrorHook = Ci.jsdIErrorHook;
 const jsdIFilter = Components.interfaces.jsdIFilter;
 const nsISupports = Ci.nsISupports;
 const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
 const nsIFactory = Ci.nsIFactory;
 const nsIConsoleService = Ci.nsIConsoleService;
@@ -147,7 +146,7 @@ var errorInfo = null;
 var timer = Timer.createInstance(nsITimer);
 var waitingForTimer = false;
 
-var FBTrace = null;
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 
@@ -729,10 +728,6 @@ var fbs =
 {
     initialize: function()
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
-
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-
         if (FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.FirebugService Starting");
 
@@ -754,7 +749,7 @@ var fbs =
 
         this.profiling = false;
 
-        prefs = PrefService.getService(nsIPrefBranch2);
+        prefs = PrefService.getService(nsIPrefBranch);
         fbs.prefDomain = "extensions.firebug";
         prefs.addObserver(fbs.prefDomain, fbs, false);
 
