@@ -61,7 +61,7 @@ function testExpression(callback, win, expr, shouldComplete, completeTo)
     var changed = (cmdLine.value !== expr);
     FBTest.compare(shouldComplete, changed,
         "Completions should " + (shouldComplete ? "" : "not ") +
-        "appear for: " + expr);
+        "appear for: " + expr + " (cmd line: " + cmdLine.value + ")");
 
     if (completeTo)
     {
