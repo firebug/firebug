@@ -362,13 +362,13 @@ var CommandLineInclude =
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
         {
-            this.log("wrongAliasArgument", [], [context, "error"]);
+            this.log("invalidAliasArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
         if (url !== null && typeof url !== "string" || !url && !newAlias)
         {
-            this.log("wrongUrlArgument", [], [context, "error"]);
+            this.log("invalidUrlArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
