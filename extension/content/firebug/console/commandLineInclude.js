@@ -362,13 +362,13 @@ var CommandLineInclude =
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
         {
-            this.log("wrongAliasArgument", [], [context, "error"]);
+            this.log("invalidAliasArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
         if (url !== null && typeof url !== "string" || !url && !newAlias)
         {
-            this.log("wrongUrlArgument", [], [context, "error"]);
+            this.log("invalidUrlArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
@@ -429,6 +429,8 @@ var CommandLineInclude =
 
         xhr.onload = function()
         {
+            if (xhr.status !== 200)
+                return errorFunction.apply(this, arguments);
             var codeToEval = xhr.responseText;
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
@@ -534,7 +536,7 @@ Firebug.registerCommand("include", {
 
 Firebug.registerRep(CommandLineIncludeRep);
 
-return CommandLineIncludeRep;
+return CommandLineInclude;
 
 // ********************************************************************************************* //
 }});
