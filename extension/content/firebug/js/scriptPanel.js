@@ -913,6 +913,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
+        this.showToolbarButtons("fbLocationList", active);
 
         Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
             Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
