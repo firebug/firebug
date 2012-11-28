@@ -120,7 +120,7 @@ NetProgress.prototype =
 
     requestNumber: 1,
 
-    startFile: function startFile(request, win)
+    openingFile: function openingFile(request, win)
     {
         var file = this.getRequestFile(request, win);
         if (file)
@@ -129,6 +129,13 @@ NetProgress.prototype =
             file.urlParams = Url.parseURLParams(file.href);
             this.breakOnXHR(file);
         }
+    },
+
+    startFile: function startFile(request, win)
+    {
+        // Called asynchronously since Fx17 so, can't be use for Break on XHR
+        // since JS stack is not available at the moment.
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=800799
     },
 
     requestedHeaderFile: function requestedHeaderFile(request, time, win, xhr, extraStringData)
