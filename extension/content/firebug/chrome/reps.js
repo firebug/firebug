@@ -719,7 +719,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         var limit = Options.get("multiHighlightLimit");
         if (!arr || (limit > 0 && arr.length > limit))
         {
-            if (Css.hasClass(target, "arrayLeftBracket ") ||
+            if (Css.hasClass(target, "arrayLeftBracket") ||
                 Css.hasClass(target, "arrayRightBracket"))
             {
                 var tooltip = Locale.$STRF("console.multiHighlightLimitExceeded", [limit]);
@@ -2859,9 +2859,9 @@ FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
         try
         {
             var items = history.length;
-            return items + " history entries";
+            return Locale.$STRP("firebug.reps.historyEntries", [items]);
         }
-        catch(exc)
+        catch (exc)
         {
             return "object does not support history (nsIDOMHistory)";
         }
@@ -2872,7 +2872,7 @@ FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
         try
         {
             var history = event.currentTarget.repObject;
-            var items = history.length;  // if this throws, then unsupported
+            history.length;  // if this throws, then unsupported
             Firebug.chrome.select(history);
         }
         catch (exc)
