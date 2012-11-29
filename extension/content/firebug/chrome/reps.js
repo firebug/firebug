@@ -878,6 +878,62 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
 // ********************************************************************************************* //
 
+FirebugReps.DOMTokenList = domplate(FirebugReps.ArrayLikeObject,
+{
+    tag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|longArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    shortTag:
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            A({"class": "objectTitle objectLink", onclick: "$onClickTitle"},
+                "$object|getTitle"
+            ),
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("item", "$object|shortArrayIterator",
+                TAG("$item.tag", {object: "$item.object"}),
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
+            ),
+            SPAN({"class": "arrayRightBracket"}, "]"),
+            SPAN({"class": "arrayProperties", role: "group"})
+        ),
+
+    getTitle: function(obj, context)
+    {
+        return "DOMTokenList";
+    },
+
+    isArray: function(obj, win)
+    {
+        if (mightBeArray(obj, win))
+        {
+            var view = Wrapper.getContentView(win || window);
+            var arr = Wrapper.unwrapObject(obj);
+
+            if (arr instanceof view.DOMTokenList)
+                return true;
+        }
+
+        return false;
+    },
+});
+
+// ********************************************************************************************* //
+
 FirebugReps.Property = domplate(Firebug.Rep,
 {
     supportsObject: function(object, type)
@@ -3376,6 +3432,7 @@ Firebug.registerRep(
     FirebugReps.XML,
     FirebugReps.Arr,
     FirebugReps.ArrayLikeObject,
+    FirebugReps.DOMTokenList,
     FirebugReps.XPathResult,
     FirebugReps.Storage,
     FirebugReps.Attr,
