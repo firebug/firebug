@@ -194,10 +194,6 @@
     display: none;
 }
 
-.cssPropValue.editing {
-    white-space: nowrap;
-}
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .useA11y .a11yCSSView .focusRow:focus {
