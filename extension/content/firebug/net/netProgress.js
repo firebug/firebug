@@ -382,6 +382,20 @@ NetProgress.prototype =
             file.fromCache = true;
             file.aborted = false;
 
+            try
+            {
+                if (request instanceof Ci.nsIApplicationCacheChannel)
+                {
+                    if (request.loadedFromApplicationCache)
+                        file.fromAppCache = true;
+                }
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("net.respondedCacheFile ERROR " + e, e);
+            }
+
             if (request.contentLength >= 0)
                 file.size = request.contentLength;
 
