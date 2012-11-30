@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6104: Firebug should display DOMTokenList content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6104">Issue 6104</a>:
+         Firebug should display DOMTokenList content</h1>
+</header>
+<div>
+    <section id="content">
+        <div id="testdiv" class="test1 test2"></div>
+    </section>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Console panel and enable it</li>
+            <li>Execute the following expression on the command line:<br/>
+            <code>$("#testdiv").classList</code><br/>
+            </li>
+            <li>You should see following in the Console panel:<br/>
+            <code>DOMTokenList["test1", "test2" ]</code>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>
