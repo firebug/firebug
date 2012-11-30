@@ -8,6 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/system",
     "firebug/html/highlighterCache"
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
+function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
     Win, System, HighlighterCache) {
 
 // ********************************************************************************************* //
@@ -71,7 +72,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         var i, elt, elementLen, oldContext, usingColorArray;
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
-        if (!elementArr || !FirebugReps.Arr.isArray(elementArr, context.window))
+        if (!elementArr || !Arr.isArrayLike(elementArr))
         {
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
@@ -139,7 +140,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = FirebugReps.Arr.isArray(colorObj, context.window);
+            usingColorArray = Arr.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {

@@ -524,48 +524,6 @@ FirebugReps.Reference = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
-// Array Helpers
-
-function mightBeArray(obj, win)
-{
-    try
-    {
-        if (!obj)
-            return false;
-        // do this first to avoid security 1000 errors
-        else if (obj instanceof Ci.nsIDOMHistory)
-            return false;
-
-        var view = Wrapper.getContentView(win || window);
-
-        // do this first to avoid security 1000 errors
-        if ("StorageList" in view && obj instanceof view.StorageList)
-            return false;
-        // do this first to avoid exceptions
-        else if (obj.toString() === "[xpconnect wrapped native prototype]")
-            return false;
-    }
-    catch (exc)
-    {
-        try
-        {
-            if (FBTrace.DBG_ERRORS)
-            {
-                // Something weird: without the try/catch, OOM, with no exception??
-                FBTrace.sysout("mightBeArray FAILS: " + exc, exc);
-                FBTrace.sysout("mightBeArray Fails on obj " + obj);
-            }
-        }
-        catch (exexc)
-        {
-            FBTrace.sysout("mightBeArray double ERROR " + exexc, exexc);
-        }
-    }
-
-    return true;
-}
-
-// ********************************************************************************************* //
 
 FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 {
@@ -580,9 +538,9 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         return "[" + object.length + "]";
     },
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        return this.isArray(object, context ? context.window : null);
+        return this.isArray(object);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -736,27 +694,10 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         Firebug.Inspector.highlightObject(arr, context);
     },
 
-    // http://code.google.com/p/fbug/issues/detail?id=874
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
-        {
-            if (!obj)
-                return false;
-            // do this first to avoid security 1000 errors
-            else if (obj instanceof Ci.nsIDOMHistory)
-                return false;
-            // do this first to avoid exceptions
-            else if (obj.toString && obj.toString() === "[xpconnect wrapped native prototype]")
-                return false;
-            else if (isFinite(obj.length) && typeof obj.splice === "function")
-                return true;
-            else if (Arr.isArray(obj))
-                return true;
-        }
-
         return false;
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -790,15 +731,16 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
         ),
 
     // http://code.google.com/p/fbug/issues/detail?id=874
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
+        try
         {
-            if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
+            if (Arr.isArray(obj))
                 return true;
-            else if (Arr.isArray(obj))
+            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
                 return true;
         }
+        catch (exc) {}
         return false;
     }
 });
@@ -863,25 +805,10 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
         return "";
     },
 
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
-        {
-            var view = Wrapper.getContentView(win || window);
-            var arr = Wrapper.unwrapObject(obj);
-
-            if (isFinite(obj.length) && typeof obj.splice === "function" && obj.length)
-                return true;
-            else if (arr instanceof view.HTMLCollection)
-                return true;
-            else if (arr instanceof view.NodeList)
-                return true;
-            else if (arr instanceof Ci.nsIDOMDOMTokenList)
-                return true;
-        }
-
-        return false;
-    },
+        return Arr.isArrayLike(obj);
+    }
 });
 
 // ********************************************************************************************* //
@@ -1479,7 +1406,6 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-var regexpConstructorRE = /RegExp/;
 FirebugReps.RegExp = domplate(Firebug.Rep,
 {
     tag:
@@ -1495,8 +1421,7 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
     {
         try
         {
-            return type == "object" && object && object.constructor && object.constructor.toString &&
-                regexpConstructorRE.test(object.constructor.toString());
+            return type == "object" && Object.prototype.toString.call(object) === "[object RegExp]";
         }
         catch (err)
         {
@@ -3359,14 +3284,14 @@ FirebugReps.ErrorCopy = function(message)
 // Registration
 
 Firebug.registerRep(
-    FirebugReps.nsIDOMHistory, // make this early to avoid exceptions
     FirebugReps.Undefined,
     FirebugReps.Null,
     FirebugReps.Number,
-    FirebugReps.RegExp,
     FirebugReps.String,
+    FirebugReps.nsIDOMHistory, // make this early to avoid exceptions
+    FirebugReps.ApplicationCache, // this also
+    FirebugReps.RegExp,
     FirebugReps.Window,
-    FirebugReps.ApplicationCache, // must come before Arr (array) else exceptions.
     FirebugReps.ErrorMessage,
     FirebugReps.Element,
     FirebugReps.TextNode,
@@ -3399,43 +3324,3 @@ return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
 }});
-
-// ********************************************************************************************* //
-
-/*
- * The following is http://developer.yahoo.com/yui/license.txt and applies to only code labeled
- * "Yahoo BSD Source" in only this file reps.js.  John J. Barton June 2007.
- *
-Software License Agreement (BSD License)
-
-Copyright (c) 2006, Yahoo! Inc.
-All rights reserved.
-
-Redistribution and use of this software in source and binary forms, with or without modification, are
-permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
-
-* Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
-
-* Neither the name of Yahoo! Inc. nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of Yahoo! Inc.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// ********************************************************************************************* //
