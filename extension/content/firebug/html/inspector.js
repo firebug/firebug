@@ -23,7 +23,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, 
 // Constants
 
 const inspectDelay = 200;
-const highlightCSS = "chrome://firebug/content/html/highlighter.css";
+const highlightCssUrl = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
 const Cu = Components.utils;
 
@@ -1276,7 +1276,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                     FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI +
                         " !?= " + body.ownerDocument.documentURI, highlighter);
 
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
 
                 try
                 {
@@ -1495,7 +1495,7 @@ BoxModelHighlighter.prototype =
 
             if (needsAppend)
             {
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
                 body.appendChild(nodes.offset);
             }
 
@@ -1634,27 +1634,26 @@ function getNonFrameBody(elt)
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
-function attachStyles(context, body)
+function attachStyles(context, doc)
 {
-    if (FBTrace.DBG_ERRORS && context.highlightStyle && Cu.isDeadWrapper(context.highlightStyle))
-        FBTrace.sysout("inspector.attachStyles; ERROR can't access dead object");
+    if (!context.highlightStyleCache)
+        context.highlightStyleCache = new WeakMap();
+    var highlightStyleCache = context.highlightStyleCache;
 
-    var doc = body.ownerDocument;
-
-    if (!context.highlightStyle)
-        context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
-
-    var parentNode = context.highlightStyle.parentNode;
-    if (!parentNode || context.highlightStyle.ownerDocument != doc)
+    var style;
+    if (highlightStyleCache.has(doc))
     {
-        // Clone the <style> element so, it doesn't adopt the new document as parent.
-        // The other doc (except of the original one that is always the top doc) comes
-        // from an iframe, which can be reloaded (within the context life-time) and
-        // consequent access to context.highlightStyle would fire "can't access dead object"
-        // exception (see issue 6013).
-        var style = parentNode ? context.highlightStyle.cloneNode(true) : context.highlightStyle;
-        Css.addStyleSheet(body.ownerDocument, style);
+        style = highlightStyleCache.get(doc);
     }
+    else
+    {
+        style = Css.createStyleSheet(doc, highlightCssUrl);
+        highlightStyleCache.set(doc, style);
+    }
+
+    // Cater for the possiblity that someone might have removed our stylesheet.
+    if (!style.parentNode)
+        Css.addStyleSheet(doc, style);
 }
 
 function createProxiesForDisabledElements(body)
