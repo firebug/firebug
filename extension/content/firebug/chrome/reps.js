@@ -799,7 +799,7 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
         if (m)
             return m[1] || label;
 
-        if (arr instanceof Ci.nsIDOMDOMTokenList)
+        if ((arr instanceof Ci.nsIDOMDOMTokenList) || (this.isTokenList_Fx19(obj)))
             return "DOMTokenList";
 
         return "";
@@ -807,8 +807,47 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     isArray: function(obj)
     {
+        if (this.isArrayLike_Fx19(obj))
+            return true;
+
         return Arr.isArrayLike(obj);
-    }
+    },
+
+    /**
+     * Hack for Firefox 19 where obj instanceof Ci.nsIDOMDOMTokenList doesn't work.
+     */
+    isTokenList_Fx19: function(obj)
+    {
+        var context = Firebug.currentContext;
+        if (!context)
+            return false;
+
+        var view = Wrapper.getContentView(context.window);
+        if (!view)
+            return false;
+
+        obj = Wrapper.unwrapObject(obj);
+        return (obj instanceof view.DOMTokenList);
+    },
+
+    /**
+     * Hack for Firefox 19 where obj instanceof Ci.nsIDOMDOMTokenList,
+     * Ci.nsIDOMHTMLCollection and nsIDOMNodeList doesn't work.
+     */
+    isArrayLike_Fx19: function(obj)
+    {
+        var context = Firebug.currentContext;
+        if (!context)
+            return false;
+
+        var view = Wrapper.getContentView(context.window);
+        if (!view)
+            return false;
+
+        obj = Wrapper.unwrapObject(obj);
+        return (obj instanceof view.DOMTokenList) || (obj instanceof view.HTMLCollection) ||
+            (obj instanceof view.NodeList);
+    },
 });
 
 // ********************************************************************************************* //
