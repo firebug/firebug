@@ -22,12 +22,13 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
     "firebug/net/netPanel",
-    "firebug/console/errors"
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper) {
+    TraceListener, TraceModule, Wrapper, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,6 +41,10 @@ var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
 
 // List of contexts with XHR spy attached.
 var contexts = [];
+
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -281,7 +286,8 @@ var SpyHttpObserver =
     {
         try
         {
-            if (topic == "http-on-opening-request" ||
+            if ((topic == "http-on-modify-request" && !fx18) ||
+                topic == "http-on-opening-request" ||
                 topic == "http-on-examine-response" ||
                 topic == "http-on-examine-cached-response")
             {
@@ -314,6 +320,8 @@ var SpyHttpObserver =
                 var requestName = request.URI.asciiSpec;
                 var requestMethod = request.requestMethod;
 
+                if (topic == "http-on-modify-request" && !fx18)
+                    this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 if (topic == "http-on-opening-request")
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-examine-response")
