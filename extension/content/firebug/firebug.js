@@ -1424,7 +1424,7 @@ window.Firebug =
     {
         testLists.push({
             extension: "Firebug",
-            testListURL: "http://getfirebug.com/tests/head/firebug.html"
+            testListURL: "https://getfirebug.com/tests/1.11/firebug.html"
         });
     }
 };
