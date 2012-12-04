@@ -14,7 +14,7 @@
               <minVersion>17.0</minVersion>
               <maxVersion>19.*</maxVersion>
               <updateLink>https://getfirebug.com/releases/firebug/@VERSION@/@LEAF@</updateLink>
-              <updateInfoURL>http://getfirebug.com/updateInfo/firebug1.11.xml</updateInfoURL>
+              <updateInfoURL>http://getfirebug.com/updateInfo/firebug1.12.xml</updateInfoURL>
             </r:Description>
           </targetApplication>
         </r:Description>
