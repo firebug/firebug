@@ -126,9 +126,9 @@ const DirTablePlate = domplate(Firebug.Rep,
             TAG("$memberRowTag", {member: "$member"})
         ),
 
-    memberIterator: function(object, level)
+    memberIterator: function(object)
     {
-        var members = Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
+        var members = Firebug.DOMBasePanel.prototype.getMembers(object, 0, null);
         if (members.length)
             return members;
 
@@ -422,28 +422,29 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     /**
      * @param object a user-level object wrapped in security blanket
      * @param level for a.b.c, level is 2
-     * @param context
+     * @param optional context
      */
     getMembers: function(object, level, context)
     {
         if (!level)
             level = 0;
 
-        var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-            domProps = [], domFuncs = [], domConstants = [], proto = [],
-            domHandlers = [];
+        var ordinals = [];
+        var userProps = [];
+        var userClasses = [];
+        var userFuncs = [];
+        var domProps = [];
+        var domClasses = [];
+        var domFuncs = [];
+        var domConstants = [];
+        var proto = [];
+        var domHandlers = [];
 
         try
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
             if (isArguments(object))
                 object = Arr.cloneArray(object);
-
-            if ("StorageList" in window && object instanceof window.StorageList)
-            {
-                var domain = context.window.location.hostname;
-                object = object.namedItem(domain);
-            }
 
             try
             {
@@ -537,13 +538,24 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 else if (typeof(val) == "function")
                 {
                     if (isClassFunction(val))
-                        this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    {
+                        if (Dom.isDOMMember(object, name))
+                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context);
+                        else
+                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    }
                     else if (Dom.isDOMMember(object, name))
+                    {
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                    }
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
+                    {
                         this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context);
+                    }
                     else
+                    {
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                    }
                 }
                 else
                 {
@@ -600,6 +612,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (Firebug.showDOMFuncs)
         {
+            domClasses.sort(sortName);
+            members.push.apply(members, domClasses);
+
             domFuncs.sort(sortName);
             members.push.apply(members, domFuncs);
         }
@@ -680,12 +695,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 hasChildren = hasChildren || Obj.hasProperties(proto,
                     !Firebug.showEnumerableProperties, Firebug.showOwnProperties);
             }
-        }
-
-        if ("StorageList" in window && value instanceof window.StorageList)
-        {
-            var domain = context.window.location.hostname;
-            hasChildren = value.namedItem(domain).length > 0;
         }
 
         var member = {
@@ -1589,6 +1598,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 items.push(
                     {
                         label: isWatch ? "DeleteWatch" : "DeleteProperty",
+                        id: "DeleteProperty",
                         tooltiptext: isWatch ? "watch.tip.Delete_Watch" :
                             "dom.tip.Delete_Property",
                         command: Obj.bindFixed(this.deleteProperty, this, row)

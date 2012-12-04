@@ -14,23 +14,9 @@ var EXPORTED_SYMBOLS = [];
 // ********************************************************************************************* //
 // Services
 
-// xxxHonza: FBTrace console doesn't have to exist at this point (Firebug is bootstrapped).
-// In such case an empty object is created and all consequent logs are not visible in the
-// console window.
-// Cu.import("resource://firebug/fbtrace.js");
-
-var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
-
-// Just workaround for this module.
-var FBTrace = {sysout: function(msg)
-{
-    consoleService.logStringMessage(msg);
-}};
-
+Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://firebug/prefLoader.js");
-
-// Import of PluralForm object.
 Cu.import("resource://gre/modules/PluralForm.jsm");
 
 // ********************************************************************************************* //

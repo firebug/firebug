@@ -172,7 +172,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
         var sourceFileMap = context.sourceFileMap;
         if (FBTrace.DBG_PROFILER)
         {
-            for (url in sourceFileMap)
+            for (var url in sourceFileMap)
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
         }
 
@@ -513,10 +513,38 @@ function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTim
 }
 
 // ********************************************************************************************* //
+// CommandLine Support
+
+function profile(context, args)
+{
+    var title = args[0];
+    Firebug.Profiler.startProfiling(context, title);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+};
+
+function profileEnd(context)
+{
+    Firebug.Profiler.stopProfiling(context);
+    return Firebug.Console.getDefaultReturnValue(context.window);
+};
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Profiler);
 Firebug.registerRep(Firebug.Profiler.ProfileCall);
+
+Firebug.registerCommand("profile", {
+    handler: profile.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/profile",
+    description: Locale.$STR("console.cmd.help.profile")
+})
+
+Firebug.registerCommand("profileEnd", {
+    handler: profileEnd.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/profileEnd",
+    description: Locale.$STR("console.cmd.help.profileEnd")
+})
 
 return Firebug.Profiler;
 

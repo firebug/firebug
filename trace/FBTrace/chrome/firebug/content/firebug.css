@@ -19,7 +19,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 /* Firebug Splitter */
 
 #fbContentSplitter[dir=reverse]{
-    -moz-transform: scale(-1, -1);
+    transform: scale(-1, -1);
 }
 
 #fbContentSplitter[orient=vertical] {
@@ -79,6 +79,7 @@ textbox#fbCommandEditor {
 
 .completionText {
     color: #666666;
+    margin-right: 1px;
 }
 [selected="true"] > .completionText {
     background-color: highlight;
@@ -261,7 +262,8 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     height: 20px;
 }
 
-#fbLocationList.noTabStop> menupopup > arrowscrollbox> scrollbox {
+#fbLocationList.noTabStop > menupopup > arrowscrollbox > scrollbox,
+#fbCommandHistory > arrowscrollbox > scrollbox {
     overflow-y: auto;
 }
 
@@ -345,7 +347,7 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 
 panelTab[breakOnNextArmed="true"] > .panelTab-text {
     text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange !important;
-    /* -moz-animation: armedBlinking 0.8s ease-out infinite alternate; see issue 5618 */
+    /* animation: armedBlinking 0.8s ease-out infinite alternate; see issue 5618 */
 }
 
 /* see issue 5618

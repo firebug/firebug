@@ -10,9 +10,10 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/options",
-    "firebug/lib/array"
+    "firebug/lib/array",
+    "firebug/editor/editorSelector"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr) {
+function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -27,7 +28,7 @@ const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 // ********************************************************************************************* //
 // CSS Module
 
-Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector),
+Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 {
     dispatchName: "cssModule",
 
@@ -87,15 +88,34 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         return insertIndex;
     },
 
-    deleteRule: function(styleSheet, ruleIndex)
+    deleteRule: function(src, ruleIndex)
     {
+        var inlineStyle = (src instanceof window.Element);
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length,
-                styleSheet.cssRules);
+        {
+            if (inlineStyle)
+            {
+                FBTrace.sysout("deleteRule: element.style", src);
+            }
+            else
+            {
+                FBTrace.sysout("deleteRule: " + ruleIndex + " " + src.cssRules.length,
+                    src.cssRules);
+            }
+        }
 
-        Events.dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
+        var rule = (inlineStyle ? src : src.cssRules[ruleIndex]);
+        var afterParams = [src, rule.style.cssText];
+        afterParams.push(inlineStyle ? "" : rule.selectorText);
 
-        styleSheet.deleteRule(ruleIndex);
+        Events.dispatch(this.fbListeners, "onCSSDeleteRule", [src, ruleIndex]);
+
+        if (src instanceof window.Element)
+            src.removeAttribute("style");
+        else
+            src.deleteRule(ruleIndex);
+
+        Events.dispatch(this.fbListeners, "onAfterCSSDeleteRule", afterParams);
     },
 
     setProperty: function(rule, propName, propValue, propPriority)
@@ -192,7 +212,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     cleanupSheets: function(doc, context)
     {
         if (!context)
-            return;
+            return false;
 
         // Due to the manner in which the layout engine handles multiple
         // references to the same sheet we need to kick it a little bit.
@@ -206,7 +226,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         /*if (!Xml.isXMLPrettyPrint(context))
         {
             var style = Css.createStyleSheet(doc);
-            style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+            style.textContent = "#fbIgnoreStyleDO_NOT_USE {}";
             Css.addStyleSheet(doc, style);
 
             if (style.parentNode)
@@ -219,6 +239,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                     FBTrace.sysout("css.cleanupSheets; ERROR no parent style:", style);
             }
         }*/
+
+        var result = true;
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
         // This voodoo touches each style sheet to force some Firefox internal change
@@ -238,11 +260,17 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             }
             catch(e)
             {
+                result = false;
+
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+
-                        (styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+                    FBTrace.sysout("css.show: sheet.cssRules FAILS for " +
+                        (styleSheets[i] ? styleSheets[i].href : "null sheet") + e, e);
             }
         }
+
+        // Return true only if all stylesheets are fully loaded and there is no
+        // excpetion when accessing them.
+        return result;
     },
 
     cleanupSheetHandler: function(event, context)

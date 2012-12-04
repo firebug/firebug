@@ -236,19 +236,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     getSize: function(cookie)
     {
         var size = cookie.cookie.name.length + cookie.cookie.value.length;
-        return this.formatSize(size);
-    },
-
-    formatSize: function(bytes)
-    {
-        if (bytes == -1 || bytes == undefined)
-            return "?";
-        else if (bytes < 1024)
-            return bytes + " B";
-        else if (bytes < 1024*1024)
-            return Math.ceil(bytes/1024) + " KB";
-        else
-            return (Math.ceil(bytes/1024)/1024) + " MB";    // OK, this is probable not necessary ;-)
+        return Str.formatSize(size);
     },
 
     getPath: function(cookie)
@@ -938,6 +926,50 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
     {
         CookieReps.Rep.getContextMenuItems.apply(this, arguments);
     }
+});
+
+
+CookieReps.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},
+            TBODY(
+                FOR("size", "$sizeInfo",
+                    TAG("$size|sizeTag", {size: "$size"})
+                )
+            )
+        ),
+
+    sizeTag:
+        TR({"class": "sizeInfoRow"},
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
+            TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
+        ),
+
+    formatSize: function(size)
+    {
+        return Str.formatSize(size.size);
+    },
+
+    formatNumber: function(size)
+    {
+        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
+    },
+
+    render: function(cookie, parentNode)
+    {
+        var size = cookie.getSize();
+        var rawSize = cookie.getRawSize();
+        var sizeInfo = [];
+
+        sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Size"), size: size});
+
+        if (size != rawSize)
+            sizeInfo.push({label: Locale.$STR("cookie.sizeinfo.Raw_Size"), size: rawSize});
+
+        this.tag.replace({sizeInfo: sizeInfo}, parentNode);
+    },
 });
 
 // ********************************************************************************************* //

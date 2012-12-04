@@ -13,6 +13,8 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
     "firebug/console/commandEditor",
+    "firebug/console/functionMonitor",
+    "firebug/console/performanceTiming",
 ],
 function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {
 
@@ -39,17 +41,20 @@ Firebug.ConsoleBase =
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
         Events.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
-        return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
+        return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
+            noThrottle);
     },
 
     openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
-        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink, noThrottle);
+        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink,
+            noThrottle);
     },
 
     openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
-        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink, noThrottle);
+        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink,
+            noThrottle);
     },
 
     closeGroup: function(context, noThrottle)
@@ -402,22 +407,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("console.setStatus ERROR no firebugStatus element");
         }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Firebug.Debugger listener
-
-    onMonitorScript: function(context, frame)
-    {
-        Firebug.Console.log(frame, context);
-    },
-
-    onFunctionCall: function(context, frame, depth, calling)
-    {
-        if (calling)
-            Firebug.Console.openGroup([frame, "depth:"+depth], context);
-        else
-            Firebug.Console.closeGroup(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

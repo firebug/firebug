@@ -164,6 +164,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
+                currentEditor.cancelEditing(currentTarget, originalValue);
+
                 if (removeGroup && !originalValue && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
@@ -548,6 +550,10 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
         return true;
     },
 
+    cancelEditing: function(target, value)
+    {
+    },
+
     insertNewRow: function(target, insertWhere)
     {
     },
@@ -924,8 +930,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Events.cancelEvent(event);
         }
         else if (this.numeric && event.charCode &&
-            (event.charCode < KeyEvent.DOM_VK_0 || event.charCode > KeyEvent.DOM_VK_9) &&
-            event.charCode != KeyEvent.DOM_VK_INSERT && event.charCode != KeyEvent.DOM_VK_DELETE)
+            !(event.ctrlKey || event.metaKey || event.altKey) &&
+            !(KeyEvent.DOM_VK_0 <= event.charCode && event.charCode <= KeyEvent.DOM_VK_9) &&
+            event.charCode !== KeyEvent.DOM_VK_INSERT && event.charCode !== KeyEvent.DOM_VK_DELETE)
         {
             Events.cancelEvent(event);
         }
@@ -965,12 +972,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         Dom.eraseNode(popup);
 
         var target = event.target;
-        var menu = this.getContextMenuItems(target);
-        if (menu)
-        {
-            for (var i = 0; i < menu.length; ++i)
-                Menu.createMenuItem(popup, menu[i]);
-        }
+        var items = this.getContextMenuItems(target);
+        if (items)
+            Menu.createMenuItems(popup, items);
 
         if (!popup.firstChild)
             return false;
@@ -1028,7 +1032,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             if(this.wrapped)
             {
-                var fixupL = clR[1].left - clR[0].left,
+                var fixupL = clR[1].left - clR[0].left;
                     fixupT = clR[1].top - clR[0].top;
             }
             else

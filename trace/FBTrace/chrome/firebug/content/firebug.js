@@ -21,11 +21,11 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
     "firebug/lib/http",
-    "firebug/js/fbs",
     "firebug/trace/traceListener",
+    "firebug/console/commandLineExposed",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, FBS, TraceListener) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -65,6 +65,7 @@ var panelTypeMap = {};
 
 // ********************************************************************************************* //
 
+//xxxHonza: we should use the existing Firebug object.
 if (window.Firebug)
 {
     // Stow the pre-load properties, add them back at the end
@@ -147,7 +148,9 @@ window.Firebug =
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
-        Firebug.Options.addListener(this);
+        // Firebug is getting option-updates from the connection so,
+        // do not register it again here (see issue 6035)
+        //Firebug.Options.addListener(this);
 
         this.isInitialized = true;
 
@@ -252,10 +255,6 @@ window.Firebug =
         // Firebug.TabWatcher is ready.
         if (Firebug.PanelActivation)
             Firebug.PanelActivation.activatePanelTypes(panelTypes);
-
-        // bug712289
-        if (Firebug.PanelActivation && !FBS.isJSDAvailable())
-            Firebug.PanelActivation.disablePanel(this.getPanelType("script"));
 
         // Tell the modules the UI is up.
         Events.dispatch(modules, "initializeUI", [detachArgs]);
@@ -397,23 +396,29 @@ window.Firebug =
         var contextURLSet = [];
 
         // create a list of all unique activeContexts
-        Firebug.connection.eachContext( function createActiveContextList(context)
+        Firebug.connection.eachContext(function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("context "+context.getName());
+                FBTrace.sysout("context " + context.getName());
 
             try
             {
                 var cw = context.window;
                 if (cw)
                 {
+                    var url;
                     if (cw.closed)
+                    {
                         url = "about:closed";
+                    }
                     else
-                        if ('location' in cw)
-                            var url = cw.location.toString();
+                    {
+                        if ("location" in cw)
+                            url = cw.location.toString();
                         else
-                            var url = context.getName();
+                            url = context.getName();
+                    }
+
                     if (url)
                     {
                         if (contextURLSet.indexOf(url) == -1)
@@ -657,6 +662,16 @@ window.Firebug =
             Firebug.TraceModule.removeListener(listener);
     },
 
+    registerCommand: function(name, config)
+    {
+        return CommandLineExposed.registerCommand(name, config);
+    },
+
+    unregistereCommand: function(name)
+    {
+        return CommandLineExposed.unregisterCommand(name);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 
@@ -861,11 +876,11 @@ window.Firebug =
             // TODO reattach
 
             // window is closing in detached mode
-            if (Firebug.chrome.window.top)
+            var parent = this.getFirebugFrameParent();
+            if (parent)
             {
-                topWindow = Firebug.chrome.window.top;
-                topWindow.exportFirebug();
-                topWindow.close();
+                parent.exportFirebug();
+                parent.close();
             }
 
             Firebug.setPlacement("minimized");
@@ -906,9 +921,9 @@ window.Firebug =
         //detached -> inbrowser
         if (!forceOpen && Firebug.isDetached())
         {
-            var topWin = Firebug.chrome.window.top;
-            topWin.exportFirebug();
-            topWin.close();
+            var parent = this.getFirebugFrameParent();
+            parent.exportFirebug();
+            parent.close();
 
             if (reopenInBrowser)
             {
@@ -953,7 +968,6 @@ window.Firebug =
         Firebug.StartButton.resetTooltip();
     },
 
-
     detachBar: function()
     {
         if (Firebug.isDetached())  // can be set true attachBrowser
@@ -964,8 +978,8 @@ window.Firebug =
 
         if (Firebug.chrome.waitingForDetach)
             return null;
-        Firebug.chrome.waitingForDetach = true;
 
+        Firebug.chrome.waitingForDetach = true;
         Firebug.chrome.toggleOpen(false);  // don't show in browser.xul now
 
         if (FBTrace.DBG_ACTIVATION)
@@ -993,6 +1007,22 @@ window.Firebug =
     toggleCommandLine: function(showCommandEditor)
     {
         Options.set("commandEditor", showCommandEditor);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
+     * Returns parent of the firebugFrame.xul frame. The actual parent depends on whether
+     * Firebug is attached or detached.
+     *
+     * attached -> browser.xul
+     * detached -> firebug.xul
+     */
+    getFirebugFrameParent: function()
+    {
+        // We need firebug.xul in case of detached state. So, don't use 'top' since
+        // it references browser.xul
+        return Firebug.chrome.window.parent;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1240,7 +1270,7 @@ window.Firebug =
             if (Css.hasClass(child, "repTarget"))
                 target = child;
 
-            if (child.repObject)
+            if (child.repObject != null)
             {
                 if (!target && Css.hasClass(child, "repIgnore"))
                     break;
@@ -1257,7 +1287,7 @@ window.Firebug =
     {
         for (var child = node; child; child = child.parentNode)
         {
-            if (child.repObject)
+            if (child.repObject != null)
                 return child;
         }
     },
@@ -1266,7 +1296,7 @@ window.Firebug =
     {
         for (var child = element.firstChild; child; child = child.nextSibling)
         {
-            if (child.repObject == object)
+            if (child.repObject === object)
                 return child;
         }
     },
@@ -1394,7 +1424,7 @@ window.Firebug =
     {
         testLists.push({
             extension: "Firebug",
-            testListURL: "http://getfirebug.com/tests/head/firebug.html"
+            testListURL: "https://getfirebug.com/tests/1.11/firebug.html"
         });
     }
 };
@@ -1719,9 +1749,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
         if (this.panelNode)
         {
+            var scrollTop = this.panelNode.scrollTop;
             this.panelNode = doc.adoptNode(this.panelNode, true);
             this.panelNode.ownerPanel = this;
             doc.body.appendChild(this.panelNode);
+            this.panelNode.scrollTop = scrollTop;
         }
     },
 
@@ -2505,6 +2537,11 @@ Firebug.Rep = domplate(
             return n[1];  // eg foo
         else
             return m ? m[1] : label;
+    },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        return false;
     },
 
     getTooltip: function(object)

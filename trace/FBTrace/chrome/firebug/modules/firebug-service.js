@@ -30,7 +30,6 @@ const jsdIErrorHook = Ci.jsdIErrorHook;
 const jsdIFilter = Components.interfaces.jsdIFilter;
 const nsISupports = Ci.nsISupports;
 const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
 const nsIFactory = Ci.nsIFactory;
 const nsIConsoleService = Ci.nsIConsoleService;
@@ -147,7 +146,7 @@ var errorInfo = null;
 var timer = Timer.createInstance(nsITimer);
 var waitingForTimer = false;
 
-var FBTrace = null;
+Cu.import("resource://firebug/fbtrace.js");
 
 // ********************************************************************************************* //
 
@@ -729,10 +728,6 @@ var fbs =
 {
     initialize: function()
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
-
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-
         if (FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.FirebugService Starting");
 
@@ -754,7 +749,7 @@ var fbs =
 
         this.profiling = false;
 
-        prefs = PrefService.getService(nsIPrefBranch2);
+        prefs = PrefService.getService(nsIPrefBranch);
         fbs.prefDomain = "extensions.firebug";
         prefs.addObserver(fbs.prefDomain, fbs, false);
 
@@ -1576,61 +1571,8 @@ var fbs =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    /**
-     * Do not activate JSD, which is broken in Firefox 9 on Mac and Linux 32 bit
-     * This method is checking the current platform & browser configuration and 
-     * return false for Mac/Linux 32 bit
-     *
-     * See: https://bugzilla.mozilla.org/show_bug.cgi?id=712289
-     *
-     * Can be removed when the min Firefox version is 10
-     * 
-     * Search for 'bug712289' within the source code to remove all find all related
-     * parts of this workaround.
-     */
-    isJSDAvailable: function()
-    {
-        if (typeof(this._isJSDAvailable) == "undefined")
-        {
-            var systemInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime);
-
-            // Check the current OS, must not be Mac or Linux 32 bit
-            var os = systemInfo.XPCOMABI == "x86-gcc3";
-
-            // Check the current Firefox version, must not be 9
-            systemInfo = systemInfo.QueryInterface(Ci.nsIXULAppInfo);
-            var ff = systemInfo.version.indexOf("9.") == 0;
-
-            // If one or another is false, JSD is available.
-            this._isJSDAvailable = !(os && ff);
-
-            if (!this._isJSDAvailable)
-            {
-                try
-                {
-                    consoleService = ConsoleService.getService(nsIConsoleService);
-                    consoleService.logStringMessage(
-                        "WARNING: Firebug Script panel is disabled in Firefox " +
-                        systemInfo.version + " running on 32 bit Mac or Linux (" +
-                        systemInfo.XPCOMABI + ")");
-                }
-                catch (err)
-                {
-                }
-            }
-        }
-
-        return this._isJSDAvailable;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     enableDebugger: function()
     {
-        // bug712289
-        if (!this.isJSDAvailable())
-            return;
-
         if (waitingForTimer)
         {
             timer.cancel();
@@ -3816,7 +3758,7 @@ var fbs =
             var bps = breakpointStore.getItem(url);
 
             // Do not restore "Run unit this line" breakpoints. This should solve complaints
-            // about Firebug braking in the sourece even if there are no breakpoints in
+            // about Firebug breaking in the source even if there are no breakpoints in
             // Firebug UI.
             if (bps.type == BP_UNTIL)
                 continue;
@@ -4096,7 +4038,7 @@ var fbs =
 
                     // stack empty
                     if (unhookAtBottom && hookFrameCount == 0)
-                       this.unhookFunctions();
+                       fbs.unhookFunctions();
 
                     contextCached = callBack(contextCached, frame, hookFrameCount, false);
                     break;

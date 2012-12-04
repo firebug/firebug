@@ -8,18 +8,41 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
+const Ci = Components.interfaces;
 var Arr = {};
 
 // ********************************************************************************************* //
 // Arrays
 
-Arr.isArray = function(obj)
+Arr.isArray = Array.isArray || function(obj)
 {
-    if (Array.isArray)
-        return Array.isArray(obj);
-
     return Object.prototype.toString.call(obj) === "[object Array]";
-}
+};
+
+Arr.isArrayLike = function(obj)
+{
+    try
+    {
+        if (typeof obj !== "object")
+            return false;
+        if (!isFinite(obj.length))
+            return false;
+        if (Arr.isArray(obj))
+            return true;
+        if (typeof obj.callee === "function") // arguments
+            return true;
+        if (typeof obj.splice === "function") // jQuery etc.
+            return true;
+        if (obj instanceof Ci.nsIDOMHTMLCollection)
+            return true;
+        if (obj instanceof Ci.nsIDOMNodeList)
+            return true;
+        if (obj instanceof Ci.nsIDOMDOMTokenList)
+            return true;
+    }
+    catch (exc) {}
+    return false;
+};
 
 // At least sometimes the keys will be on user-level window objects
 Arr.keys = function(map)
@@ -91,13 +114,13 @@ Arr.sliceArray = function(array, index)
 
 Arr.cloneArray = function(array, fn)
 {
-   var newArray = [];
+   var newArray = [], len = array.length;
 
    if (fn)
-       for (var i = 0; i < array.length; ++i)
+       for (var i = 0; i < len; ++i)
            newArray.push(fn(array[i]));
    else
-       for (var i = 0; i < array.length; ++i)
+       for (var i = 0; i < len; ++i)
            newArray.push(array[i]);
 
    return newArray;

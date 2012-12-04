@@ -94,23 +94,30 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+.userLabel,
+.userClassLabel,
+.userFunctionLabel {
+    font-weight: bold;
+}
+
 .userLabel {
     color: #000000;
-    font-weight: bold;
 }
 
 .userClassLabel {
     color: #E90000;
-    font-weight: bold;
 }
 
 .userFunctionLabel {
     color: #025E2A;
-    font-weight: bold;
 }
 
 .domLabel {
     color: #000000;
+}
+
+.domClassLabel {
+    color: #E90000;
 }
 
 .domFunctionLabel {

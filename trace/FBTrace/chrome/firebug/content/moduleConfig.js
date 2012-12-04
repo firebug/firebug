@@ -59,6 +59,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/css/computedPanel",
         "firebug/cookies/cookieModule",
         "firebug/cookies/cookiePanel",
+        "firebug/css/selectorPanel",
     ];
 
     return config;
@@ -84,13 +85,10 @@ Firebug.registerExtension = function(extName, extConfig)
     var tempConfig = this.getExtensionConfig(extName);
     if (tempConfig)
     {
-        FBTrace.sysout("firebug.registerExtension; ERROR An extension with the same ID " +
-            "already exists! - " + extName, tempConfig);
+        Components.utils.reportError("firebug.registerExtension; ERROR An extension " +
+            "with the same ID already exists! - " + extName, tempConfig);
         return;
     }
-
-    if (FBTrace.DBG_REGISTRATION)
-        FBTrace.sysout("Extension registered: " + extName);
 
     this.extensions[extName] = extConfig;
 
@@ -128,8 +126,8 @@ Firebug.registerExtension = function(extName, extConfig)
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_REGISTRATION)
-                FBTrace.sysout("firebug.main; Extension: " + extName + " EXCEPTION " + err, err);
+            Components.utils.reportError("firebug.main; Extension: " + extName +
+                " EXCEPTION " + err, err);
         }
     });
 }
@@ -153,14 +151,11 @@ Firebug.unregisterExtension = function(extName)
             extConfig.app.shutdown();
 
         delete this.extensions[extName];
-
-        if (FBTrace.DBG_REGISTRATION)
-            FBTrace.sysout("Extension unregistered: " + extName);
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS || FBTrace.DBG_REGISTRATION)
-            FBTrace.sysout("unregisterExtension: " + extName + " EXCEPTION " + err, err);
+        Components.utils.reportError("unregisterExtension: " + extName +
+            " EXCEPTION " + err, err);
     }
 }
 

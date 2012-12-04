@@ -8,6 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/system",
     "firebug/html/highlighterCache"
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
+function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
     Win, System, HighlighterCache) {
 
 // ********************************************************************************************* //
@@ -24,6 +25,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
+const Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Globals
@@ -70,7 +72,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         var i, elt, elementLen, oldContext, usingColorArray;
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
-        if (!elementArr || !FirebugReps.Arr.isArray(elementArr, context.window))
+        if (!elementArr || !Arr.isArrayLike(elementArr))
         {
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
@@ -124,12 +126,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                     if (oldContext.window && oldContext.window.document)
                     {
                         highlighter.unhighlight(oldContext);
-
-                        if (oldContext.inspectorMouseMove)
-                        {
-                            Events.removeEventListener(oldContext.window.document, "mousemove",
-                                oldContext.inspectorMouseMove, true);
-                        }
                     }
                 }, inspectDelay);
             }
@@ -144,7 +140,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = FirebugReps.Arr.isArray(colorObj, context.window);
+            usingColorArray = Arr.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {
@@ -1244,19 +1240,19 @@ Firebug.Inspector.FrameHighlighter.prototype =
             {
                 cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-                if (cs.MozTransform && cs.MozTransform != "none")
-                    css += "-moz-transform: "+cs.MozTransform+"!important;" +
-                           "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
+                if (cs.transform && cs.transform != "none")
+                    css += "transform: " + cs.transform + " !important;" +
+                           "transform-origin: " + cs.transformOrigin + " !important;";
                 if (cs.borderRadius)
-                    css += "border-radius: "+cs.borderRadius+"!important;";
+                    css += "border-radius: " + cs.borderRadius + " !important;";
                 if (cs.borderTopLeftRadius)
-                    css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
+                    css += "border-top-left-radius: " + cs.borderTopLeftRadius + " !important;";
                 if (cs.borderTopRightRadius)
-                    css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
+                    css += "border-top-right-radius: " + cs.borderTopRightRadius + " !important;";
                 if (cs.borderBottomRightRadius)
-                    css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
+                    css += "border-bottom-right-radius: " + cs.borderBottomRightRadius + " !important;";
                 if (cs.borderBottomLeftRadius)
-                    css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
+                    css += "border-bottom-left-radius: " + cs.borderBottomLeftRadius + " !important;";
             }
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
@@ -1640,12 +1636,25 @@ function getNonFrameBody(elt)
 
 function attachStyles(context, body)
 {
+    if (FBTrace.DBG_ERRORS && context.highlightStyle && Cu.isDeadWrapper(context.highlightStyle))
+        FBTrace.sysout("inspector.attachStyles; ERROR can't access dead object");
+
     var doc = body.ownerDocument;
+
     if (!context.highlightStyle)
         context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
 
-    if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-        Css.addStyleSheet(body.ownerDocument, context.highlightStyle);
+    var parentNode = context.highlightStyle.parentNode;
+    if (!parentNode || context.highlightStyle.ownerDocument != doc)
+    {
+        // Clone the <style> element so, it doesn't adopt the new document as parent.
+        // The other doc (except of the original one that is always the top doc) comes
+        // from an iframe, which can be reloaded (within the context life-time) and
+        // consequent access to context.highlightStyle would fire "can't access dead object"
+        // exception (see issue 6013).
+        var style = parentNode ? context.highlightStyle.cloneNode(true) : context.highlightStyle;
+        Css.addStyleSheet(body.ownerDocument, style);
+    }
 }
 
 function createProxiesForDisabledElements(body)
@@ -1669,9 +1678,9 @@ function createProxiesForDisabledElements(body)
         div.className = "firebugResetStyles fbProxyElement";
 
         css = moveImp(null, rect.left, rect.top + body.scrollTop) + resizeImp(null, rect.width, rect.height);
-        if (cs.MozTransform && cs.MozTransform != "none")
-          css += "-moz-transform:" + cs.MozTransform + "!important;" +
-                 "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
+        if (cs.transform && cs.transform != "none")
+            css += "transform:" + cs.transform + " !important;" +
+                   "transform-origin:" + cs.transformOrigin + " !important;";
         if (cs.borderRadius)
             css += "border-radius:" + cs.borderRadius + " !important;";
         if (cs.borderTopLeftRadius)

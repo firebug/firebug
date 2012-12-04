@@ -27,7 +27,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 
@@ -64,6 +64,8 @@ var contentTypes =
     "application/xhtml+xml": 1,
     "application/atom+xml": 1,
     "application/rss+xml": 1,
+    "application/mathml+xml": 1,
+    "application/rdf+xml": 1,
     "application/vnd.mozilla.maybe.feed": 1,
     "application/vnd.mozilla.xul+xml": 1,
     "application/javascript": 1,

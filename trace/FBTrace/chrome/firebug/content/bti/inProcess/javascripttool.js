@@ -39,7 +39,7 @@ JavaScriptTool.breakOnNext = function(context, enable)
 
 JavaScriptTool.setBreakpoint = function(context, url, lineNumber)
 {
-    // TODO we should be sending urls over not compilation units
+    // TODO we should be sending URLs over, not compilation units
     var compilationUnit = context.getCompilationUnit(url);
     JSDebugger.setBreakpoint(compilationUnit, lineNumber);
 };
@@ -71,7 +71,7 @@ JavaScriptTool.getBreakpointCondition = function(context, url, lineNumber)
 };
 
 // ********************************************************************************************* //
-// These functions should be on stack instead
+// These functions should be on the stack instead.
 
 JavaScriptTool.rerun = function(context)
 {
@@ -111,7 +111,8 @@ JavaScriptTool.onConnect = function(connection)
 {
     if (!Firebug.connection.getTool("script"))
     {
-        JavaScriptTool.asTool = new Tool("script"), // this is the script tool
+        // this is the script tool
+        JavaScriptTool.asTool = new Tool("script"),
         connection.registerTool(JavaScriptTool.asTool);
     }
     else
@@ -188,8 +189,12 @@ JavaScriptTool.onStartDebugging = function(context, frame)
 JavaScriptTool.onStopDebugging = function(context)
 {
     var panel = context.getPanel("script", true);
-    if (panel && panel === Firebug.chrome.getSelectedPanel())  // then we are looking at the script panel
-        panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
+    // Then we are looking at the Script panel.
+    if (panel && panel === Firebug.chrome.getSelectedPanel())
+    {
+        // unhighlight and remove toolbar-status line
+        panel.showNoStackFrame();
+    }
 
     if (panel)
         panel.onStopDebugging();
@@ -217,12 +222,14 @@ JavaScriptTool.initialize = function()
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("JavaScriptTool initialize");
 
-    Firebug.connection.addListener(JavaScriptTool);  // This is how we get events
+    // This is how we get events.
+    Firebug.connection.addListener(JavaScriptTool);
 }
 
 JavaScriptTool.shutdown = function()
 {
-    Firebug.connection.removeListener(JavaScriptTool);  // This is how we get events
+    // This is how we get events.
+    Firebug.connection.removeListener(JavaScriptTool);
 }
 
 // ********************************************************************************************* //

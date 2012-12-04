@@ -215,7 +215,7 @@ Firebug.TabContext.prototype =
         // to iframes (documents), which can be already unloaded at this point.
         // Removing listeners from such 'unloaded' documents (or window) can throw
         // "TypeError: can't access dead object"
-        // We should avoid these exceptions (event if they are not representing mem leaks)
+        // We should avoid these exceptions (even if they are not representing memory leaks)
         this.unregisterAllListeners();
 
         state.panelState = {};
@@ -350,7 +350,7 @@ Firebug.TabContext.prototype =
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabContext.destroy FAILS "+exc, exc);
+                FBTrace.sysout("tabContext.destroy FAILS (" + panelName + ") " + exc, exc);
 
             // the destroy failed, don't keep the bad state
             delete state.panelState[panelName];

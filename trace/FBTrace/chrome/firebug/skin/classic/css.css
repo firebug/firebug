@@ -128,15 +128,13 @@
     padding-bottom: 2px;
 }
 
-.computedStyleRow > td:first-child {
-    width: 160px;
-}
-
 .selectorName {
+    width: 160px;
     -moz-padding-start: 24px;
 }
 
 .stylePropName {
+    width: 160px;
     vertical-align: top;
     font-weight: bold;
     padding: 0 4px 0 24px;
@@ -146,11 +144,7 @@
     padding-left: 3px;
 }
 
-.styleSelector > td:first-child {
-    width: 160px;
-}
-
-.styleSelector > td:n-th-child(2) {
+.propValue {
     width: 140px;
 }
 
@@ -170,7 +164,7 @@
     text-align: right;
 }
 
-.cssRule .objectLink-sourceLink {
+.cssElementRuleContainer > .objectLink-sourceLink {
     top: 0;
 }
 
@@ -200,10 +194,6 @@
     display: none;
 }
 
-.cssPropValue.editing {
-    white-space: nowrap;
-}
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .useA11y .a11yCSSView .focusRow:focus {
@@ -228,10 +218,10 @@
 .infoTipColorBox {
     background-color: #C8C8C8;
     background-image:
-        -moz-linear-gradient(45deg, #A0A0A0 25%, transparent 25%),
-        -moz-linear-gradient(-45deg, #A0A0A0 25%, transparent 25%),
-        -moz-linear-gradient(45deg, transparent 75%, #A0A0A0 75%),
-        -moz-linear-gradient(-45deg, transparent 75%, #A0A0A0 75%);
+        linear-gradient(45deg, #A0A0A0 25%, transparent 25%),
+        linear-gradient(135deg, #A0A0A0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #A0A0A0 75%),
+        linear-gradient(135deg, transparent 75%, #A0A0A0 75%);
     background-size: 16px 16px;
     background-position:0 0, 8px 0, 8px -8px, 0px 8px;
 }

@@ -34,6 +34,8 @@ const filterByPath = "cookies.filterByPath";
 
 const panelName = "cookies";
 
+const idnService = Xpcom.CCSV("@mozilla.org/network/idn-service;1", "nsIIDNService");
+
 // ********************************************************************************************* //
 // Cookie observer
 
@@ -126,21 +128,27 @@ var CookieObserver = Obj.extend(BaseObserver,
     {
         var pathFilter = Options.get(filterByPath);
 
-        // Get directory path (without the file name)
-        var queryStringPos = activeUri.path.lastIndexOf("?");
-        var activePath = queryStringPos != -1 ?
-            activeUri.path.substr(0, queryStringPos) : activeUri.path;
-
-        // Remove slash at the end of the active path according to step 4 of RFC 6265 section 5.1.4
-        var lastChar = activePath.charAt(activePath.length - 1);
-        if (lastChar == "/")
-            activePath = activePath.substr(0, activePath.length - 1);
+        // Compute the default path of the cookie according to the algorithm
+        // defined in RFC 6265 section 5.1.4
+        //
+        // Steps 2 and 3 (output "/" in case the cookie path is empty, its first
+        // character is "/" or there is no more than one "/")
+        if (cookiePath.length == 0 || cookiePath.charAt(0) != "/" ||
+            cookiePath.lastIndexOf("/") == 0)
+        {
+            cookiePath = "/";
+        }
+        else
+        {
+            // Step 4 (remove slash at the end of the active path according to)
+            cookiePath = cookiePath.substr(0, cookiePath.lastIndexOf("/"));
+        }
 
         // If the path filter is on, only cookies that match given path
         // according to RFC 6265 section 5.1.4 will be displayed.
-        if (pathFilter && (activePath != cookiePath && !(Str.hasPrefix(activePath, cookiePath) &&
-            (cookiePath.charAt(cookiePath.length - 1) == "/" ||
-                activePath.substr(cookiePath.length, 1) == "/"))))
+        var requestPath = activeUri.path;
+        if (pathFilter && (cookiePath != requestPath && !(Str.hasPrefix(requestPath, cookiePath) &&
+            (Str.endsWith(cookiePath, "/") || requestPath.substr(cookiePath.length, 1) == "/"))))
         {
             return false;
         }
@@ -165,6 +173,15 @@ var CookieObserver = Obj.extend(BaseObserver,
     isHostFromContext: function(context, host, path)
     {
         var location;
+        try
+        {
+            host = idnService.convertACEtoUTF8(host);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COOKIES)
+                FBTrace.sysout("Host could not be converted to UTF-8", exc);
+        }
 
         // Invalid in Chromebug.
         try

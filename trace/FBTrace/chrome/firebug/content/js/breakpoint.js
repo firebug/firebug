@@ -108,8 +108,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var menuPopup = Firebug.chrome.$("fbBreakOnNextOptions");
         Dom.eraseNode(menuPopup);
 
-        for (var i=0; i<menuItems.length; ++i)
-            Menu.createMenuItem(menuPopup, menuItems[i]);
+        Menu.createMenuItems(menuPopup, menuItems);
     },
 
     /* see issue 5618

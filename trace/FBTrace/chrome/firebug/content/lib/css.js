@@ -113,6 +113,68 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
     return category;
 };
 
+/**
+ * Parses the CSS properties of a CSSStyleRule
+ * @param {Object} style CSSStyleRule to get the properties of
+ * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @returns {Array} Properties represented by {name, value, priority, longhandProps}
+ */
+Css.parseCSSProps = function(style, element)
+{
+    var props = [];
+
+    if (!element)
+    {
+        for (var i = 0, len = style.length; i < len; ++i)
+        {
+            var prop = style.item(i);
+            props.push({name: prop,
+                value: style.getPropertyValue(prop),
+                priority: style.getPropertyPriority(longhandProp)});
+        }
+    }
+    else
+    {
+        var lineRE = /(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g;
+        var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(?:! (important))?;?$/;
+        var lines = style.cssText.match(lineRE);
+        for (var i = 0, len = lines.length; i < len; ++i)
+        {
+            var match = propRE.exec(lines[i]);
+            if (!match)
+                continue;
+
+            if (match[2])
+            {
+                var prop = {name: match[1], value: match[2], priority: match[3] || ""};
+
+                // Add longhand properties to shorthand property
+                var doc = element.ownerDocument;
+                var dummyElement = doc.createElementNS(element.namespaceURI, element.tagName);
+                var dummyStyle = dummyElement.style;
+                dummyStyle.cssText = "";
+                dummyStyle.setProperty(prop.name, prop.value, prop.priority);
+
+                if (dummyStyle.length > 1)
+                {
+                    prop.longhandProps = [];
+                    for (var j = 0, propLen = dummyStyle.length; j < propLen; ++j)
+                    {
+                        var longhandProp = dummyStyle.item(j);
+                        prop.longhandProps.push({name: longhandProp,
+                            value: dummyStyle.getPropertyValue(longhandProp),
+                            priority: dummyStyle.getPropertyPriority(longhandProp)});
+                    }
+                }
+
+                props.push(prop);
+            }
+        }
+    }
+
+    return props;
+};
+
 Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
@@ -150,16 +212,20 @@ Css.isImageRule = function(nodeType,rule)
 
 Css.copyTextStyles = function(fromNode, toNode, style)
 {
-    var view = fromNode.ownerDocument.defaultView;
+    var view = fromNode ? fromNode.ownerDocument.defaultView : null;
     if (view)
     {
         if (!style)
             style = view.getComputedStyle(fromNode, "");
 
-        toNode.style.fontFamily = style.getPropertyCSSValue("font-family").cssText;
-        toNode.style.fontSize = style.getPropertyCSSValue("font-size").cssText;
-        toNode.style.fontWeight = style.getPropertyCSSValue("font-weight").cssText;
-        toNode.style.fontStyle = style.getPropertyCSSValue("font-style").cssText;
+        toNode.style.fontFamily = style.fontFamily;
+        toNode.style.fontSize = style.fontSize;
+        toNode.style.fontWeight = style.fontWeight;
+        toNode.style.fontStyle = style.fontStyle;
+        toNode.style.fontSizeAdjust = style.fontSizeAdjust;
+        toNode.style.fontStretch = style.fontStretch;
+        toNode.style.fontVariant = style.fontVariant;
+        toNode.style.MozFontFeatureSettings = style.MozFontFeatureSettings;
 
         return style;
     }
@@ -469,7 +535,7 @@ Css.createStyleSheet = function(doc, url)
         var expr = /url\(([\'"]?)(?![\'"]?(?:[a-z]+:|\/))/gi;
         cssText = cssText.replace(expr, "url($1" + absURL);
 
-        style.innerHTML = cssText;
+        style.textContent = cssText;
     }
 
     Firebug.setIgnored(style);
@@ -775,6 +841,16 @@ Css.rgbToHSL = function(value)
 Css.cssInfo = {};
 Css.cssInfo.html =
 {
+    "animation": [],
+    "animation-delay": [],
+    "animation-direction": ["normal", "alternate", "reverse", "alternate-reverse"],
+    "animation-duration": [],
+    "animation-iteration-count": ["infinite"],
+    "animation-name" : ["none"],
+    "animation-play-state": ["running", "paused"],
+    "animation-timing-function": [],
+    "animation-fill-mode": ["none", "forwards", "backwards", "both"],
+
     "background": ["bgRepeat", "bgAttachment", "position", "color", "image", "none", "boxModels"],
     "background-attachment": ["bgAttachment"],
     "background-color": ["color"],
@@ -812,10 +888,10 @@ Css.cssInfo.html =
     "border-top-right-radius": ["length"], // FF 4.0
     "border-bottom-right-radius": ["length"], // FF 4.0
     "border-bottom-left-radius": ["length"], // FF 4.0
-    "-moz-border-image": ["mozBorderImageRepeat", "thickness", "url()", "none"],
-    "border-image": ["mozBorderImageRepeat", "thickness", "url()", "none"], // FF 15.0
+    "-moz-border-image": ["borderImageRepeat", "thickness", "url()", "none"],
+    "border-image": ["borderImageRepeat", "thickness", "url()", "none"], // FF 15.0
     "border-image-outset": ["length"], // FF 15.0
-    "border-image-repeat": ["mozBorderImageRepeat"], // FF 15.0
+    "border-image-repeat": ["borderImageRepeat"], // FF 15.0
     "border-image-slice": ["fill"],
     "border-image-source": ["image", "none"],
     "border-image-width": ["auto", "length"], // FF 15.0
@@ -888,6 +964,8 @@ Css.cssInfo.html =
     "padding-bottom": ["length"],
     "padding-left": ["length"],
 
+    "page-break-after": ["pageBreak"],
+    "page-break-before": ["pageBreak"],
     "pointer-events": ["auto", "none"],
     "position": ["elPosition"],
     "quotes": ["none"],
@@ -901,6 +979,14 @@ Css.cssInfo.html =
     "text-rendering": ["textRendering"],
     "text-shadow": ["color", "length"],
     "text-transform": ["textTransform"],
+    "transition": ["transitionProperty", "timingFunction"],
+    "transition-property": ["transitionProperty"],
+    "transition-duration": [],
+    "transition-timing-function": ["timingFunction"],
+    "transition-delay": [],
+    "transform": ["transformFunction", "none", "length"],
+    "transform-origin": ["position", "length"],
+    "transform-style": ["transformStyle"],
     "unicode-bidi": ["unicodeBidi"],
     "vertical-align": ["verticalAlign", "length"],
     "visibility": ["visibility"],
@@ -909,8 +995,6 @@ Css.cssInfo.html =
     "word-spacing": ["normal", "length"],
     "word-wrap": ["wordWrap"], // FF 3.5
     "z-index": ["auto"],
-    "page-break-after": ["pageBreak"],
-    "page-break-before": ["pageBreak"],
 
     "-moz-appearance": ["mozAppearance"],
     "-moz-backface-visibility": ["mozBackfaceVisibility"], // FF 10.0
@@ -948,26 +1032,9 @@ Css.cssInfo.html =
     "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto", "length"],
     "-moz-image-region": [],
-    "-moz-transform": ["mozTransformFunction", "none", "length"],
-    "-moz-transform-origin": ["position", "length"],
-    "-moz-transform-style": ["mozTransformStyle"], // FF 10.0
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
-    "-moz-transition": ["mozTransitionProperty", "mozTimingFunction"], // FF 4.0
-    "-moz-transition-property": ["mozTransitionProperty"], // FF 4.0
-    "-moz-transition-duration": [], // FF 4.0
-    "-moz-transition-timing-function": ["mozTimingFunction"], // FF 4.0
-    "-moz-transition-delay": [], // FF 4.0
-    "-moz-animation": [], // FF 5.0
-    "-moz-animation-delay": [], // FF 5.0
-    "-moz-animation-direction": ["normal", "alternate"], // FF 5.0
-    "-moz-animation-duration": [], // FF 5.0
-    "-moz-animation-iteration-count": ["infinite"], // FF 5.0
-    "-moz-animation-name" : ["none"], // FF 5.0
-    "-moz-animation-play-state": ["running", "paused"], // FF 5.0
-    "-moz-animation-timing-function": [], // FF 5.0
-    "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF 5.0
     "orient": ["horizontal", "vertical"], // FF 6.0
     "-moz-text-blink": ["none", "blink"], // FF 6.0
     "-moz-text-decoration-color": ["color"], // FF 6.0
@@ -1044,43 +1111,9 @@ Css.cssInfo.svg =
     "writing-mode": ["writingMode"]
 };
 
-Css.inheritedStyleNames =
-{
-    "border-collapse": 1,
-    "border-spacing": 1,
-    "border-style": 1,
-    "caption-side": 1,
-    "color": 1,
-    "cursor": 1,
-    "direction": 1,
-    "empty-cells": 1,
-    "font": 1,
-    "font-family": 1,
-    "font-size-adjust": 1,
-    "font-size": 1,
-    "font-style": 1,
-    "font-variant": 1,
-    "font-weight": 1,
-    "letter-spacing": 1,
-    "line-height": 1,
-    "list-style": 1,
-    "list-style-image": 1,
-    "list-style-position": 1,
-    "list-style-type": 1,
-    "opacity": 1,
-    "quotes": 1,
-    "text-align": 1,
-    "text-decoration": 1,
-    "text-indent": 1,
-    "text-shadow": 1,
-    "text-transform": 1,
-    "white-space": 1,
-    "word-spacing": 1,
-    "word-wrap": 1
-};
-
 Css.multiValuedProperties =
 {
+    "animation": 1,
     "background": 1,
     "background-position": 1,
     "border": 1,
@@ -1092,8 +1125,7 @@ Css.multiValuedProperties =
     "font": 1,
     "font-family": 1,
     "margin": 1,
-    "padding": 1,
-    "-moz-animation": 1
+    "padding": 1
 };
 
 Css.unitlessProperties =
@@ -1144,6 +1176,8 @@ Css.cssKeywords =
         "menupopup",
         "menuradio",
         "menuseparator",
+        "meterbar",
+        "meterchunk",
         "progressbar",
         "progressbar-vertical",
         "progresschunk",
@@ -2019,7 +2053,7 @@ Css.cssKeywords =
         "inset"
     ],
 
-    "mozBorderImageRepeat":
+    "borderImageRepeat":
     [
         "stretch",
         "round",
@@ -2030,20 +2064,24 @@ Css.cssKeywords =
     "image":
     [
         "url()",
-        "-moz-linear-gradient()", // FF 3.6
-        "-moz-radial-gradient()", // FF 3.6
-        "-moz-repeating-linear-gradient()", // FF 3.6
-        "-moz-repeating-radial-gradient()", // FF 3.6
-        "-moz-image-rect()", // FF 4.0
-        "-moz-element()", // FF 4.0
+        "linear-gradient()",
+        "radial-gradient()",
+        "repeating-linear-gradient()",
+        "repeating-radial-gradient()",
+        "-moz-linear-gradient()",
+        "-moz-radial-gradient()",
+        "-moz-repeating-linear-gradient()",
+        "-moz-repeating-radial-gradient()",
+        "-moz-image-rect()",
+        "-moz-element()",
     ],
 
     "length":
     [
-        "-moz-calc()"
+        "calc()"
     ],
 
-    "mozTransformFunction":
+    "transformFunction":
     [
         "matrix()",
         "matrix3d()",
@@ -2209,14 +2247,14 @@ Css.cssKeywords =
     ],
 
     // FF 10.0
-    "mozTransformStyle":
+    "transformStyle":
     [
         "preserve-3d",
         "flat"
     ],
 
     // FF 4.0
-    "mozTransitionProperty":
+    "transitionProperty":
     [
         "none",
         "all",
@@ -2267,6 +2305,8 @@ Css.cssKeywords =
         "text-indent",
         "text-shadow",
         "top",
+        "transform-origin",
+        "transform",
         "vertical-align",
         "visibility",
         "width",
@@ -2279,12 +2319,10 @@ Css.cssKeywords =
         "-moz-column-rule-width",
         "-moz-column-width",
         "-moz-image-region",
-        "-moz-outline-radius",
-        "-moz-transform-origin",
-        "-moz-transform"
+        "-moz-outline-radius"
     ],
 
-    "mozTimingFunction": // FF 4.0
+    "timingFunction": // FF 4.0
     [
         "cubic-bezier()",
         "ease",
@@ -2628,6 +2666,9 @@ Css.pseudoClasses =
     ":-moz-lwtheme-brighttext",
     ":-moz-lwtheme-darktext",
     ":-moz-math-increment-script-level",
+    ":-moz-meter-optimum",
+    ":-moz-meter-sub-optimum",
+    ":-moz-meter-sub-sub-optimum",
     ":-moz-only-whitespace",
     ":-moz-placeholder",
     ":-moz-read-only",

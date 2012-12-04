@@ -15,7 +15,6 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/xpath",
-    "firebug/lib/array",
     "firebug/lib/fonts",
     "firebug/lib/options",
     "firebug/css/cssModule",
@@ -23,7 +22,7 @@ define([
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
-    SourceLink, Dom, Css, Xpath, Arr, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -95,11 +94,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         getSeparator: function(part)
         {
-            if (part.type == "otherProps")
-                return " ";
-
             if (part.lastFont || part.type == "important")
                 return "";
+
+            if (part.type == "otherProps")
+                return " ";
 
             return ",";
         },
@@ -257,11 +256,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 if (!isPseudoElementSheet)
                     this.markOverriddenProps(element, props, usedProps, inheritMode);
 
-                var ruleId = this.getRuleId(rule);
-                rules.unshift({rule: rule, id: ruleId,
-                    // Show universal selectors with pseudo-class
-                    // (http://code.google.com/p/fbug/issues/detail?id=3683)
-                    selector: rule.selectorText.replace(/ :/g, " *:"),
+                rules.unshift({
+                    rule: rule,
+                    selector: rule.selectorText.replace(/ :/g, " *:"), // (issue 3683)
                     sourceLink: sourceLink,
                     props: props, inherited: inheritMode,
                     isSystemSheet: isSystemSheet,
@@ -443,7 +440,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
         var props = this.parseCSSProps(element.style, inheritMode);
-        this.addOldProperties(this.context, Xpath.getElementXPath(element), inheritMode, props);
+        this.addDisabledProperties(this.context, element, inheritMode, props);
 
         this.sortProperties(props);
 
@@ -451,8 +448,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         if (props.length)
         {
-            rules.unshift({rule: element, id: Xpath.getElementXPath(element),
-                    selector: "element.style", props: props, inherited: inheritMode});
+            rules.unshift({rule: element, selector: "element.style",
+                props: props, inherited: inheritMode});
         }
     },
 
@@ -511,8 +508,18 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
+        var result = CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
 
+        // If cleanupSheets returns false there was an exception thrown when accessing
+        // a styleshet (probably since it isn't fully loaded yet). So, delay the panel
+        // update and try it again a bit later (issue 5654).
+        if (!result)
+        {
+            this.context.setTimeout(Obj.bindFixed(this.updateView, this, element), 200);
+            return;
+        }
+
+        // All stylesheets should be ready now, update the view.
         this.updateCascadeView(element);
 
         if (Dom.domUtils)
@@ -531,7 +538,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         if (sothinkInstalled)
         {
             var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);
-            div.innerHTML = Locale.$STR("SothinkWarning");
+            div.textContent = Locale.$STR("SothinkWarning");
             return;
         }
 
@@ -591,6 +598,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     }
                 }
             );
+
             if (Dom.domUtils.hasPseudoClassLock)
             {
                 items.push(
@@ -633,7 +641,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         },
         {
             label: "AddRule",
-            tooltiptext: "style.tip.Add_Rule",
+            tooltiptext: "css.tip.AddRule",
             command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
@@ -658,7 +666,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         var prop = Dom.getAncestorByClass(target, "cssProp");
         if (prop)
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
-  
+
         if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
             propNameNode.textContent.toLowerCase() == "font-family"))
         {
@@ -670,8 +678,26 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
+        return CSSStyleSheetPanel.prototype.showInfoTip.call(
+            this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Extends stylesheet (CSS Panel)
+
+    deleteRuleDeclaration: function(cssSelector)
+    {
+        var repObject = Firebug.getRepObject(cssSelector);
+
+        if (repObject instanceof window.Element)
+            CSSModule.deleteRule(repObject);
+        else
+            CSSStyleSheetPanel.prototype.deleteRuleDeclaration(cssSelector);
+
+        this.refresh();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     hasPseudoClassLock: function(pseudoClass)
     {
@@ -813,7 +839,7 @@ function getFontPropValueParts(element, value, propName)
         "monospace": 1,
     };
 
-    var parts = [];
+    var parts = [], origValue = value;
 
     // (Mirroring CSSModule.parseCSSFontFamilyValue)
     if (propName === "font")
@@ -827,7 +853,11 @@ function getFontPropValueParts(element, value, propName)
         );
         var matches = rePreFont.exec(value);
         if (!matches)
-            return;
+        {
+            // Non-simple font value, like "inherit", "status-bar" or
+            // "calc(12px) Arial" - just return the whole text.
+            return [{type: "otherProps", value: value, lastFont: true}];
+        }
         var preProps = matches[0].slice(0, -1);
         parts.push({type: "otherProps", value: preProps});
         value = value.substr(matches[0].length);
@@ -836,13 +866,23 @@ function getFontPropValueParts(element, value, propName)
     var matches = /^(.*?)( !important)?$/.exec(value);
     var fonts = matches[1].split(",");
 
-    // Clone the element to just get the fonts used in it and not its descendants
-    var clonedElement = element.cloneNode(false);
-    clonedElement.textContent = element.textContent;
-    Firebug.setIgnored(clonedElement);
-    element.parentNode.appendChild(clonedElement);
-    var usedFonts = Fonts.getFonts(clonedElement).slice();
-    clonedElement.parentNode.removeChild(clonedElement);
+    // What we want to know is what the specified "font-family" property means
+    // for the selected element's text, not what the element actually uses (that
+    // depends on font styles of its descendants). Thus, we just check the direct
+    // child text nodes of the element.
+    // Do not create a temporary element for testing to avoid problems like in
+    // issue 5905 and 6048
+    var usedFonts = [];
+    var child = element.firstChild;
+    do
+    {
+        if (!child)
+            break;
+
+        if (child.nodeType == Node.TEXT_NODE)
+            usedFonts = Arr.extendArray(usedFonts, Fonts.getFonts(child));
+    }
+    while (child = child.nextSibling);
 
     var genericFontUsed = false;
     for (var i = 0; i < fonts.length; ++i)

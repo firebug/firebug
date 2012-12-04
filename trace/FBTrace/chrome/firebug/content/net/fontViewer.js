@@ -283,12 +283,12 @@ Firebug.FontViewerModel.Preview = domplate(
                 if (target.sourceDisplayed)
                 {
                     this.insertMetaDataFormatted(fontInfo, fontObject.metadata);
-                    target.innerHTML = Locale.$STR("fontviewer.view source");
+                    target.textContent = Locale.$STR("fontviewer.view source");
                 }
                 else
                 {
                     this.insertMetaDataSource(fontInfo, fontObject.metadata);
-                    target.innerHTML = Locale.$STR("fontviewer.pretty print");
+                    target.textContent = Locale.$STR("fontviewer.pretty print");
                 }
                 target.sourceDisplayed = !target.sourceDisplayed;
                 break;
@@ -300,13 +300,13 @@ Firebug.FontViewerModel.Preview = domplate(
                 {
                     sample.style.display = "block";
                     chars.style.display = "none";
-                    target.innerHTML = Locale.$STR("fontviewer.view characters");
+                    target.textContent = Locale.$STR("fontviewer.view characters");
                 }
                 else
                 {
                     sample.style.display = "none";
                     chars.style.display = "block";
-                    target.innerHTML = Locale.$STR("fontviewer.view sample");
+                    target.textContent = Locale.$STR("fontviewer.view sample");
                 }
                 target.lettersDisplayed = !target.lettersDisplayed;
                 break;
@@ -539,6 +539,7 @@ Firebug.FontViewerModel.Preview = domplate(
         var propValueTemplates = {
             vendor: Firebug.FontViewerModel.Preview.vendorTag,
             credits: Firebug.FontViewerModel.Preview.creditsTag,
+            description: Firebug.FontViewerModel.Preview.translatedInfoTag,
             copyright: Firebug.FontViewerModel.Preview.translatedInfoTag,
             trademark: Firebug.FontViewerModel.Preview.translatedInfoTag,
             license: Firebug.FontViewerModel.Preview.licenseTag

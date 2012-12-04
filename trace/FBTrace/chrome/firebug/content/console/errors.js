@@ -146,6 +146,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     startObserving: function()
     {
+        if (this.isObserving)
+            return;
+
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("Errors.startObserving");
 
@@ -157,6 +160,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     stopObserving: function()
     {
+        if (!this.isObserving)
+            return;
+
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("Errors.stopObserving");
 
@@ -371,8 +377,12 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             correctLineNumbersOnExceptions(object, error);
         }
 
-        if (Firebug.showStackTrace && Firebug.errorStackTrace)
+        if (Firebug.errorStackTrace)
+        {
             error.correctWithStackTrace(Firebug.errorStackTrace);
+            if (!Firebug.showStackTrace)
+                error.trace = null;
+        }
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
         if (!msgId)
@@ -666,6 +676,7 @@ const categoryMap =
     "DOM": "js",
     "Events": "js",
     "CSS": "css",
+    "HTML": "xml",
     "XML": "xml",
     "malformed-xml": "xml"
 };
@@ -704,9 +715,10 @@ function whyNotShown(url, categoryList, isWarning)
         {
             return "showCSSErrors";
         }
-        else if ((category == "XML" || category == "malformed-xml" ) && !Firebug.showXMLErrors)
+        else if ((category == "HTML" || category == "XML" || category == "malformed-xml" ) &&
+            !Firebug.showXMLErrors)
         {
-            return "showXMLErors";
+            return "showXMLErrors";
         }
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                 && !isWarning && !Firebug.showJSErrors)

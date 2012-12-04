@@ -10,7 +10,6 @@
         persist="screenX,screenY,width,height,sizemode"
         onload="importFirebug()" onunload="" onclose="return exportFirebug();">
 
-
     <vbox flex="2" id="fbMainFrame" collapsed="false">
         <browser id="fbMainContainer" flex="2" src="" disablehistory="true" />
     </vbox>
@@ -23,6 +22,8 @@
         <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" key='r' modifiers='accel,shift'/>
     </keyset>
 
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+
     <script type="application/x-javascript">
         doFirefoxCommand = function(id)
         {
@@ -31,8 +32,9 @@
 
         importFirebug = function()
         {
-            var Firebug = opener.Firebug, fbc = Firebug.chrome;
+            FBTrace.sysout("firebug.xul; importFirebug");
 
+            var Firebug = opener.Firebug, fbc = Firebug.chrome;
             if (fbc.inDetachedScope)
             {
                 exportFirebug = null;
@@ -51,8 +53,7 @@
 
             fbc.originalBrowser.contentWindow.onunload = function()
             {
-                fbc.shutdown();
-                fbc.window.top.close();
+                window.close();
             }
 
             fbc.onDetach();
@@ -61,6 +62,8 @@
 
         exportFirebug = function()
         {
+            FBTrace.sysout("firebug.xul; exportFirebug");
+
             exportFirebug = null;
             var Firebug = opener.Firebug, fbc = Firebug.chrome;
 

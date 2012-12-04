@@ -22,7 +22,6 @@ define([
     "firebug/chrome/menu",
     "firebug/trace/debug",
     "firebug/lib/keywords",
-    "firebug/js/fbs",   // bug712289
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
@@ -31,7 +30,7 @@ define([
 ],
 function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
     Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords, FBS) {
+    System, Menu, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -170,7 +169,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // Front side UI mark
         var firebugStatus = Firefox.getElementById("firebugStatus");
         if (firebugStatus)
-            firebugStatus.setAttribute("script", active ? "on" : "off");
+        {
+            // Use enabled state for the status flag. JSD can be active even if
+            // the Script panel itself is deactivated (i.e. because the Console
+            // panel is enabled). See issue 2582 for more details.
+            var enabled = this.isEnabled();
+            firebugStatus.setAttribute("script", (enabled && active) ? "on" : "off");
+        }
 
         if (Firebug.StartButton)
             Firebug.StartButton.resetTooltip();
@@ -182,8 +187,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_ACTIVATION)
         {
-            FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+
-                Firefox.getElementById('firebugStatus').getAttribute("script"));
+            FBTrace.sysout("script.onJavaScriptDebugging " + active + " icon attribute: " +
+                Firefox.getElementById("firebugStatus").getAttribute("script"));
         }
     },
 
@@ -908,6 +913,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
+        this.showToolbarButtons("fbLocationList", active);
 
         Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
             Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
@@ -1377,8 +1383,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     optionMenu: function(label, option)
     {
         var checked = Firebug.Options.get(option);
-        return {label: label, type: "checkbox", checked: checked,
-            command: Obj.bindFixed(Firebug.Options.set, Firebug, option, !checked) };
+        return {
+            label: label, type: "checkbox", checked: checked,
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                Firebug.Options.set(option, checked)
+            }
+        };
     },
 
     getContextMenuItems: function(fn, target)
@@ -1567,27 +1579,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onActiveTool: function(isActive)
     {
         this.onJavaScriptDebugging(isActive, "onActiveTool");
-    },
-
-    setEnabled: function(enable)
-    {
-        // bug712289
-        if (!FBS.isJSDAvailable())
-        {
-            Firebug.SourceBoxPanel.setEnabled.apply(this, [false]);
-            return;
-        }
-
-        Firebug.SourceBoxPanel.setEnabled.apply(this, arguments);
-    },
-
-    isPanelEnabled: function(panelType)
-    {
-        // bug712289
-        if (!FBS.isJSDAvailable())
-            return false;
-
-        return Firebug.SourceBoxPanel.isPanelEnabled.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

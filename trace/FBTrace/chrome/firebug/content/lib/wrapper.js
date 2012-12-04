@@ -19,11 +19,6 @@ Wrapper.getContentView = function(object)
     if (typeof(object) === "undefined" || object == null)
         return false;
 
-    // There is an exception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if ("StorageList" in window && object instanceof window.StorageList)
-        return false;
-
     return (object.wrappedJSObject);
 }
 
@@ -31,11 +26,6 @@ Wrapper.unwrapObject = function(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
     if (typeof(object) === 'undefined' || object == null)
-        return object;
-
-    // There is an exception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if ("StorageList" in window && object instanceof window.StorageList)
         return object;
 
     if (object.wrappedJSObject)
@@ -88,10 +78,6 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
         var prop = listValue.value[i];
         var name = Wrapper.unwrapIValue(prop.name);
 
-        // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=712289.
-        if (typeof name !== "string")
-            break;
-
         if (prop.value.jsType === prop.value.TYPE_NULL) // null is an object (!)
         {
             scopeVars[name] = null;
@@ -115,7 +101,6 @@ Wrapper.ignoreVars =
 
     // We are forced to ignore Java-related variables, because
     // trying to access them causes browser freeze
-    "java": 1,
     "sun": 1,
     "Packages": 1,
     "JavaArray": 1,
@@ -123,6 +108,7 @@ Wrapper.ignoreVars =
     "JavaObject": 1,
     "JavaClass": 1,
     "JavaPackage": 1,
+
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
     "_createFirebugConsole": 1,

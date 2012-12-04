@@ -20,6 +20,7 @@ define([
     "firebug/lib/persist",
     "firebug/chrome/menu",
     "firebug/lib/url",
+    "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
@@ -30,7 +31,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSInfoTip) {
+    Url, CSSModule, CSSInfoTip) {
 
 with (Domplate) {
 
@@ -346,6 +347,30 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             null : ["link", "script", "style"]);
     },
 
+    updateNodeVisibility: function(node)
+    {
+        var wasHidden = node.classList.contains("nodeHidden");
+        if (!Xml.isVisible(node.repObject))
+        {
+            // Hide this node and, through CSS, every descendant.
+            node.classList.add("nodeHidden");
+        }
+        else if (wasHidden)
+        {
+            // The node has changed state from hidden to shown. While in the
+            // hidden state, some descendants may have been explicitly marked
+            // with .nodeHidden (not just through CSS inheritance), so we need
+            // to recheck the visibility of those.
+            node.classList.remove("nodeHidden");
+            var desc = Arr.cloneArray(node.getElementsByClassName("nodeHidden"));
+            for (var i = 0; i < desc.length; ++i)
+            {
+                if (Xml.isVisible(desc[i].repObject))
+                    desc[i].classList.remove("nodeHidden");
+            }
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getElementSourceText: function(node)
@@ -479,10 +504,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!objectNodeBox)
             return;
 
-        if (Xml.isVisible(objectNodeBox.repObject))
-            Css.removeClass(objectNodeBox, "nodeHidden");
-        else
-            Css.setClass(objectNodeBox, "nodeHidden");
+        this.updateNodeVisibility(objectNodeBox);
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
@@ -667,6 +689,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 {
                     this.ioBox.removeChildBox(parentNodeBox, target);
 
+                    // Special case for docType.
+                    if (target instanceof HTMLHtmlElement)
+                        this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
+
                     this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
                 }
                 else
@@ -693,6 +719,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
+
+                    // Special case for docType.
+                    if (target instanceof HTMLHtmlElement)
+                    {
+                        this.ioBox.insertChildBoxBefore(parentNodeBox,
+                            target.parentNode.doctype, target);
+                    }
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
@@ -1161,6 +1194,74 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // CSS Listener
+
+    updateVisibilitiesForSelectorInSheet: function(sheet, selector)
+    {
+        if (!selector)
+            return;
+        var doc = (sheet && sheet.ownerNode && sheet.ownerNode.ownerDocument);
+        if (!doc)
+            return;
+
+        var affected = doc.querySelectorAll(selector);
+        if (!affected.length || !this.ioBox.isInExistingRoot(affected[0]))
+            return;
+
+        for (var i = 0; i < affected.length; ++i)
+        {
+            var node = this.ioBox.findObjectBox(affected[i]);
+            if (node)
+                this.updateNodeVisibility(node);
+        }
+    },
+
+    updateVisibilitiesForRule: function(rule)
+    {
+        this.updateVisibilitiesForSelectorInSheet(rule.parentStyleSheet, rule.selectorText);
+    },
+
+    cssPropAffectsVisibility: function(propName)
+    {
+        // Pretend that "display" is the only property which affects visibility,
+        // which is a half-truth. We could make this more technically correct
+        // by unconditionally returning true, but forcing a synchronous reflow
+        // and computing offsetWidth/Height on up to every element on the page
+        // isn't worth it.
+        return (propName === "display");
+    },
+
+    cssTextAffectsVisibility: function(cssText)
+    {
+        return (cssText.indexOf("display:") !== -1);
+    },
+
+    onAfterCSSDeleteRule: function(styleSheet, cssText, selector)
+    {
+        if (this.cssTextAffectsVisibility(cssText))
+            this.updateVisibilitiesForSelectorInSheet(styleSheet, selector);
+    },
+
+    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
+    {
+        if (this.cssTextAffectsVisibility(cssText))
+            this.updateVisibilitiesForRule(styleSheet.cssRules[ruleIndex]);
+    },
+
+    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue,
+        prevPriority, rule, baseText)
+    {
+        if (this.cssPropAffectsVisibility(propName))
+            this.updateVisibilitiesForRule(rule);
+    },
+
+    onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
+    {
+        if (this.cssPropAffectsVisibility(propName))
+            this.updateVisibilitiesForRule(rule);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "html",
@@ -1181,6 +1282,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.onKeyPress = Obj.bind(this.onKeyPress, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.CSSModule.addListener(this);
     },
 
     destroy: function(state)
@@ -1199,6 +1301,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
 
+        Firebug.CSSModule.removeListener(this);
         this.unregisterMutationListeners();
     },
 
@@ -2262,6 +2365,25 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var emptyAttr = {name: "", value: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
+    },
+
+    getInitialValue: function(target, value)
+    {
+        if (value == "")
+            return value;
+
+        var element = Firebug.getRepObject(target);
+        if (element && element instanceof window.Element)
+        {
+            // If object that was clicked to edit was
+            // attribute value, not attribute name.
+            if (Css.hasClass(target, "nodeValue"))
+            {
+                var attributeName = Dom.getPreviousByClass(target, "nodeName").textContent;
+                return element.getAttribute(attributeName);
+            }
+        }
+        return value;
     }
 });
 

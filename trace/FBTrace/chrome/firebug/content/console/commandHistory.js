@@ -24,7 +24,7 @@ Firebug.CommandHistory = function()
     const commandHistoryMax = 1000;
 
     var commandsPopup = Firebug.chrome.$("fbCommandHistory");
-    var commands = [];
+    var commands = this.commands = [];
     var commandPointer = 0;
     var commandInsertPointer = -1;
 
@@ -78,25 +78,21 @@ Firebug.CommandHistory = function()
         var command;
         var commandLine = Firebug.CommandLine.getCommandLine(context);
 
-        if (dir < 0)
-        {
-            if (commandPointer > 0)
-                commandPointer--;
-        }
-        else
-        {
-            if (commandPointer < commands.length)
-                commandPointer++;
-        }
+        commandPointer += dir;
+        if (commandPointer < 0)
+            commandPointer = 0;
+        else if (commandPointer > commands.length)
+            commandPointer = commands.length;
 
         if (commandPointer < commands.length)
         {
             command = commands[commandPointer];
             if (commandsPopup.state == "open")
             {
-                var commandElements = commandsPopup.ownerDocument.getElementsByClassName(
-                    "commandHistoryItem");
-                this.selectCommand(commandElements[commandPointer]);
+                var commandElement = commandsPopup.children[commandPointer];
+                this.selectCommand(commandElement);
+
+                Dom.scrollMenupopup(commandsPopup, commandElement);
             }
         }
         else
@@ -119,32 +115,34 @@ Firebug.CommandHistory = function()
     this.show = function(element)
     {
         if (this.isShown())
-            return this.hide;
+            return this.hide();
 
         Dom.eraseNode(commandsPopup);
 
         if(commands.length == 0)
             return;
 
-        var vbox = commandsPopup.ownerDocument.createElement("vbox");
+        var doc = commandsPopup.ownerDocument;
 
         for (var i = 0; i < commands.length; i++)
         {
-            var hbox = commandsPopup.ownerDocument.
-                createElementNS("http://www.w3.org/1999/xhtml", "div");
+            var hbox = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
             hbox.classList.add("commandHistoryItem");
             var shortExpr = Str.cropString(Str.stripNewLines(commands[i]), 50);
             hbox.innerHTML = Str.escapeForTextNode(shortExpr);
             hbox.value = i;
-            vbox.appendChild(hbox);
+            commandsPopup.appendChild(hbox);
 
             if (i === commandPointer)
                 this.selectCommand(hbox);
         }
 
-        commandsPopup.appendChild(vbox);
         commandsPopup.openPopup(element, "before_start", 0, 0, false, false);
+
+        // make sure last element is visible
+        setTimeout(Dom.scrollMenupopup, 10, commandsPopup, hbox);
+        this.isOpen = true;
 
         return true;
     };
@@ -152,7 +150,7 @@ Firebug.CommandHistory = function()
     this.hide = function()
     {
         commandsPopup.hidePopup();
-
+        this.isOpen = false;
         return true;
     };
 
@@ -186,9 +184,13 @@ Firebug.CommandHistory = function()
 
     this.onMouseUp = function(event)
     {
+        var i = event.target.value;
+        if (i == undefined)
+            return;
+
         var commandLine = Firebug.CommandLine.getCommandLine(Firebug.currentContext);
 
-        commandLine.value = commands[event.target.value];
+        commandLine.value = commands[i];
         commandPointer = event.target.value;
 
         Firebug.CommandLine.commandHistory.hide();
@@ -198,6 +200,7 @@ Firebug.CommandHistory = function()
     {
         Firebug.chrome.setGlobalAttribute("fbCommandLineHistoryButton", "checked", "false");
         Firebug.chrome.setGlobalAttribute("fbCommandEditorHistoryButton", "checked", "false");
+        this.isOpen = false;
     };
 };
 

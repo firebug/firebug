@@ -97,7 +97,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                                 _repObject: "$selector"},
                             TD({"class": "selectorName", role: "presentation"},
                                 "$selector.selector.text"),
-                            TD({role: "presentation"},
+                            TD({"class": "propValue", role: "presentation"},
                                 SPAN({"class": "stylePropValue"}, "$selector.value|formatValue")),
                             TD({"class": "styleSourceLink", role: "presentation"},
                                 TAG(FirebugReps.SourceLink.tag, {object: "$selector|getSourceLink"})
@@ -141,6 +141,10 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                 value = Css.rgbToHex(value);
             else if (Options.get("colorDisplay") == "hsl")
                 value = Css.rgbToHSL(value);
+
+            var limit = Options.get("stringCropLength");
+            if (limit > 0)
+                value = Str.cropString(value, limit);
 
             // Add a zero-width space after a comma to allow line breaking
             return value.replace(/,/g, ",\u200B");
@@ -670,6 +674,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
                         return CSSInfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
+                    break;
 
                 case "fontFamily":
                     return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
@@ -678,6 +683,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             delete this.infoTipType;
             delete this.infoTipValue;
             delete this.infoTipObject;
+
+            return false;
         }
     },
 
@@ -840,8 +847,8 @@ const styleGroups =
         "overflow-x",  // http://www.w3.org/TR/2002/WD-css3-box-20021024/#overflow
         "overflow-y",
         "overflow-clip",
-        "-moz-transform",
-        "-moz-transform-origin",
+        "transform",
+        "transform-origin",
         "white-space",
         "clip",
         "float",

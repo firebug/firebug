@@ -252,7 +252,7 @@ h1.groupHeader {
     margin: 0 0 4px 0;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
-    background: #FFFFFF -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
+    background: #FFFFFF linear-gradient(to top, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
     font-size: inherit;
 }
 

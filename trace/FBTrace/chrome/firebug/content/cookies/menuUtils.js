@@ -13,13 +13,17 @@ var MenuUtils =
 {
     optionMenu: function(context, label, tooltiptext, domain, option)
     {
-        var value = Options.getPref(domain, option);
+        var value = Options.getPref(domain, option), self = this;
         return {
             label: label,
             tooltiptext: tooltiptext,
             type: "checkbox",
             checked: value,
-            command: Obj.bindFixed(this.setPref, this, domain, option, !value)
+            command: function()
+            {
+                var checked = this.hasAttribute("checked");
+                self.setPref(domain, option, checked);
+            }
         };
     },
 

@@ -7,7 +7,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-var EXPORTED_SYMBOLS = [];
+var EXPORTED_SYMBOLS = ["FirebugGCLICommands"];
 
 // ********************************************************************************************* //
 // GCLI
@@ -24,12 +24,28 @@ catch (err)
         FBTrace.sysout("GCLI not available");
 }
 
+// Load the Locale module and make sure Firebug string bundle is registered
+// (GCLI commands needs to be localized)
+var Locale = Cu.import("resource://firebug/locale.js").Locale;
+Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
+
 if (scope.gcli) {
 
 // ********************************************************************************************* //
-// Services
+// FirebugGCLICommands
 
-var Locale = Cu.import("resource://firebug/locale.js").Locale;
+var FirebugGCLICommands =
+{
+    startup: function()
+    {
+        registerCommands();
+    },
+
+    shutdown: function()
+    {
+        unregisterCommands();
+    }
+}
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -90,7 +106,7 @@ var FirebugController =
         if (!Firebug)
             return;
 
-        Firebug.GlobalUI.startFirebug(function(Firebug) {
+        Firebug.browserOverlay.startFirebug(function(Firebug) {
             callback(Firebug);
         });
     },
@@ -99,40 +115,59 @@ var FirebugController =
 // ********************************************************************************************* //
 // Registration
 
-scope.gcli.addCommand({
-    name: "firebug",
-    description: "Web Development Evolved"
-});
+var commands = [];
 
-scope.gcli.addCommand({
-    name: "firebug open",
-    description: Locale.$STR("firebug.menu.tip.Open_Firebug"),
-    exec: FirebugController.openFirebug.bind(FirebugController)
-});
+function addCommand(command)
+{
+    scope.gcli.addCommand(command);
+    commands.push(command);
+}
 
-scope.gcli.addCommand({
-    name: "firebug hide",
-    description: Locale.$STR("firebug.menu.tip.Minimize_Firebug"),
-    exec: FirebugController.hideFirebug.bind(FirebugController)
-});
+function registerCommands()
+{
+    addCommand({
+        name: "firebug",
+        description: "Web Development Evolved"
+    });
 
-scope.gcli.addCommand({
-    name: "firebug close",
-    description: Locale.$STR("firebug.shortcut.tip.closeFirebug"),
-    exec: FirebugController.closeFirebug.bind(FirebugController)
-});
+    addCommand({
+        name: "firebug open",
+        description: Locale.$STR("firebug.menu.tip.Open_Firebug"),
+        exec: FirebugController.openFirebug.bind(FirebugController)
+    });
 
-scope.gcli.addCommand({
-    name: "firebug detach",
-    description: Locale.$STR("firebug.DetachFirebug"),
-    exec: FirebugController.detachFirebug.bind(FirebugController)
-});
+    addCommand({
+        name: "firebug hide",
+        description: Locale.$STR("firebug.menu.tip.Minimize_Firebug"),
+        exec: FirebugController.hideFirebug.bind(FirebugController)
+    });
 
-scope.gcli.addCommand({
-    name: "firebug attach",
-    description: Locale.$STR("firebug.AttachFirebug"),
-    exec: FirebugController.attachFirebug.bind(FirebugController)
-});
+    addCommand({
+        name: "firebug close",
+        description: Locale.$STR("firebug.shortcut.tip.closeFirebug"),
+        exec: FirebugController.closeFirebug.bind(FirebugController)
+    });
+
+    addCommand({
+        name: "firebug detach",
+        description: Locale.$STR("firebug.DetachFirebug"),
+        exec: FirebugController.detachFirebug.bind(FirebugController)
+    });
+
+    addCommand({
+        name: "firebug attach",
+        description: Locale.$STR("firebug.AttachFirebug"),
+        exec: FirebugController.attachFirebug.bind(FirebugController)
+    });
+}
+
+function unregisterCommands()
+{
+    for (var i=0; i<commands.length; i++)
+        scope.gcli.removeCommand(commands[i]);
+
+    commands = [];
+}
 
 // ********************************************************************************************* //
 }

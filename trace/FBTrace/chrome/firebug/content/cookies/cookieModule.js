@@ -64,7 +64,7 @@ const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPrompt
 // Preferences
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefService = PrefService.getService(Ci.nsIPrefService);
-const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefs = PrefService.getService(Ci.nsIPrefBranch);
 
 // Cookie panel ID.
 const panelName = "cookies";
@@ -676,45 +676,30 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
-    onRemoveAllShared: function(context, sessionOnly)
+    /**
+     * Removes cookies defined for a website
+     * @param {Object} context context, in which the cookies are defined
+     * @param {Object} [filter] filter to define, which cookies should be removed
+     *   (format: {session: true/false, host: string})
+     */
+    removeCookies: function(context, filter)
     {
         var panel = context.getPanel(panelName, true);
         if (!panel)
             return;
 
-        var cookies = [];
-
-        // Remove all cookies in the list. Notice that the list can be further
-        // filtered by the search-box (the right side of Firebug's tab bar)
-        // So, make sure in case of searching-on, only visible (matched)
-        // cookies are removed.
-        var searching = Css.hasClass(panel.panelNode, "searching");
-        var row = Dom.getElementByClass(panel.panelNode, "cookieRow");
-        while (row)
+        for (var host in context.cookies.activeHosts)
         {
-            if (!searching || Css.hasClass(row, "matched"))
+            var cookieEnumerator = cookieManager.getCookiesFromHost(host);
+
+            while (cookieEnumerator.hasMoreElements())
             {
-                var cookie = row.repObject;
+                var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
 
-                // Some entries within the Cookies panel don't represent a cookie.
-                if (cookie)
-                {
-                    // If sessionOnly flag is true, only session cookies will be removed.
-                    if (sessionOnly)
-                    {
-                        if (!cookie.cookie.expires)
-                            cookies.push(cookie);
-                    }
-                    else
-                        cookies.push(cookie);
-                }
+                if (!filter || ((!filter.session || cookie.isSession) && (!filter.host || filter.host == cookie.host)))
+                    cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
             }
-
-            row = row.nextSibling;
         }
-
-        for (var i=0; i<cookies.length; i++)
-            CookieReps.CookieRow.onRemove(cookies[i]);
     },
 
     onRemoveAll: function(context)
@@ -723,11 +708,11 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         {
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeall"), flags, "", "", "",
-                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
+                Locale.$STR("Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
@@ -737,9 +722,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeConfirmation, !check.value);
         }
 
-        Firebug.CookieModule.onRemoveAllShared(context, false);
+        Firebug.CookieModule.removeCookies(context);
     },
-
+    
     onRemoveAllSession: function(context)
     {
         if (Options.get(removeSessionConfirmation))
@@ -750,7 +735,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeallsession"), flags, "", "", "",
-                Locale.$STR("cookies.msg.Do_not_show_this_message_again"), check) == 0)
+                Locale.$STR("Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
@@ -760,7 +745,30 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value)
         }
 
-        Firebug.CookieModule.onRemoveAllShared(context, true);
+        Firebug.CookieModule.removeCookies(context, {session: true});
+    },
+
+    onRemoveAllFromHost: function(context, host)
+    {
+        if (Options.get(removeConfirmation))
+        {
+            var check = {value: false};
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
+                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+
+            if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
+                Locale.$STRF("cookies.confirm.Remove_All_From_Host", [host]), flags, "", "", "",
+                Locale.$STR("Do_not_show_this_message_again"), check) == 0)
+            {
+                return;
+            }
+
+            // Update 'Remove Cookies' confirmation option according to the value
+            // of the dialog's "do not show again" checkbox.
+            Options.set(removeConfirmation, !check.value);
+        }
+
+        Firebug.CookieModule.removeCookies(context, {host: host});
     },
 
     onCreateCookieShowTooltip: function(tooltip, context)

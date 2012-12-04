@@ -101,9 +101,17 @@ Win.getRootWindow = function(win)
 {
     for (; win; win = win.parent)
     {
-        if (!win.parent || win == win.parent || !(win.parent instanceof win.Window) )
+        if (!win.parent || win == win.parent)
+            return win;
+
+        // When checking the 'win.parent' type we need to use the target
+        // type from the same scope. i.e. from win.parent
+        // Iframes from different domains can use different Window type than
+        // the top level window.
+        if (!(win.parent instanceof win.parent.Window))
             return win;
     }
+
     return null;
 };
 

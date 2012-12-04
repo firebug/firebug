@@ -32,7 +32,7 @@
     border-bottom: 1px solid #9C9C9C;
     padding: 0 !important;
     font-weight: bold;
-    background: #C4C4C4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background: #C4C4C4 linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
     color: #000000;
     white-space: nowrap;
 }
@@ -311,7 +311,7 @@
     left: 0;
     top: 1px;
     bottom: 1px;
-    background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .netBlockingBar {
@@ -397,7 +397,7 @@
  */
 .fromCache .netReceivingBar,
 .fromCache.netReceivingBar {
-    background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
 }
 
 .netSummaryRow .netTimeLabel,
@@ -414,7 +414,7 @@
 
 .netTable.showBFCacheResponses .netRow.fromBFCache {
     display: table-row;
-    background-image: -moz-repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 5px, transparent 5px, transparent 10px);
+    background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 5px, transparent 5px, transparent 10px);
     background-repeat: repeat;
 }
 
@@ -490,10 +490,6 @@
     padding-right: 10px;
     font-family: Lucida Grande, Tahoma, sans-serif;
     font-size: 11px;
-}
-
-.sizeInfoSizeCol {
-    font-weight: bold;
 }
 
 .sizeInfoDetailCol {
@@ -595,7 +591,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: #FFFFFF -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
+    background: #FFFFFF linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .netInfoBody {

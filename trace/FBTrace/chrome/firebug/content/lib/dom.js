@@ -145,6 +145,12 @@ Dom.getBody = function(doc)
 // ********************************************************************************************* //
 // DOM Modification
 
+Dom.insertAfter = function(newNode, referenceNode)
+{
+    if (referenceNode.parentNode)
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
 Dom.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
@@ -154,7 +160,7 @@ Dom.addScript = function(doc, id, src)
     if (!FBTrace.DBG_CONSOLE)
         Firebug.setIgnored(element);
 
-    element.innerHTML = src;
+    element.textContent = src;
 
     if (doc.documentElement)
     {
@@ -175,11 +181,8 @@ Dom.setOuterHTML = function(element, html)
 {
     try
     {
-        var doc = element.ownerDocument;
-        var range = doc.createRange();
-        range.selectNode(element || doc.documentElement);
+        var fragment = DOM.markupToDocFragment(html, element);
 
-        var fragment = range.createContextualFragment(html);
         var first = fragment.firstChild;
         var last = fragment.lastChild;
         element.parentNode.replaceChild(fragment, element);
@@ -189,6 +192,15 @@ Dom.setOuterHTML = function(element, html)
     {
         return [element, element];
     }
+};
+
+Dom.markupToDocFragment = function(markup, parent)
+{
+    var doc = parent.ownerDocument;
+    var range = doc.createRange();
+    range.selectNode(parent || doc.documentElement);
+
+    return range.createContextualFragment(markup);
 };
 
 Dom.appendInnerHTML = function(element, html, referenceElement)
@@ -244,7 +256,7 @@ Dom.hide = function(elt, hidden)
 
 Dom.clearNode = function(node)
 {
-    node.innerHTML = "";
+    node.textContent = "";
 };
 
 Dom.eraseNode = function(node)
@@ -402,7 +414,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Graphics
 
 Dom.getClientOffset = function(elt)
@@ -424,7 +436,10 @@ Dom.getClientOffset = function(elt)
                 addOffset(p, coords, view);
         }
         else if (elt.ownerDocument.defaultView.frameElement)
-            addOffset(elt.ownerDocument.defaultView.frameElement, coords, elt.ownerDocument.defaultView);
+        {
+            addOffset(elt.ownerDocument.defaultView.frameElement, coords,
+                elt.ownerDocument.defaultView);
+        }
     }
 
     var coords = {x: 0, y: 0};
@@ -445,8 +460,8 @@ Dom.getClientOffset = function(elt)
  */
 Dom.getLTRBWH = function(elt)
 {
-    var bcrect,
-        dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
+    var bcrect;
+    var dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
 
     if (elt)
     {
@@ -487,7 +502,8 @@ Dom.getOffsetSize = function(elt)
  */
 Dom.getOverflowParent = function(element)
 {
-    for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
+    for (var scrollParent = element.parentNode; scrollParent;
+        scrollParent = scrollParent.offsetParent)
     {
         if (scrollParent.scrollHeight > scrollParent.offsetHeight)
             return scrollParent;
@@ -504,9 +520,11 @@ Dom.isScrolledToBottom = function(element)
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
 
     if (FBTrace.DBG_CONSOLE)
+    {
         FBTrace.sysout("Dom.isScrolledToBottom offsetHeight: " + element.offsetHeight +
             ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
             ", onBottom: " + onBottom);
+    }
 
     return onBottom;
 };
@@ -522,9 +540,14 @@ Dom.scrollToBottom = function(element)
 
     if (FBTrace.DBG_CONSOLE)
     {
-        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+        FBTrace.sysout("scrollToBottom reset scrollTop " + element.scrollTop + " = " +
+            element.scrollHeight);
+
         if (element.scrollHeight == element.offsetHeight)
-            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+        {
+            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element " +
+                element, element);
+        }
     }
 
     return (element.scrollTop == element.scrollHeight);
@@ -565,8 +588,8 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     var offset = Dom.getClientOffset(element);
 
     var topSpace = offset.y - scrollBox.scrollTop;
-    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
-        - (offset.y + element.offsetHeight);
+    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight) -
+        (offset.y + element.offsetHeight);
 
     if (topSpace < 0 || bottomSpace < 0)
     {
@@ -574,7 +597,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
         var centerY = offset.y - split;
         scrollBox.scrollTop = centerY;
         topSpace = split;
-        bottomSpace = split -  element.offsetHeight;
+        bottomSpace = split - element.offsetHeight;
     }
 
     return {
@@ -692,8 +715,39 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
  */
 Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
-    Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft", notY ? "none" : "centerOrTop");
+    Dom.scrollTo(element, scrollBox, notX ? "none" : "centerOrLeft",
+        notY ? "none" : "centerOrTop");
 };
+
+Dom.scrollMenupopup = function(popup, item)
+{
+    var doc = popup.ownerDocument;
+    var box = doc.getAnonymousNodes(popup)[0];
+    var scrollBox = doc.getAnonymousNodes(box)[1];
+
+    if (item == undefined)
+    {
+        scrollBox.scrollTop = scrollBox.scrollHeight + 100;
+    }
+    else if (item == 0)
+    {
+        scrollBox.scrollTop = 0;
+    }
+    else
+    {
+        var popupRect = popup.getBoundingClientRect();
+        var itemRect = item.getBoundingClientRect();
+
+        if (itemRect.top < popupRect.top + itemRect.height)
+        {
+            scrollBox.scrollTop += itemRect.top - popupRect.top - itemRect.height;
+        }
+        else if (itemRect.bottom + itemRect.height > popupRect.bottom)
+        {
+            scrollBox.scrollTop -= popupRect.bottom - itemRect.bottom - itemRect.height;
+        }
+    }
+}
 
 // ********************************************************************************************* //
 // DOM Members
@@ -758,6 +812,8 @@ Dom.getDOMMembers = function(object)
         { return domMemberCache.Node; }
     else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
+    else if (object instanceof Object)
+        { return domMemberCache.Object; }
 
     return null;
 };
@@ -777,12 +833,27 @@ Dom.isDOMConstant = function(object, name)
     if (name == "__proto__")
         return false;
 
-    if (!(object instanceof Window ||
-        object instanceof Node ||
-        object instanceof Location ||
-        object instanceof Event ||
-        object instanceof Dom.EventCopy))
+    // object isn't recognized as such when using ===,
+    // so use this as workaround
+    var str = Object.prototype.toString.call(object);
+    var isDOMProperty = ["[object Window]", "[object Node]", "[object Location]",
+        "[object Event]"].indexOf(str) !== -1;
+
+    if (!(object === window.Window ||
+        object === window.Object ||
+        object === window.Node ||
+        object === window.Location ||
+        object === window.Event ||
+        object === Dom.EventCopy ||
+        object instanceof window.Window ||
+        object instanceof window.Node ||
+        object instanceof window.Location ||
+        object instanceof window.Event ||
+        object instanceof Dom.EventCopy ||
+        isDOMProperty))
+    {
         return false;
+    }
 
     return Dom.domConstantMap.hasOwnProperty(name);
 }
@@ -834,7 +905,12 @@ domMemberMap.Window =
     "mozAnimationStartTime", //FF4.0
     "mozPaintCount", //FF4.0
     "mozRequestAnimationFrame", //FF4.0
-    "mozIndexedDB", //FF4.0
+    "mozCancelAnimationFrame",
+    "mozCancelRequestAnimationFrame",
+
+    "mozCancelAnimationFrame",
+    "mozCancelRequestAnimationFrame",
+    "indexedDB",
 
     "status",
     "defaultStatus",
@@ -860,7 +936,6 @@ domMemberMap.Window =
     "scrollbars",
     "fullScreen",
     "netscape",
-    "java",
     "console",
     "Components",
     "controllers",
@@ -873,7 +948,6 @@ domMemberMap.Window =
     "length",
 
     "sessionStorage",
-    "globalStorage",
 
     "setTimeout",
     "setInterval",
@@ -933,6 +1007,195 @@ domMemberMap.Window =
     "matchMedia", // https://developer.mozilla.org/en/DOM/window.matchMedia
 
     "getInterface",
+
+    "BarProp",
+    "Controllers",
+    "Crypto",
+    "DOMException",
+    "DOMStringList",
+    "EventTarget",
+    "History",
+    "MimeTypeArray",
+    "MozURLProperty",
+    "Navigator",
+    "NodeList",
+    "OfflineResourceList",
+    "Screen",
+    "Storage",
+    "XULControllers",
+    "Document",
+    "Element",
+    "Attr",
+    "CharacterData",
+    "DOMTokenList",
+    "Text",
+
+    "HTMLAnchorElement",
+    "HTMLAudioElement",
+    "HTMLBaseElement",
+    "HTMLButtonElement",
+    "HTMLCollection",
+    "HTMLCanvasElement",
+    "HTMLDataListElement",
+    "HTMLDListElement",
+    "HTMLDocument",
+    "HTMLElement",
+    "HTMLEmbedElement",
+    "HTMLHtmlElement",
+    "HTMLBRElement",
+    "HTMLBodyElement",
+    "HTMLCollection",
+    "HTMLDivElement",
+    "HTMLDocument",
+    "HTMLElement",
+    "HTMLFormElement",
+    "HTMLHRElement",
+    "HTMLHeadElement",
+    "HTMLHeadingElement",
+    "HTMLHtmlElement",
+    "HTMLIFrameElement",
+    "HTMLImageElement",
+    "HTMLInputElement",
+    "HTMLLabelElement",
+    "HTMLLegendElement",
+    "HTMLLinkElement",
+    "HTMLMapElement",
+    "HTMLMediaElement",
+    "HTMLMenuElement",
+    "HTMLMetaElement",
+    "HTMLMeterElement",
+    "HTMLModElement",
+    "HTMLObjectElement",
+    "HTMLOListElement",
+    "HTMLOptionElement",
+    "HTMLOptionsCollection",
+    "HTMLOutputElement",
+    "HTMLPreElement",
+    "HTMLProgressElement",
+    "HTMLQuoteElement",
+    "HTMLScriptElement",
+    "HTMLSelectElement",
+    "HTMLSourceElement",
+    "HTMLSpanElement",
+    "HTMLStyleElement",
+    "HTMLTableCellElement",
+    "HTMLTableElement",
+    "HTMLTableRowElement",
+    "HTMLTableSectionElement",
+    "HTMLTextAreaElement",
+    "HTMLTitleElement",
+    "HTMLUListElement",
+    "HTMLUnknownElement",
+    "HTMLVideoElement",
+
+    "Infinity",
+    "JSON",
+    "Location",
+    "Math",
+    "NaN",
+    "Node",
+    "StopIteration",
+    "Window",
+    "XULElement",
+    "undefined",
+    "CSS2Properties",
+    "CSSStyleDeclaration",
+    "Error",
+    "EvalError",
+    "InternalError",
+    "Namespace",
+    "QName",
+    "RangeError",
+    "ReferenceError",
+    "SyntaxError",
+    "TypeError",
+    "URIError",
+    "Array",
+    "ArrayBuffer",
+    "Boolean",
+    "DataView",
+    "Date",
+    "Float32Array",
+    "Float64Array",
+    "Function",
+    "Int16Array",
+    "Int32Array",
+    "Int8Array",
+    "Iterator",
+    "Map",
+    "Number",
+    "Object",
+    "ParallelArray",
+    "QueryInterface",
+    "RegExp",
+    "Set",
+    "String",
+    "Uint16Array",
+    "Uint32Array",
+    "Uint8Array",
+    "Uint8ClampedArray",
+    "WeakMap",
+    "XML",
+    "XMLList",
+    "decodeURI",
+    "decodeURIComponent",
+    "dumpProfile",
+    "encodeURI",
+    "encodeURIComponent",
+    "escape",
+    "isFinite",
+    "isNaN",
+    "isXMLName",
+    "parseFloat",
+    "parseInt",
+    "pauseProfilers",
+    "resumeProfilers",
+    "startProfiling",
+    "stopProfiling",
+    "unescape",
+    "uneval",
+    "Performance",
+    "PerformanceNavigation",
+    "PerformanceTiming"
+];
+
+domMemberMap.Object =
+[
+    "arguments",
+    "caller",
+    "length",
+    "name",
+    "__defineGetter__",
+    "__defineSetter__",
+    "__lookupGetter__",
+    "__lookupSetter__",
+    "apply",
+    "bind",
+    "call",
+    "constructor",
+    "create",
+    "defineProperties",
+    "defineProperty",
+    "freeze",
+    "getOwnPropertyDescriptor",
+    "getOwnPropertyNames",
+    "getPrototypeOf",
+    "hasOwnProperty",
+    "isExtensible",
+    "isFrozen",
+    "isGenerator",
+    "isPrototypeOf",
+    "isSealed",
+    "keys",
+    "preventExtensions",
+    "propertyIsEnumerable",
+    "seal",
+    "toLocaleString",
+    "toSource",
+    "toString",
+    "unwatch",
+    "valueOf",
+    "watch"
 ];
 
 domMemberMap.Location =
@@ -948,7 +1211,9 @@ domMemberMap.Location =
 
     "assign",
     "reload",
-    "replace"
+    "replace",
+
+    "QueryInterface"
 ];
 
 domMemberMap.Node =
@@ -999,7 +1264,9 @@ domMemberMap.Node =
     "isSupported",
     "getFeature",
     "getUserData",
-    "setUserData"
+    "setUserData",
+
+    "QueryInterface"
 ];
 
 domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
@@ -1877,6 +2144,15 @@ Dom.domInlineEventHandlersMap =
     "onvolumechange": 1,
     "onwaiting": 1,
     "onmozfullscreenchange": 1,
+    "ondevicelight": 1,
+    "ondeviceproximity": 1,
+    "onmouseenter": 1,
+    "onmouseleave": 1,
+    "onmozfullscreenerror": 1,
+    "onmozpointerlockchange": 1,
+    "onmozpointerlockerror": 1,
+    "onuserproximity": 1,
+    "onwheel": 1
 }
 
 // ********************************************************************************************* //
