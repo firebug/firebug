@@ -575,10 +575,10 @@ function synthesizeDrop(srcElement, destElement, dragData, dropEffect, aWindow)
   return dataTransfer.dropEffect;
 }
 
-function disableNonTestMouseEvents(aDisable)
+function disableNonTestMouseEvents(aWindow, aDisable)
 {
   var utils =
-    window.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
+    aWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).
            getInterface(Components.interfaces.nsIDOMWindowUtils);
   if (utils)
     utils.disableNonTestMouseEvents(aDisable);

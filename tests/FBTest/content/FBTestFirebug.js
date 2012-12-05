@@ -297,6 +297,14 @@ this.mouseOver = function(node, offsetX, offsetY)
     this.synthesizeMouse(node, offsetX, offsetY, eventDetails, win);
 };
 
+this.mouseMove = function(node, offsetX, offsetY)
+{
+    var win = node.ownerDocument.defaultView;
+
+    var eventDetails = {type: "mousemove"};
+    this.synthesizeMouse(node, offsetX, offsetY, eventDetails, win);
+};
+
 this.sendMouseEvent = function(event, target, win)
 {
     if (!target)
@@ -2773,6 +2781,43 @@ this.getDOMPropertyRow = function(chrome, propName)
 
     return getDOMMemberRow(domPanel, propName);
 };
+
+// ********************************************************************************************* //
+// Tooltips
+
+this.showTooltip = function(target, callback)
+{
+    function onTooltipShowing(event)
+    {
+        TooltipController.removeListener(onTooltipShowing);
+
+        callback(event.target);
+    }
+
+    // Tooltip controller ensures clean up (listners removal) in cases
+    // when the tooltip is never shown and so, the listener not removed. 
+    TooltipController.addListener(onTooltipShowing);
+
+    var win = target.ownerDocument.defaultView;
+
+    try
+    {
+        disableNonTestMouseEvents(win, true);
+
+        this.synthesizeMouse(target, 2, 2, {type: "mouseover"});
+        this.synthesizeMouse(target, 4, 4, {type: "mousemove"});
+        this.synthesizeMouse(target, 6, 6, {type: "mousemove"});
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("EXCEPTION " + e, e);
+    }
+    finally
+    {
+        disableNonTestMouseEvents(win, false);
+    }
+}
 
 // ********************************************************************************************* //
 // Module Loader
