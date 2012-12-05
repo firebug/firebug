@@ -23,24 +23,19 @@ function runTest()
                 if (FBTest.ok(XMLTab, "There must be an XML tab."))
                 {
                     FBTest.click(XMLTab);
-                    var nodeTag = requestInfo.getElementsByClassName("netInfoXMLText")[0].
-                        getElementsByClassName("nodeTag")[2];
+
+                    var root = requestInfo.getElementsByClassName("netInfoXMLText")[0];
+                    var nodeTag = root.getElementsByClassName("nodeTag")[1];
 
                     if (FBTest.ok(nodeTag && nodeTag.textContent ==
                         "node", "There must be a <node> tag."))
                     {
-                        FBTest.mouseOver(nodeTag);
-
-                        // A tooltip is displayed asynchronously after a delay
-                        // defiend by the underlying OS. 1000ms should be enough
-                        // in all OSes. 
-                        setTimeout(function()
+                        FBTest.showTooltip(nodeTag, function(tooltip)
                         {
-                            var tooltip = FW.FBL.$("fbTooltip");
                             FBTest.compare("/root/node", tooltip.label,
                                 "The tooltip of the <node> tag must be correct.");
                             FBTest.testDone("issue5742.DONE");
-                        }, 1000);
+                        });
                     }
                 }
             });
