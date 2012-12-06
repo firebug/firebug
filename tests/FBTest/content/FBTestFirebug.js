@@ -531,11 +531,20 @@ this.pressKey = function(keyCode, target)
  */
 this.pressToggleFirebug = function(forceOpen)
 {
+    var isOpen = this.isFirebugOpen();
+    FBTest.sysout("pressToggleFirebug; before forceOpen: " + forceOpen + ", is open: " + isOpen);
+
     // Don't close if it's open and should stay open.
-    if (forceOpen && this.isFirebugOpen())
+    if (forceOpen && isOpen)
+    {
+        FBTest.sysout("pressToggleFirebug; bail out");
         return;
+    }
 
     FBTest.sendKey("F12"); // F12
+
+    isOpen = this.isFirebugOpen();
+    FBTest.sysout("pressToggleFirebug; after forceOpen: " + forceOpen + ", is open: " + isOpen);
 };
 
 /**
@@ -565,9 +574,9 @@ this.shutdownFirebug = function()
  */
 this.isFirebugOpen = function()
 {
-    var collapsedFirebug = FW.Firebug.chrome.isOpen();
-    FBTest.sysout("isFirebugOpen collapsedFirebug " + collapsedFirebug);
-    return collapsedFirebug;
+    var isOpen = FW.Firebug.chrome.isOpen();
+    FBTest.sysout("isFirebugOpen; isOpen: " + isOpen);
+    return isOpen;
 };
 
 this.getFirebugPlacement = function()
