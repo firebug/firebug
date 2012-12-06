@@ -579,13 +579,14 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex++];
+                var object = objects[objIndex];
                 if (part.type == "%c")
                     lastStyle = object.toString();
-                else if (typeof(object) != "undefined")
+                else if (objIndex < objects.length)
                     node = this.appendObject(object, row, part.rep);
                 else
                     node = this.appendObject(part.type, row, FirebugReps.Text);
+                objIndex++;
             }
             else
             {
