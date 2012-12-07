@@ -2712,16 +2712,20 @@ Css.pseudoElements =
 
 Css.nonEditableTags =
 {
-    "HTML": 1,
-    "HEAD": 1,
-    "html": 1,
-    "head": 1
+    "HTML": 1, "html": 1,
+    "HEAD": 1, "head": 1
 };
 
 Css.innerEditableTags =
 {
-    "BODY": 1,
-    "body": 1
+    "BODY": 1, "body": 1
+};
+
+Css.nonDeletableTags =
+{
+    "HTML": 1, "html": 1,
+    "HEAD": 1, "head": 1,
+    "BODY": 1, "body": 1
 };
 
 // ********************************************************************************************* //
