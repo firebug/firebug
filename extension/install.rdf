@@ -58,7 +58,7 @@
 
     <em:iconURL>chrome://firebug/skin/firebug64.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>https://getfirebug.com/releases/firebug/1.10/update.rdf</em:updateURL>
+    <em:updateURL>https://getfirebug.com/releases/firebug/1.12/update.rdf</em:updateURL>
 
     <em:translator>Leszek(teo)Zyczkowski (pl-PL)</em:translator>
     <em:translator>markh (nl)</em:translator>
