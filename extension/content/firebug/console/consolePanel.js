@@ -440,10 +440,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var row;
         var container = this.getTopContainer();
-<<<<<<< HEAD
-=======
-FBTrace.sysout("append", {appender:appender, objects:objects, className:className, rep:rep, sourceLink:sourceLink, noRow:noRow});
->>>>>>> Fallbacks for message IDs
         if (noRow)
         {
             appender.apply(this, [objects]);
