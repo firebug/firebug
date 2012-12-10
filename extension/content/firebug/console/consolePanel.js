@@ -396,12 +396,24 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
+        // Use the first item of an array
         if (object instanceof Object && typeof object[0] != "undefined")
             return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
-        // Group messages coming from the same location.
+        // Group messages coming from the same location
         if (object instanceof Object && object.href && object.lineNo && object.message)
             return object.message + object.href + ":" + object.lineNo;
+
+        // Use all direct properties of the object
+        if (object instanceof Object)
+        {
+            var msgID = "";
+            for (var prop in object)
+                msgID += prop + object[prop];
+            return msgID;
+        }
+
+        return "";
     },
 
     increaseRowCount: function(row)
@@ -428,7 +440,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var row;
         var container = this.getTopContainer();
-
+FBTrace.sysout("append", {appender:appender, objects:objects, className:className, rep:rep, sourceLink:sourceLink, noRow:noRow});
         if (noRow)
         {
             appender.apply(this, [objects]);
