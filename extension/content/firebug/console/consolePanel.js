@@ -440,7 +440,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var row;
         var container = this.getTopContainer();
-FBTrace.sysout("append", {appender:appender, objects:objects, className:className, rep:rep, sourceLink:sourceLink, noRow:noRow});
         if (noRow)
         {
             appender.apply(this, [objects]);
