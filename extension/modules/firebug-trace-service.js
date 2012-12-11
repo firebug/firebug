@@ -152,6 +152,8 @@ TracerWrapper.prototype =
             {
                 if (self.FBTrace)
                     self.FBTrace[name] = value;
+                else
+                    self.tracer[name] = value;
 
                 return true;
             },
