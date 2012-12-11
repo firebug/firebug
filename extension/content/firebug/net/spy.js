@@ -22,12 +22,13 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
     "firebug/net/netPanel",
-    "firebug/console/errors"
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper) {
+    TraceListener, TraceModule, Wrapper, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -35,8 +36,15 @@ function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, Stack
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
+    getService(Ci.nsIEventListenerService);
+
 // List of contexts with XHR spy attached.
 var contexts = [];
+
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -86,9 +94,11 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         // For any spies that are in progress, remove our listeners so that they don't leak
         this.detachObserver(context, null);
 
-        if (FBTrace.DBG_SPY && context.spies.length)
+        if (FBTrace.DBG_SPY && context.spies && context.spies.length)
+        {
             FBTrace.sysout("spy.destroyContext; ERROR There are spies in progress ("
                 + context.spies.length + ") " + context.getName());
+        }
 
         // Make sure that all Spies in progress are detached at this moment.
         // Clone the array beforehand since the spy object is removed from the
@@ -276,16 +286,13 @@ var SpyHttpObserver =
     {
         try
         {
-            if (topic != "http-on-modify-request" &&
-                topic != "http-on-examine-response" &&
-                topic != "http-on-examine-cached-response")
+            if ((topic == "http-on-modify-request" && !fx18) ||
+                topic == "http-on-opening-request" ||
+                topic == "http-on-examine-response" ||
+                topic == "http-on-examine-cached-response")
             {
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.SpyHttpObserver.observe; ERROR Unknown topic: " + topic);
-                return;
+                this.observeRequest(request, topic);
             }
-
-            this.observeRequest(request, topic);
         }
         catch (exc)
         {
@@ -313,7 +320,9 @@ var SpyHttpObserver =
                 var requestName = request.URI.asciiSpec;
                 var requestMethod = request.requestMethod;
 
-                if (topic == "http-on-modify-request")
+                if (topic == "http-on-modify-request" && !fx18)
+                    this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
+                if (topic == "http-on-opening-request")
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-examine-response")
                     this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
@@ -597,26 +606,45 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     attach: function()
     {
         var spy = this;
+
         this.onReadyStateChange = function(event) { onHTTPSpyReadyStateChange(spy, event); };
         this.onLoad = function() { onHTTPSpyLoad(spy); };
         this.onError = function() { onHTTPSpyError(spy); };
         this.onAbort = function() { onHTTPSpyAbort(spy); };
 
-        // xxxHonza: #502959 is still failing on Fx 3.5
-        // Use activity distributor to identify 3.6
-        if (SpyHttpActivityObserver.getActivityDistributor())
+        this.onEventListener = function(event)
+        {
+            switch (event.type)
+            {
+                case "readystatechange":
+                    onHTTPSpyReadyStateChange(spy, event);
+                break;
+                case "load":
+                    onHTTPSpyLoad(spy);
+                break;
+                case "error":
+                    onHTTPSpyError(spy);
+                break;
+                case "abort":
+                    onHTTPSpyAbort(spy);
+                break;
+            }
+        };
+
+        if (typeof(eventListenerService.addListenerForAllEvents) == "function")
+        {
+            eventListenerService.addListenerForAllEvents(this.xhrRequest,
+                this.onEventListener, true, false, false);
+        }
+        else
         {
             this.onreadystatechange = this.xhrRequest.onreadystatechange;
             this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+
+            this.xhrRequest.addEventListener("load", this.onLoad, false);
+            this.xhrRequest.addEventListener("error", this.onError, false);
+            this.xhrRequest.addEventListener("abort", this.onAbort, false);
         }
-
-        this.xhrRequest.addEventListener("load", this.onLoad, false);
-        this.xhrRequest.addEventListener("error", this.onError, false);
-        this.xhrRequest.addEventListener("abort", this.onAbort, false);
-
-        // xxxHonza: should be removed from FB 3.6
-        if (!SpyHttpActivityObserver.getActivityDistributor())
-            this.context.sourceCache.addListener(this);
 
         if (FBTrace.DBG_SPY)
             FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
@@ -625,7 +653,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     detach: function(force)
     {
         // Bubble out if already detached.
-        if (!this.onLoad)
+        if (!this.onEventListener)
             return;
 
         // If the activity distributor is available, let's detach it when the XHR
@@ -647,21 +675,27 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // Remove itself from the list of active spies.
         Arr.remove(this.context.spies, this);
 
-        if (this.onreadystatechange)
-            this.xhrRequest.onreadystatechange = this.onreadystatechange;
+        if (typeof(eventListenerService.addListenerForAllEvents) == "function")
+        {
+            eventListenerService.removeListenerForAllEvents(this.xhrRequest,
+                this.onEventListener, true, false);
+        }
+        else
+        {
+            if (this.onreadystatechange)
+                this.xhrRequest.onreadystatechange = this.onreadystatechange;
 
-        try { this.xhrRequest.removeEventListener("load", this.onLoad, false); } catch (e) {}
-        try { this.xhrRequest.removeEventListener("error", this.onError, false); } catch (e) {}
-        try { this.xhrRequest.removeEventListener("abort", this.onAbort, false); } catch (e) {}
+            try { this.xhrRequest.removeEventListener("load", this.onLoad, false); } catch (e) {}
+            try { this.xhrRequest.removeEventListener("error", this.onError, false); } catch (e) {}
+            try { this.xhrRequest.removeEventListener("abort", this.onAbort, false); } catch (e) {}
+        }
 
         this.onreadystatechange = null;
         this.onLoad = null;
         this.onError = null;
         this.onAbort = null;
 
-        // xxxHonza: shouuld be removed from FB 1.6
-        if (!SpyHttpActivityObserver.getActivityDistributor())
-            this.context.sourceCache.removeListener(this);
+        this.onEventListener = null;
     },
 
     getURL: function()
@@ -690,8 +724,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
 function onHTTPSpyReadyStateChange(spy, event)
 {
     if (FBTrace.DBG_SPY)
+    {
         FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
             " (multipart: " + spy.xhrRequest.multipart + ")");
+    }
 
     // Remember just in case spy is detached (readyState == 4).
     var originalHandler = spy.onreadystatechange;
@@ -720,16 +756,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     if (spy.xhrRequest.readyState == 4)
     {
         // Cumulate response so that multipart response content is properly displayed.
-        if (SpyHttpActivityObserver.getActivityDistributor())
-        {
-            spy.responseText += Http.safeGetXHRResponseText(spy.xhrRequest);
-        }
-        else
-        {
-            // xxxHonza: remove from FB 1.6
-            if (!spy.responseText)
-                spy.responseText = Http.safeGetXHRResponseText(spy.xhrRequest);
-        }
+        spy.responseText += Http.safeGetXHRResponseText(spy.xhrRequest);
 
         // The XHR is loaded now (used also by the activity observer).
         spy.loaded = true;
@@ -750,7 +777,44 @@ function onHTTPSpyReadyStateChange(spy, event)
     }
 
     // Pass the event to the original page handler.
-    callPageHandler(spy, event, originalHandler);
+    if (typeof(eventListenerService.addListenerForAllEvents) == "undefined")
+        callPageHandler(spy, event, originalHandler);
+}
+
+function callPageHandler(spy, event, originalHandler)
+{
+    try
+    {
+        // Calling the page handler throwed an exception (see #502959)
+        // This should be fixed in Firefox 3.5
+        if (originalHandler && event)
+        {
+            if (originalHandler.handleEvent)
+                originalHandler.handleEvent(event);
+            else
+                originalHandler.call(spy.xhrRequest, event);
+        }
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
+
+        var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
+        if (xpcError)
+        {
+            // TODO attach trace
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
+
+            // Make sure the exception is displayed in both Firefox & Firebug console.
+            throw new Error(xpcError.message, xpcError.href, xpcError.lineNo);
+        }
+        else
+        {
+            throw exc;
+        }
+    }
 }
 
 function onHTTPSpyLoad(spy)
@@ -761,10 +825,6 @@ function onHTTPSpyLoad(spy)
     // Detach must be done in onLoad (not in onreadystatechange) otherwise
     // onAbort would not be handled.
     spy.detach(false);
-
-    // xxxHonza: Still needed for Fx 3.5 (#502959)
-    if (!SpyHttpActivityObserver.getActivityDistributor())
-        onHTTPSpyReadyStateChange(spy, null);
 
     // If the spy is not loaded yet (and so, the response was not cached), do it now.
     // This can happen since synchronous XHRs don't fire onReadyStateChange event (issue 2868).
@@ -817,44 +877,6 @@ function onHTTPSpyAbort(spy)
     {
         netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText,
             spy.responseText]);
-    }
-}
-
-// ********************************************************************************************* //
-
-function callPageHandler(spy, event, originalHandler)
-{
-    try
-    {
-        // Calling the page handler throwed an exception (see #502959)
-        // This should be fixed in Firefox 3.5
-        if (originalHandler && event)
-        {
-            if (originalHandler.handleEvent)
-                originalHandler.handleEvent(event);
-            else
-                originalHandler.call(spy.xhrRequest, event);
-        }
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
-
-        var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
-        if (xpcError) //
-        {
-            // TODO attach trace
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
-
-            // Make sure the exception is displayed in both Firefox & Firebug console.
-            throw new Error(xpcError.message, xpcError.href, xpcError.lineNo);
-        }
-        else
-        {
-            throw exc;
-        }
     }
 }
 

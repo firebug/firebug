@@ -96,6 +96,14 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         var store = CommandLineInclude.getStore();
         var keys = store.getKeys();
         var arrayToDisplay = [];
+        var returnValue = Firebug.Console.getDefaultReturnValue(context.window);
+
+        if (keys.length === 0)
+        {
+            var msg = Locale.$STR("commandline.include.noDefinedAlias");
+            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
+            return returnValue;
+        }
 
         for (var i=0; i<keys.length; i++)
         {
@@ -108,7 +116,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
 
         var input = new CommandLineIncludeObject();
         this.log(arrayToDisplay, ["alias", "URL"], context, input);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return returnValue;
     },
 
     deleteAlias: function(aliasName, ev)
@@ -354,13 +362,13 @@ var CommandLineInclude =
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
         {
-            this.log("wrongAliasArgument", [], [context, "error"]);
+            this.log("invalidAliasArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
         if (url !== null && typeof url !== "string" || !url && !newAlias)
         {
-            this.log("wrongUrlArgument", [], [context, "error"]);
+            this.log("invalidUrlArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
@@ -421,6 +429,8 @@ var CommandLineInclude =
 
         xhr.onload = function()
         {
+            if (xhr.status !== 200)
+                return errorFunction.apply(this, arguments);
             var codeToEval = xhr.responseText;
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
@@ -526,7 +536,7 @@ Firebug.registerCommand("include", {
 
 Firebug.registerRep(CommandLineIncludeRep);
 
-return CommandLineIncludeRep;
+return CommandLineInclude;
 
 // ********************************************************************************************* //
 }});

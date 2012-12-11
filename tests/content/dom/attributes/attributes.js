@@ -7,6 +7,7 @@ function runTest()
     FBTest.openNewTab(basePath + "dom/attributes/attributes.html", function(win)
     {
         FBTest.openFirebug();
+        FBTest.selectPanel("console");
 
         FBTest.enableConsolePanel(function(win)
         {

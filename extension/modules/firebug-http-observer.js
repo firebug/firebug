@@ -61,6 +61,7 @@ var httpRequestObserver =
 
         if (!this.observing)
         {
+            observerService.addObserver(this, "http-on-opening-request", false);
             observerService.addObserver(this, "http-on-modify-request", false);
             observerService.addObserver(this, "http-on-examine-response", false);
             observerService.addObserver(this, "http-on-examine-cached-response", false);
@@ -77,6 +78,7 @@ var httpRequestObserver =
 
         if (this.observing)
         {
+            observerService.removeObserver(this, "http-on-opening-request");
             observerService.removeObserver(this, "http-on-modify-request");
             observerService.removeObserver(this, "http-on-examine-response");
             observerService.removeObserver(this, "http-on-examine-cached-response");
@@ -104,7 +106,8 @@ var httpRequestObserver =
                     ", " + safeGetName(subject));
 
             // Notify all registered observers.
-            if (topic == "http-on-modify-request" ||
+            if (topic == "http-on-opening-request" ||
+                topic == "http-on-modify-request" ||
                 topic == "http-on-examine-response" ||
                 topic == "http-on-examine-cached-response")
             {

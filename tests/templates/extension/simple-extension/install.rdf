@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>testextension@janodvarko.cz</em:id>
+    <em:name>Test Extension</em:name>
+    <em:version>1.1</em:version>
+    <em:creator>Jan Odvarko</em:creator>
+    <em:description>Test extension for wrong error parent window</em:description>
+
+    <em:targetApplication>
+      <Description>
+        <em:id>toolkit@mozilla.org</em:id>
+        <em:minVersion>1.9.0.11</em:minVersion>
+        <em:maxVersion>2.0.0.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+  </Description>
+</RDF>

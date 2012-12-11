@@ -41,7 +41,8 @@ catch (err)
             if (tracer)
                 return tracer;
 
-            if (getBoolPref(prefDomain, "alwaysOpenTraceConsole"))
+            var enabledAddons = decodeURIComponent(getCharPref("extensions", "enabledAddons"));
+            if (enabledAddons.indexOf("fbtrace@getfirebug.com:") >= 0)
             {
                 // Solution with built-in buffer for logs created before console is ready.
                 var wrapper = new TracerWrapper(prefDomain);
@@ -264,6 +265,20 @@ function getBoolPref(prefDomain, name)
     {
         var prefName = prefDomain + "." + name;
         return prefs.getBoolPref(prefName);
+    }
+    catch (err)
+    {
+    }
+
+    return false;
+}
+
+function getCharPref(prefDomain, name)
+{
+    try
+    {
+        var prefName = prefDomain + "." + name;
+        return prefs.getCharPref(prefName);
     }
     catch (err)
     {

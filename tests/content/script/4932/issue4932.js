@@ -7,7 +7,13 @@ function runTest()
         FBTest.selectPanel("script");
         FBTest.enableScriptPanel(function(win)
         {
+            FBTest.progress("Wait till the iframe is loaded");
+
             var config = {tagName: "span", classes: "sourceRowText"};
+            var panelNode = FBTest.getPanel("script").panelNode;
+            var nodes = panelNode.getElementsByClassName(config.classes);
+            FBTest.progress("Nodes: " + nodes.length);
+
             FBTest.waitForDisplayedElement("script", config, function(row)
             {
                 var expected = /function funcTest\(\) \{\}\s*/;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5945: Show source link for CSS errors</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link href="cssWithErrors.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5945">Issue 5945</a>: Show source link for CSS errors</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Enable the option <em>Show CSS Errors</em></li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The console should list two CSS errors:<br/>
+<code>
+Error in parsing value for 'background'. Declaration dropped.
+background: not-existing-function();
+cssWithErrors.css (line 2, col 47)
+
+Expected color but found 'notacolor'. Error in parsing value for 'color'. Declaration dropped.
+color: notacolor;
+cssWithErrors.css (line 6, col 84)
+</code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

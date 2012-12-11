@@ -20,6 +20,7 @@ locale  firebug es          locale/es/
 locale  firebug en-US       locale/en-US/
 locale  firebug es-AR       locale/es-AR/
 locale  firebug es-ES       locale/es-ES/
+locale  firebug eu          locale/eu/
 locale  firebug fa          locale/fa/
 locale  firebug fr          locale/fr/
 locale  firebug he          locale/he/

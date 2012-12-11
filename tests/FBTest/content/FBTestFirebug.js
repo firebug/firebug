@@ -297,6 +297,14 @@ this.mouseOver = function(node, offsetX, offsetY)
     this.synthesizeMouse(node, offsetX, offsetY, eventDetails, win);
 };
 
+this.mouseMove = function(node, offsetX, offsetY)
+{
+    var win = node.ownerDocument.defaultView;
+
+    var eventDetails = {type: "mousemove"};
+    this.synthesizeMouse(node, offsetX, offsetY, eventDetails, win);
+};
+
 this.sendMouseEvent = function(event, target, win)
 {
     if (!target)
@@ -523,11 +531,20 @@ this.pressKey = function(keyCode, target)
  */
 this.pressToggleFirebug = function(forceOpen)
 {
+    var isOpen = this.isFirebugOpen();
+    FBTest.sysout("pressToggleFirebug; before forceOpen: " + forceOpen + ", is open: " + isOpen);
+
     // Don't close if it's open and should stay open.
-    if (forceOpen && this.isFirebugOpen())
+    if (forceOpen && isOpen)
+    {
+        FBTest.sysout("pressToggleFirebug; bail out");
         return;
+    }
 
     FBTest.sendKey("F12"); // F12
+
+    isOpen = this.isFirebugOpen();
+    FBTest.sysout("pressToggleFirebug; after forceOpen: " + forceOpen + ", is open: " + isOpen);
 };
 
 /**
@@ -557,9 +574,9 @@ this.shutdownFirebug = function()
  */
 this.isFirebugOpen = function()
 {
-    var collapsedFirebug = FW.Firebug.chrome.isOpen();
-    FBTest.sysout("isFirebugOpen collapsedFirebug " + collapsedFirebug);
-    return collapsedFirebug;
+    var isOpen = FW.Firebug.chrome.isOpen();
+    FBTest.sysout("isFirebugOpen; isOpen: " + isOpen);
+    return isOpen;
 };
 
 this.getFirebugPlacement = function()
@@ -1999,7 +2016,8 @@ this.waitForDisplayedElement = function(panelName, config, callback)
             if (nodes.length < config.counter)
                 FBTest.waitForDisplayedElement(panelName, config, callback);
             else
-                callback(element);
+                // wwwFlorent: oddly, element != nodes[config.counter - 1]
+                callback(nodes[config.counter - 1]);
         };
     }
 
@@ -2772,6 +2790,43 @@ this.getDOMPropertyRow = function(chrome, propName)
 
     return getDOMMemberRow(domPanel, propName);
 };
+
+// ********************************************************************************************* //
+// Tooltips
+
+this.showTooltip = function(target, callback)
+{
+    function onTooltipShowing(event)
+    {
+        TooltipController.removeListener(onTooltipShowing);
+
+        callback(event.target);
+    }
+
+    // Tooltip controller ensures clean up (listners removal) in cases
+    // when the tooltip is never shown and so, the listener not removed. 
+    TooltipController.addListener(onTooltipShowing);
+
+    var win = target.ownerDocument.defaultView;
+
+    try
+    {
+        disableNonTestMouseEvents(win, true);
+
+        this.synthesizeMouse(target, 2, 2, {type: "mouseover"});
+        this.synthesizeMouse(target, 4, 4, {type: "mousemove"});
+        this.synthesizeMouse(target, 6, 6, {type: "mousemove"});
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("EXCEPTION " + e, e);
+    }
+    finally
+    {
+        disableNonTestMouseEvents(win, false);
+    }
+}
 
 // ********************************************************************************************* //
 // Module Loader

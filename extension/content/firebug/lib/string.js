@@ -22,7 +22,7 @@ const reNotWhitespace = /[^\s]/;
 
 var Str = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Whitespace and Entity conversions
 
 var entityConversionLists = Str.entityConversionLists =
@@ -111,7 +111,7 @@ e(0x200d, "zwj", attr, text, white, editor);
 e(0x200e, "lrm", attr, text, white, editor);
 e(0x200f, "rlm", attr, text, white, editor);
 
-//************************************************************************************************
+// ********************************************************************************************* //
 // Entity escaping
 
 var entityConversionRegexes =
@@ -356,7 +356,7 @@ function unescapeEntities(str, lists)
     return results.join('') || '';
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // String escaping
 
 var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape("text", "normal");
@@ -546,6 +546,15 @@ Str.trimRight = function(text)
 
 Str.hasPrefix = function(hay, needle)
 {
+    // Passing empty string is ok, but null or undefined is not.
+    if (hay == null)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Str.hasPrefix; string must not be null", {hay: hay, needle: needle});
+
+        return false;
+    }
+
     // This is the fastest way of testing for prefixes - (hay.indexOf(needle) === 0)
     // can be O(|hay|) in the worst case, and (hay.substr(0, needle.length) === needle)
     // unnecessarily creates a new string and might be O(|needle|) in some JavaScript
@@ -558,7 +567,7 @@ Str.endsWith = function(str, suffix)
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // HTML Wrap
 
 Str.wrapText = function(text, noEscapeHTML)
@@ -607,7 +616,7 @@ Str.insertWrappedText = function(text, textBox, noEscapeHTML)
     textBox.innerHTML = "<pre role=\"list\">" + html.join("") + "</pre>";
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Indent
 
 const reIndent = /^(\s+)/;
@@ -635,7 +644,7 @@ Str.cleanIndentation = function(text)
     return lines.join("");
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Formatting
 
 //deprecated compatibility functions

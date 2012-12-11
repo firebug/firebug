@@ -41,17 +41,20 @@ Firebug.ConsoleBase =
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
         Events.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
-        return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
+        return this.logRow(appendFormatted, objects, context, className, null, sourceLink,
+            noThrottle);
     },
 
     openGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
-        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink, noThrottle);
+        return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink,
+            noThrottle);
     },
 
     openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
     {
-        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink, noThrottle);
+        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink,
+            noThrottle);
     },
 
     closeGroup: function(context, noThrottle)

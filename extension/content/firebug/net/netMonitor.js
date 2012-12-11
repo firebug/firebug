@@ -32,6 +32,7 @@ const Cr = Components.results;
 var panelName = "net";
 
 var startFile = NetProgress.prototype.startFile;
+var openingFile = NetProgress.prototype.openingFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
@@ -399,6 +400,8 @@ var NetHttpObserver =
                 this.onExamineResponse(subject, win, tabId, context);
             else if (topic == "http-on-examine-cached-response")
                 this.onExamineCachedResponse(subject, win, tabId, context);
+            else if (topic == "http-on-opening-request")
+                this.openingFile(subject, win, tabId, context);
         }
         catch (err)
         {
@@ -515,6 +518,18 @@ var NetHttpObserver =
         NetUtils.getPostText(info, context);
 
         networkContext.post(respondedCacheFile, [request, NetUtils.now(), info]);
+    },
+
+    openingFile: function(request, win, tabId, context)
+    {
+        var networkContext = Firebug.NetMonitor.contexts[tabId];
+        if (!networkContext)
+            networkContext = context ? context.netProgress : null;
+
+        if (!networkContext)
+            return;
+
+        networkContext.post(openingFile, [request, win]);
     },
 
     /* nsISupports */

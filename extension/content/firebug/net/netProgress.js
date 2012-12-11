@@ -13,10 +13,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/system",
-    "firebug/net/netUtils"
+    "firebug/net/netUtils",
+    "firebug/lib/xpcom"
 ],
 function(Obj, Firebug, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
-    Arr, System, NetUtils) {
+    Arr, System, NetUtils, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -26,6 +27,10 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 
 const CacheService = Cc["@mozilla.org/network/cache-service;1"];
+
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,8 +125,28 @@ NetProgress.prototype =
 
     requestNumber: 1,
 
+    openingFile: function openingFile(request, win)
+    {
+        if (!fx18)
+            return;
+
+        var file = this.getRequestFile(request, win);
+        if (file)
+        {
+            // Parse URL params so, they are available for conditional breakpoints.
+            file.urlParams = Url.parseURLParams(file.href);
+            this.breakOnXHR(file);
+        }
+    },
+
     startFile: function startFile(request, win)
     {
+        // Called asynchronously since Fx17 so, can't be use for Break on XHR
+        // since JS stack is not available at the moment.
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=800799
+        if (fx18)
+            return;
+
         var file = this.getRequestFile(request, win);
         if (file)
         {
@@ -374,6 +399,20 @@ NetProgress.prototype =
             file.fromBFCache = true;
             file.fromCache = true;
             file.aborted = false;
+
+            try
+            {
+                if (request instanceof Ci.nsIApplicationCacheChannel)
+                {
+                    if (request.loadedFromApplicationCache)
+                        file.fromAppCache = true;
+                }
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("net.respondedCacheFile ERROR " + e, e);
+            }
 
             if (request.contentLength >= 0)
                 file.size = request.contentLength;

@@ -170,7 +170,10 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 
     removeAnchor: function(url)
     {
-        var index = url.indexOf("#");
+        if (FBTrace.DBG_ERRORS && !url)
+            FBTrace.sysout("sourceCache.removeAnchor; ERROR url must not be null");
+
+        var index = url ? url.indexOf("#") : -1;
         if (index < 0)
             return url;
 

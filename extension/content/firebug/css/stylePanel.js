@@ -598,6 +598,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     }
                 }
             );
+
             if (Dom.domUtils.hasPseudoClassLock)
             {
                 items.push(
@@ -665,7 +666,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         var prop = Dom.getAncestorByClass(target, "cssProp");
         if (prop)
             var propNameNode = prop.getElementsByClassName("cssPropName").item(0);
-  
+
         if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
             propNameNode.textContent.toLowerCase() == "font-family"))
         {
@@ -677,7 +678,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             }
         }
 
-        return CSSStyleSheetPanel.prototype.showInfoTip.call(this, infoTip, target, x, y, rangeParent, rangeOffset);
+        return CSSStyleSheetPanel.prototype.showInfoTip.call(
+            this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -866,34 +868,21 @@ function getFontPropValueParts(element, value, propName)
 
     // What we want to know is what the specified "font-family" property means
     // for the selected element's text, not what the element actually uses (that
-    // depends on font styles of its descendants). Thus, we create a temporary
-    // element for testing. The element still needs to be in the same document,
-    // to support web fonts, but to avoid reflows and effects like issue 5905,
-    // it is positioned absolutely and generally hidden.
-    var testElement = element.ownerDocument
-        .createElementNS("http://www.w3.org/1999/xhtml", "div");
-    Firebug.setIgnored(testElement);
-
-    testElement.textContent = element.textContent;
-    testElement.style.position = "absolute";
-    testElement.style.top = "-100px";
-    testElement.style.width = testElement.style.height = "0";
-    testElement.style.margin = testElement.style.padding =
-        testElement.style.border = "0";
-    testElement.style.overflow = "hidden";
-
-    if (propName === "font-family")
+    // depends on font styles of its descendants). Thus, we just check the direct
+    // child text nodes of the element.
+    // Do not create a temporary element for testing to avoid problems like in
+    // issue 5905 and 6048
+    var usedFonts = [];
+    var child = element.firstChild;
+    do
     {
-        // The font-family property doesn't specify a font on its own - we
-        // also need some additional related text styles.
-        Css.copyTextStyles(element, testElement);
-    }
-    var nonImportant = origValue.replace(/ !important$/, "");
-    testElement.style.setProperty(propName, nonImportant);
+        if (!child)
+            break;
 
-    element.parentNode.appendChild(testElement);
-    var usedFonts = Fonts.getFonts(testElement).slice();
-    testElement.parentNode.removeChild(testElement);
+        if (child.nodeType == Node.TEXT_NODE)
+            usedFonts = Arr.extendArray(usedFonts, Fonts.getFonts(child));
+    }
+    while (child = child.nextSibling);
 
     var genericFontUsed = false;
     for (var i = 0; i < fonts.length; ++i)

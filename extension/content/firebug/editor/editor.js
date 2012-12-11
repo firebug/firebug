@@ -1032,8 +1032,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             if(this.wrapped)
             {
-                var fixupL = clR[1].left - this.targetOffset.x,
-                    fixupT = clR[1].top - this.targetOffset.y;
+                var fixupL = clR[1].left - clR[0].left;
+                    fixupT = clR[1].top - clR[0].top;
             }
             else
             {

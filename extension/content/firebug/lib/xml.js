@@ -120,6 +120,7 @@ Xml.getElementHTML = function(element)
                 var attr = elt.attributes[i];
 
                 // Hide attributes set by Firebug
+                // XXX Do we even have any?
                 if (Str.hasPrefix(attr.localName, "firebug-"))
                     continue;
 
