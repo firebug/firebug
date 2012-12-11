@@ -239,14 +239,15 @@ Css.copyBoxStyles = function(fromNode, toNode, style)
         if (!style)
             style = view.getComputedStyle(fromNode, "");
 
-        toNode.style.marginTop = style.getPropertyCSSValue("margin-top").cssText;
-        toNode.style.marginRight = style.getPropertyCSSValue("margin-right").cssText;
-        toNode.style.marginBottom = style.getPropertyCSSValue("margin-bottom").cssText;
-        toNode.style.marginLeft = style.getPropertyCSSValue("margin-left").cssText;
-        toNode.style.borderTopWidth = style.getPropertyCSSValue("border-top-width").cssText;
-        toNode.style.borderRightWidth = style.getPropertyCSSValue("border-right-width").cssText;
-        toNode.style.borderBottomWidth = style.getPropertyCSSValue("border-bottom-width").cssText;
-        toNode.style.borderLeftWidth = style.getPropertyCSSValue("border-left-width").cssText;
+        toNode.style.marginTop = style.marginTop;
+        toNode.style.marginRight = style.marginRight;
+        toNode.style.marginBottom = style.marginBottom;
+        toNode.style.marginLeft = style.marginLeft;
+        toNode.style.borderTopWidth = style.borderTopWidth;
+        toNode.style.borderRightWidth = style.borderRightWidth;
+        toNode.style.borderBottomWidth = style.borderBottomWidth;
+        toNode.style.borderLeftWidth = style.borderLeftWidth;
+        toNode.style.unicodeBidi = style.unicodeBidi;
 
         return style;
     }
