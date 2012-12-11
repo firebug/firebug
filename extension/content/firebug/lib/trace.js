@@ -10,6 +10,9 @@ const Cu = Components.utils;
 var scope = {};
 Cu["import"]("resource://firebug/fbtrace.js", scope);
 
+//xxxHonza: duplicated from modules/firebug-trace-service.js
+var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
+
 // ********************************************************************************************* //
 // Wrapper
 
