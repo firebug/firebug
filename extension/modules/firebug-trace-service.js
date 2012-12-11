@@ -142,9 +142,6 @@ TracerWrapper.prototype =
         {
             get: function(target, name)
             {
-                if (self.FBTrace)
-                    return self.FBTrace[name];
-
                 return self.FBTrace ? self.FBTrace[name] : self.tracer[name];
             },
 
