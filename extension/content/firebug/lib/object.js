@@ -8,6 +8,9 @@ define([
 function(FBTrace, Arr, Str) {
 
 // ********************************************************************************************* //
+// Constants
+
+var Cu = Components.utils;
 
 var Obj = {};
 
@@ -191,6 +194,7 @@ Obj.XW_instanceof = function(obj, type)
  * Tells if the given property of the provided object is a non-native getter or not.
  * This method depends on PropertyPanel.jsm module available in Firefox 5+
  * isNonNativeGetter has been introduced in Firefox 7
+ * The method has been moved to WebConsoleUtils.jsm in Fx 18
  *
  * @param object aObject The object that contains the property.
  * @param string aProp The property you want to check if it is a getter or not.
@@ -201,16 +205,30 @@ Obj.isNonNativeGetter = function(obj, propName)
     try
     {
         var scope = {};
-        Components.utils.import("resource:///modules/PropertyPanel.jsm", scope);
+        Cu.import("resource://gre/modules/devtools/WebConsoleUtils.jsm", scope);
 
-        if (scope.isNonNativeGetter)
+        if (scope.WebConsoleUtils.isNonNativeGetter)
         {
-            Obj.isNonNativeGetter = scope.isNonNativeGetter;
+            Obj.isNonNativeGetter = function(obj, propName)
+            {
+                return scope.WebConsoleUtils.isNonNativeGetter(obj, propName);
+            }
+
             return Obj.isNonNativeGetter(obj, propName);
         }
     }
     catch (err)
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.isNonNativeGetter; EXCEPTION " + err, err);
+    }
+
+    // OK, the method isn't available let's use an empty implementation
+    Obj.isNonNativeGetter = function()
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.isNonNativeGetter; ERROR built-in method not found!");
+        return true;
     }
 
     return true;
