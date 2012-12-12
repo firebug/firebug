@@ -157,6 +157,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             for (var i = 0; i < props.length; i++)
             {
+                // XXX Avoid FireFile NPE
+                if (!this.template.CSSFontPropValueTag)
+                    break;
+
                 var prop = props[i];
                 var propName = prop.getElementsByClassName("cssPropName").item(0).textContent;
                 if (propName == "font-family" || propName == "font")
