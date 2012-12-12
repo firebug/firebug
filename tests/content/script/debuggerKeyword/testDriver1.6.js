@@ -67,19 +67,15 @@ function executeTest(callback, doc, testId, lineNo, disable)
             return;
         }
 
-        if (!clickDisableButton())
-            return;
-
-        FBTest.click(doc.getElementById(testId));
-
-        setTimeout(function()
+        // Clicking on the 'Disable' button resumes the debugger.
+        clickDisableButton(function()
         {
             if (testResumeState())
             {
                 FW.Firebug.Debugger.clearAllBreakpoints(null);
                 callback();
             }
-        });
+        })
     });
 
     // Execute a method with debuggger; keyword in it. This is done
@@ -93,22 +89,28 @@ function testResumeState()
     var stopped = chrome.getGlobalAttribute("fbDebuggerButtons", "stopped");
     if (!FBTest.compare("false", stopped, "The debugger must be resumed by now"))
     {
-        FBTest.testDone("debuggerKeyword.FAIL");
+        FBTest.testDone("debuggerKeyword.FAIL; stopped=" + stopped);
         return false;
     }
     return true;
 }
 
-function clickDisableButton()
+function clickDisableButton(callback)
 {
     var panel = FBTest.getPanel("script");
     var button = panel.panelNode.querySelector(".notificationButton.skipButton");
     if (!FBTest.ok(button, "There must be a balloon with 'Disable' button."))
     {
         FBTest.testDone("debuggerKeyword.FAIL");
-        return false;
+
+        // Will fail on timeout since the callback will never be executed.
+        return;
     }
 
+    FBTest.waitForDebuggerResume(function()
+    {
+        callback();
+    });
+
     FBTest.click(button);
-    return true;
 }
