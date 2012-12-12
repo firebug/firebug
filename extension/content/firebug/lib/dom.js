@@ -380,7 +380,10 @@ Dom.findNext = function(node, criteria, upOnly, maxRoot)
     }
 
     if (node.parentNode && node.parentNode != maxRoot)
+    {
         return Dom.findNext(node.parentNode, criteria, true, maxRoot);
+    }
+    return null;
 };
 
 Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
@@ -412,6 +415,7 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
 
         return Dom.findPrevious(node.parentNode, criteria, true, maxRoot);
     }
+    return null;
 };
 
 // ********************************************************************************************* //

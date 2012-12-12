@@ -229,10 +229,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         else if (dir == "left")
         {
             var box = this.ioBox.createObjectBox(this.selection);
-            if (!Css.hasClass(box, "open"))
-                this.select(this.ioBox.getParentObjectBox(box).repObject);
+            if (Css.hasClass(box, "open"))
+            {
+                this.ioBox.contractObjectBox(box);
+            }
             else
-                this.ioBox.contractObject(this.selection);
+            {
+                var parentBox = this.ioBox.getParentObjectBox(box);
+                if (parentBox && parentBox.repObject instanceof window.Element)
+                    this.select(parentBox.repObject);
+            }
         }
         else if (dir == "right")
         {
@@ -327,17 +333,34 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         editor.innerEditMode = node.localName in Css.innerEditableTags;
 
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
+        html = Str.escapeForHtmlEditor(html);
         Firebug.Editor.startEditing(box, html, editor);
     },
 
     deleteNode: function(node, dir)
     {
-        dir = dir || "up";
         var box = this.ioBox.createObjectBox(node);
         if (Css.hasClass(box, "open"))
-            this.ioBox.contractObject(this.selection);
-        this.selectNodeBy(dir);
+            this.ioBox.contractObjectBox(box);
+
+        if (dir === "up")
+        {
+            // We want a "backspace"-like behavior, including traversing parents.
+            this.selectPrevious();
+        }
+        else
+        {
+            // Move to the next sibling if there is one, else backwards.
+            var nextSelection = this.ioBox.getNextSiblingObjectBox(box);
+            if (nextSelection)
+                this.select(nextSelection.repObject);
+            else
+                this.selectPrevious();
+        }
+
         Firebug.HTMLModule.deleteNode(node, this.context);
+
+        Firebug.Inspector.highlightObject(this.selection, this.context);
     },
 
     toggleAll: function(event, node)
@@ -1179,14 +1202,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selectNodeBy("left");
         else if (event.keyCode == KeyEvent.DOM_VK_RIGHT)
             this.selectNodeBy("right");
-        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE &&
-            !(node.localName in Css.innerEditableTags) &&
-            !(Css.nonEditableTags.hasOwnProperty(node.localName)))
-            this.deleteNode(node, "up");
-        else if (event.keyCode == KeyEvent.DOM_VK_DELETE &&
-            !(node.localName in Css.innerEditableTags) &&
-            !(Css.nonEditableTags.hasOwnProperty(node.localName)))
-            this.deleteNode(node, "down");
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE)
+        {
+            if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                this.deleteNode(node, "up");
+        }
+        else if (event.keyCode == KeyEvent.DOM_VK_DELETE)
+        {
+            if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                this.deleteNode(node, "down");
+        }
         else
             return;
 
