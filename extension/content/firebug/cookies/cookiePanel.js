@@ -488,7 +488,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var row = Dom.getAncestorByClass(target, "cookieRow");
         if (row && row.repObject)
         {
-            if (Dom.getAncestorByClass(target, "cookieSizeCol") || Dom.getAncestorByClass(target, "cookieRawSizeCol"))
+            if (Dom.getAncestorByClass(target, "cookieSizeCol") || 
+                Dom.getAncestorByClass(target, "cookieRawSizeCol"))
             {
                 var infoTipCookieId = "cookiesize-"+row.repObject.name;
                 if (infoTipCookieId == this.infoTipCookieId && row.repObject == this.infoTipCookie)
