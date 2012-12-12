@@ -84,7 +84,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable",
-                _repObject: "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
+                "data-value": "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
             ),
             SPAN({"class": "cssSemi"}, ";")
         )
@@ -798,7 +798,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             disabledMap.set(rule, []);
         var map = disabledMap.get(rule);
 
-        var propValue = Firebug.getRepObject(Dom.getChildByClass(row, "cssPropValue"));
+        var propValue = Dom.getChildByClass(row, "cssPropValue").dataset.value;
         var parsedValue = parsePriority(propValue);
 
         CSSModule.disableProperty(Css.hasClass(row, "disabledStyle"), rule,
@@ -1470,10 +1470,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var rule = child.repObject;
                 if (rule)
+                {
                     return {
                         line: getRuleLine(rule),
                         offset: panelNode.scrollTop-child.offsetTop
                     };
+                }
             }
         }
         return 0;
@@ -1619,7 +1621,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 continue;
 
             var name = Dom.getChildByClass(row, "cssPropName").textContent;
-            var value = Firebug.getRepObject(Dom.getChildByClass(row, "cssPropValue"));
+            var value = Dom.getChildByClass(row, "cssPropValue").dataset.value;
             lines.push(name + ": " + value + ";");
         }
 
@@ -1738,8 +1740,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         var parsedValue = parsePriority(value);
                         CSSModule.setProperty(rule, propName, parsedValue.value,
                             parsedValue.priority);
-                        // Save in rep object.
-                        Dom.getAncestorByClass(target, "cssPropValue").repObject = value;
+                        Dom.getAncestorByClass(target, "cssPropValue").dataset.value = value;
                     }
                     else if (previousValue && previousValue != "null")
                     {
@@ -1837,7 +1838,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var rule = Firebug.getRepObject(cssRule);
             var baseText = rule.style ? rule.style.cssText : rule.cssText;
             var prop = Dom.getAncestorByClass(target, "cssProp");
-            var propValue = Firebug.getRepObject(Dom.getChildByClass(prop, "cssPropValue"));
+            var propValue = Dom.getChildByClass(prop, "cssPropValue").dataset.value;
             var parsedValue = parsePriority(propValue);
 
             if (previous)
@@ -1888,10 +1889,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
         if (propValue)
-        {
-            var row = Dom.getAncestorByClass(target, "cssProp");
-            value = Firebug.getRepObject(propValue);
-        }
+            value = propValue.dataset.value;
+
         return value;
     },
 
@@ -2363,7 +2362,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (!Css.hasClass(propEl, "disabledStyle"))
                 {
                     var propName = Dom.getChildByClass(propEl, "cssPropName").textContent;
-                    var propValue = Dom.getChildByClass(propEl, "cssPropValue").repObject;
+                    var propValue = Dom.getChildByClass(propEl, "cssPropValue").dataset.value;
                     cssText.push(propName + ":" + propValue + ";");
                 }
             }
@@ -2645,27 +2644,7 @@ function getRuleLine(rule)
     {
         return Dom.domUtils.getRuleLine(rule);
     }
-    catch(e)
-    {
-
-    }
-    return 0;
-}
-
-function getTopmostRuleLine(panelNode)
-{
-    for (var child = panelNode.firstChild; child; child = child.nextSibling)
-    {
-        if (child.offsetTop+child.offsetHeight > panelNode.scrollTop)
-        {
-            var rule = child.repObject;
-            if (rule)
-                return {
-                    line: getRuleLine(rule),
-                    offset: panelNode.scrollTop-child.offsetTop
-                };
-        }
-    }
+    catch (e) {}
     return 0;
 }
 

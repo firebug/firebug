@@ -79,7 +79,10 @@ function executeTest(callback, doc, testId, lineNo, disable)
                 FW.Firebug.Debugger.clearAllBreakpoints(null);
                 callback();
             }
-        });
+
+        // The debugger is sometimes not resumed on OSX, so let's try to increase
+        // the timeout and see if this is actually the problem (was zero before).
+        }, 300);
     });
 
     // Execute a method with debuggger; keyword in it. This is done
