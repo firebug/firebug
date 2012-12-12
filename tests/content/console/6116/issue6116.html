@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6116: undefined values are ignored in string formatting of console.log</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6116">Issue 6116</a>:
+        undefined values are ignored in string formatting of console.log</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Console panel and enable it</li>
+            <li>Execute the following expression on the command line:<br/>
+            <code>console.log('%o%o%o', 'foo', undefined, 'bar')</code><br/>
+            </li>
+            <li>You should see following in the Console panel:<br/>
+            <code>"foo"<i>undefined</i>"bar"</code>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>
