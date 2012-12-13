@@ -517,7 +517,7 @@ this.pressKey = function(keyCode, target)
         
         return null;
     }
-    
+
     FBTrace.sysout("DEPRECATE WARNING: FBTest.pressKey() should not be used. Use FBTest.sendKey() instead.");
     return this.sendKey(getKeyName(keyCode), target);
 };
@@ -529,7 +529,7 @@ this.pressKey = function(keyCode, target)
  * Open/close Firebug UI. If forceOpen is true, Firebug is only opened if closed.
  * @param {Boolean} forceOpen Set to true if Firebug should stay opened.
  */
-this.pressToggleFirebug = function(forceOpen)
+this.pressToggleFirebug = function(forceOpen, target)
 {
     var isOpen = this.isFirebugOpen();
     FBTest.sysout("pressToggleFirebug; before forceOpen: " + forceOpen + ", is open: " + isOpen);
@@ -541,7 +541,7 @@ this.pressToggleFirebug = function(forceOpen)
         return;
     }
 
-    FBTest.sendKey("F12"); // F12
+    FBTest.sendKey("F12", target); // F12
 
     isOpen = this.isFirebugOpen();
     FBTest.sysout("pressToggleFirebug; after forceOpen: " + forceOpen + ", is open: " + isOpen);
@@ -1555,9 +1555,6 @@ this.waitForDebuggerResume = function(callback)
 {
     var timeout = 250;
     var counter = 20;
-    // FIXME xxxpedro variable never used
-    var self = this;
-
     var chrome = FW.Firebug.chrome;
 
     function checkResumeState()
@@ -1571,7 +1568,7 @@ this.waitForDebuggerResume = function(callback)
             setTimeout(checkResumeState, timeout);
     }
 
-    // Start checking clipboard on timeout.
+    // Start checking state on timeout.
     setTimeout(checkResumeState, timeout);
 };
 
