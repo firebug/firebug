@@ -89,7 +89,7 @@ var Loader =
             Cu.reportError(err);
 
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("mini-require; lookup " + err, err);
+                FBTrace.sysout("mini-require; EXCEPTION lookup " + err, err);
         }
     },
 
