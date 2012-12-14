@@ -76,6 +76,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             debuggerSocketConnect(Options.get("remoteHost"), Options.get("remotePort")) :
             DebuggerServer.connectPipe();
 
+        // Debugger client represents the connection to the server side
+        // and so it's global.
         Firebug.debuggerClient = this.client = new DebuggerClient(this.transport);
 
         // Hook packet transport to allow tracing.
@@ -163,6 +165,12 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var self = this;
         this.client.listTabs(function(response)
         {
+            // The response contains list of all tab and global actors registered
+            // on the server side. We need to cache it since these IDs will be
+            // needed later (for communication to these actors).
+            // See also getActorId method.
+            context.listTabsResponse = response;
+
             var tabGrip = response.tabs[response.selected];
             self.attachTab(context, tabGrip.actor);
         });
@@ -210,6 +218,27 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             threadClient.resume();
         });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Actors
+
+    getActorId: function(context, actorName)
+    {
+        var tabs = context.listTabsResponse;
+        if (!tabs)
+            return;
+
+        var currTabActorId = context.tabClient._actor;
+
+        // xxxHonza: could be optimized using a map: tabId -> tab
+        tabs = tabs.tabs;
+        for (var i=0; i<tabs.length; i++)
+        {
+            var tab = tabs[i];
+            if (tab.actor == currTabActorId)
+                return tab[actorName];
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
