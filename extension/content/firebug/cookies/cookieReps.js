@@ -126,7 +126,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     bodyRow:
         TR({"class": "cookieInfoRow"},
             TD({"class": "sourceLine cookieRowHeader"}),
-            TD({"class": "cookieInfoCol", colspan: 10})
+            TD({"class": "cookieInfoCol", colspan: 11})
         ),
 
     bodyTag:
