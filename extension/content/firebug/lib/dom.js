@@ -181,7 +181,7 @@ Dom.setOuterHTML = function(element, html)
 {
     try
     {
-        var fragment = DOM.markupToDocFragment(html, element);
+        var fragment = Dom.markupToDocFragment(html, element);
 
         var first = fragment.firstChild;
         var last = fragment.lastChild;
