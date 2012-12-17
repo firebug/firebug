@@ -2295,22 +2295,25 @@ this.getSelectedNodeBox = function()
 // Context menu
 
 /**
- * Opens context menu for target element and executes specified command
+ * Opens context menu for target element and executes specified command.
+ * Context menu listener is registered through ContextMenuController object, which ensures
+ * that the listener is removed at the end of the test even in cases where the context menu
+ * is never opened and so, the listener not removed by the test itself.
+ * 
  * @param {Element} target Element, which's context menu should be opened
- * @param {String or Object} menuItemIdentifier ID or object holding the label of the menu item, that should be executed
+ * @param {String or Object} menuItemIdentifier ID or object holding the label of the
+ *      menu item, that should be executed
  * @param {Function} callback Function called as soon as the element is selected.
  */
 this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
 {
-    var contextMenu = FW.FBL.hasPrefix(target.ownerDocument.documentURI, "chrome://firebug/") ?
-        FW.FBL.$("fbContextMenu") : FW.Firebug.chrome.window.top.window.document.
-            getElementById("contentAreaContextMenu");
+    var contextMenu = ContextMenuController.getContextMenu(target);
 
     var self = this;
 
     function onPopupShown(event)
     {
-        contextMenu.removeEventListener("popupshown", onPopupShown, false);
+        ContextMenuController.removeListener(target, "popupshown", onPopupShown);
 
         // Fire the event handler asynchronously so items have a chance to be appended.
         setTimeout(function()
@@ -2376,7 +2379,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
     }
 
     // Wait till the menu is displayed.
-    contextMenu.addEventListener("popupshown", onPopupShown, false);
+    ContextMenuController.addListener(target, "popupshown", onPopupShown);
 
     // Right click on the target element.
     var eventDetails = {type: "contextmenu", button: 2};
