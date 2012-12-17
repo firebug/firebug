@@ -142,6 +142,8 @@
 .cookieTable[hiddenCols~=colDomain] .cookieDomainCol,
 .cookieTable[hiddenCols~=colSize] #colSize,
 .cookieTable[hiddenCols~=colSize] .cookieSizeCol,
+.cookieTable[hiddenCols~=colRawSize] #colRawSize,
+.cookieTable[hiddenCols~=colRawSize] .cookieRawSizeCol,
 .cookieTable[hiddenCols~=colPath] #colPath,
 .cookieTable[hiddenCols~=colPath] .cookiePathCol,
 .cookieTable[hiddenCols~=colExpires] #colExpires,

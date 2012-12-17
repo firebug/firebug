@@ -83,8 +83,8 @@ var CSSPropTag = domplate(CSSDomplateBase,
 
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
             SPAN({"class": "cssColon"}, ":&nbsp;"),
-            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable",
-                "data-value": "$prop.value$prop.important"}, "$prop|getPropertyValue$prop.important"
+            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
+                "$prop|getPropertyValue$prop.important"
             ),
             SPAN({"class": "cssSemi"}, ";")
         )
@@ -798,7 +798,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             disabledMap.set(rule, []);
         var map = disabledMap.get(rule);
 
-        var propValue = Dom.getChildByClass(row, "cssPropValue").dataset.value;
+        var propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
         CSSModule.disableProperty(Css.hasClass(row, "disabledStyle"), rule,
@@ -1621,7 +1621,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 continue;
 
             var name = Dom.getChildByClass(row, "cssPropName").textContent;
-            var value = Dom.getChildByClass(row, "cssPropValue").dataset.value;
+            var value = Dom.getChildByClass(row, "cssPropValue").textContent;
             lines.push(name + ": " + value + ";");
         }
 
@@ -1740,7 +1740,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         var parsedValue = parsePriority(value);
                         CSSModule.setProperty(rule, propName, parsedValue.value,
                             parsedValue.priority);
-                        Dom.getAncestorByClass(target, "cssPropValue").dataset.value = value;
                     }
                     else if (previousValue && previousValue != "null")
                     {
@@ -1838,7 +1837,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var rule = Firebug.getRepObject(cssRule);
             var baseText = rule.style ? rule.style.cssText : rule.cssText;
             var prop = Dom.getAncestorByClass(target, "cssProp");
-            var propValue = Dom.getChildByClass(prop, "cssPropValue").dataset.value;
+            var propValue = Dom.getChildByClass(prop, "cssPropValue").textContent;
             var parsedValue = parsePriority(propValue);
 
             if (previous)
@@ -1880,18 +1879,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             return !isValueInString;
         }
-    },
-
-    getInitialValue: function(target, value)
-    {
-        if (value == "")
-            return value;
-
-        var propValue = Dom.getAncestorByClass(target, "cssPropValue");
-        if (propValue)
-            value = propValue.dataset.value;
-
-        return value;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2362,7 +2349,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (!Css.hasClass(propEl, "disabledStyle"))
                 {
                     var propName = Dom.getChildByClass(propEl, "cssPropName").textContent;
-                    var propValue = Dom.getChildByClass(propEl, "cssPropValue").dataset.value;
+                    var propValue = Dom.getChildByClass(propEl, "cssPropValue").textContent;
                     cssText.push(propName + ":" + propValue + ";");
                 }
             }

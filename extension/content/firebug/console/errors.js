@@ -610,7 +610,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             showXMLErrors: 1,
             showChromeErrors: 1,
             showChromeMessages: 1,
-            showExternalErrors: 1,
             showXMLHttpRequests: 1,
             showStackTrace: 1
         };
@@ -741,31 +740,6 @@ function whyNotShown(url, categoryList, isWarning)
         return "showChromeErrors";
 
     return null;
-}
-
-function domainFilter(url)  // never called?
-{
-    if (Firebug.showExternalErrors)
-        return true;
-
-    var browserWin = document.getElementById("content").contentWindow;
-
-    var m = urlRe.exec(browserWin.location.href);
-    if (!m)
-        return false;
-
-    var browserDomain = m[3];
-
-    m = urlRe.exec(url);
-    if (!m)
-        return false;
-
-    var errorScheme = m[1];
-    var errorDomain = m[3];
-
-    return errorScheme == "javascript"
-        || errorScheme == "chrome"
-        || errorDomain == browserDomain;
 }
 
 function lessTalkMoreAction(context, object, isWarning)
