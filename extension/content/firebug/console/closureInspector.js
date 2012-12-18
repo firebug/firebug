@@ -286,6 +286,103 @@ var ClosureInspector =
                 FBTrace.sysout("ClosureInspector; getClosureVariablesList failed", exc);
             return [];
         }
+    },
+
+    getClosureWrapper: function(obj, win, context)
+    {
+        var env = this.getEnvironmentForObject(win, obj, context);
+
+        var dbg = this.getInactiveDebuggerForContext(context);
+        var dglobal = dbg.addDebuggee(win);
+
+        // Return a wrapper for its scoped variables.
+        var self = this;
+        var handler = {};
+        handler.getOwnPropertyDescriptor = function(name)
+        {
+            if (name === "__exposedProps__")
+            {
+                // Expose mostly everything, rw, through another proxy.
+                return {
+                    value: Proxy.create({
+                        getPropertyDescriptor: function(name)
+                        {
+                            if (name === "__exposedProps__" || name === "__proto__")
+                                return;
+                            return {value: "rw", enumerable: true};
+                        }
+                    })
+                };
+            }
+
+            return {
+                get: function()
+                {
+                    try
+                    {
+                        var dval = self.getVariableFromClosureRaw(env, name);
+                        if (self.isSimple(dval))
+                            return dval;
+                        var uwWin = Wrapper.getContentView(win);
+                        return self.unwrap(uwWin, dglobal, dval);
+                    }
+                    catch (exc)
+                    {
+                        if (FBTrace.DBG_COMMANDLINE)
+                            FBTrace.sysout("ClosureInspector; failed to return value from getter", exc);
+                    }
+                },
+
+                set: function(value)
+                {
+                    value = dglobal.makeDebuggeeValue(value);
+                    self.setScopedVariableRaw(env, name, value);
+                }
+            };
+        };
+        handler.getPropertyDescriptor = handler.getOwnPropertyDescriptor;
+        return Proxy.create(handler);
+    },
+
+    extendLanguageSyntax: function (expr, win, context)
+    {
+        var fname = "__fb_scopedVars";
+
+        var newExpr = Firebug.JSAutoCompleter.transformScopeOperator(expr, fname);
+        if (expr === newExpr)
+            return expr;
+
+        if (FBTrace.DBG_COMMANDLINE)
+        {
+            FBTrace.sysout("ClosureInspector; transforming expression: `" +
+                    expr + "` -> `" + newExpr + "`");
+        }
+
+        // Stick the helper function for .%-expressions on the window object.
+        // This really belongs on the command line object, but that doesn't
+        // work when stopped in the debugger (issue 5321, which depends on
+        // integrating JSD2) and we really need this to work there.
+        // To avoid leaking capabilities into arbitrary web pages, this is
+        // only injected when needed.
+        try
+        {
+            var self = this;
+            Object.defineProperty(Wrapper.getContentView(win), fname, {
+                value: function(obj)
+                {
+                    return self.getClosureWrapper(obj, win, context);
+                },
+                writable: true,
+                configurable: true
+            });
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("ClosureInspector; failed to inject " + fname, exc);
+        }
+
+        return newExpr;
     }
 };
 
