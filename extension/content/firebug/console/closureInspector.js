@@ -18,6 +18,7 @@ function(Obj, Firebug, Wrapper) {
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
+const ScopeProxy = function() {};
 const OptimizedAway = Object.create(null);
 Object.freeze(OptimizedAway);
 
@@ -123,6 +124,7 @@ var ClosureInspector =
                 names.push("constructor");
             }
 
+            // XXX keep a Map of scopes, and take the highest container of the first one or the (first) deepest one or something
             for (var i = 0; i < names.length; ++i)
             {
                 // We assume that the first own property, or the first
@@ -344,7 +346,86 @@ var ClosureInspector =
         return Proxy.create(handler);
     },
 
-    extendLanguageSyntax: function (expr, win, context)
+    getScopeWrapper: function(obj, win, context, isScope)
+    {
+        var scope;
+        try
+        {
+            if (isScope)
+                scope = Object.getPrototypeOf(obj).scope.parent;
+            else
+                scope = this.getEnvironmentForObject(win, obj, context);
+            if (!scope || !this.scopeIsInteresting(scope))
+                return;
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("ClosureInspector; getScopeWrapper failed", exc);
+            return;
+        }
+
+        var dbg = this.getInactiveDebuggerForContext(context);
+        var dwin = dbg.addDebuggee(win);
+
+        var scopeDataHolder = Object.create(ScopeProxy.prototype);
+        scopeDataHolder.scope = scope;
+
+        var names, namesSet;
+        var lazyCreateNames = function()
+        {
+            lazyCreateNames = function() {};
+            names = scope.names();
+            namesSet = new Set;
+            for (var i = 0; i < names.length; ++i)
+                namesSet.add(names[i]);
+        };
+
+        var self = this;
+        return Proxy.create({
+            desc: function(name)
+            {
+                if (!this.has(name))
+                    return;
+                return {
+                    get: function() {
+                        var dval = self.getVariableOrOptimizedAway(scope, name);
+                        if (self.isSimple(dval))
+                            return dval;
+                        var uwWin = Wrapper.getContentView(win);
+                        return self.unwrap(uwWin, dwin, dval);
+                    },
+                    set: function(value) {
+                        var dval = dwin.makeDebuggeeValue(value);
+                        scope.setVariable(name, dval);
+                    }
+                };
+            },
+            has: function(name)
+            {
+                lazyCreateNames();
+                return namesSet.has(name);
+            },
+            hasOwn: function(name) { return this.has(name); },
+            getOwnPropertyDescriptor: function(name) { return this.desc(name); },
+            getPropertyDescriptor: function(name) { return this.desc(name); },
+            keys: function()
+            {
+                lazyCreateNames();
+                return names;
+            },
+            enumerate: function() { return this.keys(); },
+            getOwnPropertyNames: function() { return this.keys(); },
+            getPropertyNames: function() { return this.keys(); }
+        }, scopeDataHolder);
+    },
+
+    isScopeWrapper: function(obj)
+    {
+        return obj instanceof ScopeProxy;
+    },
+
+    extendLanguageSyntax: function(expr, win, context)
     {
         var fname = "__fb_scopedVars";
 

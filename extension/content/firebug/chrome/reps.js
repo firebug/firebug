@@ -3320,6 +3320,37 @@ FirebugReps.ErrorCopy = function(message)
     this.message = message;
 };
 
+//********************************************************************************************** //
+
+FirebugReps.ClosureScope = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "scope",
+
+    getTitle: function(object)
+    {
+        var scope = Object.getPrototypeOf(object).scope;
+        var type = scope.type, title;
+        if (type === "declarative")
+            title = Locale.$STR("firebug.reps.declarativeScope");
+        else if (type === "object")
+            title = Locale.$STR("firebug.reps.objectScope");
+        else if (type === "with")
+            title = Locale.$STR("firebug.reps.withScope");
+        else
+            title = "<unknown scope \"" + type + "\">"; // shouldn't happen
+        return title;
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isScopeWrapper(object);
+    }
+});
+
 // ********************************************************************************************* //
 
 FirebugReps.OptimizedAway = domplate(Firebug.Rep,
@@ -3377,6 +3408,7 @@ Firebug.registerRep(
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
     FirebugReps.EventLog,
+    FirebugReps.ClosureScope,
     FirebugReps.OptimizedAway
 );
 

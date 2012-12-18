@@ -365,13 +365,12 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             return;
 
         var row = Dom.getAncestorByClass(target, "memberRow");
-        if (!row) 
+        if (!row || row.domObject.ignoredPath)
             return;
 
         var path = this.getPropertyPath(row);
         if (!path || !path.length)
             return;
-
 
         // Ignore top level variables in the Watch panel.
         if (panel.name == "watches" && path.length == 1)
