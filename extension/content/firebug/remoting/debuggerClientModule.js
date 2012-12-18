@@ -131,6 +131,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     initContext: function(context, persistedState)
     {
+        // If page reloads happens the tab-client and thread-client remains the same
+        // so, reuse them from the persiste state object (if they are available).
         if (persistedState)
         {
             context.tabClient = persistedState.tabClient;
@@ -157,8 +159,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Context already attached (page just reloaded).
         if (context.tabClient && context.activeThread)
         {
-            this.dispatch("onTabAttached", [context]);
-            this.dispatch("onThreadAttached", [context]);
+            this.dispatch("onTabAttached", [context, true]);
+            this.dispatch("onThreadAttached", [context, true]);
             return;
         }
 
@@ -195,7 +197,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             context.tabClient = tabClient;
 
-            self.dispatch("onTabAttached", [context]);
+            self.dispatch("onTabAttached", [context, false]);
 
             self.attachThread(context, response.threadActor);
         });
@@ -214,7 +216,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             context.activeThread = threadClient;
 
-            self.dispatch("onThreadAttached", [context]);
+            self.dispatch("onThreadAttached", [context, false]);
 
             threadClient.resume();
         });

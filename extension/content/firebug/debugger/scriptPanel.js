@@ -19,10 +19,17 @@ function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, DebuggerTo
     StackFrame, SourceLink, Breakpoint, BreakpointStore) {
 
 // ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_SCRIPTPANEL");
+
+// ********************************************************************************************* //
 // Script panel
 
 /**
- * @Panel
+ * @Panel This object represents the 'Script' panel that is used for debugging JavaScript.
+ * This panel is using JSD2 API for debugging.
  */
 function ScriptPanel() {}
 var BasePanel = Firebug.ActivablePanel;
@@ -297,22 +304,33 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Persist the breakpoint on the client side
         var bp = BreakpointStore.addBreakpoint(url, line);
 
-        function callback(response)
+        function callback(response, bpClient)
         {
-            if (response.error)
+            // The breakpoint is set on the server side even if the script doesn't
+            // exist yet i.e. error == 'noScript' so, doesn't count this case as
+            // an error.
+            if (response.error && response.error != "noScript")
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("scriptPanel.onBreakpointAdd; ERROR " + response, response);
+                TraceError.sysout("scriptPanel.onBreakpointAdd; ERROR " + response,
+                    {response: response, bpClient: bpClient});
                 return;
             }
 
-            bp.params.actor = {actor: response.actor};
+            // Cache the breakpoint-client object since it has API for removing itself.
+            // (removal happens in the Script panel when the user clicks a breakpoint
+            // in the breakpoint column).
+
+            //xxxHonza: this must be context dependent. We need a list of Breakpoint
+            // instances stored in the context pointing to the right BreakpointClient object.
+            // This should be probably done in DebuggerTool
+            //bp.params.client = bpClient;
 
             if (FBTrace.DBG_BP)
                 FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bp);
         }
 
-        FBTrace.sysout("scriptPanel.onBreakpointAdd; set a breakpoint", bp);
+        Trace.sysout("scriptPanel.onBreakpointAdd; set a breakpoint", bp);
+
         this.tool.setBreakpoint(this.context, url, line, callback);
     },
 
@@ -323,10 +341,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         function callback(response)
         {
-            FBTrace.sysout("scriptPanel.onBreakpointRemoved; ", response);
+            Trace.sysout("scriptPanel.onBreakpointRemoved; ", response);
         }
 
-        FBTrace.sysout("scriptPanel.onBreakpointRemovve; " + url + ", " + line);
+        Trace.sysout("scriptPanel.onBreakpointRemove; " + url + ", " + line);
 
         var bp = BreakpointStore.findBreakpoint(url, line);
         this.tool.removeBreakpoint(this.context, bp, callback);
@@ -575,9 +593,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var chrome = Firebug.chrome;
         if (!chrome)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.syncCommand, context with no chrome: " +
-                    context.getGlobalScope());
+            TraceError.sysout("debugger.syncCommand, context with no chrome: " +
+                context.getGlobalScope());
 
             return;
         }
@@ -690,8 +707,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
+            TraceError.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
 
             Firebug.Console.log("Resuming debugger: error during debugging loop: " + exc);
             this.resume(this.context);
@@ -728,14 +744,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("scriptPanel.onStopDebugging; EXCEPTION " + exc, exc);
+            TraceError.sysout("scriptPanel.onStopDebugging; EXCEPTION " + exc, exc);
         }
     },
 
     newScript: function(sourceFile)
     {
-        FBTrace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+        Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
 
         // Initialize existing breakpoints
         //var bps = BreakpointStore.getBreakpoints(sourceFile.href);

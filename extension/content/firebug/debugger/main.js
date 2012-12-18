@@ -25,7 +25,7 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Debugger
 
-// This module defines a list of dependencies for JS debugger so,
+// This module just defines a list of dependencies for JSD2 debugger so,
 // all necessary modules are properyly loaded.
 
 // ********************************************************************************************* //

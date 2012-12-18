@@ -41,9 +41,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.traceListener = new TraceListener("debuggerTool.", "DBG_DEBUGGERTOOL", true);
+        this.traceListener = new TraceListener("debuggerTool.", "DBG_DEBUGGERTOOL", false);
         TraceModule.addListener(this.traceListener);
 
+        // Listen to the debugger-client, which represents the connection to the server.
         DebuggerClientModule.addListener(this);
 
         var chrome = Firebug.chrome;
@@ -77,22 +78,33 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    onThreadAttached: function(context)
+    onThreadAttached: function(context, reattach)
     {
-        context.activeThread.addListener("paused", this.paused.bind(this, context));
-        context.activeThread.addListener("detached", this.detached.bind(this, context));
-        context.activeThread.addListener("resumed", this.resumed.bind(this, context));
-        context.activeThread.addListener("framesadded", this.framesadded.bind(this, context));
-        context.activeThread.addListener("framescleared", this.framescleared.bind(this, context));
-        context.activeThread.addListener("newScript", this.newScript.bind(this, context));
+        Trace.sysout("debuggerTool.onThreadAttached; reattach: " + reattach);
 
+        // Register listners only when the first thread-attach happens. If the page is
+        // reloaded the same ThreadClient (activeThread) instance is used and so, all
+        // listeners already registered.
+        if (!reattach)
+        {
+            context.activeThread.addListener("paused", this.paused.bind(this, context));
+            context.activeThread.addListener("detached", this.detached.bind(this, context));
+            context.activeThread.addListener("resumed", this.resumed.bind(this, context));
+            context.activeThread.addListener("framesadded", this.framesadded.bind(this, context));
+            context.activeThread.addListener("framescleared", this.framescleared.bind(this, context));
+            context.activeThread.addListener("newScript", this.newScript.bind(this, context));
+        }
+
+        // Of course, the context is always new here so, crate a cache.
         context.gripCache = new GripCache(DebuggerClientModule.client);
-
-        Trace.sysout("debuggerTool.onThreadAttached;");
     },
 
     onThreadDetached: function(context)
     {
+        Trace.sysout("debuggerTool.onThreadDetached;");
+
+        // xxxHonza: all the activeThread listeners should be removed.
+        context.activeThread.debuggerToolAttached = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,17 +114,19 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerTool.paused;");
 
-        // @hack: all types should be supported?
-        var types = {
-            "breakpoint": 1,
-            "resumeLimit": 1,
-            "debuggerStatement": 1,
-        };
-
         context.gripCache.clear();
 
         var type = packet.why.type;
-        if (types[type])
+        if (type == "clientEvaluated" && this.evalCallback)
+        {
+            // Pause packet with 'clientEvaluated' type is sent when user expression
+            // has been evaluated on the server side. Let's pass the result to the
+            // registered callback.
+            var result = packet.why.frameFinished["return"];
+            this.evalCallback(result);
+            this.evalCallback = null
+        }
+        else
         {
             context.activeThread.fillFrames(50);
 
@@ -124,20 +138,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             this.dispatch("onStartDebugging", [frame]);
         }
-        else if (type == "clientEvaluated" && this.evalCallback)
-        {
-            // Pause packet with 'clientEvaluated' type is sent when user expression
-            // has been evaluated on the server side. Let's pass the result to the
-            // registered callback.
-            var result = packet.why.frameFinished["return"];
-            this.evalCallback(result);
-            this.evalCallback = null
-        }
     },
 
     detached: function(context)
     {
-        FBTrace.sysout("debuggerTool.detached; ", arguments);
+        Trace.sysout("debuggerTool.detached; ", arguments);
 
         context.gripCache.clear();
     },
@@ -158,6 +163,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     framesadded: function(context)
     {
+        Trace.sysout("debuggerTool.framesadded; ", arguments);
+
         var frames = context.activeThread.cachedFrames;
         var stackTrace = StackTrace.buildStackTrace(frames, context);
         context.currentTrace = stackTrace;
@@ -167,18 +174,20 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     framescleared: function(context)
     {
+        Trace.sysout("debuggerTool.framescleared; ", arguments);
+
         this.dispatch("onStackCleared");
     },
 
     newScript: function(context, sourceFile)
     {
-        FBTrace.sysout("debuggerTool.newScript; ", arguments);
+        Trace.sysout("debuggerTool.newScript; ", arguments);
 
         this.dispatch("newScript", [sourceFile]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoint API
+    // Breakpoints
 
     setBreakpoint: function(context, url, lineNumber, callback)
     {
@@ -260,9 +269,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             return;
         }
 
-        var actor = bp.params.actor;
-        if (actor)
-            return context.activeThread.removeBreakpoints(arr, callback);
+        // The breakpoint with the client reference needs to be Breakpoint instance
+        // stored in the context.
+        //var client = bp.params.client;
+        //if (client)
+        //    return client.remove(arr, callback);
     },
 
     enableBreakpoint: function(context, url, lineNumber)

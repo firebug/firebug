@@ -62,8 +62,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClientModule Events
 
-    onThreadAttached: function(context)
+    onThreadAttached: function(context, reattach)
     {
+        // Ignore page reloads.
+        if (reattach)
+            return;
+
         // Get all breakpoints
         // xxxHonza: do we have to send all the breakpoints to the server?
         // Could we optimize this somehow?
@@ -100,6 +104,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
             this.breakpoints[url] = bps;
 
+            // 'params' contains data, which are not persisted.
             for (var j=0; j<bps.length; j++)
                 bps[j].params = {};
         }
@@ -123,6 +128,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             for (var p in bp)
                 cleanBP[p] = bp[p];
 
+            // Do not persist 'params' field. It's for transient data only.
             delete cleanBP.params;
 
             cleanBPs.push(cleanBP);
