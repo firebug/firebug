@@ -16,6 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
+    "firebug/console/closureInspector",
     "firebug/dom/toggleBranch",
     "firebug/lib/system",
     "firebug/chrome/menu",
@@ -25,8 +26,8 @@ define([
     "firebug/dom/domModule",
     "firebug/console/autoCompleter"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper,
-    SourceLink, StackFrame, Dom, Css, Search, Str, Arr, Persist, ToggleBranch, System, Menu) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
+    Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu) {
 
 with (Domplate) {
 
@@ -440,6 +441,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var proto = [];
         var domHandlers = [];
 
+        var isScope = ClosureInspector.isScopeWrapper(object);
+
         try
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
@@ -543,44 +546,47 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 var ordinal = parseInt(name);
                 if (ordinal || ordinal == 0)
                 {
-                    this.addMember(object, "ordinal", ordinals, name, val, level, 0, context);
+                    this.addMember(object, "ordinal", ordinals, name, val, level, 0, context, isScope);
                 }
                 else if (typeof(val) == "function")
                 {
                     if (isClassFunction(val))
                     {
                         if (Dom.isDOMMember(object, name))
-                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context);
+                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context, isScope);
                         else
-                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context, isScope);
                     }
                     else if (Dom.isDOMMember(object, name))
                     {
-                        this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                        this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context, isScope);
                     }
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
                     {
-                        this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context);
+                        this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context, isScope);
                     }
                     else
                     {
-                        this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                        this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context, isScope);
                     }
                 }
                 else
                 {
                     if (isPrototype(name))
-                        this.addMember(object, "proto", proto, name, val, level, 0, context);
+                        this.addMember(object, "proto", proto, name, val, level, 0, context, isScope);
                     else if (Dom.isDOMMember(object, name))
-                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
+                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context, isScope);
                     else if (Dom.isDOMConstant(object, name))
-                        this.addMember(object, "dom", domConstants, name, val, level, 0, context);
+                        this.addMember(object, "dom", domConstants, name, val, level, 0, context, isScope);
                     else if (Dom.isInlineEventHandler(name))
-                        this.addMember(object, "user", domHandlers, name, val, level, 0, context);
+                        this.addMember(object, "user", domHandlers, name, val, level, 0, context, isScope);
                     else
-                        this.addMember(object, "user", userProps, name, val, level, 0, context);
+                        this.addMember(object, "user", userProps, name, val, level, 0, context, isScope);
                 }
             }
+
+            if (isScope || (typeof object === "function" && Firebug.showClosures && context))
+                this.maybeAddClosureMember(object, "proto", proto, level, context, isScope);
         }
         catch (exc)
         {
@@ -675,7 +681,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-    addMemberInternal: function(object, type, props, name, value, level, order, context)
+    addMemberInternal: function(object, type, props, name, value, level, order, context, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
         var rep = Firebug.getRep(value);
@@ -689,6 +695,18 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             ((valueType == "function") ||
              (valueType == "object" && value != null) ||
              (valueType == "string" && value.length > Firebug.stringCropLength));
+
+        // Special case for closure inspection.
+        if (!hasChildren && valueType === "function" && Firebug.showClosures && context)
+        {
+            try
+            {
+                var win = context.baseWindow || context.window;
+                ClosureInspector.getEnvironmentForObject(win, value, context);
+                hasChildren = true;
+            }
+            catch (e) {}
+        }
 
         // Special case for "arguments", which is not enumerable by for...in statement
         // and so, Obj.hasProperties always returns false.
@@ -726,7 +744,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             prefix: "",
             readOnly: (descriptor && !descriptor.writable && !descriptor.set),
             // XXX should probably move the tests from getContextMenuItems here
-            deletable: !(descriptor && !descriptor.configurable)
+            deletable: (!parentIsScope && !(descriptor && !descriptor.configurable))
         };
 
         // The context doesn't have to be specified (e.g. in case of Watch panel that is based
@@ -734,7 +752,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (context)
         {
             // xxxHonza: Support for object change not implemented yet.
-            member.breakable = !hasChildren;
+            member.breakable = !hasChildren && !parentIsScope;
 
             var breakpoints = context.dom.breakpoints;
             var bp = breakpoints.findBreakpoint(object, name);
@@ -775,6 +793,38 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         props.push(member);
         return member;
+    },
+
+    // Add the magic "(closure)" property.
+    maybeAddClosureMember: function(object, type, props, level, context, isScope)
+    {
+        var win = context.baseWindow || context.window;
+        var wrapper = ClosureInspector.getScopeWrapper(object, win, context, isScope);
+        if (!wrapper)
+            return;
+
+        var name = (isScope ? Locale.$STR("dom.scopeParentName") : Locale.$STR("dom.scopeName"));
+        var rep = Firebug.getRep(wrapper);
+        var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+        var member = {
+            object: object,
+            name: name,
+            value: wrapper,
+            type: type,
+            rowClass: "memberRow-" + type,
+            open: "",
+            order: 0,
+            level: level,
+            indent: level*16,
+            hasChildren: true,
+            tag: tag,
+            prefix: "",
+            readOnly: true,
+            deletable: false,
+            ignoredPath: true
+        };
+        props.push(member);
     },
 
     // recursion starts with offset=0, level=0
@@ -975,6 +1025,14 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     getRowPathName: function(row)
     {
         var member = row.domObject, name = member.name;
+
+        // Fake "(closure)" properties.
+        if (member.ignoredPath)
+            return ["", ""];
+
+        // Closure variables.
+        if (ClosureInspector.isScopeWrapper(member.object))
+            return [".%", name];
 
         // Ordinals.
         if (name.match(/^[\d]+$/))
@@ -1404,6 +1462,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     return;
                 }
 
+                // XXX This is wrong with closures, but I haven't noticed anything
+                // break and I don't know how to fix, so let's just leave it...
                 for (var i = 0; i < newPath.length; ++i)
                 {
                     var name = newPath[i];
@@ -1492,6 +1552,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         options.add("showDOMFuncs");
         options.add("showDOMConstants");
         options.add("showInlineEventHandlers");
+        options.add("showClosures");
         options.add("showOwnProperties");
         options.add("showEnumerableProperties");
 
@@ -1503,7 +1564,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         return [
             Menu.optionMenu("ShowUserProps", "showUserProps",
-                "dom.option.tip.Show User Props"),
+                "dom.option.tip.Show_User_Props"),
             Menu.optionMenu("ShowUserFuncs", "showUserFuncs",
                 "dom.option.tip.Show_User_Funcs"),
             Menu.optionMenu("ShowDOMProps", "showDOMProps",
@@ -1514,6 +1575,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
+            Menu.optionMenu("ShowClosures", "showClosures",
+                "dom.option.tip.Show_Closures"),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),
@@ -1534,7 +1597,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         var items = [];
 
-        if (row && row.domObject)
+        if (row && row.domObject && !row.domObject.ignoredPath)
         {
             var member = row.domObject;
             var rowName = member.name;
@@ -1882,6 +1945,8 @@ function getPropertyDescriptor(object, propName)
 
 function getRowName(row)
 {
+    // XXX This can return not only property names but also just descriptive ones,
+    // like "(closure)", and indeed the collapse remembering logic relies on that.
     var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
     return labelNode.textContent;
 }
@@ -1911,7 +1976,7 @@ function getParentRow(row)
     }
 }
 
-// Return an array of JS parts that build up (and uniquely identify) a row
+// Return an array of parts that uniquely identifies a row (not always all JavaScript)
 function getPath(row)
 {
     var name = getRowName(row);
