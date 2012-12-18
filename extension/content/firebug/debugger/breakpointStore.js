@@ -203,10 +203,11 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!bps)
             return null;
 
+        // xxxHonza: Objects in the store are not instances of Breakpoint object.
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-            if (bp.lineNumber === lineNo)
+            if (bp.lineNo === lineNo)
                 return bp;
         }
 
