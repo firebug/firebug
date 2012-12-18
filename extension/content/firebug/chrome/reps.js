@@ -24,12 +24,13 @@ define([
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
     "firebug/console/eventMonitor",
+    "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, Menu, CompilationUnit) {
+    EventMonitor, ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -58,10 +59,10 @@ catch (err)
 
 // use pre here to keep line breaks while copying multiline strings 
 var OBJECTBOX = FirebugReps.OBJECTBOX =
-    PRE({"class": "objectBox inline objectBox-$className", role : "presentation"});
+    PRE({"class": "objectBox inline objectBox-$className", role: "presentation"});
 
 var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
-    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
+    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
 
 var OBJECTLINK = FirebugReps.OBJECTLINK =
     A({
@@ -209,7 +210,7 @@ FirebugReps.Caption = domplate(Firebug.Rep,
 
 FirebugReps.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({"class": "warning focusRow", role : 'listitem'}, "$object|STR")
+    tag: DIV({"class": "warning focusRow", role: "listitem"}, "$object|STR")
 });
 
 // ********************************************************************************************* //
@@ -2331,7 +2332,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
     frameIterator: function(frames)
     {
         // Skip Firebug internal frames.
-        // xxxHonza: this is anoter place where stack frame is peeling off.
+        // xxxHonza: this is another place where we peel off stack frames.
         var result = [];
         for (var i=0; frames && i<frames.length; i++)
         {
@@ -3320,6 +3321,27 @@ FirebugReps.ErrorCopy = function(message)
 };
 
 // ********************************************************************************************* //
+
+FirebugReps.OptimizedAway = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "optimizedAway",
+
+    getTitle: function(object)
+    {
+        return Locale.$STR("firebug.reps.optimizedAway");
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isOptimizedAway(object);
+    }
+});
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerRep(
@@ -3354,7 +3376,8 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog
+    FirebugReps.EventLog,
+    FirebugReps.OptimizedAway
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
