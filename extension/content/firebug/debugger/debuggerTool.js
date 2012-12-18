@@ -47,21 +47,16 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Listen to the debugger-client, which represents the connection to the server.
         DebuggerClientModule.addListener(this);
 
-        var chrome = Firebug.chrome;
-
         // Hook XUL stepping buttons.
+        var chrome = Firebug.chrome;
         chrome.setGlobalAttribute("cmd_firebug_rerun", "oncommand",
             "Firebug.DebuggerTool.rerun(Firebug.currentContext)");
-
         chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "oncommand",
             "Firebug.DebuggerTool.resume(Firebug.currentContext)");
-
         chrome.setGlobalAttribute("cmd_firebug_stepOver", "oncommand",
             "Firebug.DebuggerTool.stepOver(Firebug.currentContext)");
-
         chrome.setGlobalAttribute("cmd_firebug_stepInto", "oncommand",
             "Firebug.DebuggerTool.stepInto(Firebug.currentContext)");
-
         chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
             "Firebug.DebuggerTool.stepOut(Firebug.currentContext)");
 
@@ -78,24 +73,25 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
-    onThreadAttached: function(context, reattach)
+    onThreadAttached: function(context, reload)
     {
-        Trace.sysout("debuggerTool.onThreadAttached; reattach: " + reattach);
+        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload);
 
-        // Register listners only when the first thread-attach happens. If the page is
-        // reloaded the same ThreadClient (activeThread) instance is used and so, all
-        // listeners already registered.
-        if (!reattach)
-        {
-            context.activeThread.addListener("paused", this.paused.bind(this, context));
-            context.activeThread.addListener("detached", this.detached.bind(this, context));
-            context.activeThread.addListener("resumed", this.resumed.bind(this, context));
-            context.activeThread.addListener("framesadded", this.framesadded.bind(this, context));
-            context.activeThread.addListener("framescleared", this.framescleared.bind(this, context));
-            context.activeThread.addListener("newScript", this.newScript.bind(this, context));
-        }
+        this._onPause = this.paused.bind(this, context);
+        this._onDetached = this.detached.bind(this, context);
+        this._onResumed = this.resumed.bind(this, context);
+        this._onFramesAdded = this.framesadded.bind(this, context);
+        this._onFramesCleared = this.framescleared.bind(this, context);
+        this._onNewScript = this.newScript.bind(this, context);
 
-        // Of course, the context is always new here so, crate a cache.
+        context.activeThread.addListener("paused", this._onPause);
+        context.activeThread.addListener("detached", this._onDetached);
+        context.activeThread.addListener("resumed", this._onResumed);
+        context.activeThread.addListener("framesadded", this._onFramesAdded);
+        context.activeThread.addListener("framescleared", this._onFramesCleared);
+        context.activeThread.addListener("newScript", this._onNewScript);
+
+        // Create grip cache
         context.gripCache = new GripCache(DebuggerClientModule.client);
     },
 
@@ -103,8 +99,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerTool.onThreadDetached;");
 
-        // xxxHonza: all the activeThread listeners should be removed.
-        context.activeThread.debuggerToolAttached = false;
+        // Remove all listeners from the current ThreadClient
+        context.activeThread.removeListener("paused", this._onPause);
+        context.activeThread.removeListener("detached", this._onDetached);
+        context.activeThread.removeListener("resumed", this._onResumed);
+        context.activeThread.removeListener("framesadded", this._onFramesAdded);
+        context.activeThread.removeListener("framescleared", this._onFramesCleared);
+        context.activeThread.removeListener("newScript", this._onNewScript);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

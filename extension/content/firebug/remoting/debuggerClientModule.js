@@ -122,6 +122,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     onTabDetached: function()
     {
+        // xxxHonza: we need pass context to the listeners. 
         this.dispatch("onThreadDetached", arguments);
         this.dispatch("onTabDetached", arguments);
     },
@@ -159,6 +160,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Context already attached (page just reloaded).
         if (context.tabClient && context.activeThread)
         {
+            this.dispatch("onThreadDetached", [context, true]);
+            this.dispatch("onTabDetached", [context, true]);
+
             this.dispatch("onTabAttached", [context, true]);
             this.dispatch("onThreadAttached", [context, true]);
             return;
@@ -264,6 +268,11 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         {
             onPacket: function onPacket(packet)
             {
+                // Ignore newGlobal packets for now.
+                // See https://bugzilla.mozilla.org/show_bug.cgi?id=801084
+                if (packet.type == "newGlobal")
+                    return;
+
                 TraceConn.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
                 self.client.onPacket(packet);
             },

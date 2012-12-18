@@ -77,7 +77,8 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         var tool = context.getTool("debugger");
         tool.setBreakpoints(context, bps, function()
         {
-            FBTrace.sysout("breakpointStore.onThreadAttached; Server initialized", bps);
+            FBTrace.sysout("breakpointStore.onThreadAttached; Server side breakpoints " +
+                "initialized", bps);
         });
     },
 
