@@ -10,9 +10,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/console/closureInspector",
     "firebug/editor/editor"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, Editor) {
+function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -890,6 +891,54 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     }
 };
 
+/**
+ * Transform expressions that use .% into more JavaScript-friendly function calls.
+ * (This is unrelated to the auto-completer, but autoCompleter.js has so many nice
+ * helper functions.)
+ */
+Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
+{
+    var sexpr = simplifyExpr(expr);
+    if (!sexpr)
+        return expr;
+    var search = 0;
+    for (;;)
+    {
+        // Find the next occurrance of .%.
+        var end = sexpr.indexOf(".%", search);
+        if (end === -1)
+            break;
+
+        var start = getExpressionOffset(sexpr, end);
+        if (/^-?[0-9]*$/.test(expr.substring(start, end)))
+        {
+            // False alarm - the operator was actually a number and the modulo operator.
+            search = end + 1;
+        }
+        else
+        {
+            // Substitute "expr.%prop" with "scopeGetter(expr).prop", or, if used
+            // in a "new" expression, "(scopeGetter(expr)).prop" (so that the scope
+            // getter isn't used as a constructor). We don't want to use the first
+            // thing unconditionally though, because it messes with ASI.
+            var newPos = (start === 0 ? -1 : sexpr.lastIndexOf("new", start-1));
+            var hasNew = (newPos !== -1 && !/[a-zA-Z0-9_$.]/.test(sexpr.charAt(newPos-1)) &&
+                sexpr.substring(newPos + 3, start).trim() === "");
+            var subst = function(expr)
+            {
+                return expr.substr(0, start) + (hasNew ? "(" : "") + fname + "(" +
+                    expr.substring(start, end) + ")" + (hasNew ? ")" : "") + "." +
+                    expr.substr(end+2);
+            };
+            expr = subst(expr);
+            sexpr = subst(sexpr);
+
+            search = end + fname.length + (hasNew ? 3 : 1); // |(()).| - |.%|, or |().| - |.%|
+        }
+    }
+    return expr;
+};
+
 // ********************************************************************************************* //
 
 /**
@@ -966,15 +1015,16 @@ function EditorJSAutoCompleter(box, completionBox, options)
 /**
  * Try to find the position at which the expression to be completed starts.
  */
-function getExpressionOffset(command)
+function getExpressionOffset(command, start)
 {
-    var bracketCount = 0;
+    if (typeof start === 'undefined')
+        start = command.length;
 
-    var start = command.length, instr = false;
+    var bracketCount = 0, instr = false;
 
     // When completing []-accessed properties, start instead from the last [.
-    var lastBr = command.lastIndexOf("[");
-    if (lastBr !== -1 && /^" *$/.test(command.substr(lastBr+1)))
+    var lastBr = command.lastIndexOf("[", start);
+    if (lastBr !== -1 && /^" *$/.test(command.substring(lastBr+1, start)))
         start = lastBr;
 
     for (var i = start-1; i >= 0; --i)
@@ -998,7 +1048,10 @@ function getExpressionOffset(command)
         else if (bracketCount === 0)
         {
             if (c === '"') instr = !instr;
-            else if (!instr && !reJSChar.test(c) && c !== ".")
+            else if (instr || reJSChar.test(c) || c === "." ||
+                (c === "%" && command[i-1] === "."))
+                ;
+            else
                 break;
         }
     }
@@ -1006,7 +1059,8 @@ function getExpressionOffset(command)
 
     // The 'new' operator has higher precedence than function calls, so, if
     // present, it should be included if the expression contains a parenthesis.
-    if (i-4 >= 0 && command.indexOf("(", i) !== -1 && command.substr(i-4, 4) === "new ")
+    var ind = command.indexOf("(", i+1);
+    if (i-4 >= 0 && ind !== -1 && ind < start && command.substr(i-4, 4) === "new ")
     {
         i -= 4;
     }
@@ -1025,10 +1079,10 @@ function getPropertyOffset(expr)
         return lastBr+2;
 
     var lastDot = expr.lastIndexOf(".");
-    if (lastDot !== -1)
-        return lastDot+1;
+    if (lastDot !== -1 && expr.charAt(lastDot+1) === "%")
+        return lastDot+2;
 
-    return 0;
+    return (lastDot === -1 ? 0 : lastDot+1);
 }
 
 /**
@@ -1258,7 +1312,8 @@ function killCompletions(expr, origExpr)
         return true;
 
     if (reJSChar.test(expr[expr.length-1]) ||
-            expr[expr.length-1] === ".")
+            expr.slice(-1) === "." ||
+            expr.slice(-2) === ".%")
     {
         // An expression at the end - we're fine.
     }
@@ -1516,9 +1571,10 @@ var AutoCompletionKnownTypes = {
 
 var LinkType = {
     "PROPERTY": 0,
-    "INDEX": 1,
-    "CALL": 2,
-    "RETVAL_HEURISTIC": 3
+    "SCOPED_VARS": 1,
+    "INDEX": 2,
+    "CALL": 3,
+    "RETVAL_HEURISTIC": 4
 };
 
 function getKnownType(t)
@@ -1643,7 +1699,9 @@ function propertiesToHide(expr, obj)
         );
 
         // Hide ourselves.
-        ret.push("_FirebugCommandLine", "_firebug");
+        ret.push("_FirebugCommandLine", "_firebug",
+            "_firebugUnwrappedDebuggerObject", "__fb_scopedVars"
+        );
     }
 
     // Old and ugly.
@@ -1658,7 +1716,6 @@ function propertiesToHide(expr, obj)
     return ret;
 }
 
-
 function setCompletionsFromObject(out, object, context)
 {
     // 'object' is a user-level, non-null object.
@@ -1671,7 +1728,7 @@ function setCompletionsFromObject(out, object, context)
             // to cross-window properties, nor just '!Object.getPrototypeOf(obj)'
             // because of Object.create.
             return !Object.getPrototypeOf(obj) && "hasOwnProperty" in obj;
-        }
+        };
 
         var obj = object;
         while (obj !== null)
@@ -1716,12 +1773,36 @@ function setCompletionsFromObject(out, object, context)
     catch (exc)
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("autoCompleter.getCompletionsFromPrototypeChain failed", exc);
+            FBTrace.sysout("autoCompleter.setCompletionsFromObject failed", exc);
+    }
+}
+
+function setCompletionsFromScope(out, object, context)
+{
+    out.completions = ClosureInspector.getClosureVariablesList(object, context);
+
+    // Hide "arguments"; it almost never holds a value.
+    out.completions = Arr.unique(out.completions);
+    var ind = out.completions.indexOf("arguments");
+    if (ind !== -1)
+    {
+        out.completions.splice(ind, 1);
+        out.hiddenCompletions.push("arguments");
     }
 }
 
 function propChainBuildComplete(out, context, tempExpr, result)
 {
+    if (out.scopeCompletion)
+    {
+        if (tempExpr.fake)
+            return;
+        if (typeof result !== "object" && typeof result !== "function")
+            return;
+        setCompletionsFromScope(out, result, context);
+        return;
+    }
+
     var done = function(result)
     {
         if (result !== undefined && result !== null)
@@ -1786,6 +1867,10 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             else
                 return;
         }
+        else
+        {
+            return;
+        }
         evalPropChainStep(step+1, tempExpr, evalChain, out, context);
     }
     else
@@ -1799,6 +1884,11 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             {
                 tempExpr.thisCommand = tempExpr.command;
                 tempExpr.command += "." + link.name;
+            }
+            else if (type === LinkType.SCOPED_VARS)
+            {
+                tempExpr.thisCommand = "window";
+                tempExpr.command += ".%" + link.name;
             }
             else if (type === LinkType.INDEX)
             {
@@ -1986,10 +2076,15 @@ function evalPropChain(out, preExpr, origExpr, context)
             if (ch === ".")
             {
                 // Property access
-                var nextLink = eatProp(preExpr, linkStart+1);
-                lastProp = preExpr.substring(linkStart+1, nextLink);
+                var scope = (preExpr.charAt(linkStart+1) === "%");
+                linkStart += (scope ? 2 : 1);
+                var nextLink = eatProp(preExpr, linkStart);
+                lastProp = preExpr.substring(linkStart, nextLink);
                 linkStart = nextLink;
-                evalChain.push({"type": LinkType.PROPERTY, "name": lastProp});
+                evalChain.push({
+                    "type": (scope ? LinkType.SCOPED_VARS : LinkType.PROPERTY),
+                    "name": lastProp
+                });
             }
             else if (ch === "(")
             {
@@ -2055,24 +2150,25 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
 
             // In case of array indexing, remove the bracket and set a flag to
             // escape completions.
+            out.scopeCompletion = false;
             var len = spreExpr.length;
             if (len >= 2 && spreExpr[len-2] === "[" && spreExpr[len-1] === '"')
             {
                 indexCompletion = true;
                 out.indexQuoteType = preExpr[len-1];
-                spreExpr = spreExpr.substr(0, len-2);
-                preExpr = preExpr.substr(0, len-2);
+                len -= 2;
+            }
+            else if (spreExpr.slice(-2) === ".%")
+            {
+                out.scopeCompletion = true;
+                len -= 2;
             }
             else
             {
-                // Remove the trailing dot (if there is one)
-                var lastDot = spreExpr.lastIndexOf(".");
-                if (lastDot !== -1)
-                {
-                    spreExpr = spreExpr.substr(0, lastDot);
-                    preExpr = preExpr.substr(0, lastDot);
-                }
+                len -= 1;
             }
+            spreExpr = spreExpr.substr(0, len);
+            preExpr = preExpr.substr(0, len);
 
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.autoCompleteEval pre:'" + preExpr +

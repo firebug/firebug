@@ -23,12 +23,13 @@ define([
     "firebug/console/commandLineHelp",
     "firebug/console/commandLineInclude",
     "firebug/console/commandLineExposed",
+    "firebug/console/closureInspector",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp,
-    CommandLineInclude, CommandLineExposed) {
+    Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp, CommandLineInclude,
+    CommandLineExposed, ClosureInspector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -71,31 +72,33 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         }
     },
 
-    // returns user-level wrapped object I guess.
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
         exceptionFunction, noStateChange)
     {
         if (!context)
             return;
 
+        targetWindow = targetWindow || context.baseWindow || context.window;
+
         try
         {
-            var result = null;
             var debuggerState = Firebug.Debugger.beginInternalOperation();
+
+            expr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
             {
-                result = this.evaluateInSandbox(expr, context, thisValue, targetWindow,
+                this.evaluateInSandbox(expr, context, thisValue, targetWindow,
                     successConsoleFunction, exceptionFunction);
             }
             else if (Firebug.Debugger.hasValidStack(context))
             {
-                result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,
+                this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,
                     successConsoleFunction, exceptionFunction);
             }
             else
             {
-                result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,
+                this.evaluateByEventPassing(expr, context, thisValue, targetWindow,
                     successConsoleFunction, exceptionFunction);
             }
 
@@ -115,15 +118,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             Firebug.Debugger.endInternalOperation(debuggerState);
         }
-
-        return result;
     },
 
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction)
     {
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.baseWindow || context.window;
 
         if (!win)
         {
@@ -256,9 +256,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var result = null;
 
-        // targetWindow may be frame in HTML
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.baseWindow || context.window;
 
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context);
