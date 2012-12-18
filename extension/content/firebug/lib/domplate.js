@@ -157,7 +157,7 @@ DomplateTag.prototype =
             }
             else
             {
-                if (name == "class" && this.attrs.hasOwnProperty(name) )
+                if (name == "class" && this.attrs.hasOwnProperty(name))
                     this.attrs[name] += " " + val;
                 else
                     this.attrs[name] = val;
@@ -336,12 +336,12 @@ DomplateTag.prototype =
                 readPartNames(this.props[name], topOuts);
         }
 
-        if ( this.attrs.hasOwnProperty("class") || this.classes)
+        if (this.attrs.hasOwnProperty("class") || this.classes)
         {
             topBlock.push(', " class=\\""');
             if (this.attrs.hasOwnProperty("class"))
                 addParts(this.attrs["class"], ',', topBlock, info, true);
-              topBlock.push(', " "');
+            topBlock.push(', " "');
             for (var name in this.classes)
             {
                 topBlock.push(', (');
@@ -976,8 +976,8 @@ function creator(tag, cons)
 {
     var fn = function()
     {
-        var tag = arguments.callee.tag;
-        var cons = arguments.callee.cons;
+        var tag = fn.tag;
+        var cons = fn.cons;
         var newTag = new cons();
         return newTag.merge(arguments, tag);
     }
