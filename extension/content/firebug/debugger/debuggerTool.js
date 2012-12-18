@@ -13,14 +13,17 @@ define([
     "firebug/debugger/stackTrace",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/gripCache",
+    "firebug/trace/traceModule",
+    "firebug/trace/traceListener",
 ],
 function (Obj, Firebug, FBTrace, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, GripCache) {
+    DebuggerClientModule, GripCache, TraceModule, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
 
 var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_DEBUGGERTOOL");
 
 // ********************************************************************************************* //
 // Debugger Tool
@@ -37,6 +40,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
+
+        this.traceListener = new TraceListener("debuggerTool.", "DBG_DEBUGGERTOOL", true);
+        TraceModule.addListener(this.traceListener);
 
         DebuggerClientModule.addListener(this);
 
@@ -57,10 +63,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
             "Firebug.DebuggerTool.stepOut(Firebug.currentContext)");
+
+        Trace.sysout("debuggerTool.initialized;");
     },
 
-    destroy: function()
+    shutdown: function()
     {
+        TraceModule.removeListener(this.traceListener);
+
         DebuggerClientModule.removeListener(this);
     },
 
@@ -77,6 +87,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.activeThread.addListener("newScript", this.newScript.bind(this, context));
 
         context.gripCache = new GripCache(DebuggerClientModule.client);
+
+        Trace.sysout("debuggerTool.onThreadAttached;");
     },
 
     onThreadDetached: function(context)
@@ -88,6 +100,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     paused: function(context, event, packet)
     {
+        Trace.sysout("debuggerTool.paused;");
+
         // @hack: all types should be supported?
         var types = {
             "breakpoint": 1,
@@ -130,6 +144,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     resumed: function(context, event, packet)
     {
+        Trace.sysout("debuggerTool.resumed; ", arguments);
+
         context.gripCache.clear();
 
         context.stopped = false;

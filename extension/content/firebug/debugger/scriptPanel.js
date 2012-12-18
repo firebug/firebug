@@ -326,6 +326,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             FBTrace.sysout("scriptPanel.onBreakpointRemoved; ", response);
         }
 
+        FBTrace.sysout("scriptPanel.onBreakpointRemovve; " + url + ", " + line);
+
         var bp = BreakpointStore.findBreakpoint(url, line);
         this.tool.removeBreakpoint(this.context, bp, callback);
 
