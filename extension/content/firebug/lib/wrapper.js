@@ -16,10 +16,10 @@ var Wrapper = {};
 
 Wrapper.getContentView = function(object)
 {
-    if (typeof(object) === "undefined" || object == null)
-        return false;
+    if (typeof object !== "object" && typeof object !== "function")
+        return object;
 
-    return (object.wrappedJSObject);
+    return object.wrappedJSObject;
 }
 
 Wrapper.unwrapObject = function(object)
@@ -111,9 +111,8 @@ Wrapper.ignoreVars =
 
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
-    "_createFirebugConsole": 1,
+    "_firebugUnwrappedDebuggerObject": 1,
     "_FirebugCommandLine": 1,
-    "loadFirebugConsole": 1,
 };
 
 Wrapper.shouldIgnore = function(name)
