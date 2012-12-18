@@ -978,7 +978,7 @@ this.disableConsolePanel = function(callback)
 };
 
 /**
- * Enables the Script panel and reloads if a callback is specified.
+ * Enables the Console panel and reloads if a callback is specified.
  * @param {Function} callback A handler that is called as soon as the page is reloaded.
  */
 this.enableConsolePanel = function(callback)
