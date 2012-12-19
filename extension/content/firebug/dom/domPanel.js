@@ -456,27 +456,22 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     Firebug.showEnumerableProperties, Firebug.showOwnProperties);
                 properties = Arr.sortUnique(properties);
 
-                var hOP = Object.prototype.hasOwnProperty;
-                if (hOP.call(contentView, "constructor") &&
-                    properties.indexOf("constructor") == -1)
+                var addOwn = function(prop)
                 {
-                    properties.push("constructor");
-                }
+                    // Apparently, Object.prototype.hasOwnProperty.call(contentView, p) lies
+                    // when 'contentView' is content and 'Object' is chrome... Bug 658909?
+                    if (Object.getOwnPropertyDescriptor(contentView, prop) &&
+                        properties.indexOf(prop) === -1)
+                    {
+                        properties.push(prop);
+                    }
+                };
+                addOwn("constructor");
+                addOwn("prototype");
+                addOwn("wrappedJSObject");
 
-                if (hOP.call(contentView, "prototype") &&
-                    properties.indexOf("prototype") == -1)
-                {
-                    properties.push("prototype");
-                }
-
-                if (hOP.call(contentView, "wrappedJSObject") &&
-                    properties.indexOf("wrappedJSObject") == -1)
-                {
-                    properties.push("wrappedJSObject");
-                }
-
-                // If showOwnProperties is false the __proto__ can be already in.
-                // If showOwnProperties is true the __proto__ should not be in.
+                // __proto__ never shows in enumerations, so add it here. We currently
+                // we don't want it when only showing own properties.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
                     properties.indexOf("__proto__") == -1 && !Firebug.showOwnProperties)
                 {
@@ -1111,7 +1106,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
                     editValue = getRowName(row);
                 else
-                    editValue = "this." + getRowName(row);
+                    editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
             Firebug.Editor.startEditing(row, editValue);
