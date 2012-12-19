@@ -20,14 +20,17 @@ function runTest()
 
             FBTest.waitForDisplayedElement("script", config, function(row)
             {
-                setTimeout(function()
-                {
-                    var expected = /function funcTest\(\) \{\}\s*/;
-                    FBTest.compare(expected, row.textContent,
-                        "The script panel must show expected source: " + row.textContent);
+                var panelNode = FBTest.getPanel("script").panelNode;
+                var nodes = panelNode.getElementsByClassName(config.classes);
 
-                    FBTest.testDone("issue4932.DONE");
-                }, 1000);
+                for (var i=0; i<nodes.length; i++)
+                    FBTest.progress("n" + i + ": " + nodes[i].textContent);
+
+                var expected = /function funcTest\(\) \{\}\s*/;
+                FBTest.compare(expected, row.textContent,
+                    "The script panel must show expected source: " + row.textContent);
+
+                FBTest.testDone("issue4932.DONE");
             });
         });
     });
