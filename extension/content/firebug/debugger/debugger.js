@@ -28,7 +28,7 @@ Firebug.JSD2.Debugger = Obj.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        Firebug.ActivableModule.destroy.apply(this, arguments);
+        Firebug.ActivableModule.shutdown.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

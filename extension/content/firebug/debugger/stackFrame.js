@@ -11,6 +11,11 @@ define([
 function (FBTrace, Url, Locale, Str, SourceLink, Grips) {
 
 // ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+
+// ********************************************************************************************* //
 // Stack Frame
 
 // xxxHonza: should be derived from Grip
@@ -193,6 +198,12 @@ StackFrame.getStackSourceLink = function()
 
 StackFrame.buildStackFrame = function(frame, context)
 {
+    if (!frame)
+    {
+        TraceError.sysout("stackFrame.buildStackFrame; ERROR no frame!");
+        return;
+    }
+
     var sourceFile = context.sourceFileMap[frame.where.url];
     if (!sourceFile)
         sourceFile = {href: frame.where.url};

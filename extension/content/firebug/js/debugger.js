@@ -2464,9 +2464,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     showContext: function(browser, context)
     {
+        // JSD1 should not update script files.
         // then context was not active during load
-        if (context && context.loaded && !context.onLoadWindowContent)
-            this.updateScriptFiles(context);
+        //if (context && context.loaded && !context.onLoadWindowContent)
+        //    this.updateScriptFiles(context);
     },
 
     // scan windows for 'script' tags (only if debugger is not enabled)

@@ -15,6 +15,7 @@ FBTrace = FBTrace.to("DBG_SCRIPTVIEW");
 // ********************************************************************************************* //
 // Source Scripts
 
+//xxxHonza: Remove this file
 //xxxHonza: This entire object should be refactored.
 
 /**

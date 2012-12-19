@@ -15,9 +15,10 @@ define([
     "firebug/debugger/gripCache",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
+    "firebug/debugger/sourceFile",
 ],
 function (Obj, Firebug, FBTrace, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, GripCache, TraceModule, TraceListener) {
+    DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile) {
 
 // ********************************************************************************************* //
 // Constants
@@ -28,7 +29,11 @@ var Trace = FBTrace.to("DBG_DEBUGGERTOOL");
 // ********************************************************************************************* //
 // Debugger Tool
 
+/**
+ * @module
+ */
 var DebuggerTool = Obj.extend(Firebug.Module,
+/** @lends DebuggerTool */
 {
     dispatchName: "JSD2.DebuggerTool",
 
@@ -45,6 +50,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         TraceModule.addListener(this.traceListener);
 
         // Listen to the debugger-client, which represents the connection to the server.
+        // The debugger-client object represents the source of all RDP events.
         DebuggerClientModule.addListener(this);
 
         // Hook XUL stepping buttons.
@@ -75,7 +81,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     onThreadAttached: function(context, reload)
     {
-        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload);
+        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload, context);
 
         this._onPause = this.paused.bind(this, context);
         this._onDetached = this.detached.bind(this, context);
@@ -93,6 +99,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // Create grip cache
         context.gripCache = new GripCache(DebuggerClientModule.client);
+
+        // Get scripts from the server. Source as fetched on demand (e.g. when
+        // displayed in the Script panel).
+        this.updateScriptFiles(context);
     },
 
     onThreadDetached: function(context)
@@ -109,15 +119,55 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Script Sources
+
+    updateScriptFiles: function(context)
+    {
+        var self = this;
+        context.activeThread.getScripts(function(response)
+        {
+            var scripts = response.scripts;
+            for (var i=0; i<scripts.length; i++)
+                self.newScript(context, scripts[i]);
+        });
+    },
+
+    newScript: function(context, script)
+    {
+        // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
+        // create as the user is evaluating expressions in the watch window.
+        if (script.url == "debugger eval code")
+            return;
+
+        var s = script;
+
+        // Create a source file and append it into the context.
+        var sourceFile = new SourceFile(s.source, s.url, s.startLine, s.lineCount);
+        context.addSourceFile(sourceFile);
+
+        Trace.sysout("debuggerTool.newScript; " + s.url + " (" + s.startLine + ", " +
+            (s.startLine + s.lineCount) + ")",
+            {script: s, sourceFile: sourceFile});
+
+        // Notify listeners (e.g. the Script panel) to updated itself. It can happen
+        // that the Script panel has been empty until now and need to display a script.
+        this.dispatch("newScript", [sourceFile]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Thread Listener
 
     paused: function(context, event, packet)
     {
-        Trace.sysout("debuggerTool.paused;");
+        var type = packet.why.type;
+        Trace.sysout("debuggerTool.paused; " + type);
+
+        var ignoreTypes = {
+            "interrupted": 1,
+        };
 
         context.gripCache.clear();
 
-        var type = packet.why.type;
         if (type == "clientEvaluated" && this.evalCallback)
         {
             // Pause packet with 'clientEvaluated' type is sent when user expression
@@ -127,7 +177,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             this.evalCallback(result);
             this.evalCallback = null
         }
-        else
+        else if (!ignoreTypes[type])
         {
             context.activeThread.fillFrames(50);
 
@@ -178,13 +228,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         Trace.sysout("debuggerTool.framescleared; ", arguments);
 
         this.dispatch("onStackCleared");
-    },
-
-    newScript: function(context, sourceFile)
-    {
-        Trace.sysout("debuggerTool.newScript; ", arguments);
-
-        this.dispatch("newScript", [sourceFile]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

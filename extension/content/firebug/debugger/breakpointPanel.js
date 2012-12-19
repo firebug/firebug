@@ -46,6 +46,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.Panel.initialize.apply(this, arguments);
 
+        // Listen to breakpoint changes (add/remove).
         BreakpointStore.addListener(this);
     },
 
@@ -359,14 +360,6 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         event.initMouseEvent("click", true, true, doc.defaultView, 0, 0, 0, 0, 0,
             false, false, false, false, 0, null);
         return node.dispatchEvent(event);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Tool Listener
-
-    onStartDebugging: function(frame)
-    {
-        FBTrace.sysout("breakpointPanel.onStartDebugging;");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

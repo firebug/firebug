@@ -62,10 +62,10 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClientModule Events
 
-    onThreadAttached: function(context, reattach)
+    onThreadAttached: function(context, reload)
     {
         // Ignore page reloads.
-        if (reattach)
+        if (reload)
             return;
 
         // Get all breakpoints

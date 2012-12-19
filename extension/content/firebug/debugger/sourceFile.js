@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/string",
 ],
-function(FBTrace) {
+function(FBTrace, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -11,16 +12,20 @@ function(FBTrace) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace;
+
 // ********************************************************************************************* //
 // Source File
 
 /**
  * SourceFile one for every compilation unit.
  */
-function SourceFile(href, startLine, lineCount)
+function SourceFile(actor, href, startLine, lineCount)
 {
     this.compilation_unit_type = "remote-script";
 
+    this.sourceActor = actor;
     this.href = href;
     this.startLine = startLine;
     this.lineCount = lineCount;
@@ -45,33 +50,53 @@ SourceFile.prototype =
 
     getSourceLength: function()
     {
-        if (!this.sourceLength)
-            this.sourceLength = this.context.sourceCache.load(this.href).length;
-
-        return this.sourceLength;
+        // xxxHonza: TODO
+        return 0;
     },
 
     getLine: function(context, lineNo)
     {
-        return context.sourceCache.getLine(this.href, lineNo);
+        // xxxHonza: TODO
+        return "";
     },
 
     isExecutableLine: function(lineNo)
     {
+        // xxxHonza: TODO
         return false;
     },
 
-    loadScriptLines: function(context)  // array of lines
+    loadScriptLines: function(context, callback)
     {
-        if (this.source)
-            return this.source;
-        else if (context.sourceCache)
-            return context.sourceCache.load(this.href);
-        else if (FBTrace.DBG_ERRORS)
+        if (this.loaded)
         {
-            FBTrace.sysout("sourceFile.loadScriptLines FAILS no sourceCache "+
-                context.getName(), context);
+            callback(this.lines);
+            return;
         }
+
+        // Ignore if the request-for-source is currently in progress.
+        if (this.inProgress)
+            return;
+
+        this.inProgress = true;
+
+        var self = this;
+        var sourceClient = context.activeThread.source(this.sourceActor);
+        sourceClient.source(function(response)
+        {
+            if (response.error)
+            {
+                TraceError.sysout("sourceFile.loadScriptLines; ERROR " +
+                    response.error, response);
+                return;
+            }
+
+            self.loaded = true;
+            self.inProgress = false;
+            self.lines = Str.splitLines(response.source);
+
+            callback(self.lines);
+        });
     },
 }
 

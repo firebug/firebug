@@ -143,10 +143,14 @@ CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listene
     //if (!this.lines)
 
     // TODO remove - a comment from xxxJJB.
-    this.lines = this.sourceFile.loadScriptLines(this.context);
-
-    this.numberOfLines = (this.lines ? this.lines.length : 0);
-    listener(this, 1, this.numberOfLines, this.lines);
+    // xxxHonza: why to remove?
+    var self = this;
+    this.sourceFile.loadScriptLines(this.context, function(lines)
+    {
+        self.lines = lines;
+        self.numberOfLines = (self.lines ? self.lines.length : 0);
+        listener(self, 1, self.numberOfLines, self.lines);
+    });
 };
 
 /**

@@ -122,14 +122,15 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
 
         var packet = {
             to: this.getActor(),
-            type: RDP.DebugProtocolTypes.nameAndParameters
+            type: "parameterNames"
         };
 
         var self = this;
         return this.cache.request(packet).then(function(response)
         {
             var r = response;
-            self.signature = r.name + "(" + r.parameters.join(", ") + ")";
+            var params = r.parameters ? r.parameters.join(", ") : "";
+            self.signature = r.name + "(" + params + ")";
             return self.signature;
         });
     },

@@ -14,9 +14,11 @@ define([
     "firebug/debugger/sourceLink",
     "firebug/debugger/breakpoint",
     "firebug/debugger/breakpointStore",
+    "firebug/trace/traceModule",
+    "firebug/trace/traceListener",
 ],
 function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, DebuggerTool, Menu,
-    StackFrame, SourceLink, Breakpoint, BreakpointStore) {
+    StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -56,6 +58,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     initialize: function(context, doc)
     {
         BasePanel.initialize.apply(this, arguments);
+
+        // Custom tracing.
+        this.traceListener = new TraceListener("scriptPanel.", "DBG_SCRIPTPANEL", false);
+        TraceModule.addListener(this.traceListener);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
@@ -264,12 +270,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             compilationUnit = this.getDefaultLocation();
 
         // Sources doesn't have to be fetched from the server yet. In such case there
-        // are not compilation units and so, no default location.
+        // are not compilation units and so, no default location. We need to just wait
+        // since sources are coming asynchronously (the UI will auto update after
+        // newScript event).
         if (!compilationUnit)
-        {
-            FBTrace.sysout("scriptPanel.showSource; ERROR no compilation unit");
             return;
-        }
 
         var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
@@ -751,6 +756,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     newScript: function(sourceFile)
     {
         Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+
+        // New script has been appended, update the default location if necessary.
+        if (!this.location)
+            this.navigate(null);
 
         // Initialize existing breakpoints
         //var bps = BreakpointStore.getBreakpoints(sourceFile.href);

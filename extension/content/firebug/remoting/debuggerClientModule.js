@@ -26,8 +26,24 @@ Cu.import("resource://gre/modules/devtools/dbg-server.jsm");
 // Module Implementation
 
 /**
- * @module This object is responsible for DebuggerClient initialization. DebuggerClient
- * represents the connection to the server side.
+ * @module This object is responsible for 'DebuggerClient' initialization. DebuggerClient
+ * is Firefox built-in object and represents the connection to the server side.
+ *
+ * This object should stay generic and only be responsible for:
+ * - connection setup + connect/disconnect
+ * - initialization of browser actors
+ * - hooking DebuggerClient events
+ * - firing events to more specialized listeners (client tools)
+ * - attach/detach the current tab and thread
+ * - hooking packet transport for debug purposes
+ *
+ * This object is implemented as a module since it represents a singleton (there is
+ * only one connection per Firebug instance).
+ *
+ * More specialized client tools (see e.g. @DebuggerTool) should register listeners
+ * to this object and handle all events accordingly.
+ *
+ * DebuggerClientModule.addListener(this);
  */
 var DebuggerClientModule = Obj.extend(Firebug.Module,
 /** @lends DebuggerClientModule */

@@ -161,16 +161,6 @@ Firebug.TabContext.prototype =
         }
 
         compilationUnit.sourceFile = sourceFile;
-
-        compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit,
-            firstLineNumber, lastLineNumber, lines)
-        {
-            Firebug.connection.dispatch("onSourceLines", arguments);
-
-            if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("onSourceLines "+compilationUnit.getURL() + " " + lines.length +
-                    " lines", compilationUnit);
-        });
     },
 
     removeSourceFile: function(sourceFile)

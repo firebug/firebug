@@ -903,6 +903,9 @@ var fbs =
     // first one in will be last one called. Returns state enabledDebugger
     registerDebugger: function(debuggrWrapper)
     {
+        // Make sure JSD1 doesn't activate
+        return;
+
         var debuggr = debuggrWrapper.wrappedJSObject;
 
         if (debuggr)
@@ -1573,6 +1576,9 @@ var fbs =
 
     enableDebugger: function()
     {
+        // Make sure JSD1 doesn't activate
+        return;
+
         if (waitingForTimer)
         {
             timer.cancel();
