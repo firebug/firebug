@@ -6,6 +6,7 @@
 <script>
 var htmlCollection = document.getElementsByTagName("html");
 var anArray = [1,2,3,4];
+var objWithNumericProps = {"0": 0, "1": 1};
 </script>
 </head>
 <body>
@@ -59,6 +60,8 @@ that completions appear for:</li>
     <li><code style="color:green">getterSeemingEval('[window]')[0].i</code></li>
     <li><code style="color:green">String.prototype.ch</code></li>
     <li><code style="color:green">new Date().g</code></li>
+    <li><code style="color:green">anArray["0</code></li>
+    <li><code style="color:green">objWithNumericProps.0</code></li>
 </ul>
 
 and don't appear for:
