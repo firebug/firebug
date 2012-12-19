@@ -90,6 +90,15 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     };
 
     /**
+     * Completely reset the auto-completer.
+     */
+    this.reset = function()
+    {
+        this.hide();
+        this.revertValue = null;
+    };
+
+    /**
      * Hide completions for this expression (/completion base). Appending further
      * characters to the variable name will not make completions appear, but
      * adding, say, a semicolon and typing something else will.
@@ -813,6 +822,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         try
         {
             this.completionPopup.hidePopup();
+            this.selectedPopupElement = null;
         }
         catch (err)
         {
@@ -1004,7 +1014,7 @@ function EditorJSAutoCompleter(box, completionBox, options)
     var ac = new Firebug.JSAutoCompleter(box, completionBox, options);
 
     this.destroy = Obj.bindFixed(ac.shutdown, ac);
-    this.reset = Obj.bindFixed(ac.hide, ac);
+    this.reset = Obj.bindFixed(ac.reset, ac);
     this.complete = Obj.bind(ac.complete, ac);
     this.handleKeyPress = Obj.bind(ac.handleKeyPress, ac);
 }
