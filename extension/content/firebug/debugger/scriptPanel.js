@@ -755,8 +755,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     newScript: function(sourceFile)
     {
-        Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
-
         // New script has been appended, update the default location if necessary.
         if (!this.location)
             this.navigate(null);

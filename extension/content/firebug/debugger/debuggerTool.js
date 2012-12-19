@@ -77,12 +77,27 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Tabs
+
+    onTabNavigated: function()
+    {
+        this.dispatch("onTabNavigated");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
     onThreadAttached: function(context, reload)
     {
         Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload, context);
 
+        if (this._onPause)
+        {
+            TraceError.sysout("debuggerTool.onThreadAttached; ERROR listeners still active!");
+        }
+
+        // This is the place where we bind all listeners to the current
+        // context so, it's available inside the methods.
         this._onPause = this.paused.bind(this, context);
         this._onDetached = this.detached.bind(this, context);
         this._onResumed = this.resumed.bind(this, context);
@@ -90,12 +105,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this._onFramesCleared = this.framescleared.bind(this, context);
         this._onNewScript = this.newScript.bind(this, context);
 
+        // Add all listeners
         context.activeThread.addListener("paused", this._onPause);
         context.activeThread.addListener("detached", this._onDetached);
         context.activeThread.addListener("resumed", this._onResumed);
         context.activeThread.addListener("framesadded", this._onFramesAdded);
         context.activeThread.addListener("framescleared", this._onFramesCleared);
-        context.activeThread.addListener("newScript", this._onNewScript);
+
+        DebuggerClientModule.client.addListener("newScript", this._onNewScript);
 
         // Create grip cache
         context.gripCache = new GripCache(DebuggerClientModule.client);
@@ -115,7 +132,15 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.activeThread.removeListener("resumed", this._onResumed);
         context.activeThread.removeListener("framesadded", this._onFramesAdded);
         context.activeThread.removeListener("framescleared", this._onFramesCleared);
-        context.activeThread.removeListener("newScript", this._onNewScript);
+
+        DebuggerClientModule.client.removeListener("newScript", this._onNewScript);
+
+        this._onPause = null;
+        this._onDetached = null;
+        this._onResumed = null;
+        this._onFramesAdded = null;
+        this._onFramesCleared = null;
+        this._onNewScript = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -128,11 +153,16 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         {
             var scripts = response.scripts;
             for (var i=0; i<scripts.length; i++)
-                self.newScript(context, scripts[i]);
+                self.addScript(context, scripts[i]);
         });
     },
 
-    newScript: function(context, script)
+    newScript: function(context, type, response)
+    {
+        this.addScript(context, response);
+    },
+
+    addScript: function(context, script)
     {
         // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
         // create as the user is evaluating expressions in the watch window.
@@ -144,10 +174,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Create a source file and append it into the context.
         var sourceFile = new SourceFile(s.source, s.url, s.startLine, s.lineCount);
         context.addSourceFile(sourceFile);
-
-        Trace.sysout("debuggerTool.newScript; " + s.url + " (" + s.startLine + ", " +
-            (s.startLine + s.lineCount) + ")",
-            {script: s, sourceFile: sourceFile});
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen
         // that the Script panel has been empty until now and need to display a script.
