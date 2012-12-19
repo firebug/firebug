@@ -2105,9 +2105,9 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             }
         }
 
-        // Add "] to properties if we are doing index-completions.
         if (indexCompletion)
         {
+            // If we are doing index-completions, add "] to everything.
             function convertQuotes(x)
             {
                 x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
@@ -2116,15 +2116,15 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             out.completions = out.completions.map(convertQuotes);
             out.hiddenCompletions = out.hiddenCompletions.map(convertQuotes);
         }
-
-        // Remove numeric keys.
-        var rePositiveNumber = /^[1-9][0-9]*$/;
-        var nonNumeric = function(x)
+        else if (out.completions.indexOf("length") !== -1 && out.completions.indexOf("0") !== -1)
         {
-            return x !== '0' && !rePositiveNumber.test(x);
+            // ... otherwise remove numeric keys from array-like things.
+            var rePositiveNumber = /^[1-9][0-9]*$/;
+            out.completions = out.completions.filter(function(x)
+            {
+                return !rePositiveNumber.test(x) && x !== "0";
+            });
         }
-        out.completions = out.completions.filter(nonNumeric);
-        out.hiddenCompletions = out.hiddenCompletions.filter(nonNumeric);
 
         // Sort the completions, and avoid duplicates.
         // XXX: If we make it possible to show both regular and hidden completions
