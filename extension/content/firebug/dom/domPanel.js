@@ -1103,7 +1103,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
                 var type = typeof propValue;
                 if (type == "undefined" || type == "number" || type == "boolean")
-                    editValue = propValue;
+                    editValue = "" + propValue;
                 else if (type == "string")
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue == null)
