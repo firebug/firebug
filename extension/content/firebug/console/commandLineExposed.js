@@ -3,8 +3,9 @@
 define([
     "firebug/lib/wrapper",
     "firebug/lib/events",
+    "firebug/lib/dom",
 ],
-function(Wrapper, Events) {
+function(Wrapper, Events, Dom) {
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -173,7 +174,7 @@ function createFirebugCommandLine(context, win)
             FBTrace.sysout("commandLine.Exposed.firebugEvalEvent " + window.location);
 
         // see commandLine.js
-        var expr = contentView.document.getUserData("firebug-expr");
+        var expr = Dom.getMappedData(contentView.document, "firebug-expr");
         evaluate(expr);
 
         if (FBTrace.DBG_COMMANDLINE)
@@ -232,7 +233,7 @@ function createFirebugCommandLine(context, win)
             commandLine.userObjects.push(objs[i]);
 
         var length = commandLine.userObjects.length;
-        contentView.document.setUserData("firebug-methodName", methodName, null);
+        Dom.setMappedData(contentView.document, "firebug-methodName", methodName);
 
         contentView.document.dispatchEvent(event);
 
@@ -244,7 +245,7 @@ function createFirebugCommandLine(context, win)
         }
 
         var result;
-        if (contentView.document.getUserData("firebug-retValueType") == "array")
+        if (Dom.getMappedData(contentView.document, "firebug-retValueType") == "array")
             result = [];
 
         if (!result && commandLine.userObjects.length == length + 1)
