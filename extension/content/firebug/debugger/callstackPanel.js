@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/chrome/reps",
     "firebug/lib/events",
     "firebug/lib/wrapper",
@@ -14,7 +15,7 @@ define([
     "firebug/debugger/stackFrameRep",
     "firebug/debugger/stackTrace",
 ],
-function(Obj, Firebug, FirebugReps, Events, Wrapper, StackFrame, Css, Arr, Dom, Menu,
+function(Obj, Firebug, FBTrace, FirebugReps, Events, Wrapper, StackFrame, Css, Arr, Dom, Menu,
     StackFrameRep, StackTrace) {
 
 // ********************************************************************************************* //
@@ -22,6 +23,8 @@ function(Obj, Firebug, FirebugReps, Events, Wrapper, StackFrame, Css, Arr, Dom, 
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+var Trace = FBTrace.to("SBG_STACK");
 
 // ********************************************************************************************* //
 // Callstack Panel
@@ -79,14 +82,12 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.visible)
             this.show();
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstackPanel.onStartDebugging; " + this.visible);
+        Trace.sysout("callstackPanel.onStartDebugging; " + this.visible);
     },
 
     onStopDebugging: function(context)
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstackPanel.onStopDebugging;");
+        Trace.sysout("callstackPanel.onStopDebugging;");
 
         // clear the view
         this.showStackTrace(null);
@@ -102,11 +103,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             this.updateLocation(this.location);
         }
 
-        if (FBTrace.DBG_STACK)
-        {
-            FBTrace.sysout("callstack.show; state: " + state + ", location: " +
-                this.location, state);
-        }
+        Trace.sysout("callstack.show; state: " + state + ", location: " + this.location, state);
 
         if (state)
         {
@@ -142,8 +139,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 state.selectedCallStackFrameIndex = i + 1;  // traces are 1 base
         }
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack.hide state: "+state, state);
+        Trace.sysout("callstack.hide state: "+state, state);
     },
 
     supportsObject: function(object, type)
@@ -154,8 +150,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack.updateSelection; " + object, object);
+        Trace.sysout("callstack.updateSelection; " + object, object);
 
         if (!this.location)
         {
@@ -174,19 +169,15 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 this.selectFrame(frameIndex);
             }
 
-            if (FBTrace.DBG_STACK)
-            {
-                FBTrace.sysout("Callstack updateSelection index:" + trace.currentFrameIndex +
-                    " StackFrame " + object, object);
-            }
+            Trace.sysout("Callstack updateSelection index:" + trace.currentFrameIndex +
+                " StackFrame " + object, object);
         }
     },
 
     // this.location is a StackTrace
     updateLocation: function(object)
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack.updateLocation; " + object, object);
+        Trace.sysout("callstack.updateLocation; " + object, object);
 
         // All paths lead to showStackTrace
         if (object instanceof StackTrace)
@@ -211,12 +202,9 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var rep = Firebug.getRep(trace, this.context);
 
-            if (FBTrace.DBG_STACK)
-            {
-                FBTrace.sysout("callstack showStackFrame with " + trace.frames.length +
-                    " frames using " + rep + " into " + this.panelNode,
-                    {trace: trace, rep:rep, node:this.panelNode});
-            }
+            Trace.sysout("callstack showStackFrame with " + trace.frames.length +
+                " frames using " + rep + " into " + this.panelNode,
+                {trace: trace, rep:rep, node:this.panelNode});
 
             rep.tag.replace({object:trace}, this.panelNode);
 
