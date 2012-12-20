@@ -678,7 +678,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(frame)
     {
-        //if (FBTrace.DBG_UI_LOOP)
+        if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.startDebugging enter context: " + this.context.getName(), frame);
 
         try
@@ -727,7 +727,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onStopDebugging: function()
     {
-        //if (FBTrace.DBG_UI_LOOP)
+        if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
 
         try

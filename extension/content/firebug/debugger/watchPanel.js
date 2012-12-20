@@ -28,6 +28,7 @@ with (Domplate) {
 // Constants
 
 var Trace = FBTrace.to("DBG_WATCH");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Domplate
@@ -148,8 +149,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("WatchPanel.updateSelection; EXCEPTION " + exc, exc);
+            TraceError.sysout("WatchPanel.updateSelection; EXCEPTION " + exc, exc);
         }
     },
 
@@ -192,8 +192,12 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.tree.expandObject(scope);
         }
 
-        // Asynchronously eval all user-expressions
-        this.evalWatches(this.watches);
+        // Asynchronously eval all user-expressions, but only if the selection
+        // doesn't happen due to clientEvaluated packet.
+        // xxxHonza: the entire 'clientEvaluated' logic should be part of this panel.
+        // (so, move the evalCallback here from the debuggerTool) 
+        if (this.tool.evalCallback == null)
+            this.evalWatches(this.watches);
     },
 
     showMembers: function(members, update, scrollTop)
@@ -317,46 +321,70 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Watches Evaluation
 
-    // xxxHonza: should this be done throug promise-chain?
     evalWatches: function(watches)
     {
-        if (watches)
-            this.watchesToEval = Arr.cloneArray(watches);
-
-        var watch = this.watchesToEval.shift();
-        if (!watch)
+        if (!watches.length)
             return;
 
-        this.evalWatch(watch);
-    },
+        // The debugger must be halted at this moment.
+        var currentFrame = this.context.currentFrame;
+        if (!currentFrame)
+            return;
 
-    evalWatch: function(watch)
-    {
-        var expr = watch.expr;
+        var list = Arr.cloneArray(watches);
 
-        var self = this;
-        this.tool.eval(this.context, this.context.currentFrame, expr, function(grip)
+        var expression = [];
+        for (var i=0; i<list.length; i++)
         {
-            FBTrace.sysout("watchPanel.evalWatch; " + grip, grip);
+            var watch = list[i];
+
+            // Avoid yielding an empty pseudo-array when evaluating 'arguments',
+            // since they're overridden by the expression's closure scope.
+            expression.push("(function(arguments) {" +
+                // Make sure all the quotes are escaped in the expression's syntax.
+                "try { return eval(\"" + watch.expr.replace(/"/g, "\\$&") + "\"); }" +
+                "catch(e) { return e.name + ': ' + e.message; }" +
+            "})(arguments)");
+        }
+        expression = "[" + expression.join(",") + "]";
+
+        Trace.sysout("watchPanel.evalWatches; " + expression, watches);
+
+        // xxxHonza: the entire logic related to eval result, shoule be refactored
+        // The cache and grip objects should do most of the work automatically.
+        var self = this;
+        this.tool.eval(this.context, currentFrame, expression, function(resultGrip)
+        {
+            Trace.sysout("watchPanel.evalWatches; EVALUATED ", resultGrip);
 
             // If grip is not defined an exception has been thrown.
-            if (grip)
+            if (!resultGrip)
+                return;
+
+            var cache = self.context.gripCache;
+            var gripObj = cache.getObject(resultGrip);
+            gripObj.getProperties().then(function(props)
             {
-                var thread = self.context.activeThread;
-                watch.value = thread.getObject(grip);
+                // We don't want object properties, we need the object itself (it's an
+                // array with results and we want to iterate it).
+                var results = gripObj.getValue();
 
-                //xxxHonza: this should be in the cache/factory probably.
-                if (grip.type == "undefined")
-                    delete watch.value;
-                else if (grip.type == "null")
-                    watch.value = null;
+                Trace.sysout("watchPanel.evalWatches; RESULTS", results);
 
-                self.tree.updateObject(watch);
-            }
+                if (results.length != list.length)
+                {
+                    TraceError.sysout("watchPanel.evalWatches; ERROR wrong number " +
+                        "of results after evaluation " + results.length + " != "+ list.length);
+                    return;
+                }
 
-            // Eval another watch in the queue.
-            setTimeout(function() {
-                self.evalWatches();
+                for (var i=0; i<results.length; i++)
+                {
+                    var watch = list[i];
+                    var result = results[i].grip ? results[i].grip : results[i];
+                    watch.value = cache.getObject(result);
+                    self.tree.updateObject(watch);
+                }
             });
         });
     },

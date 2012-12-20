@@ -109,6 +109,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.activeThread.addListener("paused", this._onPause);
         context.activeThread.addListener("detached", this._onDetached);
         context.activeThread.addListener("resumed", this._onResumed);
+
+        // These events are used to sync with ThreadClient's stack frame cache.
         context.activeThread.addListener("framesadded", this._onFramesAdded);
         context.activeThread.addListener("framescleared", this._onFramesCleared);
 
@@ -186,42 +188,49 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     paused: function(context, event, packet)
     {
         var type = packet.why.type;
-        Trace.sysout("debuggerTool.paused; " + type);
+        Trace.sysout("debuggerTool.paused; " + type, packet);
 
         var ignoreTypes = {
             "interrupted": 1,
         };
 
+        if (ignoreTypes[type])
+            return;
+
         context.gripCache.clear();
 
+        context.stopped = true;
+
+        // Asynchronously initializes ThreadClient's stack frame cache. If you want to
+        // sync with the cache handle 'framesadded' and 'framescleared' events.
+        context.activeThread.fillFrames(50);
+
+        var frame = StackFrame.buildStackFrame(packet.frame, context);
+
+        // the frame we stopped in, don't change this elsewhere.
+        context.stoppedFrame = frame;
+
+        // the frame we show to user, depends on selection
+        context.currentFrame = frame;
+
+        // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
+        this.dispatch("onStartDebugging", [frame]);
+
+        // Resolve evaluated expression (e.g. for {@WatchPanel}).
         if (type == "clientEvaluated" && this.evalCallback)
         {
             // Pause packet with 'clientEvaluated' type is sent when user expression
             // has been evaluated on the server side. Let's pass the result to the
             // registered callback.
             var result = packet.why.frameFinished["return"];
+
+            // xxxHonza: temporary
+            if (typeof(result) == "undefined")
+                result = packet.why.frameFinished["throw"];
+
             this.evalCallback(result);
             this.evalCallback = null
         }
-        else if (!ignoreTypes[type])
-        {
-            context.activeThread.fillFrames(50);
-
-            var frame = StackFrame.buildStackFrame(packet.frame, context);
-
-            context.stopped = true;
-            context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
-            context.currentFrame = frame;  // the frame we show to user, depends on selection
-
-            this.dispatch("onStartDebugging", [frame]);
-        }
-    },
-
-    detached: function(context)
-    {
-        Trace.sysout("debuggerTool.detached; ", arguments);
-
-        context.gripCache.clear();
     },
 
     resumed: function(context, event, packet)
@@ -238,22 +247,36 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.dispatch("onStopDebugging");
     },
 
+    detached: function(context)
+    {
+        Trace.sysout("debuggerTool.detached; ", arguments);
+
+        context.gripCache.clear();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stack Frames
+
     framesadded: function(context)
     {
         Trace.sysout("debuggerTool.framesadded; ", arguments);
 
+        // Get frames from ThreadClient's stack-frame cache and build stack trace object,
+        // which is stored in the context.
         var frames = context.activeThread.cachedFrames;
-        var stackTrace = StackTrace.buildStackTrace(frames, context);
-        context.currentTrace = stackTrace;
+        context.currentTrace = StackTrace.buildStackTrace(frames, context);
 
-        this.dispatch("onStackCreated", [stackTrace]);
+        // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
+        this.dispatch("framesadded", [context.currentTrace]);
     },
 
     framescleared: function(context)
     {
         Trace.sysout("debuggerTool.framescleared; ", arguments);
 
-        this.dispatch("onStackCleared");
+        context.currentTrace = null;
+
+        this.dispatch("framescleared");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -415,6 +438,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     eval: function(context, frame, expr, callback)
     {
+        Trace.sysout("debuggerTool.eval; " + expr);
+
         var self = this;
         this.evalCallback = callback;
 
