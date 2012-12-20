@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/lib/domplate",
+    "firebug/lib/trace",
     "firebug/chrome/firefox",
     "firebug/firebug",
     "firebug/dom/toggleBranch",
@@ -18,10 +19,15 @@ define([
     "firebug/debugger/watchPanelProvider",
     "firebug/debugger/grips",
 ],
-function(Obj, Domplate, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, StackFrame,
+function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, StackFrame,
     Locale, Str, WatchEditor, WatchTree, WatchPanelProvider, Grips) {
 
 with (Domplate) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Trace = FBTrace.to("DBG_WATCH");
 
 // ********************************************************************************************* //
 // Domplate
@@ -55,7 +61,9 @@ function WatchPanel()
 }
 
 /**
- * Represents the Watch side panel available in the Script panel.
+ * @panel Represents the Watch side panel available in the Script panel. This panel
+ * allows variable inspection during debugging. It's possible to inspect existing
+ * variables in the scope-chaine as well as evaluating user expressions.
  */
 var BasePanel = Firebug.Panel;
 WatchPanel.prototype = Obj.extend(BasePanel,
@@ -147,8 +155,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     doUpdateSelection: function(frame)
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
+        Trace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
@@ -200,8 +207,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     rebuild: function()
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.rebuild", this.selection);
+        Trace.sysout("WatchPanel.rebuild", this.selection);
 
         this.updateSelection(this.selection);
     },
@@ -236,8 +242,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         expression = Str.trim(expression);
 
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.addWatch; expression: " + expression, this.watches);
+        Trace.sysout("WatchPanel.addWatch; expression: " + expression, this.watches);
 
         if (!this.watches)
             this.watches = [];
@@ -254,8 +259,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     removeWatch: function(expression)
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.removeWatch; expression: " + expression);
+        Trace.sysout("WatchPanel.removeWatch; expression: " + expression);
 
         if (!this.watches)
             return;
@@ -267,8 +271,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     editNewWatch: function(value)
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.editNewWatch; value: " + value);
+        Trace.sysout("WatchPanel.editNewWatch; value: " + value);
 
         var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
@@ -277,8 +280,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     setWatchValue: function(row, value)
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.setWatchValue", {row: row, value: value});
+        Trace.sysout("WatchPanel.setWatchValue", {row: row, value: value});
 
         var rowIndex = this.getWatchRowIndex(row);
         this.watches[rowIndex] = value;
@@ -287,8 +289,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     deleteWatch: function(row)
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.deleteWatch", row);
+        Trace.sysout("WatchPanel.deleteWatch", row);
 
         var rowIndex = this.getWatchRowIndex(row);
         this.watches.splice(rowIndex, 1);
@@ -302,8 +303,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     deleteAllWatches: function()
     {
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("WatchPanel.deleteAllWatches");
+        Trace.sysout("WatchPanel.deleteAllWatches");
 
         this.watches = [];
         this.rebuild(true);
@@ -478,8 +478,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // otherwise, we insert the item at the beginning of the menu
         var deleteAllWatchesIndex = (deleteWatchIndex >= 0) ? deleteWatchIndex + 1 : 0;
 
-        if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("insert DeleteAllWatches at: " + deleteAllWatchesIndex);
+        Trace.sysout("insert DeleteAllWatches at: " + deleteAllWatchesIndex);
 
         // insert DeleteAllWatches after DeleteWatch
         items.splice(deleteAllWatchesIndex, 0, {
