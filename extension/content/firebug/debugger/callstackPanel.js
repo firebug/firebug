@@ -24,7 +24,7 @@ function(Obj, Firebug, FBTrace, FirebugReps, Events, Wrapper, StackFrame, Css, A
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var Trace = FBTrace.to("SBG_STACK");
+var Trace = FBTrace.to("DBG_STACK");
 
 // ********************************************************************************************* //
 // Callstack Panel
@@ -36,6 +36,10 @@ var Trace = FBTrace.to("SBG_STACK");
  *
  * Panel location is an instance of StackTrace object.
  * Panel selection is an instance of StackFrame object.
+ *
+ * The content of this panel is synced with ThreadClient's stack frame cache using
+ * 'framesadded' and 'framescleared' events. These events are re-sent from {@DebuggerTool},
+ * which is registered ThreadClient's listener. 
  */
 function CallstackPanel() {}
 CallstackPanel.prototype = Obj.extend(Firebug.Panel,
@@ -60,40 +64,46 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
+        // Listen for frames added/cleared events to sync content of this panel.
         this.tool = this.context.getTool("debugger");
         this.tool.addListener(this);
     },
 
     destroy: function(state)
     {
-        this.tool.removeListener(this);
-
         Firebug.Panel.destroy.apply(this, arguments);
+
+        // Unregister all listeners.
+        this.tool.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Tool Listener
 
-    onStartDebugging: function(context, frame)
+    framesadded: function(stackTrace)
     {
+        Trace.sysout("callstackPanel.framesadded;", stackTrace);
+
         // if we get a show() call then create and set new location
         delete this.location;
 
         // then we should reshow
         if (this.visible)
             this.show();
-
-        Trace.sysout("callstackPanel.onStartDebugging; " + this.visible);
     },
 
-    onStopDebugging: function(context)
+    framescleared: function()
     {
-        Trace.sysout("callstackPanel.onStopDebugging;");
+        Trace.sysout("callstackPanel.framescleared;");
 
-        // clear the view
+        delete this.location;
+
+        //xxxHonza: would it ne more logical to call this.show() here?
         this.showStackTrace(null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Framework Events
 
     show: function(state)
     {
@@ -103,7 +113,8 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             this.updateLocation(this.location);
         }
 
-        Trace.sysout("callstack.show; state: " + state + ", location: " + this.location, state);
+        Trace.sysout("callstackPanel.show; state: " + state + ", location: " +
+            this.location, state);
 
         if (state)
         {
@@ -139,7 +150,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 state.selectedCallStackFrameIndex = i + 1;  // traces are 1 base
         }
 
-        Trace.sysout("callstack.hide state: "+state, state);
+        Trace.sysout("callstackPanel.hide state: "+state, state);
     },
 
     supportsObject: function(object, type)
@@ -150,7 +161,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
-        Trace.sysout("callstack.updateSelection; " + object, object);
+        Trace.sysout("callstackPanel.updateSelection; " + object, object);
 
         if (!this.location)
         {
@@ -169,7 +180,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 this.selectFrame(frameIndex);
             }
 
-            Trace.sysout("Callstack updateSelection index:" + trace.currentFrameIndex +
+            Trace.sysout("callstackPanel.updateSelection index:" + trace.currentFrameIndex +
                 " StackFrame " + object, object);
         }
     },
@@ -177,7 +188,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     // this.location is a StackTrace
     updateLocation: function(object)
     {
-        Trace.sysout("callstack.updateLocation; " + object, object);
+        Trace.sysout("callstackPanel.updateLocation; " + object, object);
 
         // All paths lead to showStackTrace
         if (object instanceof StackTrace)
@@ -202,7 +213,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var rep = Firebug.getRep(trace, this.context);
 
-            Trace.sysout("callstack showStackFrame with " + trace.frames.length +
+            Trace.sysout("callstackPanel.showStackFrame with " + trace.frames.length +
                 " frames using " + rep + " into " + this.panelNode,
                 {trace: trace, rep:rep, node:this.panelNode});
 
@@ -279,21 +290,6 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         for (var i=0; i<elements.length; i++)
             StackFrameRep.collapseArguments(elements[i]);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Tool Listener
-
-    onStackCreated: function(stackTrace)
-    {
-        FBTrace.sysout("CallstackPanel.onStackCreated;", stackTrace);
-
-        this.showStackTrace(stackTrace);
-    },
-
-    onStackCleared: function()
-    {
-        
-    }
 });
 
 // ********************************************************************************************* //
