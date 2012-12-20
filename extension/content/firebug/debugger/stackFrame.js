@@ -208,8 +208,6 @@ StackFrame.buildStackFrame = function(frame, context)
     if (!sourceFile)
         sourceFile = {href: frame.where.url};
 
-    var connection = context.getConnection();
-
     var args = [];
     var arguments = frame.arguments;
     for (var i=0; i<arguments.length; i++)
@@ -220,7 +218,7 @@ StackFrame.buildStackFrame = function(frame, context)
         });
     }
 
-    return new StackFrame(sourceFile, frame.where.line, frame.calleeName,
+    return new StackFrame(sourceFile, frame.where.line, frame.callee.name,
         args, frame, 0, context);
 };
 
