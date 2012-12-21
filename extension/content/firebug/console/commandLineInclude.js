@@ -306,7 +306,7 @@ function CommandLineIncludeObject()
 
 var CommandLineInclude = Obj.extend(Firebug.Module,
 {
-    onSuccess: function(newAlias, context, loadingMsgRow, xhr)
+    onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
         var urlComponent = xhr.channel.URI.QueryInterface(Ci.nsIURL);
         var filename = urlComponent.fileName, url = urlComponent.spec;
@@ -320,7 +320,8 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             this.log("aliasCreated", [newAlias], [context, "info"]);
         }
 
-        this.log("includeSuccess", [filename], [context, "info", true]);
+        if (!hasWarnings)
+            this.log("includeSuccess", [filename], [context, "info", true]);
     },
 
     onError: function(context, url, loadingMsgRow)
@@ -440,9 +441,19 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             if (xhr.status !== 200)
                 return errorFunction.apply(this, arguments);
             var codeToEval = xhr.responseText;
+            var hasWarnings = false;
+
+            // test if the content is an HTML file, which is the most current after a mistake
+            if (!isValidJS(codeToEval))
+            {
+                CommandLineInclude.log("invalidSyntax", [], [context, "warn"]);
+                CommandLineInclude.clearLoadingMessage(loadingMsgRow);
+                hasWarnings = true;
+            }
+
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
-                successFunction(xhr);
+                successFunction(xhr, hasWarnings);
         }
 
         if (errorFunction)
@@ -542,6 +553,22 @@ IncludeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         target.textContent = value;
     }
 });
+
+function isValidJS(codeToCheck)
+{
+    try
+    {
+        new Function(codeToCheck);
+        return true;
+    }
+    catch(ex)
+    {
+        if (ex instanceof SyntaxError)
+            return false;
+        else
+            throw ex;
+    }
+};
 
 // ********************************************************************************************* //
 // Registration
