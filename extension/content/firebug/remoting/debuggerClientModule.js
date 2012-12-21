@@ -84,8 +84,17 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Initialize the server to allow connections through pipe transport.
         if (!this.isRemoteDebugger)
         {
-            DebuggerServer.init(function () { return true; });
-            DebuggerServer.addBrowserActors();
+            try
+            {
+                DebuggerServer.init(function () { return true; });
+                DebuggerServer.addBrowserActors();
+            }
+            catch (e)
+            {
+                // If the built-in debugger has been opened browser actors
+                // can be already added.
+                TraceError.sysout("debuggerClientModule.connect; EXCEPTION " + e, e);
+            }
         }
 
         this.transport = (this.isRemoteDebugger) ?
