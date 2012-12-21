@@ -167,7 +167,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
-                    "through document.getUserData, it is too early for command line",
+                    "through Dom.getMappedData, it is too early for command line",
                      win], context, "error", true);
             }
             return;
@@ -175,11 +175,11 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
-        win.document.setUserData("firebug-methodName", "evaluate", null);
+        Dom.setMappedData(win.document, "firebug-methodName", "evaluate");
 
         expr = expr.toString();
         expr = "with(_FirebugCommandLine){\n" + expr + "\n};";
-        win.document.setUserData("firebug-expr", expr, null);
+        Dom.setMappedData(win.document, "firebug-expr", expr);
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
 
@@ -949,7 +949,7 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
     handle: function(event, api, win)
     {
         var element = event.target;
-        var methodName = win.document.getUserData("firebug-methodName");
+        var methodName = Dom.getMappedData(win.document, "firebug-methodName");
 
         // We create this array in the page using JS, so we need to look on the
         // wrappedJSObject for it.
@@ -967,13 +967,13 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
         if (!subHandler)
             return false;
 
-        win.document.setUserData("firebug-retValueType", null, null);
+        Dom.deleteMappedData(win.document, "firebug-retValueType");
         var result = subHandler.apply(api, userObjects);
         if (typeof result != "undefined")
         {
             if (result instanceof window.Array)
             {
-                win.document.setUserData("firebug-retValueType", "array", null);
+                Dom.setMappedData(win.document, "firebug-retValueType", "array");
                 for (var item in result)
                     hosed_userObjects.push(result[item]);
             }
@@ -1427,14 +1427,14 @@ function CommandLineHandler(context, win)
 
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
         {
-            var methodName = win.document.getUserData("firebug-methodName");
+            var methodName = Dom.getMappedData(win.document, "firebug-methodName");
             Firebug.Console.log(Locale.$STRF("commandline.MethodNotSupported", [methodName]));
         }
 
         if (FBTrace.DBG_COMMANDLINE)
         {
             FBTrace.sysout("commandLine.handleEvent() " +
-                win.document.getUserData("firebug-methodName") +
+                Dom.getMappedData(win.document, "firebug-methodName") +
                 " context.baseWindow: " +
                 (context.baseWindow ? context.baseWindow.location : "no basewindow"),
                 context.baseWindow);
