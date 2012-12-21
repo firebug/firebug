@@ -691,22 +691,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tool Listener
 
-    onStartDebugging: function(frame)
+    onStartDebugging: function(context, event, packet)
     {
-        if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.startDebugging enter context: " + this.context.getName(), frame);
+        Trace.sysout("scriptPanel.onStartDebugging; " + this.context.getName());
 
         try
         {
             var currentBreakable = Firebug.chrome.getGlobalAttribute(
                 "cmd_firebug_toggleBreakOn", "breakable");
 
-            if (FBTrace.DBG_BP)
-            {
-                FBTrace.sysout("debugger.startDebugging; currentBreakable " + currentBreakable +
-                    " in " + this.context.getName() + " currentContext " +
-                    Firebug.currentContext.getName());
-            }
+            Trace.sysout("scriptPanel.onStartDebugging; currentBreakable " + currentBreakable +
+                " in " + this.context.getName() + " currentContext " +
+                Firebug.currentContext.getName());
 
             // If currentBreakable is false, then we are armed, but we broke
             if (currentBreakable == "false")
@@ -721,29 +717,24 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
-            Firebug.chrome.select(frame, "jsd2script", null, true);
+
+            // This is how the Watch panel is synchronized.
+            Firebug.chrome.select(this.context.currentFrame, "jsd2script", null, true);
             Firebug.chrome.syncPanel("jsd2script");  // issue 3463 and 4213
             Firebug.chrome.focus();
         }
         catch (exc)
         {
             TraceError.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
-
             Firebug.Console.log("Resuming debugger: error during debugging loop: " + exc);
-            this.resume(this.context);
-        }
 
-        if (FBTrace.DBG_UI_LOOP)
-        {
-            FBTrace.sysout("script.onStartDebugging exit context.stopped:" +
-                this.context.stopped + " for context: " + this.context.getName());
+            this.resume(this.context);
         }
     },
 
-    onStopDebugging: function()
+    onStopDebugging: function(context, event, packet)
     {
-        if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
+        Trace.sysout("scriptPanel.onStopDebugging; " + this.context.getName());
 
         try
         {

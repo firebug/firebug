@@ -214,23 +214,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.currentFrame = frame;
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
-        this.dispatch("onStartDebugging", [frame]);
-
-        // Resolve evaluated expression (e.g. for {@WatchPanel}).
-        if (type == "clientEvaluated" && this.evalCallback)
-        {
-            // Pause packet with 'clientEvaluated' type is sent when user expression
-            // has been evaluated on the server side. Let's pass the result to the
-            // registered callback.
-            var result = packet.why.frameFinished["return"];
-
-            // xxxHonza: temporary
-            if (typeof(result) == "undefined")
-                result = packet.why.frameFinished["throw"];
-
-            this.evalCallback(result);
-            this.evalCallback = null
-        }
+        this.dispatch("onStartDebugging", [context, event, packet]);
     },
 
     resumed: function(context, event, packet)
@@ -244,7 +228,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.currentFrame = null;
         context.currentTrace = null;
 
-        this.dispatch("onStopDebugging");
+        this.dispatch("onStopDebugging", [context, event, packet]);
     },
 
     detached: function(context)
@@ -434,14 +418,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Expression API
+    // Evaluation
 
-    eval: function(context, frame, expr, callback)
+    eval: function(context, frame, expr)
     {
         Trace.sysout("debuggerTool.eval; " + expr);
-
-        var self = this;
-        this.evalCallback = callback;
 
         // This operation causes the server side to:
         // 1) Resume the current thread

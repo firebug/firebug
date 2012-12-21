@@ -192,13 +192,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.tree.expandObject(scope);
         }
 
-        // Asynchronously eval all user-expressions, but only if the selection
-        // doesn't happen due to clientEvaluated packet.
-        // xxxHonza: the entire 'clientEvaluated' logic should be part of this panel.
-        // (so, move the evalCallback here from the debuggerTool) 
-        if (this.tool.evalCallback == null)
-            this.evalWatches(this.watches);
+        // Asynchronously eval all user-expressions, but make sure it isn't
+        // already in-progress (to avoid recursion).
+        if (this.evalCallback == null)
+            this.evalWatches();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Content 
 
     showMembers: function(members, update, scrollTop)
     {
@@ -321,22 +322,23 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Watches Evaluation
 
-    evalWatches: function(watches)
+    evalWatches: function()
     {
-        if (!watches.length)
+        // Bail out if there are no user expressions.
+        if (!this.watches.length)
             return;
 
         // The debugger must be halted at this moment.
-        var currentFrame = this.context.currentFrame;
-        if (!currentFrame)
+        if (!this.context.currentFrame)
             return;
 
-        var list = Arr.cloneArray(watches);
-
+        // Build an array of expression that is sent to the back-end and evaluated
+        // all at once. The result of all evaluated expressions is sent back
+        // as an array (of the same size).
         var expression = [];
-        for (var i=0; i<list.length; i++)
+        for (var i=0; i<this.watches.length; i++)
         {
-            var watch = list[i];
+            var watch = this.watches[i];
 
             // Avoid yielding an empty pseudo-array when evaluating 'arguments',
             // since they're overridden by the expression's closure scope.
@@ -348,45 +350,82 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         expression = "[" + expression.join(",") + "]";
 
-        Trace.sysout("watchPanel.evalWatches; " + expression, watches);
+        // Set callback so, we can execute it when 'clientEvaluated' packet
+        // is received (see 'onStartDebugging' method).
+        this.evalCallback = this.onEvalWatches;
+
+        // Eval through the debuggerTool.
+        this.tool.eval(this.context, this.context.currentFrame, expression);
+    },
+
+    onEvalWatches: function(resultGrip)
+    {
+        Trace.sysout("watchPanel.evalWatches; EVALUATED ", resultGrip);
+
+        // If grip is not defined an exception has been thrown.
+        if (!resultGrip)
+            return;
+
+        var self = this;
 
         // xxxHonza: the entire logic related to eval result, shoule be refactored
         // The cache and grip objects should do most of the work automatically.
-        var self = this;
-        this.tool.eval(this.context, currentFrame, expression, function(resultGrip)
+        var cache = this.context.gripCache;
+        var gripObj = cache.getObject(resultGrip);
+        gripObj.getProperties().then(function(props)
         {
-            Trace.sysout("watchPanel.evalWatches; EVALUATED ", resultGrip);
+            // We don't want object properties, we need the object itself (it's an
+            // array with results and we want to iterate it).
+            var results = gripObj.getValue();
 
-            // If grip is not defined an exception has been thrown.
-            if (!resultGrip)
-                return;
-
-            var cache = self.context.gripCache;
-            var gripObj = cache.getObject(resultGrip);
-            gripObj.getProperties().then(function(props)
+            // The number of results shuld be the same as the number of user expressions
+            // in the panel.
+            // xxxHonza: we should freeze the UI during the evaluation on the server side.
+            if (results.length != self.watches.length)
             {
-                // We don't want object properties, we need the object itself (it's an
-                // array with results and we want to iterate it).
-                var results = gripObj.getValue();
+                TraceError.sysout("watchPanel.evalWatches; ERROR wrong number " +
+                    "of results after evaluation " + results.length + " != " +
+                    this.watches.length);
 
-                Trace.sysout("watchPanel.evalWatches; RESULTS", results);
+                return;
+            }
 
-                if (results.length != list.length)
-                {
-                    TraceError.sysout("watchPanel.evalWatches; ERROR wrong number " +
-                        "of results after evaluation " + results.length + " != "+ list.length);
-                    return;
-                }
+            Trace.sysout("watchPanel.evalWatches; RESULTS", results);
 
-                for (var i=0; i<results.length; i++)
-                {
-                    var watch = list[i];
-                    var result = results[i].grip ? results[i].grip : results[i];
-                    watch.value = cache.getObject(result);
-                    self.tree.updateObject(watch);
-                }
-            });
+            for (var i=0; i<results.length; i++)
+            {
+                var watch = self.watches[i];
+                var result = results[i].grip ? results[i].grip : results[i];
+                watch.value = cache.getObject(result);
+                self.tree.updateObject(watch);
+            }
         });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
+
+    onStartDebugging: function(context, event, packet)
+    {
+        var type = packet.why.type;
+
+        Trace.sysout("watchPanel.onStartDebugging; " + type);
+
+        // Resolve evaluated expression (if there is one in progress).
+        if (type == "clientEvaluated" && this.evalCallback)
+        {
+            // Pause packet with 'clientEvaluated' type is sent when user expression
+            // has been evaluated on the server side. Let's pass the result to the
+            // registered callback.
+            var result = packet.why.frameFinished["return"];
+
+            // xxxHonza: temporary
+            if (typeof(result) == "undefined")
+                result = packet.why.frameFinished["throw"];
+
+            this.evalCallback(result);
+            this.evalCallback = null
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
