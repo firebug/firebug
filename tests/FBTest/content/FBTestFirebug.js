@@ -73,8 +73,16 @@ this.compare = function(expected, actual, msg, shouldNotMatch)
     FBTest.sysout("compare "+(result?"passes":"**** FAILS ****")+" "+msg,
         {expected: expected, actual: actual});
 
+    var shownMsg = msg;
+    if (!result)
+    {
+        shownMsg += " (was: " + actual + ", expected" +
+            (shouldNotMatch ? " otherwise" : ": " + expected) +
+            (typeof actual === typeof expected ? ")" : " - different types)");
+    }
+
     FBTestApp.TestRunner.appendResult(new FBTestApp.TestResult(window,
-        result, msg, expected, actual));
+        result, shownMsg, expected, actual));
 
     if (result)
         FBTest.resetTimeout();
