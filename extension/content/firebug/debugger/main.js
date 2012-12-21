@@ -2,6 +2,8 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/trace/traceListener",
+    "firebug/trace/traceModule",
     "firebug/debugger/debugger",
     "firebug/debugger/scriptPanel",
     "firebug/debugger/breakpointStore",
@@ -20,13 +22,18 @@ define([
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
 ],
-function(FBTrace) {
+function(FBTrace, TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
 // Debugger
 
 // This module just defines a list of dependencies for JSD2 debugger so,
 // all necessary modules are properyly loaded.
+
+// Register stylesheet with DBG_* styles
+// xxxHonza: any better way how to register global Firebug stylesheth with trace styles?
+TraceModule.addListener(new TraceListener("jsd2.", "DBG_JSD2", true,
+    "chrome://firebug/skin/trace.css"));
 
 // ********************************************************************************************* //
 // Registration
