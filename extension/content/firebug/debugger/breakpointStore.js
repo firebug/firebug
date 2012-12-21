@@ -52,7 +52,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.destroy.apply(this, arguments);
+        Firebug.Module.shutdown.apply(this, arguments);
 
         DebuggerClientModule.removeListener(this);
 
