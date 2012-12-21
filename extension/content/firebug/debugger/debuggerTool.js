@@ -173,6 +173,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         var s = script;
 
+        // xxxHonza: Ignore inner script for now
+        if (context.sourceFileMap[s.url])
+            return;
+
         // Create a source file and append it into the context.
         var sourceFile = new SourceFile(s.source, s.url, s.startLine, s.lineCount);
         context.addSourceFile(sourceFile);

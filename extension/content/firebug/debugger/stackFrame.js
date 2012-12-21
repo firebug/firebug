@@ -14,6 +14,7 @@ function (FBTrace, Url, Locale, Str, SourceLink, Grips) {
 // Constants
 
 var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_STACK");
 
 // ********************************************************************************************* //
 // Stack Frame
@@ -221,6 +222,47 @@ StackFrame.buildStackFrame = function(frame, context)
     return new StackFrame(sourceFile, frame.where.line, frame.callee.name,
         args, frame, 0, context);
 };
+
+StackFrame.guessFunctionName = function(url, lineNo, sourceFile)
+{
+    if (sourceFile)
+        return StackFrame.guessFunctionNameFromLines(url, lineNo, sourceFile);
+
+    return "? in " + Url.getFileName(url) + "@" + lineNo;
+}
+
+var reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
+var reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
+StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceFile)
+{
+    // Walk backwards from the first line in the function until we find the line which
+    // matches the pattern above, which is the function definition
+    var line = "";
+    for (var i = 0; i < 4; ++i)
+    {
+        line = sourceFile.getLine(lineNo - i) + line;
+        if (line != undefined)
+        {
+            var m = reGuessFunction.exec(line);
+            if (m)
+            {
+                return m[1];
+            }
+            else
+            {
+                if (FBTrace.DBG_FUNCTION_NAMES)
+                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+
+                        "-"+i+" line="+line+"\n");
+            }
+
+            m = reFunctionArgNames.exec(line);
+            if (m && m[1])
+                return m[1];
+        }
+    }
+
+    return Url.getFileName(url) + "@" + lineNo;
+}
 
 // ********************************************************************************************* //
 // Helpers

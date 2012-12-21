@@ -3,20 +3,27 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stackFrame",
     "firebug/lib/persist",
     "firebug/debugger/sourceFileRenamer",
     "firebug/debugger/breakpoint",
     "firebug/debugger/breakpointStore",
+    "firebug/trace/traceModule",
+    "firebug/trace/traceListener",
+    "firebug/lib/url",
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, StackFrame, Persist, SourceFileRenamer,
-    Breakpoint, BreakpointStore) {
+function(Obj, Firebug, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
+    SourceFileRenamer, Breakpoint, BreakpointStore, TraceModule, TraceListener, Url) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Trace = FBTrace.to("DBG_BREAKPOINTPANEL");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Breakpoint Panel
@@ -25,7 +32,11 @@ function BreakpointPanel()
 {
 }
 
+/**
+ * @panel Represents the Breakpoints side panel available within the Script panel.
+ */
 BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
+/** @lends BreakpointPanel */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
@@ -46,6 +57,10 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.Panel.initialize.apply(this, arguments);
 
+        // Custom tracing.
+        this.traceListener = new TraceListener("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
+        TraceModule.addListener(this.traceListener);
+
         // Listen to breakpoint changes (add/remove).
         BreakpointStore.addListener(this);
     },
@@ -55,6 +70,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         state.groupOpened = this.groupOpened;
 
         Firebug.Panel.destroy.apply(this, arguments);
+
+        TraceModule.removeListener(this.traceListener);
 
         BreakpointStore.removeListener(this);
     },
@@ -91,12 +108,9 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var errorBreakpoints = extracted.errorBreakpoints;
         var monitors = extracted.monitors;
 
-        if (FBTrace.DBG_BP)
-        {
-            FBTrace.sysout("breakpoints.refresh extracted " +
-                breakpoints.length + errorBreakpoints.length + monitors.length,
-                [breakpoints, errorBreakpoints, monitors]);
-        }
+        Trace.sysout("breakpointPanel.refresh; extracted " +
+            breakpoints.length + ", " + errorBreakpoints.length + ", " + monitors.length,
+            [breakpoints, errorBreakpoints, monitors]);
 
         function sortBreakpoints(a, b)
         {
@@ -110,12 +124,9 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         errorBreakpoints.sort(sortBreakpoints);
         monitors.sort(sortBreakpoints);
 
-        if (FBTrace.DBG_BP)
-        {
-            FBTrace.sysout("breakpoints.refresh sorted " + breakpoints.length +
-                errorBreakpoints.length + monitors.length,
-                [breakpoints, errorBreakpoints, monitors]);
-        }
+        Trace.sysout("breakpointPanel.refresh; sorted " + breakpoints.length + ", " + 
+            errorBreakpoints.length + ", " + monitors.length,
+            [breakpoints, errorBreakpoints, monitors]);
 
         var groups = [];
 
@@ -149,12 +160,9 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
         }
 
-        if (FBTrace.DBG_BP)
-        {
-            FBTrace.sysout("breakpoints.refresh " + breakpoints.length +
-                errorBreakpoints.length + monitors.length,
-                [breakpoints, errorBreakpoints, monitors]);
-        }
+        Trace.sysout("breakpointPanel.refresh; " + breakpoints.length + ", " + 
+            errorBreakpoints.length + ", " + monitors.length,
+            [breakpoints, errorBreakpoints, monitors]);
 
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
     },
@@ -172,45 +180,42 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         {
             BreakpointStore.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
             {
-                if (FBTrace.DBG_BP)
-                {
-                    FBTrace.sysout("breakpoints.extractBreakpoints type: " + props.type +
-                        " in url " + url + "@" + line + " context " + context.getName(),
-                        props);
-                }
+                Trace.sysout("breakpointPanel.extractBreakpoints; type: " + props.type +
+                    " in url " + url + "@" + line + " context " + context.getName(),
+                    props);
 
                 // some url in this sourceFileMap has changed, we'll be back.
                 if (renamer.checkForRename(url, line, props))
                     return;
+
+                var name;
+                var isFuture;
 
                 if (scripts)  // then this is a current (not future) breakpoint
                 {
                     var script = scripts[0];
                     var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
 
-                    if (FBTrace.DBG_BP)
-                    {
-                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script=" +
-                            script.tag + (analyzer ? " has analyzer" : " no analyzer") +
-                            " in context " + context.getName());
-                    }
+                    Trace.sysout("breakpointPanel.refresh; enumerateBreakpoints for script=" +
+                        script.tag + (analyzer ? " has analyzer" : " no analyzer") +
+                        " in context " + context.getName());
 
                     if (analyzer)
-                        var name = analyzer.getFunctionDescription(script, context).name;
+                        name = analyzer.getFunctionDescription(script, context).name;
                     else
-                        var name = StackFrame.guessFunctionName(url, 1, context);
+                        name = StackFrame.guessFunctionName(url, 1, context);
 
-                    var isFuture = false;
+                    isFuture = false;
                 }
                 else
                 {
-                    if (FBTrace.DBG_BP)
-                    {
-                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future " +
-                            "for url@line=" + url + "@" + line);
-                    }
+                    Trace.sysout("breakpointPanel.refresh; enumerateBreakpoints future " +
+                        "for url@line=" + url + "@" + line);
 
-                    var isFuture = true;
+                    var compilationUnit = context.compilationUnits[url];
+                    name = StackFrame.guessFunctionName(url, line, compilationUnit.sourceFile);
+
+                    isFuture = true;
                 }
 
                 var source = context.sourceCache.getLine(url, line);
@@ -257,11 +262,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         // even if we did not rename, some bp may be dynamic
-        if (FBTrace.DBG_SOURCEFILES)
-        {
-            FBTrace.sysout("breakpoints.extractBreakpoints context.dynamicURLhasBP: "+
-                context.dynamicURLhasBP, result);
-        }
+        Trace.sysout("breakpointPanel.extractBreakpoints; context.dynamicURLhasBP: " +
+            context.dynamicURLhasBP, result);
 
         return result;
     },
@@ -335,9 +337,9 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             // Remove regular JSD breakpoints
             Firebug.Debugger.clearAllBreakpoints(context);
         }
-        catch(exc)
+        catch (exc)
         {
-            FBTrace.sysout("breakpoint.clearAllBreakpoints FAILS "+exc, exc);
+            TraceError.sysout("breakpointPanel.clearAllBreakpoints; EXCEPTION " + exc, exc);
         }
 
         this.noRefresh = false;

@@ -85,6 +85,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.tool.removeListener(this);
 
+        TraceModule.removeListener(this.traceListener);
+
         BasePanel.destroy.apply(this, arguments);
     },
 

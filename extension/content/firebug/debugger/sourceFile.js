@@ -54,8 +54,11 @@ SourceFile.prototype =
         return 0;
     },
 
-    getLine: function(context, lineNo)
+    getLine: function(lineNo)
     {
+        if (this.loaded && lineNo >=0 && lineNo < this.lines.length)
+            return this.lines[lineNo];
+
         // xxxHonza: TODO
         return "";
     },

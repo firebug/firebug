@@ -59,7 +59,8 @@ Firebug.JSD2.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
             var offset = Dom.getClientOffset(node);
             var titleAtTop = offset.y < panel.panelNode.scrollTop;
             Dom.scrollTo(groupNode, panel.panelNode, null,
-                groupNode.offsetHeight > panel.panelNode.clientHeight || titleAtTop ? "top" : "bottom");
+                groupNode.offsetHeight > panel.panelNode.clientHeight ||
+                titleAtTop ? "top" : "bottom");
         }
     },
 
