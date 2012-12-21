@@ -5,7 +5,7 @@ pref("extensions.firebug.cookies.filterByPath", true);
 pref("extensions.firebug.cookies.showRejectedCookies", false);
 pref("extensions.firebug.cookies.defaultExpireTime", 3600);
 pref("extensions.firebug.cookies.lastSortedColumn", "");
-pref("extensions.firebug.cookies.hiddenColumns", "colRawValue colStatus colRawSize");
+pref("extensions.firebug.cookies.hiddenColumns", "colRawValue colStatus colSize");
 pref("extensions.firebug.cookies.removeConfirmation", true);
 pref("extensions.firebug.cookies.removeSessionConfirmation", true);
 
