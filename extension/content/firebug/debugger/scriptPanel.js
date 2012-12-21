@@ -66,9 +66,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
+        // Create source view for JS source code. Initialization is made when the Script
+        // panel is actualy displayed (in 'show' method).
         this.scriptView = new ScriptView();
         this.scriptView.addListener(this);
-        this.scriptView.initialize(this.panelNode);
 
         // The tool/controller (serves as a proxy to the backend service) is registered dynamicaly.
         // Depending on the current tool the communication can be local or remote.
@@ -113,6 +114,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var enabled = this.isEnabled();
         if (!enabled)
             return;
+
+        Trace.sysout("scriptPanel.show;", state);
+
+        // Initialize the source view. In case of Orion initialization here, when the 
+        // parentNode is actualy visible, also solves Orion's problem:
+        // Error: TypeError: this._iframe.contentWindow is undefined
+        // Save for muliple calls.
+        this.scriptView.initialize(this.panelNode);
 
         var active = true;
 
@@ -258,6 +267,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateLocation: function(compilationUnit)
     {
+        Trace.sysout("scriptPanel.updateLocation; " + (compilationUnit ? compilationUnit.url :
+            "no compilation unit"), compilationUnit);
+
         this.showSource(compilationUnit);
 
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation",
@@ -266,6 +278,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSource: function(compilationUnit)
     {
+        Trace.sysout("scriptPanel.showSource; " + (compilationUnit ? compilationUnit.url :
+            "no compilation unit"), compilationUnit);
+
         if (!compilationUnit)
             compilationUnit = this.getDefaultLocation();
 
@@ -755,6 +770,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     newScript: function(sourceFile)
     {
+        Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
+
         // New script has been appended, update the default location if necessary.
         if (!this.location)
             this.navigate(null);

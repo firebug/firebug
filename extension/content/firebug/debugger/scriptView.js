@@ -19,9 +19,13 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 // Introduced in Firefox 8
+// We might want to switch to CodeMirror:
+// Bug 816756 - CodeMirror as an alternative to Orion
+// Issue 5353: please integrate Codemirror2 instead of Orion editor
 Cu["import"]("resource:///modules/source-editor.jsm");
 
-FBTrace = FBTrace.to("DBG_SCRIPTVIEW");
+var Trace = FBTrace.to("DBG_SCRIPTVIEW");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Source View
@@ -41,12 +45,20 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 {
     dispatchName: "ScriptView",
     initialized: false,
+    initializeExecuted: false,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
     initialize: function(parentNode)
     {
+        if (this.initializeExecuted)
+            return;
+
+        this.initializeExecuted = true;
+
+        Trace.sysout("scriptView.initialize; " + parentNode);
+
         this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
 
@@ -69,6 +81,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onEditorLoad: function()
     {
+        Trace.sysout("scriptView.onEditorLoad;", this.defaultSource);
+
         this.initialized = true;
 
         // Add editor listeners
@@ -88,6 +102,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     destroy: function()
     {
+        Trace.sysout("scriptView.destroy; " + this.initialized);
+
         this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
             this.onContextMenuListener);
         this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
@@ -104,7 +120,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     showSource: function(source)
     {
-        FBTrace.sysout("scriptView.showSource; initialized: " + this.initialized, source);
+        Trace.sysout("scriptView.showSource; initialized: " + this.initialized, source);
 
         if (!this.initialized)
         {
@@ -212,7 +228,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         var offset = this.editor.find(text, options);
-        FBTrace.sysout("search", {options: options, offset: offset});
+        Trace.sysout("search", {options: options, offset: offset});
+
         if (offset != -1)
         {
             this.editor.setSelection(offset, offset + text.length);
@@ -266,7 +283,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     scrollToLine: function(href, lineNo, highlighter)
     {
         //@hack xxxHonza: avoid exception
-        if (!this.editor._model)
+        if (!this.editor || !this.editor._model)
             return;
 
         this.editor.setDebugLocation(lineNo - 1);
@@ -276,7 +293,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     removeDebugLocation: function()
     {
         //@hack xxxHonza: avoid exception
-        if (!this.editor._model)
+        if (!this.editor || !this.editor._model)
             return;
 
         this.editor.setDebugLocation(-1);
