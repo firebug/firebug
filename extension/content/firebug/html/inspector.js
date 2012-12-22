@@ -1089,11 +1089,19 @@ var quickInfoBox =
 
         if (qiBox.state==="closed")
         {
-            qiBox.hidePopup();
-
             this.storedX = this.storedX || Firefox.getElementById("content").tabContainer.boxObject.screenX + 5;
             this.storedY = this.storedY || Firefox.getElementById("content").tabContainer.boxObject.screenY + 35;
 
+            // Dynamically set noautohide to avoid mozilla bug 545265.
+            if (!this.noautohideAdded)
+            {
+                this.noautohideAdded = true;
+                qiBox.addEventListener("popupshowing", function runOnce()
+                {
+                    qiBox.removeEventListener("popupshowing", runOnce, false);
+                    qiBox.setAttribute("noautohide", true);
+                }, false);
+            }
             qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
@@ -1226,7 +1234,7 @@ var quickInfoBox =
                 lab.setAttribute("class", "fbQuickInfoName");
                 lab.setAttribute("value", attribs[i]);
                 hbox.appendChild(lab);
-                var desc = document.createElement("description");
+                var desc = document.createElement("label");
                 desc.setAttribute("class", "fbQuickInfoValue");
                 desc.appendChild(document.createTextNode(": " + value));
                 hbox.appendChild(desc);
