@@ -713,8 +713,19 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        if (!Firebug.currentContext)
+        var context = Firebug.currentContext;
+        if (!context)
             return;
+
+        // Warn that FireClosure is integrated and will conflict.
+        if (Firebug.JSAutoCompleter && Firebug.JSAutoCompleter.transformScopeExpr &&
+            !this.hasWarnedAboutFireClosure)
+        {
+            this.hasWarnedAboutFireClosure = true;
+            // Use English because this only reaches ~200 users anyway.
+            var msg = "FireClosure has been integrated into Firebug. To avoid conflicts, please uninstall it and restart your browser.";
+            Firebug.Console.logFormatted([msg], context, "warn");
+        }
 
         var chrome = Firebug.chrome;
         var panelState = Persist.getPersistedState(this, "console");
@@ -722,7 +733,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             var value = panelState.commandLineText;
             var commandLine = this.getCommandLine(browser);
-            Firebug.currentContext.commandLineText = value;
+            context.commandLineText = value;
 
             commandLine.value = value;
 
@@ -743,10 +754,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             this.setAutoCompleter();
     },
 
-    // called by users of command line, currently:
-    // 1) Console on focus command line,
-    // 2) Watch onfocus, and
-    // 3) debugger loadedContext if watches exist
+    // Attach the command line. Currently called by evaluate() et al. and
+    // watch onfocus (see chrome.js; probably unnecessary).
     isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_COMMANDLINE)
@@ -790,11 +799,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineKeyDown: function(event)
     {
-        // XXX: Temporary hack to make FireClosure work (until that gets a new
-        // release out)
-        if (!this.autoCompleter.shouldIncludeHint && Firebug.JSAutoCompleter.transformScopeExpr)
-            this.setAutoCompleter();
-
         var context = Firebug.currentContext;
 
         this.autoCompleter.handleKeyDown(event, context);
@@ -936,7 +940,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         return Firebug.CommandEditor;
     }
-
 });
 
 // ********************************************************************************************* //

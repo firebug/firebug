@@ -427,6 +427,10 @@ var ClosureInspector =
 
     extendLanguageSyntax: function(expr, win, context)
     {
+        // Temporary FireClosure compatibility.
+        if (Firebug.JSAutoCompleter.transformScopeExpr)
+            return expr;
+
         var fname = "__fb_scopedVars";
 
         var newExpr = Firebug.JSAutoCompleter.transformScopeOperator(expr, fname);
