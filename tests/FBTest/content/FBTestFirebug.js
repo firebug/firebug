@@ -414,6 +414,10 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 
     // Use the first client rect for clicking (e.g. SPAN can have more).
     var rect = rectCollection[0]; //node.getBoundingClientRect();
+
+    if (!FBTest.ok(rect, "Can't synthesize mouse event"))
+        return;
+
     var frameOffset = getFrameOffset(node);
 
     FBTest.sysout("frameOffset " + frameOffset);
