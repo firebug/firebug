@@ -911,7 +911,7 @@ Dom.isDOMConstant = function(object, name)
 
 Dom.isInlineEventHandler = function(name)
 {
-    return Dom.domInlineEventHandlersMap[name];
+    return !!Dom.domInlineEventHandlersMap[name];
 }
 
 Dom.EventCopy = function(event)
