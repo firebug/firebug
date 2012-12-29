@@ -324,17 +324,24 @@ var ClosureInspector =
         var scopeDataHolder = Object.create(ScopeProxy.prototype);
         scopeDataHolder.scope = scope;
 
+        var self = this;
         var names, namesSet;
         var lazyCreateNames = function()
         {
             lazyCreateNames = function() {};
             names = scope.names();
+
+            // "arguments" is almost always present and optimized away, so hide it
+            // for a nicer display.
+            var ind = names.indexOf("arguments");
+            if (ind !== -1 && self.getVariableOrOptimizedAway(scope, "arguments") === OptimizedAway)
+                names.splice(ind, 1);
+
             namesSet = new Set;
             for (var i = 0; i < names.length; ++i)
                 namesSet.add(names[i]);
         };
 
-        var self = this;
         return Proxy.create({
             desc: function(name)
             {
