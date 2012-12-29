@@ -289,6 +289,8 @@ var ClosureInspector =
                     var scope = env.find(name);
                     if (!scope)
                         throw new Error("can't create new closure variables");
+                    if (self.getVariableOrOptimizedAway(scope, name) === OptimizedAway)
+                        throw new Error("can't set optimized-away closure variables");
                     scope.setVariable(name, dvalue);
                 }
             };
