@@ -167,77 +167,6 @@ var ClosureInspector =
         return undefined;
     },
 
-    getVariableFromClosureRaw: function(env, mem)
-    {
-        try
-        {
-            env = env.find(mem);
-            if (env)
-                return this.getVariableOrOptimizedAway(env, mem);
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; getVariableFromClosureRaw didn't find anything");
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; getVariableFromClosureRaw failed", exc);
-        }
-
-        // Nothing found, for whatever reason.
-        return undefined;
-    },
-
-    setScopedVariableRaw: function(env, mem, to)
-    {
-        try
-        {
-            env = env.find(mem);
-            if (env)
-            {
-                env.setVariable(mem, to);
-                return;
-            }
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; setScopedVariableRaw didn't find anything");
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; setScopedVariableRaw failed", exc);
-            throw exc;
-        }
-        throw new Error("can't create new closure variables");
-    },
-
-    getClosureVariablesListRaw: function(env)
-    {
-        var ret = [];
-        try
-        {
-            while (env)
-            {
-                if (env.type === "with" && env.getVariable("profileEnd"))
-                {
-                    // Almost certainly the with(_FirebugCommandLine) block,
-                    // which is at the top of the scope chain on objects
-                    // defined through the console. Hide it for a nicer display.
-                    break;
-                }
-                if (!this.scopeIsInteresting(env))
-                    break;
-
-                ret.push.apply(ret, env.names());
-                env = env.parent;
-            }
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; getScopedVariablesRaw failed", exc);
-        }
-        return ret;
-    },
-
     // Within the security context of the (wrapped) window 'win', find a relevant
     // closure for the content object 'obj' (may be from another frame).
     // Throws exceptions on error.
@@ -272,22 +201,37 @@ var ClosureInspector =
 
     getClosureVariablesList: function(obj, context)
     {
+        var ret = [];
+
         // Avoid 'window' and 'document' getting associated with closures.
         var win = context.baseWindow || context.window;
         if (obj === win || obj === win.document)
-            return [];
+            return ret;
 
         try
         {
             var env = this.getEnvironmentForObject(win, obj, context);
-            return this.getClosureVariablesListRaw(env);
+            for (var scope = env; scope; scope = scope.parent)
+            {
+                if (scope.type === "with" && scope.getVariable("profileEnd"))
+                {
+                    // Almost certainly the with(_FirebugCommandLine) block,
+                    // which is at the top of the scope chain on objects
+                    // defined through the console. Hide it for a nicer display.
+                    break;
+                }
+                if (!this.scopeIsInteresting(scope))
+                    break;
+
+                ret.push.apply(ret, scope.names());
+            }
         }
         catch (exc)
         {
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("ClosureInspector; getClosureVariablesList failed", exc);
-            return [];
         }
+        return ret;
     },
 
     getClosureWrapper: function(obj, win, context)
@@ -322,7 +266,10 @@ var ClosureInspector =
                 {
                     try
                     {
-                        var dval = self.getVariableFromClosureRaw(env, name);
+                        var scope = env.find(name);
+                        if (!scope)
+                            return undefined;
+                        var dval = self.getVariableOrOptimizedAway(scope, name);
                         if (self.isSimple(dval))
                             return dval;
                         var uwWin = Wrapper.getContentView(win);
@@ -332,13 +279,17 @@ var ClosureInspector =
                     {
                         if (FBTrace.DBG_COMMANDLINE)
                             FBTrace.sysout("ClosureInspector; failed to return value from getter", exc);
+                        return undefined;
                     }
                 },
 
                 set: function(value)
                 {
-                    value = dglobal.makeDebuggeeValue(value);
-                    self.setScopedVariableRaw(env, name, value);
+                    var dvalue = dglobal.makeDebuggeeValue(value);
+                    var scope = env.find(name);
+                    if (!scope)
+                        throw new Error("can't create new closure variables");
+                    scope.setVariable(name, dvalue);
                 }
             };
         };
