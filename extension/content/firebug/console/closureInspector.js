@@ -288,9 +288,9 @@ var ClosureInspector =
                     var dvalue = dglobal.makeDebuggeeValue(value);
                     var scope = env.find(name);
                     if (!scope)
-                        throw new Error("can't create new closure variables");
+                        throw new Error("can't create new closure variable");
                     if (self.getVariableOrOptimizedAway(scope, name) === OptimizedAway)
-                        throw new Error("can't set optimized-away closure variables");
+                        throw new Error("can't set optimized-away closure variable");
                     scope.setVariable(name, dvalue);
                 }
             };
