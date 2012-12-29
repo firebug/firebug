@@ -239,8 +239,7 @@ function createFirebugCommandLine(context, win)
         if (FBTrace.DBG_COMMANDLINE)
         {
             FBTrace.sysout("commandLine.Exposed; dispatched event " + methodName + " via " +
-                eventID + " with " + objs.length + " user objects, [0]:" +
-                commandLine.userObjects[0]);
+                eventID + " with " + objs.length + " user objects", commandLine.userObjects);
         }
 
         var result;
