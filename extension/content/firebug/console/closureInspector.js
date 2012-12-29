@@ -347,18 +347,18 @@ var ClosureInspector =
             {
                 if (!this.has(name))
                     return;
+                var dval = self.getVariableOrOptimizedAway(scope, name);
                 return {
                     get: function() {
-                        var dval = self.getVariableOrOptimizedAway(scope, name);
                         if (self.isSimple(dval))
                             return dval;
                         var uwWin = Wrapper.getContentView(win);
                         return self.unwrap(uwWin, dwin, dval);
                     },
-                    set: function(value) {
-                        var dval = dwin.makeDebuggeeValue(value);
+                    set: (dval === OptimizedAway ? undefined : function(value) {
+                        dval = dwin.makeDebuggeeValue(value);
                         scope.setVariable(name, dval);
-                    }
+                    })
                 };
             },
             has: function(name)
