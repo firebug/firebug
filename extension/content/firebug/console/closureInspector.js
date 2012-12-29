@@ -2,7 +2,8 @@
 /*jshint esnext:true, es5:true, curly:false */
 /*global FBTrace:true, Components:true, Proxy:true, define:true */
 
-// A note on terminology: here a "closure" is generally thought of as a container of "scopes".
+// A note on terminology: here a "closure"/"environment" is generally thought
+// of as a container of "scopes".
 
 define([
     "firebug/lib/object",
@@ -15,7 +16,6 @@ function(Obj, Firebug, Wrapper) {
 // ********************************************************************************************* //
 // Constants
 
-const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 const ScopeProxy = function() {};
@@ -58,21 +58,21 @@ var ClosureInspector =
         return dbg;
     },
 
-    getVariableOrOptimizedAway: function(env, name)
+    getVariableOrOptimizedAway: function(scope, name)
     {
         try
         {
-            var ret = env.getVariable(name);
+            var ret = scope.getVariable(name);
             if (ret !== undefined)
                 return ret;
 
             // The variable is either optimized away or actually set to undefined.
             // Optimized-away ones are apparantly not settable, so try to detect
             // them by that (it seems rather safe).
-            env.setVariable(name, 0);
-            if (env.getVariable(name) === undefined)
+            scope.setVariable(name, 0);
+            if (scope.getVariable(name) === undefined)
                 return OptimizedAway;
-            env.setVariable(name, undefined);
+            scope.setVariable(name, undefined);
             return undefined;
         }
         catch (exc)
@@ -104,9 +104,9 @@ var ClosureInspector =
         return global._firebugUnwrappedDebuggerObject;
     },
 
-    scopeIsInteresting: function(env)
+    isScopeInteresting: function(scope)
     {
-        return !!env.parent;
+        return !!scope.parent;
     },
 
     getFunctionFromObject: function(obj)
@@ -152,7 +152,7 @@ var ClosureInspector =
                 for (var j = 0; j < toTest.length; ++j)
                 {
                     var f = toTest[j];
-                    if (f && f.environment && this.scopeIsInteresting(f.environment))
+                    if (f && f.environment && this.isScopeInteresting(f.environment))
                         return f;
                 }
             }
@@ -193,7 +193,7 @@ var ClosureInspector =
         if (typeof obj === "object")
             dobj = this.getFunctionFromObject(dobj);
 
-        if (!dobj || !dobj.environment || !this.scopeIsInteresting(dobj.environment))
+        if (!dobj || !dobj.environment || !this.isScopeInteresting(dobj.environment))
             throw new Error("missing closure");
 
         return dobj.environment;
@@ -220,7 +220,7 @@ var ClosureInspector =
                     // defined through the console. Hide it for a nicer display.
                     break;
                 }
-                if (!this.scopeIsInteresting(scope))
+                if (!this.isScopeInteresting(scope))
                     break;
 
                 ret.push.apply(ret, scope.names());
@@ -308,7 +308,7 @@ var ClosureInspector =
                 scope = Object.getPrototypeOf(obj).scope.parent;
             else
                 scope = this.getEnvironmentForObject(win, obj, context);
-            if (!scope || !this.scopeIsInteresting(scope))
+            if (!scope || !this.isScopeInteresting(scope))
                 return;
         }
         catch (exc)
