@@ -236,10 +236,21 @@ var ClosureInspector =
 
     getClosureWrapper: function(obj, win, context)
     {
-        var env = this.getEnvironmentForObject(win, obj, context);
+        var env, dbg, dglobal;
+        try
+        {
+            env = this.getEnvironmentForObject(win, obj, context);
 
-        var dbg = this.getInactiveDebuggerForContext(context);
-        var dglobal = dbg.addDebuggee(win);
+            dbg = this.getInactiveDebuggerForContext(context);
+            dglobal = dbg.addDebuggee(win);
+        }
+        catch (exc)
+        {
+            // Throw our exception into user-land, and hope it lands safely in
+            // commandLineExposed.js where internals can be hidden.
+            exc._dropFrames = true;
+            throw exc;
+        }
 
         // Return a wrapper for its scoped variables.
         var self = this;

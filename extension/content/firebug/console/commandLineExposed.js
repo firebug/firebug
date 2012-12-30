@@ -196,11 +196,24 @@ function createFirebugCommandLine(context, win)
         {
             // change source and line number of exeptions from commandline code
             // create new error since properties of nsIXPCException are not modifiable
-            var shouldModify, isXPCException;
-            if (exc.filename == Components.stack.filename)
-                shouldModify = isXPCException = true;
-            else if (exc.fileName == Components.stack.filename)
-                shouldModify = true;
+            var shouldModify = false, isXPCException = false, dropFrames = false;
+            var fileName = exc.filename || exc.fileName, lineNumber;
+            if (fileName.lastIndexOf("chrome:", 0) === 0)
+            {
+                if (fileName === Components.stack.filename)
+                {
+                    shouldModify = true;
+                    if (exc.filename)
+                        isXPCException = true;
+                    lineNumber = exc.lineNumber;
+                }
+                else if (exc._dropFrames)
+                {
+                    dropFrames = true;
+                    lineNumber = findLineNumberInExceptionStack(exc.stack);
+                    shouldModify = (lineNumber !== null);
+                }
+            }
 
             if (shouldModify)
             {
@@ -208,7 +221,7 @@ function createFirebugCommandLine(context, win)
                 result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
-                result.lineNumber = exc.lineNumber - line;
+                result.lineNumber = lineNumber - line;
                 result.fileName = "data:," + encodeURIComponent(expr);
                 if (!isXPCException)
                     result.name = exc.name;
@@ -266,6 +279,20 @@ var script = document.createElementNS("http://www.w3.org/1999/xhtml", "script")
 script.src = evalFileSrc;
 document.documentElement.appendChild(script);
 */
+
+function findLineNumberInExceptionStack(strStack) {
+    if (typeof strStack !== "string")
+        return null;
+    var stack = strStack.split("\n");
+    var fileName = Components.stack.filename, re = /^.*@(.*):(.*)$/;
+    for (var i = 0; i < stack.length; ++i)
+    {
+        var m = re.exec(stack[i]);
+        if (m && m[1] === fileName)
+            return +m[2];
+    }
+    return null;
+}
 
 // ********************************************************************************************* //
 // User Commands
