@@ -337,7 +337,7 @@ var ClosureInspector =
             if (ind !== -1 && self.getVariableOrOptimizedAway(scope, "arguments") === OptimizedAway)
                 names.splice(ind, 1);
 
-            namesSet = new Set;
+            namesSet = new Set();
             for (var i = 0; i < names.length; ++i)
                 namesSet.add(names[i]);
         };

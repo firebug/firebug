@@ -1,10 +1,13 @@
 /* See license.txt for terms of usage */
+/*jshint esnext:true, es5:true, curly:false */
+/*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
     "firebug/lib/wrapper",
     "firebug/lib/events",
 ],
 function(Wrapper, Events) {
+"use strict";
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -56,19 +59,19 @@ function createFirebugCommandLine(context, win)
     function createCommandHandler(cmd) {
         return function() {
             return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
-        }
+        };
     }
 
     function createShortcutHandler(cmd) {
         return function() {
             return console[cmd].apply(console, arguments);
-        }
+        };
     }
 
     function createVariableHandler(prop) {
         return function() {
             return notifyFirebug(arguments, prop, "firebugExecuteCommand");
-        }
+        };
     }
 
     // Define command line methods
@@ -146,10 +149,7 @@ function createFirebugCommandLine(context, win)
             FBTrace.sysout("commandLine.Exposed.attachCommandLine; " + window.location);
 
         if (!contentView.console)
-        {
-            var console = createFirebugConsole(context, win);
             contentView.console = console;
-        }
 
         Events.addEventListener(contentView.document, "firebugCommandLine",
             firebugEvalEvent, true);
@@ -182,10 +182,11 @@ function createFirebugCommandLine(context, win)
 
     function evaluate(expr)
     {
+        var result;
         try
         {
             var line = Components.stack.lineNumber;
-            var result = contentView.eval(expr);
+            result = contentView.eval(expr);
 
             // See Issue 5221
             //var result = FirebugEvaluate(expr, contentView);
@@ -203,13 +204,12 @@ function createFirebugCommandLine(context, win)
 
             if (shouldModify)
             {
-                var result = new Error;
+                result = new Error();
                 result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
                 result.lineNumber = exc.lineNumber - line;
                 result.fileName = "data:," + encodeURIComponent(expr);
-
                 if (!isXPCException)
                     result.name = exc.name;
             }
@@ -243,10 +243,10 @@ function createFirebugCommandLine(context, win)
         }
 
         var result;
-        if (contentView.document.getUserData("firebug-retValueType") == "array")
+        if (contentView.document.getUserData("firebug-retValueType") === "array")
             result = [];
 
-        if (!result && commandLine.userObjects.length == length + 1)
+        if (!result && commandLine.userObjects.length === length + 1)
             return commandLine.userObjects[length];
 
         for (var i=length; i<commandLine.userObjects.length && result; i++)
@@ -256,7 +256,7 @@ function createFirebugCommandLine(context, win)
     }
 
     return commandLine;
-};
+}
 
 /* see Issue 5221
 // chrome: urls are filtered out by debugger, so we create script with a data url
