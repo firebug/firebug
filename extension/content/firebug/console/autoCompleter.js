@@ -943,7 +943,7 @@ Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
             expr = subst(expr);
             sexpr = subst(sexpr);
 
-            search = end + fname.length + (hasNew ? 3 : 1); // |(()).| - |.%|, or |().| - |.%|
+            search = end + fname.length + (hasNew ? 5 : 3); // |(()).| or |().|
         }
     }
     return expr;
