@@ -134,7 +134,7 @@ DomplateTag.prototype =
             var val = parseValue(args[name]);
             readPartNames(val, this.vars);
 
-            if (Str.hasPrefix(name, "on"))
+            if (name.lastIndexOf("on", 0) == 0)
             {
                 var eventName = name.substr(2);
                 if (!this.listeners)
@@ -230,6 +230,16 @@ DomplateTag.prototype =
             return Str.escapeForElementAttribute(value);
         }
 
+        function __attr__(name, valueParts)
+        {
+            // Will be called with valueParts = [,arg,arg,...], but we don't
+            // care that the first element is undefined.
+            if (valueParts.length === 2 && valueParts[1] === undefined)
+                return "";
+            var value = valueParts.join("");
+            return ' ' + name + '="' + __escape__(value) + '"';
+        }
+
         function isArray(it)
         {
             return Object.prototype.toString.call(it) === "[object Array]";
@@ -318,12 +328,11 @@ DomplateTag.prototype =
             if (name != "class")
             {
                 var val = this.attrs[name];
-                topBlock.push(', " ', name, '=\\""');
-                addParts(val, ',', topBlock, info, true);
-                topBlock.push(', "\\""');
+                topBlock.push(',__attr__("', name, '",[');
+                addParts(val, ',', topBlock, info, false);
+                topBlock.push('])');
             }
         }
-
         if (this.listeners)
         {
             for (var i = 0; i < this.listeners.length; i += 2)
