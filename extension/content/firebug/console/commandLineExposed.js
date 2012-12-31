@@ -222,7 +222,11 @@ function createFirebugCommandLine(context, win)
                 result.source = expr;
                 result.message = exc.message;
                 result.lineNumber = lineNumber - line;
-                result.fileName = "data:," + encodeURIComponent(expr);
+
+                // Try to make the closure inspector transformation look a bit nicer.
+                var niceExpr = expr.replace(/__fb_scopedVars\(/g, "<get closure>(");
+                result.fileName = "data:," + encodeURIComponent(niceExpr);
+
                 if (!isXPCException)
                     result.name = exc.name;
             }
