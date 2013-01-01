@@ -76,14 +76,14 @@ const DirTablePlate = domplate(Firebug.Rep,
             disabledBreakpoint: "$member.disabledBreakpoint"},
             TD({"class": "memberHeaderCell"},
                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
-                    "&nbsp;"
+                   "&nbsp;"
                )
             ),
             TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
                 role: "presentation"},
-                DIV({"class": "memberLabel $member.type\\Label"},
+                DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
                     SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
-                    SPAN("$member.name")
+                    SPAN({title: "$member.title"}, "$member.name")
                 )
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
@@ -799,6 +799,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         var name = (isScope ? Locale.$STR("dom.scopeParentName") : Locale.$STR("dom.scopeName"));
+        var title = (isScope ? undefined : Locale.$STR("dom.tip.scopeName"));
         var rep = Firebug.getRep(wrapper);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
@@ -815,6 +816,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             hasChildren: true,
             tag: tag,
             prefix: "",
+            title: title,
             readOnly: true,
             deletable: false,
             ignoredPath: true
