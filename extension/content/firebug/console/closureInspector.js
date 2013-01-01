@@ -6,11 +6,10 @@
 // of as a container of "scopes".
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/wrapper"
 ],
-function(Obj, Firebug, Wrapper) {
+function(Firebug, Wrapper) {
 "use strict";
 
 // ********************************************************************************************* //
@@ -402,6 +401,7 @@ var ClosureInspector =
         if (Firebug.JSAutoCompleter.transformScopeExpr)
             return expr;
 
+        // Note: this is also hard-coded elsewhere.
         var fname = "__fb_scopedVars";
 
         var newExpr = Firebug.JSAutoCompleter.transformScopeOperator(expr, fname);
