@@ -83,7 +83,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 role: "presentation"},
                 DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
                     SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
-                    SPAN({title: "$member.title"}, "$member.name")
+                    SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
                 )
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
@@ -140,6 +140,11 @@ const DirTablePlate = domplate(Firebug.Rep,
             tag: Firebug.Rep.tag,
             prefix: ""
         }];
+    },
+
+    getMemberNameTooltip: function(member)
+    {
+        return member.title || member.scopeNameTooltip;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -543,27 +548,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     this.addMember(object, "ordinal", ordinals, name, val, level, 0, context, isScope);
                 }
-                else if (typeof(val) == "function")
+                else if (typeof val === "function")
                 {
-                    if (isClassFunction(val))
-                    {
-                        if (Dom.isDOMMember(object, name))
-                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context, isScope);
-                        else
-                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context, isScope);
-                    }
-                    else if (Dom.isDOMMember(object, name))
-                    {
+                    var classFunc = isClassFunction(val), domMember = Dom.isDOMMember(object, name);
+                    if (domMember && classFunc)
+                        this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context, isScope);
+                    else if (domMember)
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context, isScope);
-                    }
+                    else if (classFunc)
+                        this.addMember(object, "userClass", userClasses, name, val, level, 0, context, isScope);
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
-                    {
                         this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context, isScope);
-                    }
                     else
-                    {
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context, isScope);
-                    }
                 }
                 else
                 {
@@ -757,6 +754,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 member.disabledBreakpoint = !bp.checked;
             }
         }
+
+        if (parentIsScope)
+            member.scopeNameTooltip = Locale.$STRF("dom.tip.scopeMemberName", ["%" + name]);
 
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
