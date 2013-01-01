@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
+/*jshint esnext:true, es5:true, curly:false, evil:true */
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
@@ -174,13 +174,14 @@ function createFirebugCommandLine(context, win)
 
         // see commandLine.js
         var expr = contentView.document.getUserData("firebug-expr");
-        evaluate(expr);
+        var origExpr = contentView.document.getUserData("firebug-expr-orig");
+        evaluate(expr, origExpr);
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.Exposed; did evaluate on " + expr);
     }
 
-    function evaluate(expr)
+    function evaluate(expr, origExpr)
     {
         var result;
         try
@@ -223,9 +224,8 @@ function createFirebugCommandLine(context, win)
                 result.message = exc.message;
                 result.lineNumber = lineNumber - line;
 
-                // Try to make the closure inspector transformation look a bit nicer.
-                var niceExpr = expr.replace(/__fb_scopedVars\(/g, "<get closure>(");
-                result.fileName = "data:," + encodeURIComponent(niceExpr);
+                // Lie and show the pre-transformed expression instead.
+                result.fileName = "data:," + encodeURIComponent(origExpr);
 
                 if (!isXPCException)
                     result.name = exc.name;

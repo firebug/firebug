@@ -84,22 +84,22 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             var debuggerState = Firebug.Debugger.beginInternalOperation();
 
-            expr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
+            var newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
             {
-                this.evaluateInSandbox(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
             else if (Firebug.Debugger.hasValidStack(context))
             {
-                this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
             else
             {
-                this.evaluateByEventPassing(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateByEventPassing(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
 
             if (!noStateChange)
@@ -121,7 +121,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     },
 
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction)
+        successConsoleFunction, exceptionFunction, origExpr)
     {
         var win = targetWindow || context.baseWindow || context.window;
 
@@ -177,8 +177,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         event.initEvent("firebugCommandLine", true, false);
         win.document.setUserData("firebug-methodName", "evaluate", null);
 
-        expr = expr.toString();
+        origExpr = "with(_FirebugCommandLine){\n" + (origExpr || expr) + "\n};";
         expr = "with(_FirebugCommandLine){\n" + expr + "\n};";
+        win.document.setUserData("firebug-expr-orig", origExpr, null);
         win.document.setUserData("firebug-expr", expr, null);
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
