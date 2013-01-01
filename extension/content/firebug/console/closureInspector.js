@@ -311,6 +311,11 @@ var ClosureInspector =
             };
         };
         handler.getPropertyDescriptor = handler.getOwnPropertyDescriptor;
+        handler.delete = function(name)
+        {
+            throwUserError(new Error("can't delete closure variable"));
+        };
+        // Other traps are syntactically inaccessible, so we don't need to implement them.
         return Proxy.create(handler);
     },
 
