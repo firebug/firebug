@@ -3333,7 +3333,7 @@ FirebugReps.ClosureScope = domplate(Firebug.Rep,
 
     getTitle: function(object)
     {
-        var scope = Object.getPrototypeOf(object).scope;
+        var scope = ClosureInspector.getScopeFromWrapper(object);
         var type = scope.type, title;
         if (type === "declarative")
             title = Locale.$STR("firebug.reps.declarativeScope");
