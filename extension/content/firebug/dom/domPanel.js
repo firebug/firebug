@@ -456,9 +456,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
             try
             {
+                // Make sure not to touch the prototype chain of the magic scope objects.
+                var ownOnly = Firebug.showOwnProperties || isScope;
+                var enumerableOnly = Firebug.showEnumerableProperties;
+
                 var contentView = this.getObjectView(object);
-                var properties = this.getObjectProperties(contentView,
-                    Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                var properties = this.getObjectProperties(contentView, enumerableOnly, ownOnly);
                 properties = Arr.sortUnique(properties);
 
                 var addOwn = function(prop)

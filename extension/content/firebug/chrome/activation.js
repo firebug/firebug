@@ -171,8 +171,10 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
+            {
                 FBTrace.sysout("pageHasAnnotation FAILS for url: " + url + " which gave uri " +
                     (uri ? uri.spec : "null"), exc);
+            }
         }
     },
 

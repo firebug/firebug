@@ -378,7 +378,9 @@ var ClosureInspector =
                     set: (dval === OptimizedAway ? undefined : function(value) {
                         dval = dwin.makeDebuggeeValue(value);
                         scope.setVariable(name, dval);
-                    })
+                    }),
+                    enumerable: true,
+                    configurable: false
                 };
             },
             has: function(name)
@@ -403,6 +405,11 @@ var ClosureInspector =
     isScopeWrapper: function(obj)
     {
         return obj instanceof ScopeProxy;
+    },
+
+    getScopeFromWrapper: function(obj)
+    {
+        return Object.getPrototypeOf(obj).scope;
     },
 
     extendLanguageSyntax: function(expr, win, context)
