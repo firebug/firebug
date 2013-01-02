@@ -119,6 +119,8 @@ function runTest()
 
                 var tests = [
                     ["a.%b", "f(a).b"],
+                    ["a.%%b", "f(a).%b"],
+                    ["a.%b.%c", "f(f(a).b).c"],
                     ["a\na.%b", "a\nf(a).b"],
                     ["anew\na.%b", "anew\nf(a).b"],
                     ["new\na.%b()", "new\n(f(a)).b()"],
