@@ -231,11 +231,18 @@ function runTest()
             taskList.push(FBTest.executeCommandAndVerify, "a.%local.%blah",
                 "TypeError: can't get scope of non-object", "span", "errorMessage");
 
+            taskList.push(FBTest.executeCommandAndVerify, "innerA.%b",
+                "2", "pre", "objectBox-number");
+            taskList.push(FBTest.executeCommandAndVerify, "innerB.%a",
+                "1", "pre", "objectBox-number");
+
             // Test setting
             taskList.push(FBTest.executeCommandAndVerify, "a.%nonExistent = 1",
-                "Error: can't create new closure variables", "span", "errorMessage");
+                "Error: can't create new closure variable", "span", "errorMessage");
             taskList.push(FBTest.executeCommandAndVerify, "a.%unused = 1",
-                "1", "pre", "objectBox-number");
+                "Error: can't set optimized-away closure variable", "span", "errorMessage");
+            taskList.push(FBTest.executeCommandAndVerify, "delete a.%unused",
+                "Error: can't delete closure variable", "span", "errorMessage");
             taskList.push(FBTest.executeCommandAndVerify, "++a.%local",
                 "6", "pre", "objectBox-number");
 
@@ -247,6 +254,14 @@ function runTest()
                 "(optimized away)", "pre", "objectBox-optimizedAway");
             taskList.push(FBTest.executeCommandAndVerify, "a.%local",
                 "6", "pre", "objectBox-number");
+
+            // Test that error sources are faked
+            taskList.push(FBTest.executeCommandAndVerify, "innerA.%a()",
+                "TypeError: <get closure>(...).a is not a function", "span", "errorMessage");
+            taskList.push(FBTest.executeCommandAndVerify, "innerA.%a()",
+                "innerA.%a()", "pre", "errorSourceCode");
+            taskList.push(FBTest.executeCommandAndVerify, "a.%nonExistent = 1",
+                "a.%nonExistent = 1", "pre", "errorSourceCode");
 
             // Test object->function heuristics:
             // * already a function
