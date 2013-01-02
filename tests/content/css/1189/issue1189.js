@@ -13,6 +13,7 @@ function runTest()
         {
             shorthandPropOverwritesShorthandProp(panel, callback);
         });
+
         tests.push(function(callback)
         {
             shorthandPropOverwritesSingleValueProp(panel, callback);
@@ -43,16 +44,19 @@ function checkProp(panel, element, checkedSelector, checkedPropName, callback)
     FBTest.selectElementInHtmlPanel(element, function(node)
     {
         var rules = panel.panelNode.getElementsByClassName("cssRule");
-        for each (var rule in rules)
+        for (var j=0; j<rules.length; j++)
         {
+            var rule = rules[j];
             var selector = rule.getElementsByClassName("cssSelector").item(0).textContent;
             if (selector == checkedSelector)
             {
                 var props = rule.getElementsByClassName("cssProp");
-                for each (var prop in props)
+                for (var i=0; i<props.length; i++)
                 {
+                    var prop = props[i];
                     var propName = prop.getElementsByClassName("cssPropName").item(0).
                         textContent;
+
                     if (propName == checkedPropName)
                     {
                         FBTest.ok(FW.FBL.hasClass(prop, "cssOverridden"),
