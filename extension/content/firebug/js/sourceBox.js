@@ -21,7 +21,7 @@ function(Obj, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
  */
 Firebug.SourceBoxDecorator = function(sourceBox)
 {
-}
+};
 
 Firebug.SourceBoxDecorator.sourceBoxCounter = 0;
 
@@ -86,8 +86,8 @@ Firebug.SourceBoxDecorator.prototype =
     getLineId: function(sourceBox, lineNo)
     {
         return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 
@@ -567,7 +567,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         if (this.context.scrollTimeout)
         {
             this.context.clearTimeout(this.context.scrollTimeout);
-            delete this.context.scrollTimeout
+            delete this.context.scrollTimeout;
         }
 
         if (href)
@@ -676,7 +676,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             }
 
             return false; // not sticky
-        }
+        };
     },
 
     /*

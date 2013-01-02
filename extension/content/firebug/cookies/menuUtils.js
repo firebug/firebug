@@ -36,7 +36,7 @@ var MenuUtils =
             type: "checkbox",
             checked: value,
             command: Obj.bindFixed(this.onAllowCookie, this, domain, option)
-        }
+        };
     },
 
     // Command handlers

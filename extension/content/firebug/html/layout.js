@@ -386,8 +386,8 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 layoutLabelPaddingLeft: {value: "paddingLeft"},
                 layoutLabelWidth: {value: "width"},
                 layoutLabelHeight: {value: "height"},
-                outerLabel: {value: "outerLabel"},
-            }
+                outerLabel: {value: "outerLabel"}
+            };
 
             for (val in values)
             {
@@ -534,7 +534,8 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // Don't remove groups
         return false;
     }
-})};
+});
+};
 
 // ************************************************************************************************
 // Local Helpers

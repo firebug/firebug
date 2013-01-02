@@ -57,19 +57,19 @@ function createFirebugCommandLine(context, win)
     function createCommandHandler(cmd) {
         return function() {
             return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
-        }
+        };
     }
 
     function createShortcutHandler(cmd) {
         return function() {
             return console[cmd].apply(console, arguments);
-        }
+        };
     }
 
     function createVariableHandler(prop) {
         return function() {
             return notifyFirebug(arguments, prop, "firebugExecuteCommand");
-        }
+        };
     }
 
     // Define command line methods

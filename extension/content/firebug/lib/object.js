@@ -19,13 +19,13 @@ var Obj = {};
 Obj.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
    var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
-   return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); }
+   return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); };
 };
 
 Obj.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
-    return function() { return fn.apply(object, args); }
+    return function() { return fn.apply(object, args); };
 };
 
 Obj.extend = function()
@@ -154,12 +154,12 @@ Obj.getPrototype = function(ob)
 Obj.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
-}
+};
 
 Obj.getRandomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);
-}
+};
 
 // Cross Window instanceof; type is local to this window
 Obj.XW_instanceof = function(obj, type)
@@ -188,7 +188,7 @@ Obj.XW_instanceof = function(obj, type)
 
     // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited
     // /Determining_Instance_Relationships
-}
+};
 
 /**
  * Tells if the given property of the provided object is a non-native getter or not.
@@ -212,7 +212,7 @@ Obj.isNonNativeGetter = function(obj, propName)
             Obj.isNonNativeGetter = function(obj, propName)
             {
                 return scope.WebConsoleUtils.isNonNativeGetter(obj, propName);
-            }
+            };
 
             return Obj.isNonNativeGetter(obj, propName);
         }
@@ -229,10 +229,10 @@ Obj.isNonNativeGetter = function(obj, propName)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Obj.isNonNativeGetter; ERROR built-in method not found!");
         return true;
-    }
+    };
 
     return true;
-}
+};
 
 // ********************************************************************************************* //
 

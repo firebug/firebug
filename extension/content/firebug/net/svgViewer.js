@@ -124,7 +124,7 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
             originals[i] = templates[i].getHidden;
             templates[i].getHidden = function() {
                 return "";
-            }
+            };
         }
 
         // Generate SVG preview.
@@ -169,7 +169,8 @@ Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-})};
+});
+};
 
 // ************************************************************************************************
 // Registration

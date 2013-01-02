@@ -448,11 +448,12 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
         panel.refresh();
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
-Firebug.Breakpoint.BreakpointsPanel = function() {}
+Firebug.Breakpoint.BreakpointsPanel = function() {};
 
 Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
 {
@@ -787,7 +788,7 @@ function countBreakpoints(context)
 Firebug.Breakpoint.BreakpointGroup = function()
 {
     this.breakpoints = [];
-}
+};
 
 Firebug.Breakpoint.BreakpointGroup.prototype =
 {
@@ -883,7 +884,7 @@ SourceFileRenamer.prototype.needToRename = function(context)
             context.sourceFileMap);
 
     return this.renamedSourceFiles.length;
-}
+};
 
 SourceFileRenamer.prototype.renameSourceFiles = function(context)
 {
@@ -903,7 +904,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         if (!sourceFile.source)
         {
             FBTrace.sysout("breakpoint.renameSourceFiles no source for " + oldURL +
-                " callerURL " + callerURL, sourceFile)
+                " callerURL " + callerURL, sourceFile);
             continue;
         }
 
@@ -939,14 +940,14 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
     }
 
     return this.renamedSourceFiles.length;
-}
+};
 
 // ********************************************************************************************* //
 
 Firebug.Breakpoint.ConditionEditor = function(doc)
 {
     this.initialize(doc);
-}
+};
 
 with (Domplate) {
 Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
@@ -1034,7 +1035,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.JSEditor.prototy
             var sourceFile = compilationUnit.sourceFile;
             FBS.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -1051,7 +1052,7 @@ Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
     this.document = doc;
     this.cause = cause;
-}
+};
 
 Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 /** @lends Firebug.ScriptPanel.Notification */
@@ -1366,7 +1367,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
             }
         }, 15);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

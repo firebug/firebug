@@ -184,7 +184,7 @@ function prepareBuild()
     copy({
         source: "install.rdf.tpl.xml",
         dest: buildDir + "/install.rdf"
-    })
+    });
 }
 
 // ********************************************************************************************* //

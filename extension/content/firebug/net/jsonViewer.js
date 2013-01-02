@@ -213,7 +213,8 @@ Firebug.JSONViewerModel.Preview = domplate(
 
         body.jsonTree.render(file.jsonObject, parentNode, context);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 

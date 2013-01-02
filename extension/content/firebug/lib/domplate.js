@@ -450,7 +450,7 @@ DomplateTag.prototype =
 
         function __bind__(object, fn)
         {
-            return function(event) { return fn.apply(object, [event]); }
+            return function(event) { return fn.apply(object, [event]); };
         }
 
         function __link__(node, tag, args)
@@ -980,7 +980,7 @@ function creator(tag, cons)
         var cons = arguments.callee.cons;
         var newTag = new cons();
         return newTag.merge(arguments, tag);
-    }
+    };
 
     fn.tag = tag;
     fn.cons = cons;
@@ -1282,7 +1282,7 @@ function defineTags()
         return function() {
             var newTag = new Domplate.DomplateTag(tagName);
             return newTag.merge(arguments);
-        }
+        };
     }
 }
 

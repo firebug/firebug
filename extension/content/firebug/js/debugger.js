@@ -441,10 +441,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 var str = "if (!window._firebug)window._firebug={};\n";
                 str += "window._firebug.rerunThis = this;\n";
-                str += "window._firebug.rerunArgs = [];\n"
-                str += "if (arguments && arguments.length) for (var i = 0; i < arguments.length; i++) window._firebug.rerunArgs.push(arguments[i]);\n"
-                str += "window._firebug.rerunFunctionName = "+fnName+";\n"
-                str +="window._firebug.rerunFunction = function _firebugRerun() { "+fnName+".apply(window._firebug.rerunThis, window._firebug.rerunArgs); }"
+                str += "window._firebug.rerunArgs = [];\n";
+                str += "if (arguments && arguments.length) for (var i = 0; i < arguments.length; i++) window._firebug.rerunArgs.push(arguments[i]);\n";
+                str += "window._firebug.rerunFunctionName = "+fnName+";\n";
+                str +="window._firebug.rerunFunction = function _firebugRerun() { "+fnName+".apply(window._firebug.rerunThis, window._firebug.rerunArgs); }";
                 return str;
             }
 
@@ -538,7 +538,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     unSuspend: function(context)
     {
         FBS.stopStepping(null, context);  // TODO per context
-        FBS.cancelBreakOnNextCall(this, context)
+        FBS.cancelBreakOnNextCall(this, context);
     },
 
     runUntil: function(context, compilationUnit, lineNo)
@@ -2365,7 +2365,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
         this.debuggerName =  window.location.href +"-@-"+Obj.getUniqueId();
-        this.toString = function() { return this.debuggerName; }
+        this.toString = function() { return this.debuggerName; };
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+
@@ -2854,7 +2854,7 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
     this.checked = checked;
     this.sourceLine = sourceLine;
     this.isFuture = isFuture;
-}
+};
 
 // ********************************************************************************************* //
 
@@ -2891,7 +2891,7 @@ Firebug.DebuggerListener =
 
     onFunctionConstructor: function(context, frame, ctor_script, url, sourceFile)
     {
-    },
+    }
 };
 
 // ********************************************************************************************* //
@@ -2936,8 +2936,8 @@ Firebug.JSDebugClient =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejection: " +
                 rejection.length + ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
-    },
-}
+    }
+};
 
 // Recursively look for obj in container using array of visited objects
 function findObjectPropertyPath(containerName, container, obj, visited)
@@ -3018,11 +3018,11 @@ function ArrayEnumerator(array)
     this.hasMoreElements = function()
     {
         return (this.index < array.length);
-    }
+    };
     this.getNext = function()
     {
         return this.array[++this.index];
-    }
+    };
 }
 
 // ********************************************************************************************* //

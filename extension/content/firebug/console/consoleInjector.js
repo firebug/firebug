@@ -174,8 +174,8 @@ Firebug.Console.injector =
             win = context.window;
 
         this.removeConsoleHandler(context, win);
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 

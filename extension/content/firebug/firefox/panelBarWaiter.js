@@ -119,7 +119,7 @@ window.panelBarWaiter = function()
             dump("bindings panelBar ctor FAILs: " + e + "\n");
             dump("window.top " + window.top.location + " window.opener: " + window.opener + "\n");
         }
-    }
+    };
 
     return panelBarWaiter;
 }();

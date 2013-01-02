@@ -1070,7 +1070,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (forceAll)
             Dom.scrollIntoCenterView(this.box, null, true);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Autocompletion

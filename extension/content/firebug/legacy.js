@@ -50,7 +50,7 @@ window.FBL =
             FBTrace.sysout("Panel types: " + Firebug.earlyRegPanelTypes.length);
         }
     }
-}
+};
 
 // ********************************************************************************************* //
 // Called by firebugFrame main.js to pump global and deprecated API back.
@@ -62,7 +62,7 @@ window.FBL.legacyPatch = function(FBL, Firebug)
 
     top.FBL = FBL;
     top.Firebug = Firebug;
-}
+};
 
 window.FBL.legacyApiPatch = function(FBL, Firebug, Firefox)
 {
@@ -74,6 +74,6 @@ window.FBL.legacyApiPatch = function(FBL, Firebug, Firefox)
     Firebug.chrome.getBrowsers = Firefox.getBrowsers;
     Firebug.chrome.getCurrentBrowsers = Firefox.getCurrentBrowsers;
     Firebug.chrome.getCurrentURI = Firefox.getCurrentURI;
-}
+};
 
 // ********************************************************************************************* //

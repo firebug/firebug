@@ -124,8 +124,8 @@ var BrowserToolbar =
             navBar.removeAttribute("collapsed");
             doc.persist(navBarId, "collapsed");
         }
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Registration

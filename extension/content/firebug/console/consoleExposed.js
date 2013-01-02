@@ -361,7 +361,7 @@ function createFirebugConsole(context, win)
 
         if (args.length > 1)
         {
-            errorObject.objects = []
+            errorObject.objects = [];
             for (var i = 1; i < args.length; i++)
                 errorObject.objects.push(args[i]);
         }

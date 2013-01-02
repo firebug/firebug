@@ -203,7 +203,7 @@ Firebug.InsideOutBox.prototype =
                 Css.setClass(parentBox, "open");
                 labelBox = parentBox.getElementsByClassName("nodeLabelBox").item(0);
                 if (labelBox)
-                    labelBox.setAttribute("aria-expanded", "true")
+                    labelBox.setAttribute("aria-expanded", "true");
             }
         }
     },
@@ -532,7 +532,7 @@ Firebug.InsideOutBox.prototype =
                 if (newBox)
                 {
                     if (!nodeChildBox)
-                        FBTrace.sysout("insideOutBox FAILS no nodeChildBox "+repObject, repObject)
+                        FBTrace.sysout("insideOutBox FAILS no nodeChildBox "+repObject, repObject);
 
                     if (lastSiblingBox)
                     {

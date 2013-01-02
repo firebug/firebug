@@ -133,7 +133,7 @@ BrowserOverlay.prototype =
         var scriptSources = [
             "chrome://firebug/content/legacy.js",
             "chrome://firebug/content/moduleConfig.js"
-        ]
+        ];
 
         // Create script elements.
         var self = this;
@@ -424,7 +424,7 @@ BrowserOverlay.prototype =
                 this.showItem("inspect-separator", false);
                 this.showItem("context-inspect", false);
             }
-        }
+        };
     },
 
     unloadContextMenuOverlay: function()

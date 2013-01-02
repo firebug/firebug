@@ -63,7 +63,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     ];
 
     return config;
-}
+};
 
 // ********************************************************************************************* //
 // Firebug Extension Registration
@@ -130,7 +130,7 @@ Firebug.registerExtension = function(extName, extConfig)
                 " EXCEPTION " + err, err);
         }
     });
-}
+};
 
 /**
  * Unregisters and shutdowns specific extension. Registered extensions are unregistered
@@ -157,18 +157,18 @@ Firebug.unregisterExtension = function(extName)
         Components.utils.reportError("unregisterExtension: " + extName +
             " EXCEPTION " + err, err);
     }
-}
+};
 
 Firebug.getExtensionConfig = function(extName)
 {
     return this.extensions[extName];
-}
+};
 
 Firebug.iterateExtensions = function(callback)
 {
     for (var ext in this.extensions)
         callback(ext, this.extensions[ext]);
-}
+};
 
 /**
  * Unregisters and shutdowns all registered extensions. Called by the framework when
@@ -184,6 +184,6 @@ Firebug.unregisterExtensions = function()
         this.unregisterExtension(extName);
 
     this.extensions = {};
-}
+};
 
 // ********************************************************************************************* //

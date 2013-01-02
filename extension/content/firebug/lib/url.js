@@ -174,7 +174,7 @@ Url.isSystemPage = function(win)
         FBTrace.sysout("Url.isSystemPage; EXCEPTION document not ready?: " + exc);
         return false;
     }
-}
+};
 
 Url.isSystemStyleSheet = function(sheet)
 {
@@ -195,7 +195,7 @@ Url.getURIHost = function(uri)
     {
         return "";
     }
-}
+};
 
 Url.isLocalURL = function(url)
 {
@@ -253,7 +253,7 @@ Url.getLocalSystemURI = function(url)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("getLocalSystemURI failed for "+url);
     }
-}
+};
 
 /*
  * Mozilla native path for local URL
@@ -269,14 +269,14 @@ Url.getLocalOrSystemPath = function(url, allowDirectories)
         else
             return file && !file.isDirectory() && file.path;
     }
-}
+};
 
 Url.getLocalOrSystemFile = function(url)
 {
     var uri = Url.getLocalSystemURI(url);
     if (uri instanceof Ci.nsIFileURL)
         return uri.file;
-}
+};
 
 Url.getURLFromLocalFile = function(file)
 {
@@ -290,10 +290,10 @@ Url.getDataURLForContent = function(content, url)
 {
     // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
     var uri = "data:text/html;";
-    uri += "fileName="+encodeURIComponent(url)+ ","
+    uri += "fileName="+encodeURIComponent(url)+ ",";
     uri += encodeURIComponent(content);
     return uri;
-},
+};
 
 Url.getDomain = function(url)
 {
@@ -385,7 +385,7 @@ Url.absoluteURLWithDots = function(url, baseURL)
         var parts = tail.split("/");
         return head + parts.slice(0, parts.length-1).join("/") + "/" + url;
     }
-}
+};
 
 var reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
 Url.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
@@ -549,7 +549,7 @@ Url.makeURI = function(urlString)
 
         return false;
     }
-}
+};
 
 /**
  * Converts resource: to file: Url.
@@ -566,7 +566,7 @@ Url.resourceToFile = function(resourceURL)
 
     var path = resHandler.getSubstitution(sub).spec;
     return path + split.join("/");
-}
+};
 
 // ********************************************************************************************* //
 // Registration

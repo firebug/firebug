@@ -187,7 +187,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                         editor.setText("// "+Locale.$STR("scratchpad.loading"));
                 }
             });
-        }
+        };
 
         var xhr = new XMLHttpRequest({mozAnon: true});
         xhr.open("GET", url, true);
@@ -203,7 +203,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
             // otherwise, we wait for the editor
             if (editor)
                 editor.setText(scriptContent);
-        }
+        };
 
         xhr.onerror = function()
         {
@@ -211,7 +211,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                 return;
 
             spInstance.setText("// "+Locale.$STR("scratchpad.failLoading"));
-        }
+        };
 
         xhr.send(null);
     },
@@ -446,7 +446,7 @@ var CommandLineInclude =
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
                 successFunction(xhr, hasWarnings);
-        }
+        };
 
         if (errorFunction)
         {

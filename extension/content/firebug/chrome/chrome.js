@@ -165,7 +165,7 @@ var FirebugChrome =
             {
                 // chrome bound into this scope
                 FirebugChrome.initializeUI();
-            })
+            });
         }
     },
 
@@ -819,7 +819,7 @@ var FirebugChrome =
         {
             // panels provide location, use the selected panel
             return Firebug.chrome.getSelectedPanel();
-        }
+        };
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -840,10 +840,10 @@ var FirebugChrome =
     hidePanel: function()
     {
         if (panelBar1.selectedPanel)
-            panelBar1.hideSelectedPanel()
+            panelBar1.hideSelectedPanel();
 
         if (panelBar2.selectedPanel)
-            panelBar2.hideSelectedPanel()
+            panelBar2.hideSelectedPanel();
     },
 
     syncPanel: function(panelName)
@@ -1162,7 +1162,7 @@ var FirebugChrome =
 
     swapBrowsers: function(oldBrowser, newBrowser)
     {
-        var oldDoc = oldBrowser.contentDocument
+        var oldDoc = oldBrowser.contentDocument;
         // Panels remember the top window, for which they were first opened.
         // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
@@ -1187,7 +1187,7 @@ var FirebugChrome =
                 a.QueryInterface(Ci.nsIFrameLoaderOwner).swapFrameLoaders(b);
             else
                 a.swapDocShells(b);
-        }
+        };
 
         for (var i = frames.length - 1; i >= 0; i--)
         {

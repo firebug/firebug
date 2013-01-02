@@ -556,7 +556,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 currFile.row.removeAttribute("breakpoint");
             else
                 currFile.row.setAttribute("breakpoint", "true");
-        })
+        });
     },
 
     stopLoading: function(file)
@@ -759,7 +759,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if(this.currentSearch.shouldSearchResponses() &&
                 Dom.getAncestorByClass(row, "netInfoResponseText"))
             {
-                this.highlightNode(row)
+                this.highlightNode(row);
             }
             else
             {
@@ -1161,7 +1161,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             fileCount += summary.fileCount;
             totalSize += summary.totalSize;
             cachedSize += summary.cachedSize;
-            totalTime += summary.totalTime
+            totalTime += summary.totalTime;
         }
 
         var row = this.summaryRow;
@@ -1234,7 +1234,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var totalTime = maxTime - minTime;
         return {cachedSize: cachedSize, totalSize: totalSize, totalTime: totalTime,
-                fileCount: fileCount}
+                fileCount: fileCount};
     },
 
     updateLogLimit: function(limit)
@@ -1479,7 +1479,7 @@ Firebug.NetMonitor.NetFileLink = function(href, request)
 {
     this.href = href;
     this.request = request;
-}
+};
 
 Firebug.NetMonitor.NetFileLink.prototype =
 {
@@ -1594,13 +1594,13 @@ var NetPanelSearch = function(panel, rowFinder)
         searchRange.setEnd(this.currentRow, this.currentRow.childNodes.length);
 
         startPt = searchRange;
-    }
+    };
 
     this.getFirstRow = function()
     {
         var table = panelNode.getElementsByClassName("netTable").item(0);
         return table.querySelector(".netTableBody").firstChild;
-    }
+    };
 
     this.getNextRow = function(wrapAround, reverse)
     {
@@ -1614,12 +1614,12 @@ var NetPanelSearch = function(panel, rowFinder)
         }
 
         return wrapAround ? this.getFirstRow() : null;
-    }
+    };
 
     this.shouldSearchResponses = function()
     {
         return Firebug["netSearchResponseBody"];
-    }
+    };
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1627,7 +1627,7 @@ var NetPanelSearch = function(panel, rowFinder)
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {
     Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
-}
+};
 
 Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Breakpoint.ConditionEditor.prototype,
 {
@@ -1666,7 +1666,7 @@ Firebug.NetMonitor.BrowserCache =
         Options.setPref(this.cacheDomain, "disk.enable", state);
         Options.setPref(this.cacheDomain, "memory.enable", state);
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

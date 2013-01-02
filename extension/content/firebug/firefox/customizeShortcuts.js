@@ -22,7 +22,7 @@ var shortcutNames = null;
 var gVKNames = [];
 var gLocaleKeys = [];
 var gPlatformKeys = new Object();
-var updatedShortcuts = {}
+var updatedShortcuts = {};
 var modified = false;
 var mustBeKeyChars = {
     VK_SEMICOLON      : ";",
@@ -117,7 +117,7 @@ function saveChanges()
     var e = Services.wm.getEnumerator("navigator:browser");
     while (e.hasMoreElements())
     {
-        var fbug = e.getNext().Firebug
+        var fbug = e.getNext().Firebug;
         fbug && fbug.ShortcutsModel.initShortcuts();
     }
     return true;

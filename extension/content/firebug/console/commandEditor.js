@@ -390,7 +390,7 @@ TextEditor.prototype =
 
         return this.textBox.value.substring(start, end);
     } 
-}
+};
 
 // ********************************************************************************************* //
 // Registration
