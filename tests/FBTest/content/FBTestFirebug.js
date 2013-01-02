@@ -2327,15 +2327,14 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             else if (menuItemIdentifier.label)
             {
                 var menuItemId = menuItemIdentifier.label;
-                var menuItems = contextMenu.children;
-                for each (menuItem in menuItems)
+                for (var item = contextMenu.firstChild; item; item = item.nextSibling)
                 {
-                    if (menuItem.label == menuItemId)
+                    if (item.label == menuItemId)
                         break;
                 }
             }
 
-            self.ok(menuItem, "'" + menuItemId  + "' item must be available in the context menu.");
+            self.ok(menuItem, "'" + menuItemId + "' item must be available in the context menu.");
 
             // If the menu item isn't available close the context menu and bail out.
             if (!menuItem)
