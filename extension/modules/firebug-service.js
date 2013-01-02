@@ -844,9 +844,11 @@ var fbs =
         // make sure to unregister all the hooks
         var hookNames = ["error", "script", "breakpoint", "debugger", "debug", "interrupt", 
             "throw", "topLevel", "function", "debug"];
-        for each (var hook in hookNames)
+        for (var i=0; i<hookNames.length; i++)
         {
-            try {
+            var hook = hookNames[i];
+            try
+            {
                 jsd[hook + "Hook"] = null;
             }
             catch (exc)
