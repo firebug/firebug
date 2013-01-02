@@ -33,7 +33,7 @@ var BrowserOverlayLib =
         if (!(doc instanceof Ci.nsIDOMDocument))
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("browserOvelayLib.$el; No document!")
+                FBTrace.sysout("browserOvelayLib.$el; No document!");
             return;
         }
 
@@ -232,8 +232,8 @@ var BrowserOverlayLib =
         script.type = "text/javascript";
         script.setAttribute("firebugRootNode", true);
         doc.documentElement.appendChild(script);
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Helpers

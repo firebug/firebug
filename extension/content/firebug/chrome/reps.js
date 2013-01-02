@@ -490,7 +490,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 FirebugReps.ReferenceObj = function(target)
 {
     this.target = target;
-}
+};
 
 /**
  * Rep for cycle reference in an array.
@@ -1465,7 +1465,7 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err)
+                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err);
         }
     },
 
@@ -3281,7 +3281,7 @@ FirebugReps.ErrorMessageObj.prototype =
         if (!this.context.sourceCache)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!")
+                FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!");
             return;
         }
 

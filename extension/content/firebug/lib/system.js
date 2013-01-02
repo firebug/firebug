@@ -85,7 +85,7 @@ System.getIconURLForFile = function(path)
     }
 
     return null;
-}
+};
 
 System.copyToClipboard = function(string)
 {
@@ -132,7 +132,7 @@ System.getStringDataFromClipboard = function()
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 // Firebug Version Comparator
@@ -162,7 +162,7 @@ System.checkFirebugVersion = function(expectedVersion)
     var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
         getService(Ci.nsIVersionComparator);
     return versionChecker.compare(version, expectedVersion);
-}
+};
 
 // ********************************************************************************************* //
 

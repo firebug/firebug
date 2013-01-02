@@ -85,7 +85,7 @@ Breakpoint.prototype =
             // The properties of scope are all strings; we pass them in then
             // unpack them using 'with'. The function is called immediately.
             var expr = "(function (){var scope = " + JSON.stringify(scope) +
-                "; with (scope) { return  " + this.condition + ";}})();"
+                "; with (scope) { return  " + this.condition + ";}})();";
 
             // The callbacks will set this if the condition is true or if the eval faults.
             delete context.breakingCause;
@@ -129,8 +129,8 @@ Breakpoint.prototype =
             prevValue: this.condition,
             newValue:result
         };
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Breakpoint UI
@@ -197,7 +197,7 @@ var BreakpointRep = domplate(Firebug.Rep,
                 file.row.removeAttribute("breakpoint");
                 file.row.removeAttribute("disabledBreakpoint");
             }
-        })
+        });
     },
 
     onEnable: function(event)
@@ -237,7 +237,8 @@ var BreakpointRep = domplate(Firebug.Rep,
     {
         return object instanceof Breakpoint;
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

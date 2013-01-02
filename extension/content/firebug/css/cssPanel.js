@@ -2545,12 +2545,12 @@ Firebug.StyleSheetEditor = StyleSheetEditor;
 
 Firebug.CSSDirtyListener = function(context)
 {
-}
+};
 
 Firebug.CSSDirtyListener.isDirty = function(styleSheet, context)
 {
     return (styleSheet.fbDirty == true);
-}
+};
 
 Firebug.CSSDirtyListener.prototype =
 {

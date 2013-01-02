@@ -150,7 +150,7 @@ var CommandLineHelp = domplate(
                 name: CommandLineExposed.commands[i],
                 desc: "console.cmd.help." + CommandLineExposed.commands[i],
                 type: CMD_TYPE_COMMAND,
-            })
+            });
         }
 
         for (var i=0; i<CommandLineExposed.consoleShortcuts.length; i++)
@@ -159,7 +159,7 @@ var CommandLineHelp = domplate(
                 name: CommandLineExposed.consoleShortcuts[i],
                 desc: "console.cmd.help." + CommandLineExposed.consoleShortcuts[i],
                 type: CMD_TYPE_SHORTCUT,
-            })
+            });
         }
 
         for (var i=0; i<CommandLineExposed.properties.length; i++)
@@ -168,7 +168,7 @@ var CommandLineHelp = domplate(
                 name: CommandLineExposed.properties[i],
                 desc: "console.cmd.help." + CommandLineExposed.properties[i],
                 type: CMD_TYPE_PROPERTY,
-            })
+            });
         }
 
         for (var name in CommandLineExposed.userCommands)
@@ -181,7 +181,7 @@ var CommandLineHelp = domplate(
                 noUserHelpUrl: !config.helpUrl,
                 helpUrl: config.helpUrl ? config.helpUrl: null,
                 type: config.getter ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
-            })
+            });
         }
 
         // Sort commands

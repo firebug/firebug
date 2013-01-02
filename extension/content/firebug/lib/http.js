@@ -179,7 +179,7 @@ Http.removeHeadersFromPostText = function(request, text)
         return text;
 
     return text.substring(index + headerSeparator.length);
-}
+};
 
 /**
  * Returns an array of headers from posted data (appended by Firefox)
@@ -223,7 +223,7 @@ Http.getHeadersFromPostText = function(request, text)
     }
 
     return headers;
-}
+};
 
 Http.getInputStreamFromString = function(dataString)
 {
@@ -307,7 +307,7 @@ Http.safeGetRequestName = function(request)
     }
 
     return null;
-}
+};
 
 Http.safeGetURI = function(browser)
 {
@@ -320,7 +320,7 @@ Http.safeGetURI = function(browser)
     }
 
     return null;
-}
+};
 
 Http.safeGetContentType = function(request)
 {
@@ -333,7 +333,7 @@ Http.safeGetContentType = function(request)
     }
 
     return null;
-}
+};
 
 Http.safeGetXHRResponseText = function(xhr)
 {
@@ -346,7 +346,7 @@ Http.safeGetXHRResponseText = function(xhr)
     }
 
     return null;
-}
+};
 
 // ********************************************************************************************* //
 // IP Adress and port number (Requires Gecko 5).
@@ -362,7 +362,7 @@ Http.safeGetLocalAddress = function(request)
     {
     }
     return null;
-}
+};
 
 Http.safeGetLocalPort = function(request)
 {
@@ -375,7 +375,7 @@ Http.safeGetLocalPort = function(request)
     {
     }
     return null;
-}
+};
 
 Http.safeGetRemoteAddress = function(request)
 {
@@ -388,7 +388,7 @@ Http.safeGetRemoteAddress = function(request)
     {
     }
     return null;
-}
+};
 
 Http.safeGetRemotePort = function(request)
 {
@@ -401,7 +401,7 @@ Http.safeGetRemotePort = function(request)
     {
     }
     return null;
-}
+};
 
 // ********************************************************************************************* //
 // XHR
@@ -424,7 +424,7 @@ Http.isXHR = function(request)
     }
 
     return false;
-},
+};
 
 // ********************************************************************************************* //
 // Conversions

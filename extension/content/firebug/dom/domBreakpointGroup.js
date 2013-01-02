@@ -181,7 +181,7 @@ Breakpoint.prototype =
                 FBTrace.sysout("dom.unwatch; object FAILS " + exc, exc);
         }
     }
-}
+};
 
 // ********************************************************************************************* //
 

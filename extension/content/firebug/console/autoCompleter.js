@@ -1671,7 +1671,7 @@ function setCompletionsFromObject(out, object, context)
             // to cross-window properties, nor just '!Object.getPrototypeOf(obj)'
             // because of Object.create.
             return !Object.getPrototypeOf(obj) && "hasOwnProperty" in obj;
-        }
+        };
 
         var obj = object;
         while (obj !== null)

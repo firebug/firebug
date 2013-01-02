@@ -54,13 +54,13 @@ CompilationUnit.BROWSER_GENERATED = "event";
 CompilationUnit.prototype.getKind = function getKind()
 {
     return this.kind;
-}
+};
 
 CompilationUnit.prototype.isExecutableLine = function isExecutableLine(lineNo)
 {
     // TODO no sourceFiles!
     return this.sourceFile.isExecutableLine(lineNo);
-}
+};
 
 /**
  * Returns the URL of this compilation unit.

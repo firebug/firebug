@@ -264,7 +264,7 @@ var PerfInfoTip = domplate(Firebug.Rep,
             name: "load",
             className: "onLoad",
             start: t.loadEventStart - t.navigationStart,
-        })
+        });
 
         // Insert separator.
         this.separatorTag.insertRows({label: Locale.$STR("requestinfo.timings.label")},
@@ -329,7 +329,7 @@ function performanceTiming(context, timing)
     var rep = PerformanceTimingRep;
     var bars = calculateBars(t);
 
-    var result = []
+    var result = [];
     for (var i=0; i<bars.length; i++)
     {
         var bar = bars[i];
@@ -384,13 +384,13 @@ function performanceTiming(context, timing)
             timeLabel: startTime ? "+" + Str.formatTime(startTime) : 0,
             desc: Locale.$STR("perftiming." + name),
             time: startTime,
-        }
+        };
         timings.push(timing);
     }
 
     timings.sort(function(a, b) {
         return a.time > b.time ? 1 : -1;
-    })
+    });
 
     DetailsEntry.tag.insertRows({timings: timings}, tBody);
 

@@ -330,7 +330,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             consoleHandler.evaluateError = function useExceptionFunction(result)
             {
                 exceptionFunction(result, context, "errorMessage");
-            }
+            };
         }
         else
         {
@@ -344,7 +344,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 }
 
                 Firebug.Console.logFormatted([result], context, "error", true);
-            }
+            };
         }
 
         return win.postMessage(expr, "*");
@@ -1228,7 +1228,7 @@ function FirebugCommandLineAPI(context)
                         "a command: " + name + ", " + err, err);
                 }
             }
-        }
+        };
     }
 
     // Register user commands.
@@ -1418,7 +1418,7 @@ function CommandLineHandler(context, win)
                         FBTrace.sysout("commandLine.getInspectorHistory: " + p, vars);
 
                     return Wrapper.unwrapObject(vars[p]);
-                }
+                };
             }
 
             // XXXjjb should these be removed?

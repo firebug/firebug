@@ -481,8 +481,10 @@ OutStepper.prototype =
 
         // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
+        {
             FBTrace.sysout("fbs." + this.mode + ".onFunctionReturn callingFrameId " +
-                callingFrameId + " called frame " + frameToString(frame), this)
+                callingFrameId + " called frame " + frameToString(frame), this);
+        }
     },
 
     unhook: function(frame)
@@ -492,8 +494,10 @@ OutStepper.prototype =
     hit: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_STEP)
+        {
             FBTrace.sysout("fbs." + this.mode + " hit " + getCallFromType(type) + " at " +
                 frameToString(frame), this);
+        }
 
         var debuggr = fbs.reFindDebugger(frame, this.debuggr);
         if (debuggr)

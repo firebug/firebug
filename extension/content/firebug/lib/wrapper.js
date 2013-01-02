@@ -20,7 +20,7 @@ Wrapper.getContentView = function(object)
         return false;
 
     return (object.wrappedJSObject);
-}
+};
 
 Wrapper.unwrapObject = function(object)
 {
@@ -32,7 +32,7 @@ Wrapper.unwrapObject = function(object)
         return object.wrappedJSObject;
 
     return object;
-}
+};
 
 Wrapper.unwrapIValue = function(object, viewChrome)
 {
@@ -65,7 +65,7 @@ Wrapper.unwrapIValue = function(object, viewChrome)
     }
 
     return unwrapped;
-}
+};
 
 Wrapper.unwrapIValueObject = function(scope, viewChrome)
 {

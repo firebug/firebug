@@ -279,13 +279,13 @@ StackFrame.StackFrame.prototype =
             // in all cases.
             if (scope.jsClassName == "Call")
             {
-                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome)
-                scopeVars.toString = function() {return Locale.$STR("Closure Scope");}
+                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome);
+                scopeVars.toString = function() { return Locale.$STR("Closure Scope"); };
             }
             else if (scope.jsClassName == "Block")
             {
-                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome)
-                scopeVars.toString = function() {return Locale.$STR("Block Scope");}
+                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome);
+                scopeVars.toString = function() { return Locale.$STR("Block Scope"); };
             }
             else
             {
@@ -359,7 +359,7 @@ StackFrame.parseToStackFrame = function(line, context) // function name (arg, ar
             return new StackFrame.StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
         }
     }
-}
+};
 
 StackFrame.parseToStackTrace = function(stack, context)
 {
@@ -376,7 +376,7 @@ StackFrame.parseToStackTrace = function(stack, context)
              trace.frames.push(frame);
      }
      return trace;
-}
+};
 
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
@@ -395,7 +395,7 @@ StackFrame.cleanStackTraceOfFirebug = function(trace)
             trace = undefined;
     }
     return trace;
-}
+};
 
 StackFrame.getStackDump = function()
 {
@@ -432,7 +432,7 @@ StackFrame.getStackSourceLink = function()
         }
     }
     return StackFrame.getFrameSourceLink(frame);
-}
+};
 
 StackFrame.getFrameSourceLink = function(frame)
 {
@@ -570,7 +570,7 @@ StackFrame.getFunctionName = function(script, context, frame, noArgs)
         FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");
 
     return name;
-}
+};
 
 StackFrame.getDisplayName = function(scope, script)
 {
@@ -591,7 +591,7 @@ StackFrame.getDisplayName = function(scope, script)
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("stackFrame.getDisplayName; EXCEPTION " + err, err);
     }
-}
+};
 
 StackFrame.guessFunctionName = function(url, lineNo, context)
 {
@@ -601,7 +601,7 @@ StackFrame.guessFunctionName = function(url, lineNo, context)
             return StackFrame.guessFunctionNameFromLines(url, lineNo, context.sourceCache);
     }
     return "? in "+Url.getFileName(url)+"@"+lineNo;
-}
+};
 
 var reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
 var reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
@@ -636,7 +636,7 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
         }
     }
     return "(?)";
-}
+};
 
 // Mozilla
 StackFrame.getFunctionArgValues = function(frame)
@@ -651,7 +651,7 @@ StackFrame.getFunctionArgValues = function(frame)
             {values: values});
 
     return values;
-}
+};
 
 // Mozilla
 StackFrame.getArgumentsFromObjectScope = function(frame)

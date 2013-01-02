@@ -259,7 +259,7 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.trialSelector)
         {
             WarningTemplate.noSelectionResultsTag.insertRows(
-                {object: this.selection}, tbody.lastChild)
+                {object: this.selection}, tbody.lastChild);
         }
         else
         {

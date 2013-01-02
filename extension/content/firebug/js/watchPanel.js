@@ -20,7 +20,7 @@ function(Obj, Firefox, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Loca
 
 Firebug.WatchPanel = function()
 {
-}
+};
 
 /**
  * Represents the Watch side panel available in the Script panel.
@@ -154,8 +154,10 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                 this.addMember(scopes[0], "watch", members, expr, value, 0);
 
                 if (FBTrace.DBG_DOM)
+                {
                     FBTrace.sysout("watch.updateSelection " + expr + " = " + value,
-                        {expr: expr, value: value, members: members})
+                        {expr: expr, value: value, members: members});
+                }
             }
         }
 

@@ -81,7 +81,7 @@ Toolbar.setItemIntoElement = function(element, item)
         element.setAttribute("name", item.name);
 
     return element;
-}
+};
 
 Toolbar.createToolbarSeparator = function(toolbar, before)
 {

@@ -188,7 +188,7 @@ function createSimpleEscape(name, direction)
                     return list[ch];
                 }
             );
-    }
+    };
 }
 
 function escapeEntityAsName(char)
@@ -567,7 +567,7 @@ Str.hasPrefix = function(hay, needle)
 Str.endsWith = function(str, suffix)
 {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
+};
 
 // ********************************************************************************************* //
 // HTML Wrap

@@ -64,7 +64,7 @@ require.load = function(context, fullName, url)
     }
 
     return originalLoad.apply(require, [context, fullName, url]);
-}
+};
 
 // ********************************************************************************************* //
 
@@ -100,7 +100,7 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 
                 if (prevResourcesReady)
                     prevResourcesReady(isReady);
-            }
+            };
         }
         else
         {
@@ -142,7 +142,7 @@ function onModulesLoaded(ChromeFactory, FBL, Firebug, Browser)
     Browser.onDebug = function()
     {
         FBTrace.sysout.apply(FBTrace, arguments);
-    }
+    };
 
     Firebug.Options.initialize(prefDomain);
 
@@ -174,4 +174,3 @@ function onModulesLoaded(ChromeFactory, FBL, Firebug, Browser)
 })();
 
 // ********************************************************************************************* //
-

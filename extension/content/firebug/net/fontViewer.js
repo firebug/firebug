@@ -543,7 +543,7 @@ Firebug.FontViewerModel.Preview = domplate(
             copyright: Firebug.FontViewerModel.Preview.translatedInfoTag,
             trademark: Firebug.FontViewerModel.Preview.translatedInfoTag,
             license: Firebug.FontViewerModel.Preview.licenseTag
-        }
+        };
 
         for (var i=0; i<root.children.length; i++)
         {
@@ -690,7 +690,8 @@ Firebug.FontViewerModel.Preview = domplate(
         if (fontObject.metadata != "")
             this.insertMetaDataFormatted(body, fontObject.metadata);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

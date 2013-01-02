@@ -30,7 +30,7 @@ var getElementType = Xml.getElementType = function(node)
         return 'xhtml';
     else if (isElementHTML(node))
         return 'html';
-}
+};
 
 var getElementSimpleType = Xml.getElementSimpleType = function(node)
 {
@@ -40,44 +40,44 @@ var getElementSimpleType = Xml.getElementSimpleType = function(node)
         return 'mathml';
     else
         return 'html';
-}
+};
 
 var isElementHTML = Xml.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
+};
 
 var isElementXHTML = Xml.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
+};
 
 var isElementMathML = Xml.isElementMathML = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
-}
+};
 
 var isElementSVG = Xml.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
-}
+};
 
 var isElementXUL = Xml.isElementXUL = function(node)
 {
     return node instanceof XULElement;
-}
+};
 
 var getNodeName = Xml.getNodeName = function(node)
 {
     var name = node.nodeName;
     return isElementHTML(node) ? name.toLowerCase() : name;
-}
+};
 
 var getLocalName = Xml.getLocalName = function(node)
 {
     var name = node.localName;
     return isElementHTML(node) ? name.toLowerCase() : name;
-}
+};
 
 // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
 Xml.selfClosingTags =
@@ -91,8 +91,8 @@ Xml.selfClosingTags =
     "img": 1,
     "br": 1,
     "hr": 1,
-    "param":1,
-    "embed":1
+    "param": 1,
+    "embed": 1
 };
 
 Xml.isSelfClosing = function(element)

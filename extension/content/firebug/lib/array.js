@@ -124,7 +124,7 @@ Arr.cloneArray = function(array, fn)
            newArray.push(array[i]);
 
    return newArray;
-}
+};
 
 Arr.extendArray = function(array, array2)
 {
@@ -132,7 +132,7 @@ Arr.extendArray = function(array, array2)
    newArray.push.apply(newArray, array);
    newArray.push.apply(newArray, array2);
    return newArray;
-}
+};
 
 Arr.arrayInsert = function(array, index, other)
 {
@@ -140,7 +140,7 @@ Arr.arrayInsert = function(array, index, other)
        array.splice(i+index, 0, other[i]);
 
    return array;
-}
+};
 
 /**
  * Filter out unique values of an array, saving only the first occurrence of

@@ -46,7 +46,7 @@ for (var p in Firebug.EditorSelector)
 Firebug.ScriptPanel.getEditorOptionKey = function()
 {
     return "JSEditor";
-}
+};
 
 Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
 
@@ -59,7 +59,7 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
     decorate: function(sourceBox, unused)
     {
         this.markExecutableLines(sourceBox);
-        this.setLineBreakpoints(sourceBox.repObject, sourceBox)
+        this.setLineBreakpoints(sourceBox.repObject, sourceBox);
     },
 
     markExecutableLines: function(sourceBox)
@@ -718,7 +718,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         this.tooltip = this.document.createElement("div");
         Css.setClass(this.tooltip, "scriptTooltip");
-        this.tooltip.setAttribute('aria-live', 'polite')
+        this.tooltip.setAttribute('aria-live', 'polite');
         Css.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
@@ -980,7 +980,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
             {
                 this.scrollToLine(sourceBox.repObject.getURL(), lineNo,
-                    this.jumpHighlightFactory(lineNo, this.context))
+                    this.jumpHighlightFactory(lineNo, this.context));
                 return true;
             }
         }
@@ -1388,7 +1388,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             command: function()
             {
                 var checked = this.hasAttribute("checked");
-                Firebug.Options.set(option, checked)
+                Firebug.Options.set(option, checked);
             }
         };
     },
@@ -1889,7 +1889,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var args = {
             pageTitle: Locale.$STR("script.warning.javascript_not_enabled"),
             suggestion: Locale.$STR("script.suggestion.javascript_not_enabled")
-        }
+        };
 
         var box = this.tag.replace(args, parentNode, this);
         this.enableScriptTag.append({}, box, this);
@@ -1902,7 +1902,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var args = {
             pageTitle: Locale.$STR("script.warning.debugger_not_activated"),
             suggestion: Locale.$STR("script.suggestion.debugger_not_activated")
-        }
+        };
 
         var box = this.tag.replace(args, parentNode, this);
 
@@ -1923,7 +1923,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var args = {
             pageTitle: Locale.$STR("script.warning.no_javascript"),
             suggestion: Locale.$STR("script.suggestion.no_javascript2")
-        }
+        };
         return this.tag.replace(args, parentNode, this);
     },
 
@@ -1932,7 +1932,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var args = {
             pageTitle: Locale.$STR("script.warning.no_system_source_debugging"),
             suggestion: Locale.$STR("script.suggestion.no_system_source_debugging")
-        }
+        };
 
         var box = this.tag.replace(args, parentNode, this);
         var description = box.getElementsByClassName("disabledPanelDescription").item(0);
@@ -1947,7 +1947,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var args = {
             pageTitle: Locale.$STR("script.warning.debugger_active"),
             suggestion: Locale.$STR("script.suggestion.debugger_active")
-        }
+        };
 
         var box = this.tag.replace(args, parentNode, this);
         this.focusDebuggerTag.append({}, box, this);

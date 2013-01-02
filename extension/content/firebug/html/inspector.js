@@ -1045,7 +1045,7 @@ function getImageMapHighlighter(context)
                 canvas = null;
                 ctx = null;
             }
-        }
+        };
     }
 
     return context.imageMapHighlighter;
@@ -1463,7 +1463,7 @@ BoxModelHighlighter.prototype =
                 moveImp(nodes.lines.top, 0, top);
                 moveImp(nodes.lines.right, left + width, 0);
                 moveImp(nodes.lines.bottom, 0, top + height);
-                moveImp(nodes.lines.left, left, 0)
+                moveImp(nodes.lines.left, left, 0);
             }
 
             var body = getNonFrameBody(element);

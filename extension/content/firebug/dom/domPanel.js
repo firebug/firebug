@@ -42,7 +42,7 @@ const jsdIStackFrame = Ci.jsdIStackFrame;
 const insertSliceSize = 18;
 const insertInterval = 40;
 
-const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
+const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
 
 // ********************************************************************************************* //
 
@@ -252,7 +252,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             Css.setClass(row, "opened");
             if (isString)
             {
-                var rowValue = row.domObject.value
+                var rowValue = row.domObject.value;
                 row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
             else
@@ -350,7 +350,7 @@ const ToolboxPlate = domplate(
 
 // ********************************************************************************************* //
 
-Firebug.DOMBasePanel = function() {}
+Firebug.DOMBasePanel = function() {};
 
 Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
 
@@ -491,7 +491,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         wrappedJSObject: XPCNativeWrapper.unwrap(contentView),
                         toString: function() { return wrapperToString; },
                         isXPCNativeWrapper: (XPCNativeWrapper.unwrap(contentView) !== contentView),
-                    }
+                    };
 
                     object = contentView;
                 }

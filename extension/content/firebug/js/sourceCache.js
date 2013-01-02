@@ -84,7 +84,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = Str.splitLines(data)
+            var lines = Str.splitLines(data);
             this.cache[url] = lines;
 
             return lines;

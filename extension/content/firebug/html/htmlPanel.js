@@ -2370,7 +2370,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 "title",
                 "alt",
                 "style"
-            ]
+            ];
 
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
 

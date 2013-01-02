@@ -59,8 +59,8 @@ catch (err)
 
             this.tracers[prefDomain] = tracer;
             return tracer;
-        },
-    }
+        }
+    };
 }
 
 // ********************************************************************************************* //
@@ -107,7 +107,7 @@ TracerWrapper.prototype =
         {
             return function() {
                 self.push(method, arguments);
-            }
+            };
         };
 
         // Fake FBTrace object
@@ -244,7 +244,7 @@ TracerWrapper.prototype =
         {
         }
     }
-}
+};
 
 // ********************************************************************************************* //
 // Helpers

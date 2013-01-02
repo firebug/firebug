@@ -40,7 +40,7 @@ var FirebugLoader =
                 return;
 
             e.firebugFrameLoad(win.Firebug);
-        })
+        });
     },
 
     unregisterBootstrapScope: function(e)
@@ -54,7 +54,7 @@ var FirebugLoader =
             this.forEachWindow(function(win)
             {
                 e.topWindowUnload(win);
-            })
+            });
         }
 
         if (e.firebugFrameUnload)
@@ -62,7 +62,7 @@ var FirebugLoader =
             this.forEachWindow(function(win)
             {
                 e.firebugFrameUnload(win.Firebug);
-            })
+            });
         }
     },
 
@@ -101,7 +101,7 @@ var FirebugLoader =
 
     unloadFromWindow: function(win)
     {
-        var fbug = win.Firebug
+        var fbug = win.Firebug;
         this.dispatchToScopes("topWindowUnload", [win]);
 
         if (fbug.shutdown)
@@ -202,6 +202,6 @@ var FirebugLoader =
             }
         }
     }
-}
+};
 
 // ********************************************************************************************* //

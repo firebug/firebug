@@ -172,7 +172,8 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
     {
         this.showPanel(browser, panel);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration
