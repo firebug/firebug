@@ -304,7 +304,7 @@ function CommandLineIncludeObject()
 
 // ********************************************************************************************* //
 
-var CommandLineInclude =
+var CommandLineInclude = Obj.extend(Firebug.module,
 {
     onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
@@ -340,6 +340,14 @@ var CommandLineInclude =
     {
         if (!this.store)
             this.store = storageScope.StorageService.getStorage("includeAliases.json");
+
+        // let's log when the store could not be opened:
+        if (!this.store)
+        {
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("CommandLineInclude.getStore; can't open or create the store");
+        }
+
         return this.store;
     },
 
@@ -478,8 +486,20 @@ var CommandLineInclude =
         xhr.send(null);
 
         // xxxFlorent: TODO show XHR progress
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //
+    // Module events:
+
+    resetAllOptions: function()
+    {
+        var store = this.getStore();
+
+        if (!store)
+            return;
+        store.clear();
     }
-};
+});
 
 // ********************************************************************************************* //
 // Command Handler
@@ -562,6 +582,8 @@ Firebug.registerCommand("include", {
 });
 
 Firebug.registerRep(CommandLineIncludeRep);
+
+Firebug.registerModule(CommandLineInclude);
 
 return CommandLineInclude;
 
