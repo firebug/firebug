@@ -227,6 +227,11 @@ function createFirebugCommandLine(context, win)
                 // Lie and show the pre-transformed expression instead.
                 result.fileName = "data:," + encodeURIComponent(origExpr);
 
+                // The error message can also contain post-transform details about the
+                // source, but it's harder to lie about. Make it prettier, at least.
+                if (typeof result.message === "string")
+                    result.message = result.message.replace(/__fb_scopedVars\(/g, "<get closure>(");
+
                 if (!isXPCException)
                     result.name = exc.name;
             }
