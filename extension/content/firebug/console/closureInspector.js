@@ -65,6 +65,12 @@ var ClosureInspector =
             if (ret !== undefined)
                 return ret;
 
+            // With scopes are based on real objects - don't try anything fancy.
+            // (Object properties probably don't get optimized away anyway, and
+            // "with" tends to inhibit optimizations).
+            if (scope.type === "with")
+                return undefined;
+
             // The variable is either optimized away or actually set to undefined.
             // Optimized-away ones are apparantly not settable, so try to detect
             // them by that (it seems rather safe).
