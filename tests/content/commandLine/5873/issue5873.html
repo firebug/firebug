@@ -92,6 +92,16 @@ window.emptyObject = {};
     var oth = window.otherFunc;
 })();
 
+(function(a)
+{
+    (function()
+    {
+        var b = 2;
+        window.innerA = function() { return a; };
+        window.innerB = function() { return b; };
+    })();
+})(1);
+
 window.scopelessFunc = function() {};
 window.scopelessFunc.prop = window.func;
         </script>
