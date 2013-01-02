@@ -2356,7 +2356,10 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 for (var item = contextMenu.firstChild; item; item = item.nextSibling)
                 {
                     if (item.label == menuItemId)
+                    {
+                        menuItem = item;
                         break;
+                    }
                 }
             }
 
