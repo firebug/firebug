@@ -62,7 +62,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
     "ObjectShortIteratorMax", "showEnumerableProperties", "showOwnProperties",
-    "showInlineEventHandlers",
+    "showInlineEventHandlers", "showClosures",
 
     // Layout
     "showRulers",

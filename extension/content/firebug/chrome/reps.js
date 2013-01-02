@@ -24,12 +24,13 @@ define([
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
     "firebug/console/eventMonitor",
+    "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, Menu, CompilationUnit) {
+    EventMonitor, ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -58,10 +59,10 @@ catch (err)
 
 // use pre here to keep line breaks while copying multiline strings 
 var OBJECTBOX = FirebugReps.OBJECTBOX =
-    PRE({"class": "objectBox inline objectBox-$className", role : "presentation"});
+    PRE({"class": "objectBox inline objectBox-$className", role: "presentation"});
 
 var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
-    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
+    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
 
 var OBJECTLINK = FirebugReps.OBJECTLINK =
     A({
@@ -209,7 +210,7 @@ FirebugReps.Caption = domplate(Firebug.Rep,
 
 FirebugReps.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({"class": "warning focusRow", role : 'listitem'}, "$object|STR")
+    tag: DIV({"class": "warning focusRow", role: "listitem"}, "$object|STR")
 });
 
 // ********************************************************************************************* //
@@ -1927,7 +1928,10 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         try
         {
-            var fileName = Url.getFileName(sourceLink.href);
+            // XXX This is wrong for at least data: URLs. E.g. evaluating
+            // "%2f" in the command line shows as "/".
+            var fileName = sourceLink.href;
+            fileName = Url.getFileName(fileName);
             fileName = decodeURIComponent(fileName);
         }
         catch(exc)
@@ -1935,8 +1939,6 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'" +
                     sourceLink.href + "\': " + exc, exc);
-
-            fileName = sourceLink.href;
         }
 
         var maxWidth = Firebug.sourceLinkLabelWidth;
@@ -2331,7 +2333,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
     frameIterator: function(frames)
     {
         // Skip Firebug internal frames.
-        // xxxHonza: this is anoter place where stack frame is peeling off.
+        // xxxHonza: this is another place where we peel off stack frames.
         var result = [];
         for (var i=0; frames && i<frames.length; i++)
         {
@@ -3319,6 +3321,58 @@ FirebugReps.ErrorCopy = function(message)
     this.message = message;
 };
 
+//********************************************************************************************** //
+
+FirebugReps.ClosureScope = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "scope",
+
+    getTitle: function(object)
+    {
+        var scope = ClosureInspector.getScopeFromWrapper(object);
+        var type = scope.type, title;
+        if (type === "declarative")
+            title = Locale.$STR("firebug.reps.declarativeScope");
+        else if (type === "object")
+            title = Locale.$STR("firebug.reps.objectScope");
+        else if (type === "with")
+            title = Locale.$STR("firebug.reps.withScope");
+        else
+            title = "<unknown scope \"" + type + "\">"; // shouldn't happen
+        return title;
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isScopeWrapper(object);
+    }
+});
+
+// ********************************************************************************************* //
+
+FirebugReps.OptimizedAway = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "optimizedAway",
+
+    getTitle: function(object)
+    {
+        return Locale.$STR("firebug.reps.optimizedAway");
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isOptimizedAway(object);
+    }
+});
+
 // ********************************************************************************************* //
 // Registration
 
@@ -3354,7 +3408,9 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog
+    FirebugReps.EventLog,
+    FirebugReps.ClosureScope,
+    FirebugReps.OptimizedAway
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);

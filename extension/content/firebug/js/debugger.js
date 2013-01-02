@@ -122,6 +122,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
     },
 
+    _temporaryTransformSyntax: function(expr, win, context)
+    {
+        return Firebug.ClosureInspector.extendLanguageSyntax(expr, win, context);
+    },
+
     /**
      * Used by autocomplete in commandLine
      * @return array of locally visible property names for each scope we are in
