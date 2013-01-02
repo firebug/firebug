@@ -72,7 +72,7 @@ var ClosureInspector =
                 return undefined;
 
             // The variable is either optimized away or actually set to undefined.
-            // Optimized-away ones are apparantly not settable, so try to detect
+            // Optimized-away ones are apparently not settable, so try to detect
             // them by that (it seems rather safe).
             scope.setVariable(name, 0);
             if (scope.getVariable(name) === undefined)
@@ -129,7 +129,6 @@ var ClosureInspector =
                 names.push("constructor");
             }
 
-            // XXX keep a Map of scopes, and take the highest container of the first one or the (first) deepest one or something
             for (var i = 0; i < names.length; ++i)
             {
                 // We assume that the first own property, or the first
@@ -137,6 +136,10 @@ var ClosureInspector =
                 // that is a function with some scope (i.e., it is interpreted,
                 // JSScript-backed, and without optimized-away scope) shares
                 // this scope with 'obj'.
+                // (Since, in the current implementation, Firefox seems to give
+                // all functions in a particular scope (except self-contained
+                // ones) the same environment, the first is as good as any,
+                // and it's probably near the definition of 'obj').
 
                 var name = names[i];
                 try
