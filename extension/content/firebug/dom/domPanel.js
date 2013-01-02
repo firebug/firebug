@@ -834,7 +834,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         for (var i = offset; i < members.length; ++i)
         {
             var member = members[i];
-            if (member.level > level)
+            if (member.level < level)
                 break;
 
             if (toggles.get(member.name))
@@ -862,10 +862,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         member.level, member);
                 }
 
-                expanded += newMembers.length;
-
-                i += newMembers.length + this.expandMembers(members, toggles.get(member.name),
-                    i+1, level+1, context);
+                var moreExpanded = newMembers.length +
+                    this.expandMembers(members, toggles.get(member.name), i+1, level+1, context);
+                i += moreExpanded;
+                expanded += moreExpanded;
             }
         }
 
