@@ -124,14 +124,14 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         // NOTE: that piece of code has not been tested since deleting aliases through the table 
         // has been disabled.
         // Once it is enabled again, make sure FBTests is available for this feature
-        var store = CommandLine.getStore();
-        if (! Options.get(removeConfirmation))
+        var store = CommandLineInclude.getStore();
+        if (!Options.get(removeConfirmation))
         {
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
             prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
-            if  (prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
+            if (prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("commandline.include.confirmDelete"), flags, "", "", "",
                 Locale.$STR("Do_not_show_this_message_again"), check) > 0)
             {
@@ -483,10 +483,8 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     resetAllOptions: function()
     {
         var store = this.getStore();
-
-        if (!store)
-            return;
-        store.clear();
+        if (store)
+            store.clear(true);
     }
 });
 
