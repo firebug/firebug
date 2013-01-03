@@ -53,7 +53,7 @@ var Privacy = Obj.extend(Firebug.Module,
                 [this.privateBrowsingEnabled]);
 
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Privacy.update " + this.isPrivateBrowsing())
+                FBTrace.sysout("Privacy.update " + this.isPrivateBrowsing());
         }
         catch (e)
         {
@@ -71,7 +71,7 @@ var Privacy = Obj.extend(Firebug.Module,
     isPrivateBrowsing: function()
     {
         return this.privateBrowsingEnabled;
-    },
+    }
 });
 
 // ********************************************************************************************* //

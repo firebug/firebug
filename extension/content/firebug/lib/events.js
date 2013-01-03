@@ -455,7 +455,7 @@ Events.addEventListener = function(parent, eventId, listener, capturing)
             parent: parent,
         });
     }
-}
+};
 
 Events.removeEventListener = function(parent, eventId, listener, capturing)
 {
@@ -498,7 +498,7 @@ Events.removeEventListener = function(parent, eventId, listener, capturing)
         // xxxHonza: it's not necessary to pollute the tracing console with this message.
         //FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
     }
-}
+};
 
 if (FBTrace.DBG_EVENTLISTENERS && typeof(Firebug) != "undefined")
 {

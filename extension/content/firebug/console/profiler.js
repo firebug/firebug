@@ -147,7 +147,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     isProfiling: function()
     {
-        return (Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleProfiling", "checked") === "true")
+        return (Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleProfiling", "checked") === "true");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -350,13 +350,13 @@ Firebug.Profiler.ProfileTable = domplate(
         {
           Css.removeClass(header, "sortedAscending");
           Css.setClass(header, "sortedDescending");
-          header.setAttribute("aria-sort", "descending")
+          header.setAttribute("aria-sort", "descending");
 
           header.sorted = 1;
 
           for (var i = values.length-1; i >= 0; --i)
               tbody.appendChild(values[i].row);
-        }
+        };
 
         var tbody = Dom.getChildByClass(table, "profileTbody");
         var thead = Dom.getChildByClass(table, "profileThead");
@@ -538,13 +538,13 @@ Firebug.registerCommand("profile", {
     handler: profile.bind(this),
     helpUrl: "http://getfirebug.com/wiki/index.php/profile",
     description: Locale.$STR("console.cmd.help.profile")
-})
+});
 
 Firebug.registerCommand("profileEnd", {
     handler: profileEnd.bind(this),
     helpUrl: "http://getfirebug.com/wiki/index.php/profileEnd",
     description: Locale.$STR("console.cmd.help.profileEnd")
-})
+});
 
 return Firebug.Profiler;
 

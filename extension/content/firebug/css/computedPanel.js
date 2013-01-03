@@ -175,7 +175,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             self.context.removeEventListener(win, "load", onWindowLoadHandler, true);
             self.updateInProgress = false;
             self.doUpdateComputedView(element);
-        }
+        };
 
         this.context.addEventListener(win, "load", onWindowLoadHandler, true);
         this.updateInProgress = true;
@@ -185,7 +185,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     {
         function isUnwantedProp(propName)
         {
-            return !Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz")
+            return !Firebug.showMozillaSpecificStyles && Str.hasPrefix(propName, "-moz");
         }
 
         var win = element.ownerDocument.defaultView;

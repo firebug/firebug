@@ -380,7 +380,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         }
 
         if (panel)
-            privateAppend(panel.document)
+            privateAppend(panel.document);
 
         // Firebug 1.6 introduces another panel for console preview on other panels
         // The allows to use command line in other panels too.
@@ -742,7 +742,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             // Update 'Remove Session Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
-            Options.set(removeSessionConfirmation, !check.value)
+            Options.set(removeSessionConfirmation, !check.value);
         }
 
         Firebug.CookieModule.removeCookies(context, {session: true});
@@ -786,7 +786,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // There is an excepion if the window is closed or not initialized (empty tab)
         var host;
         try {
-            host = context.window.location.host
+            host = context.window.location.host;
         }
         catch (err) {
             alert(Locale.$STR("cookies.message.There_is_no_active_page"));

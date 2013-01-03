@@ -129,7 +129,7 @@ Menu.setItemIntoElement = function(element, item)
         element.setAttribute("type", "splitmenu");
 
     return element;
-}
+};
 
 Menu.createMenuHeader = function(popup, item)
 {

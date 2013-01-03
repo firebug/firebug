@@ -102,7 +102,7 @@ var Loader =
         module = this.modules[moduleId] = {};
         module.scope = {
             define: this.lookup.bind(this)
-        }
+        };
 
         this.currentModule.push(module);
 
@@ -215,8 +215,8 @@ var Loader =
         for (var p in deps)
             desc += p + "\n";
         return desc;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Public API

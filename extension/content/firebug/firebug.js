@@ -1411,7 +1411,7 @@ window.Firebug =
         if (!Firebug.previousPlacement)
             Firebug.previousPlacement = Options.get("previousPlacement");
 
-        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
+        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) );
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1497,7 +1497,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -1514,7 +1514,7 @@ Firebug.Listener = function()
     // It can't be created here since derived objects would share
     // the same array.
     this.fbListeners = null;
-}
+};
 
 Firebug.Listener.prototype =
 {
@@ -2627,7 +2627,8 @@ Firebug.Rep = domplate(
     {
         return n == 1 ? "" : "s";
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
@@ -2768,9 +2769,8 @@ Firebug.Migrator =
     {
         var id = elt.getAttribute('id');
         Options.set( "migrated_"+id, true, typeof(true));
-    },
-
-}
+    }
+};
 
 // ********************************************************************************************* //
 

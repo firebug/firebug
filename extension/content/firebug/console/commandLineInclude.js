@@ -187,7 +187,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                         editor.setText("// "+Locale.$STR("scratchpad.loading"));
                 }
             });
-        }
+        };
 
         var xhr = new XMLHttpRequest({mozAnon: true});
         xhr.open("GET", url, true);
@@ -203,7 +203,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
             // otherwise, we wait for the editor
             if (editor)
                 editor.setText(scriptContent);
-        }
+        };
 
         xhr.onerror = function()
         {
@@ -211,7 +211,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                 return;
 
             spInstance.setText("// "+Locale.$STR("scratchpad.failLoading"));
-        }
+        };
 
         xhr.send(null);
     },
@@ -304,9 +304,9 @@ function CommandLineIncludeObject()
 
 // ********************************************************************************************* //
 
-var CommandLineInclude =
+var CommandLineInclude = Obj.extend(Firebug.Module,
 {
-    onSuccess: function(newAlias, context, loadingMsgRow, xhr)
+    onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
         var urlComponent = xhr.channel.URI.QueryInterface(Ci.nsIURL);
         var filename = urlComponent.fileName, url = urlComponent.spec;
@@ -320,7 +320,8 @@ var CommandLineInclude =
             this.log("aliasCreated", [newAlias], [context, "info"]);
         }
 
-        this.log("includeSuccess", [filename], [context, "info", true]);
+        if (!hasWarnings)
+            this.log("includeSuccess", [filename], [context, "info", true]);
     },
 
     onError: function(context, url, loadingMsgRow)
@@ -339,6 +340,14 @@ var CommandLineInclude =
     {
         if (!this.store)
             this.store = storageScope.StorageService.getStorage("includeAliases.json");
+
+        // let's log when the store could not be opened:
+        if (!this.store)
+        {
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("CommandLineInclude.getStore; can't open or create the store");
+        }
+
         return this.store;
     },
 
@@ -432,10 +441,20 @@ var CommandLineInclude =
             if (xhr.status !== 200)
                 return errorFunction.apply(this, arguments);
             var codeToEval = xhr.responseText;
+            var hasWarnings = false;
+
+            // test if the content is an HTML file, which is the most current after a mistake
+            if (!isValidJS(codeToEval))
+            {
+                CommandLineInclude.log("invalidSyntax", [], [context, "warn"]);
+                CommandLineInclude.clearLoadingMessage(loadingMsgRow);
+                hasWarnings = true;
+            }
+
             Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
             if (successFunction)
-                successFunction(xhr);
-        }
+                successFunction(xhr, hasWarnings);
+        };
 
         if (errorFunction)
         {
@@ -467,8 +486,20 @@ var CommandLineInclude =
         xhr.send(null);
 
         // xxxFlorent: TODO show XHR progress
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //
+    // Module events:
+
+    resetAllOptions: function()
+    {
+        var store = this.getStore();
+
+        if (!store)
+            return;
+        store.clear();
     }
-};
+});
 
 // ********************************************************************************************* //
 // Command Handler
@@ -525,6 +556,22 @@ IncludeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
+function isValidJS(codeToCheck)
+{
+    try
+    {
+        new Function(codeToCheck);
+        return true;
+    }
+    catch(ex)
+    {
+        if (ex instanceof SyntaxError)
+            return false;
+        else
+            throw ex;
+    }
+};
+
 // ********************************************************************************************* //
 // Registration
 
@@ -535,6 +582,8 @@ Firebug.registerCommand("include", {
 });
 
 Firebug.registerRep(CommandLineIncludeRep);
+
+Firebug.registerModule(CommandLineInclude);
 
 return CommandLineInclude;
 

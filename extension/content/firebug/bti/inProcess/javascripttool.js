@@ -27,7 +27,7 @@ var JavaScriptTool = Obj.extend(Firebug.Module,
  */
 JavaScriptTool.Turn =
 {
-}
+};
 
 JavaScriptTool.breakOnNext = function(context, enable)
 {
@@ -35,7 +35,7 @@ JavaScriptTool.breakOnNext = function(context, enable)
         JSDebugger.suspend(context);
     else
         JSDebugger.unSuspend(context);
-}
+};
 
 JavaScriptTool.setBreakpoint = function(context, url, lineNumber)
 {
@@ -140,7 +140,7 @@ JavaScriptTool.setActivation = function(enable)
         JSDebugger.addObserver(this);
     else
         JSDebugger.removeObserver(this);
-}
+};
 
 /**
  * A previously enabled tool becomes active and sends us an event.
@@ -186,7 +186,7 @@ JavaScriptTool.onStartDebugging = function(context, frame)
 
     JavaScriptTool.Turn.currentFrame = frame;
     panel.onStartDebugging(frame);
-}
+};
 
 JavaScriptTool.onStopDebugging = function(context)
 {
@@ -202,7 +202,7 @@ JavaScriptTool.onStopDebugging = function(context)
         panel.onStopDebugging();
 
     delete JavaScriptTool.Turn.currentFrame;
-}
+};
 
 JavaScriptTool.onCompilationUnit = function(context, url, kind)
 {
@@ -217,7 +217,7 @@ JavaScriptTool.onCompilationUnit = function(context, url, kind)
          FBTrace.sysout("JavaScriptTool.onCompilationUnit "+url+" added to "+context.getName(),
              compilationUnit);
      }
-}
+};
 
 JavaScriptTool.initialize = function()
 {
@@ -226,13 +226,13 @@ JavaScriptTool.initialize = function()
 
     // This is how we get events.
     Firebug.connection.addListener(JavaScriptTool);
-}
+};
 
 JavaScriptTool.shutdown = function()
 {
     // This is how we get events.
     Firebug.connection.removeListener(JavaScriptTool);
-}
+};
 
 // ********************************************************************************************* //
 // Registration

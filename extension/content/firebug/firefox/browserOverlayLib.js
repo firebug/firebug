@@ -33,7 +33,7 @@ var BrowserOverlayLib =
         if (!(doc instanceof Ci.nsIDOMDocument))
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("browserOvelayLib.$el; No document!")
+                FBTrace.sysout("browserOvelayLib.$el; No document!");
             return;
         }
 
@@ -60,8 +60,8 @@ var BrowserOverlayLib =
         for (var a in attributes)
             el.setAttribute(a, attributes[a]);
 
-        for each (var a in children)
-            el.appendChild(a);
+        for (var i=0; children && i<children.length; i++)
+            el.appendChild(children[i]);
 
         if (parent)
         {
@@ -232,8 +232,8 @@ var BrowserOverlayLib =
         script.type = "text/javascript";
         script.setAttribute("firebugRootNode", true);
         doc.documentElement.appendChild(script);
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Helpers
@@ -255,8 +255,9 @@ function updatePersistedValues(doc, options)
             return target.Value;
     }
 
-    for each(var attr in persist)
+    for (var i=0; i<persist.length; i++)
     {
+        var attr = persist[i];
         var val = getPersist(attr);
         if (val)
             options[attr] = val;

@@ -50,7 +50,7 @@ function executeTest(cookieName, expected, callback)
 {
     var panelNode = FBTest.getSelectedPanel().panelNode;
     var cookie = FBTestFireCookie.getCookieByName(panelNode, cookieName);
-    var sizeCol = cookie.row.getElementsByClassName("cookieSizeCol").item(0);
+    var sizeCol = cookie.row.getElementsByClassName("cookieRawSizeCol").item(0);
 
     var config = {tagName: "table", classes: "sizeInfoTip"};
     FBTest.waitForDisplayedElement("cookies", config, function (infoTip)

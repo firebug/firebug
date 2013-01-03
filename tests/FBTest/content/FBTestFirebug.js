@@ -73,8 +73,16 @@ this.compare = function(expected, actual, msg, shouldNotMatch)
     FBTest.sysout("compare "+(result?"passes":"**** FAILS ****")+" "+msg,
         {expected: expected, actual: actual});
 
+    var shownMsg = msg;
+    if (!result)
+    {
+        shownMsg += " (was: " + actual + ", expected" +
+            (shouldNotMatch ? " otherwise" : ": " + expected) +
+            (typeof actual === typeof expected ? ")" : " - different types)");
+    }
+
     FBTestApp.TestRunner.appendResult(new FBTestApp.TestResult(window,
-        result, msg, expected, actual));
+        result, shownMsg, expected, actual));
 
     if (result)
         FBTest.resetTimeout();
@@ -406,6 +414,10 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
 
     // Use the first client rect for clicking (e.g. SPAN can have more).
     var rect = rectCollection[0]; //node.getBoundingClientRect();
+
+    if (!FBTest.ok(rect, "Can't synthesize mouse event"))
+        return;
+
     var frameOffset = getFrameOffset(node);
 
     FBTest.sysout("frameOffset " + frameOffset);
@@ -978,7 +990,7 @@ this.disableConsolePanel = function(callback)
 };
 
 /**
- * Enables the Script panel and reloads if a callback is specified.
+ * Enables the Console panel and reloads if a callback is specified.
  * @param {Function} callback A handler that is called as soon as the page is reloaded.
  */
 this.enableConsolePanel = function(callback)
@@ -2341,15 +2353,17 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             else if (menuItemIdentifier.label)
             {
                 var menuItemId = menuItemIdentifier.label;
-                var menuItems = contextMenu.children;
-                for each (menuItem in menuItems)
+                for (var item = contextMenu.firstChild; item; item = item.nextSibling)
                 {
-                    if (menuItem.label == menuItemId)
+                    if (item.label == menuItemId)
+                    {
+                        menuItem = item;
                         break;
+                    }
                 }
             }
 
-            self.ok(menuItem, "'" + menuItemId  + "' item must be available in the context menu.");
+            self.ok(menuItem, "'" + menuItemId + "' item must be available in the context menu.");
 
             // If the menu item isn't available close the context menu and bail out.
             if (!menuItem)

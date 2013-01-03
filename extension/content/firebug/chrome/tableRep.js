@@ -182,7 +182,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         {
             Css.removeClass(header, "sortedAscending");
             Css.setClass(header, "sortedDescending");
-            header.setAttribute("aria-sort", "descending")
+            header.setAttribute("aria-sort", "descending");
 
             header.sorted = 1;
 
@@ -327,7 +327,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         return true;
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

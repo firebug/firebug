@@ -617,14 +617,14 @@ ChannelListenerProxy.prototype =
     {
         try
         {
-            return Firebug.TabCacheModel.shouldCacheRequest(request)
+            return Firebug.TabCacheModel.shouldCacheRequest(request);
         }
         catch (err)
         {
         }
         return false;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Registration

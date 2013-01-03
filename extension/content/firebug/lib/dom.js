@@ -103,7 +103,7 @@ Dom.getElementsByAttribute = function(node, attrName, attrValue)
     var result = [];
     iteratorHelper(node, attrName, attrValue, result);
     return result;
-}
+};
 
 Dom.isAncestor = function(node, potentialAncestor)
 {
@@ -151,7 +151,7 @@ Dom.insertAfter = function(newNode, referenceNode)
 {
     if (referenceNode.parentNode)
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-}
+};
 
 Dom.addScript = function(doc, id, src)
 {
@@ -177,7 +177,7 @@ Dom.addScript = function(doc, id, src)
         return;
     }
     return element;
-}
+};
 
 Dom.setOuterHTML = function(element, html)
 {
@@ -609,7 +609,7 @@ Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     return {
         before: Math.round((topSpace/element.offsetHeight) + 0.5),
         after: Math.round((bottomSpace/element.offsetHeight) + 0.5)
-    }
+    };
 };
 
 /**
@@ -753,7 +753,7 @@ Dom.scrollMenupopup = function(popup, item)
             scrollBox.scrollTop -= popupRect.bottom - itemRect.bottom - itemRect.height;
         }
     }
-}
+};
 
 // ********************************************************************************************* //
 // MappedData
@@ -780,7 +780,7 @@ Dom.getMappedData = function(element, key)
 {
     var elementData = getElementData(element);
     return elementData[key];
-}
+};
 
 Dom.setMappedData = function(element, key, value)
 {
@@ -792,13 +792,13 @@ Dom.setMappedData = function(element, key, value)
 
     var elementData = getElementData(element);
     elementData[key] = value;
-}
+};
 
 Dom.deleteMappedData = function(element, key)
 {
     var elementData = getElementData(element);
     delete elementData[key];
-}
+};
 
 // ********************************************************************************************* //
 // DOM Members
@@ -907,12 +907,12 @@ Dom.isDOMConstant = function(object, name)
     }
 
     return Dom.domConstantMap.hasOwnProperty(name);
-}
+};
 
 Dom.isInlineEventHandler = function(name)
 {
-    return Dom.domInlineEventHandlersMap[name];
-}
+    return !!Dom.domInlineEventHandlersMap[name];
+};
 
 Dom.EventCopy = function(event)
 {
@@ -924,7 +924,7 @@ Dom.EventCopy = function(event)
             this[name] = event[name];
         } catch (exc) { }
     }
-}
+};
 
 var isDOMConstantDep = Deprecated.deprecated(
     "isDOMConstant(name) signature changed (object,name)",
@@ -2204,7 +2204,7 @@ Dom.domInlineEventHandlersMap =
     "onmozpointerlockerror": 1,
     "onuserproximity": 1,
     "onwheel": 1
-}
+};
 
 // ********************************************************************************************* //
 // Registration

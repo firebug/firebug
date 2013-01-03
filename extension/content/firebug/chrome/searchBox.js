@@ -126,7 +126,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         if (FBTrace.DBG_SEARCH)
         {
             FBTrace.sysout("search Firebug.Search.isAutoSensitive(value):" +
-                Firebug.Search.isAutoSensitive(value) + " for " + value, searchBox)
+                Firebug.Search.isAutoSensitive(value) + " for " + value, searchBox);
         }
 
         // Cancel the previous search to keep typing smooth
@@ -261,7 +261,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         else
             history.push(history.shift());
 
-        return history[0]
+        return history[0];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

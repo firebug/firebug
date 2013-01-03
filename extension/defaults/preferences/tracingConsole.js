@@ -75,3 +75,4 @@ pref("extensions.firebug.DBG_GRIPCACHE", false);        // Cache for remote obje
 pref("extensions.firebug.DBG_SELECTOR", false);         // Selector side panel (in the CSS panel)
 pref("extensions.firebug.DBG_SCRIPTVIEW", false);       // Script view is responsible for displaying JS source.
 pref("extensions.firebug.DBG_DEBUGGERTOOL", false);     // DebuggerTool, implementing debugger actions and communicating with the server side.
+pref("extensions.firebug.DBG_ELEMENTS", false);         // Elements side panel (in the CSS panel)

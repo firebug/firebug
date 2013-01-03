@@ -257,12 +257,11 @@ var gEditorManager =
             this._FBL.ERROR(exc);
         }
     }
-
 };
 
 // ************************************************************************************************
 // URLMappings
-Cu.import("resource://firebug/loader.js")
+Cu.import("resource://firebug/loader.js");
 
 var headerName = "X-Local-File-Path";
 var headerExplaination = "\
@@ -301,18 +300,20 @@ var gUrlMappingManager = {
             val.push(transform.regexp.source, splitter, transform.filePath, '\n');
         }
 
-        val.push(splitter, "\n")
+        val.push(splitter, "\n");
 
         document.getElementById("urlMappings").value = val.join("");
         document.getElementById("test").value = Firebug.Firefox.getCurrentBrowser().currentURI.spec;
 
         this.onMainInput();
     },
+
     uninit: function()
     {
         this.save();
         opener.Firebug.ExternalEditors.saveUrlMappings();
     },
+
     save: function()
     {
         var checkHeaderRe = this.checkHeaderRe;
@@ -327,6 +328,7 @@ var gUrlMappingManager = {
             extModule.pathTransformations = pathTransformations;
         });
     },
+
     parse: function(val)
     {
         var lines = val.split(/(?:\n\r|\n|\r)/);
@@ -357,7 +359,7 @@ var gUrlMappingManager = {
             if (!line[1] || !line[0])
                 continue;
 
-            var start = line[0].trim()
+            var start = line[0].trim();
             var end = line[1].trim();
 
             if (start[0] == '/' && start[1] == '/')
@@ -366,7 +368,7 @@ var gUrlMappingManager = {
             if (start == headerName)
             {
                 if (this.checkHeaderRe)
-                    erors.push(i)
+                    erors.push(i);
                 else
                     this.checkHeaderRe = addRegexp(end, i);
                 continue;
@@ -374,13 +376,13 @@ var gUrlMappingManager = {
             var t = {
                 regexp: addRegexp(start, i),
                 filePath: end
-            }
+            };
             if (t.regexp && t.filePath)
-                this.pathTransformations.push(t)
+                this.pathTransformations.push(t);
         }
 
         if (!this.checkHeaderRe)
-            this.checkHeaderRe = /^$/
+            this.checkHeaderRe = /^$/;
     },
 
     onTestInput: function()
@@ -426,13 +428,14 @@ var gUrlMappingManager = {
         } else
         {
             resultBox.style.cssText = "";
-            this.onTestInput()
+            this.onTestInput();
         }
     },
+
     schedule: function(funcName)
     {
         if (this._scheduled != "onMainInput")
-            this._scheduled = funcName
+            this._scheduled = funcName;
 
         if (this.timeOut != null)
             return;
@@ -443,7 +446,7 @@ var gUrlMappingManager = {
             _this.save()
         }, 80, this);
     }
-}
+};
 
 // ************************************************************************************************
 

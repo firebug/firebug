@@ -137,7 +137,7 @@ BrowserOverlay.prototype =
         var scriptSources = [
             "chrome://firebug/content/legacy.js",
             "chrome://firebug/content/moduleConfig.js"
-        ]
+        ];
 
         // Create script elements.
         var self = this;
@@ -305,9 +305,13 @@ BrowserOverlay.prototype =
 
         var items = [];
         var currPos = Options.get("framePosition");
-        for each (var pos in ["detached", "top", "bottom", "left", "right"])
+
+        var positions = ["detached", "top", "bottom", "left", "right"];
+        for (var i=0; i<positions.length; i++)
         {
+            var pos = positions[i];
             var label = pos.charAt(0).toUpperCase() + pos.slice(1);
+
             var item = $menuitem(this.doc, {
                 label: Locale.$STR("firebug.menu." + label),
                 tooltiptext: Locale.$STR("firebug.menu.tip." + label),
@@ -428,7 +432,7 @@ BrowserOverlay.prototype =
                 this.showItem("inspect-separator", false);
                 this.showItem("context-inspect", false);
             }
-        }
+        };
     },
 
     unloadContextMenuOverlay: function()

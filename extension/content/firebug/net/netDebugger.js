@@ -85,17 +85,19 @@ Breakpoint.prototype =
             // The properties of scope are all strings; we pass them in then
             // unpack them using 'with'. The function is called immediately.
             var expr = "(function (){var scope = " + JSON.stringify(scope) +
-                "; with (scope) { return  " + this.condition + ";}})();"
+                "; with (scope) { return  " + this.condition + ";}})();";
 
             // The callbacks will set this if the condition is true or if the eval faults.
             delete context.breakingCause;
 
-            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+            Firebug.CommandLine.evaluate(expr, context, null, context.window,
                 this.onEvaluateSucceeds, this.onEvaluateFails );
 
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.evaluateCondition; rc " + rc, {expr: expr,scope: scope,
+            {
+                FBTrace.sysout("net.evaluateCondition", {expr: expr, scope: scope,
                     json: JSON.stringify(scope)});
+            }
 
             return !!context.breakingCause;
         }
@@ -129,8 +131,8 @@ Breakpoint.prototype =
             prevValue: this.condition,
             newValue:result
         };
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Breakpoint UI
@@ -197,7 +199,7 @@ var BreakpointRep = domplate(Firebug.Rep,
                 file.row.removeAttribute("breakpoint");
                 file.row.removeAttribute("disabledBreakpoint");
             }
-        })
+        });
     },
 
     onEnable: function(event)
@@ -237,7 +239,8 @@ var BreakpointRep = domplate(Firebug.Rep,
     {
         return object instanceof Breakpoint;
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

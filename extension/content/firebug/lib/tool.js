@@ -11,7 +11,7 @@ function Tool(name)
 {
     this.toolName = name;
     this.active = false;
-}
+};
 
 Tool.prototype =
 {
@@ -29,7 +29,7 @@ Tool.prototype =
     {
         this.active = !!active;
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

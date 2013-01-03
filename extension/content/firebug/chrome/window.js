@@ -167,7 +167,7 @@ Win.iterateBrowserTabs = function(browserWindow, callback)
     }
 
     return false;
-}
+};
 
 
 Win.getBrowserByWindow = function(win)
@@ -181,7 +181,7 @@ Win.getBrowserByWindow = function(win)
     }
 
     return null;
-}
+};
 
 // ********************************************************************************************* //
 

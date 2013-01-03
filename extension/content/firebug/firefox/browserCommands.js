@@ -19,7 +19,7 @@ var shortcuts = [
     "detachFirebug",
     "closeFirebug",
     "toggleBreakOn"
-]
+];
 
 /* Used by the browser menu, but should be really global shortcuts?
 key_increaseTextSize
@@ -96,7 +96,7 @@ var BrowserCommands =
 
         keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

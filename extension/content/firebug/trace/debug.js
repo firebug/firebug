@@ -31,7 +31,7 @@ Debug.ERROR = function(exc)
 
     if (consoleService)
         consoleService.logStringMessage("FIREBUG ERROR: " + exc);
-}
+};
 
 // ********************************************************************************************* //
 // Tracing for observer service
@@ -52,7 +52,7 @@ Debug.traceObservers = function(msg, topic)
 
     FBTrace.sysout("debug.observers: " + msg + " There is " + counter + " " +
         label + " for " + topic);
-}
+};
 
 // ********************************************************************************************* //
 

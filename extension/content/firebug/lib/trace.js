@@ -34,7 +34,7 @@ function TraceWrapper(tracer, option)
             // Check the option before the log is passed to the tracing console.
             if (tracer[option])
                 tracer[method].apply(tracer, arguments);
-        }
+        };
     }
 
     for (var i=0; i<TraceAPI.length; i++)
@@ -65,7 +65,7 @@ tracer.to = function(option)
         prefLoaderScope.PrefLoader.setPref(option, false);
 
     return new TraceWrapper(this, option);
-}
+};
 
 return tracer;
 

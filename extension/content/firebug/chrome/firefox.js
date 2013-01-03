@@ -149,7 +149,7 @@ try
             {
                 prev.apply(self, args);
             });
-        }
+        };
     }
 }
 catch (err)

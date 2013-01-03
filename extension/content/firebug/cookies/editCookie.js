@@ -274,7 +274,7 @@ EditCookie.prototype =
     {
         return windowMediator.getMostRecentWindow("navigator:browser");
     }
-}
+};
 
 // ********************************************************************************************* //
 // Helpers

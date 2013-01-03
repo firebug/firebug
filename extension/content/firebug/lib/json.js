@@ -93,7 +93,7 @@ Json.parseJSONString = function(jsonString, originURL)
 
 Json.parseJSONPString = function(jsonString, originURL)
 {
-}
+};
 
 // ********************************************************************************************* //
 

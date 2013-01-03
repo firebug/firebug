@@ -262,7 +262,7 @@ Css.readBoxStyles = function(style)
         "border-left-width": "borderLeft", "border-bottom-width": "borderBottom",
         "padding-top": "paddingTop", "padding-right": "paddingRight",
         "padding-left": "paddingLeft", "padding-bottom": "paddingBottom",
-        "z-index": "zIndex",
+        "z-index": "zIndex"
     };
 
     var styles = {};
@@ -343,7 +343,7 @@ Css.hasClass = function(node, name)
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     return node.className.search(re) != -1;
 };
 
@@ -400,7 +400,7 @@ Css.removeClass = function(node, name)
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
 
     node.className = node.className.replace(re, " ");
 
@@ -488,7 +488,7 @@ Css.safeGetCSSRules = function(styleSheet)
     }
 
     return null;
-}
+};
 
 Css.isValidStylesheet = function(styleSheet)
 {
@@ -504,7 +504,7 @@ Css.isValidStylesheet = function(styleSheet)
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 // Stylesheet API
@@ -541,7 +541,7 @@ Css.createStyleSheet = function(doc, url)
 
     Firebug.setIgnored(style);
     return style;
-}
+};
 
 Css.addStyleSheet = function(doc, style)
 {
@@ -760,7 +760,7 @@ Css.stripUnits = function(value)
             return skip || ('0' + whitespace);
         }
     );
-}
+};
 
 Css.extractURLs = function(value)
 {
@@ -771,7 +771,7 @@ Css.extractURLs = function(value)
         urls.push(urlValues[i].replace(/url\((["'])(.*?)\1\)/, "$2"));
 
     return urls;
-}
+};
 
 Css.rgbToHex = function(value)
 {
@@ -780,7 +780,7 @@ Css.rgbToHex = function(value)
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
                 toString(16).substr(-6).toUpperCase();
         });
-}
+};
 
 Css.rgbToHSL = function(value)
 {
@@ -834,7 +834,7 @@ Css.rgbToHSL = function(value)
             else
                 return "hsl("+h+", "+s+"%, "+l+"%)";
         });
-}
+};
 
 // ********************************************************************************************* //
 // CSS Info

@@ -774,7 +774,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             context = Firebug.currentContext;
 
         if (context.browser)
-            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
+            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE);
         else
             context.window.location.reload();
     },

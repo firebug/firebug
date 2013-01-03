@@ -59,7 +59,7 @@ var CookieObserver = Obj.extend(BaseObserver,
             // For all possible values.
             if (aTopic == "cookie-changed")
             {
-                var cookies = []
+                var cookies = [];
                 if (aData == "batch-deleted")
                 {
                     // In this case the subject is nsIArray.
