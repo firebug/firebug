@@ -387,7 +387,7 @@ Url.absoluteURLWithDots = function(url, baseURL)
     }
 };
 
-var reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
+var reChromeCase = /chrome:\/\/([^\/]*)\/(.*?)$/;
 Url.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
 {
     if (!url)
@@ -396,12 +396,12 @@ Url.normalizeURL = function(url)  // this gets called a lot, any performance imp
     if (url.length < 255) // guard against monsters.
     {
         // Replace one or more characters that are not forward-slash followed by /.., by space.
-        url = url.replace(/[^/]+\/\.\.\//, "", "g");
+        url = url.replace(/[^\/]+\/\.\.\//, "", "g");
         // Issue 1496, avoid #
         url = url.replace(/#.*/,"");
         // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
-        url = url.replace(/file:\/([^/])/g, "file:///$1");
+        url = url.replace(/file:\/([^\/])/g, "file:///$1");
         // For script tags inserted dynamically sometimes the script.fileName is bogus
         url = url.replace(/[^\s]*\s->\s/, "");
 
