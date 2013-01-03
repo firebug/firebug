@@ -38,6 +38,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showChromeErrors", "showChromeMessages",
     "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
     "consoleFilterTypes", "alwaysShowCommandLine",
+    "commandLineShowCompleterPopup",
 
     // HTML
     "showFullTextNodes", "showCommentNodes",

@@ -30,14 +30,6 @@ Firebug.KnownIssues = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        var popupPrefName = "commandLineShowCompleterPopup";
-        if (/Linux/.test(window.navigator.platform))
-            Options.register(popupPrefName, false);
-        else
-            Options.register(popupPrefName, true);
-
-        Firebug.commandLineShowCompleterPopup = Firebug.Options.get(popupPrefName);
-
         // In Firefox 4.0b7+ the addon-toolbar is not showing up. We'll show it once just
         // in case the user overlooks the new Firebug start-button in the toolbar. As soon
         // as users will get used to the toolbar button this could be removed completely.
@@ -52,10 +44,6 @@ Firebug.KnownIssues = Obj.extend(Firebug.Module,
             // This is just one time operation.
             Firebug.Options.set("addonBarOpened", true);
         }
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("Set commandLineShowCompleterPopup " +
-                Firebug.commandLineShowCompleterPopup);
     },
 
     internationalizeUI: function(doc)
