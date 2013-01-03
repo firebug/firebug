@@ -304,7 +304,7 @@ function CommandLineIncludeObject()
 
 // ********************************************************************************************* //
 
-var CommandLineInclude = Obj.extend(Firebug.module,
+var CommandLineInclude = Obj.extend(Firebug.Module,
 {
     onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
