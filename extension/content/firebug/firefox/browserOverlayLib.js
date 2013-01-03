@@ -88,7 +88,7 @@ var BrowserOverlayLib =
         return this.$el(doc, "command", {
             id: id,
             oncommand: oncommand
-        }, this.$(doc, "mainCommandSet"))
+        }, this.$(doc, "mainCommandSet"));
     },
 
     $key: function(doc, id, key, modifiers, command, position)
@@ -253,7 +253,7 @@ function updatePersistedValues(doc, options)
 
         if (target instanceof Ci.nsIRDFLiteral)
             return target.Value;
-    }
+    };
 
     for (var i=0; i<persist.length; i++)
     {

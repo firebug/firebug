@@ -94,7 +94,7 @@ var FirebugLoader =
         this.forEachWindow(function(win)
         {
             FirebugLoader.unloadFromWindow(win);
-        })
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

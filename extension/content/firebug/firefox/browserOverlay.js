@@ -519,7 +519,7 @@ BrowserOverlay.prototype =
 
         return versionChecker.compare(version, currentVersion);
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

@@ -2244,7 +2244,7 @@ var fbs =
                 fbs.onTopLevelDelegate + " " + frame.script.tag + " " + frame.script.fileName);
 
         if (fbs.onTopLevelDelegate)
-            fbs.onTopLevelDelegate(frame, type)
+            fbs.onTopLevelDelegate(frame, type);
     },
 
     isTopLevelScript: function(frame, type, val)
@@ -4108,7 +4108,7 @@ var ScriptInterrupter =
 
         this.entries[script.tag] = {
             script: script
-        }
+        };
     },
 
     disable: function(script)
@@ -4264,7 +4264,7 @@ function hook(fn, rv)
             ERROR(msg, exc);
             return rv;
         }
-    }
+    };
 }
 
 var lastWindowScope = null;
