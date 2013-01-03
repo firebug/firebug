@@ -1866,7 +1866,7 @@ var fbs =
     {
         // For some reason, JSD reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
-        return url ? url.replace(/file:\/([^/])/, "file:///$1") : "";
+        return url ? url.replace(/file:\/([^\/])/, "file:///$1") : "";
     },
 
     denormalizeURL: function(url)
