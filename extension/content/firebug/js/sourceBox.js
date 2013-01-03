@@ -283,8 +283,6 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
             source = source.substring(beginOffset);
-        else
-            source = source;
 
         return source;
     },
