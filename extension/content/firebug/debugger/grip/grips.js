@@ -325,25 +325,6 @@ Property.prototype =
 }
 
 // ********************************************************************************************* //
-// Expression
-
-function WatchExpression(expr)
-{
-    this.expr = expr;
-
-    // The value is set after the expression is evaluated on the back-end.
-    this.value = undefined;
-}
-
-WatchExpression.prototype = Obj.descend(new Property(),
-{
-    getName: function()
-    {
-        return this.expr;
-    }
-});
-
-// ********************************************************************************************* //
 // ProxyGrip
 
 function createGripProxy(grip)
@@ -367,7 +348,6 @@ return {
     Property: Property,
     ObjectGrip: ObjectGrip,
     Scope: Scope,
-    WatchExpression: WatchExpression,
 };
 
 // ********************************************************************************************* //

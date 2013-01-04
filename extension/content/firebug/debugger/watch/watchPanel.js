@@ -17,10 +17,10 @@ define([
     "firebug/debugger/watch/watchEditor",
     "firebug/debugger/watch/watchTree",
     "firebug/debugger/watch/watchPanelProvider",
-    "firebug/debugger/grip/grips",
+    "firebug/debugger/watch/watchExpression",
 ],
 function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, StackFrame,
-    Locale, Str, WatchEditor, WatchTree, WatchPanelProvider, Grips) {
+    Locale, Str, WatchEditor, WatchTree, WatchPanelProvider, WatchExpression) {
 
 with (Domplate) {
 
@@ -258,7 +258,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
                 return;
         }
 
-        this.watches.push(new Grips.WatchExpression(expression));
+        this.watches.push(new WatchExpression(expression));
         this.rebuild(true);
     },
 

@@ -11,8 +11,9 @@ define([
     "firebug/chrome/domTree",
     "firebug/lib/locale",
     "firebug/debugger/grip/grips",
+    "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, Grips) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, Grips, WatchExpression) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -79,7 +80,7 @@ WatchTree.prototype = domplate(BaseTree,
         // decorates Scope rows.
         if (object instanceof Grips.Scope)
             return "scopes";
-        else if (object instanceof Grips.WatchExpression)
+        else if (object instanceof WatchExpression)
             return "watch";
 
         return BaseTree.getType.apply(this, arguments);
