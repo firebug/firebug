@@ -65,19 +65,17 @@ var ClosureInspector =
             if (ret !== undefined)
                 return ret;
 
-            // With scopes are based on real objects - don't try anything fancy.
-            // (Object properties probably don't get optimized away anyway, and
-            // "with" tends to inhibit optimizations).
-            if (scope.type === "with")
-                return undefined;
+            if (scope.type === "declarative")
+            {
+                // The variable is either optimized away or actually set to
+                // undefined. Optimized-away ones are apparently not settable,
+                // so try to detect them by that (it seems rather safe).
+                scope.setVariable(name, 0);
+                if (scope.getVariable(name) === undefined)
+                    return OptimizedAway;
+                scope.setVariable(name, undefined);
+            }
 
-            // The variable is either optimized away or actually set to undefined.
-            // Optimized-away ones are apparently not settable, so try to detect
-            // them by that (it seems rather safe).
-            scope.setVariable(name, 0);
-            if (scope.getVariable(name) === undefined)
-                return OptimizedAway;
-            scope.setVariable(name, undefined);
             return undefined;
         }
         catch (exc)
