@@ -185,10 +185,14 @@ function createFirebugCommandLine(context, win)
     function evaluate(expr, origExpr)
     {
         var result;
-        var line = Components.stack.lineNumber;
+        var baseLine;
         try
         {
-            result = contentView.eval(expr);
+            // Errors thrown from within the expression of the eval call will
+            // have a line number equal to (line of eval, 1-based) + (line in
+            // expression, 0-based) - keep track of the former term so we can
+            // correct it later.
+            baseLine = Components.stack.lineNumber; result = contentView.eval(expr);
 
             // See Issue 5221
             //var result = FirebugEvaluate(expr, contentView);
@@ -223,7 +227,7 @@ function createFirebugCommandLine(context, win)
                 result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
-                result.lineNumber = lineNumber - line;
+                result.lineNumber = lineNumber - baseLine + 1;
 
                 // Lie and show the pre-transformed expression instead.
                 result.fileName = "data:," + encodeURIComponent(origExpr);
