@@ -23,7 +23,7 @@ define([
     "firebug/lib/http",
     "firebug/trace/traceListener",
     "firebug/console/commandLineExposed",
-    "firebug/debugger/grip/gripFactory",
+    "firebug/debugger/grips/gripFactory",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
     Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed,

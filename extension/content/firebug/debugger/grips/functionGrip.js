@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/grip/objectGrip",
+    "firebug/debugger/grips/objectGrip",
 ],
 function (FBTrace, ObjectGrip) {
 

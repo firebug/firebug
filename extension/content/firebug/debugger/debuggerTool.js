@@ -12,7 +12,7 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/remoting/debuggerClientModule",
-    "firebug/debugger/grip/gripCache",
+    "firebug/debugger/grips/gripCache",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
     "firebug/debugger/script/sourceFile",

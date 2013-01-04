@@ -5,7 +5,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/string",
     "firebug/lib/locale",
-    "firebug/debugger/grip/objectGrip",
+    "firebug/debugger/grips/objectGrip",
 ],
 function (FBTrace, Obj, Str, Locale, ObjectGrip) {
 
