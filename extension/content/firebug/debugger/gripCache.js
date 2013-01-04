@@ -6,8 +6,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/promise",
     "firebug/debugger/grips",
+    "firebug/debugger/gripFactory",
 ],
-function (FBTrace, Firebug, Obj, Promise, Grips) {
+function (FBTrace, Firebug, Obj, Promise, Grips, GripFactory) {
 
 // ********************************************************************************************* //
 // Constants
@@ -60,7 +61,7 @@ GripCache.prototype =
         if (object)
             return object;
 
-        object = Grips.Factory.createGrip(grip, this);
+        object = GripFactory.createGripObject(grip, this);
         this.grips[grip.actor] = object;
 
         return object;

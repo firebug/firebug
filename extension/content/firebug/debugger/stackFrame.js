@@ -143,7 +143,7 @@ StackFrame.prototype =
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.
-        var thisScope = Grips.Factory.createGrip(this.nativeFrame["this"], cache);
+        var thisScope = cache.getObject(this.nativeFrame["this"]);
         thisScope.name = "this";
         this.scopes.push(thisScope);
 
@@ -152,7 +152,7 @@ StackFrame.prototype =
         var scope = this.nativeFrame.environment;
         while (scope)
         {
-            this.scopes.push(Grips.Factory.createScope(scope, cache));
+            this.scopes.push(new Grips.Scope(scope, cache));
             scope = scope.parent;
         }
 

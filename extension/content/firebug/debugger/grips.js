@@ -87,11 +87,29 @@ ObjectGrip.prototype =
         var self = this;
         return this.cache.request(packet).then(function(response)
         {
-            self.properties = Factory.parseProperties(response.ownProperties, self.cache);
+            self.properties = self.parseProperties(response.ownProperties);
             return self.properties;
         });
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Properties
+
+    createProperty: function(name, packet)
+    {
+        return new Property(name, packet, this.cache);
+    },
+
+    parseProperties: function(ownProperties)
+    {
+        var result = [];
+        for (var name in ownProperties)
+            result.push(this.createProperty(name, ownProperties[name], this.cache));
+        return result;
+    },
 }
+
+Firebug.registerDefaultGrip(ObjectGrip);
 
 // ********************************************************************************************* //
 // Function Grip
@@ -151,6 +169,8 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
         return this;
     }
 });
+
+Firebug.registerGrip("Function", FunctionGrip);
 
 // ********************************************************************************************* //
 // LongString
@@ -226,13 +246,29 @@ Scope.prototype = Obj.descend(new ObjectGrip(),
             case "block":
             case "function":
                 var ps = this.properties = [];
-                ps.push.apply(ps, Factory.parseProperties(this.grip.bindings.variables, this.cache));
-                ps.push.apply(ps, Factory.parseArguments(this.grip.bindings.arguments, this.cache));
+                ps.push.apply(ps, this.parseProperties(this.grip.bindings.variables));
+                ps.push.apply(ps, this.parseArguments(this.grip.bindings.arguments));
                 break;
         }
 
         return this.properties;
     },
+
+    parseArguments: function(args)
+    {
+        var result = [];
+
+        if (!args)
+            return result;
+
+        for (var i=0; i<args.length; i++)
+        {
+            var arg = args[i];
+            for (var name in arg)
+                result.push(this.createProperty(name, arg[name], this.cache));
+        }
+        return result;
+    }
 });
 
 // ********************************************************************************************* //
@@ -308,56 +344,6 @@ WatchExpression.prototype = Obj.descend(new Property(),
 });
 
 // ********************************************************************************************* //
-// Factory
-
-var Factory =
-{
-    createProperty: function(name, packet, cache)
-    {
-        return new Property(name, packet, cache);
-    },
-
-    createGrip: function(grip, cache)
-    {
-        switch (grip["class"])
-        {
-            case "Function":
-                return new FunctionGrip(grip, cache);
-        }
-        return new ObjectGrip(grip, cache);
-    },
-
-    parseProperties: function(ownProperties, cache)
-    {
-        var result = [];
-        for (var name in ownProperties)
-            result.push(this.createProperty(name, ownProperties[name], cache));
-        return result;
-    },
-
-    parseArguments: function(args, cache)
-    {
-        var result = [];
-
-        if (!args)
-            return result;
-
-        for (var i=0; i<args.length; i++)
-        {
-            var arg = args[i];
-            for (var name in arg)
-                result.push(this.createProperty(name, arg[name], cache));
-        }
-        return result;
-    },
-
-    createScope: function(grip, cache)
-    {
-        return new Scope(grip, cache);
-    }
-}
-
-// ********************************************************************************************* //
 // ProxyGrip
 
 function createGripProxy(grip)
@@ -381,7 +367,6 @@ return {
     Property: Property,
     ObjectGrip: ObjectGrip,
     Scope: Scope,
-    Factory: Factory,
     WatchExpression: WatchExpression,
 };
 

@@ -5,9 +5,8 @@ define([
     "firebug/lib/object",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/debugger/grips",
 ],
-function (FBTrace, Obj, Str, Arr, Grips) {
+function (FBTrace, Obj, Str, Arr) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider

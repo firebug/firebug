@@ -23,9 +23,11 @@ define([
     "firebug/lib/http",
     "firebug/trace/traceListener",
     "firebug/console/commandLineExposed",
+    "firebug/debugger/gripFactory",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed,
+    GripFactory) {
 
 // ********************************************************************************************* //
 // Constants
@@ -671,6 +673,21 @@ window.Firebug =
     unregistereCommand: function(name)
     {
         return CommandLineExposed.unregisterCommand(name);
+    },
+
+    registerGrip: function(gripClass, gripType)
+    {
+        return GripFactory.registerGrip(gripType);
+    },
+
+    unregistereGrip: function(gripClass)
+    {
+        return GripFactory.unregisterGrip(gripClass);
+    },
+
+    registerDefaultGrip: function(gripType)
+    {
+        return GripFactory.registerDefaultGrip(gripType);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

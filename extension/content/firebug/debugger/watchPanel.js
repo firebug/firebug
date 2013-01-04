@@ -368,8 +368,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // xxxHonza: the entire logic related to eval result, shoule be refactored
+        // xxxHonza: the entire logic related to eval result, should be refactored
         // The cache and grip objects should do most of the work automatically.
+        // This method should be much simpler.
         var cache = this.context.gripCache;
         var gripObj = cache.getObject(resultGrip);
         gripObj.getProperties().then(function(props)
