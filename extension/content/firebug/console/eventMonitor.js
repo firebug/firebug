@@ -113,10 +113,11 @@ var EventMonitor = Obj.extend(Firebug.Module,
             return false;
         }
 
+        var eventTypes = [];
         if (!types)
-            var eventTypes = Events.getEventTypes();
+            eventTypes = Events.getEventTypes();
         else
-            var eventTypes = typeof types == "string" ? [types] : types;
+            eventTypes = typeof types == "string" ? [types] : types;
 
         for (var i = 0; i < eventTypes.length; ++i)
         {

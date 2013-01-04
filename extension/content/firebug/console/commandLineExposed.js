@@ -185,9 +185,9 @@ function createFirebugCommandLine(context, win)
     function evaluate(expr, origExpr)
     {
         var result;
+        var line = Components.stack.lineNumber;
         try
         {
-            var line = Components.stack.lineNumber;
             result = contentView.eval(expr);
 
             // See Issue 5221
@@ -198,8 +198,9 @@ function createFirebugCommandLine(context, win)
         {
             // change source and line number of exeptions from commandline code
             // create new error since properties of nsIXPCException are not modifiable
-            var shouldModify = false, isXPCException = false, dropFrames = false;
-            var fileName = exc.filename || exc.fileName, lineNumber;
+            var shouldModify = false, isXPCException = false;
+            var fileName = exc.filename || exc.fileName;
+            var lineNumber = 0;
             if (fileName.lastIndexOf("chrome:", 0) === 0)
             {
                 if (fileName === Components.stack.filename)
@@ -211,7 +212,6 @@ function createFirebugCommandLine(context, win)
                 }
                 else if (exc._dropFrames)
                 {
-                    dropFrames = true;
                     lineNumber = findLineNumberInExceptionStack(exc.stack);
                     shouldModify = (lineNumber !== null);
                 }
@@ -265,7 +265,7 @@ function createFirebugCommandLine(context, win)
                 eventID + " with " + objs.length + " user objects", commandLine.userObjects);
         }
 
-        var result;
+        var result = null;
         if (Dom.getMappedData(contentView.document, "firebug-retValueType") === "array")
             result = [];
 

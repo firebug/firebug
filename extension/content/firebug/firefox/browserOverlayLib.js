@@ -11,7 +11,6 @@ function(FBTrace, Locale) {
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Overlay Helpers
@@ -138,7 +137,7 @@ var BrowserOverlayLib =
         for (var i=0; i<children.length; ++i)
         {
             var child = children[i];
-            var beforeEl;
+            var beforeEl = null;
 
             if (child.getAttribute("position"))
             {
@@ -185,7 +184,7 @@ var BrowserOverlayLib =
         attrs.id = id;
 
         // in seamonkey gNavToolbox is null onload
-        var button = this.$el(doc, "toolbarbutton", attrs, children,
+        this.$el(doc, "toolbarbutton", attrs, children,
             (doc.defaultView.gNavToolbox || this.$(doc, "navigator-toolbox")).palette);
 
         var selector = "[currentset^='" + id + ",'],[currentset*='," + id +
@@ -198,7 +197,8 @@ var BrowserOverlayLib =
         var currentset = toolbar.getAttribute("currentset").split(",");
         var i = currentset.indexOf(id) + 1;
 
-        var len = currentset.length, beforeEl;
+        var len = currentset.length;
+        var beforeEl = null;
         while (i < len && !(beforeEl = this.$(doc, currentset[i])))
             i++;
 

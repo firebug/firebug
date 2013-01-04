@@ -70,12 +70,6 @@ createFirebugChrome: function(win)
 
     var panelSplitter, sidePanelDeck, panelBar1, panelBar2;
 
-    var disabledHead = null;
-    var disabledCaption = null;
-    var enableSiteLink = null;
-    var enableSystemPagesLink = null;
-    var enableAlwaysLink = null;
-
 var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title, focusedElement, setter popup
@@ -776,7 +770,7 @@ var FirebugChrome =
 
     getSelectedPanelURL: function()
     {
-        var location;
+        var location = null;
         if (Firebug.currentContext)
         {
             var panel = Firebug.chrome.getSelectedPanel();

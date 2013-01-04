@@ -466,7 +466,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         var isButton = target.nodeName.search(/(xul:)?((toolbar)?button)|(checkbox)/) != -1;
         var isDropDownMenu = isButton && (target.getAttribute("type") == "menu" ||
             target.id == "fbLocationList");
-        var siblingTab, forward, toolbar, buttons;
+        var siblingTab, forward, toolbar;
         var keyCode = event.keyCode || (event.type == "keypress" ? event.charCode : null);
         if (keyCode == KeyEvent.DOM_VK_TAB)
             this.ensurePanelTabStops(); //TODO: need a better solution to prevent loss of panel tabstop
@@ -1176,10 +1176,10 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             case KeyEvent.DOM_VK_RETURN:
             case KeyEvent.DOM_VK_SPACE:
                 var isEnter = (keyCode == KeyEvent.DOM_VK_RETURN);
-                var nodeLabels = null;
+                var nodeLabels = [];
                 if (isEnter)
                 {
-                    var nodeLabels = target.getElementsByClassName("nodeName");
+                    nodeLabels = target.getElementsByClassName("nodeName");
                     if (nodeLabels.length > 0)
                     {
                         Firebug.Editor.startEditing(nodeLabels[0]);
@@ -1684,7 +1684,6 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
             return;
         }
         var matchFeedback = "";
-        var matchType = "";
         var selector;
         if (Css.hasClass(matchRow, "cssSelector"))
         {
@@ -1807,7 +1806,6 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         if (!Css.hasClass(target, "focusGroup"))
             return;
 
-        var panel = Firebug.getElementPanel(target);
         switch (keyCode)
         {
             case KeyEvent.DOM_VK_LEFT:
@@ -1872,7 +1870,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         switch (panelA11y.type)
         {
             case "html":
-                var tagName= nodeName = null;
+                var nodeName = null;
                 var setSize = posInSet = 0; var setElems;
                 var label = Locale.$STR("a11y.labels.inline editor") + ": ";
                 if (Css.hasClass(target, "nodeName") || Css.hasClass(target, "nodeValue"))
@@ -2056,7 +2054,6 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         var lineNo = parseInt(lineNode.getElementsByClassName("sourceLine").item(0).textContent);
         box.a11yCaretLine = lineNo;
         box.a11yCaretOffset = caretDetails[1];
-        var newLineNo = 1;
         var linesToScroll = 0;
         var goUp;
         switch (keyCode)
@@ -2134,7 +2131,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 liveString += "Line " + lineNo;
                 if (lineNode.getAttribute("breakpoint") == "true")
                 {
-                    var breakpointStr;
+                    var breakpointStr = "";
                     if (lineNode.getAttribute("disabledbreakpoint") == "true")
                         breakpointStr = "a11y.updates.has disabled breakpoint";
                     if (lineNode.getAttribute("condition") == "true")
@@ -2423,8 +2420,6 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         if (!panelA11y || !rows)
             return;
 
-        var setSize;
-        var posInset;
         var setSize = rows.length;
         var posInset = 0;
         for (var i = 0; i < rows.length; i++)

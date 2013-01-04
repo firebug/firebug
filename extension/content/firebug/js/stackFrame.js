@@ -27,9 +27,10 @@ StackFrame.getStackTrace = Deprecated.deprecated("name change for self-documenta
  */
 StackFrame.getCorrectedStackTrace = function(frame, context)
 {
+    var trace = null;
     try
     {
-        var trace = new StackFrame.StackTrace();
+        trace = new StackFrame.StackTrace();
         var newestFrame = null;
         var nextOlderFrame = null;
         for (; frame && frame.isValid; frame = frame.callingFrame)
@@ -641,10 +642,9 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
 // Mozilla
 StackFrame.getFunctionArgValues = function(frame)
 {
-    if (frame.isValid && frame.scope.jsClassName == "Call")
-        var values = StackFrame.getArgumentsFromCallScope(frame);
-    else
-        var values = StackFrame.getArgumentsFromObjectScope(frame);
+    var values = (frame.isValid && frame.scope.jsClassName == "Call") ?
+        StackFrame.getArgumentsFromCallScope(frame) :
+        StackFrame.getArgumentsFromObjectScope(frame);
 
     if (FBTrace.DBG_STACK)
         FBTrace.sysout("stackFrame.getFunctionArgValues "+frame+" scope: "+frame.scope.jsClassName,

@@ -88,10 +88,8 @@ function setKeyInfo()
             gPlatformKeys.accel = (window.navigator.platform.search("Mac") == 0 ? gPlatformKeys.meta : gPlatformKeys.ctrl);
     }
 
-    for ( var property in KeyEvent)
-    {
+    for (var property in KeyEvent)
         gVKNames[KeyEvent[property]] = property.replace("DOM_", "");
-    }
     gVKNames[8] = "VK_BACK";
 }
 

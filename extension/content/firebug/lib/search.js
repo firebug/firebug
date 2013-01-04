@@ -11,7 +11,6 @@ function(FBTrace, Options) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 
 var Search = {};
 
@@ -31,7 +30,8 @@ var finder = Search.finder = Cc["@mozilla.org/embedcomp/rangefind;1"].createInst
 Search.TextSearch = function(rootNode, rowFinder)
 {
     var doc = rootNode.ownerDocument;
-    var count, searchRange, startPt;
+    var searchRange = null;
+    var startPt = null;
 
     /**
      * Find the first result in the node.

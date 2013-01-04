@@ -484,7 +484,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (this.context.loaded)
         {
-            var state;
+            var state = null;
             Persist.restoreObjects(this, state);
 
             if (state)
@@ -576,7 +576,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         var monitors = [];
 
         var renamer = new SourceFileRenamer(context);
-        var self = this;
         var Breakpoint = Firebug.Debugger.Breakpoint;
 
         for (var url in context.sourceFileMap)
@@ -591,6 +590,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props))
                     return;
 
+                var isFuture = false;
+                var name = "";
                 if (scripts)  // then this is a current (not future) breakpoint
                 {
                     var script = scripts[0];
@@ -600,12 +601,9 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                             script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+
                             context.getName());
 
-                    if (analyzer)
-                        var name = analyzer.getFunctionDescription(script, context).name;
-                    else
-                        var name = StackFrame.guessFunctionName(url, 1, context);
-
-                    var isFuture = false;
+                    name = analyzer ?
+                        analyzer.getFunctionDescription(script, context).name :
+                        StackFrame.guessFunctionName(url, 1, context);
                 }
                 else
                 {
@@ -613,7 +611,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                         FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+
                             url+"@"+line+"\n");
 
-                    var isFuture = true;
+                    isFuture = true;
                 }
 
                 var source = context.sourceCache.getLine(url, line);
