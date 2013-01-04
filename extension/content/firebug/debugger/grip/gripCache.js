@@ -5,16 +5,16 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/promise",
-    "firebug/debugger/grip/grips",
+    "firebug/debugger/grip/objectGrip",
     "firebug/debugger/grip/gripFactory",
 ],
-function (FBTrace, Firebug, Obj, Promise, Grips, GripFactory) {
+function (FBTrace, Firebug, Obj, Promise, ObjectGrip, GripFactory) {
 
 // ********************************************************************************************* //
 // Constants
 
-var gripNull = new Grips.ObjectGrip({type: "null"});
-var gripUndefined = new Grips.ObjectGrip({type: "undefined"});
+var gripNull = new ObjectGrip({type: "null"});
+var gripUndefined = new ObjectGrip({type: "undefined"});
 
 // ********************************************************************************************* //
 // GripCache

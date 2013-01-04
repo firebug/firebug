@@ -6,9 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/debugger/script/sourceLink",
-    "firebug/debugger/grip/grips",
+    "firebug/debugger/grip/scopeGrip",
 ],
-function (FBTrace, Url, Locale, Str, SourceLink, Grips) {
+function (FBTrace, Url, Locale, Str, SourceLink, ScopeGrip) {
 
 // ********************************************************************************************* //
 // Constants
@@ -152,7 +152,7 @@ StackFrame.prototype =
         var scope = this.nativeFrame.environment;
         while (scope)
         {
-            this.scopes.push(new Grips.Scope(scope, cache));
+            this.scopes.push(new ScopeGrip(scope, cache));
             scope = scope.parent;
         }
 

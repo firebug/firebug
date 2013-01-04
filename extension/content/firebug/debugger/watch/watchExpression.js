@@ -3,9 +3,9 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/debugger/grip/grips",
+    "firebug/debugger/grip/objectGrip",
 ],
-function (FBTrace, Obj, Grips) {
+function (FBTrace, Obj, ObjectGrip) {
 
 // ********************************************************************************************* //
 // Watch Expression
@@ -18,7 +18,7 @@ function WatchExpression(expr)
     this.value = undefined;
 }
 
-WatchExpression.prototype = Obj.descend(new Grips.Property(),
+WatchExpression.prototype = Obj.descend(new ObjectGrip.Property(),
 {
     getName: function()
     {
