@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/stackFrame",
+    "firebug/debugger/stack/stackFrame",
 ],
 function (FBTrace, StackFrame) {
 

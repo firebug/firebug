@@ -23,7 +23,7 @@ define([
     "firebug/lib/http",
     "firebug/trace/traceListener",
     "firebug/console/commandLineExposed",
-    "firebug/debugger/gripFactory",
+    "firebug/debugger/grip/gripFactory",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
     Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed,
@@ -680,7 +680,7 @@ window.Firebug =
         return GripFactory.registerGrip(gripType);
     },
 
-    unregistereGrip: function(gripClass)
+    unregisterGrip: function(gripClass)
     {
         return GripFactory.unregisterGrip(gripClass);
     },

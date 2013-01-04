@@ -3,8 +3,8 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/debugger/gripProvider",
-    "firebug/debugger/stackFrame",
+    "firebug/debugger/grip/gripProvider",
+    "firebug/debugger/stack/stackFrame",
 ],
 function (FBTrace, Obj, GripProvider, StackFrame) {
 

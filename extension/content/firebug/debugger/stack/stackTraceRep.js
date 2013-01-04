@@ -7,8 +7,8 @@ define([
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/lib/domplate",
-    "firebug/debugger/stackTrace",
-    "firebug/debugger/stackFrameRep",
+    "firebug/debugger/stack/stackTrace",
+    "firebug/debugger/stack/stackFrameRep",
 ],
 function(Obj, Arr, Str, Locale, Firebug, Domplate, StackTrace, StackFrameRep) {
 with (Domplate) {

@@ -10,7 +10,7 @@ define([
     "firebug/lib/array",
     "firebug/chrome/domTree",
     "firebug/lib/locale",
-    "firebug/debugger/grips",
+    "firebug/debugger/grip/grips",
 ],
 function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, Grips) {
 with (Domplate) {

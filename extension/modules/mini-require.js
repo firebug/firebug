@@ -156,10 +156,11 @@ var Loader =
         var moduleName = parts.pop();
 
         var self = this;
+        var paths = this.config.paths;
         var resolved = parts.map(function(part)
         {
-            var alias = self.config.paths[part];
-            return alias ? alias : part;
+            // Use alias from config.paths if it's available.
+            return paths.hasOwnProperty(part) ? paths[part] : part;
         });
 
         var moduleUrl = resolved.join("/");

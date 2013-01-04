@@ -5,8 +5,8 @@ define([
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
-    "firebug/debugger/sourceLink",
-    "firebug/debugger/grips",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/grip/grips",
 ],
 function (FBTrace, Url, Locale, Str, SourceLink, Grips) {
 
