@@ -243,24 +243,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
-    onBreakpointChange: function(event)
-    {
-        if (this.skipEditorBreakpointChange)
-            return;
-
-        event.added.forEach(function(bp) {
-            this.dispatch("onBreakpointAdd", [bp]);
-        }, this);
-
-        event.removed.forEach(function(bp) {
-            this.dispatch("onBreakpointRemove", [bp]);
-        }, this);
-    },
-
     initBreakpoints: function()
     {
         var bps = [];
-        this.dispatch("onGetBreakpoints", [bps]);
+        this.dispatch("getBreakpoints", [bps]);
 
         if (!bps.length)
             return;
@@ -275,6 +261,30 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         this.skipEditorBreakpointChange = false;
+    },
+
+    onBreakpointChange: function(event)
+    {
+        if (this.skipEditorBreakpointChange)
+            return;
+
+        event.added.forEach(function(bp) {
+            this.dispatch("addBreakpoint", [bp]);
+        }, this);
+
+        event.removed.forEach(function(bp) {
+            this.dispatch("removeBreakpoint", [bp]);
+        }, this);
+    },
+
+    removeBreakpoint: function(bp)
+    {
+        this.editor.removeBreakpoint(bp.lineNo - 1);
+    },
+
+    addBreakpoint: function(bp)
+    {
+        this.editor.addBreakpoint(bp.lineNo - 1);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

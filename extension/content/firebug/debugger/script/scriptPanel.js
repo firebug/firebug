@@ -71,6 +71,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView = new ScriptView();
         this.scriptView.addListener(this);
 
+        // Listen to breakpoint changes (add/remove).
+        BreakpointStore.addListener(this);
+
         // The tool/controller (serves as a proxy to the backend service) is registered dynamicaly.
         // Depending on the current tool the communication can be local or remote.
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
@@ -82,6 +85,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
+
+        BreakpointStore.removeListener(this);
 
         this.tool.removeListener(this);
 
@@ -318,13 +323,54 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // ScriptView Listener
 
-    onBreakpointAdd: function(bp)
+    addBreakpoint: function(bp)
     {
         var url = this.location.href;
         var line = bp.line + 1;
 
-        // Persist the breakpoint on the client side
-        var bp = BreakpointStore.addBreakpoint(url, line);
+        // Persist the breakpoint on the client side.
+        BreakpointStore.addBreakpoint(url, line);
+    },
+
+    removeBreakpoint: function(bp)
+    {
+        var url = this.location.href;
+        var line = bp.line + 1;
+
+        var bp = BreakpointStore.findBreakpoint(url, line);
+        if (!bp)
+        {
+            TraceError.sysout("scriptPanel.removeBreakpoint; ERROR doesn't exist!");
+            return;
+        }
+
+        // Remove the breakpoint from the client side store. Breakpoint store
+        // will notify all listeners (all Script panel including this one)
+        // about breakpoint removal and so, it can be removed from all contexts
+        BreakpointStore.removeBreakpoint(url, line);
+    },
+
+    getBreakpoints: function(breakpoints)
+    {
+        if (!this.location)
+            return;
+
+        var url = this.location.href;
+        var bps = BreakpointStore.getBreakpoints(url);
+        if (!bps || !bps.length)
+            return;
+
+        breakpoints.push.apply(breakpoints, bps);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BreakpointStore Listener
+
+    onBreakpointAdded: function(bp)
+    {
+        Trace.sysout("scriptPanel.onBreakpointAdded;", bp);
+
+        var self = this;
 
         function callback(response, bpClient)
         {
@@ -348,50 +394,43 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             //bp.params.client = bpClient;
 
             if (FBTrace.DBG_BP)
-                FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bp);
+                FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bpClient);
         }
 
-        Trace.sysout("scriptPanel.onBreakpointAdd; set a breakpoint", bp);
+        // Append the new breakpoint to the panel/context.
+        // xxxHonza: append the breakpoint only if the script is loaded in this context?
+        // But, what if the script is loaded later?
+        this.tool.setBreakpoint(this.context, bp.href, bp.lineNo, callback);
 
-        this.tool.setBreakpoint(this.context, url, line, callback);
+        // Ass breakpoint to the UI.
+        // xxxHonza: we should add a disabled breakpoint and wait for async response.
+        this.scriptView.addBreakpoint(bp);
     },
 
-    onBreakpointRemove: function(bp)
+    onBreakpointRemoved: function(bp)
     {
-        var url = this.location.href;
-        var line = bp.line + 1;
+        Trace.sysout("scriptPanel.onBreakpointRemoved;", bp);
 
         function callback(response)
         {
-            Trace.sysout("scriptPanel.onBreakpointRemoved; ", response);
+            Trace.sysout("scriptPanel.onBreakpointRemoved; Response from the server:", response);
         }
 
-        Trace.sysout("scriptPanel.onBreakpointRemove; " + url + ", " + line);
+        // Remove the breakpoint from this panel/context.
+        this.tool.removeBreakpoint(this.context, bp.href, bp.lineNo, callback);
 
-        var bp = BreakpointStore.findBreakpoint(url, line);
-        this.tool.removeBreakpoint(this.context, bp, callback);
-
-        // Remove the breakpoint from the client side store.
-        BreakpointStore.removeBreakpoint(url, line);
+        // Remove breakpoint from the UI.
+        // xxxHonza: we should mark it as disabled and wait for the response from the server.
+        this.scriptView.removeBreakpoint(bp);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     onContextMenu: function(items)
     {
         var menuItems = this.getOptionsMenuItems();
         items.push.apply(items, menuItems);
-    },
-
-    onGetBreakpoints: function(breakpoints)
-    {
-        if (!this.location)
-            return;
-
-        var url = this.location.href;
-        var bps = BreakpointStore.getBreakpoints(url);
-        if (!bps || !bps.length)
-            return;
-
-        breakpoints.push.apply(breakpoints, bps);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

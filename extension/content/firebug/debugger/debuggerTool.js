@@ -278,10 +278,29 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             return;
         }
 
+        var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)
+        {
+            Trace.sysout("debuggerTool.onSetBreakpoint; " + bpClient.location.url + " (" +
+                bpClient.location.line + ")", bpClient);
+
+            // TODO: error logging?
+
+            // Store breakpoint clients so, we can use the actors to remove the
+            // breakpoint later.
+            if (!context.breakpointClients)
+                context.breakpointClients = [];
+
+            context.breakpointClients.push(bpClient);
+
+            // TODO: update the UI?
+
+            callback(response, bpClient);
+        };
+
         return context.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
-        }, callback);
+        }, doSetBreakpoint);
     },
 
     setBreakpoints: function(context, arr, cb)
@@ -297,6 +316,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         var self = this;
         var doSetBreakpoints = function _doSetBreakpoints(callback)
         {
+            Trace.sysout("debuggerTool.doSetBreakpoints; ", arr);
+
             // Iterate all breakpoints and set them step by step. The thread is
             // paused at this point.
             for (var i=0; i<arr.length; i++)
@@ -304,14 +325,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 var bp = arr[i];
                 self.setBreakpoint(context, bp.href, bp.lineNo, function(response, bpClient)
                 {
-                    // TODO: error logging.
+                    cb(response, bpClient);
                 });
             }
 
+            // xxxHonza: At this point responses are not received yet, is it ok to resume?
             if (callback)
-                callback(cb());
-            else
-                cb();
+                callback();
         };
 
         // If the thread is currently paused, go to set all the breakpoints.
@@ -332,11 +352,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             }
 
             // When the thread is interrupted, we can set all the breakpoints.
-            doSetBreakpoints(this.resume.bind(this));
+            doSetBreakpoints(self.resume.bind(self, context));
         });
     },
 
-    removeBreakpoint: function(context, bp, callback)
+    removeBreakpoint: function(context, url, lineNumber, callback)
     {
         if (!context.activeThread)
         {
@@ -344,17 +364,26 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             return;
         }
 
-        if (!bp)
-        {
-            FBTrace.sysout("debuggerTool.removeBreakpoint; No breakpoint specified.");
-            return;
-        }
+        // We need to get the breakpoint client object for this context. The client.
+        // knowns how to remove the breakpoint on the server side.
+        var client = this.getBreakpointClient(context, url, lineNumber);
+        if (client)
+            client.remove(callback);
+    },
 
-        // The breakpoint with the client reference needs to be Breakpoint instance
-        // stored in the context.
-        //var client = bp.params.client;
-        //if (client)
-        //    return client.remove(arr, callback);
+    getBreakpointClient: function(context, url, lineNumber)
+    {
+        var clients = context.breakpointClients;
+        if (!clients)
+            return;
+
+        for (var i=0; i<clients.length; i++)
+        {
+            var client = clients[i];
+            var loc = client.location;
+            if (loc.url == url && loc.line == lineNumber)
+                return client;
+        }
     },
 
     enableBreakpoint: function(context, url, lineNumber)

@@ -25,6 +25,8 @@ const BP_ONRELOAD = 8;  // XXXjjb: This is a mark for the UI to test
 const BP_ERROR = 16;
 const BP_TRACE = 32; // BP used to initiate traceCalls
 
+var Trace = FBTrace.to("DBG_BREAKPOINTSTORE");
+
 // ********************************************************************************************* //
 // Breakpoint Store
 
@@ -47,7 +49,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.storage = StorageService.getStorage("breakpoints.json");
         this.restore();
 
-        FBTrace.sysout("breakpointStore.initialize; ", this.breakpoints);
+        Trace.sysout("breakpointStore.initialize; ", this.breakpoints);
     },
 
     shutdown: function()
@@ -73,12 +75,17 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // Could we optimize this somehow?
         var bps = this.getBreakpoints();
 
-        // Set breakpoints on the server side.
+        Trace.sysout("breakpointStore.onThreadAttached; Initialize server " +
+            "side breakpoints", bps);
+
+        // Set breakpoints on the server side. The initialization is done by the breakpoint
+        // store since the Script panel doesn't have to exist at this point. Also, other
+        // panels can also deal with breakpoints (BON) and so, a panel doesn't seem to be
+        // the right center place, where the perform the initialization.
         var tool = context.getTool("debugger");
         tool.setBreakpoints(context, bps, function()
         {
-            FBTrace.sysout("breakpointStore.onThreadAttached; Server side breakpoints " +
-                "initialized", bps);
+            // TODO: any async UI update or logging here?
         });
     },
 
@@ -137,7 +144,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         this.storage.setItem(url, cleanBPs);
 
-        FBTrace.sysout("breakpointStore.save;", this.storage);
+        Trace.sysout("breakpointStore.save;", this.storage);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -154,6 +161,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!this.breakpoints[url])
             this.breakpoints[url] = [];
 
+        // xxxHonza: we should probably use instance of Breakpoint object.
         var bp = {
             href: url,
             lineNo: lineNo,
@@ -167,7 +175,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.breakpoints[url].push(bp);
         this.save(url);
 
-        FBTrace.sysout("breakpointStore.addBreakpoint; " + url + " (" + lineNo + ")", bp);
+        Trace.sysout("breakpointStore.addBreakpoint; " + url + " (" + lineNo + ")", bp);
 
         this.dispatch("onBreakpointAdded", [bp]);
 
@@ -196,7 +204,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         this.save(url);
 
-        FBTrace.sysout("breakpointStore.removeBreakpoint; " + url +
+        Trace.sysout("breakpointStore.removeBreakpoint; " + url +
             " (" + lineNo + ")", removedBp);
 
         this.dispatch("onBreakpointRemoved", [removedBp]);
