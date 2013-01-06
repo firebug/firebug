@@ -767,13 +767,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (!parentNodeBox)
                 return;
 
+            // Ignore whitespace nodes.
             if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
                 return;
 
-            // target is only whitespace
-
             var newParentTag = getNodeTag(parent);
             var oldParentTag = getNodeBoxTag(parentNodeBox);
+
+            var objectBox = null;
 
             if (newParentTag == oldParentTag)
             {
@@ -810,7 +811,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                            nextSibling = this.findNextSibling(nextSibling);
                         }
 
-                        var objectBox = nextSibling ?
+                        objectBox = nextSibling ?
                             this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                             this.ioBox.appendChildBox(parentNodeBox, target);
 
@@ -836,7 +837,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                     {
-                        var objectBox = this.ioBox.createObjectBox(target);
+                        objectBox = this.ioBox.createObjectBox(target);
                         this.highlightMutation(objectBox, objectBox, "mutated");
                     }
                 }
@@ -857,10 +858,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                 {
-                    var objectBox = this.ioBox.createObjectBox(target);
+                    objectBox = this.ioBox.createObjectBox(target);
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
             }
+
+            if (objectBox && this.selection === target)
+                this.ioBox.selectObjectBox(objectBox);
         }
         catch (exc)
         {
