@@ -12,7 +12,7 @@ var Wrapper = {};
 
 Wrapper.getContentView = function(object)
 {
-    if (typeof object !== "object" && typeof object !== "function")
+    if (isPrimitive(object))
         return object;
 
     return object.wrappedJSObject;
@@ -20,14 +20,10 @@ Wrapper.getContentView = function(object)
 
 Wrapper.unwrapObject = function(object)
 {
-    // TODO: We might be able to make this check more authoritative with QueryInterface.
-    if (typeof(object) === 'undefined' || object == null)
+    if (isPrimitive(object))
         return object;
 
-    if (object.wrappedJSObject)
-        return object.wrappedJSObject;
-
-    return object;
+    return XPCNativeWrapper.unwrap(object);
 };
 
 Wrapper.unwrapIValue = function(object, viewChrome)
@@ -113,6 +109,11 @@ Wrapper.shouldIgnore = function(name)
 {
     return (Wrapper.ignoreVars[name] === 1);
 };
+
+function isPrimitive(obj)
+{
+    return !(obj && (typeof obj === "object" || typeof obj === "function"));
+}
 
 // ********************************************************************************************* //
 
