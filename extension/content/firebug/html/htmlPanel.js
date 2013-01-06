@@ -743,92 +743,115 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     mutateNode: function(target, parent, nextSibling, removal)
     {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
-                (removal ? "REMOVE" : ""));
-
-        // Due to the delay call this may or may not exist in the tree anymore
-        if (!removal && !this.ioBox.isInExistingRoot(target))
+        try
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateNode: different tree " + target, target);
-            return;
-        }
+                FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
+                    (removal ? "REMOVE" : ""));
 
-        this.markChange();  // This invalidates the panels for every mutate
-
-        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
-            ? this.ioBox.createObjectBox(parent)
-            : this.ioBox.findObjectBox(parent);
-
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
-                parentNodeBox);
-
-        if (!parentNodeBox)
-            return;
-
-        if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
-            return;
-
-        // target is only whitespace
-
-        var newParentTag = getNodeTag(parent);
-        var oldParentTag = getNodeBoxTag(parentNodeBox);
-
-        if (newParentTag == oldParentTag)
-        {
-            if (parentNodeBox.populated)
+            // Due to the delay call this may or may not exist in the tree anymore
+            if (!removal && !this.ioBox.isInExistingRoot(target))
             {
-                if (removal)
+                if (FBTrace.DBG_HTML)
+                    FBTrace.sysout("mutateNode: different tree " + target, target);
+                return;
+            }
+
+            this.markChange();  // This invalidates the panels for every mutate
+
+            var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
+                ? this.ioBox.createObjectBox(parent)
+                : this.ioBox.findObjectBox(parent);
+
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
+                    parentNodeBox);
+
+            if (!parentNodeBox)
+                return;
+
+            if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
+                return;
+
+            // target is only whitespace
+
+            var newParentTag = getNodeTag(parent);
+            var oldParentTag = getNodeBoxTag(parentNodeBox);
+
+            if (newParentTag == oldParentTag)
+            {
+                if (parentNodeBox.populated)
                 {
-                    this.ioBox.removeChildBox(parentNodeBox, target);
+                    if (removal)
+                    {
+                        this.ioBox.removeChildBox(parentNodeBox, target);
 
-                    // Special case for docType.
-                    if (target instanceof HTMLHtmlElement)
-                        this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
+                        // Special case for docType.
+                        if (target instanceof HTMLHtmlElement)
+                            this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
 
-                    this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
+                        this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
+                    }
+                    else
+                    {
+                        var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+
+                        var comments = Firebug.showCommentNodes;
+                        var whitespaces = Firebug.showTextNodesWithWhitespace;
+
+                        // Get the right next sibling that match following criteria:
+                        // 1) It's not a whitespace text node in case 'show whitespaces' is false.
+                        // 2) It's not a comment in case 'show comments' is false.
+                        // 3) There is a child box already created for it in the HTML panel UI.
+                        // The new node will then be inserted before that sibling's child box, or
+                        // appended at the end (issue 5255).
+                        while (nextSibling && (
+                           (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
+                           (!comments && nextSibling instanceof window.Comment) ||
+                           (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
+                        {
+                           nextSibling = this.findNextSibling(nextSibling);
+                        }
+
+                        var objectBox = nextSibling ?
+                            this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
+                            this.ioBox.appendChildBox(parentNodeBox, target);
+
+                        // Special case for docType.
+                        if (target instanceof HTMLHtmlElement)
+                        {
+                            this.ioBox.insertChildBoxBefore(parentNodeBox,
+                                target.parentNode.doctype, target);
+                        }
+
+                        this.highlightMutation(objectBox, objectBox, "mutated");
+                    }
                 }
-                else
+                else // !parentNodeBox.populated
                 {
-                    var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+                    var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
+                    parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
-                    var comments = Firebug.showCommentNodes;
-                    var whitespaces = Firebug.showTextNodesWithWhitespace;
+                    if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                        this.ioBox.select(parent, true);
 
-                    // Get the right next sibling that match following criteria:
-                    // 1) It's not a whitespace text node in case 'show whitespaces' is false.
-                    // 2) It's not a comment in case 'show comments' is false.
-                    // 3) There is a child box already created for it in the HTML panel UI.
-                    // The new node will then be inserted before that sibling's child box, or
-                    // appended at the end (issue 5255).
-                    while (nextSibling && (
-                       (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
-                       (!comments && nextSibling instanceof window.Comment) ||
-                       (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
+                    this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
+
+                    if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                     {
-                       nextSibling = this.findNextSibling(nextSibling);
+                        var objectBox = this.ioBox.createObjectBox(target);
+                        this.highlightMutation(objectBox, objectBox, "mutated");
                     }
-
-                    var objectBox = nextSibling ?
-                        this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
-                        this.ioBox.appendChildBox(parentNodeBox, target);
-
-                    // Special case for docType.
-                    if (target instanceof HTMLHtmlElement)
-                    {
-                        this.ioBox.insertChildBoxBefore(parentNodeBox,
-                            target.parentNode.doctype, target);
-                    }
-
-                    this.highlightMutation(objectBox, objectBox, "mutated");
                 }
             }
-            else // !parentNodeBox.populated
+            else // newParentTag != oldParentTag
             {
                 var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
-                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+                if (parentNodeBox.parentNode)
+                    parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+
+                if (Css.hasClass(parentNodeBox, "open"))
+                    this.ioBox.toggleObjectBox(newParentNodeBox, true);
 
                 if (this.selection && (!this.selection.parentNode || parent == this.selection))
                     this.ioBox.select(parent, true);
@@ -842,25 +865,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
             }
         }
-        else // newParentTag != oldParentTag
+        catch (exc)
         {
-            var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
-            if (parentNodeBox.parentNode)
-                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
-
-            if (Css.hasClass(parentNodeBox, "open"))
-                this.ioBox.toggleObjectBox(newParentNodeBox, true);
-
-            if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                this.ioBox.select(parent, true);
-
-            this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
-
-            if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
-            {
-                var objectBox = this.ioBox.createObjectBox(target);
-                this.highlightMutation(objectBox, objectBox, "mutated");
-            }
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("html.mutateNode FAILS", exc);
         }
     },
 
