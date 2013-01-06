@@ -34,6 +34,11 @@ Wrapper.wrapObject = function(object)
     return XPCNativeWrapper(object);
 };
 
+Wrapper.isDeadWrapper = function(wrapper)
+{
+    return Components.utils.isDeadWrapper(wrapper);
+};
+
 Wrapper.unwrapIValue = function(object, viewChrome)
 {
     var unwrapped = object.getWrappedValue();
