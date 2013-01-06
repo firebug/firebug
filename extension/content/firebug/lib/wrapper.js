@@ -26,6 +26,14 @@ Wrapper.unwrapObject = function(object)
     return XPCNativeWrapper.unwrap(object);
 };
 
+Wrapper.wrapObject = function(object)
+{
+    if (isPrimitive(object))
+        return object;
+
+    return XPCNativeWrapper(object);
+};
+
 Wrapper.unwrapIValue = function(object, viewChrome)
 {
     var unwrapped = object.getWrappedValue();
