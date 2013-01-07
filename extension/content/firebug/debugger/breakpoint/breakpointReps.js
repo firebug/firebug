@@ -11,9 +11,18 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/debugger/breakpoint/breakpoint",
+    "firebug/debugger/breakpoint/breakpointStore",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom, Breakpoint) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom,
+    Breakpoint, BreakpointStore) {
+
 with (Domplate) {
+
+// ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_BP");
 
 // ********************************************************************************************* //
 // Breakpoint Reps
@@ -104,22 +113,32 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     removeBreakpoint: function(groupName, href, lineNumber)
     {
+        Trace.sysout("breakpointRep.removeBreakpoint; " + href + " (" + lineNumber + ")");
+
         if (groupName == "breakpoints")
-            FBS.clearBreakpoint(href, lineNumber);
+        {
+            BreakpointStore.removeBreakpoint(href, lineNumber);
+
+            //FBS.clearBreakpoint(href, lineNumber);
+        }
         else if (groupName == "errorBreakpoints")
-            FBS.clearErrorBreakpoint(href, lineNumber);
+        {
+            //FBS.clearErrorBreakpoint(href, lineNumber);
+        }
         else if (groupName == "monitors")
-            FBS.unmonitor(href, lineNumber);
+        {
+            //FBS.unmonitor(href, lineNumber);
+        }
     },
 
     enableBreakpoint: function(href, lineNumber)
     {
-        FBS.enableBreakpoint(href, lineNumber);
+        //FBS.enableBreakpoint(href, lineNumber);
     },
 
     disableBreakpoint: function(href, lineNumber)
     {
-        FBS.disableBreakpoint(href, lineNumber);
+        //FBS.disableBreakpoint(href, lineNumber);
     },
 
     isEnabled: function(bp)

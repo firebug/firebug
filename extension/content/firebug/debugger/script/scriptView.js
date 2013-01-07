@@ -251,16 +251,15 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (!bps.length)
             return;
 
-        // Ignore events about breakpoint changes.
-        this.skipEditorBreakpointChange = true;
-
-        for (var i=0; i<bps.length; i++)
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
         {
-            var bp = bps[i];
-            this.editor.addBreakpoint(bp.lineNo - 1);
-        }
-
-        this.skipEditorBreakpointChange = false;
+            for (var i=0; i<bps.length; i++)
+            {
+                var bp = bps[i];
+                self.editor.addBreakpoint(bp.lineNo - 1);
+            }
+        });
     },
 
     onBreakpointChange: function(event)
@@ -279,12 +278,40 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     removeBreakpoint: function(bp)
     {
-        this.editor.removeBreakpoint(bp.lineNo - 1);
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+            self.editor.removeBreakpoint(bp.lineNo - 1);
+        });
     },
 
     addBreakpoint: function(bp)
     {
-        this.editor.addBreakpoint(bp.lineNo - 1);
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+            self.editor.addBreakpoint(bp.lineNo - 1);
+        });
+    },
+
+    safeSkipEditorBreakpointChange: function(callback)
+    {
+        try
+        {
+            // Ignore events about breakpoint changes.
+            this.skipEditorBreakpointChange = true;
+
+            // Modify editor breakpoints.
+            callback();
+        }
+        catch (e)
+        {
+            TraceError.sysout("scriptView.safeSkipEditorBreakpointChange; EXCEPTION " + e, e);
+        }
+        finally
+        {
+            this.skipEditorBreakpointChange = false;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
