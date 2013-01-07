@@ -316,7 +316,10 @@ this.mouseMove = function(node, offsetX, offsetY)
 this.sendMouseEvent = function(event, target, win)
 {
     if (!target)
-        FBTrace.sysout("sendMouseEvent target is null");
+    {
+        FBTest.progress("sendMouseEvent target is null");
+        return;
+    }
 
     var targetIsString = typeof target == "string";
  
