@@ -22,7 +22,7 @@ var Ci = Components.interfaces;
 
 var RETURN_CONTINUE = Ci.jsdIExecutionHook.RETURN_CONTINUE;
 
-var memoryReporterManager;
+var memoryReporterManager = null;
 
 try
 {
@@ -170,7 +170,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
         if (!cancelReport)
         {
             var title = Locale.$STR("firebug.Objects Added While Profiling");
-            var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
+            Firebug.Console.openCollapsedGroup(title, context, "profile",
                 Firebug.MemoryProfiler.ProfileCaption, true, null, true);
     
             Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);

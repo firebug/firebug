@@ -119,18 +119,11 @@ var prefTypeMap = (function()
 
 function getPref(prefDomain, name)
 {
-    var prefName;
-    if (name == undefined)
-        prefName = PrefLoader.prefDomain + prefDomain;
-    else
-        prefName = prefDomain + "." + name;
-
+    var prefName = (name == undefined) ?
+        PrefLoader.prefDomain + prefDomain : prefDomain + "." + name;
     var prefs = Services.prefs;
     var type = prefTypeMap[prefs.getPrefType(prefName)];
-    if (type)
-        var value = prefs["get" + type](prefName);
-
-    return value;
+    return type ? prefs["get" + type](prefName) : null;
 }
 
 function setPref(name, value)

@@ -795,12 +795,12 @@ function waitForWindowLoad(browser, callback)
     // (bug549539) could be utilized.
     function waitForEvents(event)
     {
-        if (event.type == "load")
+        if (event.type == "load" && event.target === browser.contentDocument)
         {
             browser.removeEventListener("load", waitForEvents, true);
             loaded = true;
         }
-        else if (event.type == "MozAfterPaint")
+        else if (event.type == "MozAfterPaint" && event.target === browser.contentWindow)
         {
             browser.removeEventListener("MozAfterPaint", waitForEvents, true);
             painted = true;

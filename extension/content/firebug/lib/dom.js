@@ -1920,7 +1920,7 @@ domMemberMap.Event =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-var domConstantMap = Dom.domConstantMap =
+Dom.domConstantMap =
 {
     "ELEMENT_NODE": 1,
     "ATTRIBUTE_NODE": 1,

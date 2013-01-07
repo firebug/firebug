@@ -242,10 +242,8 @@ Browser.prototype.closeContext = function(context, userCommands)
 
         if (shouldDispatch)
         {
-            var userCommands;
-
             // TODO remove
-            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, userCommands]);
+            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, null]);
             return true;
         }
         return false;
@@ -681,8 +679,6 @@ Browser.EventListener = {
 };
 
 // ********************************************************************************************* //
-
-var clearContextTimeout = 0;
 
 var TabWatchListener =
 {

@@ -62,8 +62,17 @@ function runTest()
                 }
                 var src = (createA + "").replace(/\n/g,' ').replace(/ +/g, ' ');
                 src += " createA();";
+                var sync = false;
                 FW.Firebug.CommandLine.evaluate(src, FW.Firebug.currentContext, undefined,
-                    undefined, function() {}, function() {});
+                    undefined, function()
+                {
+                    sync = true;
+                }, function(e)
+                {
+                    sync = true;
+                    FBTest.compare(1, 0, "evaluation error: " + e);
+                });
+                FBTest.compare(true, sync, "Evaluation must be syncronous.");
                 callback();
             }
 
@@ -86,8 +95,6 @@ function runTest()
                     }).join(",");
                     var wanted = "catched,helper,local,param,unused,withVar";
                     FBTest.compare(wanted, joined, "The completion popup should show the right list of closure variables.");
-                    if (wanted !== joined)
-                        FBTest.progress("Actual: " + joined);
                     cmdLine.value = "";
                     FBTest.setPref("commandLineShowCompleterPopup", false);
                     callback();

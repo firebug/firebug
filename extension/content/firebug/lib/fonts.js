@@ -10,10 +10,6 @@ function(FBTrace, Dom, Url) {
 // ********************************************************************************************* //
 // Constants
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
-
 var Fonts = {};
 
 // ********************************************************************************************* //

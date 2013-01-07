@@ -48,12 +48,11 @@ ToggleBranch.prototype =
     get: function(name)  // return the toggle branch at name
     {
         var metaName = this.getMeta(name);
+        var value = null;
         if (metaName)
-            var value = this.meta[metaName];
+            value = this.meta[metaName];
         else if (this.normal.hasOwnProperty(name))
-            var value = this.normal[name];
-        else
-            var value = null;
+            value = this.normal[name];
 
         if (FBTrace.DBG_DOMPLATE)
             if (value && !(value instanceof ToggleBranch))

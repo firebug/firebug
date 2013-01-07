@@ -126,7 +126,6 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             return false;
 
         // Climb prototype chain.
-        var inheritedProps = [];
         var parent = Object.getPrototypeOf(ob);
         if (parent)
             return this.hasProperties(parent, nonEnumProps, ownPropsOnly);

@@ -11,72 +11,71 @@ function(FBTrace, Str) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 
 var Xml = {};
 
 // ************************************************************************************************
 // HTML and XML Serialization
 
-var getElementType = Xml.getElementType = function(node)
+Xml.getElementType = function(node)
 {
-    if (isElementXUL(node))
+    if (Xml.isElementXUL(node))
         return 'xul';
-    else if (isElementSVG(node))
+    else if (Xml.isElementSVG(node))
         return 'svg';
-    else if (isElementMathML(node))
+    else if (Xml.isElementMathML(node))
         return 'mathml';
-    else if (isElementXHTML(node))
+    else if (Xml.isElementXHTML(node))
         return 'xhtml';
-    else if (isElementHTML(node))
+    else if (Xml.isElementHTML(node))
         return 'html';
 };
 
-var getElementSimpleType = Xml.getElementSimpleType = function(node)
+Xml.getElementSimpleType = function(node)
 {
-    if (isElementSVG(node))
+    if (Xml.isElementSVG(node))
         return 'svg';
-    else if (isElementMathML(node))
+    else if (Xml.isElementMathML(node))
         return 'mathml';
     else
         return 'html';
 };
 
-var isElementHTML = Xml.isElementHTML = function(node)
+Xml.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 };
 
-var isElementXHTML = Xml.isElementXHTML = function(node)
+Xml.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 };
 
-var isElementMathML = Xml.isElementMathML = function(node)
+Xml.isElementMathML = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
 };
 
-var isElementSVG = Xml.isElementSVG = function(node)
+Xml.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
 };
 
-var isElementXUL = Xml.isElementXUL = function(node)
+Xml.isElementXUL = function(node)
 {
     return node instanceof XULElement;
 };
 
-var getNodeName = Xml.getNodeName = function(node)
+Xml.getNodeName = function(node)
 {
     var name = node.nodeName;
-    return isElementHTML(node) ? name.toLowerCase() : name;
+    return Xml.isElementHTML(node) ? name.toLowerCase() : name;
 };
 
-var getLocalName = Xml.getLocalName = function(node)
+Xml.getLocalName = function(node)
 {
     var name = node.localName;
-    return isElementHTML(node) ? name.toLowerCase() : name;
+    return Xml.isElementHTML(node) ? name.toLowerCase() : name;
 };
 
 // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
@@ -97,7 +96,7 @@ Xml.selfClosingTags =
 
 Xml.isSelfClosing = function(element)
 {
-    if (isElementSVG(element) || isElementMathML(element))
+    if (Xml.isElementSVG(element) || Xml.isElementMathML(element))
         return true;
     var tag = element.localName.toLowerCase();
     return (Xml.selfClosingTags.hasOwnProperty(tag));
@@ -105,14 +104,14 @@ Xml.isSelfClosing = function(element)
 
 Xml.getElementHTML = function(element)
 {
-    function toHTML(elt)
+    function toHTML(elt, html)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
             if (Firebug.shouldIgnore(elt))
                 return;
 
-            var nodeName = getNodeName(elt);
+            var nodeName = Xml.getNodeName(elt);
             html.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -139,17 +138,17 @@ Xml.getElementHTML = function(element)
                 html.push('>');
 
                 for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toHTML(child);
+                    toHTML(child, html);
 
                 html.push('</', nodeName, '>');
             }
-            else if (isElementSVG(elt) || isElementMathML(elt))
+            else if (Xml.isElementSVG(elt) || Xml.isElementMathML(elt))
             {
                 html.push('/>');
             }
             else if (Xml.isSelfClosing(elt))
             {
-                html.push((isElementXHTML(elt))?'/>':'>');
+                html.push((Xml.isElementXHTML(elt))?'/>':'>');
             }
             else
             {
@@ -157,28 +156,34 @@ Xml.getElementHTML = function(element)
             }
         }
         else if (elt.nodeType == Node.TEXT_NODE)
+        {
             html.push(Str.escapeForTextNode(elt.textContent));
+        }
         else if (elt.nodeType == Node.CDATA_SECTION_NODE)
+        {
             html.push('<![CDATA[', elt.nodeValue, ']]>');
+        }
         else if (elt.nodeType == Node.COMMENT_NODE)
+        {
             html.push('<!--', elt.nodeValue, '-->');
+        }
     }
 
     var html = [];
-    toHTML(element);
+    toHTML(element, html);
     return html.join("");
 };
 
 Xml.getElementXML = function(element)
 {
-    function toXML(elt)
+    function toXML(elt, xml)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
             if (Firebug.shouldIgnore(elt))
                 return;
 
-            var nodeName = getNodeName(elt);
+            var nodeName = Xml.getNodeName(elt);
             xml.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -204,7 +209,7 @@ Xml.getElementXML = function(element)
                 xml.push('>');
 
                 for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toXML(child);
+                    toXML(child, xml);
 
                 xml.push('</', nodeName, '>');
             }
@@ -220,7 +225,7 @@ Xml.getElementXML = function(element)
     }
 
     var xml = [];
-    toXML(element);
+    toXML(element, xml);
     return xml.join("");
 };
 
@@ -298,7 +303,7 @@ Xml.isVisible = function(elt)
     return false;
 };
 
-var invisibleTags = Xml.invisibleTags =
+Xml.invisibleTags =
 {
     "HTML": 1,
     "HEAD": 1,

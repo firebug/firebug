@@ -36,7 +36,7 @@ var uid = 0;
 // xxxHonza: the only global should be Firebug object.
 var domplate = function()
 {
-    var lastSubject;
+    var lastSubject = null;
     for (var i = 0; i < arguments.length; ++i)
         lastSubject = lastSubject ? copyObject(lastSubject, arguments[i]) : arguments[i];
 
@@ -256,7 +256,7 @@ DomplateTag.prototype =
             if (isArray(iter) || iter instanceof NodeList)
                 iter = new ArrayIterator(iter);
 
-            var value;
+            var value = null;
             try
             {
                 while (1)
@@ -483,7 +483,6 @@ DomplateTag.prototype =
             return tag.tag.renderDOM.apply(tag.tag.subject, domArgs);
         }
 
-        var self = this;
         function __loop__(iter, fn)
         {
             var nodeCount = 0;
@@ -1085,7 +1084,8 @@ var Renderer =
         var parent = before.localName.toLowerCase() == "tr" ? before.parentNode : before;
         var after = before.localName.toLowerCase() == "tr" ? before.nextSibling : null;
 
-        var firstRow = tbody.firstChild, lastRow;
+        var firstRow = tbody.firstChild;
+        var lastRow = null;
         while (tbody.firstChild)
         {
             lastRow = tbody.firstChild;

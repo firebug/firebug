@@ -185,10 +185,14 @@ function createFirebugCommandLine(context, win)
     function evaluate(expr, origExpr)
     {
         var result;
+        var baseLine;
         try
         {
-            var line = Components.stack.lineNumber;
-            result = contentView.eval(expr);
+            // Errors thrown from within the expression of the eval call will
+            // have a line number equal to (line of eval, 1-based) + (line in
+            // expression, 0-based) - keep track of the former term so we can
+            // correct it later.
+            baseLine = Components.stack.lineNumber; result = contentView.eval(expr);
 
             // See Issue 5221
             //var result = FirebugEvaluate(expr, contentView);
@@ -198,8 +202,9 @@ function createFirebugCommandLine(context, win)
         {
             // change source and line number of exeptions from commandline code
             // create new error since properties of nsIXPCException are not modifiable
-            var shouldModify = false, isXPCException = false, dropFrames = false;
-            var fileName = exc.filename || exc.fileName, lineNumber;
+            var shouldModify = false, isXPCException = false;
+            var fileName = exc.filename || exc.fileName;
+            var lineNumber = 0;
             if (fileName.lastIndexOf("chrome:", 0) === 0)
             {
                 if (fileName === Components.stack.filename)
@@ -211,7 +216,6 @@ function createFirebugCommandLine(context, win)
                 }
                 else if (exc._dropFrames)
                 {
-                    dropFrames = true;
                     lineNumber = findLineNumberInExceptionStack(exc.stack);
                     shouldModify = (lineNumber !== null);
                 }
@@ -223,7 +227,7 @@ function createFirebugCommandLine(context, win)
                 result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
-                result.lineNumber = lineNumber - line;
+                result.lineNumber = lineNumber - baseLine + 1;
 
                 // Lie and show the pre-transformed expression instead.
                 result.fileName = "data:," + encodeURIComponent(origExpr);
@@ -265,7 +269,7 @@ function createFirebugCommandLine(context, win)
                 eventID + " with " + objs.length + " user objects", commandLine.userObjects);
         }
 
-        var result;
+        var result = null;
         if (Dom.getMappedData(contentView.document, "firebug-retValueType") === "array")
             result = [];
 

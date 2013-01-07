@@ -699,11 +699,12 @@ LogFunctionStepper.prototype =
 
         if (!frame.callingFrame)
         {
-            var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
-
             if (FBTrace.DBG_FBS_STEP)
+            {
+                var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
                 FBTrace.sysout("fbs.Stack ends at depth "+fbs.stackDescription.depth +
                     (diff ? " NO Match on tag " : " tags match"), fbs.stackDescription.entries);
+            }
 
             fbs.stackDescription.entries = [];
         }
@@ -1358,7 +1359,7 @@ var fbs =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
-            var bp = this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
+            this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
@@ -2250,7 +2251,7 @@ var fbs =
                 fbs.onTopLevelDelegate + " " + frame.script.tag + " " + frame.script.fileName);
 
         if (fbs.onTopLevelDelegate)
-            fbs.onTopLevelDelegate(frame, type)
+            fbs.onTopLevelDelegate(frame, type);
     },
 
     isTopLevelScript: function(frame, type, val)
@@ -4114,7 +4115,7 @@ var ScriptInterrupter =
 
         this.entries[script.tag] = {
             script: script
-        }
+        };
     },
 
     disable: function(script)
@@ -4270,7 +4271,7 @@ function hook(fn, rv)
             ERROR(msg, exc);
             return rv;
         }
-    }
+    };
 }
 
 var lastWindowScope = null;

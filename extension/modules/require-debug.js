@@ -50,6 +50,7 @@ require.originalExecCb = require.execCb;
 require.execCbOFF = function (name)
 {
     var ret = require.originalExecCb.apply(require, arguments);
+    var value = null;
     try
     {
         if (ret)
@@ -61,7 +62,7 @@ require.execCbOFF = function (name)
                 {
                     if (ret.hasOwnProperty(prop))
                     {
-                        var value = ret[prop];
+                        value = ret[prop];
                         if (value !== null &&
                             (typeof value == "function"/* || typeof value == "object"*/))
                         {

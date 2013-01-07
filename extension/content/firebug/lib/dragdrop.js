@@ -67,7 +67,7 @@ Tracker.prototype =
 
         var newPos = absoluteCursorPostion(event);
         //newPos = newPos.Add(this.elementStartPos);
-        var newPos = newPos.Subtract(this.cursorStartPos);
+        newPos = newPos.Subtract(this.cursorStartPos);
         //newPos = newPos.Bound(lowerBound, upperBound);
         //newPos.Apply(this.element);
 
