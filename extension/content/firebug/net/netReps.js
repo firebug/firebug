@@ -1431,6 +1431,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
         var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
 
+        // TODO: Trigger an event here instead and register the viewer models as listeners
         if (Firebug.JSONViewerModel.isJSON(contentType, text))
             this.insertJSON(parentNode, file, context);
 
