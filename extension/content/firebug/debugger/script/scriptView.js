@@ -248,18 +248,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var bps = [];
         this.dispatch("getBreakpoints", [bps]);
 
-        if (!bps.length)
-            return;
-
-        var self = this;
-        this.safeSkipEditorBreakpointChange(function()
-        {
-            for (var i=0; i<bps.length; i++)
-            {
-                var bp = bps[i];
-                self.editor.addBreakpoint(bp.lineNo - 1);
-            }
-        });
+        for (var i=0; i<bps.length; i++)
+            this.addBreakpoint(bps[i]);
     },
 
     onBreakpointChange: function(event)
@@ -275,42 +265,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.dispatch("removeBreakpoint", [bp]);
         }, this);
     },
-
-    removeBreakpoint: function(bp)
-    {
-        var self = this;
-        this.safeSkipEditorBreakpointChange(function()
-        {
-            self.editor.removeBreakpoint(bp.lineNo - 1);
-        });
-    },
-
-    addBreakpoint: function(bp)
-    {
-        var self = this;
-        this.safeSkipEditorBreakpointChange(function()
-        {
-            self.editor.addBreakpoint(bp.lineNo - 1);
-        });
-    },
-
-    enableBreakpoint: function(bp)
-    {
-        var self = this;
-        this.safeSkipEditorBreakpointChange(function()
-        {
-        });
-    },
-
-    disableBreakpoint: function(bp)
-    {
-        var self = this;
-        this.safeSkipEditorBreakpointChange(function()
-        {
-        });
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     safeSkipEditorBreakpointChange: function(callback)
     {
@@ -333,6 +287,53 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoint API
+
+    removeBreakpoint: function(bp)
+    {
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+            self.editor.removeBreakpoint(bp.lineNo - 1);
+        });
+    },
+
+    addBreakpoint: function(bp)
+    {
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+            self.editor.addBreakpoint(bp.lineNo - 1);
+
+            // Make sure to update the icon if breakpoint is disabled.
+            if (bp.disabled)
+                self.disableBreakpoint(bp);
+        });
+    },
+
+    enableBreakpoint: function(bp)
+    {
+        var annotation = {
+            style: {styleClass: "annotation breakpoint"},
+            overviewStyle: {styleClass: "annotationOverview breakpoint"},
+            rangeStyle: {styleClass: "annotationRange breakpoint"}
+        };
+
+        this.modifyAnnotation("breakpoint", bp.lineNo - 1, annotation);
+    },
+
+    disableBreakpoint: function(bp)
+    {
+        var annotation = {
+            style: {styleClass: "annotation breakpoint disabled"},
+            overviewStyle: {styleClass: "annotationOverview breakpoint disabled"},
+            rangeStyle: {styleClass: "annotationRange breakpoint disabled"}
+        };
+
+        this.modifyAnnotation("breakpoint", bp.lineNo - 1, annotation);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Highlight Line
 
     scrollToLine: function(href, lineNo, highlighter)
@@ -352,7 +353,27 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
 
         this.editor.setDebugLocation(-1);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editor Enhancements
+
+    modifyAnnotation: function(type, lineIndex, props)
+    {
+        var lineStart = this.editor.getLineStart(lineIndex);
+        var lineEnd = this.editor.getLineEnd(lineIndex);
+
+        var annotations = this.editor._getAnnotationsByType(type, lineStart, lineEnd);
+        annotations.forEach(function(annotation)
+        {
+            // Modify existing properties
+            for (var p in props)
+                annotation[p] = props[p];
+
+            // Apply modifications.
+            this.editor._annotationModel.modifyAnnotation(annotation);
+        }, this);
+    },
 });
 
 // ********************************************************************************************* //

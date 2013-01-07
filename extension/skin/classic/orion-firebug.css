@@ -46,6 +46,16 @@
     background-position: top !important;
 }
 
+.annotation.breakpoint.disabled > DIV.annotationHTML {
+    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-position: top !important;
+}
+
+.annotationOverview.breakpoint.disabled {
+    background-color: silver;
+    border: 1px solid grey;
+}
+
 .annotation.debugLocation > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/exe.png);
     color: #000000;
