@@ -294,6 +294,24 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         });
     },
 
+    enableBreakpoint: function(bp)
+    {
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+        });
+    },
+
+    disableBreakpoint: function(bp)
+    {
+        var self = this;
+        this.safeSkipEditorBreakpointChange(function()
+        {
+        });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     safeSkipEditorBreakpointChange: function(callback)
     {
         try

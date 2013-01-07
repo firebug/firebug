@@ -367,18 +367,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // We need to get the breakpoint client object for this context. The client.
         // knowns how to remove the breakpoint on the server side.
-        var client = this.getBreakpointClient(context, url, lineNumber);
-        if (!client)
-            return;
-
-        // Remove the bp from the back-end.
-        client.remove(callback);
-
-        // Remove the bp client from context.
-        Arr.remove(context.breakpointClients, client);
+        var client = this.removeBreakpointClient(context, url, lineNumber);
+        if (client)
+            client.remove(callback);
     },
 
-    getBreakpointClient: function(context, url, lineNumber)
+    removeBreakpointClient: function(context, url, lineNumber)
     {
         var clients = context.breakpointClients;
         if (!clients)
@@ -389,7 +383,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             var client = clients[i];
             var loc = client.location;
             if (loc.url == url && loc.line == lineNumber)
+            {
+                clients.splice(i, 1);
                 return client;
+            }
         }
     },
 
