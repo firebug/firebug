@@ -91,6 +91,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
             this.onBreakpointChangeListener);
 
+        // Hook annotation and lines ruler clicks
+        this.editor._annotationRuler.onClick = this.annotationRulerClick.bind(this);
+        this.editor._linesRuler.onClick = this.linesRulerClick.bind(this);
+
         // Focus so, keyboard works as expected.
         this.editor.focus();
 
@@ -373,6 +377,21 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             // Apply modifications.
             this.editor._annotationModel.modifyAnnotation(annotation);
         }, this);
+    },
+
+    linesRulerClick: function(lineIndex, event)
+    {
+        Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
+
+        this.editor._annotationRulerClick.call(this.editor, lineIndex, event);
+    },
+
+    annotationRulerClick: function(lineIndex, event)
+    {
+        Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
+
+        // Clicking on a line number also toggls breakpoint.
+        this.editor._annotationRulerClick.call(this.editor, lineIndex, event);
     },
 });
 
