@@ -424,6 +424,28 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.removeBreakpoint(bp);
     },
 
+    onBreakpointEnabled: function(bp)
+    {
+        this.tool.enableBreakpoint(this.context, bp.href, bp.lineNo, function()
+        {
+        });
+
+        // Remove breakpoint from the UI.
+        // xxxHonza: should be async
+        this.scriptView.enableBreakpoint(bp);
+    },
+
+    onBreakpointDisabled: function(bp)
+    {
+        this.tool.disableBreakpoint(this.context, bp.href, bp.lineNo, function()
+        {
+        });
+
+        // Remove breakpoint from the UI.
+        // xxxHonza: should be async
+        this.scriptView.disableBreakpoint(bp);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 

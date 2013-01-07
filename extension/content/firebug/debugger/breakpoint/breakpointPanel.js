@@ -61,7 +61,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         this.traceListener = new TraceListener("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
         TraceModule.addListener(this.traceListener);
 
-        // Listen to breakpoint changes (add/remove).
+        // Listen to breakpoint changes (add/remove/enable/disable).
+        // These events are used to refresh the panel content.
         BreakpointStore.addListener(this);
     },
 
@@ -173,57 +174,25 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var errorBreakpoints = [];
         var monitors = [];
 
-        var renamer = new SourceFileRenamer(context);
         var self = this;
 
         for (var url in context.compilationUnits)
         {
-            BreakpointStore.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
+            BreakpointStore.enumerateBreakpoints(url, function(bp)
             {
-                Trace.sysout("breakpointPanel.extractBreakpoints; type: " + props.type +
-                    " in url " + url + "@" + line + " context " + context.getName(),
-                    props);
+                var line = bp.lineNo;
+                var unit = context.compilationUnits[url];
+                var name = StackFrame.guessFunctionName(url, line, unit.sourceFile);
+                var sourceLine = context.sourceCache.getLine(url, line);
 
-                // some url in this sourceFileMap has changed, we'll be back.
-                if (renamer.checkForRename(url, line, props))
-                    return;
+                bp.setName(name);
+                bp.setSourceLine(sourceLine);
 
-                var name;
-                var isFuture;
+                breakpoints.push(bp);
+            });
 
-                if (scripts)  // then this is a current (not future) breakpoint
-                {
-                    var script = scripts[0];
-                    var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
-
-                    Trace.sysout("breakpointPanel.refresh; enumerateBreakpoints for script=" +
-                        script.tag + (analyzer ? " has analyzer" : " no analyzer") +
-                        " in context " + context.getName());
-
-                    if (analyzer)
-                        name = analyzer.getFunctionDescription(script, context).name;
-                    else
-                        name = StackFrame.guessFunctionName(url, 1, context);
-
-                    isFuture = false;
-                }
-                else
-                {
-                    Trace.sysout("breakpointPanel.refresh; enumerateBreakpoints future " +
-                        "for url@line=" + url + "@" + line);
-
-                    var compilationUnit = context.compilationUnits[url];
-                    name = StackFrame.guessFunctionName(url, line, compilationUnit.sourceFile);
-
-                    isFuture = true;
-                }
-
-                var source = context.sourceCache.getLine(url, line);
-                breakpoints.push(new Breakpoint(name, url, line, !props.disabled,
-                    source, isFuture));
-            }});
-
-            BreakpointStore.enumerateErrorBreakpoints(url, {call: function(url, line, props)
+            // xxxHonza
+            /*BreakpointStore.enumerateErrorBreakpoints(url, {call: function(url, line, props)
             {
                 // some url in this sourceFileMap has changed, we'll be back.
                 if (renamer.checkForRename(url, line, props))
@@ -242,31 +211,20 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
                 var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
                 monitors.push(new Breakpoint(name, url, line, true, ""));
-            }});
+            }});*/
         }
 
-        var result = null;
-
-        if (renamer.needToRename(context))
-        {
-            // since we renamed some sourceFiles we need to refresh the breakpoints again.
-            result = this.extractBreakpoints(context);
-        }
-        else
-        {
-            result = {
-                breakpoints: breakpoints,
-                errorBreakpoints: errorBreakpoints,
-                monitors: monitors
-            };
-        }
-
-        // even if we did not rename, some bp may be dynamic
-        Trace.sysout("breakpointPanel.extractBreakpoints; context.dynamicURLhasBP: " +
-            context.dynamicURLhasBP, result);
+        var result = {
+            breakpoints: breakpoints,
+            errorBreakpoints: errorBreakpoints,
+            monitors: monitors
+        };
 
         return result;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
 
     getOptionsMenuItems: function()
     {
@@ -312,10 +270,16 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         return items;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
     getContextMenuItems: function(object, target, context)
     {
         return this.getOptionsMenuItems();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Commands
 
     enableAllBreakpoints: function(context, status)
     {
@@ -373,6 +337,16 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     onBreakpointRemoved: function(bp)
+    {
+        this.refresh();
+    },
+
+    onBreakpointEnabled: function(bp)
+    {
+        this.refresh();
+    },
+
+    onBreakpointDisabled: function(bp)
     {
         this.refresh();
     },

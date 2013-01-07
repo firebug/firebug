@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/breakpoint/breakpoint",
 ],
-function(FBTrace, Firebug, Obj, DebuggerClientModule) {
+function(FBTrace, Firebug, Obj, DebuggerClientModule, Breakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -75,6 +76,13 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // Could we optimize this somehow?
         var bps = this.getBreakpoints();
 
+        // Filter out disabled breakpoints. These won't be set on the server side
+        // (unless the user enables them later).
+        bps = bps.filter(function(bp, index, array)
+        {
+            return bp.isEnabled();
+        });
+
         Trace.sysout("breakpointStore.onThreadAttached; Initialize server " +
             "side breakpoints", bps);
 
@@ -108,6 +116,15 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             bps = bps.filter(function(element, index, array)
             {
                 return (element.type != BP_UNTIL);
+            });
+
+            // Convert to Breakpoint type
+            bps = bps.map(function(bp)
+            {
+                var breakpoint = new Breakpoint();
+                for (var p in bp)
+                    breakpoint[p] = bp[p];
+                return breakpoint;
             });
 
             this.breakpoints[url] = bps;
@@ -161,17 +178,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!this.breakpoints[url])
             this.breakpoints[url] = [];
 
-        // xxxHonza: we should probably use instance of Breakpoint object.
-        var bp = {
-            href: url,
-            lineNo: lineNo,
-            type: BP_NORMAL,
-            disabled: false,
-            hitCount: -1,
-            hit: 0,
-            params: {},
-        };
-
+        var bp = new Breakpoint(url, lineNo, false);
         this.breakpoints[url].push(bp);
         this.save(url);
 
@@ -218,7 +225,6 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         if (!bps)
             return null;
 
-        // xxxHonza: Objects in the store are not instances of Breakpoint object.
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
@@ -227,6 +233,32 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         }
 
         return null;
+    },
+
+    enableBreakpoint: function(url, lineNo)
+    {
+        var bp = this.findBreakpoint(url, lineNo);
+        if (!bp || !bp.disabled)
+            return;
+
+        bp.disabled = false;
+
+        this.save(url);
+
+        this.dispatch("onBreakpointEnabled", [bp]);
+    },
+
+    disableBreakpoint: function(url, lineNo)
+    {
+        var bp = this.findBreakpoint(url, lineNo);
+        if (!bp || bp.disabled)
+            return;
+
+        bp.disabled = true;
+
+        this.save(url);
+
+        this.dispatch("onBreakpointDisabled", [bp]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -268,7 +300,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                     var bp = urlBreakpoints[i];
                     if (bp.type & BP_NORMAL && !(bp.type & BP_ERROR))
                     {
-                        var rc = cb.call.apply(bp, [url, bp.lineNo, bp]);
+                        var rc = cb(bp);
                         if (rc)
                             return [bp];
                     }

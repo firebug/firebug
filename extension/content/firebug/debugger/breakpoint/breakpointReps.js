@@ -93,22 +93,31 @@ Firebug.JSD2.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
 Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
+    inspectable: false,
+
     tag:
         DIV({"class": "breakpointRow focusRow", $disabled: "$bp|isDisabled", role: "option",
-                "aria-checked": "$bp.checked", _repObject: "$bp", onclick: "$onClick"},
+                "aria-checked": "$bp|isEnabled", _repObject: "$bp", onclick: "$onClick"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp|isEnabled", tabindex : '-1'}),
-                SPAN({"class": "breakpointName"}, "$bp.name"),
+                SPAN({"class": "breakpointName"}, "$bp|getName"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
                 IMG({"class": "closeButton", src: "blank.gif"})
             ),
-            DIV({"class": "breakpointCode"}, "$bp.sourceLine")
+            DIV({"class": "breakpointCode"}, "$bp|getSourceLink")
         ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getName: function(bp)
+    {
+        return bp.getName();
+    },
 
     getSourceLink: function(bp)
     {
-        return new SourceLink.SourceLink(bp.href, bp.lineNumber, "js");
+        return new SourceLink.SourceLink(bp.href, bp.lineNo, "js");
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)
@@ -118,8 +127,6 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         if (groupName == "breakpoints")
         {
             BreakpointStore.removeBreakpoint(href, lineNumber);
-
-            //FBS.clearBreakpoint(href, lineNumber);
         }
         else if (groupName == "errorBreakpoints")
         {
@@ -133,12 +140,12 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     enableBreakpoint: function(href, lineNumber)
     {
-        //FBS.enableBreakpoint(href, lineNumber);
+        BreakpointStore.enableBreakpoint(href, lineNumber);
     },
 
     disableBreakpoint: function(href, lineNumber)
     {
-        //FBS.disableBreakpoint(href, lineNumber);
+        BreakpointStore.disableBreakpoint(href, lineNumber);
     },
 
     isEnabled: function(bp)
@@ -160,18 +167,18 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             label: "breakpoints.Remove_Breakpoint",
             tooltiptext: "breakpoints.tip.Remove_Breakpoint",
             command: Obj.bindFixed(this.removeBreakpoint, this, groupName,
-                breakpoint.href, breakpoint.lineNumber)
+                breakpoint.href, breakpoint.lineNo)
         }];
 
         if (groupName == "breakpoints")
         {
-            if (breakpoint.checked)
+            if (!breakpoint.disabled)
             {
                 items.push({
                     label: "breakpoints.Disable_Breakpoint",
                     tooltiptext: "breakpoints.tip.Disable_Breakpoint",
                     command: Obj.bindFixed(this.disableBreakpoint, this, breakpoint.href,
-                        breakpoint.lineNumber)
+                        breakpoint.lineNo)
                 });
             }
             else
@@ -180,7 +187,7 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                     label: "breakpoints.Enable_Breakpoint",
                     tooltiptext: "breakpoints.tip.Enable_Breakpoint",
                     command: Obj.bindFixed(this.enableBreakpoint, this, breakpoint.href,
-                        breakpoint.lineNumber)
+                        breakpoint.lineNo)
                 });
             }
         }
@@ -193,59 +200,62 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    inspectable: false,
+    // Reps
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Breakpoint);  // FIXME moz back end
+        return (object instanceof Breakpoint);
     },
 
     onClick: function(event)
     {
         var panel = Firebug.getElementPanel(event.target);
+        var row = Dom.getAncestorByClass(event.target, "breakpointRow");
+        var bp = row.repObject;
 
-        if (Dom.getAncestorByClass(event.target, "breakpointCheckbox"))
+        this.disablePanelRefresh(panel, function()
         {
-            var node = event.target.parentNode.getElementsByClassName(
-                "objectLink-sourceLink").item(0);
-
-            if (!node)
-                return;
-
-            var sourceLink = node.repObject;
-
-            panel.noRefresh = true;
-            var checkBox = event.target;
-            var bpRow = Dom.getAncestorByClass(checkBox, "breakpointRow");
-
-            if (checkBox.checked)
+            if (Dom.getAncestorByClass(event.target, "breakpointCheckbox"))
             {
-                this.enableBreakpoint(sourceLink.href, sourceLink.line);
-                bpRow.setAttribute("aria-checked", "true");
+                var checkBox = event.target;
+                if (checkBox.checked)
+                {
+                    this.enableBreakpoint(bp.href, bp.lineNo);
+                    row.setAttribute("aria-checked", "true");
+                }
+                else
+                {
+                    this.disableBreakpoint(bp.href, bp.lineNo);
+                    row.setAttribute("aria-checked", "false");
+                }
             }
-            else
+            else if (Dom.getAncestorByClass(event.target, "closeButton"))
             {
-                this.disableBreakpoint(sourceLink.href, sourceLink.line);
-                bpRow.setAttribute("aria-checked", "false");
+                var head = Dom.getAncestorByClass(event.target, "breakpointBlock");
+                var groupName = Css.getClassValue(head, "breakpointBlock");
+                this.removeBreakpoint(groupName, bp.href, bp.lineNo);
             }
-            panel.noRefresh = false;
-        }
-        else if (Dom.getAncestorByClass(event.target, "closeButton"))
-        {
-            panel.noRefresh = true;
-            var sourceLink = event.target.parentNode.getElementsByClassName(
-                "objectLink-sourceLink").item(0).repObject;
-
-            var head = Dom.getAncestorByClass(event.target, "breakpointBlock");
-            var groupName = Css.getClassValue(head, "breakpointBlock");
-
-            this.removeBreakpoint(groupName, sourceLink.href, sourceLink.line);
-
-            panel.noRefresh = false;
-        }
+        });
 
         panel.refresh();
+    },
+
+    disablePanelRefresh: function(panel, callback)
+    {
+        try
+        {
+            panel.noRefresh = true;
+
+            callback.bind(this)();
+        }
+        catch (e)
+        {
+            TraceError.sysout("breakpointReps.doNotRefreshPanel; EXCEPTION " + e, e);
+        }
+        finally
+        {
+            panel.noRefresh = false;
+        }
     }
 })};
 

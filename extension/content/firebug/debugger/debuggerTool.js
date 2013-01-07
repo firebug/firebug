@@ -7,6 +7,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/array",
     "firebug/lib/tool",
     "arch/compilationunit",
     "firebug/debugger/stack/stackFrame",
@@ -17,7 +18,7 @@ define([
     "firebug/trace/traceListener",
     "firebug/debugger/script/sourceFile",
 ],
-function (Obj, Firebug, FBTrace, Tool, CompilationUnit, StackFrame, StackTrace,
+function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
     DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile) {
 
 // ********************************************************************************************* //
@@ -366,12 +367,18 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // We need to get the breakpoint client object for this context. The client.
         // knowns how to remove the breakpoint on the server side.
-        var client = this.removeBreakpointClient(context, url, lineNumber);
-        if (client)
-            client.remove(callback);
+        var client = this.getBreakpointClient(context, url, lineNumber);
+        if (!client)
+            return;
+
+        // Remove the bp from the back-end.
+        client.remove(callback);
+
+        // Remove the bp client from context.
+        Arr.remove(context.breakpointClients, client);
     },
 
-    removeBreakpointClient: function(context, url, lineNumber)
+    getBreakpointClient: function(context, url, lineNumber)
     {
         var clients = context.breakpointClients;
         if (!clients)
@@ -382,21 +389,18 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             var client = clients[i];
             var loc = client.location;
             if (loc.url == url && loc.line == lineNumber)
-            {
-                clients.splice(i, 1);
                 return client;
-            }
         }
     },
 
-    enableBreakpoint: function(context, url, lineNumber)
+    enableBreakpoint: function(context, url, lineNumber, callback)
     {
-        //JSDebugger.fbs.enableBreakpoint(url, lineNumber);
+        this.setBreakpoint(context, url, lineNumber, callback);
     },
 
-    disableBreakpoint: function(context, url, lineNumber)
+    disableBreakpoint: function(context, url, lineNumber, callback)
     {
-        //JSDebugger.fbs.disableBreakpoint(url, lineNumber);
+        this.removeBreakpoint(context, url, lineNumber, callback);
     },
 
     isBreakpointDisabled: function(context, url, lineNumber)
