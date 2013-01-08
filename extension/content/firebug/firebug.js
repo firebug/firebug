@@ -2522,7 +2522,7 @@ Firebug.Rep = domplate(
         if (object.constructor && typeof(object.constructor) == 'function')
         {
             var ctorName = object.constructor.name;
-            if (ctorName && ctorName != "Object")
+            if (ctorName)
                 return ctorName;
         }
 
