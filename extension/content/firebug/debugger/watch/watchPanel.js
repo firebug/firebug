@@ -194,7 +194,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Asynchronously eval all user-expressions, but make sure it isn't
         // already in-progress (to avoid recursion).
-        if (this.evalCallback == null)
+        if (!this.context.userExpressionsEval)
             this.evalWatches();
     },
 
@@ -352,7 +352,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Set callback so, we can execute it when 'clientEvaluated' packet
         // is received (see 'onStartDebugging' method).
-        this.evalCallback = this.onEvalWatches;
+        this.context.userExpressionsEval = true;
 
         // Eval through the debuggerTool.
         this.tool.eval(this.context, this.context.currentFrame, expression);
@@ -413,8 +413,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("watchPanel.onStartDebugging; " + type);
 
         // Resolve evaluated expression (if there is one in progress).
-        if (type == "clientEvaluated" && this.evalCallback)
+        if (type == "clientEvaluated" && this.context.userExpressionsEval)
         {
+            this.context.userExpressionsEval = false;
+
             // Pause packet with 'clientEvaluated' type is sent when user expression
             // has been evaluated on the server side. Let's pass the result to the
             // registered callback.
@@ -424,8 +426,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             if (typeof(result) == "undefined")
                 result = packet.why.frameFinished["throw"];
 
-            this.evalCallback(result);
-            this.evalCallback = null
+            this.onEvalWatches(result);
         }
     },
 

@@ -195,7 +195,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     paused: function(context, event, packet)
     {
         var type = packet.why.type;
-        Trace.sysout("debuggerTool.paused; " + type, packet);
+        Trace.sysout("debuggerTool.paused; " + type + " (bp-cond: " +
+            context.conditionalBreakpointEval + ", user-exp: " +
+            context.userExpressionsEval + ")", packet);
 
         var ignoreTypes = {
             "interrupted": 1,
@@ -206,10 +208,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         context.gripCache.clear();
 
-        // Asynchronously initializes ThreadClient's stack frame cache. If you want to
-        // sync with the cache handle 'framesadded' and 'framescleared' events.
-        context.activeThread.fillFrames(50);
-
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
         // context.currentFrame: the frame we show to user, depends on selection.
@@ -218,9 +216,15 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.currentFrame = frame;
         context.stopped = true;
 
-        // Apply breakpoint condition logic.
+        // Apply breakpoint condition logic. If a breakpoint-condition evaluation
+        // result is false, the debugger is immediatelly resumed.
         if (!this.checkBreakpointCondition(context, event, packet))
             return;
+
+        // Asynchronously initializes ThreadClient's stack frame cache. If you want to
+        // sync with the cache handle 'framesadded' and 'framescleared' events.
+        // This is done after we know that the debugger is going to pause now.
+        context.activeThread.fillFrames(50);
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);
@@ -240,6 +244,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +
                     bp.condition, bp);
 
+                // xxxHonza: the condition-eval could be done server-side
+                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
                 this.eval(context, context.currentFrame, bp.condition);
                 context.conditionalBreakpointEval = true;
                 return false;
@@ -257,7 +263,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 result, result);
 
             // Resume debugger if the breakpoint condition evaluation is false
-            if (this.isFalse({value: packet.why.frameFinished["return"]}))
+            if (!result || this.isFalse({value: result}))
             {
                 this.resume(context);
                 return false;
