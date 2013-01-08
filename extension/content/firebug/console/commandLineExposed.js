@@ -269,7 +269,7 @@ function createFirebugCommandLine(context, win)
                 eventID + " with " + objs.length + " user objects", commandLine.userObjects);
         }
 
-        var result = null;
+        var result = undefined;
         if (Dom.getMappedData(contentView.document, "firebug-retValueType") === "array")
             result = [];
 
