@@ -2522,6 +2522,8 @@ Firebug.Rep = domplate(
         if (object.constructor && typeof(object.constructor) == 'function')
         {
             var ctorName = object.constructor.name;
+            // xxxsz: Objects with 'Object' as constructor name should also be shown.
+            // See issue 6148.
             if (ctorName)
                 return ctorName;
         }
