@@ -363,6 +363,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         breakpoints.push.apply(breakpoints, bps);
     },
 
+    openBreakpointConditionEditor: function(lineIndex, event)
+    {
+        Trace.sysout("scriptPanel.openBreakpointConditionEditor; Line: " + lineIndex);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // BreakpointStore Listener
 

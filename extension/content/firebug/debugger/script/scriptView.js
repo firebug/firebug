@@ -7,9 +7,11 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/dom",
+    "firebug/lib/css",
+    "firebug/lib/events",
     "firebug/chrome/menu",
 ],
-function (FBTrace, Obj, Dom, Menu) {
+function (FBTrace, Obj, Dom, Css, Events, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -94,6 +96,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // Hook annotation and lines ruler clicks
         this.editor._annotationRuler.onClick = this.annotationRulerClick.bind(this);
         this.editor._linesRuler.onClick = this.linesRulerClick.bind(this);
+
+        // Hook view body mouse up (for breakpoint condition editor).
+        this.editor._view._handleBodyMouseUp = this.bodyMouseUp.bind(this);
 
         // Focus so, keyboard works as expected.
         this.editor.focus();
@@ -390,8 +395,37 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
 
-        // Clicking on a line number also toggls breakpoint.
+        // Clicking on a line number also toggles breakpoint.
         this.editor._annotationRulerClick.call(this.editor, lineIndex, event);
+    },
+
+    bodyMouseUp: function(event)
+    {
+        // We are only interested in right-click events on a breakpoint 
+        // (to show the breakpoint condition editor)
+        var target = event.target;
+        if (!Css.hasClass(target, "breakpoint"))
+            return;
+
+        if (!Events.isRightClick(event))
+            return;
+
+        // Compute the clicked line index (see _handleRulerEvent in orion.js).
+        var target = event.target;
+        var lineIndex = target.lineIndex;
+        var element = target;
+
+        while (element && !element._ruler)
+        {
+            if (lineIndex === undefined && element.lineIndex !== undefined)
+                lineIndex = element.lineIndex;
+            element = element.parentNode;
+        }
+
+        Trace.sysout("scriptView.breakpointMouseUp; " + lineIndex, event);
+
+        // The condittion editor for breakpoints should be opened now.
+        this.dispatch("openBreakpointConditionEditor", [lineIndex, event]);
     },
 });
 
