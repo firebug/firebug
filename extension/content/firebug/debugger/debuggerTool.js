@@ -17,9 +17,11 @@ define([
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
     "firebug/debugger/script/sourceFile",
+    "firebug/debugger/breakpoint/breakpointStore",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile) {
+    DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile,
+    BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -204,22 +206,66 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         context.gripCache.clear();
 
-        context.stopped = true;
-
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
         context.activeThread.fillFrames(50);
 
+        // Create stack of frames and initialize context.
+        // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
+        // context.currentFrame: the frame we show to user, depends on selection.
         var frame = StackFrame.buildStackFrame(packet.frame, context);
-
-        // the frame we stopped in, don't change this elsewhere.
         context.stoppedFrame = frame;
-
-        // the frame we show to user, depends on selection
         context.currentFrame = frame;
+        context.stopped = true;
+
+        // Apply breakpoint condition logic.
+        if (!this.checkBreakpointCondition(context, event, packet))
+            return;
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);
+    },
+
+    checkBreakpointCondition: function(context, event, packet)
+    {
+        var type = packet.why.type;
+
+        // If paused by a breakpoint, evaluate optional condition expression.
+        if (type == "breakpoint")
+        {
+            var location = packet.frame.where;
+            var bp = BreakpointStore.findBreakpoint(location.url, location.line);
+            if (bp && bp.condition)
+            {
+                Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +
+                    bp.condition, bp);
+
+                this.eval(context, context.currentFrame, bp.condition);
+                context.conditionalBreakpointEval = true;
+                return false;
+            }
+        }
+
+        // Resolve evaluated breakpoint condition expression (if there is one in progress).
+        if (type == "clientEvaluated" && context.conditionalBreakpointEval)
+        {
+            context.conditionalBreakpointEval = false;
+
+            var result = packet.why.frameFinished["return"];
+
+            Trace.sysout("debuggerTool.paused; Breakpoint condition evaluated: " +
+                result, result);
+
+            // Resume debugger if the breakpoint condition evaluation is false
+            if (this.isFalse({value: packet.why.frameFinished["return"]}))
+            {
+                this.resume(context);
+                return false;
+            }
+        }
+
+        // Continue with pause
+        return true;
     },
 
     resumed: function(context, event, packet)
@@ -471,6 +517,27 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             // when 'pause' packet is received, see paused() method.
         });
     },
+
+    // xxxHonza: used to get boolean result of evaluated breakpoint condition
+    // should be somewhere is an API library so, we can share it. 
+    isFalse: function(descriptor)
+    {
+        if (!descriptor || typeof(descriptor) != "object")
+            return true;
+
+        // As described in the remote debugger protocol, the value grip
+        // must be contained in a 'value' property.
+        var grip = descriptor.value;
+        if (typeof(grip) != "object")
+            return !grip;
+
+        // For convenience, undefined and null are both considered types.
+        var type = grip.type;
+        if (type == "undefined" || type == "null")
+            return true;
+
+        return false;
+    }
 });
 
 // ********************************************************************************************* //

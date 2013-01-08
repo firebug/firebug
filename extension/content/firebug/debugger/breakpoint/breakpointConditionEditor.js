@@ -53,7 +53,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
         this.getAutoCompleter().reset();
 
         Dom.hide(this.box, true);
-        panel.selectedSourceBox.appendChild(this.box);
+        panel.panelNode.appendChild(this.box);
 
         this.input.value = value;
 
@@ -61,9 +61,9 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
         {
             var offset = Dom.getClientOffset(sourceLine);
 
-            var bottom = offset.y+sourceLine.offsetHeight;
+            var bottom = offset.y + sourceLine.offsetHeight;
             var y = bottom - this.box.offsetHeight;
-            if (y < panel.selectedSourceBox.scrollTop)
+            if (y < panel.scrollTop)
             {
                 y = offset.y;
                 Css.setClass(this.box, "upsideDown");
@@ -98,13 +98,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
     endEditing: function(target, value, cancel)
     {
         if (!cancel)
-        {
-            var compilationUnit = this.panel.location;
-            var lineNo = parseInt(this.target.textContent);
-            // TODO rest is mozilla backend
-            var sourceFile = compilationUnit.sourceFile;
-            FBS.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
-        }
+            this.callback(this.breakpoint, value);
     },
 });
 

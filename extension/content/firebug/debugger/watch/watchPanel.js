@@ -420,7 +420,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             // registered callback.
             var result = packet.why.frameFinished["return"];
 
-            // xxxHonza: temporary
+            // xxxHonza: properly deal with exceptions
             if (typeof(result) == "undefined")
                 result = packet.why.frameFinished["throw"];
 

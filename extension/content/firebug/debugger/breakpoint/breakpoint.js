@@ -15,6 +15,7 @@ function Breakpoint(href, lineNumber, disabled)
     this.disabled = disabled;
     this.hitCount = -1;
     this.hit = 0;
+    this.condition = null;
 
     // Transient parameters (not serialized into breakpoints.json)
     this.params = {};
@@ -22,6 +23,9 @@ function Breakpoint(href, lineNumber, disabled)
 
 Breakpoint.prototype =
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Transient Members
+
     getName: function()
     {
         return this.params.name;

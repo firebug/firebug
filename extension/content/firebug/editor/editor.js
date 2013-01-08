@@ -57,14 +57,14 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             currentEditor.setSelection(selectionData);
     },
 
-    startEditing: function(target, value, editor, selectionData)
+    startEditing: function(target, value, editor, selectionData, panel)
     {
         this.stopEditing();
 
         if (Css.hasClass(target, "insertBefore") || Css.hasClass(target, "insertAfter"))
             return;
 
-        var panel = Firebug.getElementPanel(target);
+        panel = panel ? panel : Firebug.getElementPanel(target);
         if (!panel.editable)
             return;
 

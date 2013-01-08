@@ -8,7 +8,6 @@ define([
     "firebug/lib/array",
     "firebug/debugger/script/scriptView",
     "arch/compilationunit",
-    "firebug/debugger/debuggerTool",
     "firebug/chrome/menu",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
@@ -16,9 +15,11 @@ define([
     "firebug/debugger/breakpoint/breakpointStore",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
+    "firebug/debugger/breakpoint/breakpointConditionEditor",
 ],
-function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, DebuggerTool, Menu,
-    StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener) {
+function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, Menu,
+    StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener,
+    BreakpointConditionEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -366,6 +367,48 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     openBreakpointConditionEditor: function(lineIndex, event)
     {
         Trace.sysout("scriptPanel.openBreakpointConditionEditor; Line: " + lineIndex);
+
+        this.editBreakpointCondition(lineIndex, event);
+        Events.cancelEvent(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Conditional Breakpoints
+
+    editBreakpointCondition: function(lineNo, event)
+    {
+        var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo + 1);
+        var condition = bp.condition;
+
+        // xxxHonza: displaying BP conditions in the Watch panel is not supported yet.
+        /*if (condition)
+        {
+            var watchPanel = this.context.getPanel("watches", true);
+            watchPanel.removeWatch(condition);
+            watchPanel.rebuild();
+        }*/
+
+        // Reference to the edited breakpoint.
+        var editor = this.getEditor();
+        editor.breakpoint = bp;
+
+        Firebug.Editor.startEditing(event.target, condition, null, null, this);
+    },
+
+    onSetBreakpointCondition: function(bp, value)
+    {
+        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
+    },
+
+    getEditor: function(target, value)
+    {
+        if (!this.conditionEditor)
+        {
+            this.conditionEditor = new BreakpointConditionEditor(this.document);
+            this.conditionEditor.callback = this.onSetBreakpointCondition.bind(this);
+        }
+
+        return this.conditionEditor;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -601,17 +644,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         return items;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Editors
-
-    getEditor: function(target, value)
-    {
-        if (!this.conditionEditor)
-            this.conditionEditor = new Firebug.Breakpoint.ConditionEditor(this.document);
-
-        return this.conditionEditor;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

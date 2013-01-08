@@ -43,14 +43,25 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        DebuggerClientModule.addListener(this);
-
         // Restore breakpoints from a file. This should be done only if it's necessary
         // (i.e. when the Debugger tool is actually activated.
         this.storage = StorageService.getStorage("breakpoints.json");
         this.restore();
 
-        Trace.sysout("breakpointStore.initialize; ", this.breakpoints);
+        Trace.sysout("breakpointStore.initializeUI; ", this.breakpoints);
+    },
+
+    initializeUI: function()
+    {
+        Firebug.Module.initializeUI.apply(this, arguments);
+
+        // BreakpointStore object must be registered as a {@DebuggerClientModule} listener
+        // after {@DebuggerTool} otherwise breakpoint initialization doesn't work
+        // (it would be done before requesting scripts).
+        // This is why we do it here, in initializeUI.
+        // xxxHonza: is there any other way how to ensure that DebuggerTool listener
+        // is registered first?
+        DebuggerClientModule.addListener(this);
     },
 
     shutdown: function()
@@ -91,7 +102,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // panels can also deal with breakpoints (BON) and so, a panel doesn't seem to be
         // the right center place, where the perform the initialization.
         var tool = context.getTool("debugger");
-        tool.setBreakpoints(context, bps, function()
+        tool.setBreakpoints(context, bps, function(response, bpClient)
         {
             // TODO: any async UI update or logging here?
         });
@@ -259,6 +270,19 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.save(url);
 
         this.dispatch("onBreakpointDisabled", [bp]);
+    },
+
+    setBreakpointCondition: function(url, lineNo, condition)
+    {
+        var bp = this.findBreakpoint(url, lineNo);
+        if (!bp)
+            return;
+
+        bp.condition = condition;
+
+        this.save(url);
+
+        this.dispatch("onBreakpointModified", [bp]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
