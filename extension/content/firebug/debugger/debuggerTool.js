@@ -197,7 +197,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         var type = packet.why.type;
         Trace.sysout("debuggerTool.paused; " + type + " (bp-cond: " +
             context.conditionalBreakpointEval + ", user-exp: " +
-            context.userExpressionsEval + ")", packet);
+            context.userExpressionsEval + ") " + packet.frame.where.url +
+            " (" + packet.frame.where.line + ")", packet);
 
         var ignoreTypes = {
             "interrupted": 1,
@@ -207,6 +208,17 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             return;
 
         context.gripCache.clear();
+
+        // Avoid double-break at the same line (e.g. breakpoint + step-over)
+        if (context.lastDebuggerLocation &&
+            context.lastDebuggerLocation.url == packet.frame.where.url &&
+            context.lastDebuggerLocation.line == packet.frame.where.line)
+        {
+            Trace.sysout("debuggerTool.Resume pause since it happens at the same location: " +
+                packet.frame.where.url + " (" + packet.frame.where.line + ")");
+            this.stepOver(context);
+            return;
+        }
 
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
@@ -221,6 +233,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // result is false, the debugger is immediatelly resumed.
         if (!this.checkBreakpointCondition(context, event, packet))
             return;
+
+        context.lastDebuggerLocation = packet.frame.where;
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
