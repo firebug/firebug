@@ -350,9 +350,21 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         expression = "[" + expression.join(",") + "]";
 
-        // Set callback so, we can execute it when 'clientEvaluated' packet
+        // Set flag so, we can get the eval-result when 'clientEvaluated' packet
         // is received (see 'onStartDebugging' method).
-        this.context.userExpressionsEval = true;
+        // Also remember the current pause actor since 'onStartDebugging' can be executed
+        // yet in this pause, and if the current packet type is 'clientEvaluated'
+        // (e.g. bp condition evaluated to true) it would be reused in onEvalWatches.
+        //
+        // It's important to understand the order of steps (all happens in the same pause):
+        // ThreadClient.onPacket - 'clientEvaluated' received (BP condition eval result)
+        // DebuggerTool.paused -> fire 'onStartDebugging' events
+        // ScriptPanel.onStartDebugging -> chrome.select(currentFrame)
+        // WatchPanel.updateSelection -> evalWatches
+        // WatchPanel.onStartDebugging -> onEvalWatches - We must not reuse the current packet
+        //     it belongs to the bp condition evaluation. We need to wait for the next one.
+        // xxxHonza: the architecture should make the whole problem somehow easier.
+        this.context.userExpressionsEval = this.context.currentPauseActor;
 
         // Eval through the debuggerTool.
         this.tool.eval(this.context, this.context.currentFrame, expression);
@@ -410,12 +422,15 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         var type = packet.why.type;
 
-        Trace.sysout("watchPanel.onStartDebugging; " + type);
+        Trace.sysout("watchPanel.onStartDebugging; " + type + ", user-expr: " +
+            context.userExpressionsEval);
 
         // Resolve evaluated expression (if there is one in progress).
-        if (type == "clientEvaluated" && this.context.userExpressionsEval)
+        var actor = this.context.currentPauseActor;
+        if (type == "clientEvaluated" && context.userExpressionsEval &&
+            context.userExpressionsEval != actor)
         {
-            this.context.userExpressionsEval = false;
+            context.userExpressionsEval = false;
 
             // Pause packet with 'clientEvaluated' type is sent when user expression
             // has been evaluated on the server side. Let's pass the result to the

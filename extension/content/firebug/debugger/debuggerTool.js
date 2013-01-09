@@ -215,6 +215,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.stoppedFrame = frame;
         context.currentFrame = frame;
         context.stopped = true;
+        context.currentPauseActor = packet.actor;
 
         // Apply breakpoint condition logic. If a breakpoint-condition evaluation
         // result is false, the debugger is immediatelly resumed.
