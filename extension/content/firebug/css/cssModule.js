@@ -520,6 +520,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             // XXX: Maybe we should restrict ourselves to just
             // document.head, non-recursively?
             var observer = new MutationObserver(cleaners.handler);
+            cleaners.observers.set(win, observer);
             observer.observe(win.document, {
                 childList: true,
                 attributes: true,
@@ -535,6 +536,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
         if (cleaners && cleaners.observers.has(win))
         {
             var observer = cleaners.observers.get(win);
+            cleaners.observers.delete(win);
             observer.disconnect();
         }
     },
