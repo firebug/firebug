@@ -1143,50 +1143,53 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     onMutationObserve: function(records)
     {
-        this.context.delay(function()
+        for (var ri = 0; ri < records.length; ++ri)
         {
-            records.forEach(function(record)
-            {
-                var target = record.target;
-                if (Firebug.shouldIgnore(target))
-                    return;
+            var record = records[ri];
 
-                var type = record.type;
-                if (type === "attributes")
+            var target = record.target;
+            if (Firebug.shouldIgnore(target))
+                continue;
+
+            var type = record.type;
+            if (type === "attributes")
+            {
+                var attrName = record.attributeName;
+                var newValue = target.getAttribute(attrName);
+                var removal = (newValue === null);
+                this.context.throttle(this.mutateAttr, this,
+                    [target, attrName, newValue, removal]);
+            }
+            else if (type === "childList")
+            {
+                var added = record.addedNodes, removed = record.removedNodes;
+                if (added.length)
                 {
-                    var attrName = record.attributeName;
-                    var newValue = target.getAttribute(attrName);
-                    var removal = (newValue === null);
-                    this.mutateAttr(target, attrName, newValue, removal);
-                }
-                else if (type === "childList")
-                {
-                    var added = record.addedNodes, removed = record.removedNodes;
-                    if (added.length)
+                    var nextSibling = HTMLLib.findNextNodeFrom(record.nextSibling);
+                    for (var i = 0; i < added.length; ++i)
                     {
-                        var nextSibling = HTMLLib.findNextNodeFrom(record.nextSibling);
-                        for (var i = 0; i < added.length; ++i)
-                        {
-                            var node = added[i];
-                            if (Firebug.shouldIgnore(node))
-                                continue;
-                            this.mutateNode(node, target, nextSibling, false);
-                        }
-                    }
-                    for (var i = 0; i < removed.length; ++i)
-                    {
-                        var node = removed[i];
+                        var node = added[i];
                         if (Firebug.shouldIgnore(node))
                             continue;
-                        this.mutateNode(node, target, null, true);
+                        this.context.throttle(this.mutateNode, this,
+                            [node, target, nextSibling, false]);
                     }
                 }
-                else if (type === "characterData")
+                for (var i = 0; i < removed.length; ++i)
                 {
-                    this.mutateText(target, target.parentNode, target.data);
+                    var node = removed[i];
+                    if (Firebug.shouldIgnore(node))
+                        continue;
+                    this.context.throttle(this.mutateNode, this,
+                        [node, target, null, true]);
                 }
-            }.bind(this));
-        }, this);
+            }
+            else if (type === "characterData")
+            {
+                this.context.throttle(this.mutateText, this,
+                    [target, target.parentNode, target.data]);
+            }
+        }
     },
 
     onMutateAttr: function(event)
