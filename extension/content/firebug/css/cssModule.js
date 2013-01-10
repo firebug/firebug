@@ -273,13 +273,33 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
         return result;
     },
 
-    cleanupSheetHandler: function(event, context)
+    cleanupSheetHandler: function(context, records)
     {
-        var target = event.target;
-        var tagName = (target.tagName || "").toLowerCase();
+        var shouldHandle = false;
+        records.forEach(function(record)
+        {
+            if (record.type === "attributes")
+            {
+                if (record.target.tagName.toUpperCase() === "LINK")
+                    shouldHandle = true;
+            }
+            else
+            {
+                var nodes = record.addedNodes, len = nodes.length;
+                for (var i = 0; i < len; ++i)
+                {
+                    if (nodes[i].nodeType === 1 && // Node.ELEMENT_NODE
+                        nodes[i].tagName.toUpperCase() === "LINK")
+                    {
+                        shouldHandle = true;
+                        break;
+                    }
+                }
+            }
+        });
 
-        if (tagName == "link")
-            this.cleanupSheets(target.ownerDocument, context);
+        if (shouldHandle)
+            this.cleanupSheets(records[0].target.ownerDocument, context);
     },
 
     parseCSSValue: function(value, offset)
@@ -486,19 +506,39 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 
     watchWindow: function(context, win)
     {
-        if (!context.cleanupSheetListener)
-            context.cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
+        if (!context.sheetCleaners)
+        {
+            context.sheetCleaners = {
+                handler: this.cleanupSheetHandler.bind(this, context),
+                observers: new WeakMap()
+            };
+        }
 
-        context.addEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
-        context.addEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
+        var cleaners = context.sheetCleaners;
+        if (!cleaners.observers.has(win))
+        {
+            // XXXsimon: Maybe we should restrict ourselves to just
+            // document.head, non-recursively? It is probably possible to do
+            // this without mutation observers at all, too.
+            var observer = new MutationObserver(cleaners.handler);
+            cleaners.observers.set(win, observer);
+            observer.observe(win.document, {
+                childList: true,
+                attributes: true,
+                attributeFilter: ["disabled", "href", "media", "type", "rel"],
+                subtree: true
+            });
+        }
     },
 
     unwatchWindow: function(context, win)
     {
-        if (context.cleanupSheetListener)
+        var cleaners = context.sheetCleaners;
+        if (cleaners && cleaners.observers.has(win))
         {
-            context.removeEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
-            context.removeEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
+            var observer = cleaners.observers.get(win);
+            cleaners.observers.delete(win);
+            observer.disconnect();
         }
     },
 

@@ -750,12 +750,22 @@ var HTMLLib =
      */
     findNextSibling: function(node)
     {
+        return this.findNextNodeFrom(node.nextSibling);
+    },
+
+    /**
+     * Like findNextSibling, except it also allows returning the node itself.
+     */
+    findNextNodeFrom: function(node)
+    {
         if (Firebug.showTextNodesWithWhitespace)
-            return node.nextSibling;
+        {
+            return node;
+        }
         else
         {
             // only return a non-whitespace node
-            for (var child = node.nextSibling; child; child = child.nextSibling)
+            for (var child = node; child; child = child.nextSibling)
             {
                 if (!HTMLLib.isWhitespaceText(child))
                     return child;

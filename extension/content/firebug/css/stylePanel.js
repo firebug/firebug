@@ -305,7 +305,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             if (!dummyStyle)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
+                {
+                    FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL for clone " +
+                        "of " + element, dummyElement);
+                }
                 return;
             }
 
