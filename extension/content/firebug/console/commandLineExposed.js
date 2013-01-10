@@ -204,7 +204,7 @@ function createFirebugCommandLine(context, win)
             // create new error since properties of nsIXPCException are not modifiable
             var shouldModify = false, isXPCException = false;
             var fileName = exc.filename || exc.fileName;
-            var lineNumber = 0;
+            var lineNumber = null;
             if (fileName.lastIndexOf("chrome:", 0) === 0)
             {
                 if (fileName === Components.stack.filename)
@@ -269,7 +269,7 @@ function createFirebugCommandLine(context, win)
                 eventID + " with " + objs.length + " user objects", commandLine.userObjects);
         }
 
-        var result = null;
+        var result = undefined;
         if (Dom.getMappedData(contentView.document, "firebug-retValueType") === "array")
             result = [];
 

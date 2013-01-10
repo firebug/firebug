@@ -19,67 +19,67 @@ var Xml = {};
 
 Xml.getElementType = function(node)
 {
-    if (Xml.isElementXUL(node))
+    if (isElementXUL(node))
         return 'xul';
-    else if (Xml.isElementSVG(node))
+    else if (isElementSVG(node))
         return 'svg';
-    else if (Xml.isElementMathML(node))
+    else if (isElementMathML(node))
         return 'mathml';
-    else if (Xml.isElementXHTML(node))
+    else if (isElementXHTML(node))
         return 'xhtml';
-    else if (Xml.isElementHTML(node))
+    else if (isElementHTML(node))
         return 'html';
 };
 
 Xml.getElementSimpleType = function(node)
 {
-    if (Xml.isElementSVG(node))
+    if (isElementSVG(node))
         return 'svg';
-    else if (Xml.isElementMathML(node))
+    else if (isElementMathML(node))
         return 'mathml';
     else
         return 'html';
 };
 
-Xml.isElementHTML = function(node)
+var isElementHTML = Xml.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 };
 
-Xml.isElementXHTML = function(node)
+var isElementXHTML = Xml.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 };
 
-Xml.isElementMathML = function(node)
+var isElementMathML = Xml.isElementMathML = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
 };
 
-Xml.isElementSVG = function(node)
+var isElementSVG = Xml.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
 };
 
-Xml.isElementXUL = function(node)
+var isElementXUL = Xml.isElementXUL = function(node)
 {
     return node instanceof XULElement;
 };
 
-Xml.getNodeName = function(node)
+var getNodeName = Xml.getNodeName = function(node)
 {
     var name = node.nodeName;
-    return Xml.isElementHTML(node) ? name.toLowerCase() : name;
+    return isElementHTML(node) ? name.toLowerCase() : name;
 };
 
 Xml.getLocalName = function(node)
 {
     var name = node.localName;
-    return Xml.isElementHTML(node) ? name.toLowerCase() : name;
+    return isElementHTML(node) ? name.toLowerCase() : name;
 };
 
 // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
-Xml.selfClosingTags =
+var selfClosingTags = Xml.selfClosingTags =
 {
     "meta": 1,
     "link": 1,
@@ -94,12 +94,12 @@ Xml.selfClosingTags =
     "embed": 1
 };
 
-Xml.isSelfClosing = function(element)
+var isSelfClosing = Xml.isSelfClosing = function(element)
 {
-    if (Xml.isElementSVG(element) || Xml.isElementMathML(element))
+    if (isElementSVG(element) || isElementMathML(element))
         return true;
     var tag = element.localName.toLowerCase();
-    return (Xml.selfClosingTags.hasOwnProperty(tag));
+    return (selfClosingTags.hasOwnProperty(tag));
 };
 
 Xml.getElementHTML = function(element)
@@ -111,7 +111,7 @@ Xml.getElementHTML = function(element)
             if (Firebug.shouldIgnore(elt))
                 return;
 
-            var nodeName = Xml.getNodeName(elt);
+            var nodeName = getNodeName(elt);
             html.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -142,13 +142,13 @@ Xml.getElementHTML = function(element)
 
                 html.push('</', nodeName, '>');
             }
-            else if (Xml.isElementSVG(elt) || Xml.isElementMathML(elt))
+            else if (isElementSVG(elt) || isElementMathML(elt))
             {
                 html.push('/>');
             }
-            else if (Xml.isSelfClosing(elt))
+            else if (isSelfClosing(elt))
             {
-                html.push((Xml.isElementXHTML(elt))?'/>':'>');
+                html.push((isElementXHTML(elt))?'/>':'>');
             }
             else
             {
@@ -183,7 +183,7 @@ Xml.getElementXML = function(element)
             if (Firebug.shouldIgnore(elt))
                 return;
 
-            var nodeName = Xml.getNodeName(elt);
+            var nodeName = getNodeName(elt);
             xml.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -280,7 +280,7 @@ Xml.isXMLPrettyPrint = function(context, win)
 
 Xml.isVisible = function(elt)
 {
-    if (Xml.isElementXUL(elt))
+    if (isElementXUL(elt))
     {
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+
         // elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
@@ -289,10 +289,10 @@ Xml.isVisible = function(elt)
 
     try
     {
-        return (!Xml.isElementHTML(elt) && !Xml.isElementXHTML(elt)) ||
+        return (!isElementHTML(elt) && !isElementXHTML(elt)) ||
             elt.offsetWidth > 0 ||
             elt.offsetHeight > 0 ||
-            elt.localName in Xml.invisibleTags;
+            elt.localName in invisibleTags;
     }
     catch (err)
     {
@@ -303,7 +303,7 @@ Xml.isVisible = function(elt)
     return false;
 };
 
-Xml.invisibleTags =
+var invisibleTags = Xml.invisibleTags =
 {
     "HTML": 1,
     "HEAD": 1,

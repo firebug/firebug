@@ -195,7 +195,7 @@ function createFirebugConsole(context, win)
     console.timeEnd = function(name)
     {
         var time = new Date().getTime();
-        var diff = 0;
+        var diff = undefined;
 
         if (!this.timeCounters)
             return Console.getDefaultReturnValue(win);
