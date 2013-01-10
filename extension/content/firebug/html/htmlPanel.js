@@ -472,7 +472,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!context.registeredHTMLMutationObservers)
             return;
 
-        function addObserver(win)
+        function removeObserver(win)
         {
             var doc = win.document;
             var observer = context.registeredHTMLMutationObservers.get(doc);
@@ -484,9 +484,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         if (win)
-            addObserver(win);
+            removeObserver(win);
         else
-            Win.iterateWindows(context.window, addObserver);
+            Win.iterateWindows(context.window, removeObserver);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

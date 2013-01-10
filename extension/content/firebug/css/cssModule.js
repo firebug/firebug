@@ -517,8 +517,9 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
         var cleaners = context.sheetCleaners;
         if (!cleaners.observers.has(win))
         {
-            // XXX: Maybe we should restrict ourselves to just
-            // document.head, non-recursively?
+            // XXXsimon: Maybe we should restrict ourselves to just
+            // document.head, non-recursively? It is probably possible to do
+            // this without mutation observers at all, too.
             var observer = new MutationObserver(cleaners.handler);
             cleaners.observers.set(win, observer);
             observer.observe(win.document, {
