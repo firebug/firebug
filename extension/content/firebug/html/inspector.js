@@ -74,10 +74,12 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         if (!elementArr || !Arr.isArrayLike(elementArr))
         {
+            // Not everything that comes through here is wrapped - fix that.
+            elementArr = Wrapper.wrapObject(elementArr);
+
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
-                (Wrapper.getContentView(elementArr) &&
-                    !Xml.isVisible(Wrapper.getContentView(elementArr))))
+                (typeof elementArr === "object" && !Xml.isVisible(elementArr)))
             {
                 if (elementArr && Dom.isRange(elementArr))
                     elementArr = elementArr;
@@ -146,7 +148,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             {
                 for (i=0, elementLen=elementArr.length; i<elementLen; i++)
                 {
-                    elt = elementArr[i];
+                    // Like above, wrap things.
+                    elt = Wrapper.wrapObject(elementArr[i]);
 
                     if (elt && elt instanceof HTMLElement)
                     {

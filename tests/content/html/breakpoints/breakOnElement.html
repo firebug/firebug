@@ -22,6 +22,7 @@ HTML panel. This features allows to debug mutation events (<i>DOMAttrModified</i
     <ul>
         <li>Break on Attribute Change</li>
         <li>Break on Child Addition or Removal</li>
+        <li>Break on Child Addition or Removal</li>
         <li>Break on Element Removal</li>
     </ul>
 </li>
@@ -32,7 +33,8 @@ always breaks at the proper location.</li>
 <h3 id="content" style="color:green">Test Element</h3>
 
 <button id="breakOnAttrModified" onclick="breakOnAttrModified()">Break on Attribute Modified</button>
-<button id="breakOnNodeInserted" onclick="breakOnNodeInserted()">Break on Node Inserted</button>
+<button id="breakOnChildInserted" onclick="breakOnChildInserted()">Break on Child Inserted</button>
+<button id="breakOnChildRemoved" onclick="breakOnChildRemoved()">Break on Child Removed</button>
 <button id="breakOnNodeRemoved" onclick="breakOnNodeRemoved()">Break on Node Removed</button>
 
 <script type="text/javascript">
@@ -40,20 +42,22 @@ var content = document.getElementById("content");
 function breakOnAttrModified()
 {
     var now = (new Date()).getTime();
-    content.setAttribute("test", now); // Line 42 do not move
+    content.setAttribute("test", now); // Line 45 do not move
 }
 
-function breakOnNodeInserted()
+function breakOnChildInserted()
 {
-    content.appendChild(document.createElement("div"));  // line 47 do not move
+    content.appendChild(document.createElement("div"));  // line 50 do not move
+}
+
+function breakOnChildRemoved()
+{
+    content.removeChild(content.firstChild);  // line 55 do not move
 }
 
 function breakOnNodeRemoved()
 {
-    if (content.firstChild)
-        content.removeChild(content.firstChild);  // line 53 do not move
-    else
-        alert("You have to append a node first. Use 'Break on Node Inserted'.");
+    content.parentNode.removeChild(content);  // line 60 do not move
 }
 
 </script>

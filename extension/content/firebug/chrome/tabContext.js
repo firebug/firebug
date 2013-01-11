@@ -516,7 +516,7 @@ Firebug.TabContext.prototype =
             }
 
             // Count how many messages have been logged during the throttle period
-            var logTime = new Date().getTime();
+            var logTime = Date.now();
             if (logTime - this.lastMessageTime < throttleTimeWindow)
                 ++this.throttleBuildup;
             else
