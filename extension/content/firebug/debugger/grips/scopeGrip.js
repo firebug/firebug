@@ -49,19 +49,25 @@ ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
 
     getValue: function()
     {
+        // xxxHonza: needs refactoring (e.g. we need WindowGrip object)
+        // Global scope is usually a window, which is displayed with href.
+
+        var object;
         switch (this.grip.type)
         {
             case "with":
             case "object":
+                object = this.cache.getObject(this.grip["object"]);
             break;
 
             case "function":
+                object = this.cache.getObject(this.grip["function"]);
             break;
         }
 
-        // xxxHonza: we need an extra domplate rep for ScopeGrip() objects
-        // and then the return value could be 'this'
-        // For now use the default ObjectGrip implementation
+        if (object)
+            return object.getValue();
+
         return ObjectGrip.prototype.getValue.apply(this, arguments);
     },
 
