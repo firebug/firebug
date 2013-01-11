@@ -1156,7 +1156,13 @@ domMemberMap.Window =
     "uneval",
     "Performance",
     "PerformanceNavigation",
-    "PerformanceTiming"
+    "PerformanceTiming",
+
+    "devicePixelRatio",
+    "external",
+    "mozIndexedDB",
+    "sidebar",
+    "getDefaultComputedStyle"
 ];
 
 domMemberMap.Object =
