@@ -41,6 +41,13 @@ ObjectGrip.prototype =
         if (this.properties)
             return createGripProxy(this);
 
+        // Basic grip data packet contains also list of some properties so, it's
+        // possible to display some useful info about the object without additional
+        // request. Let's use these properties for the value label.
+        // See also {@ObjectGrip}
+        if (this.grip.properties)
+            return this.grip.properties;
+
         return {type: this.grip.type};
     },
 

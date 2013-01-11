@@ -47,6 +47,24 @@ ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
         return label;
     },
 
+    getValue: function()
+    {
+        switch (this.grip.type)
+        {
+            case "with":
+            case "object":
+            break;
+
+            case "function":
+            break;
+        }
+
+        // xxxHonza: we need an extra domplate rep for ScopeGrip() objects
+        // and then the return value could be 'this'
+        // For now use the default ObjectGrip implementation
+        return ObjectGrip.prototype.getValue.apply(this, arguments);
+    },
+
     hasProperties: function()
     {
         // If properties are loaded, but there are none return false.

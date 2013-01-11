@@ -209,8 +209,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         context.gripCache.clear();
 
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
         // Avoid double-break at the same line (e.g. breakpoint + step-over)
-        if (context.lastDebuggerLocation &&
+        /*if (context.lastDebuggerLocation &&
             context.lastDebuggerLocation.url == packet.frame.where.url &&
             context.lastDebuggerLocation.line == packet.frame.where.line)
         {
@@ -218,7 +219,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 packet.frame.where.url + " (" + packet.frame.where.line + ")");
             this.stepOver(context);
             return;
-        }
+        }*/
 
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
@@ -234,7 +235,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         if (!this.checkBreakpointCondition(context, event, packet))
             return;
 
-        context.lastDebuggerLocation = packet.frame.where;
+        //context.lastDebuggerLocation = packet.frame.where;
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.

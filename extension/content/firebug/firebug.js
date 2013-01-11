@@ -677,7 +677,7 @@ window.Firebug =
 
     registerGrip: function(gripClass, gripType)
     {
-        return GripFactory.registerGrip(gripType);
+        return GripFactory.registerGrip(gripClass, gripType);
     },
 
     unregisterGrip: function(gripClass)

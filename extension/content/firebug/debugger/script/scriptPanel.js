@@ -508,16 +508,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getOptionsMenuItems: function()
     {
-        var context = this.context;
-
         return [
-            // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
-            // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
-            Menu.optionMenu("script.option.Track_Throw_Catch", "trackThrowCatch",
-                "script.option.tip.Track_Throw_Catch"),
-            //"-",
-            //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
-            Menu.optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification",
+            Menu.optionMenu("firebug.breakpoint.showBreakNotifications",
+                "showBreakNotification",
                 "firebug.breakpoint.tip.Show_Break_Notifications")
         ];
     },

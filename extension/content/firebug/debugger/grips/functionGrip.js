@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/debugger/grips/objectGrip",
 ],
-function (FBTrace, ObjectGrip) {
+function (FBTrace, Obj, ObjectGrip) {
 
 // ********************************************************************************************* //
 // Function Grip
@@ -14,6 +15,12 @@ function FunctionGrip(grip, cache)
     this.grip = grip;
     this.cache = cache;
     this.signature = null;
+
+    // xxxHonza: function name in the function grip can be provided as:
+    // name, displayName or userDisplayName
+    // See: dbg-script-actors.js, ObjectActor.grip
+    // See Reps.Func
+    this.displayName = grip.name;
 }
 
 FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
@@ -61,6 +68,7 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
         if (!this.signature)
             return this.getSignature();
 
+        // The Reps.Func will deal with this object.
         return this;
     }
 });

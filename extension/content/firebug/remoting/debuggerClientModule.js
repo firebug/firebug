@@ -97,6 +97,31 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             }
         }
 
+        // Load Firebug actors. If Firebug is running server side these actors
+        // should also be loaded.
+        this.loadActors(this.onActorsLoaded.bind(this));
+    },
+
+    loadActors: function(callback)
+    {
+        // Actors must be loaded at the time when basic browser actors are already available.
+        // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
+        // actor types.
+        var config = Firebug.getModuleLoaderConfig();
+        Firebug.require(config, [
+            "firebug/debugger/actors/objectActor"
+        ],
+        function()
+        {
+            if (FBTrace.DBG_CONNECTION)
+                FBTrace.sysout("debuggerClientModule.loadActors; ", arguments);
+
+            callback();
+        });
+    },
+
+    onActorsLoaded: function()
+    {
         this.transport = (this.isRemoteDebugger) ?
             debuggerSocketConnect(Options.get("remoteHost"), Options.get("remotePort")) :
             DebuggerServer.connectPipe();
