@@ -349,9 +349,9 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 "absoluteEdge";
         }
 
-        var node = null;
+        var node = this.panelNode.getElementsByClassName("outerLayoutBox").item(0);
         // If the layout panel content was already created, just fill in the new values
-        if (this.panelNode.getElementsByClassName("outerLayoutBox").item(0))
+        if (node)
         {
             // The styles for the positionLayoutBox need to be set manually
             var positionLayoutBox = this.panelNode.getElementsByClassName("positionLayoutBox").
