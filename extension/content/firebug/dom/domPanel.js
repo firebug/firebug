@@ -571,7 +571,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     {
                         add("userClass", userClasses);
                     }
-                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
+                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers &&
+                        Dom.isInlineEventHandler(name))
                     {
                         add("userFunction", domHandlers);
                     }
