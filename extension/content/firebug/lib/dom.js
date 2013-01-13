@@ -1849,6 +1849,12 @@ var domConstantMap = Dom.domConstantMap =
     "MEDIA_RULE": 1,
     "FONT_FACE_RULE": 1,
     "PAGE_RULE": 1,
+    "KEYFRAMES_RULE": 1,
+    "KEYFRAME_RULE": 1,
+    "MOZ_KEYFRAMES_RULE": 1,
+    "MOZ_KEYFRAME_RULE": 1,
+    "NAMESPACE_RULE": 1,
+    "SUPPORTS_RULE": 1,
 
     "CAPTURING_PHASE": 1,
     "AT_TARGET": 1,
