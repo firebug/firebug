@@ -2061,6 +2061,13 @@ Dom.domConstantMap =
     "DOM_VK_QUOTE": 1,
     "DOM_VK_META": 1,
 
+    "UNCACHED": 1,
+    "IDLE": 1,
+    "CHECKING": 1,
+    "DOWNLOADING": 1,
+    "UPDATEREADY": 1,
+    "OBSOLETE": 1,
+
     "SVG_ZOOMANDPAN_DISABLE": 1,
     "SVG_ZOOMANDPAN_MAGNIFY": 1,
     "SVG_ZOOMANDPAN_UNKNOWN": 1
