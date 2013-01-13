@@ -516,10 +516,16 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 */
             }
 
+            var name, val;
+            var add = function(type, where, order)
+            {
+                this.addMember(object, type, where, name, val, level, order || 0, context, isScope);
+            }.bind(this);
+
             var domMembers = Dom.getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
-                var name = properties[i];
+                name = properties[i];
 
                 // Ignore only global variables (properties of the |window| object).
                 if (Wrapper.shouldIgnore(name) && (object instanceof Window))
@@ -532,7 +538,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     continue;
                 }
 
-                var val;
                 try
                 {
                     val = contentView[name];
@@ -546,42 +551,64 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     val = undefined;
                 }
 
-                var ordinal = parseInt(name);
-                if (ordinal || ordinal == 0)
+                if (!isNaN(parseInt(name, 10)))
                 {
-                    this.addMember(object, "ordinal", ordinals, name, val, level, 0, context, isScope);
+                    add("ordinal", ordinals, 0);
                 }
                 else if (typeof val === "function")
                 {
-                    var classFunc = isClassFunction(val), domMember = Dom.isDOMMember(object, name);
+                    var classFunc = isClassFunction(val);
+                    var domMember = Dom.isDOMMember(object, name);
                     if (domMember && classFunc)
-                        this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context, isScope);
+                    {
+                        add("domClass", domClasses, domMembers[name]);
+                    }
                     else if (domMember)
-                        this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context, isScope);
+                    {
+                        add("domFunction", domFuncs, domMembers[name]);
+                    }
                     else if (classFunc)
-                        this.addMember(object, "userClass", userClasses, name, val, level, 0, context, isScope);
+                    {
+                        add("userClass", userClasses);
+                    }
                     else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
-                        this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context, isScope);
+                    {
+                        add("userFunction", domHandlers);
+                    }
                     else
-                        this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context, isScope);
+                    {
+                        add("userFunction", userFuncs);
+                    }
                 }
                 else
                 {
                     if (isPrototype(name))
-                        this.addMember(object, "proto", proto, name, val, level, 0, context, isScope);
+                    {
+                        add("proto", proto);
+                    }
                     else if (Dom.isDOMMember(object, name))
-                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context, isScope);
+                    {
+                        add("dom", domProps, domMembers[name]);
+                    }
                     else if (Dom.isDOMConstant(object, name))
-                        this.addMember(object, "dom", domConstants, name, val, level, 0, context, isScope);
+                    {
+                        add("dom", domConstants);
+                    }
                     else if (Dom.isInlineEventHandler(name))
-                        this.addMember(object, "user", domHandlers, name, val, level, 0, context, isScope);
+                    {
+                        add("user", domHandlers);
+                    }
                     else
-                        this.addMember(object, "user", userProps, name, val, level, 0, context, isScope);
+                    {
+                        add("user", userProps);
+                    }
                 }
             }
 
             if (isScope || (typeof object === "function" && Firebug.showClosures && context))
+            {
                 this.maybeAddClosureMember(object, "proto", proto, level, context, isScope);
+            }
         }
         catch (exc)
         {
