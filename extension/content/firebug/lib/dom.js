@@ -916,6 +916,11 @@ Dom.EventCopy = function(event)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Note: Missing HTML elements:
+// <tbody>, <object>, <embed>, <video>, <audio>, <source>, <option>, <select>, <textarea>, <br>,
+// <frame>, <iframe>, <frameset>, <link>, <meta>, <style>, probably more
+// Instead of adding them, effort should rather be spent on automatic scanning.
+
 domMemberMap.Window =
 [
     "document",
@@ -1035,8 +1040,8 @@ domMemberMap.Window =
 
     "InstallTrigger",
 
-    "performance", // https://developer.mozilla.org/en/Navigation_timing
-    "matchMedia", // https://developer.mozilla.org/en/DOM/window.matchMedia
+    "performance",
+    "matchMedia",
 
     "getInterface",
 
@@ -1686,6 +1691,7 @@ domMemberMap.Node =
 
     "ownerDocument",
     "parentNode",
+    "parentElement",
     "offsetParent",
     "nextSibling",
     "previousSibling",
@@ -1693,6 +1699,7 @@ domMemberMap.Node =
     "lastChild",
     "childNodes",
     "attributes",
+    "contains",
 
     "dir",
     "baseURI",
@@ -1728,6 +1735,7 @@ domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
 [
     "documentElement",
     "body",
+    "head",
     "title",
     "location",
     "referrer",
@@ -1773,7 +1781,6 @@ domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
     "hasFocus",
     "activeElement",
 
-    /* These are also in domMemberMap.Element, but it reflects the real interface definition */
     "getElementsByClassName",
     "querySelector",
     "querySelectorAll",
@@ -1858,7 +1865,25 @@ domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
     "normalizeDocument",
     "getFeature",
     "getUserData",
-    "setUserData"
+    "setUserData",
+
+    "hidden",
+    "mozFullScreen",
+    "mozFullScreenElement",
+    "mozFullScreenEnabled",
+    "mozHidden",
+    "mozPointerLockElement",
+    "mozSyntheticDocument",
+    "mozVisibilityState",
+    "currentScript",
+    "scripts",
+    "visibilityState",
+    "caretPositionFromPoint",
+    "getItems",
+    "mozCancelFullScreen",
+    "mozExitPointerLock",
+    "mozSetImageElement",
+    "releaseCapture"
 ]);
 
 domMemberMap.Element = Arr.extendArray(domMemberMap.Node,
@@ -1887,6 +1912,7 @@ domMemberMap.Element = Arr.extendArray(domMemberMap.Node,
     "dispatchEvent",
     "focus",
     "blur",
+    "click",
     "cloneNode",
     "appendChild",
     "insertBefore",
@@ -1941,10 +1967,30 @@ domMemberMap.Element = Arr.extendArray(domMemberMap.Node,
     "querySelectorAll",
     "scrollIntoView",
 
-    "onLoad",//FF4.0
-    "hidden",//FF4.0
-    "setCapture",//FF4.0
-    "releaseCapture"//FF4.0
+    "isContentEditable",
+    "dataset",
+    "contextMenu",
+    "accessKey",
+    "accessKeyLabel",
+    "outerHTML",
+    "properties",
+    "scrollLeftMax",
+    "scrollTopMax",
+    "insertAdjacentHTML",
+    "mozRequestFullScreen",
+    "mozRequestPointerLock",
+
+    "itemId",
+    "itemRef",
+    "itemScope",
+    "itemProp",
+    "itemType",
+    "itemValue",
+
+    "onload",
+    "hidden",
+    "setCapture",
+    "releaseCapture"
 ]);
 
 domMemberMap.SVGElement = Arr.extendArray(domMemberMap.Element,
@@ -2074,6 +2120,8 @@ domMemberMap.HTMLAnchorElement = Arr.extendArray(domMemberMap.Element,
     "type",
     "rel",
     "rev",
+    "ping",
+    "download",
     "charset"
 ]);
 
@@ -2153,7 +2201,15 @@ domMemberMap.HTMLTableCellElement = Arr.extendArray(domMemberMap.Element,
 
 domMemberMap.HTMLScriptElement = Arr.extendArray(domMemberMap.Element,
 [
-    "src"
+    "src",
+    "type",
+    "async",
+    "charset",
+    "crossOrigin",
+    "defer",
+    "event",
+    "htmlFor",
+    "text"
 ]);
 
 domMemberMap.HTMLButtonElement = Arr.extendArray(domMemberMap.Element,
@@ -2164,6 +2220,19 @@ domMemberMap.HTMLButtonElement = Arr.extendArray(domMemberMap.Element,
     "name",
     "type",
     "value",
+
+    "autofocus",
+    "formAction",
+    "formEnctype",
+    "formMethod",
+    "formNoValidate",
+    "formTarget",
+
+    "validity",
+    "validationMessage",
+    "willValidate",
+    "checkValidity",
+    "setCustomValidity",
 
     "click"
 ]);
@@ -2209,6 +2278,24 @@ domMemberMap.HTMLInputElement = Arr.extendArray(domMemberMap.Element,
     "placeholder",
     "required",
 
+    "height",
+    "width",
+    "inputmode",
+    "max",
+    "min",
+    "step",
+    "selectionDirection",
+    "validity",
+    "validationMessage",
+    "willValidate",
+    "checkValidity",
+    "setCustomValidity",
+    "valueAsDate",
+    "valueAsNumber",
+    "mozIsTextField",
+    "stepUp",
+    "stepDown",
+
     "click",
     "select",
     "setSelectionRange"
@@ -2230,6 +2317,10 @@ domMemberMap.HTMLFormElement = Arr.extendArray(domMemberMap.Element,
     "target",
     "text",
     "url",
+
+    "checkValidity",
+    "noValidate",
+    "autocomplete",
 
     "reset",
     "submit"
@@ -2260,6 +2351,7 @@ domMemberMap.Text = Arr.extendArray(domMemberMap.Node,
     "insertData",
     "replaceData",
     "splitText",
+    "wholeText",
     "substringData"
 ]);
 
