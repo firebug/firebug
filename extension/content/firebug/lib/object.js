@@ -85,13 +85,7 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         if (!nonEnumProps && !ownPropsOnly)
         {
             for (var name in ob)
-            {
-                // Try to access the property before declaring existing properties.
-                // It's because some properties can't be read see:
-                // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
-                var value = ob[name];
                 return true;
-            }
             return false;
         }
 
@@ -108,13 +102,7 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             props = Object.keys(ob);
 
         if (props.length)
-        {
-            // Try to access the property before declaring existing properties.
-            // It's because some properties can't be read see:
-            // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
-            var value = ob[props[0]];
             return true;
-        }
 
         // Not interested in inherited properties, bail out.
         if (ownPropsOnly)
