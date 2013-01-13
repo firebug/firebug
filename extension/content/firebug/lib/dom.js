@@ -878,36 +878,23 @@ Dom.isDOMMember = function(object, propName)
 
 Dom.isDOMConstant = function(object, name)
 {
-    if (name == undefined)
-        return Dom.isDOMConstantDep({},object);
-
-    // The constant map has also its own prototype, but it isn't considered to be a constant.
-    if (name == "__proto__")
+    if (!Dom.domConstantMap.hasOwnProperty(name))
         return false;
 
-    // object isn't recognized as such when using ===,
-    // so use this as workaround
-    var str = Object.prototype.toString.call(object);
-    var isDOMProperty = ["[object Window]", "[object Node]", "[object Location]",
-        "[object Event]"].indexOf(str) !== -1;
-
-    if (!(object === window.Window ||
-        object === window.Object ||
-        object === window.Node ||
-        object === window.Location ||
-        object === window.Event ||
-        object === Dom.EventCopy ||
-        object instanceof window.Window ||
-        object instanceof window.Node ||
-        object instanceof window.Location ||
-        object instanceof window.Event ||
-        object instanceof Dom.EventCopy ||
-        isDOMProperty))
+    try
+    {
+        // Test for nativeness. This is a fragile piece of dark magic, and might be
+        // equivalent to |Cu.isXrayWrapper(XPCNativeWrapper(object))| in >= Fx 20.
+        object = XPCNativeWrapper.unwrap(object);
+        var isNative = (XPCNativeWrapper(object).toString !== XPCNativeWrapper(object.toString));
+        return (isNative ||
+            object instanceof window.Event ||
+            object instanceof Dom.EventCopy);
+    }
+    catch (exc)
     {
         return false;
     }
-
-    return Dom.domConstantMap.hasOwnProperty(name);
 };
 
 Dom.isInlineEventHandler = function(name)
@@ -926,10 +913,6 @@ Dom.EventCopy = function(event)
         } catch (exc) { }
     }
 };
-
-var isDOMConstantDep = Deprecated.deprecated(
-    "isDOMConstant(name) signature changed (object,name)",
-    Dom.isDOMConstant);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
