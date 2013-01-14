@@ -78,7 +78,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (!context)
             return;
 
-        targetWindow = targetWindow || context.baseWindow || context.window;
+        targetWindow = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         try
         {
@@ -123,7 +123,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction, origExpr)
     {
-        var win = targetWindow || context.baseWindow || context.window;
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!win)
         {
@@ -257,7 +257,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var result = null;
 
-        var win = targetWindow || context.baseWindow || context.window;
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context);
@@ -286,9 +286,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     evaluateByPostMessage: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction)
     {
-        // targetWindow may be frame in HTML
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!win)
         {
@@ -351,8 +349,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     evaluateInWebPage: function(expr, context, targetWindow)
     {
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
+
         var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
         if (!element)
             return;
@@ -1402,8 +1400,8 @@ function CommandLineHandler(context, win)
 
         if (FBTrace.DBG_COMMANDLINE)
         {
-            FBTrace.sysout("commandLine.handleEvent('firebugExecuteCommand') " +
-                "event in context.baseWindow " + context.baseWindow.location, event);
+            FBTrace.sysout("commandLine.handleEvent() " +
+                " window: " + Win.safeGetWindowLocation(win), {win: win, ev: event});
         }
 
         // Appends variables into the api.
@@ -1431,15 +1429,6 @@ function CommandLineHandler(context, win)
         {
             var methodName = win.document.getUserData("firebug-methodName");
             Firebug.Console.log(Locale.$STRF("commandline.MethodNotSupported", [methodName]));
-        }
-
-        if (FBTrace.DBG_COMMANDLINE)
-        {
-            FBTrace.sysout("commandLine.handleEvent() " +
-                win.document.getUserData("firebug-methodName") +
-                " context.baseWindow: " +
-                (context.baseWindow ? context.baseWindow.location : "no basewindow"),
-                context.baseWindow);
         }
     };
 }

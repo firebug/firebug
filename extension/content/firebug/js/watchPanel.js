@@ -120,10 +120,12 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }
 
         var scopes;
+        var context = this.context;
+        var win = context.stoppedGlobal || context.baseWindow || context.window;
         if (frame instanceof StackFrame.StackFrame)
             scopes = frame.getScopes(Firebug.viewChrome);
         else
-            scopes = [this.context.getGlobalScope()];
+            scopes = [win];
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("dom watch frame isStackFrame " +
@@ -132,7 +134,6 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
         var members = [];
 
-        var context = this.context;
         if (this.watches)
         {
             for (var i = 0; i < this.watches.length; ++i)
@@ -140,7 +141,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                 var expr = this.watches[i];
                 var value = null;
 
-                Firebug.CommandLine.evaluate(expr, context, null, context.getGlobalScope(),
+                Firebug.CommandLine.evaluate(expr, context, null, win,
                     function success(result, context)
                     {
                         value = result;

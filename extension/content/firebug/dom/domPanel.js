@@ -696,7 +696,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         {
             try
             {
-                var win = context.baseWindow || context.window;
+                var win = context.stoppedGlobal || context.baseWindow || context.window;
                 ClosureInspector.getEnvironmentForObject(win, value, context);
                 hasChildren = true;
             }
@@ -796,7 +796,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     // Add the magic "(closure)" property.
     maybeAddClosureMember: function(object, type, props, level, context, isScope)
     {
-        var win = context.baseWindow || context.window;
+        var win = context.stoppedGlobal || context.baseWindow || context.window;
         var wrapper = ClosureInspector.getScopeWrapper(object, win, context, isScope);
         if (!wrapper)
             return;
@@ -1163,7 +1163,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var object = this.getRealRowObject(row);
         if (object && !(object instanceof StackFrame.StackFrame))
         {
-            Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
+            var win = this.context.stoppedGlobal || this.context.baseWindow || this.context.window;
+            Firebug.CommandLine.evaluate(value, this.context, object, win,
                 function success(result, context)
                 {
                     if (FBTrace.DBG_DOM)
@@ -1537,7 +1538,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     getDefaultSelection: function()
     {
-        return this.getObjectView(this.context.getGlobalScope());
+        // Default to showing the top window.
+        return this.getObjectView(this.context.window);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

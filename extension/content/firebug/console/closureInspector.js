@@ -234,7 +234,7 @@ var ClosureInspector =
         var ret = [];
 
         // Avoid 'window' and 'document' getting associated with closures.
-        var win = context.baseWindow || context.window;
+        var win = context.stoppedGlobal || context.baseWindow || context.window;
         if (obj === win || obj === win.document)
             return ret;
 
