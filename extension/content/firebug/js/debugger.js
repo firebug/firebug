@@ -134,7 +134,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     getCurrentFrameKeys: function(context)  // TODO remote, on bti
     {
         // return is safe
-        var globals = Arr.keys(Wrapper.getContentView(context.getGlobalScope()));
+        var globals = Arr.keys(Wrapper.getContentView(context.getCurrentGlobal()));
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
 
@@ -301,7 +301,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
 
-        var hookReturn = Firebug.connection.dispatch("onStop",[context,frame, type,rv]);
+        var hookReturn = Firebug.connection.dispatch("onStop", [context, frame, type, rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;

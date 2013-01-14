@@ -2195,7 +2195,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
         spreExpr: spreExpr,
         completions: [],
         hiddenCompletions: [],
-        window: context.baseWindow || context.window
+        window: context.getCurrentGlobal()
     };
     var indexCompletion = false;
 

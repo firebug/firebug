@@ -191,6 +191,11 @@ Firebug.TabContext.prototype =
         return Firebug.chrome;
     },
 
+    getCurrentGlobal: function()
+    {
+        return this.baseWindow || this.window;
+    },
+
     destroy: function(state)
     {
         // All existing timeouts need to be cleared
