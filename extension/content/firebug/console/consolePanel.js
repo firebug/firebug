@@ -404,6 +404,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (object instanceof Object && object.href && object.lineNo && object.message)
             return object.message + object.href + ":" + object.lineNo;
 
+        // object may be NaN
+        if (object !== object)
+            return "NotANumber";
+
         // Use all direct properties of the object
         if (object instanceof Object)
         {
