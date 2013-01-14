@@ -219,7 +219,8 @@ StackFrame.buildStackFrame = function(frame, context)
         });
     }
 
-    return new StackFrame(sourceFile, frame.where.line, frame.callee.name,
+    var funcName = frame.callee ? frame.callee.name : "";
+    return new StackFrame(sourceFile, frame.where.line, funcName,
         args, frame, 0, context);
 };
 

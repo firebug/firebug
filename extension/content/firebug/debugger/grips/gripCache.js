@@ -72,13 +72,17 @@ GripCache.prototype =
 
     request: function(packet)
     {
-        //xxxHonza: packets should be also cached.
-
+        // xxxHonza: packets should be also cached.
+        // xxxHonza: we need to check if the same request is in progress and
+        // return the existing promise.
+        // There should be a map requestID -> promise; where requestID = {actorID + packetType}
+        // The same map could be also used to cache the packets.
         var deferred = Promise.defer();
         this.debuggerClient.request(packet, function(response)
         {
             deferred.resolve(response);
         });
+
         return deferred.promise;
     },
 };
