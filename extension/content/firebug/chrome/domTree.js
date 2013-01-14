@@ -435,15 +435,19 @@ DomTree.prototype = domplate(
         var member = row.repObject;
         member.hasChildren = this.provider.hasChildren(object);
 
+        // If the old row was expanded remember the state. We want to expand it again after
+        // the row itself is updated. Do not forget to remove the existing child rows (by
+        // collapsing the row), they will be regenerated.
+        var expanded = Css.hasClass(row, "opened");
+        if (expanded)
+            this.toggleRow(row);
+
         // Generate new row with new value.
         var rowTag = this.getRowTag();
         var rows = rowTag.insertRows({member: member}, row, this);
 
-        // If the old row was expanded remember it.
-        var expanded = Css.hasClass(row, "opened");
-
-        // Remove the old row before expanding the new row,otherwise the old one
-        // would be expanded and consequently removed.
+        // Remove the old row before dealing (expanding) the new updated row. 
+        // Otherwise the old one would be used since it's associated with the same rep object.
         row.parentNode.removeChild(row);
 
         if (expanded)
