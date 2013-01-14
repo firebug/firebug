@@ -193,7 +193,7 @@ Firebug.TabContext.prototype =
 
     getCurrentGlobal: function()
     {
-        return this.baseWindow || this.window;
+        return this.stoppedGlobal || this.baseWindow || this.window;
     },
 
     destroy: function(state)
