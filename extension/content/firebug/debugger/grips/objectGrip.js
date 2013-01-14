@@ -86,11 +86,24 @@ ObjectGrip.prototype =
         };
 
         var self = this;
-        return this.cache.request(packet).then(function(response)
-        {
-            self.properties = self.parseProperties(response.ownProperties);
-            return self.properties;
-        });
+        return this.cache.request(packet).then(
+            function onSuccess(response)
+            {
+                if (response.error)
+                {
+                    FBTrace.sysout("objectGrip.getPrototypeAndProperties; ERROR " +
+                        response.error + ": " + response.message, response);
+                    return [];
+                }
+
+                self.properties = self.parseProperties(response.ownProperties);
+                return self.properties;
+            },
+            function onError(response)
+            {
+                FBTrace.sysout("objectGrip.getPrototypeAndProperties; ERROR ", response);
+            }
+        );
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -60,6 +60,7 @@ ObjectActor.prototype.grip = function()
         catch (e)
         {
             // Calling getOwnPropertyDescriptor on wrapped native prototypes is not allowed.
+            FBTrace.sysout("objectActor.grip; EXCEPTION " + e, e);
         }
     }
 
