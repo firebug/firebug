@@ -1235,6 +1235,20 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return true;
     },
 
+    ignoreTarget: function(target)
+    {
+        // XXX: Temporary fix for issue 5577.
+        var repNode = target && Firebug.getRepNode(target);
+        return (repNode && repNode.classList.contains("cssRule"));
+    },
+
+    highlightObject: function(object, context, target)
+    {
+        if (this.ignoreTarget(target))
+            return;
+        Firebug.Inspector.highlightObject(object, context);
+    },
+
     persistObject: function(elt, context)
     {
         var xpath = Xpath.getElementXPath(elt);
@@ -1259,8 +1273,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
-        // XXX: Temporary fix for issue 5577.
-        if (Dom.getAncestorByClass(target, "cssElementRuleContainer"))
+        if (this.ignoreTarget(target))
             return;
 
         var type;
