@@ -350,6 +350,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.refresh();
     },
+
+    onBreakpointModified: function(bp)
+    {
+        this.refresh();
+    },
 });
 
 // ********************************************************************************************* //

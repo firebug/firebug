@@ -497,6 +497,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.updateBreakpoint(bp);
     },
 
+    onBreakpointModified: function(bp)
+    {
+        this.scriptView.updateBreakpoint(bp);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
@@ -883,12 +888,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (Css.hasClass(target, "breakpoint"))
             return this.populateBreakpointInfoTip(infoTip, target);
 
-        // Tooltips for variables in the script source are only displayed if the
-        // script execution is halted (i.e. there is a current frame).
-        var frame = this.context.currentFrame;
-        if (!frame)
-            return;
-
         // The source script must be within viewConent DIV (Orion).
         var viewContent = Dom.getAncestorByClass(target, "viewContent");
         if (!viewContent)
@@ -897,12 +896,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // See http://code.google.com/p/fbug/issues/detail?id=889
         // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
         if (!rangeParent)
-            return;
+            return false;
 
         rangeOffset = rangeOffset || 0;
         var expr = getExpressionAt(rangeParent.data, rangeOffset);
         if (!expr || !expr.expr)
-            return;
+            return false;
 
         if (expr.expr == this.infoTipExpr)
             return true;
@@ -915,40 +914,39 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!expr || Keywords.isJavaScriptKeyword(expr))
             return false;
 
+        // Tooltips for variables in the script source are only displayed if the
+        // script execution is halted (i.e. there is a current frame).
+        var frame = this.context.currentFrame;
+        if (!frame)
+            return false;
+
+        //xxxHonza: expression evaluation is not finished.
+        return false;
+
         var self = this;
+        this.tool.eval(this.context, null, expr, function (context, event, packet)
+        {
+            var result = packet.why.frameFinished["return"];
+            self.onPopulateInfoTip(infoTip, result);
+        });
 
-        // If the evaluate fails, then we report an error and don't show the infotip
-        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
-            function success(result, context)
-            {
-                var rep = Firebug.getRep(result, context);
-                var tag = rep.shortTag ? rep.shortTag : rep.tag;
+        // The result will be fetched asynchronously so, the tooltip should
+        // display a throbber or something...
+        return true;
+    },
 
-                if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("populateInfoTip result is "+result, result);
+    onPopulateInfoTip: function(infoTip, result)
+    {
+        var gripObj = this.context.gripCache.getObject(result);
+        gripObj.getProperties().then(function(props)
+        {
+            var value = gripObj.getValue();
 
-                tag.replace({object: result}, infoTip);
+            var rep = Firebug.getRep(value, context);
+            var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-                // If the menu is never displayed, the contextMenuObject is not reset
-                // (back to null) and is reused at the next time the user opens the
-                // context menu, which is wrong.
-                // This line was appended when fixing:
-                // http://code.google.com/p/fbug/issues/detail?id=1700
-                // The object should be returned by getPopupObject(),
-                // that is called when the context menu is showing.
-                // The problem is, that the "onContextShowing" event doesn't have the
-                // rangeParent field set and so it isn't possible to get the
-                // expression under the cursor (see getExpressionAt).
-                //Firebug.chrome.contextMenuObject = result;
-
-                self.infoTipExpr = expr;
-            },
-            function failed(result, context)
-            {
-                self.infoTipExpr = "";
-            }
-        );
-        return (self.infoTipExpr == expr);
+            tag.replace({object: value}, infoTip);
+        });
     },
 
     populateBreakpointInfoTip: function(infoTip, target)

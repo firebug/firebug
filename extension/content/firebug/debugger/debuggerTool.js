@@ -267,6 +267,18 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);
+
+        // Execute registered 'clientEvaluated' callback.
+        // This must be done after "onStartDebugging" is dispatched to the Script panel, which
+        // is updating selection of the Watch panel and could potentially start Watch expr
+        // evaluation again (since evalInProgress would be false - done).
+        // xxxHonza: still bad architecture, but this.eval should have a simple callback
+        // even if spreaded over two pauses.
+        if (type == "clientEvaluated" && context.evalCallback)
+        {
+            context.evalCallback(context, event, packet);
+            context.evalCallback = null;
+        }
     },
 
     checkBreakpointCondition: function(context, event, packet)
@@ -548,9 +560,20 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Evaluation
 
-    eval: function(context, frame, expr)
+    eval: function(context, frame, expr, callback)
     {
         Trace.sysout("debuggerTool.eval; " + expr);
+
+        if (!frame)
+            frame = context.currentFrame;
+
+        // xxxHonza: can this happen?
+        if (context.evalCallback)
+            FBTrace.sysout("debuggerTool.eval; ERROR unhandled case!");
+
+        // Will be executed when 'clientEvaluated' packet is received, see paused() method.
+        if (callback)
+            context.evalCallback = this.getEvalCallback(callback, context);
 
         // This operation causes the server side to:
         // 1) Resume the current thread
@@ -561,6 +584,25 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             // Not interested in 'resume' packet. The callback will be executed
             // when 'pause' packet is received, see paused() method.
         });
+    },
+
+    getEvalCallback: function(callback, context)
+    {
+        var currentPauseActor = context.currentPauseActor;
+        return function evalCallback(context, event, packet)
+        {
+            try
+            {
+                // Make sure we are not just re-using the current clientEvaluated packet
+                // (e.g. related to BP condition). It must be one from next roundtrip/pause.
+                if (context.currentPauseActor != currentPauseActor)
+                    callback(context, event, packet);
+            }
+            catch (e)
+            {
+                TraceError.sysout("debuggerTool.evalCallback; EXCEPTION " + e, e);
+            }
+        }
     },
 
     // xxxHonza: used to get boolean result of evaluated breakpoint condition

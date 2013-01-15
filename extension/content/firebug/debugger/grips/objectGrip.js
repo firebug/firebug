@@ -3,8 +3,9 @@
 define([
     "firebug/lib/trace",
     "firebug/debugger/rdp",
+    "firebug/lib/promise",
 ],
-function (FBTrace, RDP) {
+function (FBTrace, RDP, Promise) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -84,6 +85,15 @@ ObjectGrip.prototype =
             to: actor,
             type: RDP.DebugProtocolTypes.prototypeAndProperties
         };
+
+        // 'null' and 'undefined' grips don't have cache reference (see GripCache and
+        // gripNull and gripUndefined constants).
+        if (!this.cache)
+        {
+            var deferred = Promise.defer();
+            deferred.resolve([]);
+            return deferred.promise;
+        }
 
         var self = this;
         return this.cache.request(packet).then(

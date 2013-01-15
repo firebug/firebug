@@ -194,7 +194,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Asynchronously eval all user-expressions, but make sure it isn't
         // already in-progress (to avoid recursion).
-        if (!this.context.userExpressionsEval)
+        if (!this.context.evalInProgress)
             this.evalWatches();
     },
 
@@ -350,24 +350,24 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         expression = "[" + expression.join(",") + "]";
 
-        // Set flag so, we can get the eval-result when 'clientEvaluated' packet
-        // is received (see 'onStartDebugging' method).
-        // Also remember the current pause actor since 'onStartDebugging' can be executed
-        // yet in this pause, and if the current packet type is 'clientEvaluated'
-        // (e.g. bp condition evaluated to true) it would be reused in onEvalWatches.
-        //
-        // It's important to understand the order of steps (all happens in the same pause):
-        // ThreadClient.onPacket - 'clientEvaluated' received (BP condition eval result)
-        // DebuggerTool.paused -> fire 'onStartDebugging' events
-        // ScriptPanel.onStartDebugging -> chrome.select(currentFrame)
-        // WatchPanel.updateSelection -> evalWatches
-        // WatchPanel.onStartDebugging -> onEvalWatches - We must not reuse the current packet
-        //     it belongs to the bp condition evaluation. We need to wait for the next one.
-        // xxxHonza: the architecture should make the whole problem somehow easier.
-        this.context.userExpressionsEval = this.context.currentPauseActor;
+        // Evaluation callback
+        var self = this;
+        function onEvaluated(context, event, packet)
+        {
+            context.evalInProgress = false;
+
+            var result = packet.why.frameFinished["return"];
+
+            // xxxHonza: properly deal with exceptions
+            if (typeof(result) == "undefined")
+                result = packet.why.frameFinished["throw"];
+
+            self.onEvalWatches(result);
+        }
 
         // Eval through the debuggerTool.
-        this.tool.eval(this.context, this.context.currentFrame, expression);
+        this.context.evalInProgress = true;
+        this.tool.eval(this.context, this.context.currentFrame, expression, onEvaluated);
     },
 
     onEvalWatches: function(resultGrip)
@@ -381,6 +381,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var self = this;
 
         // xxxHonza: the entire logic related to eval result, should be refactored
+        // xxxHonza: see also ScriptPanel.onPopulateInfoTip()
         // The cache and grip objects should do most of the work automatically.
         // This method should be much simpler.
         var cache = this.context.gripCache;
@@ -420,29 +421,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(context, event, packet)
     {
-        var type = packet.why.type;
-
-        Trace.sysout("watchPanel.onStartDebugging; " + type + ", user-expr: " +
-            context.userExpressionsEval);
-
-        // Resolve evaluated expression (if there is one in progress).
-        var actor = this.context.currentPauseActor;
-        if (type == "clientEvaluated" && context.userExpressionsEval &&
-            context.userExpressionsEval != actor)
-        {
-            context.userExpressionsEval = false;
-
-            // Pause packet with 'clientEvaluated' type is sent when user expression
-            // has been evaluated on the server side. Let's pass the result to the
-            // registered callback.
-            var result = packet.why.frameFinished["return"];
-
-            // xxxHonza: properly deal with exceptions
-            if (typeof(result) == "undefined")
-                result = packet.why.frameFinished["throw"];
-
-            this.onEvalWatches(result);
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
