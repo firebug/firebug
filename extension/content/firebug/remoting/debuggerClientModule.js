@@ -16,11 +16,11 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-var TraceConn = FBTrace.to("DBG_CONNECTION");
+var Trace = FBTrace.to("DBG_CONNECTION");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-Cu.import("resource://gre/modules/devtools/dbg-client.jsm");
-Cu.import("resource://gre/modules/devtools/dbg-server.jsm");
+Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm");
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -113,8 +113,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         ],
         function()
         {
-            if (FBTrace.DBG_CONNECTION)
-                FBTrace.sysout("debuggerClientModule.loadActors; ", arguments);
+            Trace.sysout("debuggerClientModule.loadActors; ", arguments);
 
             callback();
         });
@@ -302,7 +301,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     dispatch: function(eventName, args)
     {
-        FBTrace.sysout("debuggerClientModule.dispatch; " + eventName, args);
+        Trace.sysout("debuggerClientModule.dispatch; " + eventName, args);
 
         Firebug.Module.dispatch.apply(this, arguments);
     },
@@ -323,7 +322,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                 if (packet.type == "newGlobal")
                     return;
 
-                TraceConn.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
+                Trace.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
                 self.client.onPacket(packet);
             },
 
@@ -336,7 +335,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var send = this.transport.send;
         this.transport.send = function(packet)
         {
-            TraceConn.sysout("PACKET SEND " + JSON.stringify(packet), packet);
+            Trace.sysout("PACKET SEND " + JSON.stringify(packet), packet);
 
             send.apply(self.transport, arguments);
         }

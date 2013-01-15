@@ -54,6 +54,12 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
 Firebug.TabContext.prototype =
 {
+    getId: function()
+    {
+        // UID is set by {@TabWatcher} in TabWatcher.createContext() method.
+        return this.uid;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Browser Tools Interface BrowserContext
 

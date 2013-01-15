@@ -88,11 +88,30 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context
+
+    initContext: function(context, persistedState)
+    {
+        Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
+    },
+
+    showContext: function(browser, context)
+    {
+        Trace.sysout("debuggerTool.showContext; context ID: " + context.getId());
+    },
+
+    destroyContext: function(context, persistedState, browser)
+    {
+        Trace.sysout("debuggerTool.destroyContext; context ID: " + context.getId());
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Connection
 
     onThreadAttached: function(context, reload)
     {
-        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload, context);
+        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload + ", context ID: " +
+            context.getId(), context);
 
         if (this._onPause)
         {
@@ -129,7 +148,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     onThreadDetached: function(context)
     {
-        Trace.sysout("debuggerTool.onThreadDetached;");
+        Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
 
         // Remove all listeners from the current ThreadClient
         context.activeThread.removeListener("paused", this._onPause);
@@ -195,10 +214,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     paused: function(context, event, packet)
     {
         var type = packet.why.type;
-        Trace.sysout("debuggerTool.paused; " + type + " (bp-cond: " +
-            context.conditionalBreakpointEval + ", user-exp: " +
-            context.userExpressionsEval + ") " + packet.frame.where.url +
-            " (" + packet.frame.where.line + ")", packet);
+        Trace.sysout("debuggerTool.paused; " + type + ", " + packet.frame.where.url +
+            " (" + packet.frame.where.line + "), context ID: " + context.getId(), packet);
 
         var ignoreTypes = {
             "interrupted": 1,
@@ -241,6 +258,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // sync with the cache handle 'framesadded' and 'framescleared' events.
         // This is done after we know that the debugger is going to pause now.
         context.activeThread.fillFrames(50);
+
+        // Panels are created when first used by the user, but in this case we need to break
+        // JS execution and update the Script panel immediatelly so, make sure it exists before
+        // we distribute 'onStartDebugging' event. The panel doesn't have to exist in case 
+        // the page breaks before it's fully loaded (e.g. in an 'onLoad' handler).
+        var scriptPanel = context.getPanel("jsd2script");
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);

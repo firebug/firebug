@@ -1,16 +1,19 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/firebug",
 ],
-function(Obj, Firebug) {
+function(FBTrace, Obj, Firebug) {
 
 // ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+var Trace = FBTrace.to("DBG_DEBUGGER");
 
 // ********************************************************************************************* //
 
@@ -44,12 +47,12 @@ Firebug.JSD2.Debugger = Obj.extend(Firebug.ActivableModule,
 
     activateDebugger: function()
     {
-        FBTrace.sysout("JSD2Debugger.activateDebugger;");
+        Trace.sysout("JSD2Debugger.activateDebugger;");
     },
 
     deactivateDebugger: function()
     {
-        FBTrace.sysout("JSD2Debugger.deactivateDebugger;");
+        Trace.sysout("JSD2Debugger.deactivateDebugger;");
     },
 
     onSuspendFirebug: function()
@@ -57,7 +60,7 @@ Firebug.JSD2.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.JSD2.Debugger.isAlwaysEnabled())
             return;
 
-        FBTrace.sysout("JSD2Debugger.onSuspendFirebug;");
+        Trace.sysout("JSD2Debugger.onSuspendFirebug;");
 
         return false;
     },
@@ -67,7 +70,7 @@ Firebug.JSD2.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.JSD2.Debugger.isAlwaysEnabled())
             return;
 
-        FBTrace.sysout("JSD2Debugger.onResumeFirebug;");
+        Trace.sysout("JSD2Debugger.onResumeFirebug;");
     },
 });
 

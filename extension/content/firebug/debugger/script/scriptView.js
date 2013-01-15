@@ -106,6 +106,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (this.defaultSource)
             this.showSource(this.defaultSource);
 
+        if (this.defaultLine > 0)
+            this.scrollToLine("", this.defaultLine);
+
         this.initBreakpoints();
     },
 
@@ -348,8 +351,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     scrollToLine: function(href, lineNo, highlighter)
     {
         //@hack xxxHonza: avoid exception
-        if (!this.editor || !this.editor._model)
+        if (!this.initialized)
+        {
+            this.defaultLine = lineNo;
             return;
+        }
 
         this.editor.setDebugLocation(lineNo - 1);
         this.editor.setCaretPosition(lineNo - 1);
@@ -358,8 +364,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     removeDebugLocation: function()
     {
         //@hack xxxHonza: avoid exception
-        if (!this.editor || !this.editor._model)
+        if (!this.initialized)
+        {
+            this.defaultLine = -1;
             return;
+        }
 
         this.editor.setDebugLocation(-1);
     },
