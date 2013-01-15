@@ -358,6 +358,16 @@ var ClosureInspector =
             lazyCreateNames = function() {};
             names = scope.names();
 
+            // Due to weird Firefox behavior, we sometimes have to skip over duplicate
+            // scopes (see issue 6184).
+            if (names.length === 1 && scope.type === "declarative" &&
+                scope.parent && scope.parent.type === "declarative")
+            {
+                var par = scope.parent, parNames = par.names();
+                if (parNames.length === 1 && parNames[0] === names[0])
+                    scopeDataHolder.scope = scope = par;
+            }
+
             // "arguments" is almost always present and optimized away, so hide it
             // for a nicer display.
             var ind = names.indexOf("arguments");
