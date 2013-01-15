@@ -6,6 +6,8 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/array",
+    "firebug/lib/css",
+    "firebug/lib/domplate",
     "firebug/debugger/script/scriptView",
     "arch/compilationunit",
     "firebug/chrome/menu",
@@ -16,10 +18,11 @@ define([
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
     "firebug/debugger/breakpoint/breakpointConditionEditor",
+    "firebug/lib/keywords",
 ],
-function (Obj, Locale, Events, Dom, Arr, ScriptView, CompilationUnit, Menu,
+function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener,
-    BreakpointConditionEditor) {
+    BreakpointConditionEditor, Keywords) {
 
 // ********************************************************************************************* //
 // Constants
@@ -480,7 +483,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         // xxxHonza: should be async
-        this.scriptView.enableBreakpoint(bp);
+        this.scriptView.updateBreakpoint(bp);
     },
 
     onBreakpointDisabled: function(bp)
@@ -491,7 +494,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         // xxxHonza: should be async
-        this.scriptView.disableBreakpoint(bp);
+        this.scriptView.updateBreakpoint(bp);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -877,16 +880,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
-        var sourceLine = Dom.getAncestorByClass(target, "sourceLine");
-        if (sourceLine)
-            return this.populateBreakpointInfoTip(infoTip, sourceLine);
+        if (Css.hasClass(target, "breakpoint"))
+            return this.populateBreakpointInfoTip(infoTip, target);
 
+        // Tooltips for variables in the script source are only displayed if the
+        // script execution is halted (i.e. there is a current frame).
         var frame = this.context.currentFrame;
         if (!frame)
             return;
 
-        var sourceRowText = Dom.getAncestorByClass(target, "sourceRowText");
-        if (!sourceRowText)
+        // The source script must be within viewConent DIV (Orion).
+        var viewContent = Dom.getAncestorByClass(target, "viewContent");
+        if (!viewContent)
             return;
 
         // See http://code.google.com/p/fbug/issues/detail?id=889
@@ -946,27 +951,82 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return (self.infoTipExpr == expr);
     },
 
-    populateBreakpointInfoTip: function(infoTip, sourceLine)
+    populateBreakpointInfoTip: function(infoTip, target)
     {
-        var sourceRow = Dom.getAncestorByClass(sourceLine, "sourceRow");
-        var condition = sourceRow.getAttribute("condition");
-        if (!condition)
-            return false;
-
-        var expr = sourceRow.breakpointCondition;
+        var lineNo = this.scriptView.getLineIndex(target);
+        var bp = BreakpointStore.findBreakpoint(this.location.href, lineNo + 1);
+        var expr = bp.condition;
         if (!expr)
             return false;
 
         if (expr == this.infoTipExpr)
             return true;
 
-        Firebug.ScriptPanel.BreakpointInfoTip.render(infoTip, expr);
+        BreakpointInfoTip.render(infoTip, expr);
 
         this.infoTipExpr = expr;
 
         return true;
     },
 });
+
+// ********************************************************************************************* //
+// Breakpoint InfoTip Template
+
+with (Domplate) {
+var BreakpointInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        DIV("$expr"),
+
+    render: function(parentNode, expr)
+    {
+        this.tag.replace({expr: expr}, parentNode, this);
+    }
+})};
+
+// ********************************************************************************************* //
+
+const reWord = /([A-Za-z_$0-9]+)(\.([A-Za-z_$0-9]+)|\[([A-Za-z_$0-9]+|["'].+?["'])\])*/;
+
+function getExpressionAt(text, charOffset)
+{
+    var offset = 0;
+    for (var m = reWord.exec(text); m; m = reWord.exec(text.substr(offset)))
+    {
+        var word = m[0];
+        var wordOffset = offset+m.index;
+        if (charOffset >= wordOffset && charOffset <= wordOffset+word.length)
+        {
+            var innerOffset = charOffset-wordOffset;
+            m = word.substr(innerOffset+1).match(/\.|\]|\[|$/);
+            var end = m.index + innerOffset + 1, start = 0;
+
+            var openBr = word.lastIndexOf('[', innerOffset);
+            var closeBr = word.lastIndexOf(']', innerOffset);
+
+            if (openBr == innerOffset)
+                end++;
+            else if (closeBr < openBr)
+            {
+                if (/['"\d]/.test(word[openBr+1]))
+                    end++;
+                else
+                    start = openBr + 1;
+            }
+
+            word = word.substring(start, end);
+
+            if (/^\d+$/.test(word) && word[0] != '0')
+                word = '';
+
+            return {expr: word, offset: wordOffset-start};
+        }
+        offset = wordOffset+word.length;
+    }
+
+    return {expr: null, offset: -1};
+};
 
 // ********************************************************************************************* //
 // Registration

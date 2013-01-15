@@ -46,6 +46,11 @@
     background-position: top !important;
 }
 
+.annotation.breakpoint.condition > DIV.annotationHTML {
+    background-image: url(chrome://firebug/skin/breakpointCondition.png);
+    background-position: top !important;
+}
+
 .annotation.breakpoint.disabled > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/breakpointDisabled.png);
     background-position: top !important;
