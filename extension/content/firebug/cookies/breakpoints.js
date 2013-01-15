@@ -349,11 +349,13 @@ Breakpoints.Breakpoint.prototype =
                 "; with (scope) { return " + this.condition + ";}})();"
 
             // Evaluate condition using Firebug's command line.
-            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+            Firebug.CommandLine.evaluate(expr, context, null, context.window,
                 this.onEvaluateSucceeds, this.onEvaluateFails);
 
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.evaluateCondition; rc " + rc, {expr: expr, scope: scope});
+            {
+                FBTrace.sysout("cookies.evaluateCondition", {expr: expr, scope: scope});
+            }
 
             return !!context.breakingCause;
         }

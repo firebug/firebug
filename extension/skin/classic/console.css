@@ -166,6 +166,13 @@
     color: #787878;
 }
 
+.objectBox-scope {
+    color: #707070;
+}
+.objectBox-optimizedAway {
+    color: #909090;
+}
+
 .objectLink-sourceLink {
     position: absolute;
     right: 4px;

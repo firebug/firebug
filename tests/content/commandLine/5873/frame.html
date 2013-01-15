@@ -1,0 +1,9 @@
+<script>
+(function() {
+    var framePriv = 2;
+    window.frameA = function() {
+        return framePriv * Math.random();
+    };
+})();
+location.fra = frameA;
+</script>

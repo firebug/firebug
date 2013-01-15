@@ -812,14 +812,15 @@ Dom.getDOMMembers = function(object)
         { return domMemberCache.Node; }
     else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
-    else if (object instanceof Object)
-        { return domMemberCache.Object; }
 
     return null;
 };
 
 Dom.isDOMMember = function(object, propName)
 {
+    // We use "in" here instead of "hasOwnProperty" so that things on Object.prototype
+    // also get treated as DOM members.
+    // XXXsimon: Non-DOM objects should also get this behavior.
     var members = Dom.getDOMMembers(object);
     return members && propName in members;
 };
@@ -1163,45 +1164,6 @@ domMemberMap.Window =
     "mozIndexedDB",
     "sidebar",
     "getDefaultComputedStyle"
-];
-
-domMemberMap.Object =
-[
-    "arguments",
-    "caller",
-    "length",
-    "name",
-    "__defineGetter__",
-    "__defineSetter__",
-    "__lookupGetter__",
-    "__lookupSetter__",
-    "apply",
-    "bind",
-    "call",
-    "constructor",
-    "create",
-    "defineProperties",
-    "defineProperty",
-    "freeze",
-    "getOwnPropertyDescriptor",
-    "getOwnPropertyNames",
-    "getPrototypeOf",
-    "hasOwnProperty",
-    "isExtensible",
-    "isFrozen",
-    "isGenerator",
-    "isPrototypeOf",
-    "isSealed",
-    "keys",
-    "preventExtensions",
-    "propertyIsEnumerable",
-    "seal",
-    "toLocaleString",
-    "toSource",
-    "toString",
-    "unwatch",
-    "valueOf",
-    "watch"
 ];
 
 domMemberMap.Location =

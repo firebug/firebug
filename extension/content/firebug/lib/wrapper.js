@@ -16,10 +16,10 @@ var Wrapper = {};
 
 Wrapper.getContentView = function(object)
 {
-    if (typeof(object) === "undefined" || object == null)
-        return false;
+    if (typeof object !== "object" && typeof object !== "function")
+        return object;
 
-    return (object.wrappedJSObject);
+    return object.wrappedJSObject;
 }
 
 Wrapper.unwrapObject = function(object)
@@ -96,9 +96,6 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
 
 Wrapper.ignoreVars =
 {
-    "__firebug__": 1,
-    "eval": 1,
-
     // We are forced to ignore Java-related variables, because
     // trying to access them causes browser freeze
     "sun": 1,
@@ -111,9 +108,9 @@ Wrapper.ignoreVars =
 
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
-    "_createFirebugConsole": 1,
+    "_firebugUnwrappedDebuggerObject": 1,
+    "__fb_scopedVars": 1,
     "_FirebugCommandLine": 1,
-    "loadFirebugConsole": 1,
 };
 
 Wrapper.shouldIgnore = function(name)
