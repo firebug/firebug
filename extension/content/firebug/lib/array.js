@@ -9,6 +9,7 @@ function(FBTrace) {
 // Constants
 
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 var Arr = {};
 
 // ********************************************************************************************* //
@@ -33,12 +34,24 @@ Arr.isArrayLike = function(obj)
             return true;
         if (typeof obj.splice === "function") // jQuery etc.
             return true;
-        if (obj instanceof Ci.nsIDOMHTMLCollection)
+        if (Arr._isDOMTokenList(obj))
             return true;
-        if (obj instanceof Ci.nsIDOMNodeList)
+        var str = Object.prototype.toString.call(obj);
+        if (str === "[object HTMLCollection]" || str === "[object NodeList]")
             return true;
-        if (obj instanceof Ci.nsIDOMDOMTokenList)
-            return true;
+    }
+    catch (exc) {}
+    return false;
+};
+
+Arr._isDOMTokenList = function(obj)
+{
+    // When minVersion is 19 or so, we can replace this whole function with
+    // (Object.prototype.toString.call(obj) === "[object DOMTokenList]").
+    try
+    {
+        var uwGlobal = XPCNativeWrapper.unwrap(Cu.getGlobalForObject(obj));
+        return obj instanceof uwGlobal.DOMTokenList;
     }
     catch (exc) {}
     return false;
