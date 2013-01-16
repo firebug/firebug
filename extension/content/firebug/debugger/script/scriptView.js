@@ -378,9 +378,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.editor.setDebugLocation(lineNo);
 
-        // xxxHonza: this should scroll the content to make the debug line visible
-        // but doesn't work, why?
-        this.editor.setCaretPosition(lineNo, 0, SourceEditor.VERTICAL_ALIGN.CENTER);
+        // Scroll the content so the debug-location (execution line) is still visible
+        // during stepping (must be done asynchronously from some reason).
+        var self = this;
+        setTimeout(function()
+        {
+            self.editor.setCaretPosition(lineNo, 0, SourceEditor.VERTICAL_ALIGN.CENTER);
+        });
     },
 
     removeDebugLocation: function()
