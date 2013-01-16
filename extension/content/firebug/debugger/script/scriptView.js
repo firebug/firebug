@@ -373,8 +373,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        this.editor.setDebugLocation(lineNo - 1);
-        this.editor.setCaretPosition(lineNo - 1);
+        // Convert to index based.
+        lineNo = lineNo - 1;
+
+        this.editor.setDebugLocation(lineNo);
+
+        // xxxHonza: this should scroll the content to make the debug line visible
+        // but doesn't work, why?
+        this.editor.setCaretPosition(lineNo, 0, SourceEditor.VERTICAL_ALIGN.CENTER);
     },
 
     removeDebugLocation: function()
