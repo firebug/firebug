@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/object",
+    "firebug/lib/array",
     "arch/compilationunit",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/chrome/plugin",
 ],
-function(Obj, CompilationUnit, Events, Url, Win, Css) {
+function(Obj, Arr, CompilationUnit, Events, Url, Win, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -70,7 +71,7 @@ Firebug.TabContext.prototype =
 
     getAllCompilationUnits: function()
     {
-        return Firebug.SourceFile.mapAsArray(this.compilationUnits);
+        return Arr.values(this.compilationUnits);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
