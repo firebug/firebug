@@ -8,7 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",
@@ -965,7 +965,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
         else if (object instanceof window.CSSRule ||
             (object instanceof window.CSSStyleDeclaration && object.parentRule) ||
-            (object instanceof SourceLink.SourceLink && object.type == "css" &&
+            (object instanceof SourceLink && object.type == "css" &&
                 Url.reCSS.test(object.href)))
         {
             return 2;
@@ -1043,7 +1043,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             this.navigate(object);
         }
-        else if (object instanceof SourceLink.SourceLink)
+        else if (object instanceof SourceLink)
         {
             try
             {
@@ -1456,7 +1456,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         var line = getRuleLine(rule);
         var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
-        var sourceLink = new SourceLink.SourceLink(href, line, "css", rule, instance);
+        var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
         return sourceLink;
     },

@@ -8,7 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/html/htmlLib",
     "firebug/lib/events",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",
@@ -1555,7 +1555,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             return 2;
         }
-        else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
+        else if (object instanceof SourceLink && object.type == "css" &&
             !Url.reCSS.test(object.href))
         {
             return 2;
@@ -1595,7 +1595,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.ioBox.sourceRow.removeAttribute("exe_line");
 
         // && object.type == "css" and !Url.reCSS(object.href) by supports
-        if (object instanceof SourceLink.SourceLink)
+        if (object instanceof SourceLink)
         {
             var sourceLink = object;
             var stylesheet = Css.getStyleSheetByHref(sourceLink.href, this.context);

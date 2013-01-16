@@ -11,7 +11,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/array",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/xpath",

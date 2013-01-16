@@ -9,7 +9,7 @@ define([
     "firebug/lib/deprecated",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -120,7 +120,7 @@ for (var p in Firefox)
     FBL[p] = Firefox[p];
 
 FBL.deprecated = Deprecated.deprecated;
-FBL.SourceLink = SourceLink.SourceLink;
+FBL.SourceLink = SourceLink;
 
 // deprecated
 FBL.$ = function(id, doc)

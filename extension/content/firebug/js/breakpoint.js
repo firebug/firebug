@@ -7,7 +7,7 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -324,7 +324,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getSourceLink: function(bp)
     {
-        return new SourceLink.SourceLink(bp.href, bp.lineNumber, "js");
+        return new SourceLink(bp.href, bp.lineNumber, "js");
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)

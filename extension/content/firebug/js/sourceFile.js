@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
 ],
 function(Obj, Firebug, Url, SourceLink, StackFrame) {
@@ -501,7 +501,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
     getSourceLinkForScript: function (script)
     {
         var line = this.getBaseLineNumberByScript(script);
-        return new SourceLink.SourceLink(this.sourceFile.href, line, "js");
+        return new SourceLink(this.sourceFile.href, line, "js");
     },
 
     getBaseLineNumberByScript: function(script)
@@ -631,7 +631,7 @@ Firebug.EvalLevelSourceFile.OuterScriptAnalyzer.prototype =
 
     getSourceLinkForScript: function (script)
     {
-        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
+        return new SourceLink(this.sourceFile.href, 1, "js");
     }
 };
 
@@ -716,7 +716,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
 
     getSourceLinkForScript: function (script)
     {
-        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
+        return new SourceLink(this.sourceFile.href, 1, "js");
     }
 };
 
@@ -771,7 +771,7 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
 
     getSourceLinkForScript: function (script)
     {
-        return SourceLink.SourceLink(Url.normalizeURL(script.fileName),
+        return new SourceLink(Url.normalizeURL(script.fileName),
             script.baseLineNumber, "js");
     }
 };

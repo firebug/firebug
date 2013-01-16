@@ -71,7 +71,7 @@ StackFrame.prototype =
 
     toSourceLink: function()
     {
-        return new SourceLink.SourceLink(this.sourceFile.href, this.line, "js");
+        return new SourceLink(this.sourceFile.href, this.line, "js");
     },
 
     toString: function()

@@ -117,7 +117,7 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getSourceLink: function(bp)
     {
-        return new SourceLink.SourceLink(bp.href, bp.lineNo, "js");
+        return new SourceLink(bp.href, bp.lineNo, "js");
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)

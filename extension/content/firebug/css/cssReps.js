@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/chrome/infotip",
     "firebug/lib/domplate",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/lib/css",

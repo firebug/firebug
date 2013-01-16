@@ -13,7 +13,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/options",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -1988,7 +1988,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof SourceLink.SourceLink;
+        return object instanceof SourceLink;
     },
 
     getTooltip: function(sourceLink)
@@ -2228,7 +2228,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,
 
     getSourceLink: function(stackFrame)
     {
-        var sourceLink = new SourceLink.SourceLink(stackFrame.href, stackFrame.line, "js");
+        var sourceLink = new SourceLink(stackFrame.href, stackFrame.line, "js");
         return sourceLink;
     },
 
@@ -2538,7 +2538,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext,
+        return error.lineNo ? new SourceLink(error.href, error.lineNo, ext,
             null, null, error.colNumber) : null;
     },
 

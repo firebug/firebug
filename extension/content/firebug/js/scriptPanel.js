@@ -11,7 +11,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -869,7 +869,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 {
                     if (state.location)
                     {
-                        var sourceLink = new SourceLink.SourceLink(state.location.getURL(),
+                        var sourceLink = new SourceLink(state.location.getURL(),
                             state.previousCentralLine, "js");
 
                         // Causes the Script panel to show the proper location.
@@ -1081,7 +1081,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     supportsObject: function(object, type)
     {
         if (object instanceof CompilationUnit
-            || (object instanceof SourceLink.SourceLink && object.type == "js")
+            || (object instanceof SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame.StackFrame)
         {
@@ -1199,7 +1199,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             if (object instanceof CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
-            else if (object instanceof SourceLink.SourceLink)
+            else if (object instanceof SourceLink)
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
                 FBTrace.sysout("script updateSelection this.showFunction(object)", object);
@@ -1211,7 +1211,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (object instanceof CompilationUnit)
             this.navigate(object);
-        else if (object instanceof SourceLink.SourceLink)
+        else if (object instanceof SourceLink)
             this.showSourceLink(object);
         else if (typeof(object) == "function")
             this.showFunction(object);
@@ -1361,7 +1361,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         var sourceLine = Dom.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
-        return new SourceLink.SourceLink(this.location.url, lineNo, "js");
+        return new SourceLink(this.location.url, lineNo, "js");
     },
 
     getOptionsMenuItems: function()

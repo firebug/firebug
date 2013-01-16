@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "arch/compilationunit",
     "firebug/lib/events",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
@@ -544,7 +544,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         if (!lineNo)
             lineNo = this.getCentralLine(this.selectedSourceBox);
 
-        return new SourceLink.SourceLink(this.selectedSourceBox.repObject.href, lineNo,
+        return new SourceLink(this.selectedSourceBox.repObject.href, lineNo,
             this.getSourceType());
     },
 
@@ -754,7 +754,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         if (Firebug.uiListeners.length > 0)
         {
-            var link = new SourceLink.SourceLink(sourceBox.repObject.href, sourceBox.centralLine,
+            var link = new SourceLink(sourceBox.repObject.href, sourceBox.centralLine,
                 this.getSourceType());
 
             Events.dispatch(Firebug.uiListeners, "onViewportChange", [link]);

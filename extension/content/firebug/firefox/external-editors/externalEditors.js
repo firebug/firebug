@@ -8,7 +8,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/lib/string",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/system",
     "firebug/lib/array",
@@ -208,7 +208,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         if (!this.count())
             return
 
-        if (object instanceof SourceLink.SourceLink)
+        if (object instanceof SourceLink)
         {
             var sourceLink = object;
             this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);

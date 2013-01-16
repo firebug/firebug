@@ -10,7 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/chrome/window",
@@ -2618,7 +2618,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         var sourceFile = Firebug.SourceFile.getSourceFileByHref(url, context);
         if (sourceFile)
-            return new SourceLink.SourceLink(sourceFile.href, 0, "js");
+            return new SourceLink(sourceFile.href, 0, "js");
     },
 
     shutdown: function()

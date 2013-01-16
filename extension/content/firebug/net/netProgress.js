@@ -6,7 +6,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/chrome/window",
@@ -1040,7 +1040,7 @@ NetFile.prototype =
     getFileLink: function(message)
     {
         // this.SourceLink = function(url, line, type, object, instance)
-        var link = new SourceLink.SourceLink(this.href, null, "net", this.request);
+        var link = new SourceLink(this.href, null, "net", this.request);
         return link;
     },
 

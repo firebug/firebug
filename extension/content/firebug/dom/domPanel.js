@@ -8,7 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/js/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -1441,7 +1441,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (typeof object == "undefined")
             return 1000;
-        else if (object instanceof SourceLink.SourceLink)
+        else if (object instanceof SourceLink)
             return 0;
         else
             return 1; // just agree to support everything but not aggressively.

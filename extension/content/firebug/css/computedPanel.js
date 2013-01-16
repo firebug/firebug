@@ -11,7 +11,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/url",
     "firebug/lib/array",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/lib/string",
@@ -129,7 +129,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             var rule = selector.selector._cssRule._domRule;
 
             var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
-            var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css",
+            var sourceLink = line != -1 ? new SourceLink(href, line, "css",
                 rule, instance) : null;
 
             return sourceLink;

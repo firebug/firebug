@@ -10,7 +10,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/lib/url",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -286,7 +286,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     supportsObject: function(object, type)
     {
-        return ((object instanceof SourceLink.SourceLink && object.type == "net") ? 2 : 0);
+        return ((object instanceof SourceLink && object.type == "net") ? 2 : 0);
     },
 
     getOptionsMenuItems: function()

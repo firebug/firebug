@@ -5,7 +5,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/deprecated",
     "firebug/lib/options",
 ],
@@ -190,7 +190,7 @@ StackFrame.StackFrame.prototype =
 
     toSourceLink: function()
     {
-        return new SourceLink.SourceLink(this.sourceFile.href, this.line, "js");
+        return new SourceLink(this.sourceFile.href, this.line, "js");
     },
 
     toString: function()
@@ -438,7 +438,7 @@ StackFrame.getStackSourceLink = function()
 StackFrame.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
-        return new SourceLink.SourceLink(frame.filename, frame.lineNumber, "js");
+        return new SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
 };
