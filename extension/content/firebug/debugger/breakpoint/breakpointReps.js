@@ -7,7 +7,7 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/debugger/breakpoint/breakpoint",
