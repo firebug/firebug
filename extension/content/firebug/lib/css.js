@@ -239,7 +239,7 @@ Css.copyBoxStyles = function(fromNode, toNode, style)
         if (!style)
             style = view.getComputedStyle(fromNode, "");
 
-        toNode.style.marginTop = style.getPropertyCSSValue("margin-top").cssText;
+        toNode.style.marginTop = style.marginTop;
         toNode.style.marginRight = style.marginRight;
         toNode.style.marginBottom = style.marginBottom;
         toNode.style.marginLeft = style.marginLeft;
