@@ -15,12 +15,11 @@ define([
     "firebug/lib/array",
     "firebug/lib/persist",
     "firebug/chrome/menu",
-    "firebug/js/fbs",
     "firebug/editor/editor",
     "firebug/console/autoCompleter"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
-    StackFrame, Css, Dom, Str, Arr, Persist, Menu, FBS) {
+    StackFrame, Css, Dom, Str, Arr, Persist, Menu) {
 
 // ********************************************************************************************* //
 // Constants

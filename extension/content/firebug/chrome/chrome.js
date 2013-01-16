@@ -15,12 +15,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
-    "firebug/js/fbs",
     "firebug/chrome/window",
     "firebug/lib/options"
 ],
 function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
-    Events, FBS, Win, Options) {
+    Events, Win, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1453,7 +1452,7 @@ var FirebugChrome =
                 {
                     var checked = false;
                     if (option == "profiling")
-                        checked = FBS.profiling;
+                        checked = false;//xxxHonza; FBS doesn't exist now FBS.profiling;
                     else
                         checked = Firebug.Options.get(option);
 

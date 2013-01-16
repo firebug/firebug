@@ -55,6 +55,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/html/htmlPanel",
         "firebug/console/commandLinePopup",
         "firebug/accessible/a11y",
+        "firebug/js/debugger",
         "firebug/console/consoleInjector",
         "firebug/net/spy",
         "firebug/net/tabCache",

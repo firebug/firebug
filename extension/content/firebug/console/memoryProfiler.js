@@ -11,9 +11,8 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
-    "firebug/js/fbs",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, Css, Str, FBS) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, Css, Str) {
 
 // ********************************************************************************************* //
 

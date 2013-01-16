@@ -17,12 +17,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/trace/debug",
-    "firebug/js/fbs",
     "firebug/lib/events",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
-    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events) {
+    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -69,7 +68,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
-    fbs: FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
+    fbs: null, //FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
@@ -2416,12 +2415,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
      */
     registerClient: function(clientAPI)
     {
-        return FBS.registerClient(clientAPI);
+        return 0; //FBS.registerClient(clientAPI);
     },
 
     unregisterClient: function(clientAPI)
     {
-        FBS.unregisterClient(clientAPI);
+        //FBS.unregisterClient(clientAPI);
     },
 
     enable: function()
@@ -2444,8 +2443,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         this.obeyPrefs();
         this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // TODO move to script.js
         this.filterMenuUpdate();
-        if (FBS.isJSDActive())  // notify frontend of current state
-            Firebug.JSDebugClient.onJSDActivate(true, 'Firebug.Debugger.initializeUI');
+
+        // xxxHonza; no FBS
+        //if (FBS.isJSDActive())  // notify frontend of current state
+        //    Firebug.JSDebugClient.onJSDActivate(true, 'Firebug.Debugger.initializeUI');
     },
 
     obeyPrefs: function()
@@ -2641,7 +2642,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("registerDebugger");
 
         // this will eventually set 'jsd' on the statusIcon
-        var check = FBS.registerDebugger(this);
+        var check = false; //FBS.registerDebugger(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.registerDebugger "+check+" debuggers");
@@ -2656,7 +2657,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (Firebug.Profiler && Firebug.Profiler.isProfiling())
             return;
 
-        var check = FBS.unregisterDebugger(this);
+        var check = false; //FBS.unregisterDebugger(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.unregisterDebugger: "+check+" debuggers");
@@ -2693,6 +2694,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     activateDebugger: function()
     {
+        // xxxHonza; no FBS
+        return;
+
         this.registerDebugger();
 
         // If jsd is already active, we'll notify true; else we'll get another event
@@ -2706,6 +2710,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     deactivateDebugger: function()
     {
+        // xxxHonza; no FBS
+        return;
+
         this.unregisterDebugger();
 
         var isActive = FBS.isJSDActive();
@@ -2731,6 +2738,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
+        // xxxHonza; no FBS
+        return;
+
         // can be called multiple times.
         var paused = FBS.pause(this.debuggerName);
 
@@ -2752,6 +2762,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
+
+        // xxxHonza; no FBS
+        return;
 
         var unpaused = FBS.unPause();
 

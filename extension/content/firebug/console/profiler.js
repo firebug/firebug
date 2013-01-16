@@ -13,10 +13,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
-    "firebug/js/fbs",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
-    Css, Dom, Str, FBS) {
+    Css, Dom, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -103,6 +102,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     toggleProfiling: function(context)
     {
+        //xxxHonza: FBS doesn't exist now
+        return;
+
         if (FBS.profiling)
             this.stopProfiling(context);
         else
@@ -111,6 +113,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     startProfiling: function(context, title)
     {
+        //xxxHonza: FBS doesn't exist now
+        return;
+
         FBS.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
@@ -130,6 +135,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     stopProfiling: function(context, cancelReport)
     {
+        //xxxHonza: FBS doesn't exist now
+        return;
+
         var totalTime = FBS.stopProfiling();
         if (totalTime == -1)
             return;
