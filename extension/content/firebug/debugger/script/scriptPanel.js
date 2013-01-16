@@ -108,12 +108,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (enable)
         {
             Firebug.JSD2.Debugger.addObserver(this);
-            Firebug.TabCacheModel.addObserver(this);
         }
         else
         {
             Firebug.JSD2.Debugger.removeObserver(this);
-            Firebug.TabCacheModel.removeObserver(this);
         }
     },
 

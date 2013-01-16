@@ -59,7 +59,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/js/callstack",
         "firebug/console/consoleInjector",
         "firebug/net/spy",
-        "firebug/js/tabCache",
+        "firebug/net/tabCache",
         "firebug/chrome/activation",
         "firebug/css/stylePanel",
         "firebug/css/computedPanel",

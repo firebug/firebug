@@ -15,7 +15,7 @@ define([
     "firebug/net/jsonViewer",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
-    "firebug/js/sourceCache"
+    "firebug/net/sourceCache"
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
     Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener) {
