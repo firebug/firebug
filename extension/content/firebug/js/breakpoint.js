@@ -75,7 +75,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         // The script panel can be created at this moment (the second parameter is false)
         // It's needed for break on next to work (do not wait till the user actuall
         // selectes the panel).
-        var scriptPanel = panel.context.getPanel("script");
+        // xxxHonza: reimplement using JSD2
+        var scriptPanel = null;//panel.context.getPanel("script");
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");
         var scriptActive = tool && tool.getActive();

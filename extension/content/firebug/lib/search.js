@@ -137,64 +137,6 @@ Search.TextSearch = function(rootNode, rowFinder)
     this.reset();
 };
 
-Search.SourceBoxTextSearch = function(sourceBox)
-{
-    this.tryToContinueSearch = function(sBox, text)
-    {
-        if (sBox != sourceBox)
-            return false;
-
-        var isSubstring = text.indexOf(this.text) !=-1 || this.text.indexOf(text) !=-1;
-
-        if (isSubstring && this.mark && Math.abs(sourceBox.centralLine - this.mark) < 10)
-            this.mark--;
-        else
-            this.reset();
-
-        return true;
-    };
-    this.find = function(text, reverse, caseSensitive)
-    {
-        this.text = text;
-
-        this.re = new Search.ReversibleRegExp(text);
-
-        return this.findNext(false, reverse, caseSensitive);
-    };
-
-    this.findNext = function(wrapAround, reverse, caseSensitive)
-    {
-        this.wrapped = false;
-        var lines = sourceBox.lines;
-        var match = null;
-        for (var iter = new Search.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
-        {
-            match = this.re.exec(lines[iter.index], false, caseSensitive);
-            if (match)
-            {
-                this.mark = iter.index;
-                return iter.index;
-            }
-        }
-
-        if (!match && wrapAround)
-        {
-            this.reset();
-            this.wrapped = true;
-            return this.findNext(false, reverse, caseSensitive);
-        }
-
-        return match;
-    };
-
-    this.reset = function()
-    {
-        delete this.mark;
-    };
-
-    this.reset();
-};
-
 Search.ReversibleIterator = function(length, start, reverse)
 {
     this.length = length;
