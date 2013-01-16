@@ -6,7 +6,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/string",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/console/errors",
     "firebug/trace/debug",
     "firebug/console/console",

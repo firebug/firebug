@@ -9,7 +9,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/debugger/script/sourceLink",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/search",

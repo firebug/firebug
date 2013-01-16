@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
+    "firebug/debugger/grips/objectGrip",
     "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
     "firebug/debugger/debugger",
     "firebug/debugger/script/scriptPanel",
@@ -22,13 +23,17 @@ define([
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
 ],
-function(FBTrace, TraceListener, TraceModule) {
+function(FBTrace, TraceListener, TraceModule, ObjectGrip) {
 
 // ********************************************************************************************* //
 // Debugger
 
 // This module just defines a list of dependencies for JSD2 debugger so,
 // all necessary modules are properyly loaded.
+
+// xxxHonza: can't be in ObjectGrip since firebug/firebug is not loaded at that moment
+// is there a better place?
+Firebug.registerDefaultGrip(ObjectGrip);
 
 // Register stylesheet with DBG_* styles
 // xxxHonza: any better way how to register global Firebug stylesheth with trace styles?

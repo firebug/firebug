@@ -7,7 +7,7 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",

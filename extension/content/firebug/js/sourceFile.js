@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "firebug/lib/url",
     "firebug/debugger/script/sourceLink",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
 ],
 function(Obj, Firebug, Url, SourceLink, StackFrame) {
 

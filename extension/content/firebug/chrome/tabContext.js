@@ -154,7 +154,11 @@ Firebug.TabContext.prototype =
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("onCompilationUnit " + url, [this, url, kind] );
 
-        Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
+         var compilationUnit = new CompilationUnit(url, this);
+         compilationUnit.kind = kind;
+         this.compilationUnits[url] = compilationUnit;
+
+        //Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
 
         // HACKs
         var compilationUnit = this.getCompilationUnit(url);

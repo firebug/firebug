@@ -14,7 +14,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/url",
     "firebug/debugger/script/sourceLink",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",

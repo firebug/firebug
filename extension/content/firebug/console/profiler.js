@@ -8,7 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",

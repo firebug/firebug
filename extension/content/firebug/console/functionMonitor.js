@@ -5,7 +5,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",

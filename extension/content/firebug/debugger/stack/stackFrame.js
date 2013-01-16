@@ -280,6 +280,12 @@ function getArgValue(arg)
 }
 
 // ********************************************************************************************* //
+// JSD1 Artifacts
+
+StackFrame.suspendShowStackTrace = function(){}
+StackFrame.resumeShowStackTrace = function(){}
+
+// ********************************************************************************************* //
 // Registration
 
 return StackFrame;

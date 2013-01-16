@@ -10,7 +10,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/debugger/script/sourceLink",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/http",

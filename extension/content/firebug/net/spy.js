@@ -7,7 +7,7 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/events",
     "firebug/net/requestObserver",
-    "firebug/js/stackFrame",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/dom",
