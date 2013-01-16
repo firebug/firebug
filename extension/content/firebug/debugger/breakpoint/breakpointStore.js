@@ -73,6 +73,13 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.storage = null;
     },
 
+    resetAllOptions: function()
+    {
+        // xxxHonza: remove also on the server side.
+        this.storage.clear();
+        this.breakpoints = {};
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerClientModule Events
 

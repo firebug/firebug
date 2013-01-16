@@ -180,8 +180,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 this.selectFrame(frameIndex);
             }
 
-            Trace.sysout("callstackPanel.updateSelection index:" + trace.currentFrameIndex +
-                " StackFrame " + object, object);
+            Trace.sysout("callstackPanel.updateSelection" + object, object);
         }
     },
 

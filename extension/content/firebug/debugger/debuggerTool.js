@@ -271,9 +271,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Execute registered 'clientEvaluated' callback.
         // This must be done after "onStartDebugging" is dispatched to the Script panel, which
         // is updating selection of the Watch panel and could potentially start Watch expr
-        // evaluation again (since evalInProgress would be false - done).
-        // xxxHonza: still bad architecture, but this.eval should have a simple callback
-        // even if spreaded over two pauses.
+        // evaluation again (since evalInProgress would be false i.e. done).
+        // xxxHonza: still bad architecture, the eval() method should have a simple callback
+        // even if the action is spreaded over resume-pause roundtrip.
         if (type == "clientEvaluated" && context.evalCallback)
         {
             context.evalCallback(context, event, packet);
