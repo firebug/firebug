@@ -7,11 +7,11 @@ function runTest()
         FBTest.openFirebug();
 
         var tests = [];
-        /*tests.push(function(callback)
+        tests.push(function(callback)
         {
             FBTest.progress("Testing JSON array");
             testJSONArray(win, callback);
-        });*/
+        });
 
         tests.push(function(callback)
         {
@@ -105,7 +105,7 @@ function testJSONObject(win, callback)
                 verifyJSONContents("object", jsonBody, ["a", "b", "c"]);
 
                 // Reset click state
-                //FBTest.click(sortLink);
+                FBTest.click(sortLink);
             }
         }
 
