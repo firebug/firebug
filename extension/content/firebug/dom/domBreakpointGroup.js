@@ -12,8 +12,10 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
+    "firebug/debugger/breakpoint/breakpointGroup",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist) {
+function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
+    BreakpointGroup) {
 
 with (Domplate) {
 
@@ -31,7 +33,7 @@ function DOMBreakpointGroup()
     this.breakpoints = [];
 }
 
-DOMBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
+DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 {
     name: "domBreakpoints",
     title: Locale.$STR("dom.label.DOM Breakpoints"),

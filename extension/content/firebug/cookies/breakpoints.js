@@ -8,9 +8,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
-    "firebug/cookies/cookieUtils"
+    "firebug/cookies/cookieUtils",
+    "firebug/debugger/breakpoint/breakpointConditionEditor",
 ],
-function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
+function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils, ConditionEditor) {
 
 with (Domplate) {
 
@@ -295,7 +296,7 @@ Breakpoints.ConditionEditor = function(doc)
     Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
 };
 
-Breakpoints.ConditionEditor.prototype = Domplate.domplate(Firebug.Breakpoint.ConditionEditor.prototype,
+Breakpoints.ConditionEditor.prototype = Domplate.domplate(ConditionEditor.prototype,
 {
     endEditing: function(target, value, cancel)
     {

@@ -20,9 +20,9 @@ function(Obj, Firebug, Locale, Events, Dom, Arr, Menu) {
 // ********************************************************************************************* //
 // Breakpoints
 
-Firebug.JSD2.Breakpoint = Obj.extend(Firebug.Module,
+Firebug.Breakpoint = Obj.extend(Firebug.Module,
 {
-    dispatchName: "JSD2.BreakpointModule",
+    dispatchName: "BreakpointModule",
 
     toggleBreakOnNext: function(panel)
     {
@@ -110,7 +110,7 @@ Firebug.JSD2.Breakpoint = Obj.extend(Firebug.Module,
             return;
 
         Events.removeEventListener(event.target, "animationiteration",
-            Firebug.JSD2.Breakpoint.toggleTabHighlighting, true);
+            Firebug.Breakpoint.toggleTabHighlighting, true);
 
         var panel = Firebug.currentContext.getPanel(event.target.panelType.prototype.name);
         if (!panel)
@@ -250,9 +250,9 @@ function countBreakpoints(context)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.JSD2.Breakpoint);
+Firebug.registerModule(Firebug.Breakpoint);
 
-return Firebug.JSD2.Breakpoint;
+return Firebug.Breakpoint;
 
 // ********************************************************************************************* //
 });

@@ -41,8 +41,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
-    name: "jsd2breakpoints",
-    parentPanel: "jsd2script",
+    name: "breakpoints",
+    parentPanel: "script",
     order: 2,
     enableA11y: true,
     deriveA11yFrom: "console",
@@ -153,7 +153,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                     this.groupOpened[groups[i].name] : true;
             }
 
-            Firebug.JSD2.Breakpoint.BreakpointListRep.tag.replace(
+            Firebug.Breakpoint.BreakpointListRep.tag.replace(
                 {groups: groups}, this.panelNode);
         }
         else

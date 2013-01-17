@@ -70,14 +70,14 @@ var BasePanel = Firebug.Panel;
 WatchPanel.prototype = Obj.extend(BasePanel,
 /** @lends WatchPanel */
 {
-    dispatchName: "JSD2.WatchPanel",
+    dispatchName: "WatchPanel",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
-    name: "jsd2watches",
+    name: "watches",
     order: 0,
-    parentPanel: "jsd2script",
+    parentPanel: "script",
     enableA11y: true,
     deriveA11yFrom: "console",
     remoteable: true,

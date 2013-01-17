@@ -21,7 +21,7 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netProgress",
     "firebug/lib/http",
-    "firebug/js/breakpoint",
+    "firebug/debugger/breakpoint/breakpointModule",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",

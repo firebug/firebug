@@ -30,12 +30,13 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/chrome/firefox",
+    "firebug/debugger/breakpoint/breakpointGroup",
     "firebug/cookies/legacy",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
-    TraceListener, TraceModule, Firefox) {
+    TraceListener, TraceModule, Firefox, BreakpointGroup) {
 
 with (Domplate) {
 
@@ -1239,7 +1240,7 @@ function CookieBreakpointGroup()
     this.breakpoints = [];
 }
 
-CookieBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
+CookieBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 {
     name: "cookieBreakpoints",
     title: Locale.$STR("cookies.Cookie Breakpoints"),

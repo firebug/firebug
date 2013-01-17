@@ -23,7 +23,7 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netProgress",
     "firebug/css/cssReps",
-    "firebug/js/breakpoint",
+    "firebug/debugger/breakpoint/breakpointConditionEditor",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",
@@ -37,7 +37,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor) {
 
 with (Domplate) {
 
@@ -1622,14 +1622,14 @@ var NetPanelSearch = function(panel, rowFinder)
     };
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {
     Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
 };
 
-Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Breakpoint.ConditionEditor.prototype,
+Firebug.NetMonitor.ConditionEditor.prototype = domplate(ConditionEditor.prototype,
 {
     endEditing: function(target, value, cancel)
     {

@@ -42,12 +42,12 @@ var BasePanel = Firebug.ActivablePanel;
 ScriptPanel.prototype = Obj.extend(BasePanel,
 /** @lends ScriptPanel */
 {
-    dispatchName: "JSD2.ScriptPanel",
+    dispatchName: "ScriptPanel",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
-    name: "jsd2script",
+    name: "script",
     searchable: true,
     breakable: true,
     enableA11y: true,
@@ -107,11 +107,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // xxxHonza: needs to be revisited
         if (enable)
         {
-            Firebug.JSD2.Debugger.addObserver(this);
+            Firebug.Debugger.addObserver(this);
         }
         else
         {
-            Firebug.JSD2.Debugger.removeObserver(this);
+            Firebug.Debugger.removeObserver(this);
         }
     },
 
@@ -202,7 +202,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.updateInfoTip();
 
-        var watchPanel = this.context.getPanel("jsd2watches", true);
+        var watchPanel = this.context.getPanel("watches", true);
         if (watchPanel)
             watchPanel.showEmptyMembers();
     },
@@ -818,8 +818,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             //Firebug.Breakpoint.updatePanelTab(this, false);
 
             // This is how the Watch panel is synchronized.
-            Firebug.chrome.select(this.context.currentFrame, "jsd2script", null, true);
-            Firebug.chrome.syncPanel("jsd2script");  // issue 3463 and 4213
+            Firebug.chrome.select(this.context.currentFrame, "script", null, true);
+            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
         }
         catch (exc)

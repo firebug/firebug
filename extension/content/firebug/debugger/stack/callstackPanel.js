@@ -45,13 +45,13 @@ function CallstackPanel() {}
 CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 /** @lends CallstackPanel */
 {
-    dispatchName: "JSD2.CallstackPanel",
+    dispatchName: "CallstackPanel",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
-    name: "jsd2callstack",
-    parentPanel: "jsd2script",
+    name: "callstack",
+    parentPanel: "script",
     order: 1,
     enableA11y: true,
     deriveA11yFrom: "console",

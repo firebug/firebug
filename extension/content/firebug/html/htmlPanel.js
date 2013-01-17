@@ -22,7 +22,7 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
-    "firebug/js/breakpoint",
+    "firebug/debugger/breakpoint/breakpointGroup",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
@@ -31,7 +31,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip) {
+    Url, CSSModule, CSSInfoTip, BreakpointGroup) {
 
 with (Domplate) {
 
@@ -3077,7 +3077,7 @@ function MutationBreakpointGroup(context)
     this.context = context;
 }
 
-MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
+MutationBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 {
     name: "mutationBreakpoints",
     title: Locale.$STR("html.label.HTML Breakpoints"),

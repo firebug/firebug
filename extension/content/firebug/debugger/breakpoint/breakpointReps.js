@@ -27,7 +27,7 @@ var Trace = FBTrace.to("DBG_BP");
 // ********************************************************************************************* //
 // Breakpoint Reps
 
-Firebug.JSD2.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
+Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 {
     tag:
         DIV({role : "list"},
@@ -91,7 +91,7 @@ Firebug.JSD2.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
+Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
     inspectable: false,
 
@@ -262,9 +262,9 @@ Firebug.JSD2.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerRep(Firebug.JSD2.Breakpoint.BreakpointRep);
+Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
 
-return Firebug.JSD2.Breakpoint.BreakpointListRep;
+return Firebug.Breakpoint.BreakpointListRep;
 
 // ********************************************************************************************* //
 });

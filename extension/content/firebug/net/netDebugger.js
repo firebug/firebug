@@ -11,8 +11,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/array",
     "firebug/net/netUtils",
+    "firebug/debugger/breakpoint/breakpointGroup",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
+function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils,
+    BreakpointGroup) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,7 +33,7 @@ function NetBreakpointGroup()
     this.breakpoints = [];
 }
 
-NetBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
+NetBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 {
     name: "netBreakpoints",
     title: Locale.$STR("net.label.XHR Breakpoints"),

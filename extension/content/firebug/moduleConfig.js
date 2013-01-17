@@ -54,7 +54,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/html/htmlPanel",
         "firebug/console/commandLinePopup",
         "firebug/accessible/a11y",
-        "firebug/js/debugger",
         "firebug/console/consoleInjector",
         "firebug/net/spy",
         "firebug/net/tabCache",
@@ -75,12 +74,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
 
     return config;
 };
-
-// ********************************************************************************************* //
-
-// Create an extra namespace for JSD2 objects.
-// xxxHonza: should this really be here?
-Firebug.JSD2 = {};
 
 // ********************************************************************************************* //
 // Firebug Extension Registration

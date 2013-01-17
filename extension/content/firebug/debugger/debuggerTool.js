@@ -38,7 +38,7 @@ var Trace = FBTrace.to("DBG_DEBUGGERTOOL");
 var DebuggerTool = Obj.extend(Firebug.Module,
 /** @lends DebuggerTool */
 {
-    dispatchName: "JSD2.DebuggerTool",
+    dispatchName: "DebuggerTool",
 
     toolName: "debugger",
 
@@ -263,7 +263,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // JS execution and update the Script panel immediatelly so, make sure it exists before
         // we distribute 'onStartDebugging' event. The panel doesn't have to exist in case 
         // the page breaks before it's fully loaded (e.g. in an 'onLoad' handler).
-        var scriptPanel = context.getPanel("jsd2script");
+        var scriptPanel = context.getPanel("script");
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);
