@@ -286,6 +286,119 @@ StackFrame.suspendShowStackTrace = function(){}
 StackFrame.resumeShowStackTrace = function(){}
 
 // ********************************************************************************************* //
+
+var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
+var reErrorStackLine2 = /^([^\(]*)\((.*)\)$/;
+
+// function name (arg, arg, arg)@fileName:lineNo
+StackFrame.parseToStackFrame = function(line, context)
+{
+    var last255 = line.length - 255;
+    if (last255 > 0)
+        line = line.substr(last255);   // avoid regexp on monster compressed source (issue 4135)
+
+    var m = reErrorStackLine.exec(line);
+    if (m)
+    {
+        var m2 = reErrorStackLine2.exec(m[1]);
+        if (m2)
+        {
+            var params = m2[2].split(',');
+            //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
+            //var params = JSON.parse("["+m2[2]+"]");
+            return new StackFrame.StackFrame({href:m[2]}, m[3], m2[1],
+                params, null, null, context);
+        }
+        else
+        {
+            // Firefox 14 removes arguments from <exception-object>.stack.toString()
+            // That's why the m2 reg doesn't match
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=744842
+            return new StackFrame.StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
+        }
+    }
+};
+
+StackFrame.parseToStackTrace = function(stack, context)
+{
+     var lines = stack.split('\n');
+     var trace = new StackFrame.StackTrace();
+     for (var i = 0; i < lines.length; i++)
+     {
+         var frame = StackFrame.parseToStackFrame(lines[i],context);
+
+         if (FBTrace.DBG_STACK)
+             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+
+         if (frame)
+             trace.frames.push(frame);
+     }
+     return trace;
+};
+
+StackFrame.cleanStackTraceOfFirebug = function(trace)
+{
+    if (trace && trace.frames)
+    {
+        var count = trace.frames.length - 1;
+        while (trace.frames.length && (/^_[fF]irebug/.test(trace.frames[count].fn) ||
+            /^\s*with\s*\(\s*_[fF]irebug/.test(trace.frames[count].sourceFile.source)))
+        {
+            trace.frames.pop();
+        }
+
+        if (trace.frames.length == 0)
+            trace = undefined;
+    }
+    return trace;
+};
+
+StackFrame.getStackDump = function()
+{
+    var lines = [];
+    for (var frame = Components.stack; frame; frame = frame.caller)
+        lines.push(frame.filename + " (" + frame.lineNumber + ")");
+
+    return lines.join("\n");
+};
+
+StackFrame.getJSDStackDump = function(newestFrame)
+{
+    var lines = [];
+    for (var frame = newestFrame; frame; frame = frame.callingFrame)
+        lines.push(frame.script.fileName + " (" + frame.line + ")");
+
+    return lines.join("\n");
+};
+
+StackFrame.getStackSourceLink = function()
+{
+    for (var frame = Components.stack; frame; frame = frame.caller)
+    {
+        if (frame.filename && frame.filename.indexOf("://firebug/") > 0)
+        {
+            for (; frame; frame = frame.caller)
+            {
+                var firebugComponent = "/modules/firebug-";
+                if (frame.filename && frame.filename.indexOf("://firebug/") < 0 &&
+                    frame.filename.indexOf(firebugComponent) == -1)
+                    break;
+            }
+            break;
+        }
+    }
+    return StackFrame.getFrameSourceLink(frame);
+};
+
+StackFrame.getFrameSourceLink = function(frame)
+{
+    if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
+        return new SourceLink.SourceLink(frame.filename, frame.lineNumber, "js");
+    else
+        return null;
+};
+
+// ********************************************************************************************* //
 // Registration
 
 return StackFrame;
