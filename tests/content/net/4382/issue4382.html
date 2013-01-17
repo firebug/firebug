@@ -27,11 +27,6 @@
             <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4382">Issue 4382</a>: JSON sorting</h1>
         </header>
         <div>
-            <section id="content">
-                <button type="button" id="requestArray" onclick="sendAJAXRequest('array')">Send array request</button>
-                <button type="button" id="requestObject" onclick="sendAJAXRequest('object')">Send object request</button>
-                <section id="output"></section>
-            </section>
             <section id="description">
                 <h2>JSON Array</h2>
                 <h3>Steps to reproduce</h3>
@@ -39,7 +34,8 @@
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>Net</em> panel</li>
                     <li>
-                        Click the <em>Send array request</em> button<br/>
+                        Click the <em>Send array request</em> button
+                        <button type="button" id="requestArray" onclick="sendAJAXRequest('array')">Send array request</button><br/>
                         <span class="ok">&rArr; There should be a request to <code>json.php?type=array</code> shown inside the request list</span>
                     </li>
                     <li>
@@ -66,7 +62,8 @@
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>Net</em> panel</li>
                     <li>
-                        Click the <em>Send object request</em> button<br/>
+                        Click the <em>Send object request</em> button
+                        <button type="button" id="requestObject" onclick="sendAJAXRequest('object')">Send object request</button><br/>
                         <span class="ok">&rArr; There should be a request to <code>json.php?type=object</code> shown inside the request list</span>
                     </li>
                     <li>
@@ -75,17 +72,24 @@
                     </li>
                     <li>
                         Expand the <em>JSON</em> tab<br/>
-                        <span class="ok">&rArr; The object properties should be listed in the order they were defined (<code>5</code>, <code>2</code>, <code>15</code>, &hellip;)</span>
+                        <span class="ok">&rArr; The object properties should be listed in the order they were defined (<code>"a"</code>, <code>"c"</code>, <code>"b"</code>)</span>
                     </li>
                     <li>
                         Click the <em>Sort by key</em> link
-                        <span class="ok">&rArr; The object properties should be listed in alphabetical order (<code>1</code>, <code>10</code>, <code>11</code>, &hellip;)</span>
+                        <span class="ok">&rArr; The object properties should be listed in alphabetical order (<code>"a"</code>, <code>"b"</code>, <code>"c"</code>)</span>
                     </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
                     <li>The object properties should be listed in the order they were defined by default</li>
                     <li>There should be an option to switch to an alphabetical order</li>
+                </ul>
+                <h3>Notes</h3>
+                <ul>
+                    <li>"Basically, objects and arrays now have the same enumeration behavior,
+                    and it's numeric properties in numeric order followed by named properties
+                    in addition order."
+                    See <a href="http://code.google.com/p/fbug/issues/detail?id=6193">issue 6193</a></li>
                 </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>

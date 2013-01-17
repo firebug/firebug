@@ -782,62 +782,19 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     getTitle: function(obj, context)
     {
-        var arr = Wrapper.unwrapObject(obj);
-        const re =/\[object ([^\]]*)/;
-        var label = Str.safeToString(arr);
-        var m = re.exec(label);
-        if (m)
-            return m[1] || label;
-
-        if ((arr instanceof Ci.nsIDOMDOMTokenList) || (this.isTokenList_Fx19(obj)))
+        if (Arr._isDOMTokenList(obj))
             return "DOMTokenList";
 
-        return "";
+        const re = /\[object ([^\]]*)/;
+        var label = Object.prototype.toString.call(obj);
+        var m = re.exec(label);
+        return (m ? m[1] : label);
     },
 
     isArray: function(obj)
     {
-        if (this.isArrayLike_Fx19(obj))
-            return true;
-
         return Arr.isArrayLike(obj);
-    },
-
-    /**
-     * Hack for Firefox 19 where obj instanceof Ci.nsIDOMDOMTokenList doesn't work.
-     */
-    isTokenList_Fx19: function(obj)
-    {
-        var context = Firebug.currentContext;
-        if (!context)
-            return false;
-
-        var view = Wrapper.getContentView(context.window);
-        if (!view)
-            return false;
-
-        obj = Wrapper.unwrapObject(obj);
-        return (obj instanceof view.DOMTokenList);
-    },
-
-    /**
-     * Hack for Firefox 19 where obj instanceof Ci.nsIDOMDOMTokenList,
-     * Ci.nsIDOMHTMLCollection and nsIDOMNodeList doesn't work.
-     */
-    isArrayLike_Fx19: function(obj)
-    {
-        var context = Firebug.currentContext;
-        if (!context)
-            return false;
-
-        var view = Wrapper.getContentView(context.window);
-        if (!view)
-            return false;
-
-        obj = Wrapper.unwrapObject(obj);
-        return (obj instanceof view.DOMTokenList) || (obj instanceof view.HTMLCollection) ||
-            (obj instanceof view.NodeList);
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -1224,6 +1181,20 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return true;
     },
 
+    ignoreTarget: function(target)
+    {
+        // XXX: Temporary fix for issue 5577.
+        var repNode = target && Firebug.getRepNode(target);
+        return (repNode && repNode.classList.contains("cssRule"));
+    },
+
+    highlightObject: function(object, context, target)
+    {
+        if (this.ignoreTarget(target))
+            return;
+        Firebug.Inspector.highlightObject(object, context);
+    },
+
     persistObject: function(elt, context)
     {
         var xpath = Xpath.getElementXPath(elt);
@@ -1248,8 +1219,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
-        // XXX: Temporary fix for issue 5577.
-        if (Dom.getAncestorByClass(target, "cssElementRuleContainer"))
+        if (this.ignoreTarget(target))
             return;
 
         var type;
