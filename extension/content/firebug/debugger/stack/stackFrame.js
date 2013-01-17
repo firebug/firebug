@@ -362,15 +362,6 @@ StackFrame.getStackDump = function()
     return lines.join("\n");
 };
 
-StackFrame.getJSDStackDump = function(newestFrame)
-{
-    var lines = [];
-    for (var frame = newestFrame; frame; frame = frame.callingFrame)
-        lines.push(frame.script.fileName + " (" + frame.line + ")");
-
-    return lines.join("\n");
-};
-
 StackFrame.getStackSourceLink = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
