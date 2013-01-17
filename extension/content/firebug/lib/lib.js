@@ -131,20 +131,12 @@ FBL.$ = function(id, doc)
         return document.getElementById(id);
 };
 
-// deprecated
-FBL.jsd = Components.classes["@mozilla.org/js/jsd/debugger-service;1"].
-    getService(Components.interfaces.jsdIDebuggerService);
-
 // ********************************************************************************************* //
 // Constants
 
 try
 {
     Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
-    Components.utils["import"]("resource://firebug/firebug-service.js");
-
-    // deprecated
-    FBL.fbs = fbs; // left over from component.
 }
 catch (err)
 {

@@ -46,8 +46,6 @@ const pointlessErrors =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Components.utils["import"]("resource://firebug/firebug-service.js");
-
 const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);

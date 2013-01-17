@@ -43,17 +43,6 @@ const Ci = Components.interfaces;
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
 
-try
-{
-    // xxxHonza: RJS
-    var FBS = {};
-    Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
-    var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
-}
-catch (err)
-{
-}
-
 // ********************************************************************************************* //
 // Common Tags
 
@@ -294,8 +283,8 @@ FirebugReps.Func = domplate(Firebug.Rep,
             return;
 
         var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
-        var monitored = scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
-            scriptInfo.lineNo) : false;
+        var monitored = false; // xxxHonza: FBS doesn't exist scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
+            //scriptInfo.lineNo) : false;
 
         var self = this;
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
@@ -2435,7 +2424,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     hasErrorBreak: function(error)
     {
-        return FBS.fbs.hasErrorBreakpoint(Url.normalizeURL(error.href), error.lineNo);
+        return false; //xxxHonza: FBS doesn't exist FBS.fbs.hasErrorBreakpoint(Url.normalizeURL(error.href), error.lineNo);
     },
 
     getDuplication: function(msgId)

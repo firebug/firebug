@@ -10,10 +10,8 @@ const Cu = Components.utils;
 // List of firebug modules that must be loaded at startup and unloaded on shutdown.
 // !important every new module loaded with Cu.import must be added here
 var FIREBUG_MODULES = [
-    "resource://firebug/debuggerHalter.js",
     "resource://firebug/fbtrace.js",
     "resource://firebug/firebug-http-observer.js",
-    "resource://firebug/firebug-service.js",
     "resource://firebug/firebug-trace-service.js",
     "resource://firebug/gcli.js",
     "resource://firebug/loader.js",
@@ -105,12 +103,6 @@ function shutdown(params, reason)
 
     // Unregister all GCLI commands
     FirebugGCLICommands.shutdown();
-
-    // xxxHonza: I think this shouldn't be here (perhaps in firebug-service.js)
-    // Shutdown Firebug's JSD debugger service.
-    var fbs = Cu.import("resource://firebug/firebug-service.js", {}).fbs;
-    fbs.disableDebugger();
-    fbs.shutdown();
 
     // remove default preferences
     PrefLoader.clearDefaultPrefs();

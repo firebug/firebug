@@ -142,10 +142,6 @@ Url.isSystemURL = function(url)
         return true;
     else if (url.substr(0, 6) == "about:")
         return true;
-    else if (url.indexOf("firebug-service.js") != -1)
-        return true;
-    else if (url.indexOf("/modules/debuggerHalter.js") != -1)
-        return true;
     else
         return false;
 };

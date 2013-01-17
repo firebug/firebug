@@ -421,10 +421,6 @@ function createFirebugConsole(context, win)
                 if (Str.hasPrefix(frames[i].href, "resource:"))
                     continue;
 
-                // firebug-service scope reached, in some cases the url starts with file://
-                if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
-                    continue;
-
                 // command line
                 var fn = frames[i].getFunctionName() + "";
                 if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
