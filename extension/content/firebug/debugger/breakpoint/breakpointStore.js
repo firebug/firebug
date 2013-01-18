@@ -298,6 +298,15 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.dispatch("onBreakpointModified", [bp]);
     },
 
+    isBreakpointDisabled: function(url, lineNo)
+    {
+        var bp = this.findBreakpoint(url, lineNo);
+        if (!bp)
+            return;
+
+        return bp.disabled;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getBreakpoints: function(url)

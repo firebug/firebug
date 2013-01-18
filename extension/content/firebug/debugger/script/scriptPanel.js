@@ -556,9 +556,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (hasBreakpoint)
         {
-            var isDisabled = this.tool.isBreakpointDisabled(this.context, this.location.href,
-                lineNo);
-
+            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo);
             items.push({
                 label: "breakpoints.Disable_Breakpoint",
                 tooltiptext: "breakpoints.tip.Disable_Breakpoint",
@@ -646,6 +644,30 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var text = this.scriptView.getSelectedText();
         watchPanel.addWatch(text);
+    },
+
+    toggleBreakpoint: function(line)
+    {
+        // Convert to breakpoit lines (one based).
+        line = line + 1;
+
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, line);
+        if (hasBreakpoint)
+            BreakpointStore.removeBreakpoint(this.location.href, line);
+        else
+            BreakpointStore.addBreakpoint(this.location.href, line);
+    },
+
+    toggleDisableBreakpoint: function(line)
+    {
+        // Convert to breakpoit lines (one based).
+        line = line + 1;
+
+        var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, line);
+        if (isDisabled)
+            BreakpointStore.enableBreakpoint(this.location.href, line);
+        else
+            BreakpointStore.disableBreakpoint(this.location.href, line);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
