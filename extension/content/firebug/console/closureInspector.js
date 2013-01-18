@@ -62,7 +62,11 @@ var ClosureInspector =
     {
         var dbg = this.getInactiveDebuggerForContext(context);
 
-        var dglobal = this.debuggeeCache.get(global);
+        // Because (outer) windows persist between reloads, use their documents
+        // as keys into the cache instead.
+        var cacheKey = global.document || global;
+
+        var dglobal = this.debuggeeCache.get(cacheKey);
         if (dglobal)
             return dglobal;
 
@@ -71,7 +75,7 @@ var ClosureInspector =
         dglobal = dbg.addDebuggee(global);
         dbg.removeDebuggee(global);
 
-        this.debuggeeCache.set(global, dglobal);
+        this.debuggeeCache.set(cacheKey, dglobal);
         return dglobal;
     },
 
