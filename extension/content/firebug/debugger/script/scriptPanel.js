@@ -648,7 +648,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     toggleBreakpoint: function(line)
     {
-        // Convert to breakpoit lines (one based).
+        // Convert to breakpoint lines (one based).
         line = line + 1;
 
         var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, line);
