@@ -27,6 +27,7 @@ var ClosureInspector =
 {
     hasInit: false,
     Debugger: null,
+    debuggeeCache: new WeakMap(),
 
     getInactiveDebuggerForContext: function(context)
     {
@@ -55,6 +56,23 @@ var ClosureInspector =
         dbg.enabled = false;
         context.inactiveDebugger = dbg;
         return dbg;
+    },
+
+    getDebuggeeObject: function(context, global)
+    {
+        var dbg = this.getInactiveDebuggerForContext(context);
+
+        var dglobal = this.debuggeeCache.get(global);
+        if (dglobal)
+            return dglobal;
+
+        // Note: for no purposes is it actually important that the global is
+        // held as a debuggee; it just makes things slower.
+        dglobal = dbg.addDebuggee(global);
+        dbg.removeDebuggee(global);
+
+        this.debuggeeCache.set(global, dglobal);
+        return dglobal;
     },
 
     getVariableOrOptimizedAway: function(scope, name)
@@ -192,7 +210,9 @@ var ClosureInspector =
             throw new Error("permission denied to access cross origin scope");
         }
 
-        var dglobal = dbg.addDebuggee(objGlobal);
+        // Create a view of the object as seen from its own global - 'environment'
+        // will not be accessible otherwise.
+        var dglobal = this.getDebuggeeObject(context, objGlobal);
 
         var dobj = dglobal.makeDebuggeeValue(obj);
 
@@ -250,13 +270,12 @@ var ClosureInspector =
             throw exc;
         }
 
-        var env, dbg, dglobal;
+        var env, dglobal;
         try
         {
             env = this.getEnvironmentForObject(win, obj, context);
 
-            dbg = this.getInactiveDebuggerForContext(context);
-            dglobal = dbg.addDebuggee(win);
+            dglobal = this.getDebuggeeObject(context, win);
         }
         catch (exc)
         {
@@ -345,8 +364,7 @@ var ClosureInspector =
             return;
         }
 
-        var dbg = this.getInactiveDebuggerForContext(context);
-        var dwin = dbg.addDebuggee(win);
+        var dwin = this.getDebuggeeObject(context, win);
 
         var scopeDataHolder = Object.create(ScopeProxy.prototype);
         scopeDataHolder.scope = scope;
