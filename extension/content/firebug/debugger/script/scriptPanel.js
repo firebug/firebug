@@ -19,10 +19,11 @@ define([
     "firebug/trace/traceListener",
     "firebug/debugger/breakpoint/breakpointConditionEditor",
     "firebug/lib/keywords",
+    "firebug/lib/system",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener,
-    BreakpointConditionEditor, Keywords) {
+    BreakpointConditionEditor, Keywords, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -501,15 +502,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Context Menu
-
-    onContextMenu: function(items)
-    {
-        var menuItems = this.getOptionsMenuItems();
-        items.push.apply(items, menuItems);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 
     getOptionsMenuItems: function()
@@ -524,22 +516,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
-    getContextMenuItems: function(fn, target)
+    onContextMenu: function(event, items)
     {
-        if (Dom.getAncestorByClass(target, "sourceLine"))
-            return;
+        var target = event.target;
+        var line = this.scriptView.getLineIndex(target);
+        var menuItems = this.getContextMenuItems(line, target);
+        items.push.apply(items, menuItems);
+    },
 
-        var sourceRow = Dom.getAncestorByClass(target, "sourceRow");
-        if (!sourceRow)
-            return;
-
-        var sourceLine = Dom.getChildByClass(sourceRow, "sourceLine");
-        var lineNo = parseInt(sourceLine.textContent);
-
+    getContextMenuItems: function(lineNo, target)
+    {
         var items = [];
 
-        var selection = this.document.defaultView.getSelection();
-        if (selection.toString())
+        var text = this.scriptView.getSelectedText();
+        if (text.toString())
         {
             items.push({
                 label: "CopySourceCode",
@@ -554,8 +544,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             });
         }
 
-        var hasBreakpoint = sourceRow.getAttribute("breakpoint") == "true";
-
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, lineNo + 1);
         items.push("-",
         {
             label: "SetBreakpoint",
@@ -587,62 +576,76 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (this.context.stopped)
         {
-            var sourceRow = Dom.getAncestorByClass(target, "sourceRow");
-            if (sourceRow)
-            {
-                var compilationUnit = Dom.getAncestorByClass(sourceRow, "sourceBox").repObject;
-                var lineNo = parseInt(sourceRow.firstChild.textContent);
-
-                var debuggr = this;
-                items.push(
-                    "-",
-                    {
-                        label: "script.Rerun",
-                        tooltiptext: "script.tip.Rerun",
-                        id: "contextMenuRerun",
-                        command: Obj.bindFixed(debuggr.rerun, debuggr, this.context),
-                        acceltext: "Shift+F8"
-                    },
-                    {
-                        label: "script.Continue",
-                        tooltiptext: "script.tip.Continue",
-                        id: "contextMenuContinue",
-                        command: Obj.bindFixed(debuggr.resume, debuggr, this.context),
-                        acceltext: "F8"
-                    },
-                    {
-                        label: "script.Step_Over",
-                        tooltiptext: "script.tip.Step_Over",
-                        id: "contextMenuStepOver",
-                        command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context),
-                        acceltext: "F10"
-                    },
-                    {
-                        label: "script.Step_Into",
-                        tooltiptext: "script.tip.Step_Into",
-                        id: "contextMenuStepInto",
-                        command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context),
-                        acceltext: "F11"
-                    },
-                    {
-                        label: "script.Step_Out",
-                        tooltiptext: "script.tip.Step_Out",
-                        id: "contextMenuStepOut",
-                        command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
-                        acceltext: "Shift+F11"
-                    },
-                    {
-                        label: "firebug.RunUntil",
-                        tooltiptext: "script.tip.Run_Until",
-                        id: "contextMenuRunUntil",
-                        command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
-                            compilationUnit, lineNo)
-                    }
-                );
-            }
+            var debuggr = this;
+            items.push(
+                "-",
+                // xxxHonza: TODO
+                /*{
+                    label: "script.Rerun",
+                    tooltiptext: "script.tip.Rerun",
+                    id: "contextMenuRerun",
+                    command: Obj.bindFixed(debuggr.rerun, debuggr, this.context),
+                    acceltext: "Shift+F8"
+                },*/
+                {
+                    label: "script.Continue",
+                    tooltiptext: "script.tip.Continue",
+                    id: "contextMenuContinue",
+                    command: Obj.bindFixed(debuggr.resume, debuggr, this.context),
+                    acceltext: "F8"
+                },
+                {
+                    label: "script.Step_Over",
+                    tooltiptext: "script.tip.Step_Over",
+                    id: "contextMenuStepOver",
+                    command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context),
+                    acceltext: "F10"
+                },
+                {
+                    label: "script.Step_Into",
+                    tooltiptext: "script.tip.Step_Into",
+                    id: "contextMenuStepInto",
+                    command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context),
+                    acceltext: "F11"
+                },
+                {
+                    label: "script.Step_Out",
+                    tooltiptext: "script.tip.Step_Out",
+                    id: "contextMenuStepOut",
+                    command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
+                    acceltext: "Shift+F11"
+                }
+                //xxxHonza: TODO
+                /*{
+                    label: "firebug.RunUntil",
+                    tooltiptext: "script.tip.Run_Until",
+                    id: "contextMenuRunUntil",
+                    command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
+                        compilationUnit, lineNo)
+                }*/
+            )
         }
 
         return items;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu Commands
+
+    copySource: function()
+    {
+        var text = this.scriptView.getSelectedText();
+        System.copyToClipboard(text);
+    },
+
+    addSelectionWatch: function()
+    {
+        var watchPanel = this.context.getPanel("watches", true);
+        if (!watchPanel)
+            return;
+
+        var text = this.scriptView.getSelectedText();
+        watchPanel.addWatch(text);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

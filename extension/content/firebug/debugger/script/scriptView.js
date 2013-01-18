@@ -170,6 +170,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onContextMenu: function(event)
     {
+        Trace.sysout("scripView.onContextMenu;", event);
+
         var popup = document.getElementById("fbScriptViewPopup");
         Dom.eraseNode(popup);
 
@@ -177,7 +179,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var commandDispatcher = browserWindow.document.commandDispatcher;
 
         var items = [];
-        this.dispatch("onContextMenu", [items]);
+        this.dispatch("onContextMenu", [event.event, items]);
 
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);
@@ -519,6 +521,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var browser = Firefox.getCurrentBrowser();
         InfoTip.onMouseOut(event, browser);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getSelectedText: function()
+    {
+        return this.editor.getSelectedText();
+    }
 });
 
 // ********************************************************************************************* //

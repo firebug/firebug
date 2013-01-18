@@ -253,6 +253,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         return null;
     },
 
+    hasBreakpoint: function(url, lineNo)
+    {
+        var bp = this.findBreakpoint(url, lineNo);
+        return (bp != null);
+    },
+
     enableBreakpoint: function(url, lineNo)
     {
         var bp = this.findBreakpoint(url, lineNo);
