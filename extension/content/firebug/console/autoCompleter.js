@@ -1745,7 +1745,17 @@ function setCompletionsFromObject(out, object, context)
         {
             var target = (isObjectPrototype(obj) ?
                     out.hiddenCompletions : out.completions);
-            target.push.apply(target, Object.getOwnPropertyNames(obj));
+            if (Array.isArray(obj) && obj.length > 4000)
+            {
+                // The object is a large array. To avoid RangeErrors from
+                // `target.push.apply` and a slow `Object.getOwnPropertyNames`,
+                // we just skip this level ("length" is also on the prototype,
+                // and numeric property would get hidden later anyway).
+            }
+            else
+            {
+                target.push.apply(target, Object.getOwnPropertyNames(obj));
+            }
             obj = Object.getPrototypeOf(obj);
         }
 
@@ -1815,15 +1825,20 @@ function propChainBuildComplete(out, context, tempExpr, result)
 
     var done = function(result)
     {
-        if (result !== undefined && result !== null)
+        if (result == null)
+            return;
+
+        if (typeof result !== "object" && typeof result !== "function")
         {
-            if (typeof result !== "object" && typeof result !== "function")
-            {
-                // Convert the primitive into its scope's matching object type.
-                result = Wrapper.getContentView(out.window).Object(result);
-            }
-            setCompletionsFromObject(out, result, context);
+            // To avoid slow completions, convert strings to length 0 (numeric
+            // properties are hidden anyway).
+            if (typeof result === "string")
+                result = "";
+
+            // Convert the primitive into its scope's matching object type.
+            result = Wrapper.getContentView(out.window).Object(result);
         }
+        setCompletionsFromObject(out, result, context);
     };
 
     if (tempExpr.fake)
