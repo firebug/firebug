@@ -31,7 +31,18 @@ var Trace = FBTrace.to("DBG_BREAKPOINTSTORE");
 // ********************************************************************************************* //
 // Breakpoint Store
 
+/**
+ * @Module BreakpointStore module is responsible for saving and loading breakpoints
+ * on the client side.
+ * 
+ * TODO:
+ * 1) Methods should expect zero-based line numbers so, it's consistent across
+ *    Firebug framework. The line numbers should be auto-converted into one-based
+ *    when stored into breakpoints.json so, the file contains numbers expected
+ *    by the user.
+ */
 var BreakpointStore = Obj.extend(Firebug.Module,
+/** @lends BreakpointStore */
 {
     dispatchName: "BreakpointStore",
     breakpoints: {},
