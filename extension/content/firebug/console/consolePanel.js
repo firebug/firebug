@@ -398,10 +398,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (typeof object == "string")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
-        // Use the first item of an array
-        if (object instanceof Object && typeof object[0] != "undefined")
-            return object[0] + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-
         // Group messages coming from the same location
         if (object instanceof Object && object.href && object.lineNo && object.message)
             return object.message + object.href + ":" + object.lineNo;
@@ -413,10 +409,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Use all direct properties of the object
         if (object instanceof Object)
         {
-            var msgID = "";
-            for (var prop in object)
-                msgID += prop + object[prop];
-            return msgID;
+            var id = Obj.getObjHash(object);
+            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
         }
 
         return "";

@@ -2,10 +2,17 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/xpcom",
     "firebug/lib/array",
-    "firebug/lib/string",
+    "firebug/lib/string"
 ],
-function(FBTrace, Arr, Str) {
+function(FBTrace, Xpcom, Arr, Str) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // ********************************************************************************************* //
 
@@ -152,6 +159,28 @@ Obj.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
 }
+
+Obj.getObjHash = function(obj)
+{
+    function toHexString(charCode)
+    {
+        return ("0" + charCode.toString(16)).slice(-2);
+    }
+
+    var str = JSON.stringify(obj);
+    var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
+        "nsIScriptableUnicodeConverter");
+    converter.charset = "UTF-8";
+    var result = {};
+    var data = converter.convertToByteArray(str, result);
+    var ch = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+    ch.init(ch.MD5);
+    ch.update(data, data.length);
+    var hash = ch.finish(false);
+     
+    var s = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+    return s;
+};
 
 Obj.getRandomInt = function(min, max)
 {
