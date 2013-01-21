@@ -14,7 +14,9 @@
     <vbox id="fbContentBox">
         <box id="fbPanelBox">
             <panelBar id="fbPanelBar1">
-                <hbox id="fbPaneBar1-connectionToolbar" insertbefore="fbPanelBar1-tabBox">
+                <!-- xxxHonza: hidden for now, till remoting is really supported -->
+                <hbox id="fbPaneBar1-connectionToolbar" insertbefore="fbPanelBar1-tabBox"
+                    style="display:none">
 
                     <!-- Connect/disconnect menu -->
                     <toolbarbutton id="firebugConnectionMenu" type="menu"
