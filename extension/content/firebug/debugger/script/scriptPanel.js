@@ -286,6 +286,31 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             [this, compilationUnit]);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breadcrumbs (object path)
+
+    framesadded: function(stackTrace)
+    {
+        // Invoke breadcrumbs update.
+        Firebug.chrome.syncStatusPath();
+    },
+
+    framescleared: function()
+    {
+        Firebug.chrome.syncStatusPath();
+    },
+
+    getObjectPath: function(frame)
+    {
+        Trace.sysout("scriptPanel.getObjectPath; frame " + frame, frame);
+
+        if (this.context.currentTrace)
+            return this.context.currentTrace.frames;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Source
+
     showSource: function(compilationUnit)
     {
         Trace.sysout("scriptPanel.showSource; " + (compilationUnit ? compilationUnit.url :
