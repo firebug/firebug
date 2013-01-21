@@ -160,7 +160,6 @@ Obj.getObjHash = function(obj)
         return ("0" + charCode.toString(16)).slice(-2);
     }
 
-<<<<<<< HEAD
     var str = "";
     try
     {
@@ -173,9 +172,6 @@ Obj.getObjHash = function(obj)
         str = "notStringifyable";
     }
 
-=======
-    var str = JSON.stringify(obj);
->>>>>>> Improved creating of message ID for objects, so that objects with different properties and property values are treated as different objects
     var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
         "nsIScriptableUnicodeConverter");
     converter.charset = "UTF-8";
