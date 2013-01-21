@@ -370,17 +370,32 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.openBreakpointConditionEditor; Line: " + lineIndex);
 
-        this.editBreakpointCondition(lineIndex, event);
+        this.editBreakpointCondition(lineIndex);
         Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Conditional Breakpoints
 
-    editBreakpointCondition: function(lineNo, event)
+    editBreakpointCondition: function(lineNo)
     {
+        var target = this.scriptView.getAnnotationTarget(lineNo);
+        if (!target)
+            return;
+
+        // Create helper object for remembering the line and URL. It's used when
+        // the user right clicks on a line with no breakpoint and picks
+        // Edit Breakpoint Condition. This should still work and the breakpoint
+        // should be created automatically if the user provide a condition.
+        var tempBp = {
+            lineNo: lineNo,
+            href: this.location.getURL(),
+            condition: "",
+        }
+
+        // The breakpoint doesn't have to exist.
         var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo + 1);
-        var condition = bp.condition;
+        var condition = bp ? bp.condition : tempBp.condition;
 
         // xxxHonza: displaying BP conditions in the Watch panel is not supported yet.
         /*if (condition)
@@ -392,14 +407,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Reference to the edited breakpoint.
         var editor = this.getEditor();
-        editor.breakpoint = bp;
+        editor.breakpoint = bp ? bp : tempBp;
 
-        Firebug.Editor.startEditing(event.target, condition, null, null, this);
+        Firebug.Editor.startEditing(target, condition, null, null, this);
     },
 
     onSetBreakpointCondition: function(bp, value)
     {
-        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
+        // If the breakpoint doesn't yet exist create it now. This allows to create
+        // conditional breakpoints in one step.
+        var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo + 1);
+        if (!availableBp)
+            BreakpointStore.addBreakpoint(bp.href, bp.lineNo + 1, value);
+
+        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo + 1, value);
     },
 
     getEditor: function(target, value)

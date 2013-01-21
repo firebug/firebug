@@ -43,6 +43,11 @@ function ScriptView()
 /**
  * ScriptView wraps SourceEditor component that is built on top of Orion editor.
  * This object is responsible for displaying JS source code in the debugger panel.
+ *
+ * TODO:
+ * 1) Since the {@ScriptView} is using Orion's private API, we should have some
+ * tests (could be within the lib group) that are checking every new Orion version.
+ *
  */
 ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 /** @lends ScriptView */
@@ -484,7 +489,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (!Css.hasClass(target, "breakpoint"))
             return;
 
-        // The condittion editor for breakpoints should be opened now.
+        // The breakpoint condition editor is about to be opened.
         var lineIndex = this.getLineIndex(target);
         this.dispatch("openBreakpointConditionEditor", [lineIndex, event]);
     },
@@ -520,6 +525,32 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var event = params.event;
         var browser = Firefox.getCurrentBrowser();
         InfoTip.onMouseOut(event, browser);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Annotations
+
+    /**
+     * Returns related annotation target (an element) associated with the given line.
+     * @param {Object} line Given line number. Line numbers are zero-based.
+     */
+    getAnnotationTarget: function(line)
+    {
+        // This method is using Orion's private API.
+        var viewLeftRuler = this.editor._view._leftDiv;
+        var annotationsRuler = viewLeftRuler.querySelector(".ruler.annotations");
+
+        // Search through the annotations for the one associated with the given
+        // line number.
+        var length = annotationsRuler.children.length;
+        for (var i=0; i<length; i++)
+        {
+            var annotation = annotationsRuler.children[i];
+            if (annotation.lineIndex == line)
+                return annotation;
+        }
+
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

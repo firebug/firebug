@@ -66,23 +66,24 @@
     color: #000000;
 }
 
-/*.sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png);
+/**
+ * When the user right click on a line with no breakpoint and picks "Edit Breakpoint Condition"
+ * The related annotation is marked as 'editing'. Use the style and display a breakpoint
+ * icon indicating that the breakpoint will be auto-created if the user provides a condition.
+ */
+.ruler.annotations > DIV.editing {
+    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-position: top !important;
+    background-repeat: no-repeat !important;
 }
 
-.sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
-}*/
+/*************************************************************************************************/
+/* The current debug location (execution line) */
 
 .annotation.breakpoint.debugLocation > DIV.annotationHTML {
     background-image: url(chrome://firebug/skin/breakpointExe.png);
 }
 
-/*.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
-}*/
-
-/* The current debug location */
 .annotationLine.debugLocation {
     outline: 1px solid #D9D9B6;
     margin-left: -10px;
