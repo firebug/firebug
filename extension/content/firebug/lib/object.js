@@ -160,7 +160,18 @@ Obj.getObjHash = function(obj)
         return ("0" + charCode.toString(16)).slice(-2);
     }
 
-    var str = JSON.stringify(obj);
+    var str = "";
+    try
+    {
+        str = JSON.stringify(obj);
+    }
+    catch(e)
+    {
+        // Object has a cyclic reference, is a wrapped Object, etc.
+        // TODO: Find a way to stringify the object in case JSON.stringify() fails
+        str = "notStringifyable";
+    }
+
     var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
         "nsIScriptableUnicodeConverter");
     converter.charset = "UTF-8";
