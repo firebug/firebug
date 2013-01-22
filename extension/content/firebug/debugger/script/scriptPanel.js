@@ -553,10 +553,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     getOptionsMenuItems: function()
     {
         return [
+            Menu.optionMenu("firebug.debugger.breakOnExceptions",
+                "breakOnExceptions",
+                "firebug.debugger.tip.breakOnExceptions"),
             Menu.optionMenu("firebug.breakpoint.showBreakNotifications",
                 "showBreakNotification",
                 "firebug.breakpoint.tip.Show_Break_Notifications")
         ];
+    },
+
+    updateOption: function(name, value)
+    {
+        if (name == "breakOnExceptions")
+            this.tool.breakOnExceptions(this.context, value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

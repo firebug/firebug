@@ -18,10 +18,11 @@ define([
     "firebug/trace/traceListener",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoint/breakpointStore",
+    "firebug/lib/options",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
     DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile,
-    BreakpointStore) {
+    BreakpointStore, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -144,6 +145,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).
         this.updateScriptFiles(context);
+
+        // Initialize break on exception flag.
+        this.breakOnExceptions(context, Options.get("breakOnExceptions"));
     },
 
     onThreadDetached: function(context)
@@ -624,7 +628,15 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             return true;
 
         return false;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Break On Exceptions
+
+    breakOnExceptions: function(context, flag)
+    {
+        return context.activeThread.pauseOnExceptions(flag);
+    },
 });
 
 // ********************************************************************************************* //

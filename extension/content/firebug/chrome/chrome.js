@@ -338,6 +338,8 @@ var FirebugChrome =
 
     updateOption: function(name, value)
     {
+        // xxxHonza: I think we should distribute updateOption also to all panels
+        // in all contexts.
         if (panelBar1 && panelBar1.selectedPanel)
             panelBar1.selectedPanel.updateOption(name, value);
 
