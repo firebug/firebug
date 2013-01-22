@@ -7,6 +7,9 @@
 var htmlCollection = document.getElementsByTagName("html");
 var anArray = [1,2,3,4];
 var objWithNumericProps = {"0": 0, "1": 1};
+var largeArray = [];
+for (var i = 0; i < 10000; ++i)
+    largeArray.push(i);
 </script>
 </head>
 <body>
@@ -62,6 +65,8 @@ that completions appear for:</li>
     <li><code style="color:green">new Date().g</code></li>
     <li><code style="color:green">anArray["0</code></li>
     <li><code style="color:green">objWithNumericProps.0</code></li>
+    <li><code style="color:green">largeArray.leng</code></li>
+    <li><code style="color:green">largeArray.j</code></li>
 </ul>
 
 and don't appear for:
