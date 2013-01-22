@@ -20,6 +20,11 @@ function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, Closure
 
 const kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
                    "typeof", "void", "yield"];
+const kwAll = ["break", "case", "catch", "const", "continue", "debugger",
+  "default", "delete", "do", "else", "false", "finally", "for", "function",
+  "get", "if", "in", "instanceof", "let", "new", "null", "return", "set",
+  "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while",
+  "with", "yield"];
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
 const reJSChar = /[a-zA-Z0-9$_]/;
@@ -185,7 +190,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var spreExpr = sparsed.substr(0, propertyStart);
         var preExpr = parsed.substr(0, propertyStart);
 
-        this.completionBase.pre = value.substr(0, parseStart);
+        var spreParsed = svalue.substr(0, parseStart);
+        var preParsed = value.substr(0, parseStart);
 
         if (FBTrace.DBG_COMMANDLINE)
         {
@@ -195,14 +201,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var prevCompletions = this.completions;
 
-        // We only need to calculate a new candidate list if the expression has
-        // changed (we can ignore completionBase.pre since completions do not
-        // depend upon that).
-        if (preExpr !== this.completionBase.expr)
+        // We only need to calculate a new candidate list if the expression has changed.
+        if (preExpr !== this.completionBase.expr || preParsed !== this.completionBase.pre)
         {
             this.completionBase.expr = preExpr;
+            this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                this.options.includeCurrentScope);
+                preParsed, spreParsed, this.options.includeCurrentScope);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
@@ -1027,7 +1032,7 @@ function EditorJSAutoCompleter(box, completionBox, options)
  */
 function getExpressionOffset(command, start)
 {
-    if (typeof start === 'undefined')
+    if (typeof start === "undefined")
         start = command.length;
 
     var bracketCount = 0, instr = false;
@@ -1680,7 +1685,7 @@ function propertiesToHide(expr, obj)
     ret.push("__defineGetter__", "__defineSetter__",
         "__lookupGetter__", "__lookupSetter__");
 
-    // function.caller/argument are deprecated and ugly.
+    // function.caller/arguments are deprecated and ugly.
     if (typeof obj === "function")
         ret.push("caller", "arguments");
 
@@ -1809,6 +1814,22 @@ function setCompletionsFromScope(out, object, context)
         out.completions.splice(ind, 1);
         out.hiddenCompletions.push("arguments");
     }
+}
+
+function getNewlyDeclaredNames(js)
+{
+    // XXXsimon: In the future, machinery from issue 5291 could perhaps replace this.
+    var re = /\b[a-zA-Z_$][a-zA-Z0-9_$]*\b/g;
+    var ar = [], match;
+    while ((match = re.exec(js)) !== null)
+    {
+        if (!/[.%]/.test(js.charAt(match.index - 1)) &&
+            js.charAt(re.lastIndex) !== ":" && kwAll.indexOf(match[0]) === -1)
+        {
+            ar.push(match[0]);
+        }
+    }
+    return ar;
 }
 
 function propChainBuildComplete(out, context, tempExpr, result)
@@ -2157,7 +2178,7 @@ function evalPropChain(out, preExpr, origExpr, context)
     return true;
 }
 
-function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
+function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, includeCurrentScope)
 {
     var out = {
         spreExpr: spreExpr,
@@ -2224,6 +2245,10 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             {
                 setCompletionsFromObject(out, context.global, context);
             }
+
+            // Also add names of variables declared previously in the typed code.
+            var previousDeclarations = getNewlyDeclaredNames(spreParsed);
+            out.completions.push.apply(out.completions, previousDeclarations);
         }
 
         if (indexCompletion)
