@@ -341,9 +341,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
+            "console.": ["log"],
             "document.": ["getElementById", "addEventListener", "createElement",
                 "documentElement"],
-            "Object.prototype.toString": ["call"]
+            "Object.prototype.toString.": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
         {
