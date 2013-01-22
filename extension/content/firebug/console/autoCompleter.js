@@ -310,8 +310,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     /**
      * Choose a default candidate from the list of completions. The first of all
-     * shortest completions is current used for this, except in some very hacky,
-     * but useful, special cases (issue 5593).
+     * shortest completions is currently used for this, except in some very hacky,
+     * but useful, special cases.
      */
     this.pickDefaultCandidate = function(prevCompletions)
     {
@@ -326,7 +326,16 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 return ind;
         }
 
-        // Special-case certain expressions.
+        // Special-case certain expressions. (But remember to pick prefix-free
+        // candidates; otherwise "validVariable<return>" can auto-complete
+        // instead of run.)
+        var prefixFree = function(name)
+        {
+            return !list.some(function(x)
+            {
+                return x.length < name.length && Str.hasPrefix(name, x);
+            });
+        };
         var special = {
             "": ["document", "console", "frames", "window", "parseInt", "undefined",
                 "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
@@ -346,7 +355,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 {
                     // Use 'prop' as a completion, if it exists.
                     ind = list.indexOf(prop);
-                    if (ind !== -1)
+                    if (ind !== -1 && prefixFree(prop))
                         return ind;
                 }
             }
@@ -354,9 +363,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         // 'prototype' is a good default if it exists.
         ind = list.indexOf("prototype");
-        if (ind !== -1)
+        if (ind !== -1 && prefixFree(prop))
             return ind;
 
+        // Simply pick out the shortest candidate. This works remarkably well.
         ind = 0;
         for (var i = 1; i < list.length; ++i)
         {
