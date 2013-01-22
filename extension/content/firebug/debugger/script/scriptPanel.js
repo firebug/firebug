@@ -565,14 +565,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     onContextMenu: function(event, items)
     {
         var target = event.target;
-        var line = this.scriptView.getLineIndex(target);
-        var menuItems = this.getContextMenuItems(line, target);
+        var menuItems = this.getContextMenuItems(null, target);
         items.push.apply(items, menuItems);
     },
 
-    getContextMenuItems: function(lineNo, target)
+    getContextMenuItems: function(object, target)
     {
         var items = [];
+        var lineNo = this.scriptView.getLineIndex(target);
+
+        Trace.sysout("scriptPanel.getContextMenuItems; " + lineNo, target);
 
         var text = this.scriptView.getSelectedText();
         if (text.toString())
@@ -602,7 +604,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (hasBreakpoint)
         {
-            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo + 1);
             items.push({
                 label: "breakpoints.Disable_Breakpoint",
                 tooltiptext: "breakpoints.tip.Disable_Breakpoint",
@@ -694,6 +696,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     toggleBreakpoint: function(line)
     {
+        Trace.sysout("scriptPanel.toggleBreakpoint; " + line);
+
         // Convert to breakpoint lines (one based).
         line = line + 1;
 

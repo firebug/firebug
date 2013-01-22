@@ -480,11 +480,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     bodyMouseUp: function(event)
     {
+        Trace.sysout("scripView.bodyMouseUp;", event);
+
+        // We are only interested in right-click events...
         if (!Events.isRightClick(event))
             return;
 
-        // We are only interested in right-click events on a breakpoint 
-        // (to show the breakpoint condition editor)
+        // ... on a breakpoint (to show the breakpoint condition editor).
         var target = event.target;
         if (!Css.hasClass(target, "breakpoint"))
             return;
