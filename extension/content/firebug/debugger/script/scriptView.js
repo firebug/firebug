@@ -486,9 +486,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (!Events.isRightClick(event))
             return;
 
-        // ... on a breakpoint (to show the breakpoint condition editor).
+        // ... on the breakpoint-column (to show the breakpoint condition editor).
         var target = event.target;
-        if (!Css.hasClass(target, "breakpoint"))
+        var ruler = Dom.getAncestorByClass(target, "ruler");
+        if (!Css.hasClass(ruler, "annotations") && !Css.hasClass(ruler, "lines"))
             return;
 
         // The breakpoint condition editor is about to be opened.
