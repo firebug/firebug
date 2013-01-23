@@ -514,6 +514,10 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
      */
     unwatchTopWindow: function(win)
     {
+        // Ignore about:blank pages
+        if (win.location == aboutBlank)
+            return;
+
         var context = this.getContextByWindow(win);
         if (FBTrace.DBG_WINDOWS)
         {
@@ -868,9 +872,39 @@ Firebug.TabWatcherUnloader = TabWatcherUnloader;
 
 // ********************************************************************************************* //
 
+// xxxHonza: I don't know why, but CSSStyleSheetPanel.destroy invokes
+// FrameProgressListener.onStateChange again. Switch between two tabs
+// with Firebug UI opened (the same domain) to see the scenario.
+// Caused by accessing |this.panelNode.scrollTop|
+// So, do not reexecute locationChange if it's in progress.
+var stateInProgress = false;
+
 var TabProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
+    {
+        if (stateInProgress)
+        {
+            FBTrace.sysout("tabWatcher.onLocationChange; already IN-PROGRESS")
+            return;
+        }
+
+        stateInProgress = true;
+
+        try
+        {
+            this.doLocationChange(progress, request, uri);
+        }
+        catch (e)
+        {
+        }
+        finally
+        {
+            stateInProgress = false;
+        }
+    },
+
+    doLocationChange: function(progress, request, uri)
     {
         // Only watch windows that are their own parent - e.g. not frames
         if (progress.DOMWindow.parent == progress.DOMWindow)
@@ -887,10 +921,12 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
 
-            // See issue 4040
+            // See issue 4040 xxxHonza: different patch must be used.
             // the onStateChange will deal with this troublesome case
             //if (uri && uri.spec === "about:blank")
             //    return;
+            if (uri && uri.spec === "about:blank")
+                return;
 
             // document.open() was called, the document was cleared.
             if (uri && uri.scheme === "wyciwyg")
@@ -923,6 +959,29 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
+        if (stateInProgress)
+        {
+            FBTrace.sysout("tabWatcher.onLocationChange; already IN-PROGRESS")
+            return;
+        }
+
+        stateInProgress = true;
+
+        try
+        {
+            this.doStateChange(progress, request, flag, status)
+        }
+        catch (e)
+        {
+        }
+        finally
+        {
+            stateInProgress = false;
+        }
+    },
+
+    doStateChange: function(progress, request, flag, status)
+    {
         if (FBTrace.DBG_WINDOWS)
         {
             var win = progress.DOMWindow;
@@ -946,7 +1005,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
                 // "unload" is dispatched to the document, but onLocationChange is not called
                 // again, so we have to call watchTopWindow here
 
-                if (win.parent == win && (win.location.href == "about:blank"))
+                if (win.parent == win && (win.location.href != "about:blank"))
                 {
                     Firebug.TabWatcher.watchTopWindow(win, win.location.href);
                     return;

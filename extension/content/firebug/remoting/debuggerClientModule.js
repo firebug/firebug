@@ -182,6 +182,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     onTabDetached: function()
     {
+        Trace.sysout("debuggerClientModule.onTabDetached;", arguments);
+
         // xxxHonza: we need pass context to the listeners. 
         this.dispatch("onThreadDetached", arguments);
         this.dispatch("onTabDetached", arguments);
@@ -229,6 +231,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Context already attached (page just reloaded).
         if (context.tabClient && context.activeThread)
         {
+            Trace.sysout("debuggerClientModule.attachCurrentTab; " +
+                "Page already attached (just reloaded)");
+
             this.dispatch("onThreadDetached", [context, true]);
             this.dispatch("onTabDetached", [context, true]);
 
@@ -258,8 +263,10 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         if (context.tabClient)
         {
-            // xxxHonza: response is not defined.
-            this.attachThread(context, response.threadActor);
+            Trace.sysout("debuggerClientModule.attachTab; context.tabClient exists. " +
+                "thread actor: " + context.threadActor, context.tabClient);
+
+            this.attachThread(context, context.threadActor);
             return;
         }
 
@@ -272,6 +279,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                 return;
             }
 
+            context.threadActor = response.threadActor;
             context.tabClient = tabClient;
 
             self.dispatch("onTabAttached", [context, false]);

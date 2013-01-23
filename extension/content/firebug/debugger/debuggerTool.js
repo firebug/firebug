@@ -14,15 +14,12 @@ define([
     "firebug/debugger/stack/stackTrace",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/grips/gripCache",
-    "firebug/trace/traceModule",
-    "firebug/trace/traceListener",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoint/breakpointStore",
     "firebug/lib/options",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, GripCache, TraceModule, TraceListener, SourceFile,
-    BreakpointStore, Options) {
+    DebuggerClientModule, GripCache, SourceFile, BreakpointStore, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -50,8 +47,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.traceListener = new TraceListener("debuggerTool.", "DBG_DEBUGGERTOOL", false);
-        TraceModule.addListener(this.traceListener);
+        Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
 
         // Listen to the debugger-client, which represents the connection to the server.
         // The debugger-client object represents the source of all RDP events.
@@ -75,7 +71,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        TraceModule.removeListener(this.traceListener);
+        Firebug.unregisterTracePrefix("debuggerTool.");
 
         DebuggerClientModule.removeListener(this);
     },
@@ -98,11 +94,17 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
+        // xxxHonza: see TabWatcher.unwatchContext
+        if (!context)
+            return;
+
         Trace.sysout("debuggerTool.showContext; context ID: " + context.getId());
     },
 
     destroyContext: function(context, persistedState, browser)
     {
+        this.detachListeners(context);
+
         Trace.sysout("debuggerTool.destroyContext; context ID: " + context.getId());
     },
 
@@ -114,30 +116,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload + ", context ID: " +
             context.getId(), context);
 
-        if (this._onPause)
-        {
-            TraceError.sysout("debuggerTool.onThreadAttached; ERROR listeners still active!");
-        }
-
-        // This is the place where we bind all listeners to the current
-        // context so, it's available inside the methods.
-        this._onPause = this.paused.bind(this, context);
-        this._onDetached = this.detached.bind(this, context);
-        this._onResumed = this.resumed.bind(this, context);
-        this._onFramesAdded = this.framesadded.bind(this, context);
-        this._onFramesCleared = this.framescleared.bind(this, context);
-        this._onNewScript = this.newScript.bind(this, context);
-
-        // Add all listeners
-        context.activeThread.addListener("paused", this._onPause);
-        context.activeThread.addListener("detached", this._onDetached);
-        context.activeThread.addListener("resumed", this._onResumed);
-
-        // These events are used to sync with ThreadClient's stack frame cache.
-        context.activeThread.addListener("framesadded", this._onFramesAdded);
-        context.activeThread.addListener("framescleared", this._onFramesCleared);
-
-        DebuggerClientModule.client.addListener("newScript", this._onNewScript);
+        this.attachListeners(context);
 
         // Create grip cache
         context.gripCache = new GripCache(DebuggerClientModule.client);
@@ -154,21 +133,57 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
 
+        this.detachListeners(context);
+    },
+
+    attachListeners: function(context)
+    {
+        // Bail out if listeners are already attached.
+        if (context._onPause)
+            return;
+
+        // This is the place where we bind all listeners to the current
+        // context so, it's available inside the methods.
+        context._onPause = this.paused.bind(this, context);
+        context._onDetached = this.detached.bind(this, context);
+        context._onResumed = this.resumed.bind(this, context);
+        context._onFramesAdded = this.framesadded.bind(this, context);
+        context._onFramesCleared = this.framescleared.bind(this, context);
+        context._onNewScript = this.newScript.bind(this, context);
+
+        // Add all listeners
+        context.activeThread.addListener("paused", context._onPause);
+        context.activeThread.addListener("detached", context._onDetached);
+        context.activeThread.addListener("resumed", context._onResumed);
+
+        // These events are used to sync with ThreadClient's stack frame cache.
+        context.activeThread.addListener("framesadded", context._onFramesAdded);
+        context.activeThread.addListener("framescleared", context._onFramesCleared);
+
+        DebuggerClientModule.client.addListener("newScript", context._onNewScript);
+    },
+
+    detachListeners: function(context)
+    {
+        // Bail out if listeners are already dettached.
+        if (!context._onPause)
+            return;
+
         // Remove all listeners from the current ThreadClient
-        context.activeThread.removeListener("paused", this._onPause);
-        context.activeThread.removeListener("detached", this._onDetached);
-        context.activeThread.removeListener("resumed", this._onResumed);
-        context.activeThread.removeListener("framesadded", this._onFramesAdded);
-        context.activeThread.removeListener("framescleared", this._onFramesCleared);
+        context.activeThread.removeListener("paused", context._onPause);
+        context.activeThread.removeListener("detached", context._onDetached);
+        context.activeThread.removeListener("resumed", context._onResumed);
+        context.activeThread.removeListener("framesadded", context._onFramesAdded);
+        context.activeThread.removeListener("framescleared", context._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newScript", this._onNewScript);
+        DebuggerClientModule.client.removeListener("newScript", context._onNewScript);
 
-        this._onPause = null;
-        this._onDetached = null;
-        this._onResumed = null;
-        this._onFramesAdded = null;
-        this._onFramesCleared = null;
-        this._onNewScript = null;
+        context._onPause = null;
+        context._onDetached = null;
+        context._onResumed = null;
+        context._onFramesAdded = null;
+        context._onFramesCleared = null;
+        context._onNewScript = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -218,8 +233,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     paused: function(context, event, packet)
     {
         var type = packet.why.type;
-        Trace.sysout("debuggerTool.paused; " + type + ", " + packet.frame.where.url +
-            " (" + packet.frame.where.line + "), context ID: " + context.getId(), packet);
+        var where = packet.frame ? packet.frame.where : {};
+        Trace.sysout("debuggerTool.paused; " + type + ", " + where.url +
+            " (" + where.line + "), context ID: " + context.getId(), packet);
 
         var ignoreTypes = {
             "interrupted": 1,

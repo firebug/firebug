@@ -105,6 +105,9 @@ SourceFile.prototype =
 
 // ********************************************************************************************* //
 
+// xxxHonza: backward compatibility, search the code and fix.
+Firebug.SourceFile = SourceFile;
+
 return SourceFile;
 
 // ********************************************************************************************* //
