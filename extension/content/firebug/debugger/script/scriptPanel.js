@@ -573,10 +573,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     getContextMenuItems: function(object, target)
     {
         var items = [];
+
+        // The target must be within viewConent DIV (Orion).
+        // This could be changed if we decide to have a context menu displayed for
+        // right-click on a breakpoint (in the column bar) instead of the condition-editor.
+        // See issue 4378
+        var viewContent = Dom.getAncestorByClass(target, "viewContent");
+        if (!viewContent)
+            return items;
+
         var lineNo = this.scriptView.getLineIndex(target);
-
-        Trace.sysout("scriptPanel.getContextMenuItems; " + lineNo, target);
-
         var text = this.scriptView.getSelectedText();
         if (text.toString())
         {
