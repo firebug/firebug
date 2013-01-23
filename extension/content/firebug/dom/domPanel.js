@@ -1039,7 +1039,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
         try
         {
-            if (object instanceof StackFrame.StackFrame)
+            if (object instanceof StackFrame)
                 return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
@@ -1137,7 +1137,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
-                else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
+                else if (object instanceof window.Window || object instanceof StackFrame)
                     editValue = getRowName(row);
                 else
                     editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
@@ -1190,7 +1190,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         var object = this.getRealRowObject(row);
-        if (object && !(object instanceof StackFrame.StackFrame))
+        if (object && !(object instanceof StackFrame))
         {
             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                 function success(result, context)
@@ -1242,7 +1242,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             // Clear cached scope chain (it'll be regenerated the next time the getScopes
             // is executed). This forces the watch window to update in case a closer scope
             // variables have been changed during a debugging session.
-            if (object instanceof StackFrame.StackFrame)
+            if (object instanceof StackFrame)
                 object.clearScopes();
         }
 
@@ -1634,7 +1634,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var rowValue = member.value;
 
             var isWatch = Css.hasClass(row, "watchRow");
-            var isStackFrame = rowObject instanceof StackFrame.StackFrame;
+            var isStackFrame = rowObject instanceof StackFrame;
             var label, tooltiptext;
 
             items.push(

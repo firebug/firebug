@@ -293,7 +293,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
 
 Breakpoints.ConditionEditor = function(doc)
 {
-    Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
+    ConditionEditor.apply(this, arguments);
 };
 
 Breakpoints.ConditionEditor.prototype = Domplate.domplate(ConditionEditor.prototype,

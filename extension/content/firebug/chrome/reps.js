@@ -2252,7 +2252,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof StackFrame.StackFrame;
+        return object instanceof StackFrame;
     },
 
     inspectObject: function(stackFrame, context)

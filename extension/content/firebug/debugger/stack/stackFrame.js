@@ -296,7 +296,7 @@ StackFrame.parseToStackFrame = function(line, context)
     if (!m)
         return;
 
-    return new StackFrame.StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
+    return new StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
 };
 
 StackFrame.parseToStackTrace = function(stack, context)
@@ -364,7 +364,7 @@ StackFrame.getStackSourceLink = function()
 StackFrame.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
-        return new SourceLink.SourceLink(frame.filename, frame.lineNumber, "js");
+        return new SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
 };
