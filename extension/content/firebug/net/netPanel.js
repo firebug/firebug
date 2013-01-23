@@ -1626,7 +1626,7 @@ var NetPanelSearch = function(panel, rowFinder)
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {
-    Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
+    ConditionEditor.apply(this, arguments);
 };
 
 Firebug.NetMonitor.ConditionEditor.prototype = domplate(ConditionEditor.prototype,
