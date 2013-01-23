@@ -18,10 +18,11 @@ define([
     "firebug/debugger/breakpoint/breakpointConditionEditor",
     "firebug/lib/keywords",
     "firebug/lib/system",
+    "firebug/editor/editor",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, Breakpoint, BreakpointStore,
-    BreakpointConditionEditor, Keywords, System) {
+    BreakpointConditionEditor, Keywords, System, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -389,6 +390,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.editBreakpointCondition(lineIndex);
         Events.cancelEvent(event);
+    },
+
+    onEditorMouseUp: function(event)
+    {
+        // Click anywhere in the script panel closes breakpoint-condition-editor
+        // if it's currently opened.
+        if (this.editing)
+            Editor.stopEditing(true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

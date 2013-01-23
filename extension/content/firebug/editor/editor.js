@@ -355,9 +355,15 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getParentWindow: function()
+    {
+        return currentPanel.panelNode.ownerDocument.defaultView;
+    },
+
     attachListeners: function(editor, context)
     {
-        var win = currentTarget.ownerDocument.defaultView;
+        var win = this.getParentWindow();
+
         Events.addEventListener(win, "resize", this.onResize, true);
         Events.addEventListener(win, "blur", this.onBlur, true);
 
@@ -426,7 +432,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         if (!this.listeners)
             return;
 
-        var win = currentTarget.ownerDocument.defaultView;
+        var win = this.getParentWindow(editor, context, currentTarget);
         Events.removeEventListener(win, "resize", this.onResize, true);
         Events.removeEventListener(win, "blur", this.onBlur, true);
         Events.removeEventListener(win, "input", this.onInput, true);
@@ -448,6 +454,12 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
     onBlur: function(event)
     {
+        if (FBTrace.DBG_EDITOR)
+        {
+            FBTrace.sysout("editor.onBlur; " + currentEditor.enterOnBlur + ", " +
+                Dom.isAncestor(event.target, currentEditor.box));
+        }
+
         if (currentEditor.enterOnBlur && Dom.isAncestor(event.target, currentEditor.box))
             this.stopEditing();
     },

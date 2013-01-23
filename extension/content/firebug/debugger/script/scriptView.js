@@ -482,6 +482,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scripView.bodyMouseUp;", event);
 
+        this.dispatch("onEditorMouseUp", [event]);
+
         // We are only interested in right-click events...
         if (!Events.isRightClick(event))
             return;
