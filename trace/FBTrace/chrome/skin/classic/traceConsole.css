@@ -360,6 +360,10 @@
     color: rgb(135, 0, 21);
 }
 
+.DBG_DEBUGGERCLIENTMODULE {
+    color: rgb(132, 0, 209);
+}
+
 /************************************************************************************************/
 
 #consoleToolbar toolbarbutton {

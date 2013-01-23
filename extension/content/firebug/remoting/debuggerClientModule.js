@@ -55,6 +55,13 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+
+        Firebug.registerTracePrefix("debuggerClientModule.", "DBG_DEBUGGERCLIENTMODULE", false);
+    },
+
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
@@ -66,13 +73,15 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         this.onTabDetached = Obj.bind(this.onTabDetached, this);
 
         // Connect the server in 'initializeUI' so, listeners from other modules can
-        // be registered in 'initialize'.
+        // be registered before in 'initialize'.
         this.connect();
     },
 
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
+
+        Firebug.unregisterTracePrefix("debuggerClientModule.");
 
         this.disconnect();
     },
@@ -164,8 +173,10 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         this.dispatch("onDisconnect", [this.client]);
     },
 
-    onTabNavigated: function()
+    onTabNavigated: function(type, packet)
     {
+        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url);
+
         this.dispatch("onTabNavigated", arguments);
     },
 
@@ -181,6 +192,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     initContext: function(context, persistedState)
     {
+        Trace.sysout("debuggerClientModule.initContext; " + context.getName() +
+            " ID: " + context.getId());
+
         // If page reloads happens the tab-client and thread-client remains the same
         // so, reuse them from the persiste state object (if they are available).
         if (persistedState)
@@ -197,6 +211,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
+        Trace.sysout("debuggerClientModule.destroyContext; " + context.getName() +
+            " ID: " + context.getId());
+
         persistedState.tabClient = context.tabClient;
         persistedState.activeThread = context.activeThread;
     },
@@ -206,6 +223,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     attachCurrentTab: function(context)
     {
+        Trace.sysout("debuggerClientModule.attachCurrentTab; " + context.getName() +
+            " ID: " + context.getId());
+
         // Context already attached (page just reloaded).
         if (context.tabClient && context.activeThread)
         {
@@ -233,8 +253,12 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     attachTab: function(context, tabActor)
     {
+        Trace.sysout("debuggerClientModule.attachTab; " + context.getName() +
+            " ID: " + context.getId(), tabActor);
+
         if (context.tabClient)
         {
+            // xxxHonza: response is not defined.
             this.attachThread(context, response.threadActor);
             return;
         }
@@ -258,6 +282,9 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     attachThread: function(context, threadActor)
     {
+        Trace.sysout("debuggerClientModule.attachThread; " + context.getName() +
+            " ID: " + context.getId(), threadActor);
+
         var self = this;
         this.client.attachThread(threadActor, function(response, threadClient)
         {

@@ -12,12 +12,10 @@ define([
     "firebug/debugger/script/sourceFileRenamer",
     "firebug/debugger/breakpoint/breakpoint",
     "firebug/debugger/breakpoint/breakpointStore",
-    "firebug/trace/traceModule",
-    "firebug/trace/traceListener",
     "firebug/lib/url",
 ],
 function(Obj, Firebug, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
-    SourceFileRenamer, Breakpoint, BreakpointStore, TraceModule, TraceListener, Url) {
+    SourceFileRenamer, Breakpoint, BreakpointStore, Url) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,8 +56,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Panel.initialize.apply(this, arguments);
 
         // Custom tracing.
-        this.traceListener = new TraceListener("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
-        TraceModule.addListener(this.traceListener);
+        Firebug.registerTracePrefix("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
 
         // Listen to breakpoint changes (add/remove/enable/disable).
         // These events are used to refresh the panel content.
@@ -72,7 +69,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.Panel.destroy.apply(this, arguments);
 
-        TraceModule.removeListener(this.traceListener);
+        Firebug.unregisterTracePrefix("breakpointPanel.");
 
         BreakpointStore.removeListener(this);
     },

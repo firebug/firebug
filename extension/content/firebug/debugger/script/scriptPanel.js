@@ -15,14 +15,12 @@ define([
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/breakpoint/breakpoint",
     "firebug/debugger/breakpoint/breakpointStore",
-    "firebug/trace/traceModule",
-    "firebug/trace/traceListener",
     "firebug/debugger/breakpoint/breakpointConditionEditor",
     "firebug/lib/keywords",
     "firebug/lib/system",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, Breakpoint, BreakpointStore, TraceModule, TraceListener,
+    StackFrame, SourceLink, Breakpoint, BreakpointStore,
     BreakpointConditionEditor, Keywords, System) {
 
 // ********************************************************************************************* //
@@ -64,10 +62,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         BasePanel.initialize.apply(this, arguments);
 
-        // Custom tracing.
-        this.traceListener = new TraceListener("scriptPanel.", "DBG_SCRIPTPANEL", false);
-        TraceModule.addListener(this.traceListener);
-
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
@@ -94,8 +88,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         BreakpointStore.removeListener(this);
 
         this.tool.removeListener(this);
-
-        TraceModule.removeListener(this.traceListener);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -1112,6 +1104,7 @@ function getExpressionAt(text, charOffset)
 // Registration
 
 Firebug.registerPanel(ScriptPanel);
+Firebug.registerTracePrefix("scriptPanel.", "DBG_SCRIPTPANEL", false);
 
 return ScriptPanel;
 

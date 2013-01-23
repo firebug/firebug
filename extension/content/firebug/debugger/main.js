@@ -2,8 +2,6 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/trace/traceListener",
-    "firebug/trace/traceModule",
     "firebug/debugger/grips/objectGrip",
     "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
     "firebug/debugger/debugger",
@@ -23,7 +21,7 @@ define([
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
 ],
-function(FBTrace, TraceListener, TraceModule, ObjectGrip) {
+function(FBTrace, ObjectGrip) {
 
 // ********************************************************************************************* //
 // Debugger
@@ -37,8 +35,7 @@ Firebug.registerDefaultGrip(ObjectGrip);
 
 // Register stylesheet with DBG_* styles
 // xxxHonza: any better way how to register global Firebug stylesheth with trace styles?
-TraceModule.addListener(new TraceListener("jsd2.", "DBG_JSD2", true,
-    "chrome://firebug/skin/trace.css"));
+Firebug.registerTracePrefix("jsd2.", "DBG_JSD2", true, "chrome://firebug/skin/trace.css");
 
 // ********************************************************************************************* //
 // Registration
