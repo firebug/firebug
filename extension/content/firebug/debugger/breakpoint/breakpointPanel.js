@@ -55,9 +55,6 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.Panel.initialize.apply(this, arguments);
 
-        // Custom tracing.
-        Firebug.registerTracePrefix("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
-
         // Listen to breakpoint changes (add/remove/enable/disable).
         // These events are used to refresh the panel content.
         BreakpointStore.addListener(this);
@@ -68,8 +65,6 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         state.groupOpened = this.groupOpened;
 
         Firebug.Panel.destroy.apply(this, arguments);
-
-        Firebug.unregisterTracePrefix("breakpointPanel.");
 
         BreakpointStore.removeListener(this);
     },
@@ -358,6 +353,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 // Registration
 
 Firebug.registerPanel(BreakpointPanel);
+Firebug.registerTracePrefix("breakpointPanel.", "DBG_BREAKPOINTPANEL", false);
 
 return BreakpointPanel;
 
