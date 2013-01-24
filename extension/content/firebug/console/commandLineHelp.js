@@ -261,7 +261,7 @@ var CommandLineHelp = domplate(
         });
 
         tips.push({
-            example: "object.%closureVarName",
+            example: "myObject.%closureVarName",
             text: "console.cmd.tip.closures"
         });
 
