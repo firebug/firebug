@@ -169,7 +169,7 @@ var Tip = domplate(
 
     getExample: function(object)
     {
-        return object.nol10n ? object.example : Locale.$STR(object.example);
+        return object.example;
     }
 });
 
