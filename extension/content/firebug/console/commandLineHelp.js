@@ -26,7 +26,7 @@ var CMD_TYPE_PROPERTY = 3;
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // ********************************************************************************************* //
-// Domplates
+// Command Line Help
 
 var HelpCaption = domplate(
 {
@@ -128,11 +128,63 @@ var HelpEntry = domplate(
 });
 
 // ********************************************************************************************* //
+// Command Line Tips
+
+var TipsCaption = domplate(
+{
+    tag:
+        SPAN({"class": "helpTitle"},
+            SPAN({"class": "helpCaption"},
+                Locale.$STR("console.cmd.tip_title")
+            ),
+            SPAN({"class": "helpCaptionDesc"},
+                Locale.$STR("console.cmd.tip_title_desc")
+            )
+        )
+});
+
+var TipsList = domplate(
+{
+    tag:
+        DIV({"class": "tipsContent"},
+            UL({"class": "tipsList"})
+        )
+});
+
+var Tip = domplate(
+{
+    tag:
+        FOR("tip", "$tips",
+            LI({"class": "tip"},
+                SPAN("$tip|getText"),
+                SPAN("&nbsp"),
+                SPAN({"class": "example"},"$tip|getExample")
+            )
+        ),
+
+    getText: function(object)
+    {
+        return object.nol10n ? object.text : Locale.$STR(object.text);
+    },
+
+    getExample: function(object)
+    {
+        return object.nol10n ? object.example : Locale.$STR(object.example);
+    }
+});
+
+// ********************************************************************************************* //
 // Help Object
 
 var CommandLineHelp = domplate(
 {
     render: function(context)
+    {
+        this.renderHelp(context);
+        this.renderTips(context);
+    },
+
+    renderHelp: function(context)
     {
         var row = Firebug.Console.openGroup("help", context, "help",
             HelpCaption, true, null, true);
@@ -189,8 +241,31 @@ var CommandLineHelp = domplate(
 
         // Generate table
         HelpEntry.tag.insertRows({commands: commands}, tBody);
+    },
 
-        return row;
+    renderTips: function(context)
+    {
+        var row = Firebug.Console.openGroup("help", context, "help",
+            TipsCaption, true, null, true);
+        Firebug.Console.closeGroup(context, true);
+
+        var logGroupBody = row.lastChild;
+        var table = TipsList.tag.replace({}, logGroupBody);
+        var list = table.lastChild;
+
+        var tips = [];
+
+        tips.push({
+            example: "1 + 1",
+            text: "console.cmd.tip.javascript"
+        });
+
+        tips.push({
+            example: "object.%closureVarName",
+            text: "console.cmd.tip.closures"
+        });
+
+        Tip.tag.append({tips: tips}, list);
     }
 });
 

@@ -443,7 +443,16 @@
 }
 
 .logRow-help .commandDesc {
-    color: gray
+    color: gray;
+}
+
+.logRow-help .tipsContent .tip {
+    margin-bottom: 5px;
+}
+
+.logRow-help .tipsContent .tip .example {
+    color: green;
+    font-family: monospace;
 }
 
 /*************************************************************************************************/
