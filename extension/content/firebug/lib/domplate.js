@@ -485,6 +485,9 @@ DomplateTag.prototype =
 
         function __loop__(iter, fn)
         {
+            if (!iter)
+                return 0;
+
             var nodeCount = 0;
             for (var i = 0; i < iter.length; ++i)
             {
