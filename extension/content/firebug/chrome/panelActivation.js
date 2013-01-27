@@ -356,7 +356,8 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var doc = browser.contentDocument;
         return doc.documentElement.querySelector(".disabledPanelNode");
     },
-})};
+});
+};
 
 // ************************************************************************************************
 // Registration

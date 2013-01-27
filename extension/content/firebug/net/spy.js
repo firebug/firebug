@@ -1011,6 +1011,13 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     {
         try
         {
+            if (!context.window)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("spy.resend; ERROR no context");
+                return;
+            }
+
             // xxxHonza: must be done through Console RDP
             var win = Wrapper.unwrapObject(context.window);
             var request = new win.XMLHttpRequest();
@@ -1103,7 +1110,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         return items;
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 

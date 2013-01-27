@@ -67,7 +67,7 @@ Tracker.prototype =
 
         var newPos = absoluteCursorPostion(event);
         //newPos = newPos.Add(this.elementStartPos);
-        var newPos = newPos.Subtract(this.cursorStartPos);
+        newPos = newPos.Subtract(this.cursorStartPos);
         //newPos = newPos.Bound(lowerBound, upperBound);
         //newPos.Apply(this.element);
 
@@ -117,7 +117,7 @@ Tracker.prototype =
         if (this.dragging)
             this.dragStop();
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -134,10 +134,10 @@ function Position(x, y)
             if(!isNaN(val.x))
                 newPos.x += val.x;
             if(!isNaN(val.y))
-                newPos.y += val.y
+                newPos.y += val.y;
         }
         return newPos;
-    }
+    };
 
     this.Subtract = function(val)
     {
@@ -147,16 +147,16 @@ function Position(x, y)
             if(!isNaN(val.x))
                 newPos.x -= val.x;
             if(!isNaN(val.y))
-                newPos.y -= val.y
+                newPos.y -= val.y;
         }
         return newPos;
-    }
+    };
 
     this.Bound = function(lower, upper)
     {
         var newPos = this.Max(lower);
         return newPos.Min(upper);
-    }
+    };
 
     this.Check = function()
     {
@@ -168,7 +168,7 @@ function Position(x, y)
             newPos.y = 0;
 
         return newPos;
-    }
+    };
 
     this.Apply = function(element)
     {
@@ -183,7 +183,7 @@ function Position(x, y)
 
         if(!isNaN(this.y))
             element.style.top = this.y + "px";
-    }
+    };
 }
 
 // ********************************************************************************************* //

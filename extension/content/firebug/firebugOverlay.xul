@@ -22,7 +22,9 @@
             onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
 
         <panel id="fbQuickInfoPanel" width="210" noautofocus="true"
-            ignorekeys="true" backdrag="true">
+            onmousedown="Firebug.Inspector.quickInfoBoxHandler(event);"
+            onmouseover="Firebug.Inspector.quickInfoBoxHandler(event);"
+            onmouseout="Firebug.Inspector.quickInfoBoxHandler(event);">
             <vbox></vbox>
         </panel>
 

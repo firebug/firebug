@@ -45,14 +45,14 @@ Browser.onDebug = function()
 {
     if (Browser.debug)
         throw new Error("Browser.debug set but no Brower.onDebug is defined");
-}
+};
 
 Browser.unimplementedHandler = function()
 {
     if (Browser.debug && Browser.debug.handlers)
         Browser.onDebug("Browser.listener unimplemented event handler called ",
             {handler: this, args: arguments});
-}
+};
 
 Browser.listener =
 {
@@ -139,7 +139,7 @@ Browser.listener =
     onDisconnect: function()
     {
         Browser.unimplementedHandler.apply(this, arguments);
-    },
+    }
 };
 
 /**
@@ -148,7 +148,7 @@ Browser.listener =
 Browser.prototype.clearAllBreakpoints = function()
 {
     Firebug.Debugger.clearAllBreakpoints();
-}
+};
 
 /**
  * Command: clearAnnotations
@@ -157,13 +157,13 @@ Browser.prototype.clearAnnotations = function()
 {
     // should trigger event onClearAnnotations
     Firebug.Activation.clearAnnotations();
-}
+};
 
 Browser.prototype.getWebAppByWindow = function(win)
 {
     if (win && win.top)
         return new WebApp(win.top);
-}
+};
 
 Browser.prototype.getContextByWebApp = function(webApp)
 {
@@ -177,14 +177,14 @@ Browser.prototype.getContextByWebApp = function(webApp)
         if (context.window === topMost)
             return context
     }*/
-}
+};
 
 Browser.prototype.getContextByWindow = function(win)
 {
     var webApp = this.getWebAppByWindow(win);
     if (webApp)
         return this.getContextByWebApp(webApp);
-}
+};
 
 /**
  * get local metadata for the remote WebApp if it exists
@@ -202,7 +202,7 @@ Browser.prototype.setContextByWebApp = function(webApp, context)
     // xxxHonza: possible mem leak, the context object isn't removed from the array sometimes
     // Do not use for now (this will be used for remoting).
     //this.contexts.push(context);
-}
+};
 
 /**
  * Stop debugging a WebApp and cause the destruction of a ToolsInterface.WebAppContext
@@ -242,15 +242,13 @@ Browser.prototype.closeContext = function(context, userCommands)
 
         if (shouldDispatch)
         {
-            var userCommands;
-
             // TODO remove
-            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, userCommands]);
+            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, null]);
             return true;
         }
         return false;
     }
-}
+};
 
 /**
  * get local metadata for the remote WebApp or create one
@@ -284,7 +282,7 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
         Events.dispatch(TabWatcher.fbListeners, "watchBrowser", [browser]);
     }
     return context;
-}
+};
 
 /**
  * The WebApp on the selected tab of the selected window of this Browser
@@ -298,7 +296,7 @@ Browser.prototype.getCurrentSelectedWebApp = function()
     if (FBTrace.DBG_ACTIVATION)
         FBTrace.sysout("BTI.WebApp ", {browser: browser, webApp: webApp});
     return webApp;
-}
+};
 
 
 /**
@@ -325,7 +323,7 @@ Browser.prototype.getTool = function(name)
     //    FBTrace.sysout("BTI.Browser.getTool; Unknown tool: " + name);
 
     return this.tools[name];
-}
+};
 
 /**
  * Call on the backend
@@ -340,7 +338,7 @@ Browser.prototype.registerTool = function(tool)
 
         this.tools[name] = tool;
     }
-}
+};
 
 Browser.prototype.unregisterTool = function(tool)
 {
@@ -352,7 +350,7 @@ Browser.prototype.unregisterTool = function(tool)
         else
             delete this.tools[name];
     }
-}
+};
 
 Browser.prototype.eachContext = function(fnOfContext)
 {
@@ -457,7 +455,7 @@ Browser.prototype.dispatch = function(eventName, args)
     {
         FBTrace.sysout("BTI.Browser.dispatch; EXCEPTION " + exc, exc);
     }
-}
+};
 
 /**
  * Disconnects this client from the browser it is associated with.
@@ -475,7 +473,7 @@ Browser.prototype.disconnect = function()
     TabWatcher.removeListener(this);
 
     this._setConnected(false);
-}
+};
 
 // ********************************************************************************************* //
 // Private, subclasses may call these functions
@@ -689,8 +687,6 @@ Browser.EventListener = {
 
 // ********************************************************************************************* //
 
-var clearContextTimeout = 0;
-
 var TabWatchListener =
 {
     dispatchName: "TabWatchListener",
@@ -857,7 +853,7 @@ Browser.prototype.connect = function ()
     TabWatcher.addListener(TabWatchListener);
 
     this._setConnected(true);
-}
+};
 
 // ********************************************************************************************* //
 

@@ -16,6 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
+    "firebug/console/closureInspector",
     "firebug/dom/toggleBranch",
     "firebug/lib/system",
     "firebug/chrome/menu",
@@ -25,8 +26,8 @@ define([
     "firebug/dom/domModule",
     "firebug/console/autoCompleter"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper,
-    SourceLink, StackFrame, Dom, Css, Search, Str, Arr, Persist, ToggleBranch, System, Menu) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
+    Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu) {
 
 with (Domplate) {
 
@@ -42,7 +43,7 @@ const jsdIStackFrame = Ci.jsdIStackFrame;
 const insertSliceSize = 18;
 const insertInterval = 40;
 
-const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
+const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
 
 // ********************************************************************************************* //
 
@@ -75,14 +76,14 @@ const DirTablePlate = domplate(Firebug.Rep,
             disabledBreakpoint: "$member.disabledBreakpoint"},
             TD({"class": "memberHeaderCell"},
                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
-                    "&nbsp;"
+                   "&nbsp;"
                )
             ),
             TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
                 role: "presentation"},
-                DIV({"class": "memberLabel $member.type\\Label"},
+                DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
                     SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
-                    SPAN("$member.name")
+                    SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
                 )
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
@@ -141,6 +142,11 @@ const DirTablePlate = domplate(Firebug.Rep,
         }];
     },
 
+    getMemberNameTooltip: function(member)
+    {
+        return member.title || member.scopeNameTooltip;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onClick: function(event)
@@ -174,9 +180,10 @@ const DirTablePlate = domplate(Firebug.Rep,
                 var panel = row.parentNode.parentNode.domPanel;
                 if (panel)
                 {
+                    // XXX this should use member.value
                     var rowValue = panel.getRowPropertyValue(row);
-                    if (typeof(rowValue) == "boolean")
-                        panel.setPropertyValue(row, !rowValue);
+                    if (typeof rowValue == "boolean")
+                        panel.setPropertyValue(row, ""+!rowValue);
                     else
                         panel.editProperty(row);
                     Events.cancelEvent(event);
@@ -187,7 +194,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     toggleRow: function(row)
     {
-        var level = parseInt(row.getAttribute("level"));
+        var level = parseInt(row.getAttribute("level"), 10);
         var table = Dom.getAncestorByClass(row, "domTable");
         var toggles = table.toggles;
         if (!toggles)
@@ -239,7 +246,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 {
                     for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
                     {
-                        if (parseInt(firstRow.getAttribute("level")) <= level)
+                        if (parseInt(firstRow.getAttribute("level"), 10) <= level)
                             break;
 
                         tbody.removeChild(firstRow);
@@ -252,12 +259,11 @@ const DirTablePlate = domplate(Firebug.Rep,
             Css.setClass(row, "opened");
             if (isString)
             {
-                var rowValue = row.domObject.value
+                var rowValue = row.domObject.value;
                 row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
             else
             {
-
                 if (toggles)
                 {
                     var path = getPath(row);
@@ -350,7 +356,7 @@ const ToolboxPlate = domplate(
 
 // ********************************************************************************************* //
 
-Firebug.DOMBasePanel = function() {}
+Firebug.DOMBasePanel = function() {};
 
 Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
 
@@ -363,10 +369,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (!Firebug.viewChrome)
         {
+            // Unwrap native, wrapped objects.
             var contentView = Wrapper.getContentView(object);
-            if (!contentView && FBTrace.DBG_DOM)
-                FBTrace.sysout("getObjectView: no contentView for " + object);
-            return contentView || object;
+            if (contentView)
+                return contentView;
         }
         return object;
     },
@@ -440,6 +446,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var proto = [];
         var domHandlers = [];
 
+        var isScope = ClosureInspector.isScopeWrapper(object);
+
         try
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
@@ -448,25 +456,30 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
             try
             {
+                // Make sure not to touch the prototype chain of the magic scope objects.
+                var ownOnly = Firebug.showOwnProperties || isScope;
+                var enumerableOnly = Firebug.showEnumerableProperties;
+
                 var contentView = this.getObjectView(object);
-                var properties = this.getObjectProperties(contentView,
-                    Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                var properties = this.getObjectProperties(contentView, enumerableOnly, ownOnly);
                 properties = Arr.sortUnique(properties);
 
-                if (contentView.hasOwnProperty("constructor") &&
-                    properties.indexOf("constructor") == -1)
+                var addOwn = function(prop)
                 {
-                    properties.push("constructor");
-                }
+                    // Apparently, Object.prototype.hasOwnProperty.call(contentView, p) lies
+                    // when 'contentView' is content and 'Object' is chrome... Bug 658909?
+                    if (Object.getOwnPropertyDescriptor(contentView, prop) &&
+                        properties.indexOf(prop) === -1)
+                    {
+                        properties.push(prop);
+                    }
+                };
+                addOwn("constructor");
+                addOwn("prototype");
+                addOwn("wrappedJSObject");
 
-                if (contentView.hasOwnProperty("prototype") &&
-                    properties.indexOf("prototype") == -1)
-                {
-                    properties.push("prototype");
-                }
-
-                // If showOwnProperties is false the __proto__ can be already in.
-                // If showOwnProperties is true the __proto__ should not be in.
+                // __proto__ never shows in enumerations, so add it here. We currently
+                // we don't want it when only showing own properties.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
                     properties.indexOf("__proto__") == -1 && !Firebug.showOwnProperties)
                 {
@@ -475,7 +488,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             }
             catch (exc)
             {
-                 // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.getMembers: property lookups failed", exc);
+
+                // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+                // XXX can't reproduce, and it's at most relevant to Chromebug.
+                /*
                 if (contentView.wrappedJSObject)
                 {
                     if (FBTrace.DBG_ERRORS || FBTrace.DBG_DOM)
@@ -491,19 +509,23 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         wrappedJSObject: XPCNativeWrapper.unwrap(contentView),
                         toString: function() { return wrapperToString; },
                         isXPCNativeWrapper: (XPCNativeWrapper.unwrap(contentView) !== contentView),
-                    }
+                    };
 
                     object = contentView;
                 }
+                */
             }
 
-            if (contentView.wrappedJSObject)
-                properties.push("wrappedJSObject");
+            var name, val;
+            var add = function(type, where, order)
+            {
+                this.addMember(object, type, where, name, val, level, order || 0, context, isScope);
+            }.bind(this);
 
             var domMembers = Dom.getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
-                var name = properties[i];
+                name = properties[i];
 
                 // Ignore only global variables (properties of the |window| object).
                 if (Wrapper.shouldIgnore(name) && (object instanceof Window))
@@ -516,10 +538,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     continue;
                 }
 
-                var val;
                 try
                 {
-                    val = contentView[name];  // getter is safe
+                    val = contentView[name];
                 }
                 catch (exc)
                 {
@@ -530,54 +551,71 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     val = undefined;
                 }
 
-                var ordinal = parseInt(name);
-                if (ordinal || ordinal == 0)
+                if (!isNaN(parseInt(name, 10)))
                 {
-                    this.addMember(object, "ordinal", ordinals, name, val, level, 0, context);
+                    add("ordinal", ordinals, 0);
                 }
-                else if (typeof(val) == "function")
+                else if (typeof val === "function")
                 {
-                    if (isClassFunction(val))
+                    var classFunc = isClassFunction(val);
+                    var domMember = Dom.isDOMMember(object, name);
+                    if (domMember && classFunc)
                     {
-                        if (Dom.isDOMMember(object, name))
-                            this.addMember(object, "domClass", domClasses, name, val, level, domMembers[name], context);
-                        else
-                            this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                        add("domClass", domClasses, domMembers[name]);
                     }
-                    else if (Dom.isDOMMember(object, name))
+                    else if (domMember)
                     {
-                        this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                        add("domFunction", domFuncs, domMembers[name]);
                     }
-                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
+                    else if (classFunc)
                     {
-                        this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context);
+                        add("userClass", userClasses);
+                    }
+                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers &&
+                        Dom.isInlineEventHandler(name))
+                    {
+                        add("userFunction", domHandlers);
                     }
                     else
                     {
-                        this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                        add("userFunction", userFuncs);
                     }
                 }
                 else
                 {
                     if (isPrototype(name))
-                        this.addMember(object, "proto", proto, name, val, level, 0, context);
+                    {
+                        add("proto", proto);
+                    }
                     else if (Dom.isDOMMember(object, name))
-                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
+                    {
+                        add("dom", domProps, domMembers[name]);
+                    }
                     else if (Dom.isDOMConstant(object, name))
-                        this.addMember(object, "dom", domConstants, name, val, level, 0, context);
+                    {
+                        add("dom", domConstants);
+                    }
                     else if (Dom.isInlineEventHandler(name))
-                        this.addMember(object, "user", domHandlers, name, val, level, 0, context);
+                    {
+                        add("user", domHandlers);
+                    }
                     else
-                        this.addMember(object, "user", userProps, name, val, level, 0, context);
+                    {
+                        add("user", userProps);
+                    }
                 }
+            }
+
+            if (isScope || (typeof object === "function" && Firebug.showClosures && context))
+            {
+                this.maybeAddClosureMember(object, "proto", proto, level, context, isScope);
             }
         }
         catch (exc)
         {
             // Sometimes we get exceptions just from trying to iterate the members
             // of certain objects, like StorageList, but don't let that gum up the works
-            //throw exc;
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+            if (FBTrace.DBG_DOM)
                 FBTrace.sysout("dom.getMembers FAILS: ", exc);
         }
 
@@ -622,7 +660,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (Firebug.showDOMConstants)
             members.push.apply(members, domConstants);
 
-        // The prototype is always displayed at the end.
         members.push.apply(members, proto);
 
         if (Firebug.showInlineEventHandlers)
@@ -654,7 +691,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         return members;
     },
 
-    addMember: function(object, type, props, name, value, level, order, context)
+    addMember: function()
     {
         try
         {
@@ -667,35 +704,53 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-    addMemberInternal: function(object, type, props, name, value, level, order, context)
+    addMemberInternal: function(object, type, props, name, value, level, order, context, parentIsScope)
     {
-        // do this first in case a call to instanceof reveals contents
+        // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
         var hasProperties = Obj.hasProperties(value, !Firebug.showEnumerableProperties,
             Firebug.showOwnProperties);
 
-        var valueType = typeof(value);
+        var valueType = typeof value;
         var hasChildren = hasProperties && !(value instanceof FirebugReps.ErrorCopy) &&
-            (valueType == "function" || (valueType == "object" && value != null)
-            || (valueType == "string" && value.length > Firebug.stringCropLength));
+            ((valueType == "function") ||
+             (valueType == "object" && value != null) ||
+             (valueType == "string" && value.length > Firebug.stringCropLength));
+
+        // Special case for closure inspection.
+        if (!hasChildren && valueType === "function" && Firebug.showClosures && context)
+        {
+            try
+            {
+                var win = context.baseWindow || context.window;
+                ClosureInspector.getEnvironmentForObject(win, value, context);
+                hasChildren = true;
+            }
+            catch (e) {}
+        }
 
         // Special case for "arguments", which is not enumerable by for...in statement
         // and so, Obj.hasProperties always returns false.
-        if (!hasChildren && value) // arguments will never be falsy if the arguments exist
-            hasChildren = isArguments(value);
+        hasChildren = hasChildren || (!!value && isArguments(value));
 
-        if (value)
+        if (valueType === "function" && !hasChildren)
         {
-            var proto = Obj.getPrototype(value);
-            // Special case for functions with a prototype that has values
-            if (valueType === "function" && proto)
+            try
             {
-                hasChildren = hasChildren || Obj.hasProperties(proto,
-                    !Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                // Special case for functions with a prototype that has values
+                var proto = value.prototype;
+                if (proto)
+                {
+                    hasChildren = Obj.hasProperties(proto, !Firebug.showEnumerableProperties,
+                        Firebug.showOwnProperties);
+                }
             }
+            catch (exc) {}
         }
+
+        var descriptor = getPropertyDescriptor(object, name);
 
         var member = {
             object: object,
@@ -710,7 +765,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             hasChildren: hasChildren,
             tag: tag,
             prefix: "",
-            readOnly: false
+            readOnly: (descriptor && !descriptor.writable && !descriptor.set),
+            // XXX should probably move the tests from getContextMenuItems here
+            deletable: (!parentIsScope && !(descriptor && !descriptor.configurable))
         };
 
         // The context doesn't have to be specified (e.g. in case of Watch panel that is based
@@ -718,7 +775,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (context)
         {
             // xxxHonza: Support for object change not implemented yet.
-            member.breakable = !hasChildren;
+            member.breakable = !hasChildren && !parentIsScope;
 
             var breakpoints = context.dom.breakpoints;
             var bp = breakpoints.findBreakpoint(object, name);
@@ -729,8 +786,13 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             }
         }
 
+        if (parentIsScope)
+            member.scopeNameTooltip = Locale.$STRF("dom.tip.scopeMemberName", ["%" + name]);
+
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
+        // XXX This should be rewritten to use 'descriptor', and I believe the unwrapping
+        // test is wrong (see issue 5377).
         var o = this.getObjectView(object);
         if (o && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
         {
@@ -751,17 +813,46 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             // only setter
             if (!getter && setter)
             {
-                member.readOnly = true;
                 member.prefix = "set";
             }
         }
 
-        var readOnly = isReadOnly(object, name);
-        if (typeof(readOnly) != "undefined")
-            member.readOnly = readOnly;
-
         props.push(member);
         return member;
+    },
+
+    // Add the magic "(closure)" property.
+    maybeAddClosureMember: function(object, type, props, level, context, isScope)
+    {
+        var win = context.baseWindow || context.window;
+        var wrapper = ClosureInspector.getScopeWrapper(object, win, context, isScope);
+        if (!wrapper)
+            return;
+
+        var name = (isScope ? Locale.$STR("dom.scopeParentName") : Locale.$STR("dom.scopeName"));
+        var title = (isScope ? undefined : Locale.$STR("dom.tip.scopeName"));
+        var rep = Firebug.getRep(wrapper);
+        var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+        var member = {
+            object: object,
+            name: name,
+            value: wrapper,
+            type: type,
+            rowClass: "memberRow-" + type,
+            open: "",
+            order: 0,
+            level: level,
+            indent: level*16,
+            hasChildren: true,
+            tag: tag,
+            prefix: "",
+            title: title,
+            readOnly: true,
+            deletable: false,
+            ignoredPath: true
+        };
+        props.push(member);
     },
 
     // recursion starts with offset=0, level=0
@@ -771,7 +862,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         for (var i = offset; i < members.length; ++i)
         {
             var member = members[i];
-            if (member.level > level)
+            if (member.level < level)
                 break;
 
             if (toggles.get(member.name))
@@ -799,10 +890,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         member.level, member);
                 }
 
-                expanded += newMembers.length;
-
-                i += newMembers.length + this.expandMembers(members, toggles.get(member.name),
-                    i+1, level+1, context);
+                var moreExpanded = newMembers.length +
+                    this.expandMembers(members, toggles.get(member.name), i+1, level+1, context);
+                i += moreExpanded;
+                expanded += moreExpanded;
             }
         }
 
@@ -961,14 +1052,26 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     getRowPathName: function(row)
     {
-        var name = row.domObject.name;
+        var member = row.domObject, name = member.name;
 
-        if(name.match(/^[\d]+$/))//ordinal
+        // Fake "(closure)" properties.
+        if (member.ignoredPath)
+            return ["", ""];
+
+        // Closure variables.
+        if (ClosureInspector.isScopeWrapper(member.object))
+            return [".%", name];
+
+        // Ordinals.
+        if (name.match(/^[\d]+$/))
             return ["", "["+name+"]"];
-        else if(name.match(rxIdentifier))//identifier
+
+        // Identifiers.
+        if (name.match(rxIdentifier))
             return [".", name];
-        else//map keys
-            return ["", "[\""+name.replace(/\\/g, "\\\\").replace(/"/g,"\\\"") + "\"]"];
+
+        // Other, weird, names.
+        return ["", "[\""+name.replace(/\\/g, "\\\\").replace(/"/g,"\\\"") + "\"]"];
     },
 
     copyName: function(row)
@@ -991,7 +1094,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     getPropertyPath: function(row)
     {
         var path = [];
-        for(var current = row; current ; current = getParentRow(current))
+        for (var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
         path.shift(); //don't want the first separator
         return path;
@@ -1026,9 +1129,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var propValue = this.getRowPropertyValue(row);
 
-                var type = typeof(propValue);
+                var type = typeof propValue;
                 if (type == "undefined" || type == "number" || type == "boolean")
-                    editValue = propValue;
+                    editValue = "" + propValue;
                 else if (type == "string")
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue == null)
@@ -1036,7 +1139,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
                     editValue = getRowName(row);
                 else
-                    editValue = "this." + getRowName(row);
+                    editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
             Firebug.Editor.startEditing(row, editValue);
@@ -1051,17 +1154,14 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
         else
         {
-            var object = getRowOwnerObject(row);
-            if (!object)
-                object = this.selection;
-            object = this.getObjectView(object);
+            var member = row.domObject;
+            var object = this.getObjectView(member.object);
 
-            if (object)
+            if (member.deletable)
             {
-                var name = getRowName(row);
                 try
                 {
-                    delete object[name];
+                    delete object[member.name];
                 }
                 catch (exc)
                 {
@@ -1076,13 +1176,15 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     setPropertyValue: function(row, value)  // value must be string
     {
+        var member = row.domObject;
+        var name = member.name;
+
         if (FBTrace.DBG_DOM)
         {
-            FBTrace.sysout("row: " + row);
-            FBTrace.sysout("value: " + value + " type " + typeof(value), value);
+            FBTrace.sysout("setPropertyValue: " + name + " set to " +
+                (typeof value === "string" ? "\"" + value + "\"" : "non-string!?!?"), row);
         }
 
-        var name = getRowName(row);
         if (name == "this")
             return;
 
@@ -1094,8 +1196,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     if (FBTrace.DBG_DOM)
                     {
-                        FBTrace.sysout("setPropertyValue evaluate success object[" + name + "]=" +
-                            result + " type " + typeof(result), result);
+                        FBTrace.sysout("setPropertyValue evaluate success object[" + name + "]" +
+                            " set to type " + typeof result, result);
                     }
                     object[name] = result;
                 },
@@ -1105,19 +1207,15 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     {
                         if (FBTrace.DBG_DOM)
                         {
-                            FBTrace.sysout("setPropertyValue evaluate failed with exc:" + exc +
-                                " object[" + name + "]=" + value + " type " + typeof(value), exc);
+                            FBTrace.sysout("setPropertyValue evaluate FAILED", exc);
                         }
 
                         // If the value doesn't parse, then just store it as a string.
                         // Some users will not realize they're supposed to enter a JavaScript
                         // expression and just type literal text
-                        object[name] = String(value);  // unwrappedJSobject.property = string
+                        object[name] = value;
                     }
-                    catch (exc)
-                    {
-                        return;
-                    }
+                    catch (exc) {}
                 }
             );
         }
@@ -1132,7 +1230,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 try
                 {
                     // See catch block above...
-                    object[name] = String(value); // unwrappedJSobject.property = string
+                    object[name] = value;
                 }
                 catch (exc)
                 {
@@ -1161,10 +1259,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (!member.breakable)
             return;
 
-        //xxxHonza: don't use getRowName to get the prop name. From some reason
-        // unwatch doesn't work if row.firstChild.textContent is used.
-        // It works only from within the watch handler method if the passed param
-        // name is used.
         var name = member.name;
         if (name == "this")
             return;
@@ -1345,7 +1439,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (object == null)
             return 1000;
 
-        if (typeof(object) == "undefined")
+        if (typeof object == "undefined")
             return 1000;
         else if (object instanceof SourceLink.SourceLink)
             return 0;
@@ -1361,7 +1455,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     updateSelection: function(object)
     {
         if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.updateSelection; object=" + object, object);
+            FBTrace.sysout("dom.updateSelection", object);
 
         var previousIndex = this.pathIndex;
         var previousView = previousIndex == -1 ? null : this.viewPath[previousIndex];
@@ -1396,6 +1490,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     return;
                 }
 
+                // XXX This is wrong with closures, but I haven't noticed anything
+                // break and I don't know how to fix, so let's just leave it...
                 for (var i = 0; i < newPath.length; ++i)
                 {
                     var name = newPath[i];
@@ -1445,7 +1541,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             }
 
             this.panelNode.scrollTop = 0;
-            this.rebuild();
+            this.rebuild(false);
         }
         else
         {
@@ -1460,7 +1556,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
             this.rebuild(false, view ? view.scrollTop : 0);
         }
-
     },
 
     getObjectPath: function(object)
@@ -1485,6 +1580,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         options.add("showDOMFuncs");
         options.add("showDOMConstants");
         options.add("showInlineEventHandlers");
+        options.add("showClosures");
         options.add("showOwnProperties");
         options.add("showEnumerableProperties");
 
@@ -1496,7 +1592,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         return [
             Menu.optionMenu("ShowUserProps", "showUserProps",
-                "dom.option.tip.Show User Props"),
+                "dom.option.tip.Show_User_Props"),
             Menu.optionMenu("ShowUserFuncs", "showUserFuncs",
                 "dom.option.tip.Show_User_Funcs"),
             Menu.optionMenu("ShowDOMProps", "showDOMProps",
@@ -1507,6 +1603,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
+            Menu.optionMenu("ShowClosures", "showClosures",
+                "dom.option.tip.Show_Closures"),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),
@@ -1527,12 +1625,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         var items = [];
 
-        if (row)
+        if (row && row.domObject && !row.domObject.ignoredPath)
         {
-            var rowName = getRowName(row);
-            var rowObject = this.getRowObject(row);
-            var rowValue = this.getRowPropertyValue(row);
             var member = row.domObject;
+            var rowName = member.name;
+            var rowObject = member.object;
+            var rowValue = member.value;
 
             var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof StackFrame.StackFrame;
@@ -1552,7 +1650,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 }
             );
 
-            if (typeof(rowValue) == "string" || typeof(rowValue) == "number")
+            if (typeof rowValue == "string" || typeof rowValue == "number")
             {
                 // Functions already have a copy item in their context menu
                 items.push(
@@ -1580,7 +1678,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 tooltiptext = "dom.tip.Edit_Property";
             }
 
-            var readOnly = (!isWatch && !isStackFrame && member && member.readOnly);
+            var readOnly = (!isWatch && !isStackFrame && member.readOnly);
             if (!readOnly)
             {
                 items.push(
@@ -1593,7 +1691,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 );
             }
 
-            if (isWatch || (!isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
+            if (isWatch ||
+                (member.deletable && !isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
             {
                 items.push(
                     {
@@ -1853,7 +1952,7 @@ function isPrototype(name)
     return (name == "prototype" || name == "__proto__");
 }
 
-function isReadOnly(object, propName)
+function getPropertyDescriptor(object, propName)
 {
     try
     {
@@ -1862,18 +1961,20 @@ function isReadOnly(object, propName)
         {
             desc = Object.getOwnPropertyDescriptor(object, propName);
             if (desc)
-                break;
+                return desc;
             object = Object.getPrototypeOf(object);
         }
-        return (desc && !desc.writable && !desc.set);
     }
     catch (e)
     {
     }
+    return undefined;
 }
 
 function getRowName(row)
 {
+    // XXX This can return not only property names but also just descriptive ones,
+    // like "(closure)", and indeed the collapse remembering logic relies on that.
     var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
     return labelNode.textContent;
 }
@@ -1893,24 +1994,26 @@ function getRowOwnerObject(row)
 
 function getParentRow(row)
 {
-    var level = parseInt(row.getAttribute("level"))-1;
-    // If it's top level object the level is now set to -1, is that a problem?
+    var level = "" + (parseInt(row.getAttribute("level"), 10) - 1);
+    if (level == "-1")
+        return;
     for (row = row.previousSibling; row; row = row.previousSibling)
     {
-        if (parseInt(row.getAttribute("level")) == level)
+        if (row.getAttribute("level") === level)
             return row;
     }
 }
 
+// Return an array of parts that uniquely identifies a row (not always all JavaScript)
 function getPath(row)
 {
     var name = getRowName(row);
     var path = [name];
 
-    var level = parseInt(row.getAttribute("level"))-1;
-    for (row = row.previousSibling; row; row = row.previousSibling)
+    var level = parseInt(row.getAttribute("level"), 10) - 1;
+    for (row = row.previousSibling; row && level >= 0; row = row.previousSibling)
     {
-        if (parseInt(row.getAttribute("level")) == level)
+        if (parseInt(row.getAttribute("level"), 10) === level)
         {
             var name = getRowName(row);
             path.splice(0, 0, name);

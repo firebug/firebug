@@ -70,12 +70,6 @@ createFirebugChrome: function(win)
 
     var panelSplitter, sidePanelDeck, panelBar1, panelBar2;
 
-    var disabledHead = null;
-    var disabledCaption = null;
-    var enableSiteLink = null;
-    var enableSystemPagesLink = null;
-    var enableAlwaysLink = null;
-
 var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title, focusedElement, setter popup
@@ -165,7 +159,7 @@ var FirebugChrome =
             {
                 // chrome bound into this scope
                 FirebugChrome.initializeUI();
-            })
+            });
         }
     },
 
@@ -776,7 +770,7 @@ var FirebugChrome =
 
     getSelectedPanelURL: function()
     {
-        var location;
+        var location = null;
         if (Firebug.currentContext)
         {
             var panel = Firebug.chrome.getSelectedPanel();
@@ -819,7 +813,7 @@ var FirebugChrome =
         {
             // panels provide location, use the selected panel
             return Firebug.chrome.getSelectedPanel();
-        }
+        };
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -840,10 +834,10 @@ var FirebugChrome =
     hidePanel: function()
     {
         if (panelBar1.selectedPanel)
-            panelBar1.hideSelectedPanel()
+            panelBar1.hideSelectedPanel();
 
         if (panelBar2.selectedPanel)
-            panelBar2.hideSelectedPanel()
+            panelBar2.hideSelectedPanel();
     },
 
     syncPanel: function(panelName)
@@ -1162,7 +1156,7 @@ var FirebugChrome =
 
     swapBrowsers: function(oldBrowser, newBrowser)
     {
-        var oldDoc = oldBrowser.contentDocument
+        var oldDoc = oldBrowser.contentDocument;
         // Panels remember the top window, for which they were first opened.
         // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
@@ -1187,7 +1181,7 @@ var FirebugChrome =
                 a.QueryInterface(Ci.nsIFrameLoaderOwner).swapFrameLoaders(b);
             else
                 a.swapDocShells(b);
-        }
+        };
 
         for (var i = frames.length - 1; i >= 0; i--)
         {

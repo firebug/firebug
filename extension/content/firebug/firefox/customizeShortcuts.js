@@ -22,7 +22,7 @@ var shortcutNames = null;
 var gVKNames = [];
 var gLocaleKeys = [];
 var gPlatformKeys = new Object();
-var updatedShortcuts = {}
+var updatedShortcuts = {};
 var modified = false;
 var mustBeKeyChars = {
     VK_SEMICOLON      : ";",
@@ -88,10 +88,8 @@ function setKeyInfo()
             gPlatformKeys.accel = (window.navigator.platform.search("Mac") == 0 ? gPlatformKeys.meta : gPlatformKeys.ctrl);
     }
 
-    for ( var property in KeyEvent)
-    {
+    for (var property in KeyEvent)
         gVKNames[KeyEvent[property]] = property.replace("DOM_", "");
-    }
     gVKNames[8] = "VK_BACK";
 }
 
@@ -117,7 +115,7 @@ function saveChanges()
     var e = Services.wm.getEnumerator("navigator:browser");
     while (e.hasMoreElements())
     {
-        var fbug = e.getNext().Firebug
+        var fbug = e.getNext().Firebug;
         fbug && fbug.ShortcutsModel.initShortcuts();
     }
     return true;

@@ -259,7 +259,7 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.trialSelector)
         {
             WarningTemplate.noSelectionResultsTag.insertRows(
-                {object: this.selection}, tbody.lastChild)
+                {object: this.selection}, tbody.lastChild);
         }
         else
         {
@@ -272,7 +272,7 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
 
     getObjectPath: function(object)
     {
-        if (FBTrace.DBG_SELECTOR)
+        if (FBTrace.DBG_ELEMENTS)
             FBTrace.sysout("css.selector.getObjectPath NOOP", object);
     },
 

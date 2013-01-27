@@ -22,7 +22,7 @@ var Ci = Components.interfaces;
 
 var RETURN_CONTINUE = Ci.jsdIExecutionHook.RETURN_CONTINUE;
 
-var memoryReporterManager;
+var memoryReporterManager = null;
 
 try
 {
@@ -170,7 +170,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
         if (!cancelReport)
         {
             var title = Locale.$STR("firebug.Objects Added While Profiling");
-            var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
+            Firebug.Console.openCollapsedGroup(title, context, "profile",
                 Firebug.MemoryProfiler.ProfileCaption, true, null, true);
     
             Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
@@ -599,7 +599,7 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
     {
         var cols = [];
         for (var p in object)
-            cols.push(p)
+            cols.push(p);
         return cols;
     },
 
@@ -636,19 +636,19 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
 
             for (var i = 0; i < values.length; ++i)
                 tbody.appendChild(values[i].row);
-        },
+        };
 
         sortDescending = function()
         {
             Css.removeClass(header, "sortedAscending");
             Css.setClass(header, "sortedDescending");
-            header.setAttribute("aria-sort", "descending")
+            header.setAttribute("aria-sort", "descending");
 
             header.sorted = 1;
 
             for (var i = values.length-1; i >= 0; --i)
                 tbody.appendChild(values[i].row);
-        }
+        };
 
         var tbody = Dom.getChildByClass(table, "profileTbody");
         var thead = Dom.getChildByClass(table, "profileThead");
@@ -830,13 +830,13 @@ Firebug.MemoryProfiler.ProfileSummary = domplate(Firebug.Rep,
 
     getColumns: function(call)
     {
-        return Firebug.MemoryProfiler.ProfileCall.getColumns(call)
+        return Firebug.MemoryProfiler.ProfileCall.getColumns(call);
     },
 
     getColumnLabel: function(call)
     {
         return Firebug.MemoryProfiler.ProfileCall.getColumnLabel(call);
-    },
+    }
 });
 
 } // END with Domplate

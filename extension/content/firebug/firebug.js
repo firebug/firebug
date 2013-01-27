@@ -83,7 +83,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.10",
+    version: "1.12",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -1386,7 +1386,7 @@ window.Firebug =
         if (!Firebug.previousPlacement)
             Firebug.previousPlacement = Options.get("previousPlacement");
 
-        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
+        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) );
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1472,7 +1472,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -1489,7 +1489,8 @@ Firebug.Listener = function()
     // It can't be created here since derived objects would share
     // the same array.
     this.fbListeners = null;
-}
+};
+
 Firebug.Listener.prototype =
 {
     addListener: function(listener)
@@ -2518,14 +2519,24 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
-        if (object.constructor && typeof(object.constructor) == 'function')
+        try
         {
-            var ctorName = object.constructor.name;
-            if (ctorName && ctorName != "Object")
-                return ctorName;
+            if (object.constructor && typeof(object.constructor) == 'function')
+            {
+                var ctorName = object.constructor.name;
+                // xxxsz: Objects with 'Object' as constructor name should also be shown.
+                // See issue 6148.
+                if (ctorName)
+                    return ctorName;
+            }
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Rep.getTitle; EXCEPTION " + e, e);
         }
 
-        var label = FBL.safeToString(object); // eg [object XPCWrappedNative [object foo]]
+        var label = Str.safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
         const re =/\[object ([^\]]*)/;
         var m = re.exec(label);
@@ -2591,7 +2602,8 @@ Firebug.Rep = domplate(
     {
         return n == 1 ? "" : "s";
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
@@ -2732,9 +2744,8 @@ Firebug.Migrator =
     {
         var id = elt.getAttribute('id');
         Options.set( "migrated_"+id, true, typeof(true));
-    },
-
-}
+    }
+};
 
 // ********************************************************************************************* //
 

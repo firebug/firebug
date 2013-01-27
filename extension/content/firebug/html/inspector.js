@@ -23,7 +23,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, 
 // Constants
 
 const inspectDelay = 200;
-const highlightCSS = "chrome://firebug/content/html/highlighter.css";
+const highlightCssUrl = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
 const Cu = Components.utils;
 
@@ -74,10 +74,12 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         if (!elementArr || !Arr.isArrayLike(elementArr))
         {
+            // Not everything that comes through here is wrapped - fix that.
+            elementArr = Wrapper.wrapObject(elementArr);
+
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
-                (Wrapper.getContentView(elementArr) &&
-                    !Xml.isVisible(Wrapper.getContentView(elementArr))))
+                (typeof elementArr === "object" && !Xml.isVisible(elementArr)))
             {
                 if (elementArr && Dom.isRange(elementArr))
                     elementArr = elementArr;
@@ -146,7 +148,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             {
                 for (i=0, elementLen=elementArr.length; i<elementLen; i++)
                 {
-                    elt = elementArr[i];
+                    // Like above, wrap things.
+                    elt = Wrapper.wrapObject(elementArr[i]);
 
                     if (elt && elt instanceof HTMLElement)
                     {
@@ -788,11 +791,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             this.highlightObject(null);
             this.defaultHighlighter = value ? getHighlighter("boxModel") : getHighlighter("frame");
         }
-        else if (name == "showQuickInfoBox")
+        else if(name == "showQuickInfoBox")
         {
-            if (quickInfoBox.boxEnabled && !value)
-                quickInfoBox.hide();
-
             quickInfoBox.boxEnabled = value;
         }
     },
@@ -829,10 +829,23 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     hideQuickInfoBox: function()
     {
-        quickInfoBox.hide();
+        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
+
+        if (qiBox.state==="open")
+            quickInfoBox.hide();
 
         this.inspectNode(null);
+    },
+
+    /**
+     * Pass all quick info box events to quickInfoBox.handleEvent() for handling.
+     * @param {Event} event Event to handle
+     */
+    quickInfoBoxHandler: function(event)
+    {
+        quickInfoBox.handleEvent(event);
     }
+
 });
 
 // ********************************************************************************************* //
@@ -1045,7 +1058,7 @@ function getImageMapHighlighter(context)
                 canvas = null;
                 ctx = null;
             }
-        }
+        };
     }
 
     return context.imageMapHighlighter;
@@ -1059,6 +1072,8 @@ var quickInfoBox =
     dragging: false,
     storedX: null,
     storedY: null,
+    prevX: null,
+    prevY: null,
 
     show: function(element)
     {
@@ -1120,16 +1135,76 @@ var quickInfoBox =
     hide: function()
     {
         // if mouse is over panel defer hiding to mouseout to not cause flickering
+        if (this.mouseover || this.dragging)
+        {
+            this.needsToHide = true;
+            return;
+        }
+
         var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-        if (qiBox.state==="closed")
-            return;
 
-        if (qiBox.mozMatchesSelector(":hover"))
-            return;
-
-        this.storedX = qiBox.boxObject.screenX;
-        this.storedY = qiBox.boxObject.screenY;
+        this.prevX = null;
+        this.prevY = null;
+        this.needsToHide = false;
         qiBox.hidePopup();
+    },
+
+    handleEvent: function(event)
+    {
+        switch (event.type)
+        {
+            case "mousemove":
+                if(!this.dragging)
+                    return;
+
+                var diffX, diffY,
+                    boxX = this.qiBox.screenX,
+                    boxY = this.qiBox.screenY,
+                    x = event.screenX,
+                    y = event.screenY;
+
+                diffX = x - this.prevX;
+                diffY = y - this.prevY;
+
+                this.qiBox.moveTo(boxX + diffX, boxY + diffY);
+
+                this.prevX = x;
+                this.prevY = y;
+                this.storedX = boxX;
+                this.storedY = boxY;
+                break;
+            case "mousedown":
+                this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
+                this.qiBox = this.qiPanel.boxObject;
+                Events.addEventListener(this.qiPanel, "mousemove", this, true);
+                Events.addEventListener(this.qiPanel, "mouseup", this, true);
+                this.dragging = true;
+                this.prevX = event.screenX;
+                this.prevY = event.screenY;
+                break;
+            case "mouseup":
+                Events.removeEventListener(this.qiPanel, "mousemove", this, true);
+                Events.removeEventListener(this.qiPanel, "mouseup", this, true);
+                this.qiPanel = this.qiBox = null;
+                this.prevX = this.prevY = null;
+                this.dragging = false;
+                break;
+            // this is a hack to find when mouse enters and leaves panel
+            // it requires that #fbQuickInfoPanel have border
+            case "mouseover":
+                if(this.dragging)
+                    return;
+                this.mouseover = true;
+                break;
+            case "mouseout":
+                if(this.dragging)
+                    return;
+                this.mouseover = false;
+                // if hiding was defered because mouse was over panel hide it
+                if (this.needsToHide && event.target.nodeName == "panel")
+                    this.hide();
+                break;
+        }
     },
 
     addRows: function(domBase, vbox, attribs, computedStyle)
@@ -1276,7 +1351,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                     FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI +
                         " !?= " + body.ownerDocument.documentURI, highlighter);
 
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
 
                 try
                 {
@@ -1463,7 +1538,7 @@ BoxModelHighlighter.prototype =
                 moveImp(nodes.lines.top, 0, top);
                 moveImp(nodes.lines.right, left + width, 0);
                 moveImp(nodes.lines.bottom, 0, top + height);
-                moveImp(nodes.lines.left, left, 0)
+                moveImp(nodes.lines.left, left, 0);
             }
 
             var body = getNonFrameBody(element);
@@ -1495,7 +1570,7 @@ BoxModelHighlighter.prototype =
 
             if (needsAppend)
             {
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
                 body.appendChild(nodes.offset);
             }
 
@@ -1634,27 +1709,26 @@ function getNonFrameBody(elt)
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
-function attachStyles(context, body)
+function attachStyles(context, doc)
 {
-    if (FBTrace.DBG_ERRORS && context.highlightStyle && Cu.isDeadWrapper(context.highlightStyle))
-        FBTrace.sysout("inspector.attachStyles; ERROR can't access dead object");
+    if (!context.highlightStyleCache)
+        context.highlightStyleCache = new WeakMap();
+    var highlightStyleCache = context.highlightStyleCache;
 
-    var doc = body.ownerDocument;
-
-    if (!context.highlightStyle)
-        context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
-
-    var parentNode = context.highlightStyle.parentNode;
-    if (!parentNode || context.highlightStyle.ownerDocument != doc)
+    var style;
+    if (highlightStyleCache.has(doc))
     {
-        // Clone the <style> element so, it doesn't adopt the new document as parent.
-        // The other doc (except of the original one that is always the top doc) comes
-        // from an iframe, which can be reloaded (within the context life-time) and
-        // consequent access to context.highlightStyle would fire "can't access dead object"
-        // exception (see issue 6013).
-        var style = parentNode ? context.highlightStyle.cloneNode(true) : context.highlightStyle;
-        Css.addStyleSheet(body.ownerDocument, style);
+        style = highlightStyleCache.get(doc);
     }
+    else
+    {
+        style = Css.createStyleSheet(doc, highlightCssUrl);
+        highlightStyleCache.set(doc, style);
+    }
+
+    // Cater for the possiblity that someone might have removed our stylesheet.
+    if (!style.parentNode)
+        Css.addStyleSheet(doc, style);
 }
 
 function createProxiesForDisabledElements(body)

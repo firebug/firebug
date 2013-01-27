@@ -28,7 +28,7 @@ function TraceWrapper(tracer, option)
             // Check the option before the log is passed to the tracing console.
             if (tracer[option])
                 tracer[method].apply(tracer, arguments);
-        }
+        };
     }
 
     for (var i=0; i<TraceAPI.length; i++)
@@ -54,7 +54,7 @@ var tracer = scope.FBTrace;
 tracer.to = function(option)
 {
     return new TraceWrapper(this, option);
-}
+};
 
 return tracer;
 

@@ -12,7 +12,6 @@ function(FBTrace, Http, Firefox) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
@@ -167,7 +166,7 @@ Win.iterateBrowserTabs = function(browserWindow, callback)
     }
 
     return false;
-}
+};
 
 
 Win.getBrowserByWindow = function(win)
@@ -181,18 +180,19 @@ Win.getBrowserByWindow = function(win)
     }
 
     return null;
-}
+};
 
 // ********************************************************************************************* //
 
 Win.getWindowId = function(win)
 {
     var util = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
+    var outerWindowID = null;
     var innerWindowID = "(none)";
 
     try
     {
-        var outerWindowID = util.outerWindowID;
+        outerWindowID = util.outerWindowID;
         innerWindowID = util.currentInnerWindowID;
     }
     catch(exc)

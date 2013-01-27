@@ -11,7 +11,6 @@ function(Obj, Xpcom, Locale, Win) {
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 Components.utils.import("resource://gre/modules/AddonManager.jsm");

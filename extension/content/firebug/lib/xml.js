@@ -11,14 +11,13 @@ function(FBTrace, Str) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 
 var Xml = {};
 
 // ************************************************************************************************
 // HTML and XML Serialization
 
-var getElementType = Xml.getElementType = function(node)
+Xml.getElementType = function(node)
 {
     if (isElementXUL(node))
         return 'xul';
@@ -30,9 +29,9 @@ var getElementType = Xml.getElementType = function(node)
         return 'xhtml';
     else if (isElementHTML(node))
         return 'html';
-}
+};
 
-var getElementSimpleType = Xml.getElementSimpleType = function(node)
+Xml.getElementSimpleType = function(node)
 {
     if (isElementSVG(node))
         return 'svg';
@@ -40,47 +39,47 @@ var getElementSimpleType = Xml.getElementSimpleType = function(node)
         return 'mathml';
     else
         return 'html';
-}
+};
 
 var isElementHTML = Xml.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
+};
 
 var isElementXHTML = Xml.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
+};
 
 var isElementMathML = Xml.isElementMathML = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
-}
+};
 
 var isElementSVG = Xml.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
-}
+};
 
 var isElementXUL = Xml.isElementXUL = function(node)
 {
     return node instanceof XULElement;
-}
+};
 
 var getNodeName = Xml.getNodeName = function(node)
 {
     var name = node.nodeName;
     return isElementHTML(node) ? name.toLowerCase() : name;
-}
+};
 
-var getLocalName = Xml.getLocalName = function(node)
+Xml.getLocalName = function(node)
 {
     var name = node.localName;
     return isElementHTML(node) ? name.toLowerCase() : name;
-}
+};
 
 // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
-Xml.selfClosingTags =
+var selfClosingTags = Xml.selfClosingTags =
 {
     "meta": 1,
     "link": 1,
@@ -91,21 +90,21 @@ Xml.selfClosingTags =
     "img": 1,
     "br": 1,
     "hr": 1,
-    "param":1,
-    "embed":1
+    "param": 1,
+    "embed": 1
 };
 
-Xml.isSelfClosing = function(element)
+var isSelfClosing = Xml.isSelfClosing = function(element)
 {
     if (isElementSVG(element) || isElementMathML(element))
         return true;
     var tag = element.localName.toLowerCase();
-    return (Xml.selfClosingTags.hasOwnProperty(tag));
+    return (selfClosingTags.hasOwnProperty(tag));
 };
 
 Xml.getElementHTML = function(element)
 {
-    function toHTML(elt)
+    function toHTML(elt, html)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
@@ -120,6 +119,7 @@ Xml.getElementHTML = function(element)
                 var attr = elt.attributes[i];
 
                 // Hide attributes set by Firebug
+                // XXX Do we even have any?
                 if (Str.hasPrefix(attr.localName, "firebug-"))
                     continue;
 
@@ -138,7 +138,7 @@ Xml.getElementHTML = function(element)
                 html.push('>');
 
                 for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toHTML(child);
+                    toHTML(child, html);
 
                 html.push('</', nodeName, '>');
             }
@@ -146,7 +146,7 @@ Xml.getElementHTML = function(element)
             {
                 html.push('/>');
             }
-            else if (Xml.isSelfClosing(elt))
+            else if (isSelfClosing(elt))
             {
                 html.push((isElementXHTML(elt))?'/>':'>');
             }
@@ -156,21 +156,27 @@ Xml.getElementHTML = function(element)
             }
         }
         else if (elt.nodeType == Node.TEXT_NODE)
+        {
             html.push(Str.escapeForTextNode(elt.textContent));
+        }
         else if (elt.nodeType == Node.CDATA_SECTION_NODE)
+        {
             html.push('<![CDATA[', elt.nodeValue, ']]>');
+        }
         else if (elt.nodeType == Node.COMMENT_NODE)
+        {
             html.push('<!--', elt.nodeValue, '-->');
+        }
     }
 
     var html = [];
-    toHTML(element);
+    toHTML(element, html);
     return html.join("");
 };
 
 Xml.getElementXML = function(element)
 {
-    function toXML(elt)
+    function toXML(elt, xml)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
@@ -203,7 +209,7 @@ Xml.getElementXML = function(element)
                 xml.push('>');
 
                 for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toXML(child);
+                    toXML(child, xml);
 
                 xml.push('</', nodeName, '>');
             }
@@ -219,7 +225,7 @@ Xml.getElementXML = function(element)
     }
 
     var xml = [];
-    toXML(element);
+    toXML(element, xml);
     return xml.join("");
 };
 
@@ -274,7 +280,7 @@ Xml.isXMLPrettyPrint = function(context, win)
 
 Xml.isVisible = function(elt)
 {
-    if (Xml.isElementXUL(elt))
+    if (isElementXUL(elt))
     {
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+
         // elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
@@ -283,10 +289,10 @@ Xml.isVisible = function(elt)
 
     try
     {
-        return (!Xml.isElementHTML(elt) && !Xml.isElementXHTML(elt)) ||
+        return (!isElementHTML(elt) && !isElementXHTML(elt)) ||
             elt.offsetWidth > 0 ||
             elt.offsetHeight > 0 ||
-            elt.localName in Xml.invisibleTags;
+            elt.localName in invisibleTags;
     }
     catch (err)
     {

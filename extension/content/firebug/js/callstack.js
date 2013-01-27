@@ -30,7 +30,7 @@ const Ci = Components.interfaces;
  * at specified point of Javascript execution. It's used as a side panel for the Script
  * panel.
  */
-Firebug.CallstackPanel = function() {}
+Firebug.CallstackPanel = function() {};
 Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 /** @lends Firebug.CallstackPanel */
 {
@@ -66,13 +66,13 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             this.show();
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack; onStartDebugging "+this.visible, this)
+            FBTrace.sysout("callstack; onStartDebugging "+this.visible, this);
     },
 
     onStopDebugging: function(context)
     {
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack; onStopDebugging ")
+            FBTrace.sysout("callstack; onStopDebugging");
 
         // clear the view
         this.showStackTrace(null);
@@ -108,7 +108,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (state.selectedCallStackFrameIndex)
             {
-                this.selectFrame(state.selectedCallStackFrameIndex)
+                this.selectFrame(state.selectedCallStackFrameIndex);
             }
         }
     },

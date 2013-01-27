@@ -11,7 +11,6 @@ function(FBTrace, Locale) {
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
-var Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Overlay Helpers
@@ -33,7 +32,7 @@ var BrowserOverlayLib =
         if (!(doc instanceof Ci.nsIDOMDocument))
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("browserOvelayLib.$el; No document!")
+                FBTrace.sysout("browserOvelayLib.$el; No document!");
             return;
         }
 
@@ -60,8 +59,8 @@ var BrowserOverlayLib =
         for (var a in attributes)
             el.setAttribute(a, attributes[a]);
 
-        for each (var a in children)
-            el.appendChild(a);
+        for (var i=0; children && i<children.length; i++)
+            el.appendChild(children[i]);
 
         if (parent)
         {
@@ -88,7 +87,7 @@ var BrowserOverlayLib =
         return this.$el(doc, "command", {
             id: id,
             oncommand: oncommand
-        }, this.$(doc, "mainCommandSet"))
+        }, this.$(doc, "mainCommandSet"));
     },
 
     $key: function(doc, id, key, modifiers, command, position)
@@ -138,7 +137,7 @@ var BrowserOverlayLib =
         for (var i=0; i<children.length; ++i)
         {
             var child = children[i];
-            var beforeEl;
+            var beforeEl = null;
 
             if (child.getAttribute("position"))
             {
@@ -185,7 +184,7 @@ var BrowserOverlayLib =
         attrs.id = id;
 
         // in seamonkey gNavToolbox is null onload
-        var button = this.$el(doc, "toolbarbutton", attrs, children,
+        this.$el(doc, "toolbarbutton", attrs, children,
             (doc.defaultView.gNavToolbox || this.$(doc, "navigator-toolbox")).palette);
 
         var selector = "[currentset^='" + id + ",'],[currentset*='," + id +
@@ -198,7 +197,8 @@ var BrowserOverlayLib =
         var currentset = toolbar.getAttribute("currentset").split(",");
         var i = currentset.indexOf(id) + 1;
 
-        var len = currentset.length, beforeEl;
+        var len = currentset.length;
+        var beforeEl = null;
         while (i < len && !(beforeEl = this.$(doc, currentset[i])))
             i++;
 
@@ -232,8 +232,8 @@ var BrowserOverlayLib =
         script.type = "text/javascript";
         script.setAttribute("firebugRootNode", true);
         doc.documentElement.appendChild(script);
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Helpers
@@ -253,10 +253,11 @@ function updatePersistedValues(doc, options)
 
         if (target instanceof Ci.nsIRDFLiteral)
             return target.Value;
-    }
+    };
 
-    for each(var attr in persist)
+    for (var i=0; i<persist.length; i++)
     {
+        var attr = persist[i];
         var val = getPersist(attr);
         if (val)
             options[attr] = val;

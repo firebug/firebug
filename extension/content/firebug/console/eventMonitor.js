@@ -113,10 +113,11 @@ var EventMonitor = Obj.extend(Firebug.Module,
             return false;
         }
 
+        var eventTypes = [];
         if (!types)
-            var eventTypes = Events.getEventTypes();
+            eventTypes = Events.getEventTypes();
         else
-            var eventTypes = typeof types == "string" ? [types] : types;
+            eventTypes = typeof types == "string" ? [types] : types;
 
         for (var i = 0; i < eventTypes.length; ++i)
         {
@@ -168,7 +169,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
 EventMonitor.EventLog = function(event)
 {
     this.event = event;
-}
+};
 
 // ********************************************************************************************* //
 // Helpers
@@ -237,13 +238,13 @@ Firebug.registerCommand("monitorEvents", {
     handler: monitorEvents.bind(this),
     helpUrl: "http://getfirebug.com/wiki/index.php/monitorEvents",
     description: Locale.$STR("console.cmd.help.monitorEvents")
-})
+});
 
 Firebug.registerCommand("unmonitorEvents", {
     handler: unmonitorEvents.bind(this),
     helpUrl: "http://getfirebug.com/wiki/index.php/unmonitorEvents",
     description: Locale.$STR("console.cmd.help.unmonitorEvents")
-})
+});
 
 return EventMonitor;
 

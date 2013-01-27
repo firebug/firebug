@@ -12,6 +12,7 @@ function runTest()
             FBTest.progress("Testing JSON array");
             testJSONArray(win, callback);
         });
+
         tests.push(function(callback)
         {
             FBTest.progress("Testing JSON object");
@@ -33,23 +34,23 @@ function testJSONArray(win, callback)
 {
     var panel = FBTest.selectPanel("net");
     panel.clear();
-    
+
     var options =
     {
         tagName: "tr",
         classes: "netRow category-xhr hasHeaders loaded"
     };
-  
+
     FBTest.waitForDisplayedElement("net", options, function(row)
     {
         var panelNode = FBTest.selectPanel("net").panelNode;
-  
+
         FBTest.click(row);
         if (FBTest.ok(panelNode.getElementsByClassName("netInfoJSONTab").length > 0,
             "There must be a JSON tab"))
         {
             FBTest.expandElements(panelNode, "netInfoJSONTab");
-  
+
             var jsonBody = FW.FBL.getElementByClass(panelNode, "netInfoJSONText");
             if (FBTest.ok(jsonBody, "JSON contents must exist"))
             {
@@ -64,10 +65,10 @@ function testJSONArray(win, callback)
                 FBTest.click(sortLink);
             }
         }
-  
+
         callback();
     });
-  
+
     FBTest.click(win.document.getElementById("requestArray"));
 }
 
@@ -75,45 +76,47 @@ function testJSONObject(win, callback)
 {
     var panel = FBTest.selectPanel("net");
     panel.clear();
-    
+
     var options =
     {
         tagName: "tr",
         classes: "netRow category-xhr hasHeaders loaded"
     };
-  
+
     FBTest.waitForDisplayedElement("net", options, function(row)
     {
         var panelNode = FBTest.selectPanel("net").panelNode;
-  
+
         FBTest.click(row);
         if (FBTest.ok(panelNode.getElementsByClassName("netInfoJSONTab").length > 0,
             "There must be a JSON tab"))
         {
             FBTest.expandElements(panelNode, "netInfoJSONTab");
-  
+
             var jsonBody = FW.FBL.getElementByClass(panelNode, "netInfoJSONText");
             if (FBTest.ok(jsonBody, "JSON contents must exist"))
             {
                 var sortLink = panelNode.getElementsByClassName("doSort").item(0);
 
-                verifyJSONContents("object", jsonBody, [5, 2, 15, 6, 1, 4, 10, 14, 3, 11, 9, 12, 7, 13, 8]);
+                verifyJSONContents("object", jsonBody, ["a", "c", "b"]);
+
                 FBTest.click(sortLink);
-                verifyJSONContents("object", jsonBody, [1, 10, 11, 12, 13, 14, 15, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+                verifyJSONContents("object", jsonBody, ["a", "b", "c"]);
 
                 // Reset click state
                 FBTest.click(sortLink);
             }
         }
-  
+
         callback();
     });
 
     FBTest.click(win.document.getElementById("requestObject"));
 }
 
-//********************************************************************************************* //
-//Helpers
+// ********************************************************************************************* //
+// Helpers
 
 function verifyJSONContents(type, jsonBody, expectedItems)
 {
@@ -125,9 +128,11 @@ function verifyJSONContents(type, jsonBody, expectedItems)
         for (var i=0; i<items.length; i++)
         {
             var label = items[i].getElementsByClassName("memberLabelCell").item(0).textContent;
-            if (parseInt(label) != expectedItems[i])
+            var value = parseInt(label);
+            var item = (isNaN(value) ? label : value);
+            if (item != expectedItems[i])
             {
-                FBTest.sysout("xxxxx "+i, {expectedItems: expectedItems, label: label});
+                FBTrace.sysout("xxxxx "+i, {expectedItems: expectedItems, label: label, item: item});
                 itemsCorrect = false;
                 break;
             }

@@ -481,8 +481,10 @@ OutStepper.prototype =
 
         // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
+        {
             FBTrace.sysout("fbs." + this.mode + ".onFunctionReturn callingFrameId " +
-                callingFrameId + " called frame " + frameToString(frame), this)
+                callingFrameId + " called frame " + frameToString(frame), this);
+        }
     },
 
     unhook: function(frame)
@@ -492,8 +494,10 @@ OutStepper.prototype =
     hit: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_STEP)
+        {
             FBTrace.sysout("fbs." + this.mode + " hit " + getCallFromType(type) + " at " +
                 frameToString(frame), this);
+        }
 
         var debuggr = fbs.reFindDebugger(frame, this.debuggr);
         if (debuggr)
@@ -695,11 +699,12 @@ LogFunctionStepper.prototype =
 
         if (!frame.callingFrame)
         {
-            var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
-
             if (FBTrace.DBG_FBS_STEP)
+            {
+                var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
                 FBTrace.sysout("fbs.Stack ends at depth "+fbs.stackDescription.depth +
                     (diff ? " NO Match on tag " : " tags match"), fbs.stackDescription.entries);
+            }
 
             fbs.stackDescription.entries = [];
         }
@@ -844,9 +849,11 @@ var fbs =
         // make sure to unregister all the hooks
         var hookNames = ["error", "script", "breakpoint", "debugger", "debug", "interrupt", 
             "throw", "topLevel", "function", "debug"];
-        for each (var hook in hookNames)
+        for (var i=0; i<hookNames.length; i++)
         {
-            try {
+            var hook = hookNames[i];
+            try
+            {
                 jsd[hook + "Hook"] = null;
             }
             catch (exc)
@@ -1229,6 +1236,7 @@ var fbs =
         }
 
         bp.condition = condition;
+        delete bp.transformedCondition;
 
         dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
 
@@ -1348,7 +1356,7 @@ var fbs =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
-            var bp = this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
+            this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
@@ -1859,7 +1867,7 @@ var fbs =
     {
         // For some reason, JSD reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
-        return url ? url.replace(/file:\/([^/])/, "file:///$1") : "";
+        return url ? url.replace(/file:\/([^\/])/, "file:///$1") : "";
     },
 
     denormalizeURL: function(url)
@@ -2237,7 +2245,7 @@ var fbs =
                 fbs.onTopLevelDelegate + " " + frame.script.tag + " " + frame.script.fileName);
 
         if (fbs.onTopLevelDelegate)
-            fbs.onTopLevelDelegate(frame, type)
+            fbs.onTopLevelDelegate(frame, type);
     },
 
     isTopLevelScript: function(frame, type, val)
@@ -3292,6 +3300,7 @@ var fbs =
         if (props)
         {
             bp.condition = props.condition;
+            delete bp.transformedCondition;
             bp.onTrue = props.onTrue;
             bp.hitCount = props.hitCount;
             if (bp.condition || bp.hitCount > 0)
@@ -4100,7 +4109,7 @@ var ScriptInterrupter =
 
         this.entries[script.tag] = {
             script: script
-        }
+        };
     },
 
     disable: function(script)
@@ -4256,7 +4265,7 @@ function hook(fn, rv)
             ERROR(msg, exc);
             return rv;
         }
-    }
+    };
 }
 
 var lastWindowScope = null;
@@ -4347,7 +4356,32 @@ function testBreakpoint(frame, bp)
         var result = {};
         frame.scope.refresh();
 
-        if (frame.eval(bp.condition, "", 1, result))
+        // ugly hack for closure getter syntax
+        // (see also transformedCondition elsewhere in the code)
+        var cond = bp.condition;
+        if (cond.indexOf(".%") !== -1)
+        {
+            var frameScopeRoot = fbs.getOutermostScope(frame);
+            if (frameScopeRoot)
+            {
+                if (bp.transformedCondition && "__fb_scopedVars" in frameScopeRoot.wrappedJSObject)
+                {
+                    // Fast path: everything is already prepared for us.
+                    cond = bp.transformedCondition;
+                }
+                else
+                {
+                    var debuggr = fbs.findDebugger(frame);
+                    var context = debuggr.breakContext;
+                    delete debuggr.breakContext;
+
+                    cond = debuggr._temporaryTransformSyntax(cond, frameScopeRoot, context);
+                    bp.transformedCondition = cond;
+                }
+            }
+        }
+
+        if (frame.eval(cond, "", 1, result))
         {
             if (bp.onTrue)
             {

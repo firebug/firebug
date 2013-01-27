@@ -150,8 +150,8 @@ Cookie.prototype =
 
     getRawSize: function()
     {
-        return this.cookie.name.length + this.cookie.rawValue.length
-    },
+        return this.cookie.name.length + this.cookie.rawValue.length;
+    }
 };
 
 // ********************************************************************************************* //
@@ -173,4 +173,3 @@ return Cookie;
 
 // ********************************************************************************************* //
 });
-

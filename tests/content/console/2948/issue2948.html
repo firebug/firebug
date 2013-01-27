@@ -58,7 +58,7 @@ function onOpenPopup()
     {
         var event = document.createEvent("Events");
         event.initEvent("popup-loaded", true, false);
-        document.setUserData("popup-window", popup, null);
+        window.popup = popup;
         document.dispatchEvent(event)
     }, false);
 }

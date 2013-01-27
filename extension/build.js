@@ -184,7 +184,7 @@ function prepareBuild()
     copy({
         source: "install.rdf.tpl.xml",
         dest: buildDir + "/install.rdf"
-    })
+    });
 }
 
 // ********************************************************************************************* //
@@ -414,7 +414,7 @@ function clean()
 function zip(filename, directory, callback)
 {
     // Create final XPI package.
-    var zip;
+    var zip = null;
     if (os.platform() === "win32")
     {
         var params = "a -tzip " + filename + " " + directory + "/*";
@@ -426,10 +426,17 @@ function zip(filename, directory, callback)
         //zip = spawn("zip", [ "-r", __dirname + "/" + xpiFileName, release ]);
     }
 
-    zip.on("exit", function()
+    if (zip)
+    {
+        zip.on("exit", function()
+        {
+            callback();
+        });
+    }
+    else
     {
         callback();
-    });
+    }
 }
 
 // ********************************************************************************************* //

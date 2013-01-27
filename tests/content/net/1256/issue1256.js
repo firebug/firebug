@@ -26,8 +26,8 @@ function runTest()
                 var netInfoRow = netRow.nextSibling;
                 FBTest.expandElements(netInfoRow, "netInfoPostTab");
 
-                var postTable = FW.FBL.getElementByClass(netInfoRow, "netInfoPostTable");
-                if (postTable)
+                var postTable = FW.FBL.getElementByClass(netInfoRow, "netInfoPostParamsTable");
+                if (FBTest.ok(postTable, "The post table must exist"))
                 {
                     var paramName = FW.FBL.getElementByClass(postTable, "netInfoParamName").textContent;
                     var paramValue = FW.FBL.getElementByClass(postTable, "netInfoParamValue").textContent;

@@ -152,7 +152,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
     {
         var chrome = Firebug.chrome;
         var popup = chrome.$("fbCommandPopup");
-        var splitter = chrome.$("fbCommandPopupSplitter")
+        var splitter = chrome.$("fbCommandPopupSplitter");
         var cmdbox = chrome.$("fbCommandBox");
         var toggle = chrome.$("fbToggleCommandLine");
 

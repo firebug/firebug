@@ -21,7 +21,7 @@ function(Obj, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
  */
 Firebug.SourceBoxDecorator = function(sourceBox)
 {
-}
+};
 
 Firebug.SourceBoxDecorator.sourceBoxCounter = 0;
 
@@ -86,8 +86,8 @@ Firebug.SourceBoxDecorator.prototype =
     getLineId: function(sourceBox, lineNo)
     {
         return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 
@@ -283,8 +283,6 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
             source = source.substring(beginOffset);
-        else
-            source = source;
 
         return source;
     },
@@ -567,7 +565,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         if (this.context.scrollTimeout)
         {
             this.context.clearTimeout(this.context.scrollTimeout);
-            delete this.context.scrollTimeout
+            delete this.context.scrollTimeout;
         }
 
         if (href)
@@ -676,7 +674,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             }
 
             return false; // not sticky
-        }
+        };
     },
 
     /*
@@ -700,9 +698,10 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
     // called for all scroll events, including any time sourcebox.scrollTop is set
     reView: function(sourceBox, clearCache)
     {
+        var viewRange = null;
         if (sourceBox.targetedLineNumber) // then we requested a certain line
         {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
+            viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("reView got viewRange from target line: "+
                     sourceBox.targetedLineNumber, viewRange);
@@ -715,7 +714,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         }
         else  // no special line, assume scrolling
         {
-            var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
+            viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("reView got viewRange from scrollTop: "+sourceBox.scrollTop, viewRange);
         }
@@ -844,7 +843,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
                 ref = topCacheLine;
             }
 
-            var newElement = Dom.appendInnerHTML(sourceBox.viewport, lineHTML, ref);
+            Dom.appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
     },
@@ -1057,18 +1056,18 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
         // total box will be the average line height times total lines
         var virtualSourceBoxHeight = Math.floor(max * averageLineHeight);
-        if (virtualSourceBoxHeight < sourceBox.clientHeight)
-        {
-            // the total - view-taken-up - scrollbar
-            // clientHeight excludes scrollbar
-            var totalPadding = sourceBox.clientHeight - sourceBox.viewport.clientHeight - 1;
-        }
-        else
-            var totalPadding = virtualSourceBoxHeight - sourceBox.viewport.clientHeight;
+
+        // the total - view-taken-up - scrollbar
+        // clientHeight excludes scrollbar
+        var totalPadding = virtualSourceBoxHeight < sourceBox.clientHeight ?
+            sourceBox.clientHeight - 1 : virtualSourceBoxHeight;
+        totalPadding -= sourceBox.viewport.clientHeight;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
+        {
             FBTrace.sysout("getTotalPadding clientHeight:"+sourceBox.viewport.clientHeight+
                 "  max: "+max+" gives total padding "+totalPadding);
+        }
 
         return totalPadding;
     },
@@ -1101,10 +1100,8 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         // we want the bottomPadding to take up the rest
 
         var totalPadding = this.getTotalPadding(sourceBox);
-        if (totalPadding < 0)
-            var bottomPadding = Math.abs(totalPadding);
-        else
-            var bottomPadding = Math.floor(totalPadding - topPadding);
+        var bottomPadding = totalPadding < 0 ?
+            Math.abs(totalPadding) : Math.floor(totalPadding - topPadding);
 
         if (bottomPadding < 0)
             bottomPadding = 0;

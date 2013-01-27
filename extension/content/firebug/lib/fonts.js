@@ -10,10 +10,6 @@ function(FBTrace, Dom, Url) {
 // ********************************************************************************************* //
 // Constants
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
-
 var Fonts = {};
 
 // ********************************************************************************************* //
@@ -49,7 +45,7 @@ Fonts.getFonts = function(node)
         FBTrace.sysout("Fonts.getFonts; used fonts", fonts);
 
     return fonts;
-}
+};
 
 /**
  * Retrieves all fonts used in a context, cached so that the first use is
@@ -72,7 +68,7 @@ Fonts.getFontsUsedInContext = function(context)
     }
     context.fontCache = fonts;
     return fonts;
-}
+};
 
 /**
  * Retrieves the information about a font
@@ -109,7 +105,7 @@ Fonts.getFontInfo = function(context, win, identifier)
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 

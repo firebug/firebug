@@ -31,8 +31,8 @@ const reUncaught = /uncaught exception/;
 // see http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcexception.cpp#347
 // and http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcstack.cpp#318
 // and http://lxr.mozilla.org/mozilla/source/dom/src/base/nsDOMException.cpp#351
-const reException1 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  nsresult: "0x\S+ \((.+)\)"  location: "(?:(?:JS|native) frame :: (?!<unknown filename>)(.+) :: .+ :: line (\d+)|<unknown>)"  data: (?:yes|no)\]$/
-const reException2 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  code: "\d+" nsresult: "0x\S+ \((.+)\)"  location: "(?:(.+) Line: (\d+)|<unknown>)"\]$/
+const reException1 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  nsresult: "0x\S+ \((.+)\)"  location: "(?:(?:JS|native) frame :: (?!<unknown filename>)(.+) :: .+ :: line (\d+)|<unknown>)"  data: (?:yes|no)\]$/;
+const reException2 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  code: "\d+" nsresult: "0x\S+ \((.+)\)"  location: "(?:(.+) Line: (\d+)|<unknown>)"\]$/;
 const pointlessErrors =
 {
     "uncaught exception: Permission denied to call method Location.toString": 1,
@@ -125,7 +125,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     increaseCount: function(context)
     {
-        this.setCount(context, context.errorCount + 1)
+        this.setCount(context, context.errorCount + 1);
     },
 
     setCount: function(context, count)
@@ -610,7 +610,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             showXMLErrors: 1,
             showChromeErrors: 1,
             showChromeMessages: 1,
-            showExternalErrors: 1,
             showXMLHttpRequests: 1,
             showStackTrace: 1
         };
@@ -741,31 +740,6 @@ function whyNotShown(url, categoryList, isWarning)
         return "showChromeErrors";
 
     return null;
-}
-
-function domainFilter(url)  // never called?
-{
-    if (Firebug.showExternalErrors)
-        return true;
-
-    var browserWin = document.getElementById("content").contentWindow;
-
-    var m = urlRe.exec(browserWin.location.href);
-    if (!m)
-        return false;
-
-    var browserDomain = m[3];
-
-    m = urlRe.exec(url);
-    if (!m)
-        return false;
-
-    var errorScheme = m[1];
-    var errorDomain = m[3];
-
-    return errorScheme == "javascript"
-        || errorScheme == "chrome"
-        || errorDomain == browserDomain;
 }
 
 function lessTalkMoreAction(context, object, isWarning)

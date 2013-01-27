@@ -45,7 +45,7 @@ var FirebugGCLICommands =
     {
         unregisterCommands();
     }
-}
+};
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -109,8 +109,8 @@ var FirebugController =
         Firebug.browserOverlay.startFirebug(function(Firebug) {
             callback(Firebug);
         });
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Registration

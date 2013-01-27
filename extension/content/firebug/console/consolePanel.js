@@ -274,8 +274,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 "console.option.tip.Show_System_Errors"),
             Menu.optionMenu("ShowChromeMessages", "showChromeMessages",
                 "console.option.tip.Show_System_Messages"),
-            Menu.optionMenu("ShowExternalErrors", "showExternalErrors",
-                "console.option.tip.Show_External_Errors"),
             Menu.optionMenu("ShowNetworkErrors", "showNetworkErrors",
                 "console.option.tip.Show_Network_Errors"),
             this.getShowStackTraceMenuItem(),
@@ -577,7 +575,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // are dynamically consumed during the rendering process.
         // This allows to derive new templates from an existing ones, without breaking
         // the default subject set within domplate() function.
-        return rep.tag.append({object: object}, row, rep);
+        try
+        {
+            return rep.tag.append({object: object}, row, rep);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
+                FBTrace.sysout("consolePanel.appendObject; rep " + rep.className, rep);
+            }
+        }
     },
 
     appendFormatted: function(objects, row, rep)
@@ -655,13 +664,14 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex++];
+            	var object = objects[objIndex];
                 if (part.type == "%c")
                     row.setAttribute("style", object.toString());
-                else if (typeof(object) != "undefined")
+                else if (objIndex < objects.length)
                     this.appendObject(object, row, part.rep);
                 else
                     this.appendObject(part.type, row, FirebugReps.Text);
+                objIndex++;
             }
             else
             {

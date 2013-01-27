@@ -110,6 +110,8 @@ e(0xfeff, "#65279", attr, text, white, editor); // ZERO WIDTH NO-BREAK SPACE
 e(0x200d, "zwj", attr, text, white, editor);
 e(0x200e, "lrm", attr, text, white, editor);
 e(0x200f, "rlm", attr, text, white, editor);
+e(0x202d, "#8237", attr, text, white, editor); // left-to-right override
+e(0x202e, "#8238", attr, text, white, editor); // right-to-left override
 
 // ********************************************************************************************* //
 // Entity escaping
@@ -186,7 +188,7 @@ function createSimpleEscape(name, direction)
                     return list[ch];
                 }
             );
-    }
+    };
 }
 
 function escapeEntityAsName(char)
@@ -360,9 +362,9 @@ function unescapeEntities(str, lists)
 // String escaping
 
 var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape("text", "normal");
-var escapeForHtmlEditor = Str.escapeForHtmlEditor = createSimpleEscape("editor", "normal");
 var escapeForElementAttribute = Str.escapeForElementAttribute = createSimpleEscape("attributes", "normal");
-var escapeForCss = Str.escapeForCss = createSimpleEscape("css", "normal");
+Str.escapeForHtmlEditor = createSimpleEscape("editor", "normal");
+Str.escapeForCss = createSimpleEscape("css", "normal");
 
 // deprecated compatibility functions
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
@@ -565,7 +567,7 @@ Str.hasPrefix = function(hay, needle)
 Str.endsWith = function(str, suffix)
 {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
+};
 
 // ********************************************************************************************* //
 // HTML Wrap
@@ -790,15 +792,7 @@ Str.safeToString = function(ob)
     try
     {
         if (!ob)
-        {
-            if (ob == undefined)
-                return "undefined";
-            if (ob == null)
-                return "null";
-            if (ob == false)
-                return "false";
-            return "";
-        }
+            return ""+ob;
         if (ob && (typeof (ob["toString"]) == "function") )
             return ob.toString();
         if (ob && typeof (ob["toSource"]) == "function")

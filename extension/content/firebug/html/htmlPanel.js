@@ -41,10 +41,6 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const MODIFICATION = window.MutationEvent.MODIFICATION;
-const ADDITION = window.MutationEvent.ADDITION;
-const REMOVAL = window.MutationEvent.REMOVAL;
-
 const BP_BREAKONATTRCHANGE = 1;
 const BP_BREAKONCHILDCHANGE = 2;
 const BP_BREAKONREMOVE = 3;
@@ -73,22 +69,12 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
     initContext: function(context, persistedState)
     {
         Firebug.Module.initContext.apply(this, arguments);
-        context.mutationBreakpoints = new MutationBreakpointGroup();
+        context.mutationBreakpoints = new MutationBreakpointGroup(context);
     },
 
     loadedContext: function(context, persistedState)
     {
         context.mutationBreakpoints.load(context);
-
-        // If there are mutation breakpoints, make sure the HTML panel
-        // is automatically created and mutation listeners registered.
-        // Mutation breakpoints should work even if the HTML panel has
-        // never been selected by the user since the page load.
-        if (!context.mutationBreakpoints.isEmpty())
-        {
-            var panel = context.getPanel("html");
-            panel.registerMutationListeners();
-        }
     },
 
     destroyContext: function(context, persistedState)
@@ -134,19 +120,20 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     stopEditing: function()
     {
         Firebug.Editor.stopEditing();
-
-        // After mutation listeners have made the element appear in the panel,
-        // re-select it (and also update the disable state of the "Edit" button).
-        this.context.delay(function()
-        {
-            this.select(this.selection, true);
-        }.bind(this));
     },
 
     isEditing: function()
     {
         var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
         return (this.editing && editButton.getAttribute("checked") === "true");
+    },
+
+    // Update the Edit button to reflect editability of the selection
+    setEditEnableState: function(ignoreEditing)
+    {
+        var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
+        editButton.disabled = (this.selection && (!this.isEditing() || ignoreEditing) &&
+            Css.nonEditableTags.hasOwnProperty(this.selection.localName));
     },
 
     resetSearch: function()
@@ -170,11 +157,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selection = object;
             this.updateSelection(object);
 
-            // Update the Edit button to reflect editability of the selection.
-            // (Except during editing, when it should always be possible to click it.)
-            var editButton = Firebug.chrome.$("fbToggleHTMLEditing");
-            editButton.disabled = (this.selection && !this.isEditing() &&
-                Css.nonEditableTags.hasOwnProperty(this.selection.localName));
+            this.setEditEnableState();
 
             // Distribute selection change further to listeners.
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
@@ -229,10 +212,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         else if (dir == "left")
         {
             var box = this.ioBox.createObjectBox(this.selection);
-            if (!Css.hasClass(box, "open"))
-                this.select(this.ioBox.getParentObjectBox(box).repObject);
+            if (Css.hasClass(box, "open"))
+            {
+                this.ioBox.contractObjectBox(box);
+            }
             else
-                this.ioBox.contractObject(this.selection);
+            {
+                var parentBox = this.ioBox.getParentObjectBox(box);
+                if (parentBox && parentBox.repObject instanceof window.Element)
+                    this.select(parentBox.repObject);
+            }
         }
         else if (dir == "right")
         {
@@ -327,17 +316,34 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         editor.innerEditMode = node.localName in Css.innerEditableTags;
 
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
+        html = Str.escapeForHtmlEditor(html);
         Firebug.Editor.startEditing(box, html, editor);
     },
 
     deleteNode: function(node, dir)
     {
-        dir = dir || "up";
         var box = this.ioBox.createObjectBox(node);
         if (Css.hasClass(box, "open"))
-            this.ioBox.contractObject(this.selection);
-        this.selectNodeBy(dir);
+            this.ioBox.contractObjectBox(box);
+
+        if (dir === "up")
+        {
+            // We want a "backspace"-like behavior, including traversing parents.
+            this.selectPrevious();
+        }
+        else
+        {
+            // Move to the next sibling if there is one, else backwards.
+            var nextSelection = this.ioBox.getNextSiblingObjectBox(box);
+            if (nextSelection)
+                this.select(nextSelection.repObject);
+            else
+                this.selectPrevious();
+        }
+
         Firebug.HTMLModule.deleteNode(node, this.context);
+
+        Firebug.Inspector.highlightObject(this.selection, this.context);
     },
 
     toggleAll: function(event, node)
@@ -415,52 +421,123 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     registerMutationListeners: function(win)
     {
-        // The 'attachedMutation' flag should be maintained per window. Otherwise
-        // we can miss some registration. Events.addEventListener is safe for multiple
-        // calls so, let's remove the condition for now as part of issue 5761 fix.
-        // This should be improved together with issue 5490
-        //if (this.context.attachedMutation)
-        //    return;
+        var context = this.context;
+        if (!context.registeredHTMLMutationObservers)
+            context.registeredHTMLMutationObservers = new WeakMap();
 
-        this.context.attachedMutation = true;
+        var self = this;
+        function addObserver(win)
+        {
+            var doc = win.document;
+            if (context.registeredHTMLMutationObservers.has(doc))
+                return;
+
+            // xxxHonza: an iframe doesn't have to be loaded yet, so do not
+            // register mutation observers in such cases since they wouldn't
+            // be removed.
+            // The listeners can be registered later in watchWindowDelayed,
+            // but it's also risky. Mutation observers should be registered
+            // at the moment when it's clear that the window/frame has been
+            // loaded.
+
+            // This breaks HTML panel for about:blank pages (see issue 5120).
+            //if (doc.location == "about:blank")
+            //    return;
+
+            var observer = new MutationObserver(self.onMutationObserve);
+            observer.observe(doc, {
+                attributes: true,
+                childList: true,
+                characterData: true, 
+                subtree: true
+            });
+            context.registeredHTMLMutationObservers.set(doc, observer);
+        }
+
+        // If a window is specified use it, otherwise register observers for all
+        // context windows (including the main window and all embedded iframes).
+        if (win)
+            addObserver(win);
+        else
+            Win.iterateWindows(this.context.window, addObserver);
+
+        this.registerMutationBreakpointListeners(win);
+    },
+
+    unregisterMutationListeners: function(win)
+    {
+        this.unregisterMutationBreakpointListeners(win);
+
+        var context = this.context;
+        if (!context.registeredHTMLMutationObservers)
+            return;
+
+        function removeObserver(win)
+        {
+            var doc = win.document;
+            var observer = context.registeredHTMLMutationObservers.get(doc);
+            if (!observer)
+                return;
+
+            observer.disconnect();
+            context.registeredHTMLMutationObservers.delete(doc);
+        }
+
+        if (win)
+            removeObserver(win);
+        else
+            Win.iterateWindows(context.window, removeObserver);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    registerMutationBreakpointListeners: function(win)
+    {
+        var context = this.context;
+        if (!context.mutationBreakpointListenersEnabled)
+            return;
+
+        if (!context.registeredHTMLMutationEvents)
+            context.registeredHTMLMutationEvents = new WeakMap();
 
         var self = this;
         function addListeners(win)
         {
             var doc = win.document;
+            if (context.registeredHTMLMutationEvents.has(doc))
+                return;
+            context.registeredHTMLMutationEvents.set(doc, 1);
 
-            // xxxHonza: an iframe doesn't have to be loaded yet, so do not
-            // register mutation elements in such cases since they wouldn't
-            // be removed.
-            // The listeners can be registered later in watchWindowDelayed,
-            // but it's also risky. Mutation listeners should be registered
-            // at the moment when it's clear that the window/frame has been
-            // loaded.
-
-            // This break HTML panel for about:blank pages (see issue 5120).
-            //if (doc.location == "about:blank")
-            //    return;
-
+            // (See also the changes in registerMutationListeners's addObserver)
             Events.addEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
             Events.addEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
             Events.addEventListener(doc, "DOMNodeInserted", self.onMutateNode, false);
             Events.addEventListener(doc, "DOMNodeRemoved", self.onMutateNode, false);
         }
 
-        // If a window is specified use it, otherwise register listeners for all
-        // context windows (including the main window and all embedded iframes).
         if (win)
             addListeners(win);
         else
-            Win.iterateWindows(this.context.window, addListeners);
+            Win.iterateWindows(context.window, addListeners);
     },
 
-    unregisterMutationListeners: function(win)
+    unregisterMutationBreakpointListeners: function(win)
     {
+        var context = this.context;
+        if (!context.mutationBreakpointListenersEnabled)
+            return;
+
+        if (!context.registeredHTMLMutationEvents)
+            return;
+
         var self = this;
         function removeListeners(win)
         {
             var doc = win.document;
+            if (!context.registeredHTMLMutationEvents.has(doc))
+                return;
+            context.registeredHTMLMutationEvents.delete(doc);
+
             Events.removeEventListener(doc, "DOMAttrModified", self.onMutateAttr, false);
             Events.removeEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
             Events.removeEventListener(doc, "DOMNodeInserted", self.onMutateNode, false);
@@ -470,18 +547,33 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (win)
             removeListeners(win);
         else
-            Win.iterateWindows(this.context.window, removeListeners);
+            Win.iterateWindows(context.window, removeListeners);
+    },
+
+    updateMutationBreakpointListeners: function()
+    {
+        var context = this.context;
+        var isEnabled = !!context.mutationBreakpointListenersEnabled;
+        var shouldEnable = this.shouldBreakOnNext() ||
+            context.mutationBreakpoints.hasEnabledBreakpoints();
+        if (isEnabled === shouldEnable)
+            return;
+        if (shouldEnable)
+        {
+            context.mutationBreakpointListenersEnabled = true;
+            this.registerMutationBreakpointListeners();
+        }
+        else
+        {
+            this.unregisterMutationBreakpointListeners();
+            context.mutationBreakpointListenersEnabled = false;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    mutateAttr: function(target, attrChange, attrName, attrValue)
+    mutateAttr: function(target, attrName, attrValue, removal)
     {
-        // Every time the user scrolls we get this pointless mutation event, which
-        // is only bad for performance
-        if (attrName == "curpos")
-            return;
-
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
@@ -492,8 +584,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (FBTrace.DBG_HTML)
         {
-            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+
-                " attrName:"+attrName+" attrValue: "+attrValue, target);
+            FBTrace.sysout("html.mutateAttr target:" + target + " attrName:" + attrName +
+                " attrValue: " + attrValue + " removal: " + removal, target);
         }
 
         this.markChange();
@@ -506,12 +598,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         this.updateNodeVisibility(objectNodeBox);
 
-        if (attrChange == MODIFICATION || attrChange == ADDITION)
+        if (!removal)
         {
             var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
 
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateAttr " + attrChange + " " + attrName + "=" + attrValue +
+                FBTrace.sysout("mutateAttr " + removal + " " + attrName + "=" + attrValue +
                     " node: " + nodeAttr, nodeAttr);
 
             if (nodeAttr && nodeAttr.childNodes.length > 3)
@@ -530,12 +622,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var attr = target.getAttributeNode(attrName);
 
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("mutateAttr getAttributeNode " + attrChange + " " + attrName +
+                    FBTrace.sysout("mutateAttr getAttributeNode " + removal + " " + attrName +
                         "=" + attrValue + " node: " + attr, attr);
 
                 if (attr)
                 {
-                    var nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
+                    nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
                         this.document);
 
                     var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
@@ -546,7 +638,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
             }
         }
-        else if (attrChange == REMOVAL)
+        else
         {
             var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
@@ -648,92 +740,116 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     mutateNode: function(target, parent, nextSibling, removal)
     {
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
-                (removal ? "REMOVE" : ""));
-
-        // Due to the delay call this may or may not exist in the tree anymore
-        if (!removal && !this.ioBox.isInExistingRoot(target))
+        try
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateNode: different tree " + target, target);
-            return;
-        }
+                FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
+                    (removal ? "REMOVE" : ""));
 
-        this.markChange();  // This invalidates the panels for every mutate
-
-        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
-            ? this.ioBox.createObjectBox(parent)
-            : this.ioBox.findObjectBox(parent);
-
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
-                parentNodeBox);
-
-        if (!parentNodeBox)
-            return;
-
-        if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
-            return;
-
-        // target is only whitespace
-
-        var newParentTag = getNodeTag(parent);
-        var oldParentTag = getNodeBoxTag(parentNodeBox);
-
-        if (newParentTag == oldParentTag)
-        {
-            if (parentNodeBox.populated)
+            // Due to the delay call this may or may not exist in the tree anymore
+            if (!removal && !this.ioBox.isInExistingRoot(target))
             {
-                if (removal)
+                if (FBTrace.DBG_HTML)
+                    FBTrace.sysout("mutateNode: different tree " + target, target);
+                return;
+            }
+
+            this.markChange();  // This invalidates the panels for every mutate
+
+            var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
+                ? this.ioBox.createObjectBox(parent)
+                : this.ioBox.findObjectBox(parent);
+
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
+                    parentNodeBox);
+
+            if (!parentNodeBox)
+                return;
+
+            // Ignore whitespace nodes.
+            if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
+                return;
+
+            var newParentTag = getNodeTag(parent);
+            var oldParentTag = getNodeBoxTag(parentNodeBox);
+
+            var objectBox = null;
+
+            if (newParentTag == oldParentTag)
+            {
+                if (parentNodeBox.populated)
                 {
-                    this.ioBox.removeChildBox(parentNodeBox, target);
+                    if (removal)
+                    {
+                        this.ioBox.removeChildBox(parentNodeBox, target);
 
-                    // Special case for docType.
-                    if (target instanceof HTMLHtmlElement)
-                        this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
+                        // Special case for docType.
+                        if (target instanceof HTMLHtmlElement)
+                            this.ioBox.removeChildBox(parentNodeBox, target.parentNode.doctype);
 
-                    this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
+                        this.highlightMutation(parentNodeBox, parentNodeBox, "mutated");
+                    }
+                    else
+                    {
+                        var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+
+                        var comments = Firebug.showCommentNodes;
+                        var whitespaces = Firebug.showTextNodesWithWhitespace;
+
+                        // Get the right next sibling that match following criteria:
+                        // 1) It's not a whitespace text node in case 'show whitespaces' is false.
+                        // 2) It's not a comment in case 'show comments' is false.
+                        // 3) There is a child box already created for it in the HTML panel UI.
+                        // The new node will then be inserted before that sibling's child box, or
+                        // appended at the end (issue 5255).
+                        while (nextSibling && (
+                           (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
+                           (!comments && nextSibling instanceof window.Comment) ||
+                           (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
+                        {
+                           nextSibling = this.findNextSibling(nextSibling);
+                        }
+
+                        objectBox = nextSibling ?
+                            this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
+                            this.ioBox.appendChildBox(parentNodeBox, target);
+
+                        // Special case for docType.
+                        if (target instanceof HTMLHtmlElement)
+                        {
+                            this.ioBox.insertChildBoxBefore(parentNodeBox,
+                                target.parentNode.doctype, target);
+                        }
+
+                        this.highlightMutation(objectBox, objectBox, "mutated");
+                    }
                 }
-                else
+                else // !parentNodeBox.populated
                 {
-                    var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
+                    var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
+                    parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
-                    var comments = Firebug.showCommentNodes;
-                    var whitespaces = Firebug.showTextNodesWithWhitespace;
+                    if (this.selection && (!this.selection.parentNode || parent == this.selection))
+                        this.ioBox.select(parent, true);
 
-                    // Get the right next sibling that match following criteria:
-                    // 1) It's not a whitespace text node in case 'show whitespaces' is false.
-                    // 2) It's not a comment in case 'show comments' is false.
-                    // 3) There is a child box already created for it in the HTML panel UI.
-                    // The new node will then be inserted before that sibling's child box, or
-                    // appended at the end (issue 5255).
-                    while (nextSibling && (
-                       (!whitespaces && HTMLLib.isWhitespaceText(nextSibling)) ||
-                       (!comments && nextSibling instanceof window.Comment) ||
-                       (!this.ioBox.findChildObjectBox(childBox, nextSibling))))
+                    this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
+
+                    if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                     {
-                       nextSibling = this.findNextSibling(nextSibling);
+                        objectBox = this.ioBox.createObjectBox(target);
+                        this.highlightMutation(objectBox, objectBox, "mutated");
                     }
-
-                    var objectBox = nextSibling ?
-                        this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
-                        this.ioBox.appendChildBox(parentNodeBox, target);
-
-                    // Special case for docType.
-                    if (target instanceof HTMLHtmlElement)
-                    {
-                        this.ioBox.insertChildBoxBefore(parentNodeBox,
-                            target.parentNode.doctype, target);
-                    }
-
-                    this.highlightMutation(objectBox, objectBox, "mutated");
                 }
             }
-            else // !parentNodeBox.populated
+            else // newParentTag != oldParentTag
             {
                 var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
-                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+                if (parentNodeBox.parentNode)
+                    parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
+
+                if (Css.hasClass(parentNodeBox, "open"))
+                    this.ioBox.toggleObjectBox(newParentNodeBox, true);
 
                 if (this.selection && (!this.selection.parentNode || parent == this.selection))
                     this.ioBox.select(parent, true);
@@ -742,30 +858,18 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                 {
-                    var objectBox = this.ioBox.createObjectBox(target);
+                    objectBox = this.ioBox.createObjectBox(target);
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
             }
+
+            if (objectBox && this.selection === target)
+                this.ioBox.selectObjectBox(objectBox);
         }
-        else // newParentTag != oldParentTag
+        catch (exc)
         {
-            var newParentNodeBox = newParentTag.replace({object: parent}, this.document);
-            if (parentNodeBox.parentNode)
-                parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
-
-            if (Css.hasClass(parentNodeBox, "open"))
-                this.ioBox.toggleObjectBox(newParentNodeBox, true);
-
-            if (this.selection && (!this.selection.parentNode || parent == this.selection))
-                this.ioBox.select(parent, true);
-
-            this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
-
-            if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
-            {
-                var objectBox = this.ioBox.createObjectBox(target);
-                this.highlightMutation(objectBox, objectBox, "mutated");
-            }
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("html.mutateNode FAILS", exc);
         }
     },
 
@@ -1037,22 +1141,65 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
+    onMutationObserve: function(records)
+    {
+        for (var ri = 0; ri < records.length; ++ri)
+        {
+            var record = records[ri];
+
+            var target = record.target;
+            if (Firebug.shouldIgnore(target))
+                continue;
+
+            var type = record.type;
+            if (type === "attributes")
+            {
+                var attrName = record.attributeName;
+                var newValue = target.getAttribute(attrName);
+                var removal = (newValue === null);
+                this.context.throttle(this.mutateAttr, this,
+                    [target, attrName, newValue, removal]);
+            }
+            else if (type === "childList")
+            {
+                var added = record.addedNodes, removed = record.removedNodes;
+                if (added.length)
+                {
+                    var nextSibling = HTMLLib.findNextNodeFrom(record.nextSibling);
+                    for (var i = 0; i < added.length; ++i)
+                    {
+                        var node = added[i];
+                        if (Firebug.shouldIgnore(node))
+                            continue;
+                        this.context.throttle(this.mutateNode, this,
+                            [node, target, nextSibling, false]);
+                    }
+                }
+                for (var i = 0; i < removed.length; ++i)
+                {
+                    var node = removed[i];
+                    if (Firebug.shouldIgnore(node))
+                        continue;
+                    this.context.throttle(this.mutateNode, this,
+                        [node, target, null, true]);
+                }
+            }
+            else if (type === "characterData")
+            {
+                this.context.throttle(this.mutateText, this,
+                    [target, target.parentNode, target.data]);
+            }
+        }
+    },
+
     onMutateAttr: function(event)
     {
         var target = event.target;
         if (Firebug.shouldIgnore(target))
             return;
 
-        var attrChange = event.attrChange;
-        var attrName = event.attrName;
-        var newValue = event.newValue;
-
-        this.context.delay(function()
-        {
-            this.mutateAttr(target, attrChange, attrName, newValue);
-        }, this);
-
         Firebug.HTMLModule.MutationBreakpoints.onMutateAttr(event, this.context);
+        this.updateMutationBreakpointListeners();
     },
 
     onMutateText: function(event)
@@ -1060,17 +1207,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.onMutateText; ", event);
 
-        var target = event.target;
-        var parent = target.parentNode;
-
-        var newValue = event.newValue;
-
-        this.context.delay(function()
-        {
-            this.mutateText(target, parent, newValue);
-        }, this);
-
         Firebug.HTMLModule.MutationBreakpoints.onMutateText(event, this.context);
+        this.updateMutationBreakpointListeners();
     },
 
     onMutateNode: function(event)
@@ -1079,24 +1217,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (Firebug.shouldIgnore(target))
             return;
 
-        var parent = event.relatedNode;
-        var removal = event.type == "DOMNodeRemoved";
-        var nextSibling = removal ? null : this.findNextSibling(target);
-
-        this.context.delay(function()
-        {
-            try
-            {
-                 this.mutateNode(target, parent, nextSibling, removal);
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
-                    FBTrace.sysout("html.onMutateNode FAILS:", exc);
-            }
-        }, this);
-
         Firebug.HTMLModule.MutationBreakpoints.onMutateNode(event, this.context);
+        this.updateMutationBreakpointListeners();
     },
 
     onClick: function(event)
@@ -1179,14 +1301,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.selectNodeBy("left");
         else if (event.keyCode == KeyEvent.DOM_VK_RIGHT)
             this.selectNodeBy("right");
-        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE &&
-            !(node.localName in Css.innerEditableTags) &&
-            !(Css.nonEditableTags.hasOwnProperty(node.localName)))
-            this.deleteNode(node, "up");
-        else if (event.keyCode == KeyEvent.DOM_VK_DELETE &&
-            !(node.localName in Css.innerEditableTags) &&
-            !(Css.nonEditableTags.hasOwnProperty(node.localName)))
-            this.deleteNode(node, "down");
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE)
+        {
+            if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                this.deleteNode(node, "up");
+        }
+        else if (event.keyCode == KeyEvent.DOM_VK_DELETE)
+        {
+            if (!Css.nonDeletableTags.hasOwnProperty(node.localName))
+                this.deleteNode(node, "down");
+        }
         else
             return;
 
@@ -1274,12 +1398,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     initialize: function()
     {
-        this.onMutateText = Obj.bind(this.onMutateText, this);
-        this.onMutateAttr = Obj.bind(this.onMutateAttr, this);
-        this.onMutateNode = Obj.bind(this.onMutateNode, this);
-        this.onClick = Obj.bind(this.onClick, this);
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onKeyPress = Obj.bind(this.onKeyPress, this);
+        this.onMutationObserve = this.onMutationObserve.bind(this);
+        this.onMutateText = this.onMutateText.bind(this);
+        this.onMutateAttr = this.onMutateAttr.bind(this);
+        this.onMutateNode = this.onMutateNode.bind(this);
+        this.onClick = this.onClick.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onKeyPress = this.onKeyPress.bind(this);
 
         Firebug.Panel.initialize.apply(this, arguments);
         Firebug.CSSModule.addListener(this);
@@ -1383,8 +1508,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             });
         }
 
-        if (this.context.attachedMutation)
-            this.registerMutationListeners(win);
+        this.registerMutationListeners(win);
     },
 
     unwatchWindow: function(context, win)
@@ -1886,11 +2010,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     breakOnNext: function(breaking)
     {
         Firebug.HTMLModule.MutationBreakpoints.breakOnNext(this.context, breaking);
+        this.updateMutationBreakpointListeners();
     },
 
     shouldBreakOnNext: function()
     {
-        return this.context.breakOnNextMutate;
+        return !!this.context.breakOnNextMutate;
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -2345,7 +2470,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 "title",
                 "alt",
                 "style"
-            ]
+            ];
 
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
 
@@ -2524,6 +2649,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     endEditing: function()
     {
         //this.panel.markChange();
+        this.panel.setEditEnableState(true);
         return true;
     },
 
@@ -2752,7 +2878,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         if (removal)
         {
-            // Remove all breakpoints assocaited with removed node.
+            // Remove all breakpoints associated with removed node.
             var invalidate = false;
             breakpoints.enumerateBreakpoints(function(bp)
             {
@@ -2828,11 +2954,11 @@ Firebug.HTMLModule.MutationBreakpoints =
         if (bp)
             breakpoints.removeBreakpoint(bp);
         else
-            context.mutationBreakpoints.addBreakpoint(node, type);
+            breakpoints.addBreakpoint(node, type);
 
-        Events.dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint",
+        Events.dispatch(Firebug.HTMLModule.fbListeners, "onModifyBreakpoint",
             [context, xpath, type]);
-    },
+    }
 };
 
 Firebug.HTMLModule.Breakpoint = function(node, type)
@@ -2933,6 +3059,8 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
+
+        context.mutationBreakpoints.updateListeners();
     },
 
     supportsObject: function(object, type)
@@ -2943,9 +3071,10 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-function MutationBreakpointGroup()
+function MutationBreakpointGroup(context)
 {
     this.breakpoints = [];
+    this.context = context;
 }
 
 MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
@@ -2956,6 +3085,7 @@ MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.Breakpoint
     addBreakpoint: function(node, type)
     {
         this.breakpoints.push(new Firebug.HTMLModule.Breakpoint(node, type));
+        this.updateListeners();
     },
 
     matchBreakpoint: function(bp, args)
@@ -2968,6 +3098,21 @@ MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.Breakpoint
     removeBreakpoint: function(bp)
     {
         Arr.remove(this.breakpoints, bp);
+        this.updateListeners();
+    },
+
+    hasEnabledBreakpoints: function()
+    {
+        return this.breakpoints.some(function(bp)
+        {
+            return bp.checked;
+        });
+    },
+
+    updateListeners: function()
+    {
+        var htmlPanel = this.context.getPanel("html");
+        htmlPanel.updateMutationBreakpointListeners();
     },
 
     // Persistence
@@ -2982,6 +3127,8 @@ MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.Breakpoint
             var elts = Xpath.getElementsByXPath(context.window.document, bp.xpath);
             bp.node = elts && elts.length ? elts[0] : null;
         });
+
+        this.updateListeners();
     },
 
     store: function(context)

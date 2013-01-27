@@ -44,7 +44,7 @@ Deprecated.deprecated = function(msg, fnc, args)
         }
 
         return fnc.apply(this, args || arguments);
-    }
+    };
 };
 
 // ********************************************************************************************* //

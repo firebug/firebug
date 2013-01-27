@@ -36,7 +36,7 @@ var uid = 0;
 // xxxHonza: the only global should be Firebug object.
 var domplate = function()
 {
-    var lastSubject;
+    var lastSubject = null;
     for (var i = 0; i < arguments.length; ++i)
         lastSubject = lastSubject ? copyObject(lastSubject, arguments[i]) : arguments[i];
 
@@ -134,7 +134,7 @@ DomplateTag.prototype =
             var val = parseValue(args[name]);
             readPartNames(val, this.vars);
 
-            if (Str.hasPrefix(name, "on"))
+            if (name.lastIndexOf("on", 0) == 0)
             {
                 var eventName = name.substr(2);
                 if (!this.listeners)
@@ -157,7 +157,7 @@ DomplateTag.prototype =
             }
             else
             {
-                if (name == "class" && this.attrs.hasOwnProperty(name) )
+                if (name == "class" && this.attrs.hasOwnProperty(name))
                     this.attrs[name] += " " + val;
                 else
                     this.attrs[name] = val;
@@ -230,6 +230,16 @@ DomplateTag.prototype =
             return Str.escapeForElementAttribute(value);
         }
 
+        function __attr__(name, valueParts)
+        {
+            // Will be called with valueParts = [,arg,arg,...], but we don't
+            // care that the first element is undefined.
+            if (valueParts.length === 2 && valueParts[1] === undefined)
+                return "";
+            var value = valueParts.join("");
+            return ' ' + name + '="' + __escape__(value) + '"';
+        }
+
         function isArray(it)
         {
             return Object.prototype.toString.call(it) === "[object Array]";
@@ -246,7 +256,7 @@ DomplateTag.prototype =
             if (isArray(iter) || iter instanceof NodeList)
                 iter = new ArrayIterator(iter);
 
-            var value;
+            var value = null;
             try
             {
                 while (1)
@@ -318,12 +328,11 @@ DomplateTag.prototype =
             if (name != "class")
             {
                 var val = this.attrs[name];
-                topBlock.push(', " ', name, '=\\""');
-                addParts(val, ',', topBlock, info, true);
-                topBlock.push(', "\\""');
+                topBlock.push(',__attr__("', name, '",[');
+                addParts(val, ',', topBlock, info, false);
+                topBlock.push('])');
             }
         }
-
         if (this.listeners)
         {
             for (var i = 0; i < this.listeners.length; i += 2)
@@ -336,12 +345,12 @@ DomplateTag.prototype =
                 readPartNames(this.props[name], topOuts);
         }
 
-        if ( this.attrs.hasOwnProperty("class") || this.classes)
+        if (this.attrs.hasOwnProperty("class") || this.classes)
         {
             topBlock.push(', " class=\\""');
             if (this.attrs.hasOwnProperty("class"))
                 addParts(this.attrs["class"], ',', topBlock, info, true);
-              topBlock.push(', " "');
+            topBlock.push(', " "');
             for (var name in this.classes)
             {
                 topBlock.push(', (');
@@ -450,7 +459,7 @@ DomplateTag.prototype =
 
         function __bind__(object, fn)
         {
-            return function(event) { return fn.apply(object, [event]); }
+            return function(event) { return fn.apply(object, [event]); };
         }
 
         function __link__(node, tag, args)
@@ -474,9 +483,11 @@ DomplateTag.prototype =
             return tag.tag.renderDOM.apply(tag.tag.subject, domArgs);
         }
 
-        var self = this;
         function __loop__(iter, fn)
         {
+            if (!iter)
+                return 0;
+
             var nodeCount = 0;
             for (var i = 0; i < iter.length; ++i)
             {
@@ -976,11 +987,11 @@ function creator(tag, cons)
 {
     var fn = function()
     {
-        var tag = arguments.callee.tag;
-        var cons = arguments.callee.cons;
+        var tag = fn.tag;
+        var cons = fn.cons;
         var newTag = new cons();
         return newTag.merge(arguments, tag);
-    }
+    };
 
     fn.tag = tag;
     fn.cons = cons;
@@ -1076,7 +1087,8 @@ var Renderer =
         var parent = before.localName.toLowerCase() == "tr" ? before.parentNode : before;
         var after = before.localName.toLowerCase() == "tr" ? before.nextSibling : null;
 
-        var firstRow = tbody.firstChild, lastRow;
+        var firstRow = tbody.firstChild;
+        var lastRow = null;
         while (tbody.firstChild)
         {
             lastRow = tbody.firstChild;
@@ -1282,7 +1294,7 @@ function defineTags()
         return function() {
             var newTag = new Domplate.DomplateTag(tagName);
             return newTag.merge(arguments);
-        }
+        };
     }
 }
 

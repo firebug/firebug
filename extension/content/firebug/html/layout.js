@@ -299,9 +299,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         if (!view)
             return this.panelNode.textContent = "";
 
-        var prev = Dom.getPreviousElement(element.previousSibling);
-        var next = Dom.getNextElement(element.nextSibling);
-
         var style = view.getComputedStyle(element, "");
 
         var args = Css.getBoxFromStyles(style, element);
@@ -352,9 +349,9 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 "absoluteEdge";
         }
 
-        var node;
+        var node = this.panelNode.getElementsByClassName("outerLayoutBox").item(0);
         // If the layout panel content was already created, just fill in the new values
-        if (this.panelNode.getElementsByClassName("outerLayoutBox").item(0))
+        if (node)
         {
             // The styles for the positionLayoutBox need to be set manually
             var positionLayoutBox = this.panelNode.getElementsByClassName("positionLayoutBox").
@@ -386,8 +383,8 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 layoutLabelPaddingLeft: {value: "paddingLeft"},
                 layoutLabelWidth: {value: "width"},
                 layoutLabelHeight: {value: "height"},
-                outerLabel: {value: "outerLabel"},
-            }
+                outerLabel: {value: "outerLabel"}
+            };
 
             for (val in values)
             {
@@ -534,7 +531,8 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // Don't remove groups
         return false;
     }
-})};
+});
+};
 
 // ************************************************************************************************
 // Local Helpers

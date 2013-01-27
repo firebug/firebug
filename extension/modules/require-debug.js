@@ -23,7 +23,7 @@ require.log = function()
         else
             alert.apply(null, arguments);
     }
-}
+};
 
 /*
  * Called by require for each completed module
@@ -44,12 +44,13 @@ require.onDebugDAG = function(fullName, deps, url)
         arr.push(p);
     require.depsNamesByName[fullName] = arr;
     require.urlByFullName[fullName] = url;
-}
+};
 
 require.originalExecCb = require.execCb;
 require.execCbOFF = function (name)
 {
     var ret = require.originalExecCb.apply(require, arguments);
+    var value = null;
     try
     {
         if (ret)
@@ -61,7 +62,7 @@ require.execCbOFF = function (name)
                 {
                     if (ret.hasOwnProperty(prop))
                     {
-                        var value = ret[prop];
+                        value = ret[prop];
                         if (value !== null &&
                             (typeof value == "function"/* || typeof value == "object"*/))
                         {
@@ -153,7 +154,7 @@ require.analyzeDependencyTree = function()
     require.log("Firebug dependents: ", dependents);
     require.log("Firebug minimal modules list: ", minimal);
     require.log("Firebug URLs: ", require.urlByFullName);
-}
+};
 
 /*
  * Calls require.log for warning and debug of require.js.
@@ -172,7 +173,7 @@ require.onDebug = function()
             msg += arguments[i]+", ";
         window.alert("Loader; onDebug:"+msg+"\n");
     }
-}
+};
 
 /*
  * Calls require.log for errors, then throws exception
@@ -182,4 +183,4 @@ require.onError = function(exc)
 {
     require.onDebug.apply(require, arguments);
     throw exc;
-}
+};

@@ -20,13 +20,16 @@ function runTest()
         // A suite of asynchronous tests.
         var testSuite = [];
         testSuite.push(function(callback) {
-            breakOnMutation(win, BP_BREAKONATTRCHANGE, "breakOnAttrModified", 43, callback);
+            breakOnMutation(win, BP_BREAKONATTRCHANGE, "breakOnAttrModified", 45, callback);
         });
         testSuite.push(function(callback) {
-            breakOnMutation(win, BP_BREAKONCHILDCHANGE, "breakOnNodeInserted", 48, callback);
+            breakOnMutation(win, BP_BREAKONCHILDCHANGE, "breakOnChildInserted", 50, callback);
         });
         testSuite.push(function(callback) {
-            breakOnMutation(win, BP_BREAKONREMOVE, "breakOnNodeRemoved", 54, callback);
+            breakOnMutation(win, BP_BREAKONCHILDCHANGE, "breakOnChildRemoved", 55, callback);
+        });
+        testSuite.push(function(callback) {
+            breakOnMutation(win, BP_BREAKONREMOVE, "breakOnNodeRemoved", 60, callback);
         });
 
         // Reload window to activate debugger and run all tests.
@@ -55,6 +58,11 @@ function breakOnMutation(win, type, buttonId, lineNo, callback)
         FBTest.sysout("html.breakpoints; " + buttonId);
         FBTest.clickContinueButton(chrome);
         FBTest.progress("The continue button is pushed");
+
+        // Remove breakpoint.
+        FW.Firebug.HTMLModule.MutationBreakpoints.onModifyBreakpoint(context,
+            content, type);
+
         callback();
     });
 

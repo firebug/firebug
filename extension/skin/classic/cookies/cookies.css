@@ -145,6 +145,8 @@
 .cookieTable[hiddenCols~=colDomain] .cookieDomainCol,
 .cookieTable[hiddenCols~=colSize] #colSize,
 .cookieTable[hiddenCols~=colSize] .cookieSizeCol,
+.cookieTable[hiddenCols~=colRawSize] #colRawSize,
+.cookieTable[hiddenCols~=colRawSize] .cookieRawSizeCol,
 .cookieTable[hiddenCols~=colPath] #colPath,
 .cookieTable[hiddenCols~=colPath] .cookiePathCol,
 .cookieTable[hiddenCols~=colExpires] #colExpires,
@@ -378,7 +380,7 @@
 .cookieInfoTab[selected="true"] {
     cursor: default !important;
     border-color: #D7D7D7;
-    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
     background-color: #FFFFFF;
 }
 

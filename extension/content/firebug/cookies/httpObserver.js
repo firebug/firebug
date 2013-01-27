@@ -256,7 +256,7 @@ function TempContext(tabId)
 TempContext.prototype.appendCookieEvent = function(subject, topic, data)
 {
     this.events.push({subject:subject, topic:topic, data:data});
-}
+};
 
 // ********************************************************************************************* //
 
@@ -264,4 +264,3 @@ return HttpObserver;
 
 // ********************************************************************************************* //
 });
-

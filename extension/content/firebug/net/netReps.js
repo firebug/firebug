@@ -673,7 +673,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         else if (file.fromBFCache)
             text += " (BFCache)";
 
-        return text
+        return text;
     },
 
     getDomain: function(file)
@@ -1431,6 +1431,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
         var contentType = NetUtils.findHeader(file.requestHeaders, "content-type");
 
+        // TODO: Trigger an event here instead and register the viewer models as listeners
         if (Firebug.JSONViewerModel.isJSON(contentType, text))
             this.insertJSON(parentNode, file, context);
 
@@ -1559,7 +1560,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             postData.params.push({
                 name: (m && m.length > 1) ? m[1] : "",
                 value: Str.trim(part[1])
-            })
+            });
         }
 
         return postData;
@@ -1862,12 +1863,12 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                 name: timeStamp.label,
                 classes: timeStamp.classes,
                 start: timeStamp.time - file.startTime
-            })
+            });
         }
 
         events.sort(function(a, b) {
             return a.start < b.start ? -1 : 1;
-        })
+        });
 
         var phases = context.netProgress.phases;
 
@@ -1983,7 +1984,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -2056,7 +2057,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         var row = this.limitTag.insertRows(limitInfo, parent, this)[0];
         row.limitInfo = limitInfo;
         return row;
-    },
+    }
 });
 
 // ********************************************************************************************* //

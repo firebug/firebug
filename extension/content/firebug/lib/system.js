@@ -11,7 +11,6 @@ function(FBTrace, Arr) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 
 var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
@@ -85,7 +84,7 @@ System.getIconURLForFile = function(path)
     }
 
     return null;
-}
+};
 
 System.copyToClipboard = function(string)
 {
@@ -132,7 +131,7 @@ System.getStringDataFromClipboard = function()
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 // Firebug Version Comparator
@@ -162,7 +161,7 @@ System.checkFirebugVersion = function(expectedVersion)
     var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
         getService(Ci.nsIVersionComparator);
     return versionChecker.compare(version, expectedVersion);
-}
+};
 
 // ********************************************************************************************* //
 
