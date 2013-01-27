@@ -86,7 +86,7 @@
 
 /*****************************************************************************************/
 
-.logRow-command > .objectBox-text {
+.logRow-command > div > .logContent > .objectBox-text {
     font-family: monospace;
     color: #0000FF;
     white-space: pre-wrap;
