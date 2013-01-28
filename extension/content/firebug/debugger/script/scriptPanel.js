@@ -395,9 +395,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     onEditorMouseUp: function(event)
     {
         // Click anywhere in the script panel closes breakpoint-condition-editor
-        // if it's currently opened.
+        // if it's currently opened. It's valid to close the editor this way
+        // and that's why the 'cancel' argument is set to false.
         if (this.editing)
-            Editor.stopEditing(true);
+            Editor.stopEditing(false);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

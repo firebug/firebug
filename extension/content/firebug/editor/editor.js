@@ -126,7 +126,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
         if (FBTrace.DBG_EDITOR)
         {
-            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: " +
+            FBTrace.sysout("editor.stopEditing cancel: " + cancel + ", saveTimeout: " +
                 this.saveTimeout);
         }
 
@@ -141,6 +141,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
         Css.removeClass(currentPanel.panelNode, "editing");
         Css.removeClass(currentTarget, "editing");
+
         if (currentGroup)
             Css.removeClass(currentGroup, "editing");
 
