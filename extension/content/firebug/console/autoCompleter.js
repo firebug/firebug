@@ -196,7 +196,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         if (FBTrace.DBG_COMMANDLINE)
         {
             var sep = (parsed.indexOf("|") > -1) ? "^" : "|";
-            FBTrace.sysout("Completing: " + this.completionBase.pre + sep + preExpr + sep + prop);
+            FBTrace.sysout("Completing: " + preParsed + sep + preExpr + sep + prop);
         }
 
         var prevCompletions = this.completions;
@@ -364,7 +364,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         // 'prototype' is a good default if it exists.
         ind = list.indexOf("prototype");
-        if (ind !== -1 && prefixFree(prop))
+        if (ind !== -1 && prefixFree("prototype"))
             return ind;
 
         // Simply pick out the shortest candidate. This works remarkably well.
