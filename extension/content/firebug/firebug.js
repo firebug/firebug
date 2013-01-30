@@ -154,7 +154,8 @@ window.Firebug =
 
         this.isInitialized = true;
 
-        Events.dispatch(modules, "initialize", []);
+        // Distribute Firebug's preference domain as an argument (see issue 6210).
+        Events.dispatch(modules, "initialize", [Options.prefDomain]);
 
         // This is the final of Firebug initialization.
         FBTrace.timeEnd("INITIALIZATION_TIME");
