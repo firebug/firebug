@@ -26,6 +26,9 @@ ObjectGrip.prototype =
 
     getType: function()
     {
+        if (this.grip.prototype)
+            return this.grip.prototype["class"];
+
         return this.grip["class"];
     },
 
@@ -46,8 +49,8 @@ ObjectGrip.prototype =
         // possible to display some useful info about the object without additional
         // request. Let's use these properties for the value label.
         // See also {@ObjectGrip}
-        if (this.grip.properties)
-            return this.grip.properties;
+        if (this.grip.ownProperties)
+            return this.grip.ownProperties;
 
         return {type: this.grip.type};
     },

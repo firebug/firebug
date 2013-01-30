@@ -59,7 +59,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.storage = StorageService.getStorage("breakpoints.json");
         this.restore();
 
-        Trace.sysout("breakpointStore.initializeUI; ", this.breakpoints);
+        Trace.sysout("breakpointStore.initialize; ", this.breakpoints);
     },
 
     initializeUI: function()
