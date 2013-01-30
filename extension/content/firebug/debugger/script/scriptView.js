@@ -328,7 +328,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {
-            self.editor.removeBreakpoint(bp.lineNo - 1);
+            self.editor.removeBreakpoint(bp.lineNo);
         });
     },
 
@@ -337,7 +337,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {
-            self.editor.addBreakpoint(bp.lineNo - 1);
+            self.editor.addBreakpoint(bp.lineNo);
 
             // Make sure to update the icon if breakpoint is disabled.
             self.updateBreakpoint(bp);
@@ -366,7 +366,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             annotation.rangeStyle.styleClass += " condition";
         }
 
-        this.modifyAnnotation("breakpoint", bp.lineNo - 1, annotation);
+        this.modifyAnnotation("breakpoint", bp.lineNo, annotation);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
