@@ -1169,25 +1169,33 @@ function FirebugCommandLineAPI(context)
 
     this.traceAll = function()
     {
-        Firebug.Debugger.traceAll(Firebug.currentContext);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.traceAll(Firebug.currentContext);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceAll = function()
     {
-        Firebug.Debugger.untraceAll(Firebug.currentContext);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.untraceAll(Firebug.currentContext);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.traceCalls = function(fn)
     {
-        Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceCalls = function(fn)
     {
-        Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
