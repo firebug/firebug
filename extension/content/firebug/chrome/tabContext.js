@@ -527,7 +527,16 @@ Firebug.TabContext.prototype =
             // logged later on a timer, otherwise just execute it now
             if (!this.throttleQueue.length && this.throttleBuildup <= throttleMessageLimit)
             {
-                message.apply(object, args);
+                try
+                {
+                    message.apply(object, args);
+                }
+                catch (e)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("tabContext.throttle; EXCEPTION " + e, e);
+                }
+
                 return false;
             }
         }
@@ -556,7 +565,17 @@ Firebug.TabContext.prototype =
             max = queue.length;
 
         for (var i = 0; i < max; i += 3)
-            queue[i].apply(queue[i+1], queue[i+2]);
+        {
+            try
+            {
+                queue[i].apply(queue[i+1], queue[i+2]);
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("tabContext.flushThrottleQueue; EXCEPTION " + e, e);
+            }
+        }
 
         queue.splice(0, throttleFlushCount*3);
 
