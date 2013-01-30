@@ -144,11 +144,18 @@ var CommandLineHelp = domplate(
 
         var commands = [];
 
+        var ignore = ["traceCalls", "untraceCalls", "traceAll", "untraceAll"];
         for (var i=0; i<CommandLineExposed.commands.length; i++)
         {
+            var cmd = CommandLineExposed.commands[i];
+
+            // See Issue 5221
+            if (ignore.indexOf(cmd) >= 0)
+                continue;
+
             commands.push({
-                name: CommandLineExposed.commands[i],
-                desc: "console.cmd.help." + CommandLineExposed.commands[i],
+                name: cmd,
+                desc: "console.cmd.help." + cmd,
                 type: CMD_TYPE_COMMAND,
             });
         }
