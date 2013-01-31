@@ -151,6 +151,8 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             bps = bps.map(function(bp)
             {
                 var breakpoint = new Breakpoint();
+                // Convert to line index (zero-based)
+                bp.lineNo = bp.lineNo - 1;
                 for (var p in bp)
                     breakpoint[p] = bp[p];
                 return breakpoint;
@@ -179,8 +181,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 continue;
 
             var cleanBP = {};
+            
             for (var p in bp)
                 cleanBP[p] = bp[p];
+
+            // Convert line indexes(zero-based) to line numbers(one-based)
+            cleanBP.lineNo = cleanBP.lineNo + 1;
 
             // Do not persist 'params' field. It's for transient data only.
             delete cleanBP.params;

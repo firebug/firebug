@@ -347,18 +347,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     addBreakpoint: function(bp)
     {
         var url = this.location.href;
-        var line = bp.line + 1;
-
         // Persist the breakpoint on the client side.
-        BreakpointStore.addBreakpoint(url, line);
+        BreakpointStore.addBreakpoint(url, bp.line);
     },
 
     removeBreakpoint: function(bp)
     {
         var url = this.location.href;
-        var line = bp.line + 1;
 
-        var bp = BreakpointStore.findBreakpoint(url, line);
+        bp = BreakpointStore.findBreakpoint(url, bp.line);
         if (!bp)
         {
             TraceError.sysout("scriptPanel.removeBreakpoint; ERROR doesn't exist!");
@@ -368,7 +365,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Remove the breakpoint from the client side store. Breakpoint store
         // will notify all listeners (all Script panel including this one)
         // about breakpoint removal and so, it can be removed from all contexts
-        BreakpointStore.removeBreakpoint(url, line);
+        BreakpointStore.removeBreakpoint(url, bp.lineNo);
     },
 
     getBreakpoints: function(breakpoints)
@@ -421,7 +418,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         // The breakpoint doesn't have to exist.
-        var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo + 1);
+        var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo);
         var condition = bp ? bp.condition : tempBp.condition;
 
         // xxxHonza: displaying BP conditions in the Watch panel is not supported yet.
@@ -443,11 +440,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         // If the breakpoint doesn't yet exist create it now. This allows to create
         // conditional breakpoints in one step.
-        var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo + 1);
+        var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
         if (!availableBp)
-            BreakpointStore.addBreakpoint(bp.href, bp.lineNo + 1, value);
+            BreakpointStore.addBreakpoint(bp.href, bp.lineNo, value);
 
-        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo + 1, value);
+        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
     },
 
     getEditor: function(target, value)
@@ -609,7 +606,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             });
         }
 
-        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, lineNo + 1);
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, lineNo);
         items.push("-",
         {
             label: "SetBreakpoint",
@@ -621,7 +618,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (hasBreakpoint)
         {
-            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo + 1);
+            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo);
             items.push({
                 label: "breakpoints.Disable_Breakpoint",
                 tooltiptext: "breakpoints.tip.Disable_Breakpoint",
@@ -715,9 +712,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.toggleBreakpoint; " + line);
 
-        // Convert to breakpoint lines (one based).
-        line = line + 1;
-
         var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, line);
         if (hasBreakpoint)
             BreakpointStore.removeBreakpoint(this.location.href, line);
@@ -727,9 +721,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     toggleDisableBreakpoint: function(line)
     {
-        // Convert to breakpoit lines (one based).
-        line = line + 1;
-
         var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, line);
         if (isDisabled)
             BreakpointStore.enableBreakpoint(this.location.href, line);
@@ -1042,7 +1033,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     populateBreakpointInfoTip: function(infoTip, target)
     {
         var lineNo = this.scriptView.getLineIndex(target);
-        var bp = BreakpointStore.findBreakpoint(this.location.href, lineNo + 1);
+        var bp = BreakpointStore.findBreakpoint(this.location.href, lineNo);
         var expr = bp.condition;
         if (!expr)
             return false;
