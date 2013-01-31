@@ -871,8 +871,6 @@ function instanceOf(object, Klass)
     return false;
 }
 
-
-
 // ********************************************************************************************* //
 
 FirebugReps.Element = domplate(Firebug.Rep,
@@ -1163,6 +1161,11 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
+        // Remote objects can't use instanceof operand so, they use 'type' instead.
+        // All HTML element types starts with 'HTML' prefix.
+        if (type.indexOf("HTML") == 0)
+            return true;
+
         return object instanceof window.Element;
     },
 

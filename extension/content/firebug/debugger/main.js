@@ -20,6 +20,7 @@ define([
     "firebug/debugger/grips/functionGrip",
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/grips/remoteNodeListRep",
 ],
 function(FBTrace, ObjectGrip) {
 

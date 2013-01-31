@@ -1267,12 +1267,16 @@ window.Firebug =
     getRep: function(object, context)
     {
         var type = typeof(object);
-        if (type == 'object' && object instanceof String)
-            type = 'string';
+        if (type == "object" && object instanceof String)
+            type = "string";
 
-        // Support for objects with dynamic type info.
+        // Support for objects with dynamic type info. Those objects are mostly remote
+        // objects coming from the back-end (server side). We can't use |instanceof|
+        // operand for those objects and so we need to provide type.
         if (object && Obj.isFunction(object.getType))
             type = object.getType();
+        else if (object && object["class"])
+            type = object["class"];
 
         for (var i = 0; i < reps.length; ++i)
         {

@@ -96,12 +96,12 @@ DomTree.prototype = domplate(
     getValueTag: function(member)
     {
         // xxxHonza: |this| is wrong at this moment (callback from Domplate uses wrong context).
+        // That's why we access the provider through the 'member' object.
+        // xxxHonza: It should be possible to provide the tag through a decorator or provider.
 
-        // Get proper UI template for the value.
-        // xxxHonza: The value can be fetched asynchronously so, the value tag
-        // should be also provided (by a decorator or provider).
-        var value = this.getValue(member);
-        var valueTag = Firebug.getRep(value);
+        // Get proper template for the value. |member.value| should refer to remote
+        // object implementation.
+        var valueTag = Firebug.getRep(member.value);
         return valueTag.tag;
     },
 

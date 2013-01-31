@@ -295,7 +295,7 @@ Css.getElementCSSSelector = function(element)
         label += "#" + element.id;
 
     if (element.classList && element.classList.length > 0)
-        label += "." + element.classList.item(0);
+        label += "." + element.classList[0];
 
     return label;
 };
