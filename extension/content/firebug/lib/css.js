@@ -320,7 +320,7 @@ var classNameReCache={};
 
 Css.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || !name)
         return false;
 
     if (name.indexOf(" ") != -1)

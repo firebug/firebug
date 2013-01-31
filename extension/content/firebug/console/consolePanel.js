@@ -491,7 +491,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // are dynamically consumed during the rendering process.
         // This allows to derive new templates from an existing ones, without breaking
         // the default subject set within domplate() function.
-        return rep.tag.append({object: object}, row, rep);
+        try
+        {
+            return rep.tag.append({object: object}, row, rep);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
+                FBTrace.sysout("consolePanel.appendObject; rep " + rep.className, rep);
+            }
+        }
     },
 
     appendFormatted: function(objects, row, rep)

@@ -157,7 +157,8 @@ window.Firebug =
 
         this.isInitialized = true;
 
-        Events.dispatch(modules, "initialize", []);
+        // Distribute Firebug's preference domain as an argument (see issue 6210).
+        Events.dispatch(modules, "initialize", [Options.prefDomain]);
 
         // This is the final of Firebug initialization.
         FBTrace.timeEnd("INITIALIZATION_TIME");
@@ -2575,16 +2576,24 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
-        if (object.constructor && typeof(object.constructor) == 'function')
+        try
         {
-            var ctorName = object.constructor.name;
-            // xxxsz: Objects with 'Object' as constructor name should also be shown.
-            // See issue 6148.
-            if (ctorName)
-                return ctorName;
+            if (object.constructor && typeof(object.constructor) == 'function')
+            {
+                var ctorName = object.constructor.name;
+                // xxxsz: Objects with 'Object' as constructor name should also be shown.
+                // See issue 6148.
+                if (ctorName)
+                    return ctorName;
+            }
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Rep.getTitle; EXCEPTION " + e, e);
         }
 
-        var label = FBL.safeToString(object); // eg [object XPCWrappedNative [object foo]]
+        var label = Str.safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
         const re =/\[object ([^\]]*)/;
         var m = re.exec(label);
