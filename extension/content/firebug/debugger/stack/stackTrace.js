@@ -67,6 +67,23 @@ StackTrace.buildStackTrace = function(frames, context)
     return trace;
 };
 
+StackTrace.parseToStackTrace = function(stack, context)
+{
+     var lines = stack.split('\n');
+     var trace = new StackTrace();
+     for (var i = 0; i < lines.length; i++)
+     {
+         var frame = StackFrame.parseToStackFrame(lines[i],context);
+
+         if (FBTrace.DBG_STACK)
+             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+
+         if (frame)
+             trace.frames.push(frame);
+     }
+     return trace;
+};
+
 // ********************************************************************************************* //
 // Registration
 

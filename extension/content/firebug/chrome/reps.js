@@ -2673,7 +2673,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
         var trace;
         if (object.stack)
         {
-            trace = StackFrame.parseToStackTrace(object.stack, context);
+            trace = StackTrace.parseToStackTrace(object.stack, context);
             trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
             if (!trace)
