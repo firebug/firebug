@@ -1158,16 +1158,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         		{
         			label: "css.label.Copy_Property_Declaration",
         			tooltiptext: "css.tip.Copy_Property_Declaration",
+        			id: "fbCopyPropertyDeclaration",
         			command: Obj.bindFixed(this.copyPropertyDeclaration, this, prop)
         		},
         		{
         			label: "css.label.Copy_Property_Name",
         			tooltiptext: "css.tip.Copy_Property_Name",
+        			id: "fbCopyPropertyName",
         			command: Obj.bindFixed(this.copyPropertyName, this, prop)
         		},
         		{
         			label: "css.label.Copy_Property_Value",
         			tooltiptext: "css.tip.Copy_Property_Value",
+        			id: "fbCopyPropertyValue",
         			command: Obj.bindFixed(this.copyPropertyValue, this, prop)
         		}
         	);
