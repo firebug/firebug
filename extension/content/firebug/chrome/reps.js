@@ -3040,8 +3040,9 @@ FirebugReps.Description = domplate(Firebug.Rep,
 {
     className: "Description",
 
+    // Use SPAN to make sure the description is nicely inserted into existing text inline.
     tag:
-        DIV({onclick: "$onClickLink"}),
+        SPAN({onclick: "$onClickLink"}),
 
     render: function(text, parentNode, listener)
     {

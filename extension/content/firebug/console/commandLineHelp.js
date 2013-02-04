@@ -9,8 +9,9 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xpcom",
     "firebug/lib/events",
+    "firebug/lib/object",
 ],
-function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
+function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events, Obj) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -24,6 +25,8 @@ var CMD_TYPE_SHORTCUT = 2;
 var CMD_TYPE_PROPERTY = 3;
 
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+
+var CLOSURE_INSPECTOR_HELP_URL = "https://getfirebug.com/wiki/index.php/Closure_Inspector";
 
 // ********************************************************************************************* //
 // Command Line Help
@@ -153,13 +156,16 @@ var TipsList = domplate(
 
 var Tip = domplate(
 {
-    tag:
+    loop:
         FOR("tip", "$tips",
-            LI({"class": "tip"},
-                SPAN("$tip|getText"),
-                SPAN("&nbsp"),
-                SPAN({"class": "example"},"$tip|getExample")
-            )
+            TAG("$tag", "$tip")
+        ),
+
+    tag:
+        LI({"class": "tip"},
+            SPAN({"class": "text"}, "$tip|getText"),
+            SPAN("&nbsp"),
+            SPAN({"class": "example"},"$tip|getExample")
         ),
 
     getText: function(object)
@@ -260,19 +266,27 @@ var CommandLineHelp = domplate(
         var table = TipsList.tag.replace({}, logGroupBody);
         var list = table.lastChild;
 
-        var tips = [];
-
-        tips.push({
+        // #1) Render basic command line syntaxt tip
+        var tip = {
             example: "1 + 1",
             text: "console.cmd.tip.javascript"
-        });
+        };
+        Tip.tag.append({tip: tip}, list);
 
-        tips.push({
+        // #2) Render closure syntax tip
+        tip = {
             example: "myObject.%closureVarName",
             text: "console.cmd.tip.closures"
-        });
+        };
 
-        Tip.tag.append({tips: tips}, list);
+        function onClickLink()
+        {
+            Win.openNewTab(CLOSURE_INSPECTOR_HELP_URL);
+        }
+
+        var node = Tip.tag.append({tip: tip}, list);
+        var textNode = node.getElementsByClassName("text").item(0);
+        FirebugReps.Description.render(Locale.$STR(tip.text), textNode, onClickLink);
     }
 });
 
