@@ -36,7 +36,7 @@ GripProvider.prototype =
         if (Obj.isFunction(object.hasProperties))
             return object.hasProperties();
 
-        var children = this.getChildren();
+        var children = this.getChildren(object);
         return children && children.length > 0;
     },
 

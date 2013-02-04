@@ -856,6 +856,10 @@
         ]]></handler>
 
         <handler event="popupshowing"><![CDATA[
+            // If the event comes from a sub-menu ignore it (just the root has "menuPopup" class)
+            if (!FBL.hasClass(event.originalTarget, "menuPopup"))
+                return;
+
             var tab = this.parentNode;
             if (!tab)
                 return false;
@@ -894,6 +898,10 @@
         ]]></handler>
 
         <handler event="popuphidden"><![CDATA[
+            // If the event comes from a sub-menu ignore it (just the root has "menuPopup" class)
+            if (!FBL.hasClass(event.originalTarget, "menuPopup"))
+                return;
+
             this.setAttribute("role", "presentation");
             FBL.eraseNode(this.popup);
         ]]></handler>

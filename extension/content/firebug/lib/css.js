@@ -295,7 +295,7 @@ Css.getElementCSSSelector = function(element)
         label += "#" + element.id;
 
     if (element.classList && element.classList.length > 0)
-        label += "." + element.classList.item(0);
+        label += "." + element.classList[0];
 
     return label;
 };
@@ -320,7 +320,7 @@ var classNameReCache={};
 
 Css.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || !name)
         return false;
 
     if (name.indexOf(" ") != -1)

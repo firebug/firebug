@@ -871,8 +871,6 @@ function instanceOf(object, Klass)
     return false;
 }
 
-
-
 // ********************************************************************************************* //
 
 FirebugReps.Element = domplate(Firebug.Rep,
@@ -1163,6 +1161,11 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
+        // Remote objects can't use instanceof operand so, they use 'type' instead.
+        // All HTML element types starts with 'HTML' prefix.
+        if (Str.hasPrefix(type, "HTML"))
+            return true;
+
         return object instanceof window.Element;
     },
 
@@ -2670,7 +2673,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
         var trace;
         if (object.stack)
         {
-            trace = StackFrame.parseToStackTrace(object.stack, context);
+            trace = StackTrace.parseToStackTrace(object.stack, context);
             trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
             if (!trace)

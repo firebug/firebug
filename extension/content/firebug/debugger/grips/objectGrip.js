@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/debugger/rdp",
     "firebug/lib/promise",
+    "firebug/lib/array",
 ],
-function (FBTrace, RDP, Promise) {
+function (FBTrace, RDP, Promise, Arr) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -26,6 +27,12 @@ ObjectGrip.prototype =
 
     getType: function()
     {
+        if (!this.grip)
+            return "";
+
+        if (this.grip.prototype)
+            return this.grip.prototype["class"];
+
         return this.grip["class"];
     },
 
@@ -46,8 +53,8 @@ ObjectGrip.prototype =
         // possible to display some useful info about the object without additional
         // request. Let's use these properties for the value label.
         // See also {@ObjectGrip}
-        if (this.grip.properties)
-            return this.grip.properties;
+        if (this.grip.ownProperties)
+            return Arr.values(this.grip.ownProperties);
 
         return {type: this.grip.type};
     },
@@ -140,6 +147,8 @@ function createGripProxy(grip)
 {
     // xxxHonza: this is the place where we can use proxies so, Grips are working
     // in DOM panel automatically
+    // xxxHonza: in case the grip represents an array the proxy should also 
+    // be an array.
     var obj = {};
     for (var i=0; i<grip.properties.length; i++)
     {

@@ -17,7 +17,7 @@ var Cu = Components.utils;
 Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
 
 var ObjectActor = DebuggerServer.ObjectActor;
-var propMax = Options.get("ObjectShortIteratorMax")
+var propMax = Options.get("ObjectShortIteratorMax");
 
 // ********************************************************************************************* //
 // Implementation
@@ -49,10 +49,10 @@ ObjectActor.prototype.grip = function()
             var name = props[i];
             var desc = this.obj.getOwnPropertyDescriptor(name);
 
-            if (!grip.properties)
-                grip.properties = {};
+            if (!grip.ownProperties)
+                grip.ownProperties = {};
 
-            grip.properties[name] = this.threadActor.createValueGrip(desc.value);
+            grip.ownProperties[name] = this.threadActor.createValueGrip(desc.value);
 
             if (++counter > propMax)
                 break;
@@ -63,6 +63,9 @@ ObjectActor.prototype.grip = function()
             FBTrace.sysout("objectActor.grip; EXCEPTION " + e, e);
         }
     }
+
+    // Get also prototype info.
+    grip.prototype = this.threadActor.createValueGrip(this.obj.proto);
 
     level--;
 

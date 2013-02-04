@@ -299,23 +299,6 @@ StackFrame.parseToStackFrame = function(line, context)
     return new StackFrame({href:m[2]}, m[3], m[1], [], null, null, context);
 };
 
-StackFrame.parseToStackTrace = function(stack, context)
-{
-     var lines = stack.split('\n');
-     var trace = new StackFrame.StackTrace();
-     for (var i = 0; i < lines.length; i++)
-     {
-         var frame = StackFrame.parseToStackFrame(lines[i],context);
-
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
-
-         if (frame)
-             trace.frames.push(frame);
-     }
-     return trace;
-};
-
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
     if (trace && trace.frames)

@@ -95,6 +95,9 @@ function runTest()
                 ["htmlCollection.0", false],
                 ["objWithNumericProps.0", true],
 
+                ["largeArray.leng", true],
+                ["largeArray.j", true],
+
                 // currently not handled
                 ["(window).i", false],
                 ["q='';q.s", false]

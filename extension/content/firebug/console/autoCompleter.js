@@ -20,6 +20,11 @@ function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, Closure
 
 const kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
                    "typeof", "void", "yield"];
+const kwAll = ["break", "case", "catch", "const", "continue", "debugger",
+  "default", "delete", "do", "else", "false", "finally", "for", "function",
+  "get", "if", "in", "instanceof", "let", "new", "null", "return", "set",
+  "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while",
+  "with", "yield"];
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
 const reJSChar = /[a-zA-Z0-9$_]/;
@@ -185,24 +190,24 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var spreExpr = sparsed.substr(0, propertyStart);
         var preExpr = parsed.substr(0, propertyStart);
 
-        this.completionBase.pre = value.substr(0, parseStart);
+        var spreParsed = svalue.substr(0, parseStart);
+        var preParsed = value.substr(0, parseStart);
 
         if (FBTrace.DBG_COMMANDLINE)
         {
             var sep = (parsed.indexOf("|") > -1) ? "^" : "|";
-            FBTrace.sysout("Completing: " + this.completionBase.pre + sep + preExpr + sep + prop);
+            FBTrace.sysout("Completing: " + preParsed + sep + preExpr + sep + prop);
         }
 
         var prevCompletions = this.completions;
 
-        // We only need to calculate a new candidate list if the expression has
-        // changed (we can ignore completionBase.pre since completions do not
-        // depend upon that).
-        if (preExpr !== this.completionBase.expr)
+        // We only need to calculate a new candidate list if the expression has changed.
+        if (preExpr !== this.completionBase.expr || preParsed !== this.completionBase.pre)
         {
             this.completionBase.expr = preExpr;
+            this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                this.options.includeCurrentScope);
+                preParsed, spreParsed, this.options.includeCurrentScope);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
@@ -305,8 +310,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
     /**
      * Choose a default candidate from the list of completions. The first of all
-     * shortest completions is current used for this, except in some very hacky,
-     * but useful, special cases (issue 5593).
+     * shortest completions is currently used for this, except in some very hacky,
+     * but useful, special cases.
      */
     this.pickDefaultCandidate = function(prevCompletions)
     {
@@ -321,15 +326,25 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 return ind;
         }
 
-        // Special-case certain expressions.
+        // Special-case certain expressions. (But remember to pick prefix-free
+        // candidates; otherwise "validVariable<return>" can auto-complete
+        // instead of run.)
+        var prefixFree = function(name)
+        {
+            return !list.some(function(x)
+            {
+                return x.length < name.length && Str.hasPrefix(name, x);
+            });
+        };
         var special = {
             "": ["document", "console", "frames", "window", "parseInt", "undefined",
                 "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
+            "console.": ["log"],
             "document.": ["getElementById", "addEventListener", "createElement",
                 "documentElement"],
-            "Object.prototype.toString": ["call"]
+            "Object.prototype.toString.": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
         {
@@ -341,7 +356,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 {
                     // Use 'prop' as a completion, if it exists.
                     ind = list.indexOf(prop);
-                    if (ind !== -1)
+                    if (ind !== -1 && prefixFree(prop))
                         return ind;
                 }
             }
@@ -349,9 +364,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         // 'prototype' is a good default if it exists.
         ind = list.indexOf("prototype");
-        if (ind !== -1)
+        if (ind !== -1 && prefixFree("prototype"))
             return ind;
 
+        // Simply pick out the shortest candidate. This works remarkably well.
         ind = 0;
         for (var i = 1; i < list.length; ++i)
         {
@@ -1027,7 +1043,7 @@ function EditorJSAutoCompleter(box, completionBox, options)
  */
 function getExpressionOffset(command, start)
 {
-    if (typeof start === 'undefined')
+    if (typeof start === "undefined")
         start = command.length;
 
     var bracketCount = 0, instr = false;
@@ -1680,7 +1696,7 @@ function propertiesToHide(expr, obj)
     ret.push("__defineGetter__", "__defineSetter__",
         "__lookupGetter__", "__lookupSetter__");
 
-    // function.caller/argument are deprecated and ugly.
+    // function.caller/arguments are deprecated and ugly.
     if (typeof obj === "function")
         ret.push("caller", "arguments");
 
@@ -1745,7 +1761,17 @@ function setCompletionsFromObject(out, object, context)
         {
             var target = (isObjectPrototype(obj) ?
                     out.hiddenCompletions : out.completions);
-            target.push.apply(target, Object.getOwnPropertyNames(obj));
+            if (Array.isArray(obj) && obj.length > 4000)
+            {
+                // The object is a large array. To avoid RangeErrors from
+                // `target.push.apply` and a slow `Object.getOwnPropertyNames`,
+                // we just skip this level ("length" is also on the prototype,
+                // and numeric property would get hidden later anyway).
+            }
+            else
+            {
+                target.push.apply(target, Object.getOwnPropertyNames(obj));
+            }
             obj = Object.getPrototypeOf(obj);
         }
 
@@ -1801,6 +1827,22 @@ function setCompletionsFromScope(out, object, context)
     }
 }
 
+function getNewlyDeclaredNames(js)
+{
+    // XXXsimon: In the future, machinery from issue 5291 could perhaps replace this.
+    var re = /\b[a-zA-Z_$][a-zA-Z0-9_$]*\b/g;
+    var ar = [], match;
+    while ((match = re.exec(js)) !== null)
+    {
+        if (!/[.%]/.test(js.charAt(match.index - 1)) &&
+            js.charAt(re.lastIndex) !== ":" && kwAll.indexOf(match[0]) === -1)
+        {
+            ar.push(match[0]);
+        }
+    }
+    return ar;
+}
+
 function propChainBuildComplete(out, context, tempExpr, result)
 {
     if (out.scopeCompletion)
@@ -1815,15 +1857,20 @@ function propChainBuildComplete(out, context, tempExpr, result)
 
     var done = function(result)
     {
-        if (result !== undefined && result !== null)
+        if (result == null)
+            return;
+
+        if (typeof result !== "object" && typeof result !== "function")
         {
-            if (typeof result !== "object" && typeof result !== "function")
-            {
-                // Convert the primitive into its scope's matching object type.
-                result = Wrapper.getContentView(out.window).Object(result);
-            }
-            setCompletionsFromObject(out, result, context);
+            // To avoid slow completions, convert strings to length 0 (numeric
+            // properties are hidden anyway).
+            if (typeof result === "string")
+                result = "";
+
+            // Convert the primitive into its scope's matching object type.
+            result = Wrapper.getContentView(out.window).Object(result);
         }
+        setCompletionsFromObject(out, result, context);
     };
 
     if (tempExpr.fake)
@@ -2142,13 +2189,13 @@ function evalPropChain(out, preExpr, origExpr, context)
     return true;
 }
 
-function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
+function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, includeCurrentScope)
 {
     var out = {
         spreExpr: spreExpr,
         completions: [],
         hiddenCompletions: [],
-        window: context.baseWindow || context.window
+        window: context.getCurrentGlobal()
     };
     var indexCompletion = false;
 
@@ -2209,6 +2256,10 @@ function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
             {
                 setCompletionsFromObject(out, context.global, context);
             }
+
+            // Also add names of variables declared previously in the typed code.
+            var previousDeclarations = getNewlyDeclaredNames(spreParsed);
+            out.completions.push.apply(out.completions, previousDeclarations);
         }
 
         if (indexCompletion)
