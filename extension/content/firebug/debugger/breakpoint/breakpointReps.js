@@ -117,7 +117,9 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getSourceLink: function(bp)
     {
-        return new SourceLink(bp.href, bp.lineNo, "js");
+        // Convert line index(zero-based) to line number(one-based)
+        var lineNo = bp.lineNo + 1;
+        return new SourceLink(bp.href, lineNo, "js");
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)
