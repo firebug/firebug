@@ -405,7 +405,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return "NotANumber";
 
         // Use all direct properties of the object
-        if (object instanceof Object)
+        if (object && (typeof object === "object" || typeof object === "function"))
         {
             var id = Obj.getObjHash(object);
             return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
