@@ -32,5 +32,5 @@ var SelectionController =
 // Clean up
 
 window.addEventListener("unload", function testSelectionUnload() {
-    SelectionController.cleanUp();
+    FBTestApp.SelectionController.cleanUp();
 }, true);

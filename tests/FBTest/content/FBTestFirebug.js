@@ -2202,12 +2202,12 @@ this.searchInHtmlPanel = function(searchText, callback)
     // The listener is automatically removed when the test window
     // is unloaded in case the seletion actually doesn't occur,
     // see FBTestSelection.js
-    SelectionController.addListener(function selectionListener()
+    FBTestApp.SelectionController.addListener(function selectionListener()
     {
         var sel = panel.document.defaultView.getSelection();
         if (sel && !sel.isCollapsed && sel.toString() == searchText)
         {
-            SelectionController.removeListener(arguments.callee);
+            FBTestApp.SelectionController.removeListener(arguments.callee);
             callback(sel);
         }
     });

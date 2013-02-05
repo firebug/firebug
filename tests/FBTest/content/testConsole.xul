@@ -22,22 +22,10 @@
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/moduleConfig.js"/>
-
-    <script type="application/x-javascript" src="resource://firebug/require.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/main.js"/>
+    <script type="application/x-javascript" src="resource://firebug/mini-require.js"/>
 
     <!-- FBTest -->
-    <script type="application/x-javascript" src="chrome://fbtest/content/jsdiff.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testCore.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testResultRep.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testListRep.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testRunner.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testConsole.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testLogger.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testCouchUploader.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/notify.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/testListLoader.js"/>
-    <script type="application/x-javascript" src="chrome://fbtest/content/propTree.js"/>
+    <script type="application/x-javascript" src="chrome://fbtest/content/main.js"/>
 
     <stringbundleset id="stringbundleset">
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
