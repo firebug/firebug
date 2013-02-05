@@ -488,7 +488,7 @@ FBTestApp.TestConsole =
             // Check pref if the auto logger should be registered. Useful for
             // knowing, which test caused crash.
             var enableTestLogger = Firebug.getPref(FBTestApp.prefDomain, "enableTestLogger");
-            if (true)
+            if (enableTestLogger)
             {
                 var listener = new TestLogger.ProgressListener(new Date());
                 FBTestApp.TestRunner.addListener(listener);
