@@ -10,15 +10,6 @@ function(FBTrace) {
 
 var FBTestApp =
 {
-    namespaces: [],
-
-    ns: function(fn)
-    {
-        var ns = {};
-        FBTestApp.namespaces.push(fn, ns);
-        return ns;
-    },
-
     initialize: function()
     {
         FBTestApp.prefDomain = "extensions.fbtest";
@@ -31,13 +22,6 @@ var FBTestApp =
         // must be done before namespaces are initialized.
         if (Firebug.registerStringBundle)
             Firebug.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
-
-        for (var i=0; i<FBTestApp.namespaces.length; i+=2)
-        {
-            var fn = FBTestApp.namespaces[i];
-            var ns = FBTestApp.namespaces[i+1];
-            fn.apply(ns);
-        }
 
         // Set the Firebug window now. In case of a new window we have to wait
         // till all namespaces are initialized.
