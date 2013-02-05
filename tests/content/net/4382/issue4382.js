@@ -132,7 +132,6 @@ function verifyJSONContents(type, jsonBody, expectedItems)
             var item = (isNaN(value) ? label : value);
             if (item != expectedItems[i])
             {
-                FBTrace.sysout("xxxxx "+i, {expectedItems: expectedItems, label: label, item: item});
                 itemsCorrect = false;
                 break;
             }
