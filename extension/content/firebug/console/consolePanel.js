@@ -388,12 +388,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     getMessageId: function(object, sourceLink)
     {
-        // The object could provide it's own custom ID.
+    	// Firebug internal message objects could provide their own custom ID
         if (object instanceof Object && typeof(object.getId) == "function")
             return object.getId();
 
-        // xxxHonza: this doesn't work for custom logs (e.g. cookies and XHR)
-        if (typeof object == "string")
+        // object may not be an object
+        if (typeof object != "object")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         // Group messages coming from the same location
@@ -411,7 +411,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
         }
 
-        return "";
+        return Obj.getUniqueId().toString();
     },
 
     increaseRowCount: function(row)
