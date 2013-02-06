@@ -122,11 +122,6 @@ for (var p in Firefox)
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 
-//FBL.ErrorCopy = FirebugReps.ErrorCopy;
-//FBL.ErrorMessageObj = FirebugReps.ErrorMessageObj;
-//FBL.EventCopy = Dom.EventCopy;
-//FBL.PropertyObj = FirebugReps.PropertyObj;
-
 // deprecated
 FBL.$ = function(id, doc)
 {

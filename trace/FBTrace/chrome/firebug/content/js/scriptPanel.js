@@ -503,7 +503,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var self = this;
 
         // If the evaluate fails, then we report an error and don't show the infotip
-        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
+        var win = this.context.stoppedGlobal || this.context.baseWindow || this.context.window;
+        Firebug.CommandLine.evaluate(expr, this.context, null, win,
             function success(result, context)
             {
                 var rep = Firebug.getRep(result, context);
@@ -1622,9 +1623,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!chrome)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.syncCommand, context with no chrome: " +
-                    context.getGlobalScope());
-
+                FBTrace.sysout("debugger.syncCommand, context with no chrome", context);
             return;
         }
 

@@ -327,6 +327,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         editor.innerEditMode = node.localName in Css.innerEditableTags;
 
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
+        html = Str.escapeForHtmlEditor(html);
         Firebug.Editor.startEditing(box, html, editor);
     },
 

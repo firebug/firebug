@@ -166,6 +166,13 @@
     color: #787878;
 }
 
+.objectBox-scope {
+    color: #707070;
+}
+.objectBox-optimizedAway {
+    color: #909090;
+}
+
 .objectLink-sourceLink {
     position: absolute;
     right: 4px;
@@ -436,7 +443,16 @@
 }
 
 .logRow-help .commandDesc {
-    color: gray
+    color: gray;
+}
+
+.logRow-help .tipsContent .tip {
+    margin-bottom: 5px;
+}
+
+.logRow-help .tipsContent .tip .example {
+    color: green;
+    font-family: monospace;
 }
 
 /*************************************************************************************************/

@@ -844,9 +844,11 @@ var fbs =
         // make sure to unregister all the hooks
         var hookNames = ["error", "script", "breakpoint", "debugger", "debug", "interrupt", 
             "throw", "topLevel", "function", "debug"];
-        for each (var hook in hookNames)
+        for (var i=0; i<hookNames.length; i++)
         {
-            try {
+            var hook = hookNames[i];
+            try
+            {
                 jsd[hook + "Hook"] = null;
             }
             catch (exc)
@@ -1229,6 +1231,7 @@ var fbs =
         }
 
         bp.condition = condition;
+        delete bp.transformedCondition;
 
         dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
 
@@ -3292,6 +3295,7 @@ var fbs =
         if (props)
         {
             bp.condition = props.condition;
+            delete bp.transformedCondition;
             bp.onTrue = props.onTrue;
             bp.hitCount = props.hitCount;
             if (bp.condition || bp.hitCount > 0)
@@ -4347,7 +4351,32 @@ function testBreakpoint(frame, bp)
         var result = {};
         frame.scope.refresh();
 
-        if (frame.eval(bp.condition, "", 1, result))
+        // ugly hack for closure getter syntax
+        // (see also transformedCondition elsewhere in the code)
+        var cond = bp.condition;
+        if (cond.indexOf(".%") !== -1)
+        {
+            var frameScopeRoot = fbs.getOutermostScope(frame);
+            if (frameScopeRoot)
+            {
+                if (bp.transformedCondition && "__fb_scopedVars" in frameScopeRoot.wrappedJSObject)
+                {
+                    // Fast path: everything is already prepared for us.
+                    cond = bp.transformedCondition;
+                }
+                else
+                {
+                    var debuggr = fbs.findDebugger(frame);
+                    var context = debuggr.breakContext;
+                    delete debuggr.breakContext;
+
+                    cond = debuggr._temporaryTransformSyntax(cond, frameScopeRoot, context);
+                    bp.transformedCondition = cond;
+                }
+            }
+        }
+
+        if (frame.eval(cond, "", 1, result))
         {
             if (bp.onTrue)
             {

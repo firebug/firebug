@@ -22,10 +22,14 @@ define([
     "firebug/lib/dom",
     "firebug/lib/http",
     "firebug/trace/traceListener",
-    "firebug/console/commandLineExposed",
+
+    // xxxHonza: FBTrace says that Firebug is undefined in commandLineExposed module
+    // This works in Firebug 1.12 so, we can live with this hack for 1.11 I guess.
+    // See also register and unregisterCommand methods.
+    // "firebug/console/commandLineExposed", 
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener/*, CommandLineExposed*/) {
 
 // ********************************************************************************************* //
 // Constants
@@ -83,7 +87,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.10",
+    version: "1.11",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -664,12 +668,13 @@ window.Firebug =
 
     registerCommand: function(name, config)
     {
-        return CommandLineExposed.registerCommand(name, config);
+        // See top of this file
+        //return Firebug.CommandLineExposed.registerCommand(name, config);
     },
 
     unregistereCommand: function(name)
     {
-        return CommandLineExposed.unregisterCommand(name);
+        //return CommandLineExposed.unregisterCommand(name);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

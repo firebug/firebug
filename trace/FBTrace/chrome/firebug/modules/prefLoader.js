@@ -59,8 +59,9 @@ function clearDefaultPrefs(domain)
     var pb = Services.prefs.getDefaultBranch(domain);
 
     var names = pb.getChildList("");
-    for each (var name in names)
+    for (var i=0; i<names.length; i++)
     {
+        var name = names[i];
         if (!pb.prefHasUserValue(name))
             pb.deleteBranch(name);
     }

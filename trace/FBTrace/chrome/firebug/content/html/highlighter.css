@@ -20,6 +20,7 @@
     box-shadow: none !important;
     background: transparent none !important;
     pointer-events: none !important;
+    white-space: normal !important;
 }
 
 .firebugBlockBackgroundColor {

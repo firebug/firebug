@@ -23,12 +23,13 @@ define([
     "firebug/console/commandLineHelp",
     "firebug/console/commandLineInclude",
     "firebug/console/commandLineExposed",
+    "firebug/console/closureInspector",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp,
-    CommandLineInclude, CommandLineExposed) {
+    Xpath, Str, Xml, Arr, Persist, Keywords, Console, CommandLineHelp, CommandLineInclude,
+    CommandLineExposed, ClosureInspector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -71,32 +72,34 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         }
     },
 
-    // returns user-level wrapped object I guess.
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
         exceptionFunction, noStateChange)
     {
         if (!context)
             return;
 
+        targetWindow = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
+
         try
         {
-            var result = null;
             var debuggerState = Firebug.Debugger.beginInternalOperation();
+
+            var newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
             {
-                result = this.evaluateInSandbox(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateInSandbox(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
             else if (Firebug.Debugger.hasValidStack(context))
             {
-                result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
             else
             {
-                result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction);
+                this.evaluateByEventPassing(newExpr, context, thisValue, targetWindow,
+                    successConsoleFunction, exceptionFunction, expr);
             }
 
             if (!noStateChange)
@@ -115,15 +118,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             Firebug.Debugger.endInternalOperation(debuggerState);
         }
-
-        return result;
     },
 
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction)
+        successConsoleFunction, exceptionFunction, origExpr)
     {
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!win)
         {
@@ -177,8 +177,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         event.initEvent("firebugCommandLine", true, false);
         win.document.setUserData("firebug-methodName", "evaluate", null);
 
-        expr = expr.toString();
+        origExpr = "with(_FirebugCommandLine){\n" + (origExpr || expr) + "\n};";
         expr = "with(_FirebugCommandLine){\n" + expr + "\n};";
+        win.document.setUserData("firebug-expr-orig", origExpr, null);
         win.document.setUserData("firebug-expr", expr, null);
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
@@ -256,9 +257,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var result = null;
 
-        // targetWindow may be frame in HTML
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context);
@@ -287,9 +286,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     evaluateByPostMessage: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction)
     {
-        // targetWindow may be frame in HTML
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
 
         if (!win)
         {
@@ -352,8 +349,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     evaluateInWebPage: function(expr, context, targetWindow)
     {
-        var win = targetWindow ? targetWindow :
-            (context.baseWindow ? context.baseWindow : context.window);
+        var win = targetWindow || context.stoppedGlobal || context.baseWindow || context.window;
+
         var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
         if (!element)
             return;
@@ -715,8 +712,19 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        if (!Firebug.currentContext)
+        var context = Firebug.currentContext;
+        if (!context)
             return;
+
+        // Warn that FireClosure is integrated and will conflict.
+        if (Firebug.JSAutoCompleter && Firebug.JSAutoCompleter.transformScopeExpr &&
+            !this.hasWarnedAboutFireClosure)
+        {
+            this.hasWarnedAboutFireClosure = true;
+            // Use English because this only reaches ~200 users anyway.
+            var msg = "FireClosure has been integrated into Firebug. To avoid conflicts, please uninstall it and restart your browser.";
+            Firebug.Console.logFormatted([msg], context, "warn");
+        }
 
         var chrome = Firebug.chrome;
         var panelState = Persist.getPersistedState(this, "console");
@@ -724,7 +732,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             var value = panelState.commandLineText;
             var commandLine = this.getCommandLine(browser);
-            Firebug.currentContext.commandLineText = value;
+            context.commandLineText = value;
 
             commandLine.value = value;
 
@@ -745,10 +753,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             this.setAutoCompleter();
     },
 
-    // called by users of command line, currently:
-    // 1) Console on focus command line,
-    // 2) Watch onfocus, and
-    // 3) debugger loadedContext if watches exist
+    // Attach the command line. Currently called by evaluate() et al. and
+    // watch onfocus (see chrome.js; probably unnecessary).
     isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_COMMANDLINE)
@@ -792,11 +798,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineKeyDown: function(event)
     {
-        // XXX: Temporary hack to make FireClosure work (until that gets a new
-        // release out)
-        if (!this.autoCompleter.shouldIncludeHint && Firebug.JSAutoCompleter.transformScopeExpr)
-            this.setAutoCompleter();
-
         var context = Firebug.currentContext;
 
         this.autoCompleter.handleKeyDown(event, context);
@@ -938,7 +939,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         return Firebug.CommandEditor;
     }
-
 });
 
 // ********************************************************************************************* //
@@ -1169,25 +1169,33 @@ function FirebugCommandLineAPI(context)
 
     this.traceAll = function()
     {
-        Firebug.Debugger.traceAll(Firebug.currentContext);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.traceAll(Firebug.currentContext);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceAll = function()
     {
-        Firebug.Debugger.untraceAll(Firebug.currentContext);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.untraceAll(Firebug.currentContext);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.traceCalls = function(fn)
     {
-        Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceCalls = function(fn)
     {
-        Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
+        // See issue 6220
+        Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
+        //Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
         return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
@@ -1400,8 +1408,8 @@ function CommandLineHandler(context, win)
 
         if (FBTrace.DBG_COMMANDLINE)
         {
-            FBTrace.sysout("commandLine.handleEvent('firebugExecuteCommand') " +
-                "event in context.baseWindow " + context.baseWindow.location, event);
+            FBTrace.sysout("commandLine.handleEvent() " +
+                " window: " + Win.safeGetWindowLocation(win), {win: win, ev: event});
         }
 
         // Appends variables into the api.
@@ -1429,15 +1437,6 @@ function CommandLineHandler(context, win)
         {
             var methodName = win.document.getUserData("firebug-methodName");
             Firebug.Console.log(Locale.$STRF("commandline.MethodNotSupported", [methodName]));
-        }
-
-        if (FBTrace.DBG_COMMANDLINE)
-        {
-            FBTrace.sysout("commandLine.handleEvent() " +
-                win.document.getUserData("firebug-methodName") +
-                " context.baseWindow: " +
-                (context.baseWindow ? context.baseWindow.location : "no basewindow"),
-                context.baseWindow);
         }
     };
 }
