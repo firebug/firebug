@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/lib/Locale",
+    "firebug/lib/locale",
     "firebug/lib/object",
     "firebug/lib/system",
     "firebug/chrome/window",

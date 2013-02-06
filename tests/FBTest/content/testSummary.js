@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/lib/Locale",
+    "firebug/lib/locale",
 ],
 function(FBTrace, Locale) {
 
