@@ -2,14 +2,13 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/lib/string",
     "fbtrace/lib/wrapper",
     "fbtrace/lib/domplate",
     "fbtrace/lib/dom",
     "fbtrace/lib/options",
 ],
-function(FBTrace, Firebug, Str, Wrapper, Domplate, Dom, Options) {
+function(FBTrace, Str, Wrapper, Domplate, Dom, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -38,31 +37,12 @@ var TraceMessage = function(type, text, obj, scope, time)
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
-        var trace = Firebug.errorStackTrace;
-        if (trace)
-        {
-            for (var i=0; i<trace.frames.length; i++)
-            {
-                var frame = trace.frames[i];
-                if (frame.href && frame.line)
-                {
-                    this.stack.push({
-                        fileName: frame.href,
-                        lineNumber: frame.line,
-                        funcName: ""
-                    });
-                }
-            }
-        }
-        else
-        {
-            // Put info about the script error location into the stack.
-            this.stack.push({
-                fileName: this.obj.sourceName,
-                lineNumber: this.obj.lineNumber,
-                funcName: ""
-            });
-        }
+        // Put info about the script error location into the stack.
+        this.stack.push({
+            fileName: this.obj.sourceName,
+            lineNumber: this.obj.lineNumber,
+            funcName: ""
+        });
     }
     //xxxHonza: the object doesn't have to always be an instance of Error.
     else if (this.obj && this.obj.stack && /*(this.obj instanceof Error) &&*/
@@ -329,54 +309,13 @@ TraceMessage.prototype =
 
     getScope: function()
     {
-        if (!Options.get("trace.enableScope"))
-            return null;
-
-        if (this.scope)
-            return this.scope;
-
-        var scope = {};
-        Firebug.Debugger.halt(function(frame)
-        {
-            for (var i=0; i<4 && frame; i++)
-                frame = frame.callingFrame;
-
-            if (frame)
-            {
-                var listValue = {value: null}, lengthValue = {value: 0};
-                frame.scope.getProperties(listValue, lengthValue);
-
-                for (var i=lengthValue.value-1; i>=0; i--)
-                {
-                    var prop = listValue.value[i];
-                    var name = unwrapIValue(prop.name);
-                    var value = unwrapIValue(prop.value);
-
-                    if ((typeof(value) != "function") && name && value)
-                        scope[name.toString()] = value.toString();
-                }
-            }
-        });
-
-        return this.scope = scope;
+        // xxxHonza: remove all code related to scope & debugger-halt
+        return null;
     },
 
     getResponse: function()
     {
-        var result = null;
-        try
-        {
-            var self = this;
-            Firebug.TabWatcher.iterateContexts(function(context) {
-                var url = self.obj.originalURI.spec;
-                return context.sourceCache.loadText(url);
-            });
-        }
-        catch (err)
-        {
-        }
-
-        return result;
+        // xxxHonza: remove support for net responses
     },
 
     getException: function()

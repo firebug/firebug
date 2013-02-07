@@ -236,6 +236,35 @@ function getEscapeRegexp(direction, lists)
 Str.escapeForElementAttribute = createSimpleEscape("attributes", "normal");
 
 // ********************************************************************************************* //
+// Conversions
+
+Str.convertToUnicode = function(text, charset)
+{
+    if (!text)
+        return "";
+
+    try
+    {
+        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(
+            Ci.nsIScriptableUnicodeConverter);
+        conv.charset = charset ? charset : "UTF-8";
+        return conv.ConvertToUnicode(text);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("Str.convertToUnicode: fails: for charset "+charset+" conv.charset:"+
+                conv.charset+" exc: "+exc, exc);
+        }
+
+        // the exception is worthless, make up a new one
+        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+
+            " in @mozilla.org/intl/scriptableunicodeconverter");
+    }
+};
+
+// ********************************************************************************************* //
 
 return Str;
 

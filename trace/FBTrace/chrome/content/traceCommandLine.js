@@ -17,7 +17,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu["import"]("resource:///modules/source-editor.jsm");
-Cu["import"]("resource://fbtrace-firebug/storageService.js");
+Cu["import"]("resource://fbtrace/storageService.js");
 
 // ********************************************************************************************* //
 // Command Line Implementation

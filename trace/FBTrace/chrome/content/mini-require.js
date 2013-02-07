@@ -15,7 +15,6 @@ var require, define;
 var Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://firebug/fbtrace.js");
 
 // xxxHonza: why FBTrace is undefined?
 if (typeof(FBTrace) == "undefined")

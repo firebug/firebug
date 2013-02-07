@@ -2,7 +2,6 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/lib/events",
     "fbtrace/lib/window",
     "fbtrace/firebugExplorer",
@@ -22,7 +21,7 @@ define([
     "fbtrace/propertyTree",
     "fbtrace/lib/reps",
 ],
-function(FBTrace, Firebug, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
+function(FBTrace, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
     Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
     ImportedMessage, Tree, PropertyTree, Reps) {
 
@@ -761,7 +760,7 @@ var MessageTemplate = domplate(Reps.Rep,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerRep(MessageTemplate);
+Reps.registerRep(MessageTemplate);
 
 // ********************************************************************************************* //
 

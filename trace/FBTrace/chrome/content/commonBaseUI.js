@@ -2,7 +2,6 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/globalTab",
     "fbtrace/lib/menu",
     "fbtrace/lib/css",
@@ -12,7 +11,7 @@ define([
     "fbtrace/panelTemplate",
     "fbtrace/traceOptionsController",
 ],
-function(FBTrace, Firebug, GlobalTab, Menu, Css, Locale, Options,
+function(FBTrace, GlobalTab, Menu, Css, Locale, Options,
     MessageTemplate, PanelTemplate, TraceOptionsController) {
 
 // ********************************************************************************************* //

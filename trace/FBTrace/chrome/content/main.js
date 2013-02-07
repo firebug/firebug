@@ -25,7 +25,6 @@ require(config,
     "fbtrace/traceConsole",
     "fbtrace/lib/options",
     "fbtrace/traceModule",
-    "firebug/firebug",
     "fbtrace/unblocker",
     "fbtrace/globalTab",
 ],
@@ -44,9 +43,9 @@ function(FBTrace, TraceConsole, Options, TraceModule)
     //var chrome = ChromeFactory.createFirebugChrome(window);
     //chrome.initialize();
 
-    // xxxHonza: just for debuggin, remove.
+    // xxxHonza: just for debugging, remove.
     window.setTimeout(function() {
-        FBTrace.sysout("Modules ", require.Loader.getDeps());
+        FBTrace.sysout("window ", window);
         FBTrace.sysout("Test ", {
             a: "A",
             b: "B"

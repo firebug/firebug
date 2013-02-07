@@ -2,11 +2,10 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/lib/object",
     "fbtrace/lib/options",
 ],
-function(FBTrace, Firebug, Obj, Options) {
+function(FBTrace, Obj, Options) {
 
 // ********************************************************************************************* //
 // Constants
