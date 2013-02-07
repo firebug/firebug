@@ -7,8 +7,13 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "fbtrace/serializer",
+    "fbtrace/traceObjectInspector",
+    "fbtrace/traceMessage",
+    "fbtrace/messageTemplate",
+    "fbtrace/commonBaseUI",
 ],
-function(FBTrace, Locale, Obj, Css, Dom, Serializer) {
+function(FBTrace, Locale, Obj, Css, Dom, Serializer, TraceObjectInspector, TraceMessage,
+    MessageTemplate, CommonBaseUI) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,9 +36,6 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const directoryService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
-
-const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
-const reDBG_FBS = /DBG_FBS_(.*)/;
 
 // Cache messages that are fired before the content of the window is loaded.
 var queue = [];
@@ -106,7 +108,7 @@ var TraceConsole =
 
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
 
-        Firebug.TraceModule.CommonBaseUI.initializeContent(
+        CommonBaseUI.initializeContent(
             this.consoleNode, this, this.prefDomain,
             Obj.bind(this.initializeContent, this));
 
@@ -278,7 +280,7 @@ var TraceConsole =
             if (messageInfo.type != this.prefDomain)
                 return;
 
-            var message = new Firebug.TraceModule.TraceMessage(
+            var message = new TraceMessage(
                 messageInfo.type, data, messageInfo.obj, messageInfo.scope,
                 messageInfo.time);
 
@@ -327,7 +329,7 @@ var TraceConsole =
 
     dumpSeparator: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
+        MessageTemplate.dumpSeparator(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -340,7 +342,7 @@ var TraceConsole =
 
     onSeparateConsole: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
+        MessageTemplate.dumpSeparator(this);
     },
 
     onSaveToFile: function()
@@ -451,6 +453,11 @@ var TraceConsole =
             "startup", BOOTSTRAP_REASONS.APP_STARTUP);
 
         FBTrace.sysout("startup time :" + (Date.now() - t1) + "ms");
+    },
+
+    inspect: function()
+    {
+        TraceObjectInspector.inspect();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

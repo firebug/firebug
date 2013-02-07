@@ -16,13 +16,20 @@
         onload="TraceConsole.initialize()"
         onunload="TraceConsole.shutdown()">
 
+  <!-- Firefox Files -->
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
-  <!-- Embedded Firebug Files -->
-  <script type="application/x-javascript" src="resource://fbtrace-firebug/mini-require.js"/>
+  <script type="application/x-javascript">
+  // xxxHonza: hack, keep it global, but only Firebug needs it.
+  var FBTrace = {
+    timeEnd: function() {},
+    time: function() {},
+  };
+  </script>
 
   <!-- Trace Console Application -->
+  <script type="application/x-javascript" src="mini-require.js"/>
   <script type="application/x-javascript" src="main.js"/>
 
   <!-- String Bundles -->
@@ -48,7 +55,7 @@
     <command id="cmd_reloadFirebug" oncommand="TraceConsole.toggleFirebug(true)"/>
     <command id="cmd_showCommandLine" oncommand="TraceCommandLine.toggleCommandLine()"/>
     <command id="cmd_lineEvaluate" oncommand="TraceCommandLine.evaluate()"/>
-    <command id="cmd_traceObjectInspector" oncommand="TraceObjectInspector.inspect()"/>
+    <command id="cmd_traceObjectInspector" oncommand="TraceConsole.inspect()"/>
     <command id="cmd_alwaysOpenTraceConsole" oncommand="TraceConsole.onToggleOption(this)" option="alwaysOpenTraceConsole"/>
   </commandset>
 

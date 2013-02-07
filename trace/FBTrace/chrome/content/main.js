@@ -4,12 +4,6 @@
 
 var gFindBar;
 
-// xxxHonza: hack, keep it global, but only Firebug needs it.
-var FBTrace = {
-    timeEnd: function() {},
-    time: function() {},
-};
-
 var config =
 {
     baseLoaderUrl: "resource://fbtrace-firebug/",

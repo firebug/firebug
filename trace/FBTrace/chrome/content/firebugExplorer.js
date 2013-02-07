@@ -5,8 +5,9 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/dom",
     "firebug/chrome/window",
+    "fbtrace/traceMessage",
 ],
-function(FBTrace, Wrapper, Dom, Win) {
+function(FBTrace, Wrapper, Dom, Win, TraceMessage) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -42,7 +43,7 @@ var FirebugExplorer =
             time: (new Date()).getTime()
         };
 
-        var message = new Firebug.TraceModule.TraceMessage(
+        var message = new TraceMessage(
             messageInfo.type, "Firebug Explorer", messageInfo.obj, messageInfo.scope,
             messageInfo.time);
 

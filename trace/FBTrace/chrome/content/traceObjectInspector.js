@@ -175,9 +175,6 @@ ObjectIterator.prototype =
 // ********************************************************************************************* //
 // Registration
 
-// XUL command
-window.TraceObjectInspector = TraceObjectInspector;
-
 return TraceObjectInspector;
 
 // ********************************************************************************************* //

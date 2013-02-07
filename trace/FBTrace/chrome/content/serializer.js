@@ -3,8 +3,10 @@
 define([
     "fbtrace/trace",
     "firebug/lib/http",
+    "fbtrace/importedMessage",
+    "fbtrace/messageTemplate",
 ],
-function(FBTrace, Http) {
+function(FBTrace, Http, ImportedMessage, MessageTemplate) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -106,7 +108,6 @@ var Serializer =
 
             log.filePath = fp.file.path;
 
-            var MessageTemplate = Firebug.TraceModule.MessageTemplate;
             var TraceModule = Firebug.TraceModule;
 
             // Create header, dump all logs and create footer.
@@ -119,7 +120,7 @@ var Serializer =
                 else if (logMsg.type == "separator")
                     MessageTemplate.dumpSeparator(console);
                 else
-                    MessageTemplate.dump(new TraceModule.ImportedMessage(logMsg), console);
+                    MessageTemplate.dump(new ImportedMessage(logMsg), console);
             }
             MessageTemplate.dumpSeparator(console, MessageTemplate.importFooterTag);
         }
