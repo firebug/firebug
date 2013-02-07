@@ -22,9 +22,39 @@ Str.cropMultipleLines = function(text, limit)
     return this.escapeNewLines(this.cropString(text, limit));
 };
 
+Str.cropString = function(text, limit, alterText)
+{
+    if (!alterText)
+        alterText = "...";
+
+    // Make sure it's a string.
+    text = text + "";
+
+    // Use default limit if necessary.
+    if (!limit)
+        limit = 50;
+
+    // Crop the string only if a limit is actually specified.
+    if (limit <= 0)
+        return text;
+
+    var halfLimit = (limit / 2);
+    halfLimit -= 2; // adjustment for alterText's increase in size
+
+    if (text.length > limit)
+        return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
+
+    return text;
+};
+
 Str.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g, "");
+};
+
+Str.escapeNewLines = function(value)
+{
+    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
 };
 
 // ********************************************************************************************* //

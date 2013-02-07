@@ -26,7 +26,6 @@ const Cu = Components.utils;
 
 try
 {
-    Cu["import"]("resource://moduleLoader/moduleLoader.js");
     Cu["import"]("resource://fbtrace/firebug-trace-service.js");
 }
 catch (err)
@@ -147,58 +146,6 @@ var TraceConsole =
         catch (err)
         {
             FBTrace.sysout("initializeContent; EXCEPTION " + err, err);
-        }
-    },
-
-    createLoader: function(prefDomain, baseUrl)
-    {
-        try
-        {
-            // Require JS configuration
-            var config = {};
-            config.prefDomain = prefDomain;
-            config.baseUrl = baseUrl;
-            config.paths = {"arch": "inProcess"};
-
-            config.onDebug = function()
-            {
-                window.dump("FBTrace; onDebug: ");
-                for(var i = 0; i < arguments.length; i++)
-                    window.dump(arguments[i] + ",");
-                window.dump(".\n");
-                //Components.utils.reportError(arguments[0]);
-            }
-
-            config.onError = function()
-            {
-                FBTrace.sysout("FBTrace; onError: " + arguments + "\n");
-                window.dump("FBTrace; onError: ");
-                for(var i = 0; i < arguments.length; i++)
-                    window.dump(arguments[i] + ",");
-                window.dump(".\n");
-                Components.utils.reportError(arguments[0]);
-            }
-
-            // Default globals for all modules loaded using this loader.
-            var firebugScope =
-            {
-                window : window,
-                Firebug: Firebug,
-                FBL: FBL,
-                FBTrace: FBTrace,
-                FirebugReps: FirebugReps,
-                domplate: domplate,
-                TraceConsole: this,
-            };
-
-            Firebug.loadConfiguration = config;
-
-            // Create loader and load tracing module.
-            return new ModuleLoader(firebugScope, config);
-        }
-        catch (err)
-        {
-            FBTrace.sysout("FBTrace; EXCEPTION " + err + "\n");
         }
     },
 

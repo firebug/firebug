@@ -20,10 +20,11 @@ define([
     "fbtrace/importedMessage",
     "fbtrace/tree",
     "fbtrace/propertyTree",
+    "fbtrace/lib/reps",
 ],
 function(FBTrace, Firebug, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
     Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
-    ImportedMessage, Tree, PropertyTree) {
+    ImportedMessage, Tree, PropertyTree, Reps) {
 
 with (Domplate) {
 
@@ -37,7 +38,7 @@ var Cu = Components.utils;
 // ********************************************************************************************* //
 // Trace message
 
-var MessageTemplate = domplate(Firebug.Rep,
+var MessageTemplate = domplate(Reps.Rep,
 {
     inspectable: false,
 

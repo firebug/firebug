@@ -2,16 +2,15 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/lib/events",
-    "firebug/chrome/reps",
+    "fbtrace/lib/reps",
     "fbtrace/lib/css",
     "fbtrace/lib/string",
     "fbtrace/lib/object",
     "fbtrace/lib/domplate",
     "fbtrace/lib/dom",
 ],
-function(FBTrace, Firebug, Events, Reps, Css, Str, Obj, Domplate, Dom) {
+function(FBTrace, Events, Reps, Css, Str, Obj, Domplate, Dom) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -29,7 +28,7 @@ var Cu = Components.utils;
  * structure (tree). Specific tree should be derived from this object and
  * getMembers method should be implemented.
  */
-var Tree = domplate(Firebug.Rep,
+var Tree = domplate(Reps.Rep,
 {
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
@@ -144,13 +143,13 @@ var Tree = domplate(Firebug.Rep,
 
     createMember: function(type, name, value, level)
     {
-        var rep = Firebug.getRep(value);
+        var rep = Reps.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
         var hasChildren = Obj.hasProperties(value) && !(value instanceof Reps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
-            || (valueType == "string" && value.length > Firebug.stringCropLength));
+            || (valueType == "string" && value.length > 50));
 
         return {
             name: name,
