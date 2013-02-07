@@ -6,14 +6,16 @@ define([
     "firebug/lib/object",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/options",
     "fbtrace/serializer",
     "fbtrace/traceObjectInspector",
     "fbtrace/traceMessage",
     "fbtrace/messageTemplate",
     "fbtrace/commonBaseUI",
+    "fbtrace/traceCommandLine",
 ],
-function(FBTrace, Locale, Obj, Css, Dom, Serializer, TraceObjectInspector, TraceMessage,
-    MessageTemplate, CommonBaseUI) {
+function(FBTrace, Locale, Obj, Css, Dom, Options, Serializer, TraceObjectInspector, TraceMessage,
+    MessageTemplate, CommonBaseUI, TraceCommandLine) {
 
 // ********************************************************************************************* //
 // Constants
@@ -202,7 +204,7 @@ var TraceConsole =
 
     updateTimeInfo: function()
     {
-        var showTime = Firebug.Options.get("trace.showTime");
+        var showTime = Options.get("trace.showTime");
         if (showTime)
             Css.setClass(this.logs.firstChild, "showTime");
         else
@@ -237,7 +239,7 @@ var TraceConsole =
 
     initLayoutTimer: function()
     {
-        var layoutTimeout = Firebug.Options.getPref(this.prefDomain, "fbtrace.layoutTimeout");
+        var layoutTimeout = Options.get("fbtrace.layoutTimeout");
         if (typeof(layoutTimeout) == "undefined")
             return;
 
@@ -461,6 +463,29 @@ var TraceConsole =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Command Line
+
+    toggleCommandLine: function()
+    {
+        TraceCommandLine.toggleCommandLine();
+    },
+
+    evaluate: function()
+    {
+        TraceCommandLine.evaluate();
+    },
+
+    onCmdContextMenuShowing: function(event)
+    {
+        TraceCommandLine.onContextMenuShowing(event);
+    },
+
+    onCmdContextMenuHidden: function(event)
+    {
+        TraceCommandLine.onContextMenuHidden(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 
     onOptionsShowing: function(popup)
@@ -472,7 +497,7 @@ var TraceConsole =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = Firebug.Options.get(option);
+                    var checked = Options.get(option);
                     child.setAttribute("checked", checked);
                 }
             }
@@ -485,9 +510,22 @@ var TraceConsole =
         if (!option)
             return;
 
-        var value = Firebug.Options.get(option);
-        Firebug.Options.set(option, !value);
-    }
+        var value = Options.get(option);
+        Options.set(option, !value);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
+    onContextShowing: function(event)
+    {
+        // xxxHonza: TODO
+    },
+
+    onTooltipShowing: function(event)
+    {
+        // xxxHonza: TODO
+    },
 };
 
 // ********************************************************************************************* //

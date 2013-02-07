@@ -7,8 +7,9 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/domplate",
     "firebug/lib/dom",
+    "firebug/lib/options",
 ],
-function(FBTrace, Firebug, Str, Wrapper, Domplate, Dom) {
+function(FBTrace, Firebug, Str, Wrapper, Domplate, Dom, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -328,7 +329,7 @@ TraceMessage.prototype =
 
     getScope: function()
     {
-        if (!Firebug.Options.get("trace.enableScope"))
+        if (!Options.get("trace.enableScope"))
             return null;
 
         if (this.scope)

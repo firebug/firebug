@@ -3,13 +3,13 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/xpcom",
     "firebug/lib/events",
     "firebug/chrome/window",
     "firebug/lib/object",
+    "firebug/lib/options",
     "fbtrace/messageTemplate",
 ],
-function(FBTrace, Firebug, Xpcom, Events, Win, Obj, MessageTemplate) {
+function(FBTrace, Firebug, Events, Win, Obj, Options, MessageTemplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,7 +18,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-var wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 var EOF = "<br/>";
 
@@ -45,17 +45,17 @@ Firebug.TraceModule = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         // prefDomain is the calling app, firebug or chromebug
-        this.prefDomain = Firebug.Options.getPrefDomain();
+        this.prefDomain = Options.getPrefDomain();
         window.dump("FBTrace; Firebug.TraceModule.initialize: " + this.prefDomain + "\n");
 
-        FBTrace.DBG_OPTIONS = Firebug.Options.getPref(this.prefDomain, "DBG_OPTIONS");
+        FBTrace.DBG_OPTIONS = Options.get("DBG_OPTIONS");
 
         // Open console automatically if the pref says so.
-        //if (Firebug.Options.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
+        //if (Options.get("alwaysOpenTraceConsole"))
         //    this.openConsole();
 
         window.dump("traceModule.initialize: " + this.prefDomain+" alwaysOpen: " +
-            Firebug.Options.getPref(this.prefDomain, "alwaysOpenTraceConsole") + "\n");
+            Options.get("alwaysOpenTraceConsole") + "\n");
     },
 
     shutdown: function()
@@ -79,10 +79,10 @@ Firebug.TraceModule = Obj.extend(Firebug.Module,
 
     onToggleOption: function(target)
     {
-        window.Firebug.chrome.onToggleOption(target);
+        TraceConsole.onToggleOption(target);
 
         // Open automatically if set to "always open", close otherwise.
-        if (Firebug.getPref(Firebug.prefDomain, "alwaysOpenTraceConsole"))
+        if (Options.get("alwaysOpenTraceConsole"))
             this.openConsole();
         else
             this.closeConsole();

@@ -2,14 +2,13 @@
 
 define([
     "firebug/lib/lib",
-    "firebug/lib/xpcom",
     "firebug/lib/domplate",
     "fbtrace/trace",
     "firebug/lib/dom",
     "firebug/lib/object",
     "firebug/chrome/menu",
 ],
-function(FBL, Xpcom, Domplate, FBTrace, Dom, Obj, Menu) {
+function(FBL, Domplate, FBTrace, Dom, Obj, Menu) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -19,7 +18,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-const observerService = Xpcom.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 
 Cu["import"]("resource://fbtrace/firebug-trace-service.js");
 

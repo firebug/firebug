@@ -4,8 +4,9 @@ define([
     "fbtrace/trace",
     "firebug/firebug",
     "firebug/lib/object",
+    "firebug/lib/options",
 ],
-function(FBTrace, Firebug, Obj) {
+function(FBTrace, Firebug, Obj, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,7 +59,7 @@ var TraceOptionsController = function(prefDomain, onPrefChangeHandler)
                 if (changedPrefDomain == prefDomain)
                 {
                     var optionName = data.substr(prefDomain.length+1); // skip dot
-                    var optionValue = Firebug.Options.getPref(prefDomain, m[2]);
+                    var optionValue = Options.get(m[2]);
                     if (this.prefEventToUserEvent)
                         this.prefEventToUserEvent(optionName, optionValue);
                 }
@@ -86,7 +87,7 @@ var TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
             try
             {
-                var prefValue = Firebug.Options.getPref(this.prefDomain, p);
+                var prefValue = Options.get(p);
                 var label = p.substr(4);
                 items.push({
                     label: label,
@@ -125,10 +126,10 @@ var TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
         var label = menuitem.getAttribute("label");
         var category = "DBG_" + label;
-        var value = Firebug.Options.getPref(this.prefDomain, category);
+        var value = Options.get(category);
         var newValue = !value;
 
-        Firebug.Options.setPref(this.prefDomain, category, newValue);
+        Options.set(category, newValue);
         prefService.savePrefFile(null);
 
         if (FBTrace.DBG_OPTIONS)
@@ -161,11 +162,10 @@ var TraceOptionsController = function(prefDomain, onPrefChangeHandler)
             if (m != 0)
                 continue;
 
-            Firebug.Options.setPref(this.prefDomain, p, false);
+            Options.set(p, false);
         }
         prefService.savePrefFile(null);
     };
-
 };
 
 // ********************************************************************************************* //

@@ -83,7 +83,7 @@ this.onToggleOption = function(target)
         Firebug.chrome.onToggleOption(target);
 
         // Open automatically if set to "always open", close otherwise.
-        if (Firebug.Options.getPref(Firebug.prefDomain, "alwaysOpenTraceConsole"))
+        if (Firebug.Options.get("alwaysOpenTraceConsole"))
             self.openConsole();
         else
             self.closeConsole();

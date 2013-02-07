@@ -3,10 +3,11 @@
 define([
     "fbtrace/trace",
     "firebug/lib/http",
+    "firebug/lib/options",
     "fbtrace/importedMessage",
     "fbtrace/messageTemplate",
 ],
-function(FBTrace, Http, ImportedMessage, MessageTemplate) {
+function(FBTrace, Http, Options, ImportedMessage, MessageTemplate) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -41,7 +42,7 @@ var Serializer =
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-                var currLocale = Firebug.Options.getPref("general.useragent", "locale");
+                var currLocale = Options.getPref("general.useragent", "locale");
                 var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag);
 
                 var log = { version: "1.0" };

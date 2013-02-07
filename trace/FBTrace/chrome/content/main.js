@@ -22,36 +22,32 @@ window.dump("FBTrace; main.js begin module loading\n");
 require(config,
 [
     "fbtrace/trace",
-    "firebug/chrome/chrome",
     "fbtrace/traceConsole",
-    "firebug/lib/lib",
-    "firebug/chrome/reps",
-    "firebug/lib/domplate",
-    "firebug/firebug",
-    "fbtrace/serializer", // save to file, load from file
-    "fbtrace/firebugExplorer",
-    "fbtrace/traceCommandLine",
-    "fbtrace/unblocker",
-    "fbtrace/traceObjectInspector",
-
-    // Overrides the default Firebug.TraceModule implementation that only
-    // collects tracing listeners (customization of logs)
+    "firebug/lib/options",
     "fbtrace/traceModule",
+    "firebug/firebug",
+    "fbtrace/unblocker",
     "fbtrace/globalTab",
 ],
-function(FBTrace, ChromeFactory, TraceConsole)
+function(FBTrace, TraceConsole, Options, TraceModule)
 {
     if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
         FBTrace.sysout("FBTrace; main.js require!\n");
 
-    // Needed for XUL
+    // Needed for XUL. This should be the only global (singleton).
     window.TraceConsole = TraceConsole;
 
-    Firebug.Options.initialize("extensions.firebug");
-    Firebug.TraceModule.initialize();
+    Options.initialize("extensions.firebug");
+    TraceModule.initialize();
 
-    var chrome = ChromeFactory.createFirebugChrome(window);
-    chrome.initialize();
+    // xxxHonza: don't forget to fix the context menu.
+    //var chrome = ChromeFactory.createFirebugChrome(window);
+    //chrome.initialize();
+
+    // xxxHonza: just for debuggin, remove.
+    window.setTimeout(function() {
+        FBTrace.sysout("Modules ", require.Loader.getDeps());
+    }, 1000);
 });
 
 // ********************************************************************************************* //

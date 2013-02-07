@@ -53,8 +53,8 @@
     <command id="cmd_openFirefox" oncommand="TraceConsole.openFirefox()"/>
     <command id="cmd_turnOffFirebug" oncommand="TraceConsole.toggleFirebug(false)"/>
     <command id="cmd_reloadFirebug" oncommand="TraceConsole.toggleFirebug(true)"/>
-    <command id="cmd_showCommandLine" oncommand="TraceCommandLine.toggleCommandLine()"/>
-    <command id="cmd_lineEvaluate" oncommand="TraceCommandLine.evaluate()"/>
+    <command id="cmd_showCommandLine" oncommand="TraceConsole.toggleCommandLine()"/>
+    <command id="cmd_lineEvaluate" oncommand="TraceConsole.evaluate()"/>
     <command id="cmd_traceObjectInspector" oncommand="TraceConsole.inspect()"/>
     <command id="cmd_alwaysOpenTraceConsole" oncommand="TraceConsole.onToggleOption(this)" option="alwaysOpenTraceConsole"/>
   </commandset>
@@ -152,8 +152,8 @@
   </toolbox>
 
   <popupset id="mainPopupSet">
-    <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);" />
-    <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
+    <menupopup id="fbContextMenu" onpopupshowing="return TraceConsole.onContextShowing(event);" />
+    <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return TraceConsole.onTooltipShowing(event);"/>
   </popupset>
 
   <vbox flex="1">
@@ -174,8 +174,8 @@
                 command="cmd_lineEvaluate" class="fbInternational">
             </toolbarbutton>
             <toolbarbutton id="cmdLineContext" label="Context" type="menu">
-                <menupopup onpopupshowing="return TraceCommandLine.onContextMenuShowing(this);"
-                    onpopuphidden="TraceCommandLine.onContextMenuHidden(this)"/>
+                <menupopup onpopupshowing="return TraceConsole.onCmdContextMenuShowing(this);"
+                    onpopuphidden="TraceConsole.onCmdContextMenuHidden(this)"/>
             </toolbarbutton>
         </toolbar>
 

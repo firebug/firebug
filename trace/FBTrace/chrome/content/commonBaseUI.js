@@ -7,11 +7,12 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/css",
     "firebug/lib/locale",
+    "firebug/lib/options",
     "fbtrace/messageTemplate",
     "fbtrace/panelTemplate",
     "fbtrace/traceOptionsController",
 ],
-function(FBTrace, Firebug, GlobalTab, Menu, Css, Locale,
+function(FBTrace, Firebug, GlobalTab, Menu, Css, Locale, Options,
     MessageTemplate, PanelTemplate, TraceOptionsController) {
 
 // ********************************************************************************************* //
@@ -69,7 +70,7 @@ var CommonBaseUI = {
         var optionsBody = parentNode.getElementsByClassName("traceInfoOptionsText").item(0);
 
         // Customize layout of options.
-        var tabular = Firebug.Options.get("fbtrace.tabularOptionsLayout");
+        var tabular = Options.get("fbtrace.tabularOptionsLayout");
         optionsBody.setAttribute("tabular", tabular);
 
         this.optionsController = new TraceOptionsController(prefDomain,

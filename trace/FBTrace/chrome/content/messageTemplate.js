@@ -3,13 +3,13 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/xpcom",
     "firebug/lib/events",
     "firebug/chrome/window",
     "fbtrace/firebugExplorer",
     "firebug/lib/css",
     "firebug/lib/locale",
     "firebug/lib/string",
+    "firebug/lib/options",
     "firebug/js/sourceLink",
     "firebug/lib/object",
     "firebug/lib/system",
@@ -22,7 +22,7 @@ define([
     "fbtrace/tree",
     "fbtrace/propertyTree",
 ],
-function(FBTrace, Firebug, Xpcom, Events, Win, FirebugExplorer, Css, Locale, Str,
+function(FBTrace, Firebug, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
     SourceLink, Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
     ImportedMessage, Tree, PropertyTree) {
 
@@ -212,8 +212,7 @@ var MessageTemplate = domplate(Firebug.Rep,
 
     getMessageLabel: function(message)
     {
-        var maxLength = Firebug.Options.getPref(Firebug.TraceModule.prefDomain,
-            "trace.maxMessageLength");
+        var maxLength = Options.get("trace.maxMessageLength");
         return message.getLabel(maxLength);
     },
 
@@ -426,14 +425,14 @@ var MessageTemplate = domplate(Firebug.Rep,
 
     optionMenu: function(label, option)
     {
-        var checked = Firebug.Options.getPref(Firebug.TraceModule.prefDomain, option);
+        var checked = Options.get(option);
 
         // The binding has to respect that the menu stays open even if the option
         // has been clicked.
         return {label: label, type: "checkbox", checked: checked, nol10n: true,
             command: function() {
-                var checked = Firebug.Options.getPref(Firebug.TraceModule.prefDomain, option);
-                Firebug.Options.setPref(Firebug.TraceModule.prefDomain, option, !checked);
+                var checked = Options.get(option);
+                Options.set(option, !checked);
             },
         };
     },
@@ -503,6 +502,7 @@ var MessageTemplate = domplate(Firebug.Rep,
     dump: function(message, outputNodes, index)
     {
         // Notify listeners
+        // xxxHonza: causing cyclick deps, should be notification sent to TraceModule.
         Firebug.TraceModule.onDump(message, outputNodes);
 
         // xxxHonza: find better solution for checking an ERROR messages
