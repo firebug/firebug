@@ -2,7 +2,7 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/array",
+    "fbtrace/lib/array",
 ],
 function(FBTrace, Arr) {
 

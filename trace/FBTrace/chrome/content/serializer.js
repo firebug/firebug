@@ -3,7 +3,7 @@
 define([
     "fbtrace/trace",
     "firebug/lib/http",
-    "firebug/lib/options",
+    "fbtrace/lib/options",
     "fbtrace/importedMessage",
     "fbtrace/messageTemplate",
 ],

@@ -1,14 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
-    "firebug/lib/domplate",
+    "fbtrace/lib/domplate",
     "fbtrace/trace",
-    "firebug/lib/dom",
-    "firebug/lib/object",
-    "firebug/chrome/menu",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/object",
+    "fbtrace/lib/menu",
 ],
-function(FBL, Domplate, FBTrace, Dom, Obj, Menu) {
+function(Domplate, FBTrace, Dom, Obj, Menu) {
 with (Domplate) {
 
 // ********************************************************************************************* //

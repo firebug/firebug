@@ -3,10 +3,10 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/events",
-    "firebug/chrome/window",
-    "firebug/lib/object",
-    "firebug/lib/options",
+    "fbtrace/lib/events",
+    "fbtrace/lib/window",
+    "fbtrace/lib/object",
+    "fbtrace/lib/options",
     "fbtrace/messageTemplate",
 ],
 function(FBTrace, Firebug, Events, Win, Obj, Options, MessageTemplate) {

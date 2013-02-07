@@ -2,8 +2,8 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/object",
-    "firebug/lib/array",
+    "fbtrace/lib/object",
+    "fbtrace/lib/array",
     "fbtrace/traceMessage",
 ],
 function(FBTrace, Obj, Arr, TraceMessage) {

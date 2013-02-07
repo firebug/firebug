@@ -3,15 +3,15 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/events",
+    "fbtrace/lib/events",
     "firebug/chrome/reps",
-    "firebug/lib/css",
-    "firebug/lib/string",
-    "firebug/lib/object",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
+    "fbtrace/lib/css",
+    "fbtrace/lib/string",
+    "fbtrace/lib/object",
+    "fbtrace/lib/domplate",
+    "fbtrace/lib/dom",
 ],
-function(FBTrace, Firebug, Events, FirebugReps, Css, Str, Obj, Domplate, Dom) {
+function(FBTrace, Firebug, Events, Reps, Css, Str, Obj, Domplate, Dom) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -136,7 +136,7 @@ var Tree = domplate(Firebug.Rep,
         {
             var member = this.createMember("", p, object[p], level);
             if (object[p] instanceof Array)
-                member.tag = FirebugReps.Nada.tag;
+                member.tag = Reps.Nada.tag;
             members.push(member);
         }
         return members;
@@ -148,7 +148,7 @@ var Tree = domplate(Firebug.Rep,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
-        var hasChildren = Obj.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
+        var hasChildren = Obj.hasProperties(value) && !(value instanceof Reps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 

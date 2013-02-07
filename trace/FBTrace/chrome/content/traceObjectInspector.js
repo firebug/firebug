@@ -2,8 +2,8 @@
 
 define([
     "fbtrace/trace",
-    "firebug/chrome/window",
-    "firebug/lib/dom",
+    "fbtrace/lib/window",
+    "fbtrace/lib/dom",
 ],
 function(FBTrace, Win, Dom) {
 

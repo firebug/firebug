@@ -3,19 +3,18 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/events",
-    "firebug/chrome/window",
+    "fbtrace/lib/events",
+    "fbtrace/lib/window",
     "fbtrace/firebugExplorer",
-    "firebug/lib/css",
-    "firebug/lib/locale",
-    "firebug/lib/string",
-    "firebug/lib/options",
-    "firebug/js/sourceLink",
-    "firebug/lib/object",
-    "firebug/lib/system",
-    "firebug/lib/array",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
+    "fbtrace/lib/css",
+    "fbtrace/lib/locale",
+    "fbtrace/lib/string",
+    "fbtrace/lib/options",
+    "fbtrace/lib/object",
+    "fbtrace/lib/system",
+    "fbtrace/lib/array",
+    "fbtrace/lib/domplate",
+    "fbtrace/lib/dom",
     "fbtrace/helperDomplate",
     "fbtrace/traceMessage",
     "fbtrace/importedMessage",
@@ -23,7 +22,7 @@ define([
     "fbtrace/propertyTree",
 ],
 function(FBTrace, Firebug, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
-    SourceLink, Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
+    Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
     ImportedMessage, Tree, PropertyTree) {
 
 with (Domplate) {
@@ -334,17 +333,6 @@ var MessageTemplate = domplate(Firebug.Rep,
     getRealObject: function(message, context)
     {
         return message;
-    },
-
-    getSourceLink: function(target, object)
-    {
-        if (Css.hasClass(target, "stackFrameLink"))
-        {
-            var sourceLink = new SourceLink.SourceLink(target.innerHTML,
-                target.getAttribute("lineNumber"));
-
-            return sourceLink;
-        }
     },
 
     // Context menu

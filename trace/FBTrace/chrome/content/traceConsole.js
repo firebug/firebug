@@ -2,11 +2,11 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/locale",
-    "firebug/lib/object",
-    "firebug/lib/css",
-    "firebug/lib/dom",
-    "firebug/lib/options",
+    "fbtrace/lib/locale",
+    "fbtrace/lib/object",
+    "fbtrace/lib/css",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/options",
     "fbtrace/serializer",
     "fbtrace/traceObjectInspector",
     "fbtrace/traceMessage",
@@ -179,7 +179,7 @@ var TraceConsole =
                 Components.utils.reportError(arguments[0]);
             }
 
-            // Defalt globals for all modules loaded using this loader.
+            // Default globals for all modules loaded using this loader.
             var firebugScope =
             {
                 window : window,

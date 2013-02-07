@@ -23,7 +23,7 @@ require(config,
 [
     "fbtrace/trace",
     "fbtrace/traceConsole",
-    "firebug/lib/options",
+    "fbtrace/lib/options",
     "fbtrace/traceModule",
     "firebug/firebug",
     "fbtrace/unblocker",
@@ -47,6 +47,10 @@ function(FBTrace, TraceConsole, Options, TraceModule)
     // xxxHonza: just for debuggin, remove.
     window.setTimeout(function() {
         FBTrace.sysout("Modules ", require.Loader.getDeps());
+        FBTrace.sysout("Test ", {
+            a: "A",
+            b: "B"
+        });
     }, 1000);
 });
 

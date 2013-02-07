@@ -3,8 +3,8 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/object",
-    "firebug/lib/options",
+    "fbtrace/lib/object",
+    "fbtrace/lib/options",
 ],
 function(FBTrace, Firebug, Obj, Options) {
 

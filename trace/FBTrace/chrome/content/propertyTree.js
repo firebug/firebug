@@ -3,7 +3,7 @@
 define([
     "fbtrace/trace",
     "fbtrace/tree",
-    "firebug/lib/domplate",
+    "fbtrace/lib/domplate",
 ],
 function(FBTrace, Tree, Domplate) {
 with (Domplate) {

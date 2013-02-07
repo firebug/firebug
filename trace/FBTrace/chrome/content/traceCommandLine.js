@@ -2,10 +2,10 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/dom",
-    "firebug/lib/object",
-    "firebug/chrome/window",
-    "firebug/chrome/menu",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/object",
+    "fbtrace/lib/window",
+    "fbtrace/lib/menu",
 ],
 function(FBTrace, Dom, Obj, Win, Menu) {
 

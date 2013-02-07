@@ -2,9 +2,9 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/locale",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
+    "fbtrace/lib/locale",
+    "fbtrace/lib/domplate",
+    "fbtrace/lib/dom",
 ],
 function(FBTrace, Locale, Domplate, Dom) {
 with (Domplate) {

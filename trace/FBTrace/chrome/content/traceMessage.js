@@ -3,11 +3,11 @@
 define([
     "fbtrace/trace",
     "firebug/firebug",
-    "firebug/lib/string",
-    "firebug/lib/wrapper",
-    "firebug/lib/domplate",
-    "firebug/lib/dom",
-    "firebug/lib/options",
+    "fbtrace/lib/string",
+    "fbtrace/lib/wrapper",
+    "fbtrace/lib/domplate",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/options",
 ],
 function(FBTrace, Firebug, Str, Wrapper, Domplate, Dom, Options) {
 

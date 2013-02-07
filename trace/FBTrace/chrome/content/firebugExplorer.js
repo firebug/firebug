@@ -2,12 +2,13 @@
 
 define([
     "fbtrace/trace",
-    "firebug/lib/wrapper",
-    "firebug/lib/dom",
-    "firebug/chrome/window",
+    "fbtrace/lib/wrapper",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/window",
     "fbtrace/traceMessage",
+    "fbtrace/lib/array",
 ],
-function(FBTrace, Wrapper, Dom, Win, TraceMessage) {
+function(FBTrace, Wrapper, Dom, Win, TraceMessage, Arr) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -75,7 +76,7 @@ var FirebugExplorer =
             if (obj.hasOwnProperty("__explored"))
                 return false;
 
-            if (FirebugReps.Arr.isArray(obj))
+            if (Arr.isArray(obj))
                 obj.__explored = obj.length;
             else
                 obj.__explored = true;
