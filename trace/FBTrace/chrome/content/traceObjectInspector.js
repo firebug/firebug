@@ -1,5 +1,15 @@
 /* See license.txt for terms of usage */
 
+define([
+    "fbtrace/trace",
+    "firebug/chrome/window",
+    "firebug/lib/dom",
+],
+function(FBTrace, Win, Dom) {
+
+// ********************************************************************************************* //
+// Constants
+
 // ********************************************************************************************* //
 // Firebug Trace Inspector
 
@@ -32,7 +42,7 @@ var TraceObjectInspector =
                 path += " (" + obj.dispatchName + ")";
 
             if (obj instanceof win.Window)
-                path += ", " + FBL.safeGetWindowLocation(obj);
+                path += ", " + Win.safeGetWindowLocation(obj);
 
             if (obj instanceof win.Document)
                 path += ", " + obj.location;
@@ -64,7 +74,7 @@ var TraceObjectInspector =
     {
         // Select the first browser window by default.
         var firebugWin;
-        FBL.iterateBrowserWindows("navigator:browser", function(win)
+        Win.iterateBrowserWindows("navigator:browser", function(win)
         {
             firebugWin = win;
             return true
@@ -106,7 +116,7 @@ ObjectIterator.prototype =
             return;
 
         // Ignore built-in objects
-        if (FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name))
+        if (Dom.isDOMMember(obj, name) || Dom.isDOMConstant(obj, name))
             return;
 
         if (obj instanceof win.Window ||
@@ -163,3 +173,12 @@ ObjectIterator.prototype =
 };
 
 // ********************************************************************************************* //
+// Registration
+
+// XUL command
+window.TraceObjectInspector = TraceObjectInspector;
+
+return TraceObjectInspector;
+
+// ********************************************************************************************* //
+});

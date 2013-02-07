@@ -20,16 +20,10 @@
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
   <!-- Embedded Firebug Files -->
-  <script type="application/x-javascript" src="trace.js"/>
-  <script type="application/x-javascript" src="chrome://fbtrace-firebug/content/legacy.js"/>
-  <script type="application/x-javascript" src="resource://fbtrace-firebug/require.js"/>
+  <script type="application/x-javascript" src="resource://fbtrace-firebug/mini-require.js"/>
 
   <!-- Trace Console Application -->
-  <script type="application/x-javascript" src="traceConsole.js"/>
-  <script type="application/x-javascript" src="traceCommandLine.js"/>
   <script type="application/x-javascript" src="main.js"/>
-  <script type="application/x-javascript" src="unblocker.js"/>
-  <script type="application/x-javascript" src="traceObjectInspector.js"/>
 
   <!-- String Bundles -->
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>

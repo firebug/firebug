@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "fbtrace/trace",
+    "firebug/lib/http",
+],
+function(FBTrace, Http) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -13,7 +17,7 @@ const reEndings = /\r\n|\r|\n/;
 // ********************************************************************************************* //
 // Serializer Implementation
 
-TraceConsole.Serializer =
+var Serializer =
 {
     onSaveToFile: function(console)
     {
@@ -92,7 +96,7 @@ TraceConsole.Serializer =
             inputStream.init(fp.file, -1, -1, 0); // read-only
 
             // Read and parset the content
-            var jsonString = FBL.readFromStream(inputStream)
+            var jsonString = Http.readFromStream(inputStream)
             var log = JSON.parse(jsonString);
             if (!log)
             {
@@ -159,7 +163,7 @@ TraceConsole.Serializer =
 
 // ********************************************************************************************* //
 
-return TraceConsole.Serializer;
+return Serializer;
 
 // ********************************************************************************************* //
 });

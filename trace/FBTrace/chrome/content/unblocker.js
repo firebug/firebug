@@ -1,8 +1,11 @@
 /* See license.txt for terms of usage */
 
-(function() {
+define([
+],
+function() {
 
 // ********************************************************************************************* //
+// Constants
 
 var releaser = window.arguments[0];  // see fbtrace/components/commandLine.js
 
@@ -15,6 +18,7 @@ window._firebugLoadConfig =
 };
 
 // ********************************************************************************************* //
+// Implementation
 
 function onLoad(event)
 {
@@ -30,7 +34,7 @@ function onLoad(event)
         if ((win.location.href === releaser.url) &&
             (releaser.prefDomain === win.releaser.prefDomain))
         {
-            window.dump("-------- " + window.location + " blocker window found -----------------\n");
+            window.dump("-------- " + window.location + " blocker window found --------------\n");
 
             try
             {
@@ -47,7 +51,12 @@ function onLoad(event)
     window.dump("-------- " + window.location + " unblocker done -----------------\n");
 }
 
+// ********************************************************************************************* //
+// Registration
+
 window.addEventListener("load", onLoad, false);
 
+return {};
+
 // ********************************************************************************************* //
-})();
+});

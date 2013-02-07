@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "fbtrace/trace",
+    "firebug/lib/wrapper",
+    "firebug/lib/dom",
+    "firebug/chrome/window",
+],
+function(FBTrace, Wrapper, Dom, Win) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -8,12 +14,12 @@ define([], function() {
 // ********************************************************************************************* //
 // Explorer Implementation
 
-TraceConsole.FirebugExplorer =
+var FirebugExplorer =
 {
     dump: function()
     {
         var firebugWindow;
-        FBL.iterateBrowserWindows("navigator:browser", function(win)
+        Win.iterateBrowserWindows("navigator:browser", function(win)
         {
             if (win.Firebug)
             {
@@ -22,7 +28,7 @@ TraceConsole.FirebugExplorer =
             }
         });
 
-        var contentView = FBL.getContentView(firebugWindow);
+        var contentView = Wrapper.getContentView(firebugWindow);
         if (!contentView)
         {
             FBTrace.sysout("No Browser with Firebug found!");
@@ -136,7 +142,7 @@ FirebugIterator.prototype =
             var child = obj[name];
 
             // Ignore built-in objects
-            if (FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name))
+            if (Dom.isDOMMember(obj, name) || Dom.isDOMConstant(obj, name))
                 continue;
 
             if (name == "__explored" || name == "prototype" ||
@@ -160,8 +166,9 @@ FirebugIterator.prototype =
 };
 
 // ********************************************************************************************* //
+// Registration
 
-return TraceConsole.FirebugExplorer;
+return FirebugExplorer;
 
 // ********************************************************************************************* //
 });

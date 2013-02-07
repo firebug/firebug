@@ -1,21 +1,39 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
+    "fbtrace/trace",
     "firebug/firebug",
     "firebug/lib/xpcom",
+    "firebug/lib/events",
     "firebug/chrome/reps",
+    "firebug/chrome/window",
+    "fbtrace/firebugExplorer",
+    "fbtrace/globalTab",
+    "firebug/chrome/menu",
+    "firebug/lib/css",
+    "firebug/lib/locale",
+    "firebug/lib/string",
+    "firebug/js/sourceLink",
+    "firebug/lib/object",
+    "firebug/lib/system",
+    "firebug/lib/array",
+    "firebug/lib/wrapper",
+    "firebug/lib/domplate",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, XPCOM, FirebugReps) { with (FBL) {
+function(FBTrace, Firebug, Xpcom, Events, FirebugReps, Win, FirebugExplorer, GlobalTab,
+    Menu, Css, Locale, Str, SourceLink, Obj, System, Arr, Wrapper, Domplate, Dom) {
+with (Domplate) {
 
-// ************************************************************************************************
-// Shortcuts and Services
+// ********************************************************************************************* //
+// Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
+var Cu = Components.utils;
 
-var clipboard = XPCOM.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
-var wm = XPCOM.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+var clipboard = Xpcom.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
+var wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 
 var PrefService = Cc["@mozilla.org/preferences-service;1"];
 var prefs = PrefService.getService(Ci.nsIPrefBranch);
@@ -29,12 +47,12 @@ var EOF = "<br/>";
 // Register locale file with strings for the Tracing Console window.
 Firebug.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 //  The controller for the prefDomain Model.
+
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
 //  base for trace viewers like tracePanel and traceConsole
 //  binds  to the branch 'prefDomain' of prefs
-
 Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 {
     this.prefDomain = prefDomain;
@@ -79,7 +97,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         }
     };
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI
 
     this.getOptionsMenuItems = function()  // Firebug menu items from option map
@@ -97,38 +115,42 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
                 var prefValue = Firebug.Options.getPref(this.prefDomain, p);
                 var label = p.substr(4);
                 items.push({
-                 label: label,
-                 nol10n: true,
-                 type: "checkbox",
-                 checked: prefValue,
-                 pref: p,
-                 command: bind(this.userEventToPrefEvent, this)
+                    label: label,
+                    nol10n: true,
+                    type: "checkbox",
+                    checked: prefValue,
+                    pref: p,
+                    command: Obj.bind(this.userEventToPrefEvent, this)
                 });
             }
             catch (err)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("traceModule.getOptionsMenuItems could not create item for "+p+
-                        " in prefDomain "+this.prefDomain);
+                {
+                    FBTrace.sysout("traceModule.getOptionsMenuItems could not create item for " +
+                        p + " in prefDomain " + this.prefDomain + ", " + err, err);
+                }
                 // if the option doesn't exist in this prefDomain, just continue...
             }
         }
 
-        items.sort(function(a, b) {
+        items.sort(function(a, b)
+        {
             return a.label > b.label;
         });
 
         return items;
     };
 
-    this.userEventToPrefEvent = function(event)  // use as an event listener on UI control
+    // use as an event listener on UI control
+    this.userEventToPrefEvent = function(event)
     {
         var menuitem = event.target.wrappedJSObject;
         if (!menuitem)
             menuitem = event.target;
 
         var label = menuitem.getAttribute("label");
-        var category = 'DBG_'+label;
+        var category = "DBG_" + label;
         var value = Firebug.Options.getPref(this.prefDomain, category);
         var newValue = !value;
 
@@ -136,16 +158,22 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         prefService.savePrefFile(null);
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceConsole.setOption: new value "+ this.prefDomain+"."+category+ " = " + newValue, menuitem);
+        {
+            FBTrace.sysout("traceConsole.setOption: new value "+ this.prefDomain+"."+
+                category+ " = " + newValue, menuitem);
+        }
     };
 
     if (onPrefChangeHandler)
+    {
         this.prefEventToUserEvent = onPrefChangeHandler;
+    }
     else
     {
         this.prefEventToUserEvent = function(optionName, optionValue)
         {
-            FBTrace.sysout("TraceOptionsController owner needs to implement prefEventToUser Event", {name: optionName, value: optionValue});
+            FBTrace.sysout("TraceOptionsController owner needs to implement prefEventToUser Event",
+                {name: optionName, value: optionValue});
         };
     }
 
@@ -166,10 +194,10 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Trace Module
 
-Firebug.TraceModule = extend(Firebug.Module,
+Firebug.TraceModule = Obj.extend(Firebug.Module,
 {
     dispatchName: "traceModule",
 
@@ -177,15 +205,18 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         if (!listener)
             dump("\n\n\n++++++++++++++++++ NULL LISTENER ++++++++++++++++++\n\n\n");
+
         Firebug.Module.addListener.apply(this, arguments);
     },
-    
+
     initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.prefDomain = Firebug.Options.getPrefDomain(); // prefDomain is the calling app, firebug or chromebug
+        // prefDomain is the calling app, firebug or chromebug
+        this.prefDomain = Firebug.Options.getPrefDomain();
         window.dump("FBTrace; Firebug.TraceModule.initialize: " + this.prefDomain + "\n");
+
         FBTrace.DBG_OPTIONS = Firebug.Options.getPref(this.prefDomain, "DBG_OPTIONS");
 
         // Open console automatically if the pref says so.
@@ -203,9 +234,11 @@ Firebug.TraceModule = extend(Firebug.Module,
     reattachContext: function(browser, context)
     {
         if (FBTrace.DBG_OPTIONS)
+        {
             FBTrace.sysout("traceModule.reattachContext for: " +
                 context ? context.getName() : "null context",
                 [browser, context]);
+        }
     },
 
     getTraceConsoleURL: function()
@@ -230,8 +263,10 @@ Firebug.TraceModule = extend(Firebug.Module,
             prefDomain = this.prefDomain;
 
         var consoleWindow = null;
-        iterateBrowserWindows("FBTraceConsole", function(win) {
-            if (win.TraceConsole.prefDomain == prefDomain) {
+        Win.iterateBrowserWindows("FBTraceConsole", function(win)
+        {
+            if (win.TraceConsole.prefDomain == prefDomain)
+            {
                 consoleWindow = win;
                 return true;
             }
@@ -247,15 +282,18 @@ Firebug.TraceModule = extend(Firebug.Module,
             prefDomain = this.prefDomain;
 
         var self = this;
-        iterateBrowserWindows("FBTraceConsole", function(win) {
-            if (win.TraceConsole.prefDomain == prefDomain) {
+        Win.iterateBrowserWindows("FBTraceConsole", function(win)
+        {
+            if (win.TraceConsole.prefDomain == prefDomain)
+            {
                 self.consoleWindow = win;
                 return true;
             }
         });
 
         // Try to connect an existing trace-console window first.
-        if (this.consoleWindow && this.consoleWindow.TraceConsole) {
+        if (this.consoleWindow && this.consoleWindow.TraceConsole)
+        {
             this.consoleWindow.focus();
             return;
         }
@@ -268,13 +306,14 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         var self = this;
         var args = {
-            FBL: FBL,
+            //FBL: FBL,
             Firebug: Firebug,
             traceModule: self,
             prefDomain: prefDomain,
         };
 
-        if (FBTrace.DBG_OPTIONS) {
+        if (FBTrace.DBG_OPTIONS)
+        {
             for (var p in args)
                 FBTrace.sysout("tracePanel.openConsole prefDomain:" +
                     prefDomain +" args["+p+"]= "+ args[p]+"\n");
@@ -298,14 +337,14 @@ Firebug.TraceModule = extend(Firebug.Module,
         for (var i=0; i<listeners.length; i++)
             listeners.onLoadConsoleExecuted = true;
 
-        dispatch(listeners, "onLoadConsole", [win, rootNode]);
+        Events.dispatch(listeners, "onLoadConsole", [win, rootNode]);
     },
 
     onUnloadConsole: function(win)
     {
         var win = wm.getMostRecentWindow("navigator:browser");
         if (win && win.Firebug && win.Firebug.TraceModule)
-            dispatch(win.Firebug.TraceModule.fbListeners, "onUnloadConsole", [win]);
+            Events.dispatch(win.Firebug.TraceModule.fbListeners, "onUnloadConsole", [win]);
     },
 
     onDump: function(message, outputNodes)
@@ -332,12 +371,12 @@ Firebug.TraceModule = extend(Firebug.Module,
             if (!listener.onLoadConsoleExecuted)
             {
                 listener.onLoadConsoleExecuted = true;
-                dispatch([listener], "onLoadConsole", [consoleWin, rootNode]);
+                Events.dispatch([listener], "onLoadConsole", [consoleWin, rootNode]);
             }
         }
 
         if (win && win.Firebug && win.Firebug.TraceModule)
-            dispatch(listeners, "onDump", [message]);
+            Events.dispatch(listeners, "onDump", [message]);
     },
 
     dump: function(message, outputNodes)
@@ -364,6 +403,7 @@ Firebug.TraceModule.CommonBaseUI = {
         // This IFRAME is the container for all logs.
         var logTabIframe = parentNode.getElementsByClassName("traceInfoLogsFrame").item(0);
         var self = this;
+
         logTabIframe.addEventListener("load", function(event)
         {
             var frameDoc = logTabIframe.contentWindow.document;
@@ -393,13 +433,15 @@ Firebug.TraceModule.CommonBaseUI = {
         var tabular = Firebug.Options.get("fbtrace.tabularOptionsLayout");
         optionsBody.setAttribute("tabular", tabular);
 
-        this.optionsController = new Firebug.TraceOptionsController(prefDomain, function updateButton(optionName, optionValue)
+        this.optionsController = new Firebug.TraceOptionsController(prefDomain,
+        function updateButton(optionName, optionValue)
         {
             var button = parentNode.ownerDocument.getElementById(optionName);
             if (button)
                 button.setAttribute("checked", optionValue?"true":"false");
             else
-                FBTrace.sysout("traceModule onPrefChange no button with name "+optionName+ " in parentNode", parentNode);
+                FBTrace.sysout("traceModule onPrefChange no button with name "+optionName+
+                    " in parentNode", parentNode);
         });
 
         var menuitems = this.optionsController.getOptionsMenuItems();
@@ -407,14 +449,14 @@ Firebug.TraceModule.CommonBaseUI = {
         {
             var menuitem = menuitems[i];
             var button = doc.createElement("button");
-            FBL.setClass(button, "traceOption");
-            FBL.setItemIntoElement(button, menuitem);
+            Css.setClass(button, "traceOption");
+            Menu.setItemIntoElement(button, menuitem);
             button.innerHTML = menuitem.label;
             button.setAttribute("id", menuitem.pref);
             button.removeAttribute("type");
             button.addEventListener("click", menuitem.command, false);
 
-            var tooltip = $STR("tracing.option." + menuitem.label + "_Description");
+            var tooltip = Locale.$STR("tracing.option." + menuitem.label + "_Description");
             if (tooltip)
                 button.setAttribute("title", tooltip);
 
@@ -426,7 +468,7 @@ Firebug.TraceModule.CommonBaseUI = {
             // Initialize global options
             var globalBody = parentNode.querySelector(".traceInfoGlobalText");
             if (globalBody)
-                TraceConsole.GlobalTab.render(globalBody);
+                GlobalTab.render(globalBody);
         }
         catch (e)
         {
@@ -440,11 +482,11 @@ Firebug.TraceModule.CommonBaseUI = {
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Trace Console Rep
 
-Firebug.TraceModule.PanelTemplate = domplate({
-
+Firebug.TraceModule.PanelTemplate = domplate(
+{
     tag:
         TABLE({"class": "traceTable", cellpadding: 0, cellspacing: 0},
             TBODY(
@@ -454,15 +496,15 @@ Firebug.TraceModule.PanelTemplate = domplate({
                             DIV({"class": "traceInfoTabs"},
                                 A({"class": "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Logs"},
-                                    $STR("Logs")
+                                    Locale.$STR("Logs")
                                 ),
                                 A({"class": "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Options"},
-                                    $STR("Options")
+                                    Locale.$STR("Options")
                                 ),
                                 A({"class": "traceInfoGlobalTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Global"},
-                                    $STR("Global Events")
+                                    Locale.$STR("Global Events")
                                 )
                             ),
                             DIV({"class": "traceInfoLogsText traceInfoText"},
@@ -504,14 +546,14 @@ Firebug.TraceModule.PanelTemplate = domplate({
         var textBodyName = "traceInfo" + view + "Text";
 
         messageInfoBody.selectedTab = tab;
-        messageInfoBody.selectedText = getChildByClass(messageInfoBody, textBodyName);
+        messageInfoBody.selectedText = Dom.getChildByClass(messageInfoBody, textBodyName);
 
         messageInfoBody.selectedTab.setAttribute("selected", "true");
         messageInfoBody.selectedText.setAttribute("selected", "true");
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Trace message
 
 Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
@@ -577,37 +619,37 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             DIV({"class": "messageInfoTabs"},
                 A({"class": "messageInfoStackTab messageInfoTab", onclick: "$onClickTab",
                     view: "Stack"},
-                    $STR("tracing.tab.Stack")
+                    Locale.$STR("tracing.tab.Stack")
                 ),
                 A({"class": "messageInfoExcTab messageInfoTab", onclick: "$onClickTab",
                     view: "Exc",
                     $collapsed: "$message|hideException"},
-                    $STR("tracing.tab.Exception")
+                    Locale.$STR("tracing.tab.Exception")
                 ),
                 A({"class": "messageInfoPropsTab messageInfoTab", onclick: "$onClickTab",
                     view: "Props",
                     $collapsed: "$message|hideProperties"},
-                    $STR("tracing.tab.Properties")
+                    Locale.$STR("tracing.tab.Properties")
                 ),
                 A({"class": "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
                     view: "Scope",
                     $collapsed: "$message|hideScope"},
-                    $STR("tracing.tab.Scope")
+                    Locale.$STR("tracing.tab.Scope")
                 ),
                 A({"class": "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$message|hideResponse"},
-                    $STR("tracing.tab.Response")
+                    Locale.$STR("tracing.tab.Response")
                 ),
                 A({"class": "messageInfoSourceTab messageInfoTab", onclick: "$onClickTab",
                     view: "Source",
                     $collapsed: "$message|hideSource"},
-                    $STR("tracing.tab.Source")
+                    Locale.$STR("tracing.tab.Source")
                 ),
                 A({"class": "messageInfoIfacesTab messageInfoTab", onclick: "$onClickTab",
                     view: "Ifaces",
                     $collapsed: "$message|hideInterfaces"},
-                    $STR("tracing.tab.Interfaces")
+                    Locale.$STR("tracing.tab.Interfaces")
                 ),
                 // xxxHonza: this doesn't seem to be much useful.
                 /*A({"class": "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
@@ -618,12 +660,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 A({"class": "messageInfoObjectTab messageInfoTab", onclick: "$onClickTab",
                     view: "Types",
                     $collapsed: "$message|hideObject"},
-                    $STR("tracing.tab.Object")
+                    Locale.$STR("tracing.tab.Object")
                 ),
                 A({"class": "messageInfoEventTab messageInfoTab", onclick: "$onClickTab",
                     view: "Event",
                     $collapsed: "$message|hideEvent"},
-                    $STR("tracing.tab.Event")
+                    Locale.$STR("tracing.tab.Event")
                 )
             ),
             DIV({"class": "messageInfoStackText messageInfoText"},
@@ -680,6 +722,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var m = date.getMinutes() + "";
         var s = date.getSeconds() + "";
         var ms = date.getMilliseconds() + "";
+
         return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
             ((s.length > 1) ? s : "0" + s) + ":" +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
@@ -771,7 +814,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         // Get the last part "script URL" in order to have meaningful URL
         var urls = url.split("->");
         if (urls.length == 2)
-            url = FBL.trim(urls[1]);
+            url = Str.trim(urls[1]);
 
         return url;
     },
@@ -793,26 +836,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var lineNumber = target.getAttribute("lineNumber");
         var fileName = target.getAttribute("fileName");
 
-        if (typeof(ChromeBugOpener) == "undefined")
-            return;
-
-        // Open Chromebug window.
-        var cbWindow = ChromeBugOpener.openNow();
-        FBTrace.sysout("Chromebug window has been opened", cbWindow);
-
-        // xxxHonza: Open Chromebug with the source code file, scrolled automatically
-        // to the specified line number. Currently chrome bug doesn't return the window
-        // from ChromeBugOpener.openNow method. If it would be following code opens
-        // the source code file and scrolls to the given line.
-
-        // Register onLoad listener and open the source file at the specified line.
-        if (cbWindow) {
-            cbWindow.addEventListener("load", function() {
-                var context = cbWindow.Firebug.currentContext;
-                var link = new cbWindow.FBL.SourceLink(fileName, lineNumber, "js");
-                Firebug.chrome.select(link, "script");
-            }, true);
-        }
+        // xxxHonza: open the built-in debugger?
     },
 
     // Firebug rep support
@@ -834,9 +858,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     getSourceLink: function(target, object)
     {
-        if (hasClass(target, "stackFrameLink"))
+        if (Css.hasClass(target, "stackFrameLink"))
         {
-            var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
+            var sourceLink = new SourceLink.SourceLink(target.innerHTML,
+                target.getAttribute("lineNumber"));
+
             return sourceLink;
         }
     },
@@ -846,72 +872,72 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         var items = [];
 
-        if (getAncestorByClass(target, "messageRow"))
+        if (Dom.getAncestorByClass(target, "messageRow"))
         {
             items.push({
-              label: $STR("Cut"),
+              label: Locale.$STR("Cut"),
               nol10n: true,
-              command: bindFixed(this.onCutMessage, this, message)
+              command: Obj.bindFixed(this.onCutMessage, this, message)
             });
 
             items.push({
-              label: $STR("Copy"),
+              label: Locale.$STR("Copy"),
               nol10n: true,
-              command: bindFixed(this.onCopyMessage, this, message)
+              command: Obj.bindFixed(this.onCopyMessage, this, message)
             });
 
             items.push("-");
 
             items.push({
-              label: $STR("Remove"),
+              label: Locale.$STR("Remove"),
               nol10n: true,
-              command: bindFixed(this.onRemoveMessage, this, message)
+              command: Obj.bindFixed(this.onRemoveMessage, this, message)
             });
         }
 
-        if (getAncestorByClass(target, "messageInfoStackText"))
+        if (Dom.getAncestorByClass(target, "messageInfoStackText"))
         {
             items.push({
-              label: $STR("Copy Stack"),
+              label: Locale.$STR("Copy Stack"),
               nol10n: true,
-              command: bindFixed(this.onCopyStack, this, message)
+              command: Obj.bindFixed(this.onCopyStack, this, message)
             });
         }
 
-        if (getAncestorByClass(target, "messageInfoExcText"))
+        if (Dom.getAncestorByClass(target, "messageInfoExcText"))
         {
             items.push({
-              label: $STR("Copy Exception"),
+              label: Locale.$STR("Copy Exception"),
               nol10n: true,
-              command: bindFixed(this.onCopyException, this, message)
+              command: Obj.bindFixed(this.onCopyException, this, message)
             });
         }
 
         if (items.length > 0)
             items.push("-");
 
-        items.push(this.optionMenu($STR("tracing.Show Time"), "trace.showTime"));
-        items.push(this.optionMenu($STR("tracing.Show Scope Variables"), "trace.enableScope"));
+        items.push(this.optionMenu(Locale.$STR("tracing.Show Time"), "trace.showTime"));
+        items.push(this.optionMenu(Locale.$STR("tracing.Show Scope Variables"), "trace.enableScope"));
         items.push("-");
 
         items.push({
-          label: $STR("tracing.cmd.Explore Firebug Scope"),
+          label: Locale.$STR("tracing.cmd.Explore Firebug Scope"),
           nol10n: true,
-          command: bindFixed(this.onExploreFirebug, this)
+          command: Obj.bindFixed(this.onExploreFirebug, this)
         });
 
         items.push("-");
 
         items.push({
-          label: $STR("tracing.cmd.Expand All"),
+          label: Locale.$STR("tracing.cmd.Expand All"),
           nol10n: true,
-          command: bindFixed(this.onExpandAll, this, message)
+          command: Obj.bindFixed(this.onExpandAll, this, message)
         });
 
         items.push({
-          label: $STR("tracing.cmd.Collapse All"),
+          label: Locale.$STR("tracing.cmd.Collapse All"),
           nol10n: true,
-          command: bindFixed(this.onCollapseAll, this, message)
+          command: Obj.bindFixed(this.onCollapseAll, this, message)
         });
 
         return items;
@@ -945,7 +971,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     onCopyMessage: function(message)
     {
-        copyToClipboard(message.text);
+        System.copyToClipboard(message.text);
     },
 
     onRemoveMessage: function(message)
@@ -958,31 +984,31 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     onCopyStack: function(message)
     {
-        copyToClipboard(message.getStack());
+        System.copyToClipboard(message.getStack());
     },
 
     onCopyException: function(message)
     {
-        copyToClipboard(message.getException());
+        System.copyToClipboard(message.getException());
     },
 
     onExploreFirebug: function()
     {
-        TraceConsole.FirebugExplorer.dump();
+        FirebugExplorer.dump();
     },
 
     onExpandAll: function(message)
     {
-        var table = getAncestorByClass(message.row, "messageTable");
-        var rows = cloneArray(table.firstChild.childNodes);
+        var table = Dom.getAncestorByClass(message.row, "messageTable");
+        var rows = Arr.cloneArray(table.firstChild.childNodes);
         for (var i=0; i<rows.length; i++)
             this.expandRow(rows[i]);
     },
 
     onCollapseAll: function(message)
     {
-        var table = getAncestorByClass(message.row, "messageTable");
-        var rows = cloneArray(table.firstChild.childNodes);
+        var table = Dom.getAncestorByClass(message.row, "messageTable");
+        var rows = Arr.cloneArray(table.firstChild.childNodes);
         for (var i=0; i<rows.length; i++)
             this.collapseRow(rows[i]);
     },
@@ -994,8 +1020,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             return;
 
         // Initialize transfer data.
-        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
-        var wrapper = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
+        var trans = Xpcom.CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
+        var wrapper = Xpcom.CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
         wrapper.data = text;
         trans.addDataFlavor("text/unicode");
         trans.setTransferData("text/unicode", wrapper, text.length * 2);
@@ -1041,7 +1067,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         }
 
         var scrollingNode = outputNodes.getScrollingNode();
-        var scrolledToBottom = isScrolledToBottom(scrollingNode);
+        var scrolledToBottom = Dom.isScrolledToBottom(scrollingNode);
 
         var targetNode = outputNodes.getTargetNode();
         // Set message index
@@ -1064,13 +1090,13 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             row.wrappedJSObject.repObject = message;
 
         if (scrolledToBottom)
-            scrollToBottom(scrollingNode);
+            Dom.scrollToBottom(scrollingNode);
     },
 
     dumpSeparator: function(outputNodes, tag, object)
     {
         var panelNode = outputNodes.getScrollingNode();
-        var scrolledToBottom = isScrolledToBottom(panelNode);
+        var scrolledToBottom = Dom.isScrolledToBottom(panelNode);
 
         var targetNode = outputNodes.getTargetNode();
 
@@ -1085,7 +1111,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var row = HelperDomplate.insertRows(tag, {message: object}, targetNode, this)[0];
 
         if (scrolledToBottom)
-            scrollToBottom(panelNode);
+            Dom.scrollToBottom(panelNode);
 
         panelNode.scrollTop = panelNode.scrollHeight - panelNode.offsetHeight + 50;
     },
@@ -1093,38 +1119,38 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     // Body of the message.
     onClickRow: function(event)
     {
-        if (isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
-            var row = getAncestorByClass(event.target, "messageRow");
+            var row = Dom.getAncestorByClass(event.target, "messageRow");
             if (row)
             {
                 this.toggleRow(row);
-                cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     },
 
     collapseRow: function(row)
     {
-        if (hasClass(row, "messageRow") && hasClass(row, "opened"))
+        if (Css.hasClass(row, "messageRow") && Css.hasClass(row, "opened"))
             this.toggleRow(row);
     },
 
     expandRow: function(row)
     {
-        if (hasClass(row, "messageRow"))
+        if (Css.hasClass(row, "messageRow"))
             this.toggleRow(row, true);
     },
 
     toggleRow: function(row, state)
     {
-        var opened = hasClass(row, "opened");
+        var opened = Css.hasClass(row, "opened");
         if ((state != null) && (opened == state))
              return;
 
-        toggleClass(row, "opened");
+        Css.toggleClass(row, "opened");
 
-        if (hasClass(row, "opened"))
+        if (Css.hasClass(row, "opened"))
         {
             var message = row.repObject;
             if (!message && row.wrappedJSObject)
@@ -1145,8 +1171,9 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     selectTabByName: function(messageInfoBody, tabName)
     {
-        var tab = getChildByClass(messageInfoBody, "messageInfoTabs",
+        var tab = Dom.getChildByClass(messageInfoBody, "messageInfoTabs",
             "messageInfo" + tabName + "Tab");
+
         if (tab)
             this.selectTab(tab);
     },
@@ -1170,7 +1197,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var textBodyName = "messageInfo" + view + "Text";
 
         messageInfoBody.selectedTab = tab;
-        messageInfoBody.selectedText = getChildByClass(messageInfoBody, textBodyName);
+        messageInfoBody.selectedText = Dom.getChildByClass(messageInfoBody, textBodyName);
 
         messageInfoBody.selectedTab.setAttribute("selected", "true");
         messageInfoBody.selectedText.setAttribute("selected", "true");
@@ -1187,11 +1214,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     updateInfo: function(messageInfoBody, view, message)
     {
         var tab = messageInfoBody.selectedTab;
-        if (hasClass(tab, "messageInfoStackTab"))
+        if (Css.hasClass(tab, "messageInfoStackTab"))
         {
             // The content is generated by domplate template.
         }
-        else if (hasClass(tab, "messageInfoPropsTab"))
+        else if (Css.hasClass(tab, "messageInfoPropsTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
@@ -1199,7 +1226,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                         Firebug.TraceModule.Tree);
                 });
         }
-        else if (hasClass(tab, "messageInfoScopeTab"))
+        else if (Css.hasClass(tab, "messageInfoScopeTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getScope,
                 function (message, valueBox, text) {
@@ -1207,7 +1234,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                         Firebug.TraceModule.PropertyTree);
                 });
         }
-        else if (hasClass(tab, "messageInfoIfacesTab"))
+        else if (Css.hasClass(tab, "messageInfoIfacesTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getInterfaces,
                 function (message, valueBox, text) {
@@ -1215,15 +1242,15 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                         Firebug.TraceModule.Tree);
                 });
         }
-        else if (hasClass(tab, "messageInfoTypesTab"))
+        else if (Css.hasClass(tab, "messageInfoTypesTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getTypes);
         }
-        else if (hasClass(tab, "messageInfoEventTab"))
+        else if (Css.hasClass(tab, "messageInfoEventTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getEvent);
         }
-        else if (hasClass(tab, "messageInfoObjectTab"))
+        else if (Css.hasClass(tab, "messageInfoObjectTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
@@ -1236,31 +1263,31 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                             Firebug.TraceModule.PropertyTree);
                 });
         }
-        else if (hasClass(tab, "messageInfoExcTab"))
+        else if (Css.hasClass(tab, "messageInfoExcTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getException);
         }
-        else if (hasClass(tab, "messageInfoResponseTab"))
+        else if (Css.hasClass(tab, "messageInfoResponseTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getResponse,
                 function (message, valueBox, text) {
-                    var iframe = getChildByClass(valueBox, "messageInfoResponseFrame");
+                    var iframe = Dom.getChildByClass(valueBox, "messageInfoResponseFrame");
                     iframe.contentWindow.document.body.innerHTML = text;
                 });
         }
-        else if (hasClass(tab, "messageInfoSourceTab"))
+        else if (Css.hasClass(tab, "messageInfoSourceTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getResponse,
                 function (message, valueBox, text) {
                     if (text)
-                        insertWrappedText(text, valueBox);
+                        Str.insertWrappedText(text, valueBox);
                 });
         }
     },
 
     updateInfoImpl: function(messageInfoBody, view, message, getter, setter)
     {
-        var valueBox = getChildByClass(messageInfoBody, "messageInfo" + view + "Text");
+        var valueBox = Dom.getChildByClass(messageInfoBody, "messageInfo" + view + "Text");
         if (!valueBox.valuePresented)
         {
             var text = getter.apply(message);
@@ -1277,7 +1304,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Helper Domplate object that doesn't trace.
 
 var HelperDomplate = (function()
@@ -1285,10 +1312,11 @@ var HelperDomplate = (function()
     // Private helper function.
     function execute()
     {
-        var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
+        var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
 
         // Make sure the original Domplate is *not* tracing for now.
-        if (typeof FBTrace != "undefined") {
+        if (typeof FBTrace != "undefined")
+        {
             var dumpDOM = FBTrace.DBG_DOMPLATE;
             FBTrace.DBG_DOMPLATE = false;
         }
@@ -1314,7 +1342,7 @@ var HelperDomplate = (function()
    }
 }());
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Trace Message Object
 
 Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
@@ -1328,7 +1356,8 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 
     if (typeof(this.obj) == "function")
     {
-        this.obj = {'':this.obj}; // will make functions visible
+        // will make functions visible
+        this.obj = {"": this.obj};
     }
 
     if (this.obj instanceof Ci.nsIScriptError)
@@ -1428,7 +1457,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
         this.getScope();
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.TraceModule.TraceMessage.prototype =
 {
@@ -1532,8 +1561,8 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 var prop = listValue.value[i];
                 try {
-                    var name = unwrapIValue(prop.name);
-                    this.props[name] = "" + unwrapIValue(prop.value);
+                    var name = Wrapper.unwrapIValue(prop.name);
+                    this.props[name] = "" + Wrapper.unwrapIValue(prop.value);
                 } catch (e) {
                     onPanic("instanceof jsdIValue, i="+i, e);
                 }
@@ -1558,29 +1587,23 @@ Firebug.TraceModule.TraceMessage.prototype =
                         // If "this.obj.__lookupGetter__(p)" is executed for 'window' when
                         // p == 'globalStorage' (or local or session) the property is not
                         // accessbible anymore when iterated in getMembers (dom.js)
-                        if (!isDOMMember(this.obj, p) && this.obj.__lookupGetter__)
+                        if (!Dom.isDOMMember(this.obj, p) && this.obj.__lookupGetter__)
                             var getter = this.obj.__lookupGetter__(p);
                         if (getter)
                             var value = "" + getter;
                         else
-                            var value = safeToString(this.obj[p]);
+                            var value = Str.safeToString(this.obj[p]);
 
                         this.props[p] = value;
                     }
                     catch (err)
                     {
-                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS with "+err+"\n");
-                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+safeToString(this.obj)+"\n");
                         this.props[p] = "{Error}";
                     }
                 }
             }
             catch (exc)
             {
-                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS after "+propsTotal+ " with "+exc+"\n");
-                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS on object "+safeToString(this.obj)+"\n");
-                if (this.obj instanceof Window)
-                    window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS window closed:"+this.obj.closed+"\n");
             }
         }
 
@@ -1618,39 +1641,39 @@ Firebug.TraceModule.TraceMessage.prototype =
         return this.ifaces;
     },
 
-   getScope: function()
-   {
-       if (!Firebug.Options.get("trace.enableScope"))
-           return null;
+    getScope: function()
+    {
+        if (!Firebug.Options.get("trace.enableScope"))
+            return null;
 
-       if (this.scope)
-           return this.scope;
+        if (this.scope)
+            return this.scope;
 
-       var scope = {};
-       Firebug.Debugger.halt(function(frame)
-       {
-           for (var i=0; i<4 && frame; i++)
-               frame = frame.callingFrame;
+        var scope = {};
+        Firebug.Debugger.halt(function(frame)
+        {
+            for (var i=0; i<4 && frame; i++)
+                frame = frame.callingFrame;
 
-           if (frame)
-           {
-               var listValue = {value: null}, lengthValue = {value: 0};
-               frame.scope.getProperties(listValue, lengthValue);
+            if (frame)
+            {
+                var listValue = {value: null}, lengthValue = {value: 0};
+                frame.scope.getProperties(listValue, lengthValue);
 
-               for (var i=lengthValue.value-1; i>=0; i--)
-               {
-                   var prop = listValue.value[i];
-                   var name = unwrapIValue(prop.name);
-                   var value = unwrapIValue(prop.value);
+                for (var i=lengthValue.value-1; i>=0; i--)
+                {
+                    var prop = listValue.value[i];
+                    var name = unwrapIValue(prop.name);
+                    var value = unwrapIValue(prop.value);
 
-                   if ((typeof(value) != "function") && name && value)
-                       scope[name.toString()] = value.toString();
-               }
-           }
-       });
+                    if ((typeof(value) != "function") && name && value)
+                        scope[name.toString()] = value.toString();
+                }
+            }
+        });
 
-       return this.scope = scope;
-   },
+        return this.scope = scope;
+    },
 
     getResponse: function()
     {
@@ -1658,7 +1681,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         try
         {
             var self = this;
-            TabWatcher.iterateContexts(function(context) {
+            Firebug.TabWatcher.iterateContexts(function(context) {
                 var url = self.obj.originalURI.spec;
                 return context.sourceCache.loadText(url);
             });
@@ -1680,7 +1703,8 @@ Firebug.TraceModule.TraceMessage.prototype =
         if (this.obj && this.obj.message)
             return this.obj.message;
 
-        // xxxJJB: this isn't needed, instanceof does QI. try {this.obj = this.obj.QueryInterface(Ci.nsIException);} catch (err){}
+        // xxxJJB: this isn't needed, instanceof does QI. try {this.obj =
+        // this.obj.QueryInterface(Ci.nsIException);} catch (err){}
         if (!this.obj)
             return null;
 
@@ -1708,7 +1732,8 @@ Firebug.TraceModule.TraceMessage.prototype =
 
         this.types = "";
 
-        try {
+        try
+        {
             var obj = this.obj;
             while (obj)
             {
@@ -1773,7 +1798,7 @@ Firebug.TraceModule.TraceMessage.prototype =
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Imported message
 
 Firebug.TraceModule.ImportedMessage = function(logMsg)
@@ -1786,7 +1811,7 @@ Firebug.TraceModule.ImportedMessage = function(logMsg)
     this.time = logMsg.time;
 }
 
-Firebug.TraceModule.ImportedMessage.prototype = extend(Firebug.TraceModule.TraceMessage.prototype,
+Firebug.TraceModule.ImportedMessage.prototype = Obj.extend(Firebug.TraceModule.TraceMessage.prototype,
 {
     getStackArray: function()
     {
@@ -1794,12 +1819,12 @@ Firebug.TraceModule.ImportedMessage.prototype = extend(Firebug.TraceModule.Trace
     },
 })
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var lastPanic = null;
 function onPanic(contextMessage, errorMessage)
 {
-    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);
+    var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
     var win = appShellService.hiddenDOMWindow;
     // XXXjjb I cannot get these tests to work.
     //if (win.lastPanic && (win.lastPanic == errorMessage))
@@ -1810,7 +1835,7 @@ function onPanic(contextMessage, errorMessage)
     win.lastPanic = errorMessage;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Domplate helpers - Tree (domplate widget)
 
 /**
@@ -1859,9 +1884,9 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         if (!isLeftClick(event))
             return;
 
-        var row = getAncestorByClass(event.target, "memberRow");
-        var label = getAncestorByClass(event.target, "memberLabel");
-        if (label && hasClass(row, "hasChildren"))
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
+        if (label && Css.hasClass(row, "hasChildren"))
             this.toggleRow(row);
     },
 
@@ -1869,21 +1894,22 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     {
         var level = parseInt(row.getAttribute("level"));
         var target = row.lastChild.firstChild;
-        var isString = hasClass(target,"objectBox-string");
+        var isString = Css.hasClass(target,"objectBox-string");
         var repObject = row.repObject;
 
-        if (hasClass(row, "opened"))
+        if (Css.hasClass(row, "opened"))
         {
-            removeClass(row, "opened");
+            Css.removeClass(row, "opened");
             if (isString)
             {
                 var rowValue = repObject.value;
-                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
+                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
             }
             else
             {
                 var tbody = row.parentNode;
-                for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling) {
+                for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+                {
                     if (parseInt(firstRow.getAttribute("level")) <= level)
                         break;
 
@@ -1893,7 +1919,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         }
         else
         {
-            setClass(row, "opened");
+            Css.setClass(row, "opened");
             if (isString)
             {
                 var rowValue = repObject.value;
@@ -1901,7 +1927,8 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
             }
             else
             {
-                if (repObject) {
+                if (repObject)
+                {
                     var members = this.getMembers(repObject.value, level+1);
                     if (members)
                         this.loop.insertRows({members: members}, row);
@@ -1919,7 +1946,8 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
             return [this.createMember("", "", object, level)];
 
         var members = [];
-        for (var p in object) {
+        for (var p in object)
+        {
             var member = this.createMember("", p, object[p], level);
             if (object[p] instanceof Array)
                 member.tag = FirebugReps.Nada.tag;
@@ -1934,7 +1962,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
-        var hasChildren = hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
+        var hasChildren = Obj.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
@@ -1952,7 +1980,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
 {
@@ -1984,15 +2012,15 @@ Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.TraceModule);
 Firebug.registerRep(Firebug.TraceModule.MessageTemplate);
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 return Firebug.TraceModule;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 }});

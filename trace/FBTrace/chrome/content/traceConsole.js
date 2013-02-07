@@ -1,29 +1,36 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
-// Shorcuts and Services
+define([
+    "fbtrace/trace",
+    "firebug/lib/locale",
+    "firebug/lib/object",
+    "firebug/lib/css",
+    "firebug/lib/dom",
+    "fbtrace/serializer",
+],
+function(FBTrace, Locale, Obj, Css, Dom, Serializer) {
+
+// ********************************************************************************************* //
+// Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 try
 {
-    Components.utils["import"]("resource://moduleLoader/moduleLoader.js");
-    Components.utils["import"]("resource://fbtrace/firebug-trace-service.js");
+    Cu["import"]("resource://moduleLoader/moduleLoader.js");
+    Cu["import"]("resource://fbtrace/firebug-trace-service.js");
 }
 catch (err)
 {
     dump("TraceConsole; Loading modules EXCEPTION " + err + "\n");
 }
 
-var traceService = traceConsoleService;
-
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const directoryService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
-
-var gFindBar;
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
@@ -31,7 +38,12 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 // Cache messages that are fired before the content of the window is loaded.
 var queue = [];
 
-// ************************************************************************************************
+// Get trace service (we need to register/unregister a listener later)
+var scope = {};
+Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
+var traceService = scope.traceConsoleService;
+
+// ********************************************************************************************* //
 // Trace Window Implementation
 
 var TraceConsole =
@@ -48,7 +60,7 @@ var TraceConsole =
         // to this pref-domain will be displayed. The current domain is displyaed
         // in window title.
         this.prefDomain = args.prefDomain;
-        document.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
+        document.title = Locale.$STR("title.Tracing") + ": " + this.prefDomain;
 
         try
         {
@@ -64,8 +76,7 @@ var TraceConsole =
         catch (exc)
         {
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-            window.dump("FBTrace; Firebug.TraceModule.initialize EXCEPTION " + msg + "\n");
-            window.dump(FBL.getStackDump()+"\n");
+            window.dump("FBTrace; Firebug.TraceModule.initialize EXCEPTION " + msg);
         }
     },
 
@@ -97,7 +108,7 @@ var TraceConsole =
 
         Firebug.TraceModule.CommonBaseUI.initializeContent(
             this.consoleNode, this, this.prefDomain,
-            FBL.bind(this.initializeContent, this));
+            Obj.bind(this.initializeContent, this));
 
         gFindBar = document.getElementById("FindToolbar");
     },
@@ -191,9 +202,9 @@ var TraceConsole =
     {
         var showTime = Firebug.Options.get("trace.showTime");
         if (showTime)
-            FBL.setClass(this.logs.firstChild, "showTime");
+            Css.setClass(this.logs.firstChild, "showTime");
         else
-            FBL.removeClass(this.logs.firstChild, "showTime");
+            Css.removeClass(this.logs.firstChild, "showTime");
     },
 
     shutdown: function()
@@ -234,7 +245,7 @@ var TraceConsole =
         if (this.layoutTimeout)
             clearTimeout(this.layoutTimeout);
 
-        var handler = FBL.bindFixed(this.flushCachedMessages, this);
+        var handler = Obj.bindFixed(this.flushCachedMessages, this);
         this.layoutTimeout = setTimeout(handler, layoutTimeout);
     },
 
@@ -293,9 +304,6 @@ var TraceConsole =
 
     getScrollingNode: function()
     {
-        //window.dump(FBL.getStackDump());
-        //window.dump("traceConsole getScrollingNode this.scrollingNode "+this.scrollingNode+"\n");
-
         return this.scrollingNode;
     },
 
@@ -306,9 +314,6 @@ var TraceConsole =
 
     getTargetNode: function()
     {
-        //window.dump(FBL.getStackDump());
-        //window.dump("traceConsole getTargetgNode this.scrollingNode "+this.logs.firstChild+"\n");
-
         return this.logs.firstChild;
     },
 
@@ -330,7 +335,7 @@ var TraceConsole =
 
     onClearConsole: function()
     {
-        FBL.clearNode(this.logs.firstChild);
+        Dom.clearNode(this.logs.firstChild);
     },
 
     onSeparateConsole: function()
@@ -340,12 +345,12 @@ var TraceConsole =
 
     onSaveToFile: function()
     {
-        TraceConsole.Serializer.onSaveToFile(this);
+        Serializer.onSaveToFile(this);
     },
 
     onLoadFromFile: function()
     {
-        TraceConsole.Serializer.onLoadFromFile(this);
+        Serializer.onLoadFromFile(this);
     },
 
     onRestartFirefox: function()
@@ -371,7 +376,7 @@ var TraceConsole =
             cache.evictEntries(Ci.nsICache.STORE_ON_DISK);
             cache.evictEntries(Ci.nsICache.STORE_IN_MEMORY);
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("traceConsole.onClearCache EXCEPTION " + exc, exc);
@@ -382,9 +387,9 @@ var TraceConsole =
     {
         try
         {
-            FBL.jsd.GC();
+            Cu.forceGC();
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("traceConsole.onForceGC EXCEPTION " + exc, exc);
@@ -402,8 +407,7 @@ var TraceConsole =
 
     openFirefox: function(context)
     {
-        var handler = Components.classes["@mozilla.org/browser/clh;1"]
-            .getService(Components.interfaces.nsIBrowserHandler);
+        var handler = Cc["@mozilla.org/browser/clh;1"].getService(Ci.nsIBrowserHandler);
         var defaultArgs = handler.defaultArgs;
 
         window.openDialog("chrome://browser/content/", "_blank",
@@ -412,7 +416,7 @@ var TraceConsole =
 
     toggleFirebug: function(on)
     {
-        Components.utils.import("resource://gre/modules/Services.jsm");
+        Cu["import"]("resource://gre/modules/Services.jsm");
         Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
         var BOOTSTRAP_REASONS = {
@@ -425,7 +429,7 @@ var TraceConsole =
             ADDON_UPGRADE   : 7,
             ADDON_DOWNGRADE : 8
         };
-        var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm");
+        var XPIProviderBP = Cu["import"]("resource://gre/modules/XPIProvider.jsm");
         var id = "firebug@software.joehewitt.com";
         var XPIProvider = XPIProviderBP.XPIProvider;
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
@@ -433,16 +437,19 @@ var TraceConsole =
 
         var t1 = Date.now();
         XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-                                XPIProvider.bootstrappedAddons[id].type, file,
-                                "shutdown", BOOTSTRAP_REASONS.ADDON_DISABLE);
+            XPIProvider.bootstrappedAddons[id].type, file,
+            "shutdown", BOOTSTRAP_REASONS.ADDON_DISABLE);
+
         FBTrace.sysout("shutdown time :" + (Date.now() - t1) + "ms");
+
         if (!on)
             return;
 
         t1 = Date.now()
         XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-                                XPIProvider.bootstrappedAddons[id].type, file,
-                                "startup", BOOTSTRAP_REASONS.APP_STARTUP);
+            XPIProvider.bootstrappedAddons[id].type, file,
+            "startup", BOOTSTRAP_REASONS.APP_STARTUP);
+
         FBTrace.sysout("startup time :" + (Date.now() - t1) + "ms");
     },
 
@@ -476,4 +483,11 @@ var TraceConsole =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
+
+return TraceConsole;
+
+// ********************************************************************************************* //
+});
+
