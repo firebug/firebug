@@ -246,7 +246,7 @@ TraceMessage.prototype =
                         // If "this.obj.__lookupGetter__(p)" is executed for 'window' when
                         // p == 'globalStorage' (or local or session) the property is not
                         // accessbible anymore when iterated in getMembers (dom.js)
-                        if (!Dom.isDOMMember(this.obj, p) && this.obj.__lookupGetter__)
+                        if (this.obj.__lookupGetter__)
                             var getter = this.obj.__lookupGetter__(p);
                         if (getter)
                             var value = "" + getter;

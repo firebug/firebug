@@ -377,14 +377,6 @@ var MessageTemplate = domplate(Reps.Rep,
         items.push("-");
 
         items.push({
-          label: Locale.$STR("tracing.cmd.Explore Firebug Scope"),
-          nol10n: true,
-          command: Obj.bindFixed(this.onExploreFirebug, this)
-        });
-
-        items.push("-");
-
-        items.push({
           label: Locale.$STR("tracing.cmd.Expand All"),
           nol10n: true,
           command: Obj.bindFixed(this.onExpandAll, this, message)
@@ -446,11 +438,6 @@ var MessageTemplate = domplate(Reps.Rep,
     onCopyException: function(message)
     {
         System.copyToClipboard(message.getException());
-    },
-
-    onExploreFirebug: function()
-    {
-        TraceConsole.onExploreFirebug();
     },
 
     onExpandAll: function(message)

@@ -47,7 +47,6 @@
         <command id="cmd_reloadFirebug" oncommand="TraceConsole.toggleFirebug(true)"/>
         <command id="cmd_showCommandLine" oncommand="TraceConsole.toggleCommandLine()"/>
         <command id="cmd_lineEvaluate" oncommand="TraceConsole.evaluate()"/>
-        <command id="cmd_traceObjectInspector" oncommand="TraceConsole.inspect()"/>
         <command id="cmd_alwaysOpenTraceConsole" oncommand="TraceConsole.onToggleOption(this)"
             option="alwaysOpenTraceConsole"/>
     </commandset>
@@ -120,11 +119,6 @@
                     label="tracing.cmd.Open Firefox" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Open Firefox"
                     command="cmd_openFirefox"/>
-                <menuseparator />
-                <menuitem id="traceObjectInspector"
-                    label="tracing.cmd.Inspector" class="toolbar-image-button fbInternational"
-                    tooltiptext="tracing.cmd.tip.Inspector"
-                    command="cmd_traceObjectInspector"/>
                 <menuseparator />
                 <menuitem id="alwaysOpenTraceConsole"
                     type="checkbox" label="Always_Open"

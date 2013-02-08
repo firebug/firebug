@@ -46,6 +46,11 @@ Wrapper.unwrapIValue = function(object, viewChrome)
     return unwrapped;
 };
 
+function isPrimitive(obj)
+{
+    return !(obj && (typeof obj === "object" || typeof obj === "function"));
+}
+
 // ********************************************************************************************* //
 
 return Wrapper;

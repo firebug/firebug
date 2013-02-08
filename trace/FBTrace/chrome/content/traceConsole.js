@@ -9,19 +9,16 @@ define([
     "fbtrace/lib/options",
     "fbtrace/lib/array",
     "fbtrace/serializer",
-    "fbtrace/traceObjectInspector",
     "fbtrace/traceMessage",
     "fbtrace/messageTemplate",
     "fbtrace/commonBaseUI",
     "fbtrace/traceCommandLine",
     "fbtrace/traceModule",
-    "fbtrace/firebugExplorer",
     "fbtrace/lib/reps",
     "fbtrace/lib/menu",
 ],
-function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceObjectInspector,
-    TraceMessage, MessageTemplate, CommonBaseUI, TraceCommandLine, TraceModule,
-    FirebugExplorer, Reps, Menu) {
+function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceMessage,
+    MessageTemplate, CommonBaseUI, TraceCommandLine, TraceModule, Reps, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -428,19 +425,6 @@ var TraceConsole =
             "startup", BOOTSTRAP_REASONS.APP_STARTUP);
 
         FBTrace.sysout("startup time :" + (Date.now() - t1) + "ms");
-    },
-
-    inspect: function()
-    {
-        TraceObjectInspector.inspect();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Firebug Explorer
-
-    onExploreFirebug: function()
-    {
-        FirebugExplorer.dump();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
