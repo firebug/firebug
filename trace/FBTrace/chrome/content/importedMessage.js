@@ -24,7 +24,6 @@ var ImportedMessage = function(logMsg)
     this.text = logMsg.text;
     this.obj = null;
     this.stack = logMsg.stack;
-    this.scope = null;
     this.time = logMsg.time;
 }
 

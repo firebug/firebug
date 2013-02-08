@@ -256,8 +256,7 @@ var TraceConsole =
             if (messageInfo.type != this.prefDomain)
                 return;
 
-            var message = new TraceMessage(
-                messageInfo.type, data, messageInfo.obj, messageInfo.scope,
+            var message = new TraceMessage(messageInfo.type, data, messageInfo.obj,
                 messageInfo.time);
 
             this.initLayoutTimer();

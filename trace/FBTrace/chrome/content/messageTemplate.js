@@ -112,11 +112,6 @@ var MessageTemplate = domplate(Reps.Rep,
                     $collapsed: "$message|hideProperties"},
                     Locale.$STR("tracing.tab.Properties")
                 ),
-                A({"class": "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
-                    view: "Scope",
-                    $collapsed: "$message|hideScope"},
-                    Locale.$STR("tracing.tab.Scope")
-                ),
                 A({"class": "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$message|hideResponse"},
@@ -180,7 +175,6 @@ var MessageTemplate = domplate(Reps.Rep,
             ),
             DIV({"class": "messageInfoSourceText messageInfoText"}),
             DIV({"class": "messageInfoIfacesText messageInfoText"}),
-            DIV({"class": "messageInfoScopeText messageInfoText"}),
             DIV({"class": "messageInfoTypesText messageInfoText"}),
             DIV({"class": "messageInfoObjectText messageInfoText"}),
             DIV({"class": "messageInfoEventText messageInfoText"})
@@ -232,11 +226,6 @@ var MessageTemplate = domplate(Reps.Rep,
             return false;
 
         return true;
-    },
-
-    hideScope: function(message)
-    {
-        return !message.getScope();
     },
 
     hideInterfaces: function(message)
@@ -385,7 +374,6 @@ var MessageTemplate = domplate(Reps.Rep,
             items.push("-");
 
         items.push(this.optionMenu(Locale.$STR("tracing.Show Time"), "trace.showTime"));
-        items.push(this.optionMenu(Locale.$STR("tracing.Show Scope Variables"), "trace.enableScope"));
         items.push("-");
 
         items.push({
@@ -675,13 +663,6 @@ var MessageTemplate = domplate(Reps.Rep,
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
                     Tree.tag.replace({object: message.props}, valueBox, Tree);
-                });
-        }
-        else if (Css.hasClass(tab, "messageInfoScopeTab"))
-        {
-            this.updateInfoImpl(messageInfoBody, view, message, message.getScope,
-                function (message, valueBox, text) {
-                    PropertyTree.tag.replace({object: message.scope}, valueBox, PropertyTree);
                 });
         }
         else if (Css.hasClass(tab, "messageInfoIfacesTab"))

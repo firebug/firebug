@@ -20,15 +20,6 @@
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
-  <script type="application/x-javascript">
-  // xxxHonza: hack, keep it global, but only Firebug needs it.
-  var FBTrace = {
-    timeEnd: function() {},
-    time: function() {},
-    sysout: function() {},
-  };
-  </script>
-
     <!-- Trace Console Application -->
     <script type="application/x-javascript" src="mini-require.js"/>
     <script type="application/x-javascript" src="main.js"/>
@@ -36,6 +27,7 @@
     <!-- String Bundles -->
     <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
 
+    <!-- Commands -->
     <commandset id="mainCommandSet">
         <command id="cmd_clearConsole" oncommand="TraceConsole.onClearConsole()"/>
         <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
@@ -152,6 +144,7 @@
         </toolbar>
     </toolbox>
 
+    <!-- Context Menu and Tooltip -->
     <popupset id="mainPopupSet">
         <menupopup id="fbContextMenu"
             onpopupshowing="return TraceConsole.onContextShowing(event);" />
@@ -159,36 +152,35 @@
             onpopupshowing="return TraceConsole.onTooltipShowing(event);"/>
     </popupset>
 
+    <!-- Application Content -->
     <vbox flex="1">
 
-    <!-- Content -->
-    <browser id="consoleFrame" type="content-primary"
-        src="traceConsole.html" flex="1"
-        disablehistory="true" contextmenu="fbContextMenu"
-        tooltip="fbTooltip"/>
+        <!-- Logging Output -->
+        <browser id="consoleFrame" type="content-primary"
+            src="traceConsole.html" flex="1"
+            disablehistory="true" contextmenu="fbContextMenu"
+            tooltip="fbTooltip"/>
 
-    <splitter id="fbTraceSplitter" collapsed="true"/>
+        <splitter id="fbTraceSplitter" collapsed="true"/>
 
-    <!-- Command line -->
-    <vbox id="fbTraceCommandLine" collapsed="true" persist="height">
-        <toolbar id="commandLineToolbar" align="center">
-            <toolbarbutton id="cmdLineEvaluate" label="tracing.cmd.Evaluate"
-                tooltiptext="tracing.cmd.tip.Evaluate"
-                command="cmd_lineEvaluate" class="fbInternational">
-            </toolbarbutton>
-            <toolbarbutton id="cmdLineContext" label="Context" type="menu">
-                <menupopup onpopupshowing="return TraceConsole.onCmdContextMenuShowing(this);"
-                    onpopuphidden="TraceConsole.onCmdContextMenuHidden(this)"/>
-            </toolbarbutton>
-        </toolbar>
+        <!-- Command line -->
+        <vbox id="fbTraceCommandLine" collapsed="true" persist="height">
+            <toolbar id="commandLineToolbar" align="center">
+                <toolbarbutton id="cmdLineEvaluate" label="tracing.cmd.Evaluate"
+                    tooltiptext="tracing.cmd.tip.Evaluate"
+                    command="cmd_lineEvaluate" class="fbInternational">
+                </toolbarbutton>
+                <toolbarbutton id="cmdLineContext" label="Context" type="menu">
+                    <menupopup onpopupshowing="return TraceConsole.onCmdContextMenuShowing(this);"
+                        onpopuphidden="TraceConsole.onCmdContextMenuHidden(this)"/>
+                </toolbarbutton>
+            </toolbar>
+            <hbox id="fbTrace-editor" flex="1">
+                <textbox id="fbTraceScriptBox" multiline="true" flex="1"/>
+            </hbox>
+        </vbox>
 
-        <hbox id="fbTrace-editor" flex="1">
-            <textbox id="fbTraceScriptBox" multiline="true" flex="1"/>
-        </hbox>
-        
+        <!-- Search bar -->
+        <findbar id="FindToolbar" browserid="consoleFrame"/>
     </vbox>
-
-    <!-- Search bar -->
-    <findbar id="FindToolbar" browserid="consoleFrame"/>
-  </vbox>
 </window>

@@ -22,13 +22,12 @@ var EOF = "<br/>";
 // ********************************************************************************************* //
 // Trace Message Object
 
-var TraceMessage = function(type, text, obj, scope, time)
+var TraceMessage = function(type, text, obj, time)
 {
     this.type = type;
     this.text = text;
     this.obj = obj;
     this.stack = [];
-    this.scope = scope;
     this.time = time;
 
     if (typeof(this.obj) == "function")
@@ -83,9 +82,6 @@ var TraceMessage = function(type, text, obj, scope, time)
             if (i < 5 || fileName.indexOf(traceServiceFile) != -1)
                 continue;
 
-            if (fileName.indexOf(firebugServiceFile) != -1)
-                this.fbsIsOnStack = true;
-
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
             var lineNumber = frame.lineNumber ? frame.lineNumber : "";
             this.stack.push({fileName:fileName, lineNumber:lineNumber, funcName:""});
@@ -118,11 +114,6 @@ var TraceMessage = function(type, text, obj, scope, time)
 
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
-
-    // Get current scope
-
-    if (!this.fbsIsOnStack)
-        this.getScope();
 }
 
 // ********************************************************************************************* //
@@ -307,12 +298,6 @@ TraceMessage.prototype =
             }
         }
         return this.ifaces;
-    },
-
-    getScope: function()
-    {
-        // xxxHonza: remove all code related to scope & debugger-halt
-        return null;
     },
 
     getResponse: function()

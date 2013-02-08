@@ -41,13 +41,11 @@ var FirebugExplorer =
         var messageInfo = {
             obj: this.getObjects(contentView.Firebug),
             type: "firebug-explorer",
-            scope: null,
             time: (new Date()).getTime()
         };
 
-        var message = new TraceMessage(
-            messageInfo.type, "Firebug Explorer", messageInfo.obj, messageInfo.scope,
-            messageInfo.time);
+        var message = new TraceMessage(messageInfo.type, "Firebug Explorer",
+            messageInfo.obj, messageInfo.time);
 
         MessageTemplate.dump(message, TraceConsole);
 
