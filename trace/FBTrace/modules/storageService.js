@@ -13,8 +13,10 @@ const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsI
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
-Cu.import("resource://firebug/fbtrace.js");
-Cu.import("resource://gre/modules/FileUtils.jsm");
+Cu["import"]("resource://gre/modules/FileUtils.jsm");
+Cu["import"]("resource://fbtrace/firebug-trace-service.js");
+
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 // ********************************************************************************************* //
 // Implementation

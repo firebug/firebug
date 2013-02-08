@@ -48,7 +48,10 @@ var Serializer =
                 var log = { version: "1.0" };
 
                 // Firebug info version
-                log.firebug = Firebug.version;
+                var version = this.getFirebugVersion();
+                if (version)
+                    log.firebug = version;
+
                 log.app = {
                     name: appInfo.name,
                     version: appInfo.version,
@@ -76,6 +79,21 @@ var Serializer =
         catch (err)
         {
             FBTrace.sysout("FBTrace; onSaveToFile EXCEPTION " + err, err);
+        }
+    },
+
+    getFirebugVersion: function()
+    {
+        try
+        {
+            var jsonString = Options.getPref("extensions", "bootstrappedAddons");
+            var value = JSON.parse(jsonString);
+            var firebugInfo = value["firebug@software.joehewitt.com"];
+            return firebugInfo ? firebugInfo.version : null;
+        }
+        catch (err)
+        {
+            FBTrace.sysout("FBTrace; getFirebugVersion EXCEPTION " + err, err);
         }
     },
 
@@ -108,8 +126,6 @@ var Serializer =
             }
 
             log.filePath = fp.file.path;
-
-            var TraceModule = Firebug.TraceModule;
 
             // Create header, dump all logs and create footer.
             MessageTemplate.dumpSeparator(console, MessageTemplate.importHeaderTag, log);

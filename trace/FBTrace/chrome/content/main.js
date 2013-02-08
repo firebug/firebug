@@ -4,20 +4,21 @@
 
 var gFindBar;
 
+(function() {
+
+// ********************************************************************************************* //
+// Constants
+
 var config =
 {
-    baseLoaderUrl: "resource://fbtrace-firebug/",
-    baseUrl: "resource://fbtrace_rjs/",
+    baseUrl: "chrome://fbtrace/",
     paths: {
-        "arch": "firebug/content/bti/inProcess",
-        "firebug": "firebug/content",
         "fbtrace": "content"
     },
-    coreModules: ["lib/options", "lib/xpcom"],
-    xhtml: true,
 };
 
-window.dump("FBTrace; main.js begin module loading\n");
+// ********************************************************************************************* //
+// Application Load
 
 require(config,
 [
@@ -40,8 +41,6 @@ function(FBTrace, TraceConsole, Options, TraceModule)
     TraceModule.initialize();
 
     // xxxHonza: don't forget to fix the context menu.
-    //var chrome = ChromeFactory.createFirebugChrome(window);
-    //chrome.initialize();
 
     // xxxHonza: just for debugging, remove.
     window.setTimeout(function() {
@@ -54,3 +53,5 @@ function(FBTrace, TraceConsole, Options, TraceModule)
 });
 
 // ********************************************************************************************* //
+})();
+

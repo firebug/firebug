@@ -84,6 +84,8 @@ var TraceConsole =
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
             window.dump("FBTrace; TraceModule.initialize EXCEPTION " + msg);
         }
+
+        window.gFindBar = document.getElementById("FindToolbar");
     },
 
     initializeConsole: function()

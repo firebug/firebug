@@ -170,7 +170,7 @@ var GlobalObserver =
     {
         var localTrace = traceConsoleService.getTracer(TraceConsole.prefDomain);
 
-        // Log info into the Firebug tracing console.
+        // Log info into the tracing console.
         var shout = (GlobalObserver.shoutOptionValue ? "globalObserver." : "");
         localTrace.sysout(shout + "observe: " + topic, {subject:subject, data: data});
 

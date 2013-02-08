@@ -9,14 +9,6 @@ function() {
 
 var releaser = window.arguments[0];  // see fbtrace/components/commandLine.js
 
-// This value causes loader.js to pull in firebug source from Firebug
-// embedded directory for the tracing console instance.
-window._firebugLoadConfig =
-{
-    baseUrl: "chrome://fbtrace-firebug/content/",
-    prefDomain: releaser.prefDomain,
-};
-
 // ********************************************************************************************* //
 // Implementation
 

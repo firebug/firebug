@@ -57,7 +57,7 @@ var TraceModule = Obj.extend({},
 
     getTraceConsoleURL: function()
     {
-        return "chrome://fbtrace-firebug/content/traceConsole.xul";
+        return "chrome://fbtrace/content/traceConsole.xul";
     },
 
     onToggleOption: function(target)
@@ -118,10 +118,11 @@ var TraceModule = Obj.extend({},
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.openConsole, prefDomain: " + prefDomain);
 
+        // xxxHonza
         var self = this;
         var args = {
             //FBL: FBL,
-            Firebug: Firebug,
+            //Firebug: Firebug,
             traceModule: self,
             prefDomain: prefDomain,
         };
