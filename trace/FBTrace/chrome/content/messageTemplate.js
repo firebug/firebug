@@ -4,7 +4,6 @@ define([
     "fbtrace/trace",
     "fbtrace/lib/events",
     "fbtrace/lib/window",
-    "fbtrace/firebugExplorer",
     "fbtrace/lib/css",
     "fbtrace/lib/locale",
     "fbtrace/lib/string",
@@ -20,10 +19,11 @@ define([
     "fbtrace/tree",
     "fbtrace/propertyTree",
     "fbtrace/lib/reps",
+    "fbtrace/traceModule",
 ],
-function(FBTrace, Events, Win, FirebugExplorer, Css, Locale, Str, Options,
+function(FBTrace, Events, Win, Css, Locale, Str, Options,
     Obj, System, Arr, Domplate, Dom, HelperDomplate, TraceMessage,
-    ImportedMessage, Tree, PropertyTree, Reps) {
+    ImportedMessage, Tree, PropertyTree, Reps, TraceModule) {
 
 with (Domplate) {
 
@@ -462,7 +462,7 @@ var MessageTemplate = domplate(Reps.Rep,
 
     onExploreFirebug: function()
     {
-        FirebugExplorer.dump();
+        TraceConsole.onExploreFirebug();
     },
 
     onExpandAll: function(message)
@@ -490,8 +490,8 @@ var MessageTemplate = domplate(Reps.Rep,
     dump: function(message, outputNodes, index)
     {
         // Notify listeners
-        // xxxHonza: causing cyclick deps, should be notification sent to TraceModule.
-        Firebug.TraceModule.onDump(message, outputNodes);
+        // xxxHonza: causing cyclic deps, should be notification sent to TraceModule.
+        TraceModule.onDump(message, outputNodes);
 
         // xxxHonza: find better solution for checking an ERROR messages
         // (setup some rules).
@@ -654,7 +654,7 @@ var MessageTemplate = domplate(Reps.Rep,
         messageInfoBody.selectedTab.setAttribute("selected", "true");
         messageInfoBody.selectedText.setAttribute("selected", "true");
 
-        var message = Firebug.getRepObject(messageInfoBody);
+        var message = Reps.getRepObject(messageInfoBody);
 
         // Make sure the original Domplate is *not* tracing for now.
         var dumpDOM = FBTrace.DBG_DOMPLATE;

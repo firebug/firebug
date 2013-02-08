@@ -7,8 +7,9 @@ define([
     "fbtrace/lib/window",
     "fbtrace/traceMessage",
     "fbtrace/lib/array",
+    "fbtrace/traceModule",
 ],
-function(FBTrace, Wrapper, Dom, Win, TraceMessage, Arr) {
+function(FBTrace, Wrapper, Dom, Win, TraceMessage, Arr, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -48,7 +49,7 @@ var FirebugExplorer =
             messageInfo.type, "Firebug Explorer", messageInfo.obj, messageInfo.scope,
             messageInfo.time);
 
-        Firebug.TraceModule.dump(message, TraceConsole);
+        MessageTemplate.dump(message, TraceConsole);
 
         this.cleanUp(contentView.Firebug);
     },

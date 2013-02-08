@@ -14,9 +14,12 @@ define([
     "fbtrace/messageTemplate",
     "fbtrace/commonBaseUI",
     "fbtrace/traceCommandLine",
+    "fbtrace/traceModule",
+    "fbtrace/firebugExplorer",
 ],
 function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceObjectInspector,
-    TraceMessage, MessageTemplate, CommonBaseUI, TraceCommandLine) {
+    TraceMessage, MessageTemplate, CommonBaseUI, TraceCommandLine, TraceModule,
+    FirebugExplorer) {
 
 // ********************************************************************************************* //
 // Constants
@@ -117,7 +120,7 @@ var TraceConsole =
             this.logs = logNode;
 
             // Notify listeners
-            Firebug.TraceModule.onLoadConsole(window, logNode);
+            TraceModule.onLoadConsole(window, logNode);
 
             this.updateTimeInfo();
 
@@ -157,7 +160,7 @@ var TraceConsole =
         traceService.removeObserver(this, "firebug-trace-on-message");
         prefs.removeObserver(this.prefDomain, this, false);
 
-        Firebug.TraceModule.onUnloadConsole(window);
+        TraceModule.onUnloadConsole(window);
 
         // Unregister from the opener
         if (this.addedOnCloseOpener)
@@ -293,7 +296,7 @@ var TraceConsole =
 
     dump: function(message)
     {
-        Firebug.TraceModule.dump(message, this);
+        MessageTemplate.dump(message, this);
     },
 
     dumpSeparator: function()
@@ -311,7 +314,7 @@ var TraceConsole =
 
     onSeparateConsole: function()
     {
-        MessageTemplate.dumpSeparator(this);
+        this.dumpSeparator();
     },
 
     onSaveToFile: function()
@@ -427,6 +430,14 @@ var TraceConsole =
     inspect: function()
     {
         TraceObjectInspector.inspect();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug Explorer
+
+    onExploreFirebug: function()
+    {
+        FirebugExplorer.dump();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

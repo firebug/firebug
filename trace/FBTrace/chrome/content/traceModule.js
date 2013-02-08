@@ -2,14 +2,12 @@
 
 define([
     "fbtrace/trace",
-    "firebug/firebug",
     "fbtrace/lib/events",
     "fbtrace/lib/window",
     "fbtrace/lib/object",
     "fbtrace/lib/options",
-    "fbtrace/messageTemplate",
 ],
-function(FBTrace, Firebug, Events, Win, Obj, Options, MessageTemplate) {
+function(FBTrace, Events, Win, Obj, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -23,25 +21,15 @@ var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMe
 // ********************************************************************************************* //
 // Trace Module
 
-Firebug.TraceModule = Obj.extend(Firebug.Module,
+var TraceModule = Obj.extend({},
 {
     dispatchName: "traceModule",
 
-    addListener: function(listener)
-    {
-        if (!listener)
-            dump("\n\n\n++++++++++++++++++ NULL LISTENER ++++++++++++++++++\n\n\n");
-
-        Firebug.Module.addListener.apply(this, arguments);
-    },
-
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
-
         // prefDomain is the calling app, firebug or chromebug
         this.prefDomain = Options.getPrefDomain();
-        window.dump("FBTrace; Firebug.TraceModule.initialize: " + this.prefDomain + "\n");
+        window.dump("FBTrace; TraceModule.initialize: " + this.prefDomain + "\n");
 
         FBTrace.DBG_OPTIONS = Options.get("DBG_OPTIONS");
 
@@ -204,11 +192,6 @@ Firebug.TraceModule = Obj.extend(Firebug.Module,
         if (win && win.Firebug && win.Firebug.TraceModule)
             Events.dispatch(listeners, "onDump", [message]);
     },
-
-    dump: function(message, outputNodes)
-    {
-        MessageTemplate.dump(message, outputNodes);
-    },
 });
 
 // ********************************************************************************************* //
@@ -230,11 +213,7 @@ function onPanic(contextMessage, errorMessage)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.TraceModule);
-
-// ********************************************************************************************* //
-
-return Firebug.TraceModule;
+return TraceModule;
 
 // ********************************************************************************************* //
 });

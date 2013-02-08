@@ -102,7 +102,7 @@ var TraceCommandLine =
 
     onContextMenuShowing: function(popup)
     {
-        // Collect all browser windows with Firebug.
+        // Collect available browser windows.
         var windows = [];
         Win.iterateBrowserWindows("", function(win)
         {

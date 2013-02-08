@@ -4,8 +4,9 @@ define([
     "fbtrace/lib/domplate",
     "fbtrace/lib/string",
     "fbtrace/lib/locale",
+    "fbtrace/lib/css",
 ],
-function(Domplate, Str, Locale) {
+function(Domplate, Str, Locale, Css) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -462,7 +463,7 @@ Reps.ErrorCopy = function(message)
 };
 
 // ********************************************************************************************* //
-// Generic Rep Access
+// Public Rep API
 
 Reps.getRep = function(object, context)
 {
@@ -490,6 +491,24 @@ Reps.getRep = function(object, context)
     }
 
     return (type == "function") ? defaultFuncRep : defaultRep;
+};
+
+Reps.getRepObject = function(node)
+{
+    var target = null;
+    for (var child = node; child; child = child.parentNode)
+    {
+        if (Css.hasClass(child, "repTarget"))
+            target = child;
+
+        if (child.repObject != null)
+        {
+            if (!target && Css.hasClass(child, "repIgnore"))
+                break;
+            else
+                return child.repObject;
+        }
+    }
 };
 
 Reps.registerRep = function()
