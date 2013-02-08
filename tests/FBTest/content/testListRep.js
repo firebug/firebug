@@ -1,265 +1,31 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns(function() { /** @scope _testListRep_ */ with (FBL) {
+define([
+    "firebug/lib/trace",
+    "firebug/lib/css",
+    "firebug/lib/dom",
+    "firebug/lib/locale",
+    "firebug/lib/object",
+    "firebug/lib/system",
+    "firebug/chrome/window",
+    "firebug/lib/domplate",
+    "firebug/lib/events",
+    "fbtest/testResultRep",
+],
+function(FBTrace, Css, Dom, Locale, Obj, System, Win, Domplate, Events, TestResultRep) {
+with (Domplate) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-// ************************************************************************************************
-// Test List Domplate repository.
-
-/**
- * Domplate templates in this file are used to generate list of registered tests.
- * 
- * @domplate  
- */
-FBTestApp.GroupList = domplate(Firebug.Rep,
-/** @lends FBTestApp.GroupList */
-{
-    tableTag:
-        TABLE({"class": "groupTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
-            TBODY()
-        ),
-
-    groupRowTag:
-        TR({"class": "testGroupRow", _repObject: "$group"},
-            TD({"class": "groupName testGroupCol"},
-                SPAN({"class": "testGroupName"},
-                    "$group|getGroupName"
-                ),
-                SPAN({"class": "testGroupCount"},
-                    "$group|getGroupCount"
-                ),
-                SPAN({"class": "groupAction testLink", onclick: "$onGroupClick"},
-                    SPAN("Run")
-                )
-            )
-        ),
-
-    groupSeparatorTag:
-        TR({"class": "testGroupSeparator"},
-            TD(
-                SPAN({"class": "extension"},
-                    "$group.extension"
-                ),
-                SPAN({"class": "location"},
-                    "$group.testListPath"
-                )
-            )
-        ),
-
-    groupBodyTag:
-        TR({"class": "groupBodyRow", _repObject: "$group"},
-            TD({"class": "groupBodyCol", colspan: 1})
-        ),
-
-    getGroupName: function(group)
-    {
-        var n = group.name;
-        return n.charAt(0).toUpperCase() + n.substr(1).toLowerCase();
-    },
-
-    getGroupCount: function(group)
-    {
-        return "(" + group.tests.length + ")";
-    },
-
-    onGroupClick: function(event)
-    {
-        if (isLeftClick(event))
-        {
-            var row = getAncestorByClass(event.target, "testGroupRow");
-            if (row)
-            {
-                cancelEvent(event);
-                FBTestApp.TestRunner.runTests(row.repObject.tests);
-            }
-        }
-    },
-
-    onClick: function(event)
-    {
-        if (isLeftClick(event))
-        {
-            var row = getAncestorByClass(event.target, "testGroupRow");
-            if (row)
-            {
-                this.toggleRow(row);
-                cancelEvent(event);
-            }
-        }
-    },
-
-    expandGroup: function(row)
-    {
-        if (hasClass(row, "testGroupRow"))
-            this.toggleRow(row, true);
-    },
-
-    collapseGroup: function(row)
-    {
-        if (hasClass(row, "testGroupRow") && hasClass(row, "opened"))
-            this.toggleRow(row);
-    },
-
-    toggleRow: function(row, forceOpen)
-    {
-        var opened = hasClass(row, "opened");
-        if (opened && forceOpen)
-            return;
-
-        toggleClass(row, "opened");
-        if (hasClass(row, "opened"))
-        {
-            var group = row.repObject;
-            var infoBodyRow = this.groupBodyTag.insertRows({group: group}, row)[0];
-            infoBodyRow.repObject = group;
-            this.initBody(infoBodyRow);
-        }
-        else
-        {
-            var infoBodyRow = row.nextSibling;
-            row.parentNode.removeChild(infoBodyRow);
-        }
-    },
-
-    initBody: function(infoBodyRow)
-    {
-        var group = infoBodyRow.repObject;
-        var table = FBTestApp.TestList.tag.replace({}, infoBodyRow.firstChild);
-        var row = FBTestApp.TestList.rowTag.insertRows({tests: group.tests}, table.firstChild)[0];
-        for (var i=0; i<group.tests.length; i++)
-        {
-            var test = group.tests[i];
-            test.row = row;
-            row = row.nextSibling;
-        }
-    },
-
-    // Firebug rep support
-    supportsObject: function(group, type)
-    {
-        return group instanceof FBTestApp.TestGroup;
-    },
-
-    browseObject: function(group, context)
-    {
-        return false;
-    },
-
-    getRealObject: function(group, context)
-    {
-        return group;
-    },
-
-    // Context menu
-    getContextMenuItems: function(group, target, context)
-    {
-        var items = [];
-
-        items.push({
-          label: $STR("fbtest.cmd.Expand All"),
-          nol10n: true,
-          command: bindFixed(this.onExpandAll, this, group)
-        });
-
-        items.push({
-          label: $STR("fbtest.cmd.Collapse All"),
-          nol10n: true,
-          command: bindFixed(this.onCollapseAll, this, group)
-        });
-
-        items.push("-");
-
-        items.push({
-          label: $STR("fbtest.cmd.Run From Here"),
-          nol10n: true,
-          command: bindFixed(this.onRunFromHere, this, group)
-        });
-
-        items.push({
-          label: $STR("fbtest.contextmenu.label.Hide Passing Tests"),
-          nol10n: true,
-          type: "checkbox",
-          checked: hasClass(FBTestApp.TestConsole.table, "hidePassingTests"),
-          command: bindFixed(FBTestApp.TestConsole.hidePassingTests, FBTestApp.TestConsole)
-        });
-
-        items.push("-");
-
-        items.push({
-          label: $STR("fbtest.cmd.Copy All Errors"),
-          nol10n: true,
-          command: bindFixed(this.onCopyAllErrors, this)
-        });
-
-        items.push({
-          label: $STR("fbtest.contextmenu.label.Submit Test Results"),
-          nol10n: true,
-          disabled: !FBTestApp.TestCouchUploader.isEnabled(),
-          command: bindFixed(FBTestApp.TestCouchUploader.onUpload, FBTestApp.TestCouchUploader)
-        });
-
-        return items;
-    },
-
-    // Commands
-    onExpandAll: function(group)
-    {
-        var table = getAncestorByClass(group.row, "groupTable");
-        var rows = cloneArray(table.firstChild.childNodes);
-        for (var i=0; i<rows.length; i++)
-            this.expandGroup(rows[i]);
-    },
-
-    onCollapseAll: function(group)
-    {
-        var table = getAncestorByClass(group.row, "groupTable");
-        var rows = cloneArray(table.firstChild.childNodes);
-        for (var i=0; i<rows.length; i++)
-            this.collapseGroup(rows[i]);
-    },
-
-    onRunFromHere: function(group)
-    {
-        var groups = FBTestApp.TestConsole.groups;
-        var index = groups.indexOf(group);
-
-        // Join all tests from this group and those which follow.
-        var tests = [];
-        for (var i=index; i<groups.length; i++)
-            tests.push.apply(tests, groups[i].tests);
-
-        if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("fbtest.onRunFromHere; Number of tests: " + tests.length, tests);
-
-        FBTestApp.TestRunner.runTests(tests);
-    },
-
-    onCopyAllErrors: function()
-    {
-        try
-        {
-            var text = FBTestApp.TestConsole.getErrorSummaryText();
-            copyToClipboard(text);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_FBTEST)
-                FBTrace.sysout("fbtrace.FBTestApp.GroupList; onCopyAllErrors EXCEPTION", err);
-        }
-    },
-
-
-});
-
-//-------------------------------------------------------------------------------------------------
+// ********************************************************************************************* //
+// Test List
 
 /** @domplate */
-FBTestApp.TestList = domplate(
+var TestList = domplate(
 /** @lends FBTestApp.TestList */
 {
     tag:
@@ -318,49 +84,49 @@ FBTestApp.TestList = domplate(
 
     onRunTest: function(event)
     {
-        if (isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
-            cancelEvent(event);
+            Events.cancelEvent(event);
 
             // Even one test is launched as a test-suite.
-            var row = getAncestorByClass(event.target, "testListRow");
+            var row = Dom.getAncestorByClass(event.target, "testListRow");
             FBTestApp.TestRunner.runTests([row.repObject]);
         }
     },
 
     onExpandTest: function(event)
     {
-        if (isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
-            var row = getAncestorByClass(event.target, "testListRow");
+            var row = Dom.getAncestorByClass(event.target, "testListRow");
             if (row && row.repObject.results && row.repObject.results.length > 0)
             {
                 this.toggleRow(row);
-                cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     },
 
     expandTest: function(row)
     {
-        if (hasClass(row, "testListRow"))
+        if (Css.hasClass(row, "testListRow"))
             this.toggleRow(row, true);
     },
 
     collapseTest: function(row)
     {
-        if (hasClass(row, "testListRow") && hasClass(row, "opened"))
+        if (Css.hasClass(row, "testListRow") && Css.hasClass(row, "opened"))
             this.toggleRow(row);
     },
 
     toggleRow: function(row, forceOpen)
     {
-        var opened = hasClass(row, "opened");
+        var opened = Css.hasClass(row, "opened");
         if (opened && forceOpen)
             return;
 
-        toggleClass(row, "opened");
-        if (hasClass(row, "opened"))
+        Css.toggleClass(row, "opened");
+        if (Css.hasClass(row, "opened"))
         {
             var test = row.repObject;
             var infoBodyRow = this.rowBodyTag.insertRows({test: test}, row)[0];
@@ -377,9 +143,9 @@ FBTestApp.TestList = domplate(
     initBody: function(infoBodyRow)
     {
         var test = infoBodyRow.repObject;
-        var table = FBTestApp.TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
+        var table = TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
         var tbody = table.firstChild;
-        var row = FBTestApp.TestResultRep.resultTag.insertRows(
+        var row = TestResultRep.resultTag.insertRows(
             {results: test.results}, tbody.lastChild ? tbody.lastChild : tbody)[0];
 
         for (var i=0; i<test.results.length; i++)
@@ -414,66 +180,66 @@ FBTestApp.TestList = domplate(
         if (test.testPage)
         {
             items.push({
-              label: $STR("fbtest.cmd.Open Test Page"),
+              label: Locale.$STR("fbtest.cmd.Open Test Page"),
               nol10n: true,
-              command: bindFixed(this.onOpenTestPage, this, test)
+              command: Obj.bindFixed(this.onOpenTestPage, this, test)
             });
         }
 
         items.push("-");
 
         items.push({
-          label: $STR("fbtest.cmd.Run From Here"),
+          label: Locale.$STR("fbtest.cmd.Run From Here"),
           nol10n: true,
-          command: bindFixed(this.onRunFromHere, this, test)
+          command: Obj.bindFixed(this.onRunFromHere, this, test)
         });
 
         var counter = Firebug.getPref(FBTestApp.prefDomain, "runMoreTimes");
         items.push({
-          //xxxHonza: doesn't work? label: $STRF("fbtest.cmd.Run More Times", [counter]),
+          //xxxHonza: doesn't work? label: Locale.$STRF("fbtest.cmd.Run More Times", [counter]),
           label: "Run " + counter + " Times",
           nol10n: true,
-          command: bindFixed(this.onRunMoreTimes, this, test)
+          command: Obj.bindFixed(this.onRunMoreTimes, this, test)
         });
 
         items.push({
-          label: $STR("fbtest.contextmenu.label.Hide Passing Tests"),
+          label: Locale.$STR("fbtest.contextmenu.label.Hide Passing Tests"),
           nol10n: true,
           type: "checkbox",
-          checked: hasClass(FBTestApp.TestConsole.table, "hidePassingTests"),
-          command: bindFixed(FBTestApp.TestConsole.hidePassingTests, FBTestApp.TestConsole)
+          checked: Css.hasClass(FBTestApp.TestConsole.table, "hidePassingTests"),
+          command: Obj.bindFixed(FBTestApp.TestConsole.hidePassingTests, FBTestApp.TestConsole)
         });
 
         items.push({
-          label: $STR("fbtest.contextmenu.label.Disable Test"),
+          label: Locale.$STR("fbtest.contextmenu.label.Disable Test"),
           nol10n: true,
           type: "checkbox",
           checked: test.disabled,
-          command: bindFixed(this.onDisableTest, this, test)
+          command: Obj.bindFixed(this.onDisableTest, this, test)
         });
 
         items.push("-");
 
         items.push({
-          label: $STR("fbtest.cmd.Copy All Errors"),
+          label: Locale.$STR("fbtest.cmd.Copy All Errors"),
           nol10n: true,
-          command: bindFixed(FBTestApp.GroupList.onCopyAllErrors, FBTestApp.GroupList)
+          command: Obj.bindFixed(FBTestApp.GroupList.onCopyAllErrors, FBTestApp.GroupList)
         });
 
         if (test.error)
         {
             items.push({
-              label: $STR("fbtest.cmd.Copy Errors"),
+              label: Locale.$STR("fbtest.cmd.Copy Errors"),
               nol10n: true,
-              command: bindFixed(this.onCopyAllErrors, this, test)
+              command: Obj.bindFixed(this.onCopyAllErrors, this, test)
             });
         }
 
         items.push({
-          label: $STR("fbtest.contextmenu.label.Submit Test Results"),
+          label: Locale.$STR("fbtest.contextmenu.label.Submit Test Results"),
           nol10n: true,
           disabled: !FBTestApp.TestCouchUploader.isEnabled(),
-          command: bindFixed(FBTestApp.TestCouchUploader.onUpload, FBTestApp.TestCouchUploader)
+          command: Obj.bindFixed(FBTestApp.TestCouchUploader.onUpload, FBTestApp.TestCouchUploader)
         });
 
         return items;
@@ -482,12 +248,12 @@ FBTestApp.TestList = domplate(
     // Commands
     onCopyAllErrors: function(test)
     {
-        copyToClipboard(test.getErrors());
+        System.copyToClipboard(test.getErrors());
     },
 
     onOpenTestPage: function(test)
     {
-        FBTestApp.FBTest.FirebugWindow.FBL.openNewTab(test.testCasePath + test.testPage);
+        Win.openNewTab(test.testCasePath + test.testPage);
     },
 
     onRunFromHere: function(test)
@@ -530,185 +296,18 @@ FBTestApp.TestList = domplate(
         test.disabled = !test.disabled;
 
         if (test.disabled)
-            setClass(test.row, "disabled");
+            Css.setClass(test.row, "disabled");
         else
-            removeClass(test.row, "disabled");
+            Css.removeClass(test.row, "disabled");
     }
 });
 
-// ************************************************************************************************
-// TestGroup (list of related tests)
-
-/** @class */
-FBTestApp.TestGroup = function(name)
-{
-    this.name = name;
-    this.tests = [];
-};
-
-FBTestApp.TestGroup.prototype =
-{
-    getErrors: function(includeMessages)
-    {
-        var text = "";
-        for (var i=0; i<this.tests.length; i++)
-        {
-            var test = this.tests[i];
-            var errors = test.getErrors(includeMessages);
-            if (errors)
-                text += errors + "\n";
-        }
-        return text;
-    },
-
-    getFailingTests: function()
-    {
-        var tests = [];
-        for (var i=0; i<this.tests.length; i++)
-        {
-            var test = this.tests[i];
-            if (!test.error || test.category == "fails")
-                continue;
-            tests.push(test);
-        }
-        return tests;
-    },
-
-    update: function()
-    {
-        var error = false;
-        for (var i=0; i<this.tests.length; i++)
-        {
-            var test = this.tests[i];
-            if (test.error && test.category != "fails")
-            {
-                error = true;
-                break;
-            }
-        }
-
-        if (error)
-            setClass(this.row, "error");
-        else
-            removeClass(this.row, "error");
-    }
-};
-
-// ************************************************************************************************
-// Test
-
-/** @class */
-FBTestApp.Test = function(group, uri, desc, category, testPage)
-{
-    if (category != "passes" && category != "fails")
-    {
-        if (FBTrace.DBG_ERRORS || FBTrace.DBG_FBTEST)
-            FBTrace.sysout("fbrace.FTestApp.Test; Wrong category for a test: " +
-                category + ", " + uri);
-    }
-
-    // Test definition.
-    this.group = group;
-    this.uri = uri;
-    this.desc = desc;
-    this.category = category;
-    this.testPage = testPage;
-
-    // Used by the test runner.
-    this.results = [];
-    this.error = false;
-    this.row = null;
-    this.path = null;
-
-    // Timing
-    this.start = 0;
-    this.end = 0;
-
-    this.disabled = false;
-};
-
-FBTestApp.Test.prototype =
-{
-    appendResult: function(testResult)
-    {
-        this.results.push(testResult);
-
-        setClass(this.row, "results");
-
-        // If it's an error update test so, it's reflecting an error state.
-        if (!testResult.pass)
-        {
-            setClass(this.row, "error");
-            this.error = true;
-        }
-    },
-
-    onStartTest: function(baseURI)
-    {
-        this.path = baseURI + this.uri;
-        this.results = [];
-        this.error = false;
-
-        setClass(this.row, "running");
-        removeClass(this.row, "results");
-        removeClass(this.row, "error");
-
-        // Remove previous results from the UI.
-        if (hasClass(this.row, "opened"))
-        {
-            var infoBody = this.row.nextSibling;
-            clearNode(FBL.getElementByClass(infoBody, "testBodyCol"));
-        }
-
-        // Clear time info
-        var timeNode = FBL.getElementByClass(this.row, "statusIcon");
-        clearNode(timeNode);
-        timeNode.removeAttribute("title");
-    },
-
-    onTestDone: function()
-    {
-        removeClass(this.row, "running");
-
-        var timeNode = FBL.getElementByClass(this.row, "statusIcon");
-        var elapsedTime = this.end - this.start;
-        timeNode.innerHTML = "(" + formatTime(elapsedTime) + ")";
-        timeNode.setAttribute("title", elapsedTime + "ms");
-
-        // Update group error flag.
-        this.group.update();
-    },
-
-    onManualVerify: function(verifyMsg, instructions)
-    {
-        removeClass(this.row, "running");
-    },
-
-    getErrors: function(includeMessages)
-    {
-        if (!this.error || this.category == "fails")
-            return "";
-
-        var text = "[FAILED] " + this.uri + ": " + this.desc;
-        if (!includeMessages)
-            return text;
-
-        text += "\n";
-
-        for (var i=0; i<this.results.length; i++)
-        {
-            var testResult = this.results[i];
-            text += "- " + testResult.msg + (testResult.pass ? "" : " [ERROR]") + "\n";
-        }
-        return text;
-    }
-};
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
-Firebug.registerRep(FBTestApp.GroupList);
-Firebug.registerRep(FBTestApp.TestList);
+Firebug.registerRep(TestList);
 
-// ************************************************************************************************
+return TestList;
+
+// ********************************************************************************************* //
 }});

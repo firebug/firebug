@@ -1,21 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
-    "firebug/lib/xpcom",
-    "firebug/lib/domplate"
+    "fbtrace/lib/domplate",
+    "fbtrace/trace",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/object",
+    "fbtrace/lib/menu",
 ],
-function(FBL, XPCOM, Domplate) { with (FBL) { with (Domplate) {
+function(Domplate, FBTrace, Dom, Obj, Menu) {
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Shorcuts and Services
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
-const observerService = XPCOM.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 
-Components.utils["import"]("resource://fbtrace/firebug-trace-service.js");
+Cu["import"]("resource://fbtrace/firebug-trace-service.js");
 
 //********************************************************************************************** //
 
@@ -37,7 +41,7 @@ var GlobalTab = domplate(
 
         var input = {
             topics: topics,
-            onClick: bind(this.toggleTopic, this)
+            onClick: Obj.bind(this.toggleTopic, this)
         };
 
         this.tag.replace(input, parentNode);
@@ -55,7 +59,7 @@ var GlobalTab = domplate(
 
     forEachTopicElement: function(fn)
     {
-        var topicDivs = FBL.getElementsByClass(this.panelNode, "traceOption")
+        var topicDivs = Dom.getElementsByClass(this.panelNode, "traceOption")
         for (var i=0; i<topicDivs.length; i++)
         {
             var topicElt = topicDivs[i];
@@ -76,13 +80,18 @@ var GlobalTab = domplate(
                     self.removeTopic(topicElt);
 
                 if (FBTrace.DBG_FBTRACE)
+                {
                     FBTrace.sysout("AllTopics add: "+add+" isObserved "+self.isObserved(topicElt)+
                         " "+topicElt.innerHTML);
+                }
             }
-            catch(exc)
+            catch (exc)
             {
                 if (FBTrace.DBG_FBTRACE)
-                    FBTrace.sysout("FBTrace; globalObserver allTopics fails for "+topicElt.innerHTML+" "+exc, exc);
+                {
+                    FBTrace.sysout("FBTrace; globalObserver allTopics fails for " +
+                        topicElt.innerHTML + " " + exc, exc);
+                }
             }
         });
     },
@@ -94,7 +103,7 @@ var GlobalTab = domplate(
         if (!observers)
         {
             if (FBTrace.DBG_FBTRACE)
-                FBTrace.sysout("isObserved no observers of topic "+topic);
+                FBTrace.sysout("isObserved no observers of topic " + topic);
 
             return false;
         }
@@ -105,13 +114,13 @@ var GlobalTab = domplate(
             if (x.wrappedJSObject == GlobalObserver)
             {
                 if (FBTrace.DBG_FBTRACE)
-                    FBTrace.sysout("isObserved found FBTrace.globaleObserver of topic "+topic, x);
+                    FBTrace.sysout("isObserved found FBTrace.globaleObserver of topic " + topic, x);
                 return true;
             }
         }
 
         if (FBTrace.DBG_FBTRACE)
-            FBTrace.sysout("isObserved no observers of topic "+topic+" match GlobalObserver");
+            FBTrace.sysout("isObserved no observers of topic " + topic + " match GlobalObserver");
 
         return false;
     },
@@ -133,15 +142,15 @@ var GlobalTab = domplate(
         node.removeAttribute("checked");
 
         if (FBTrace.DBG_FBTRACE)
-            FBTrace.sysout("FBTrace; GlobalObserver removeObserver "+topic);
+            FBTrace.sysout("FBTrace; GlobalObserver removeObserver " + topic);
     },
 
     getOptionsMenuItems: function()
     {
         var items = [
-            {label: "All On", command: bindFixed(this.allTopics, this, true)},
-            {label: "All Off", command: bindFixed(this.allTopics, this, false)},
-            optionMenu(GlobalObserver.shoutOptionLabel, GlobalObserver.shoutOptionName),
+            {label: "All On", command: Obj.bindFixed(this.allTopics, this, true)},
+            {label: "All Off", command: Obj.bindFixed(this.allTopics, this, false)},
+            Menu.optionMenu(GlobalObserver.shoutOptionLabel, GlobalObserver.shoutOptionName),
         ];
         return items;
     },
@@ -161,40 +170,54 @@ var GlobalObserver =
     {
         var localTrace = traceConsoleService.getTracer(TraceConsole.prefDomain);
 
-        // Log info into the Firebug tracing console.
+        // Log info into the tracing console.
         var shout = (GlobalObserver.shoutOptionValue ? "globalObserver." : "");
         localTrace.sysout(shout + "observe: " + topic, {subject:subject, data: data});
 
-        if (topic == 'domwindowopened')
+        if (topic == "domwindowopened")
         {
             try
             {
                 if (subject instanceof Ci.nsIDOMWindow)
                 {
                     if (FBTrace.DBG_FBTRACE)
-                        FBTrace.sysout("FBTrace; globalObserver found domwindowopened "+subject.location+"\n");
+                    {
+                        FBTrace.sysout("FBTrace; globalObserver found domwindowopened " +
+                            subject.location);
+                    }
                 }
             }
-            catch(exc)
+            catch (exc)
             {
                 FBTrace.sysout("FBTrace; globalObserver notify console opener FAILED ", exc);
             }
         }
-        else if (topic == 'domwindowclosed') // Apparently this event comes before the unload event on the DOMWindow
+
+        // Apparently this event comes before the unload event on the DOMWindow
+        else if (topic == "domwindowclosed") 
         {
             if (subject instanceof Ci.nsIDOMWindow)
             {
                 if (FBTrace.DBG_FBTRACE)
-                    FBTrace.sysout("FBTrace; globalObserver found domwindowclosed "+subject.location+getStackDump());
+                {
+                    FBTrace.sysout("FBTrace; globalObserver found domwindowclosed " +
+                        subject.location);
+                }
 
                 if (subject.location.toString() == "chrome://fbtrace/content/traceConsole.xul")
                     throw new Error("FBTrace; globalObserver should not find traceConsole.xul");
             }
         }
-        else if (topic == 'dom-window-destroyed')  // subject appears to be the nsIDOMWindow with a location that is invalid and closed == true; data null
+
+        // subject appears to be the nsIDOMWindow with a location that is invalid and
+        // closed == true; data null
+        else if (topic == "dom-window-destroyed")
         {
             if (FBTrace.DBG_FBTRACE)
-                FBTrace.sysout("FBTrace; globalObserver found dom-window-destroyed subject:", subject);
+            {
+                FBTrace.sysout("FBTrace; globalObserver found dom-window-destroyed subject:",
+                    subject);
+            }
         }
     },
 
@@ -203,7 +226,8 @@ var GlobalObserver =
     shoutOptionValue: true,
 };
 
-GlobalObserver.wrappedJSObject = GlobalObserver;  // and eye of newt
+// and eye of newt
+GlobalObserver.wrappedJSObject = GlobalObserver;
 
 //********************************************************************************************** //
 
@@ -305,8 +329,7 @@ var topics = [
 
 //********************************************************************************************** //
 
-TraceConsole.GlobalTab = GlobalTab;
 return GlobalTab;
 
 //********************************************************************************************** //
-}}});
+}});

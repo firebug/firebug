@@ -418,7 +418,7 @@ this.synthesizeMouse = function(node, offsetX, offsetY, event, win)
     // Use the first client rect for clicking (e.g. SPAN can have more).
     var rect = rectCollection[0]; //node.getBoundingClientRect();
 
-    if (!FBTest.ok(rect, "Can't synthesize mouse event"))
+    if (!FBTest.ok(rect, "Mouse event must be synthesized"))
         return;
 
     var frameOffset = getFrameOffset(node);
@@ -2202,12 +2202,12 @@ this.searchInHtmlPanel = function(searchText, callback)
     // The listener is automatically removed when the test window
     // is unloaded in case the seletion actually doesn't occur,
     // see FBTestSelection.js
-    SelectionController.addListener(function selectionListener()
+    FBTestApp.SelectionController.addListener(function selectionListener()
     {
         var sel = panel.document.defaultView.getSelection();
         if (sel && !sel.isCollapsed && sel.toString() == searchText)
         {
-            SelectionController.removeListener(arguments.callee);
+            FBTestApp.SelectionController.removeListener(arguments.callee);
             callback(sel);
         }
     });

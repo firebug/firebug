@@ -1,66 +1,48 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
-// Test Console singleton object
+define([
+    "firebug/lib/trace",
+],
+function(FBTrace) {
 
-/** @namespace */
-var FBTestApp = {};
-
-( /** @scope _testCore_ @this FBTestApp */ function() {
-
+// ********************************************************************************************* //
 // Registration
-var namespaces = [];
-this.ns = function(fn)
+
+var FBTestApp =
 {
-    var ns = {};
-    namespaces.push(fn, ns);
-    return ns;
-};
-
-// Initialization
-this.initialize = function()
-{
-    FBTestApp.prefDomain = "extensions.fbtest";
-
-    // Initialize global variables before all the namespaces are initialized.
-    var args = window.arguments[0];
-    window.initWithParams(args);
-
-    // Register strings so, Firebug's localization APIs can be used. This also
-    // must be done before namespaces are initialized.
-    if (Firebug.registerStringBundle)
-        Firebug.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
-
-    for (var i=0; i<namespaces.length; i+=2)
+    initialize: function()
     {
-        var fn = namespaces[i];
-        var ns = namespaces[i+1];
-        fn.apply(ns);
-    }
+        FBTestApp.prefDomain = "extensions.fbtest";
 
-    // Set the Firebug window now. In case of a new window we have to wait
-    // till all namespaces are initialized.
-    FBTestApp.FBTest.FirebugWindow = args.firebugWindow;
+        // Initialize global variables before all the namespaces are initialized.
+        var args = window.arguments[0];
+        window.initWithParams(args);
 
-    // Now we can initialize entire console.
-    FBTestApp.TestConsole.initialize();
+        // Register strings so, Firebug's localization APIs can be used. This also
+        // must be done before namespaces are initialized.
+        if (Firebug.registerStringBundle)
+            Firebug.registerStringBundle("chrome://fbtest/locale/fbtest.properties");
+
+        // Set the Firebug window now. In case of a new window we have to wait
+        // till all namespaces are initialized.
+        FBTestApp.FBTest.FirebugWindow = args.firebugWindow;
+
+        // Now we can initialize entire console.
+        FBTestApp.TestConsole.initialize();
+    },
+
+    shutdown: function()
+    {
+        window.removeEventListener("load", FBTestApp.initialize, false);
+        window.removeEventListener("unload", FBTestApp.shutdown, false);
+
+        FBTestApp.TestConsole.shutdown();
+    },
 };
 
-// Clean up
-this.shutdown = function()
-{
-    window.removeEventListener("load", FBTestApp.initialize, false);
-    window.removeEventListener("unload", FBTestApp.shutdown, false);
-
-    FBTestApp.TestConsole.shutdown();
-};
-
-// Register handlers to maintain extension life cycle.
-window.addEventListener("load", FBTestApp.initialize, false);
-window.addEventListener("unload", FBTestApp.shutdown, false);
-
+// ********************************************************************************************* //
 // Helper method for passing arguments into an existing window.
-/** @ignore */
+
 window.initWithParams = function(args)
 {
     // Get default test list and optional test to be executed from the command line.
@@ -82,6 +64,17 @@ window.initWithParams = function(args)
         FBTestApp.FBTest.FirebugWindow = args.firebugWindow;
 };
 
-}).apply(FBTestApp);
+// ********************************************************************************************* //
+// Registration
 
-// ************************************************************************************************
+// Register handlers to maintain extension life cycle.
+window.addEventListener("load", FBTestApp.initialize, false);
+window.addEventListener("unload", FBTestApp.shutdown, false);
+
+// xxxHonza: hack
+window.FBTestApp = FBTestApp;
+
+return FBTestApp;
+
+// ********************************************************************************************* //
+});

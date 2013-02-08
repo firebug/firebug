@@ -1,14 +1,20 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns( /** @scope _testCouchUploader_ */ function() { with (FBL) {
+define([
+    "firebug/lib/trace",
+    "firebug/lib/string",
+    "firebug/lib/object",
+    "firebug/chrome/window",
+],
+function(FBTrace, Str, Obj, Win) {
 
-// ************************************************************************************************
-// Test Console Implementation
+// ********************************************************************************************* //
+// Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /** @namespace */
 FBTestApp.TestCouchUploader =
@@ -33,7 +39,7 @@ FBTestApp.TestCouchUploader =
             return;
 
         // Crop the message (1K max)
-        header["User Message"] = cropString(params.message, 1024);
+        header["User Message"] = Str.cropString(params.message, 1024);
 
         // Since Gecko 2.0 installed extensions must be collected asynchronously
         var self = this;
@@ -51,8 +57,10 @@ FBTestApp.TestCouchUploader =
                 error: function(status, error, reason)
                 {
                     if (FBTrace.DBG_FBTEST || FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("fbtest.TestCouchUploader.onUpload; ERROR Can't upload test results" +
-                            status + ", " + error + ", " + reason);
+                    {
+                        FBTrace.sysout("fbtest.TestCouchUploader.onUpload; ERROR Can't upload " +
+                            "test results" + status + ", " + error + ", " + reason);
+                    }
 
                     alert("Can't upload test results! " + error + ", " + reason);
                 }
@@ -93,8 +101,10 @@ FBTestApp.TestCouchUploader =
             error: function(status, error, reason)
             {
                 if (FBTrace.DBG_FBTEST || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("fbtest.TestCouchUploader.onUpload; ERROR Can't upload test results" +
-                        status + ", " + error + ", " + reason);
+                {
+                    FBTrace.sysout("fbtest.TestCouchUploader.onUpload; ERROR Can't upload " +
+                        "test results" + status + ", " + error + ", " + reason);
+                }
 
                 alert("Can't upload test results!");
             }
@@ -105,8 +115,6 @@ FBTestApp.TestCouchUploader =
     onResultsUploaded: function(headerid, data)
     {
         var remoteFBL = FBTestApp.FBTest.FirebugWindow.FBL;
-        //remoteFBL.openNewTab("http://legoas/firebug/tests/content/testbot/results/?userheaderid=" + headerid);
-        //remoteFBL.openNewTab("http://getfirebug.com/tests/content/testbot/results/?userheaderid=" + headerid);
 
         var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
         var name = Firebug.getPref("extensions.fbtest", "databaseName");
@@ -120,7 +128,7 @@ FBTestApp.TestCouchUploader =
     onStatusBarPopupShowing: function(event)
     {
         // Can't upload if there are no results.
-        $("menu_uploadTestResults").disabled = !this.isEnabled();
+        Firebug.chrome.$("menu_uploadTestResults").disabled = !this.isEnabled();
     },
 
     isEnabled: function()
@@ -128,7 +136,7 @@ FBTestApp.TestCouchUploader =
         return this.getTotalTests() > 0;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getHeaderDoc: function()
     {
@@ -219,7 +227,7 @@ FBTestApp.TestCouchUploader =
 
     getResultDoc: function(test)
     {
-        var result = extend(this.getHeaderDoc(), {type: "user-result"});
+        var result = Obj.extend(this.getHeaderDoc(), {type: "user-result"});
 
         result.description = test.desc;
         result.file = test.testPage ? test.testPage : test.uri;
@@ -240,7 +248,7 @@ FBTestApp.TestCouchUploader =
         return result;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getTotalTests: function()
     {
@@ -255,7 +263,7 @@ FBTestApp.TestCouchUploader =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /** @namespace */
 var CouchDB =
@@ -298,7 +306,8 @@ var CouchDB =
         var uri = Firebug.getPref("extensions.fbtest", "databaseURL");
         var name = Firebug.getPref("extensions.fbtest", "databaseName");
 
-        extend(options, {successStatus: 201});
+        Obj.extend(options, {successStatus: 201});
+
         this.ajax({
             type: "POST",
             url: uri + name + "/_bulk_docs",
@@ -328,7 +337,9 @@ var CouchDB =
     {
         try
         {
-            var request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
+            var request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+                createInstance(Ci.nsIXMLHttpRequest);
+
             request.open(options.type, options.url, true);
             request.setRequestHeader("Content-Type", options.contentType);
             /** @ignore */
@@ -350,7 +361,7 @@ var CouchDB =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function toJSON(obj)
 {
@@ -370,5 +381,10 @@ function parseJSON(data)
     }
 }
 
-// ************************************************************************************************
-}});
+// ********************************************************************************************* //
+// Registration
+
+return FBTestApp.TestCouchUploader;
+
+// ********************************************************************************************* //
+});

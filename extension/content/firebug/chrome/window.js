@@ -133,6 +133,13 @@ Win.openNewTab = function(url, postText)
     }
 
     var tabBrowser = Firefox.getTabBrowser();
+    if (!tabBrowser)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("window.openNewTab; ERROR No tabBrowser!");
+        return;
+    }
+
     return tabBrowser.selectedTab = tabBrowser.addTab(url, null, null, postData);
 };
 

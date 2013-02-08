@@ -1,17 +1,26 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns( /** @scope _testListLoader_ */ function() { with (FBL) {
+define([
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/lib/events",
+    "firebug/lib/wrapper",
+    "firebug/lib/css",
+    "fbtest/browserLoadWatcher",
+],
+function(FBTrace, Obj, Events, Wrapper, Css, BrowserLoadWatcher) {
 
-// ************************************************************************************************
-// Test Logger Implementation
+// ********************************************************************************************* //
+// Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// TestListLoader Implementation
 
 /** @namespace */
-FBTestApp.TestListLoader =
+var TestListLoader =
 {
     loadTestList: function(browser, testListPath, callback)
     {
@@ -50,7 +59,7 @@ FBTestApp.TestListLoader =
         });
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     loadNextTest: function(testLists, groups, callback)
     {
@@ -106,8 +115,8 @@ FBTestApp.TestListLoader =
         var Firebug = FBTestApp.FBTest.FirebugWindow.Firebug;
 
         var testLists = [];
-        dispatch([Firebug], "onGetTestList", [testLists]);
-        dispatch(Firebug.modules, "onGetTestList", [testLists]);
+        Events.dispatch([Firebug], "onGetTestList", [testLists]);
+        Events.dispatch(Firebug.modules, "onGetTestList", [testLists]);
 
         if (FBTrace.DBG_FBTEST)
             FBTrace.sysout("fbtest.getRegisteredTestLists; ", testLists);
@@ -117,7 +126,7 @@ FBTestApp.TestListLoader =
 
     processTestList: function(doc)
     {
-        var win = unwrapObject(doc.defaultView);
+        var win = Wrapper.unwrapObject(doc.defaultView);
         if (!win.testList)
             return;
 
@@ -204,20 +213,20 @@ FBTestApp.TestListLoader =
         return groups;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Helpers
 
     addStyleSheets: function(doc)
     {
         // Some CSS from Firebug namespace.
-        addStyleSheet(doc, createStyleSheet(doc, "chrome://firebug/skin/dom.css"));
-        addStyleSheet(doc, createStyleSheet(doc, "chrome://firebug-os/skin/panel.css"));
-        addStyleSheet(doc, createStyleSheet(doc, "chrome://firebug/skin/console.css"));
+        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/dom.css"));
+        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug-os/skin/panel.css"));
+        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/console.css"));
 
         // Append specific FBTest CSS.
         var styles = ["testConsole.css", "testList.css", "testResult.css", "tabView.css"];
         for (var i=0; i<styles.length; i++)
-            addStyleSheet(doc, createStyleSheet(doc, "chrome://fbtest/skin/" + styles[i]));
+            Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://fbtest/skin/" + styles[i]));
     },
 
     /**
@@ -246,81 +255,10 @@ FBTestApp.TestListLoader =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
 
-function BrowserLoadWatcher(browser, url, callback)
-{
-    this.browser = browser;
-    this.callback = callback;
+return TestListLoader;
 
-    // Wait for "DOMContentLoaded" event.
-    this.domContentLoadedListener = bind(this.onDOMContentLoaded, this);
-    this.browser.addEventListener("DOMContentLoaded", this.domContentLoadedListener, true);
-    this.browser.setAttribute("src", url);
-}
-
-BrowserLoadWatcher.prototype =
-{
-    onDOMContentLoaded: function(event)
-    {
-        var target = event.target;
-
-        // Remove "DOMContentLoaded" listener
-        this.browser.removeEventListener("DOMContentLoaded", this.domContentLoadedListener, true);
-        this.domContentLoadedListener = null;
-
-        // If fbTestFrame element exists it's a swarm page.
-        var fbTestFrame = target.getElementById("FBTest");
-        if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("fbtest.watcher.onDOMContentLoaded; (frame=" +
-                (fbTestFrame ? "yes" : "no") + "): " + target.location, target);
-
-        if (fbTestFrame)
-        {
-            this.frameLoadedListener = bind(this.onFrameLoaded, this);
-            fbTestFrame.contentDocument.addEventListener("load", this.frameLoadedListener, true);
-        }
-        else
-        {
-            this.windowLoadedListener = bind(this.onWindowLoaded, this);
-            this.browser.addEventListener("load", this.windowLoadedListener, true);
-        }
-    },
-
-    onFrameLoaded: function(event)
-    {
-        var target = event.target;
-
-        if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("fbtest.watcher.onFrameLoaded "+target.getAttribute("id"), target);
-
-        if (target.getAttribute('id') === "FBTest")
-        {
-            this.callback(target.contentDocument);
-
-            browser.removeEventListener("load", this.frameLoadedListener, true);
-            this.frameLoadedListener = null;
-        }
-    },
-
-    onWindowLoaded: function(event)
-    {
-        var target = event.target;
-
-        if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("fbtest.watcher.onWindowLoaded; "+target.location, target);
-
-        this.callback(target);
-
-        this.browser.removeEventListener("load", this.windowLoadedListener, true);
-        this.windowLoadedListener = null;
-    }
-};
-
-// ************************************************************************************************
-
-// Shortcut
-var TestListLoader = FBTestApp.TestListLoader;
-
-// ************************************************************************************************
-}});
+// ********************************************************************************************* //
+});

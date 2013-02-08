@@ -1,18 +1,28 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns( /** @scope _propTree_ */ function() { with (FBL) {
+define([
+    "firebug/lib/trace",
+    "firebug/lib/domplate",
+    "firebug/lib/events",
+    "firebug/lib/dom",
+    "firebug/lib/css",
+    "firebug/lib/object",
+    "firebug/lib/string",
+],
+function(FBTrace, Domplate, Events, Dom, Css, Obj, Str) {
+with (Domplate) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Simple Property Tree Widget
 // xxxHonza: duplicated in FBTrace, should be a common widget available in Firebug
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Domplate helpers - Tree (domplate widget)
 
 /**
@@ -22,7 +32,7 @@ var Ci = Components.interfaces;
  * 
  * @domplate  
  */
-FBTestApp.Tree = domplate(Firebug.Rep,
+var Tree = domplate(Firebug.Rep,
 /** @lends FBTestApp.Tree */
 {
     tag:
@@ -34,7 +44,8 @@ FBTestApp.Tree = domplate(Firebug.Rep,
         ),
 
     rowTag:
-        TR({"class": "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+        TR({"class": "memberRow $member.open $member.type\\Row",
+            $hasChildren: "$member.hasChildren",
             _repObject: "$member", level: "$member.level"},
             TD({"class": "memberLabelCell",
                 style: "padding-left: $member.indent\\px; width:1%; white-space: nowrap"},
@@ -61,12 +72,12 @@ FBTestApp.Tree = domplate(Firebug.Rep,
 
     onClick: function(event)
     {
-        if (!isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
 
-        var row = getAncestorByClass(event.target, "memberRow");
-        var label = getAncestorByClass(event.target, "memberLabel");
-        if (label && hasClass(row, "hasChildren"))
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
+        if (label && Css.hasClass(row, "hasChildren"))
             this.toggleRow(row);
     },
 
@@ -74,16 +85,16 @@ FBTestApp.Tree = domplate(Firebug.Rep,
     {
         var level = parseInt(row.getAttribute("level"));
         var target = row.lastChild.firstChild;
-        var isString = hasClass(target,"objectBox-string");
+        var isString = Css.hasClass(target,"objectBox-string");
         var repObject = row.repObject;
 
-        if (hasClass(row, "opened"))
+        if (Css.hasClass(row, "opened"))
         {
-            removeClass(row, "opened");
+            Css.removeClass(row, "opened");
             if (isString)
             {
                 var rowValue = repObject.value;
-                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
+                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
             }
             else
             {
@@ -98,7 +109,7 @@ FBTestApp.Tree = domplate(Firebug.Rep,
         }
         else
         {
-            setClass(row, "opened");
+            Css.setClass(row, "opened");
             if (isString)
             {
                 var rowValue = repObject.value;
@@ -124,12 +135,14 @@ FBTestApp.Tree = domplate(Firebug.Rep,
             return [this.createMember("", "", object, level)];
 
         var members = [];
-        for (var p in object) {
+        for (var p in object)
+        {
             var member = this.createMember("", p, object[p], level);
             if (object[p] instanceof Array)
                 member.tag = FirebugReps.Nada.tag;
             members.push(member);
         }
+
         return members;
     },
 
@@ -139,7 +152,7 @@ FBTestApp.Tree = domplate(Firebug.Rep,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
-        var hasChildren = hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
+        var hasChildren = Obj.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
@@ -157,11 +170,13 @@ FBTestApp.Tree = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
-/** @domplate */
-FBTestApp.PropertyTree = domplate(FBTestApp.Tree,
-/** @lends FBTestApp.PropertyTree */
+/**
+ * @domplate
+ */
+var PropertyTree = domplate(Tree,
+/** @lends PropertyTree */
 {
     getMembers: function(object, level)
     {
@@ -190,5 +205,10 @@ FBTestApp.PropertyTree = domplate(FBTestApp.Tree,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
+
+return PropertyTree;
+
+// ********************************************************************************************* //
 }});

@@ -1151,6 +1151,31 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             );
         }
 
+        var prop = Dom.getAncestorByClass(target, "cssProp");
+        if (prop)
+        {
+        	items.push(
+        		{
+        			label: "css.label.Copy_Property_Declaration",
+        			tooltiptext: "css.tip.Copy_Property_Declaration",
+        			id: "fbCopyPropertyDeclaration",
+        			command: Obj.bindFixed(this.copyPropertyDeclaration, this, prop)
+        		},
+        		{
+        			label: "css.label.Copy_Property_Name",
+        			tooltiptext: "css.tip.Copy_Property_Name",
+        			id: "fbCopyPropertyName",
+        			command: Obj.bindFixed(this.copyPropertyName, this, prop)
+        		},
+        		{
+        			label: "css.label.Copy_Property_Value",
+        			tooltiptext: "css.tip.Copy_Property_Value",
+        			id: "fbCopyPropertyValue",
+        			command: Obj.bindFixed(this.copyPropertyValue, this, prop)
+        		}
+        	);
+        }
+
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
@@ -1663,6 +1688,26 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var props = this.getStyleDeclaration(cssSelector);
         System.copyToClipboard(props.join(Str.lineBreak()));
+    },
+
+    copyPropertyDeclaration: function(prop)
+    {
+    	// xxxsz: repObject should be used instead
+        System.copyToClipboard(Str.trim(prop.textContent));
+    },
+
+    copyPropertyName: function(prop)
+    {
+    	// xxxsz: repObject should be used instead
+    	var propName = prop.getElementsByClassName("cssPropName")[0];
+        System.copyToClipboard(propName.textContent);
+    },
+
+    copyPropertyValue: function(prop)
+    {
+    	// xxxsz: repObject should be used instead
+    	var propValue = prop.getElementsByClassName("cssPropValue")[0];
+        System.copyToClipboard(propValue.textContent);
     }
 });
 

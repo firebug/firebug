@@ -1,16 +1,30 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns( /** @scope _testRunner_ */ function() { with (FBL) {
+define([
+    "firebug/lib/trace",
+    "firebug/lib/locale",
+    "firebug/lib/array",
+    "firebug/lib/events",
+    "firebug/lib/dom",
+    "firebug/lib/object",
+    "firebug/lib/string",
+    "firebug/lib/http",
+    "firebug/lib/url",
+    "firebug/lib/css",
+    "fbtest/testResultRep",
+    "fbtest/testListRep",
+    "fbtest/testProgress",
+],
+function(FBTrace, Locale, Arr, Events, Dom, Obj, Str, Http, Url, Css,
+    TestResultRep, TestList, TestProgress) {
 
-// ************************************************************************************************
-// Test Console Implementation
+// ********************************************************************************************* //
+// Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // TestRunner
 
 /**
@@ -18,7 +32,7 @@ var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch
  * 
  * @class  
  */
-FBTestApp.TestRunner = extend(new Firebug.Listener(),
+FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
 /** @lends FBTestApp.TestRunner */
 {
     testQueue: null,
@@ -50,18 +64,18 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             FBTestApp.TestConsole.testCasePath,
             FBTestApp.TestConsole.driverBaseURI);
 
-        tests = cloneArray(tests);
+        tests = Arr.cloneArray(tests);
 
         FBTestApp.Preferences.save();
         FBTestApp.TestSummary.clear();
-        FBTestApp.TestProgress.start(tests.length);
+        TestProgress.start(tests.length);
 
         this.startTime = (new Date()).getTime();
         this.testCount = tests.length;
         this.testQueue = tests;
         this.onFinishCallback = onFinishCallback;
 
-        dispatch(this.fbListeners, "onTestSuiteStart", [tests]);
+        Events.dispatch(this.fbListeners, "onTestSuiteStart", [tests]);
 
         this.runTest(this.getNextTest());
     },
@@ -108,12 +122,12 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
                 {
                     setTimeout(function()
                     {
-                        scrollIntoCenterView(testRow, null, true);
+                        Dom.scrollIntoCenterView(testRow, null, true);
                     }, 500);
                 }
                 else if (this.shouldScroll(testRow))
                 {
-                    scrollIntoCenterView(testRow, null, true);
+                    Dom.scrollIntoCenterView(testRow, null, true);
                 }
             }
 
@@ -121,7 +135,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             // exists and can reflect the UI state.
             this.currentTest.onStartTest(this.currentTest.driverBaseURI);
 
-            dispatch(this.fbListeners, "onTestStart", [this.currentTest]);
+            Events.dispatch(this.fbListeners, "onTestStart", [this.currentTest]);
 
             if (FBTrace.DBG_FBTEST)
                 FBTrace.sysout("fbtest.TestRunner.Test START: " + this.currentTest.path,
@@ -202,7 +216,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
                 (new Date()).getTime();
             this.currentTest.onTestDone();
 
-            dispatch(this.fbListeners, "onTestDone", [this.currentTest]);
+            Events.dispatch(this.fbListeners, "onTestDone", [this.currentTest]);
 
             this.currentTest = null;
         }
@@ -218,7 +232,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         if (this.testQueue && this.testQueue.length)
         {
             // Update progress bar in the status bar.
-            FBTestApp.TestProgress.update(this.testQueue.length);
+            TestProgress.update(this.testQueue.length);
 
             // Run next test
             this.runTest(this.getNextTest());
@@ -226,14 +240,14 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         }
 
         // Otherwise the test-suite (could be also a single test) is finished.
-        FBTestApp.TestProgress.stop();
+        TestProgress.stop();
 
         // Show elapsed time when running more than one test (entire suite or group of tests).
         if (this.startTime)
         {
             this.endTime = (new Date()).getTime();
             var elapsedTime = this.endTime - this.startTime;
-            var message = "Elapsed Time: " + formatTime(elapsedTime) +
+            var message = "Elapsed Time: " + Str.formatTime(elapsedTime) +
                 " (" + this.testCount + " test cases)";
             this.startTime = null;
 
@@ -255,7 +269,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         // Preferences could be changed by tests so restore the previous values.
         FBTestApp.Preferences.restore();
 
-        dispatch(this.fbListeners, "onTestSuiteDone", [canceled]);
+        Events.dispatch(this.fbListeners, "onTestSuiteDone", [canceled]);
 
         // Execute callback to notify about finished test suit (used e.g. for
         // Firefox shutdown if test suite is executed from the command line).
@@ -271,8 +285,8 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_FBTEST)
         {
-            FBTrace.sysout("fbtest.TestRunner.Test manualVerify: " + verifyMsg + " " + this.currentTest.path,
-                this.currentTest);
+            FBTrace.sysout("fbtest.TestRunner.Test manualVerify: " + verifyMsg + " " +
+                this.currentTest.path, this.currentTest);
         }
 
         // Test is done so, clear the break-timeout.
@@ -283,15 +297,15 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         this.currentTest.end = (new Date()).getTime();
 
         // If the test is currently opened, append the result directly into the UI.
-        FBTestApp.TestList.expandTest(this.currentTest.row);
+        TestList.expandTest(this.currentTest.row);
 
         var infoBodyRow = this.currentTest.row.nextSibling;
-        var table = FBL.getElementByClass(infoBodyRow, "testResultTable");
+        var table = Dom.getElementByClass(infoBodyRow, "testResultTable");
         if (!table)
-            table = FBTestApp.TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
+            table = TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
 
         var tbody = table.firstChild;
-        var verify = FBTestApp.TestResultRep.manualVerifyTag.insertRows(
+        var verify = TestResultRep.manualVerifyTag.insertRows(
             {test: this.currentTest, verifyMsg: verifyMsg, instructions: instructions},
             tbody.lastChild ? tbody.lastChild : tbody)[0];
 
@@ -319,19 +333,25 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
     {
         if (!this.browser)
         {
-            this.browser = $("testFrame");  // browser in testConsole
+            this.browser = Firebug.chrome.$("testFrame");  // browser in testConsole
+
             // Hook the load event to run the test in the frameProgressListener
-            this.browser.addProgressListener(this.frameProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
+            this.browser.addProgressListener(this.frameProgressListener,
+                Ci.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
+
             // we don't remove the progress listener
             FBTestApp.TestRunner.defaultTestTimeout = FBTestApp.TestRunner.getDefaultTestTimeout();
         }
 
-        FBTestApp.TestRunner.loadAndRun = bind(FBTestApp.TestRunner.onLoadTestFrame, FBTestApp.TestRunner, test);
+        FBTestApp.TestRunner.loadAndRun = Obj.bind(FBTestApp.TestRunner.onLoadTestFrame,
+            FBTestApp.TestRunner, test);
 
         var testURL = test.path;
         if (/\.js$/.test(testURL))  // then the js needs a wrapper
         {
-            testURL = this.wrapJS(test); // a data url with script tags for FBTestFirebug.js and the test.path
+            // a data url with script tags for FBTestFirebug.js and the test.path
+            testURL = this.wrapJS(test); 
+
             // Load the empty test frame
             this.browser.loadURI(testURL);
         }
@@ -342,20 +362,15 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         }
     },
 
-    frameProgressListener: extend(BaseProgressListener,
+    frameProgressListener: Obj.extend(Http.BaseProgressListener,
     {
         onStateChange: function(progress, request, flag, status)
         {
-            if (FBTrace.DBG_FBTEST)
-            {
-                //FBTrace.sysout("-> frameProgressListener.onStateChanged for: "+safeGetName(request)+
-                //    ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
-            }
-
             if (safeGetName(request) === "about:blank")
                 return;
 
-            if (flag & Ci.nsIWebProgressListener.STATE_IS_DOCUMENT && flag & Ci.nsIWebProgressListener.STATE_TRANSFERRING)
+            if (flag & Ci.nsIWebProgressListener.STATE_IS_DOCUMENT &&
+                flag & Ci.nsIWebProgressListener.STATE_TRANSFERRING)
             {
                 var win = progress.DOMWindow;
 
@@ -396,13 +411,17 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_FBTEST)
             FBTrace.sysout("onUnloadTestFrame ", event);
-        var testFrame = $("testFrame");
+
+        var testFrame = Firebug.chrome.$("testFrame");
         var outerWindow =  testFrame.contentWindow;
 
-        FBTestApp.TestRunner.win.removeEventListener("load", FBTestApp.TestRunner.eventListener, true);
+        FBTestApp.TestRunner.win.removeEventListener("load",
+            FBTestApp.TestRunner.eventListener, true);
+
         delete FBTestApp.TestRunner.eventListener;
 
-        FBTestApp.TestRunner.win.removeEventListener("unload", FBTestApp.TestRunner.onUnloadTestFrame, true);
+        FBTestApp.TestRunner.win.removeEventListener("unload",
+            FBTestApp.TestRunner.onUnloadTestFrame, true);
     },
 
     getDefaultTestTimeout: function()
@@ -413,12 +432,16 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
     /*
      * Called by the 'load' event handler set in the onStateChange for nsIProgressListener
      */
-    onLoadTestFrame: function( event, test )
+    onLoadTestFrame: function(event, test)
     {
         var testURL = test.path;
         var testTitle = test.desc;
+
         if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("FBTest.onLoadTestFrame; url: "+testURL+" win: " +FBTestApp.TestRunner.win+" wrapped: "+FBTestApp.TestRunner.win.wrappedJSObject);
+        {
+            FBTrace.sysout("FBTest.onLoadTestFrame; url: "+testURL+" win: " +
+                FBTestApp.TestRunner.win+" wrapped: "+FBTestApp.TestRunner.win.wrappedJSObject);
+        }
 
         var win = FBTestApp.TestRunner.win;
         if (win.wrappedJSObject)
@@ -431,7 +454,8 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             title.innerHTML = testTitle;
 
         // Hook the unload to clean up
-        FBTestApp.TestRunner.win.addEventListener("unload", FBTestApp.TestRunner.onUnloadTestFrame, true);
+        FBTestApp.TestRunner.win.addEventListener("unload",
+            FBTestApp.TestRunner.onUnloadTestFrame, true);
 
         // Execute a "runTest" method, that must be implemented within the test driver.
         FBTestApp.TestRunner.runTestCase(win);
@@ -444,11 +468,11 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
 
         try
         {
-            var scrollBox = getOverflowParent(element);
+            var scrollBox = Dom.getOverflowParent(element);
             if (!scrollBox)
                 return false;
 
-            var offset = getClientOffset(element);
+            var offset = Dom.getClientOffset(element);
 
             var scrollBottom = scrollBox.scrollTop + scrollBox.clientHeight;
             var topLine = scrollBottom - (2 * element.clientHeight);
@@ -483,6 +507,12 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         // Start timeout that breaks stuck tests.
         FBTestApp.TestRunner.setTestTimeout(win);
 
+        if (!FBTestApp.TestRunner.currentTest)
+        {
+            FBTrace.sysout("FBTest.runTestCase; ERROR no currentTest!");
+            return;
+        }
+
         // Initialize start time.
         FBTestApp.TestRunner.currentTest.start = (new Date()).getTime();
 
@@ -506,7 +536,8 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             FBTestApp.TestRunner.testDone(true);
         }
 
-        // If we don't get an exception the test should call testDone() or the testTimeout will fire
+        // If we don't get an exception the test should call testDone() or the
+        // testTimeout will fire
     },
 
     cleanUp: function()
@@ -521,11 +552,11 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             // Since the test finished, the test frame must be set to about:blank so,
             // the current test window is unloaded and proper clean up code executed
             // (eg. registered MutationRecognizers)
-            $("testFrame").contentWindow.location = "about:blank";
+            Firebug.chrome.$("testFrame").contentWindow.location = "about:blank";
         }
-        catch(e)
+        catch (e)
         {
-            FBTrace.sysout("testRunner.cleanUp FAILS "+e, e);
+            FBTrace.sysout("testRunner.cleanUp FAILS " + e, e);
         }
     },
 
@@ -545,7 +576,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
 
         this.testTimeoutID = window.setTimeout(function()
         {
-            var time = formatTime(FBTestApp.FBTest.testTimeout);
+            var time = Str.formatTime(FBTestApp.FBTest.testTimeout);
             FBTestApp.FBTest.ok(false, "TIMEOUT: " + time );
 
             if (FBTrace.DBG_FBTEST)
@@ -556,13 +587,16 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         }, FBTestApp.FBTest.testTimeout);
 
         if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("TestRunner set timeout="+FBTestApp.FBTest.testTimeout+" testTimeoutID "+this.testTimeoutID);
+        {
+            FBTrace.sysout("TestRunner set timeout=" + FBTestApp.FBTest.testTimeout +
+                " testTimeoutID " + this.testTimeoutID);
+        }
     },
 
     clearTestTimeout: function()
     {
         if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("TestRunner clear testTimeoutID "+this.testTimeoutID);
+            FBTrace.sysout("TestRunner clear testTimeoutID " + this.testTimeoutID);
 
         if (this.testTimeoutID)
         {
@@ -575,7 +609,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
     {
         var wrapperURL = "chrome://fbtest/content/wrapAJSFile.html";
         if (!this.wrapAJSFile)
-            this.wrapAJSFile = getResource(wrapperURL);
+            this.wrapAJSFile = Http.getResource(wrapperURL);
 
         var scriptIncludes = test.testIncludes.map(function(src)
         {
@@ -587,9 +621,9 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         var temp = wrapAJSFile.replace("__TestIncludeURLs__",
             scriptIncludes.join("")).replace("__TestDriverURL__", test.path);
 
-        var testURL = getDataURLForContent(temp, wrapperURL);
+        var testURL = Url.getDataURLForContent(temp, wrapperURL);
         if (FBTrace.DBG_FBTEST)
-            FBTrace.sysout("wrapJS converted "+test.path, unescape(testURL));
+            FBTrace.sysout("wrapJS converted " + test.path, unescape(testURL));
 
         return testURL;
     },
@@ -601,7 +635,7 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
             if (FBTrace.DBG_FBTEST)
                 FBTrace.sysout("test result came in after testDone!", result);
 
-            $("progressMessage").value = "test result came in after testDone!";
+            Firebug.chrome.$("progressMessage").value = "test result came in after testDone!";
             FBTestApp.TestRunner.cleanUp();
             return;
         }
@@ -610,15 +644,15 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
         this.currentTest.appendResult(result);
 
         // If the test is currently opened, append the result directly into the UI.
-        if (hasClass(this.currentTest.row, "opened"))
+        if (Css.hasClass(this.currentTest.row, "opened"))
         {
             var infoBodyRow = this.currentTest.row.nextSibling;
-            var table = FBL.getElementByClass(infoBodyRow, "testResultTable");
+            var table = Dom.getElementByClass(infoBodyRow, "testResultTable");
             if (!table)
-                table = FBTestApp.TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
+                table = TestResultRep.tableTag.replace({}, infoBodyRow.firstChild);
 
             var tbody = table.firstChild;
-            result.row = FBTestApp.TestResultRep.resultTag.insertRows(
+            result.row = TestResultRep.resultTag.insertRows(
                 {results: [result]}, tbody.lastChild ? tbody.lastChild : tbody)[0];
         }
     },
@@ -629,174 +663,8 @@ FBTestApp.TestRunner = extend(new Firebug.Listener(),
     }
 });
 
-// ************************************************************************************************
-
-/** @namespace */
-FBTestApp.TestProgress =
-{
-    start: function(max)
-    {
-        this.max = max;
-        var meter = this.getMeter();
-        meter.style.display = "block";
-    },
-
-    stop: function()
-    {
-        var meter = this.getMeter();
-        meter.style.display = "none";
-    },
-
-    update: function(value)
-    {
-        var current = this.max - value;
-        var meter = this.getMeter();
-        meter.value = current ? current / (this.max / 100) : 0;
-    },
-
-    getMeter: function()
-    {
-        return $("progressMeter");
-    }
-};
-
-// ************************************************************************************************
-
-/** @namespace */
-FBTestApp.TestSummary =
-{
-    passingTests: {passing: 0, failing: 0},
-    failingTests: {passing: 0, failing: 0},
-
-    append: function(test)
-    {
-        if (test.category == "fails")
-        {
-            test.error ? this.failingTests.failing++ : this.failingTests.passing++;
-
-            $("todoTests").value = $STR("fbtest.label.Todo") + ": " +
-                this.failingTests.failing + "/" + this.failingTests.passing;
-        }
-        else
-        {
-            test.error ? this.passingTests.failing++ : this.passingTests.passing++;
-
-            if (this.passingTests.passing)
-                $("passingTests").value = $STR("fbtest.label.Pass") + ": " +
-                    this.passingTests.passing;
-
-            if (this.passingTests.failing)
-                $("failingTests").value = $STR("fbtest.label.Fail") + ": " +
-                    this.passingTests.failing;
-        }
-    },
-
-    setMessage: function(message)
-    {
-        $("progressMessage").value = message;
-    },
-
-    onTodoShowTooltip: function(tooltip)
-    {
-        var failingTestsLabel = $STRP("fbtest.tooltip.ToDoFailing", [this.failingTests.failing]);
-        var passingTestsLabel = $STRP("fbtest.tooltip.ToDoPassing", [this.failingTests.passing]);
-        tooltip.label = $STRF("fbtest.tooltip.ToDo", [failingTestsLabel, passingTestsLabel]);
-    },
-
-    clear: function()
-    {
-        this.passingTests = {passing: 0, failing: 0};
-        this.failingTests = {passing: 0, failing: 0};
-
-        $("passingTests").value = "";
-        $("failingTests").value = "";
-        $("progressMessage").value = "";
-    },
-
-    dumpSummary: function()
-    {
-        FBTestApp.FBTest.sysout("Passed: " + this.passingTests.passing);
-        FBTestApp.FBTest.sysout("Failed: " + this.passingTests.failing);
-    }
-};
-
-// ************************************************************************************************
-
-/** @namespace */
-FBTestApp.Preferences =
-{
-    values : [],
-
-    save: function()
-    {
-        this.values = [];
-
-        var preferences = prefs.getChildList(Firebug.prefDomain, {});
-        for (var i=0; i<preferences.length; i++)
-        {
-            var prefName = preferences[i].substr(Firebug.prefDomain.length + 1);
-            if (prefName.indexOf("DBG_") == -1 &&
-                prefName.indexOf("filterSystemURLs") == -1)
-            {
-                var value = Firebug.getPref(Firebug.prefDomain, prefName);
-                if (typeof(value) != 'undefined')
-                    this.values[prefName] = value;
-            }
-        }
-    },
-
-    restore: function()
-    {
-        if (!this.values)
-            return;
-
-        for (var prefName in this.values)
-            Firebug.setPref(Firebug.prefDomain, prefName, this.values[prefName], typeof(this.values[prefName]));
-
-        this.values = [];
-    }
-};
-
-// ************************************************************************************************
-
-/**
- * Text selection event is dispatched to all registered listeners. The original update
- * comes from command updated registered in overlayFirebug.xul
- * 
- * @namespace  
- */
-FBTestApp.SelectionController =
-{
-    listeners: [],
-
-    addListener: function(listener)
-    {
-        this.listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(this.listeners, listener);
-    },
-
-    selectionChanged: function()
-    {
-        this.listeners.forEach(function(listener)
-        {
-            try
-            {
-                listener();
-            }
-            catch (e)
-            {
-                FBTrace.sysout("SelectionController.selectionChanged; EXCEPTION " + e, e);
-                FBTestApp.FBTest.exception("SelectionController", e);
-            }
-        });
-    }
-};
-
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Helpers
 
 function safeGetName(request)
 {
@@ -810,5 +678,10 @@ function safeGetName(request)
     }
 }
 
-// ************************************************************************************************
-}});
+// ********************************************************************************************* //
+// Registration
+
+return FBTestApp.TestRunner;
+
+// ********************************************************************************************* //
+});

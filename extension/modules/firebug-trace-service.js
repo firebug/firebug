@@ -14,12 +14,12 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu["import"]("resource://gre/modules/XPCOMUtils.jsm");
+Cu["import"]("resource://gre/modules/Services.jsm");
+Cu["import"]("resource://gre/modules/AddonManager.jsm");
 
 // xxxHonza: could we remove some of them?
-var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
+var TraceAPI = ["dump", "sysout", "matchesNode", "time", "timeEnd"];
 
 // ********************************************************************************************* //
 // Service Implementation

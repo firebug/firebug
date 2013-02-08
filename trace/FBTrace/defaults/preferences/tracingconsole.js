@@ -4,7 +4,6 @@ pref("extensions.firebug.fbtrace.layoutTimeout", 0);
 // Tracing Console
 pref("extensions.firebug.alwaysOpenTraceConsole", false);
 pref("extensions.firebug.trace.maxMessageLength", 400);
-pref("extensions.firebug.trace.enableScope", false);
 pref("extensions.firebug.trace.showTime", false);
 
 // Keyboard Shortcuts

@@ -1,8 +1,18 @@
 /* See license.txt for terms of usage */
 
-FBTestApp.ns( /** @scope _notify_ */ function() { with (FBL) {
+define([
+    "firebug/lib/trace",
+],
+function(FBTrace) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Constants
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+// ********************************************************************************************* //
 // Connects FBTest to other modules via global events
 
 var Rebroadcaster =
@@ -10,13 +20,13 @@ var Rebroadcaster =
     onTestStart: function(aTest)
     {
         if (!this.observerService)
-            Components.utils.import("resource://firebug/observer-service.js", this);
+            Cu["import"]("resource://firebug/observer-service.js", this);
 
         if (this.fbObserverService)
             this.fbObserverService.notifyObservers(this, "fbtest-start-case", aTest);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     replay: function(aTest)
     {
@@ -24,7 +34,12 @@ var Rebroadcaster =
     }
 };
 
+// ********************************************************************************************* //
+// Registration
+
 FBTestApp.TestRunner.addListener(Rebroadcaster);
 
-// ************************************************************************************************
-}});
+return Rebroadcaster;
+
+// ********************************************************************************************* //
+});
