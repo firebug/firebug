@@ -37,7 +37,7 @@ var TraceOptionsController = function(prefDomain, onPrefChangeHandler)
     this.addObserver = function()
     {
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
-        this.observer = { observe: bind(this.observe, this) };
+        this.observer = { observe: Obj.bind(this.observe, this) };
         prefs.addObserver(prefDomain, this.observer, false);
     };
 

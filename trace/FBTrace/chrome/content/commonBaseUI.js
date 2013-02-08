@@ -11,8 +11,8 @@ define([
     "fbtrace/panelTemplate",
     "fbtrace/traceOptionsController",
 ],
-function(FBTrace, GlobalTab, Menu, Css, Locale, Options,
-    MessageTemplate, PanelTemplate, TraceOptionsController) {
+function(FBTrace, GlobalTab, Menu, Css, Locale, Options, MessageTemplate, PanelTemplate,
+    TraceOptionsController) {
 
 // ********************************************************************************************* //
 // Constants
