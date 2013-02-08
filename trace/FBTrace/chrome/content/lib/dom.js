@@ -130,6 +130,12 @@ Dom.clearNode = function(node)
     node.textContent = "";
 };
 
+Dom.eraseNode = function(node)
+{
+    while (node.lastChild)
+        node.removeChild(node.lastChild);
+};
+
 // ********************************************************************************************* //
 
 /**

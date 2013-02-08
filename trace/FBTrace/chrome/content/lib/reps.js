@@ -51,6 +51,11 @@ Reps.Rep = domplate(
         return false;
     },
 
+    getRealObject: function(object, context)
+    {
+        return object;
+    },
+
     getTitle: function(object)
     {
         try

@@ -20,8 +20,7 @@ var config =
 // ********************************************************************************************* //
 // Application Load
 
-require(config,
-[
+require(config, [
     "fbtrace/trace",
     "fbtrace/traceConsole",
     "fbtrace/lib/options",
@@ -39,17 +38,6 @@ function(FBTrace, TraceConsole, Options, TraceModule)
 
     Options.initialize("extensions.firebug");
     TraceModule.initialize();
-
-    // xxxHonza: don't forget to fix the context menu.
-
-    // xxxHonza: just for debugging, remove.
-    window.setTimeout(function() {
-        FBTrace.sysout("window ", window);
-        FBTrace.sysout("Test ", {
-            a: "A",
-            b: "B"
-        });
-    }, 1000);
 });
 
 // ********************************************************************************************* //

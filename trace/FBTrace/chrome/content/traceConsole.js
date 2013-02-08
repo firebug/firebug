@@ -16,10 +16,12 @@ define([
     "fbtrace/traceCommandLine",
     "fbtrace/traceModule",
     "fbtrace/firebugExplorer",
+    "fbtrace/lib/reps",
+    "fbtrace/lib/menu",
 ],
 function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceObjectInspector,
     TraceMessage, MessageTemplate, CommonBaseUI, TraceCommandLine, TraceModule,
-    FirebugExplorer) {
+    FirebugExplorer, Reps, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -499,12 +501,80 @@ var TraceConsole =
 
     onContextShowing: function(event)
     {
-        // xxxHonza: TODO
+        var popup = event.target;
+        if (popup.id != "fbContextMenu")
+            return false;
+
+        var target = document.popupNode;
+
+        Dom.eraseNode(popup);
+
+        var object;
+        if (target)
+            object = Reps.getRepObject(target);
+
+        var rep = Reps.getRep(object);
+        var realObject = rep ? rep.getRealObject(object) : null;
+        var realRep = realObject ? Reps.getRep(realObject) : null;
+
+        // 1. Add the custom menu items from the realRep
+        if (realObject && realRep)
+        {
+            var items = realRep.getContextMenuItems(realObject, target);
+            if (items)
+                Menu.createMenuItems(popup, items);
+        }
+
+        // 2. Add the custom menu items from the original rep
+        if (object && rep && rep != realRep)
+        {
+            var items = rep.getContextMenuItems(object, target);
+            if (items)
+                Menu.createMenuItems(popup, items);
+        }
+
+        if (!popup.firstChild)
+            return false;
+
+        return true;
     },
 
     onTooltipShowing: function(event)
     {
-        // xxxHonza: TODO
+        var tooltip = window.document.getElementById("fbTooltip");
+        var target = document.tooltipNode;
+
+        var object;
+
+        if (target && target.ownerDocument == document)
+            object = Reps.getRepObject(target);
+
+        var rep = object ? Reps.getRep(object) : null;
+        object = rep ? rep.getRealObject(object) : null;
+        rep = object ? Reps.getRep(object) : null;
+
+        if (object && rep)
+        {
+            var label = rep.getTooltip(object);
+            if (label)
+            {
+                tooltip.setAttribute("label", label);
+                return true;
+            }
+        }
+
+        if (Css.hasClass(target, 'noteInToolTip'))
+            Css.setClass(tooltip, 'noteInToolTip');
+        else
+            Css.removeClass(tooltip, 'noteInToolTip');
+
+        if (target && target.hasAttribute("title"))
+        {
+            tooltip.setAttribute("label", target.getAttribute("title"));
+            return true;
+        }
+
+        return false;
     },
 };
 
