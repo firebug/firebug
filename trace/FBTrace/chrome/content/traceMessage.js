@@ -17,6 +17,8 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
+var EOF = "<br/>";
+
 // ********************************************************************************************* //
 // Trace Message Object
 

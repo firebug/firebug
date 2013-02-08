@@ -92,7 +92,6 @@ Css.removeClass = function(node, name)
         re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
 
     node.className = node.className.replace(re, " ");
-
 };
 
 Css.toggleClass = function(elt, name)

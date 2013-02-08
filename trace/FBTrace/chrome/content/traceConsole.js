@@ -7,6 +7,7 @@ define([
     "fbtrace/lib/css",
     "fbtrace/lib/dom",
     "fbtrace/lib/options",
+    "fbtrace/lib/array",
     "fbtrace/serializer",
     "fbtrace/traceObjectInspector",
     "fbtrace/traceMessage",
@@ -14,8 +15,8 @@ define([
     "fbtrace/commonBaseUI",
     "fbtrace/traceCommandLine",
 ],
-function(FBTrace, Locale, Obj, Css, Dom, Options, Serializer, TraceObjectInspector, TraceMessage,
-    MessageTemplate, CommonBaseUI, TraceCommandLine) {
+function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceObjectInspector,
+    TraceMessage, MessageTemplate, CommonBaseUI, TraceCommandLine) {
 
 // ********************************************************************************************* //
 // Constants
@@ -45,6 +46,8 @@ var queue = [];
 var scope = {};
 Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
 var traceService = scope.traceConsoleService;
+
+Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
 
 // ********************************************************************************************* //
 // Trace Window Implementation
@@ -76,7 +79,7 @@ var TraceConsole =
         catch (exc)
         {
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-            window.dump("FBTrace; Firebug.TraceModule.initialize EXCEPTION " + msg);
+            window.dump("FBTrace; TraceModule.initialize EXCEPTION " + msg);
         }
     },
 
@@ -96,13 +99,7 @@ var TraceConsole =
         };
 
         // Make sure the UI is localized.
-        Firebug.internationalizeUI(window.document);
-
-        if (!Firebug.TraceModule)
-        {
-            window.dump("FBTrace; TraceModule == NULL\n");
-            return;
-        }
+        this.internationalizeUI(window.document);
 
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
 
@@ -176,6 +173,32 @@ var TraceConsole =
             FBTrace.sysout("traceConsole.onCloseOpener closing window "+window.location);
 
         window.close();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Localization
+
+    /**
+     *  Substitute strings in the UI, with fall back to en-US
+     */
+    internationalizeUI: function(doc)
+    {
+        if (!doc)
+            return;
+
+        var elements = doc.getElementsByClassName("fbInternational");
+        elements = Arr.cloneArray(elements);
+        var attributes = ["label", "tooltiptext", "aria-label"];
+        for (var i=0; i<elements.length; i++)
+        {
+            var element = elements[i];
+            Css.removeClass(elements[i], "fbInternational");
+            for (var j=0; j<attributes.length; j++)
+            {
+                if (element.hasAttribute(attributes[j]))
+                    Locale.internationalize(element, attributes[j]);
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

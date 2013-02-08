@@ -20,11 +20,6 @@ var Cu = Components.utils;
 
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
-var EOF = "<br/>";
-
-// Register locale file with strings for the Tracing Console window.
-Firebug.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
-
 // ********************************************************************************************* //
 // Trace Module
 

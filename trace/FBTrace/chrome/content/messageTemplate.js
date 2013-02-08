@@ -704,15 +704,16 @@ var MessageTemplate = domplate(Reps.Rep,
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
                     var win = messageInfoBody.ownerDocument.defaultView;
-                    if (message.obj instanceof win.Element.constructor)
-                    {
-                        Firebug.HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox,
-                            Firebug.HTMLPanel.CompleteElement);
-                    }
-                    else
-                    {
+                    // xxxHonza: HTML Reps must be ported.
+                    //if (message.obj instanceof win.Element.constructor)
+                    //{
+                    //    HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox,
+                    //        HTMLPanel.CompleteElement);
+                    //}
+                    //else
+                    //{
                         PropertyTree.tag.replace({object: message.obj}, valueBox, PropertyTree);
-                    }
+                    //}
                 });
         }
         else if (Css.hasClass(tab, "messageInfoExcTab"))
