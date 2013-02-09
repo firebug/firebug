@@ -96,7 +96,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         var store = CommandLineInclude.getStore();
         var keys = store.getKeys();
         var arrayToDisplay = [];
-        var returnValue = Firebug.Console.getDefaultReturnValue(context.window);
+        var returnValue = Firebug.Console.getDefaultReturnValue();
 
         if (keys.length === 0)
         {
@@ -366,7 +366,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     {
         var reNotAlias = /[\.\/]/;
         var urlIsAlias = url !== null && !reNotAlias.test(url);
-        var returnValue = Firebug.Console.getDefaultReturnValue(context.window);
+        var returnValue = Firebug.Console.getDefaultReturnValue();
 
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")

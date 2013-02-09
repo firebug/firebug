@@ -200,8 +200,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                var ignoreReturnValue = Console.getDefaultReturnValue(win);
-                if (result === ignoreReturnValue)
+                if (Console.isDefaultReturnValue(result))
                     return;
 
                 successConsoleFunction(result, context);
@@ -319,8 +318,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                var ignoreReturnValue = Console.getDefaultReturnValue(win);
-                if (result === ignoreReturnValue)
+                if (Console.isDefaultReturnValue(result))
                     return;
 
                 successConsoleFunction(result, context);
@@ -1117,21 +1115,21 @@ function FirebugCommandLineAPI(context)
 
         var format = Locale.$STR("commandline.CurrentWindow") + " %o";
         Firebug.Console.logFormatted([format, context.baseWindow], context, "info");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // no web page interaction
     this.clear = function()
     {
         Firebug.Console.clear(context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // no web page interaction
     this.inspect = function(obj, panelName)
     {
         Firebug.chrome.select(obj, panelName);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.keys = function(o)
@@ -1149,25 +1147,25 @@ function FirebugCommandLineAPI(context)
     this.debug = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.undebug = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.monitor = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.unmonitor = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.traceAll = function()
@@ -1175,7 +1173,7 @@ function FirebugCommandLineAPI(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.traceAll(Firebug.currentContext);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.untraceAll = function()
@@ -1183,7 +1181,7 @@ function FirebugCommandLineAPI(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.untraceAll(Firebug.currentContext);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.traceCalls = function(fn)
@@ -1191,7 +1189,7 @@ function FirebugCommandLineAPI(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.untraceCalls = function(fn)
@@ -1199,26 +1197,26 @@ function FirebugCommandLineAPI(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.copy = function(x)
     {
         System.copyToClipboard(x);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // xxxHonza: removed from 1.10 (issue 5599)
     /*this.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     this.memoryProfileEnd = function()
     {
         Firebug.MemoryProfiler.stop(context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };*/
 
     function createHandler(config, name)

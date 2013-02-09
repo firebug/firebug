@@ -27,6 +27,7 @@ const Ci = Components.interfaces;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var maxQueueRequests = 500;
+var defaultReturnValue = Object.preventExtensions(Object.create(null));
 
 // ********************************************************************************************* //
 
@@ -446,21 +447,26 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getDefaultReturnValue: function(win)
+    /**
+     * returns the value that the console must ignore
+     *
+     * @return {*} The default value
+     */
+    getDefaultReturnValue: function()
     {
-        var defaultValue = "_firebugIgnore";
-        var console = win.wrappedJSObject.console;
-        if (!console)
-            return defaultValue;
+        return defaultReturnValue;
+    },
 
-        if (Obj.isNonNativeGetter(console, "__returnValue__"))
-            return defaultValue;
-
-        var returnValue = console.__returnValue__;
-        if (returnValue)
-            return returnValue;
-
-        return defaultValue;
+    /**
+     * returns true if the passed object has to be ignored by the console
+     *
+     * @param {*} o The object to test
+     *
+     * @return {boolean} The result of the test
+     */
+    isDefaultReturnValue: function(obj)
+    {
+        return obj === defaultReturnValue;
     }
 });
 
