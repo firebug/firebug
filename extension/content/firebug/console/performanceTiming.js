@@ -394,7 +394,7 @@ function performanceTiming(context, timing)
 
     DetailsEntry.tag.insertRows({timings: timings}, tBody);
 
-    return Firebug.Console.getDefaultReturnValue();
+    return Firebug.Console.getDefaultReturnValue(context.window);
 }
 
 // ********************************************************************************************* //

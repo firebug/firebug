@@ -519,13 +519,13 @@ function profile(context, args)
 {
     var title = args[0];
     Firebug.Profiler.startProfiling(context, title);
-    return Firebug.Console.getDefaultReturnValue();
+    return Firebug.Console.getDefaultReturnValue(context.window);
 };
 
 function profileEnd(context)
 {
     Firebug.Profiler.stopProfiling(context);
-    return Firebug.Console.getDefaultReturnValue();
+    return Firebug.Console.getDefaultReturnValue(context.window);
 };
 
 // ********************************************************************************************* //
