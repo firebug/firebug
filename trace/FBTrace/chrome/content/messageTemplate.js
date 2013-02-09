@@ -211,7 +211,7 @@ var MessageTemplate = domplate(Reps.Rep,
 
     getMessageTitle: function(message)
     {
-        return message.getLabel(-1);
+        return encodeURIComponent(message.getLabel(-1));
     },
 
     isException: function(message)
