@@ -799,6 +799,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             if (i === selIndex)
                 this.selectedPopupElement = hbox;
 
+            if (!this.completionBase.expr && CommandLineExposed.completionList.indexOf(completion) !== -1)
+                pre.style.color = '#940000';
+
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);
@@ -2297,14 +2300,6 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
                 setCompletionsFromObject(out, context.global, context);
             }
 
-            // Add things from the Command Line API, if we are signalled to,
-            // and it is not unavailable due to being stopped in the debugger
-            // (issue 5321).
-            if (options.includeCommandLineAPI && !context.stopped)
-            {
-                out.hiddenCompletions.push.apply(out.hiddenCompletions, CommandLineExposed.completionList);
-            }
-
             // Add names of variables declared previously in the typed code.
             var previousDeclarations = getNewlyDeclaredNames(spreParsed);
             out.completions.push.apply(out.completions, previousDeclarations);
@@ -2338,6 +2333,16 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
         // but JSD makes that slow (issue 6256). Sort and do manual reordering instead.
         out.completions = reorderPropertyNames(Arr.sortUnique(out.completions));
         out.hiddenCompletions = reorderPropertyNames(Arr.sortUnique(out.hiddenCompletions));
+
+        // Add things from the Command Line API, if we are signalled to,
+        // and it is not unavailable due to being stopped in the debugger
+        // (issue 5321).
+        // need unique
+        if (!spreExpr && options.includeCommandLineAPI && !context.stopped)
+        {
+            out.completions.push.apply(out.completions, CommandLineExposed.completionList);
+        }
+
     }
     catch (exc)
     {
