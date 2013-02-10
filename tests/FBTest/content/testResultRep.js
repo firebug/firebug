@@ -115,7 +115,7 @@ var TestResultRep = domplate(
 
     onClick: function(event)
     {
-        if (isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
             var row = Dom.getAncestorByClass(event.target, "testResultRow");
             if (row)
@@ -184,10 +184,10 @@ var TestResultRep = domplate(
     {
         var result = infoBodyRow.repObject;
         var tabViewNode = TestResultTabView.viewTag.replace({result: result},
-            infoBodyRow.firstChild, TabView);
+            infoBodyRow.firstChild, TestResultTabView);
 
         // Select default tab.
-        TabView.selectTabByName(tabViewNode, "Stack");
+        TestResultTabView.selectTabByName(tabViewNode, "Stack");
     },
 
     // Firebug rep support
