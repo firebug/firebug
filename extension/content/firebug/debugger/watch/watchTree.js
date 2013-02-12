@@ -27,7 +27,7 @@ function WatchTree(provider)
 /**
  * @domplate Represents a tree of properties/objects
  */
-BaseTree = DomTree.prototype
+var BaseTree = DomTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
 {
     watchNewRowTag:

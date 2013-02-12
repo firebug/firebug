@@ -216,7 +216,7 @@ DomTree.prototype = domplate(
             {
                 var value = object[p];
                 var valueType = typeof(value);
-                var hasChildren = this.hasProperties(value) && (valueType == "object");
+                var hasChildren = (valueType === "object" && this.hasProperties(value));
                 var type = this.getType(value);
 
                 members.push(this.createMember(type, p, value, level, hasChildren));
