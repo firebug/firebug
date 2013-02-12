@@ -101,8 +101,8 @@ DomTree.prototype = domplate(
 
         // Get proper template for the value. |member.value| should refer to remote
         // object implementation.
-        var valueTag = Firebug.getRep(member.value);
-        return valueTag.tag;
+        var rep = Firebug.getRep(member.value);
+        return rep.shortTag ? rep.shortTag : rep.tag;
     },
 
     getRowTag: function(member)

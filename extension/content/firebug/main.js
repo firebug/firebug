@@ -10,7 +10,7 @@ const Ci = Components.interfaces;
 var prefDomain = "extensions.firebug";
 var config = Firebug.getModuleLoaderConfig();
 
-//if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 {
     if (FBTrace.DBG_MODULES)
         config.debug = true;

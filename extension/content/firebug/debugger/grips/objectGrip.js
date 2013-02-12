@@ -131,11 +131,11 @@ ObjectGrip.prototype =
         return new ObjectGrip.Property(name, packet, this.cache);
     },
 
-    parseProperties: function(ownProperties)
+    parseProperties: function(props)
     {
         var result = [];
-        for (var name in ownProperties)
-            result.push(this.createProperty(name, ownProperties[name], this.cache));
+        for (var name in props)
+            result.push(this.createProperty(name, props[name], this.cache));
         return result;
     },
 }

@@ -118,6 +118,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // actor types.
         var config = Firebug.getModuleLoaderConfig();
         Firebug.require(config, [
+            "firebug/debugger/actors/threadActor",
             "firebug/debugger/actors/objectActor"
         ],
         function()

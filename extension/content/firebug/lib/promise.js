@@ -9,7 +9,17 @@ function (FBTrace) {
 // StackTrace Implementation
 
 var imported = {};
-Components.utils["import"]("resource://gre/modules/commonjs/sdk/core/promise.js", imported);
+
+try
+{
+    Components.utils["import"]("resource://gre/modules/commonjs/sdk/core/promise.js", imported);
+
+}
+catch (e)
+{
+    // Introduced in Firefox 21
+    Components.utils["import"]("resource://gre/modules/commonjs/promise/core.js", imported);
+}
 
 // ********************************************************************************************* //
 // Registration
