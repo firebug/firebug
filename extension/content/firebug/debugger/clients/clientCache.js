@@ -35,10 +35,10 @@ ClientCache.prototype =
 
     clear: function()
     {
-        for each (var grip in this.grips)
+        for each (var grip in this.clients)
             grip.valid = false;
 
-        this.grips = {};
+        this.clients = {};
         this.signatures = {};
     },
 
@@ -58,12 +58,12 @@ ClientCache.prototype =
             return grip;
         }
 
-        var object = this.grips[grip.actor];
+        var object = this.clients[grip.actor];
         if (object)
             return object;
 
-        object = ClientFactory.createGripObject(grip, this);
-        this.grips[grip.actor] = object;
+        object = ClientFactory.createClientObject(grip, this);
+        this.clients[grip.actor] = object;
 
         return object;
     },

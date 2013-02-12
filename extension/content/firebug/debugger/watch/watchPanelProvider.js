@@ -49,7 +49,7 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 
         stackFrame.scopes = [];
 
-        var cache = stackFrame.context.gripCache;
+        var cache = stackFrame.context.clientCache;
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.

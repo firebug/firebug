@@ -1018,7 +1018,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onPopulateInfoTip: function(infoTip, result)
     {
-        var gripObj = this.context.gripCache.getObject(result);
+        var gripObj = this.context.clientCache.getObject(result);
         gripObj.getProperties().then(function(props)
         {
             var value = gripObj.getValue();

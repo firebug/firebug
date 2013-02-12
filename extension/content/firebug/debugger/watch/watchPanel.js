@@ -161,7 +161,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         Dom.clearNode(this.panelNode);
 
-        var cache = this.context.gripCache;
+        var cache = this.context.clientCache;
 
         var newFrame = frame && ("signature" in frame) &&
             (frame.signature() != this.frameSignature);
@@ -384,7 +384,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // xxxHonza: see also ScriptPanel.onPopulateInfoTip()
         // The cache and grip objects should do most of the work automatically.
         // This method should be much simpler.
-        var cache = this.context.gripCache;
+        var cache = this.context.clientCache;
         var gripObj = cache.getObject(resultGrip);
         gripObj.getProperties().then(function(props)
         {

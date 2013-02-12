@@ -119,7 +119,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.attachListeners(context);
 
         // Create grip cache
-        context.gripCache = new ClientCache(DebuggerClientModule.client, context);
+        context.clientCache = new ClientCache(DebuggerClientModule.client, context);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).
@@ -244,7 +244,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         if (ignoreTypes[type])
             return;
 
-        context.gripCache.clear();
+        context.clientCache.clear();
 
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
         // Avoid double-break at the same line (e.g. breakpoint + step-over)
@@ -349,7 +349,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerTool.resumed; ", arguments);
 
-        context.gripCache.clear();
+        context.clientCache.clear();
 
         context.stopped = false;
         context.stoppedFrame = null;
@@ -363,7 +363,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerTool.detached; ", arguments);
 
-        context.gripCache.clear();
+        context.clientCache.clear();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

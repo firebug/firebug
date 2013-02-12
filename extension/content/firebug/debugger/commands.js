@@ -29,7 +29,7 @@ function pauseGrip(context, args)
         type: type || RDP.DebugProtocolTypes.prototypeAndProperties
     };
 
-    context.gripCache.request(packet).then(function(response)
+    context.clientCache.request(packet).then(function(response)
     {
         Firebug.Console.log(response);
     });

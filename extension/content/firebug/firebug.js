@@ -676,19 +676,19 @@ window.Firebug =
         return CommandLineExposed.unregisterCommand(name);
     },
 
-    registerGrip: function(gripClass, gripType)
+    registerClient: function(gripClass, gripType)
     {
-        return ClientFactory.registerGrip(gripClass, gripType);
+        return ClientFactory.registerClient(gripClass, gripType);
     },
 
-    unregisterGrip: function(gripClass)
+    unregisterClient: function(gripClass)
     {
-        return ClientFactory.unregisterGrip(gripClass);
+        return ClientFactory.unregisterClient(gripClass);
     },
 
-    registerDefaultGrip: function(gripType)
+    registerDefaultClient: function(gripType)
     {
-        return ClientFactory.registerDefaultGrip(gripType);
+        return ClientFactory.registerDefaultClient(gripType);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

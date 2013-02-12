@@ -32,7 +32,7 @@ function(FBTrace, ObjectClient) {
 
 // xxxHonza: can't be in ObjectClient since firebug/firebug is not loaded at that moment
 // is there a better place?
-Firebug.registerDefaultGrip(ObjectClient);
+Firebug.registerDefaultClient(ObjectClient);
 
 // Register stylesheet with DBG_* styles
 // xxxHonza: any better way how to register global Firebug stylesheth with trace styles?

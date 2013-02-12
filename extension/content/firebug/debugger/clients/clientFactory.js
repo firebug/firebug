@@ -17,16 +17,16 @@ var Trace = FBTrace.to("DBG_SCRIPTPANEL");
 var ClientFactory =
 {
     classes: {},
-    defaultGrip: null,
+    defaultClient: null,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Registration
 
-    registerGrip: function(gripClass, gripType)
+    registerClient: function(gripClass, gripType)
     {
         if (this.classes[gripClass])
         {
-            TraceError.sysout("gripFactory.registerGrip; ERROR A grip is already registered " +
+            TraceError.sysout("gripFactory.registerClient; ERROR A grip is already registered " +
                 "for the specified class: " + gripClass);
             return;
         }
@@ -34,30 +34,30 @@ var ClientFactory =
         this.classes[gripClass] = gripType;
     },
 
-    unregisterGrip: function(gripClass)
+    unregisterClient: function(gripClass)
     {
         delete this.classes[gripClass];
     },
 
-    registerDefaultGrip: function(gripType)
+    registerDefaultClient: function(clientType)
     {
-        this.defaultGrip = gripType;
+        this.defaultClient = clientType;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Factory Methods
 
-    createGripObject: function(grip, cache)
+    createClientObject: function(grip, cache)
     {
         var gripClass = grip["class"];
         if (gripClass)
         {
-            var gripType = this.classes[gripClass];
-            if (gripType)
-                return new gripType(grip, cache);
+            var clientType = this.classes[gripClass];
+            if (clientType)
+                return new clientType(grip, cache);
         }
 
-        return new this.defaultGrip(grip, cache);
+        return new this.defaultClient(grip, cache);
     }
 };
 

@@ -76,7 +76,7 @@ FunctionClient.prototype = Obj.descend(new ObjectClient(),
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerGrip("Function", FunctionClient);
+Firebug.registerClient("Function", FunctionClient);
 
 return FunctionClient;
 
