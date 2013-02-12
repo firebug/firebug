@@ -10,8 +10,8 @@ define([
     "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/debugger/breakpoint/breakpoint",
-    "firebug/debugger/breakpoint/breakpointStore",
+    "firebug/debugger/breakpoints/breakpoint",
+    "firebug/debugger/breakpoints/breakpointStore",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom,
     Breakpoint, BreakpointStore) {

@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/remoting/debuggerClientModule",
-    "firebug/debugger/breakpoint/breakpoint",
+    "firebug/debugger/breakpoints/breakpoint",
 ],
 function(FBTrace, Firebug, Obj, DebuggerClientModule, Breakpoint) {
 

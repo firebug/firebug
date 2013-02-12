@@ -23,7 +23,7 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netProgress",
     "firebug/css/cssReps",
-    "firebug/debugger/breakpoint/breakpointConditionEditor",
+    "firebug/debugger/breakpoints/breakpointConditionEditor",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",

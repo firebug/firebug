@@ -23,7 +23,7 @@ define([
     "firebug/lib/system",
     "firebug/chrome/menu",
     "firebug/editor/editor",
-    "firebug/debugger/breakpoint/breakpointModule",
+    "firebug/debugger/breakpoints/breakpointModule",
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
     "firebug/console/autoCompleter"

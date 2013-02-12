@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/debugger/grips/objectClient",
+    "firebug/debugger/clients/objectClient",
 ],
 function (FBTrace, Obj, ObjectClient) {
 

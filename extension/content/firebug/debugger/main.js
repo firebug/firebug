@@ -2,25 +2,25 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/grips/objectClient",
+    "firebug/debugger/clients/objectClient",
     "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
     "firebug/debugger/debugger",
     "firebug/debugger/script/scriptPanel",
-    "firebug/debugger/breakpoint/breakpointStore",
-    "firebug/debugger/breakpoint/breakpointModule",
-    "firebug/debugger/breakpoint/breakpointPanel",
-    "firebug/debugger/breakpoint/breakpointReps",
+    "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/debugger/breakpoints/breakpointModule",
+    "firebug/debugger/breakpoints/breakpointPanel",
+    "firebug/debugger/breakpoints/breakpointReps",
     "firebug/debugger/stack/callstackPanel",
     "firebug/debugger/stack/stackFrameRep",
     "firebug/debugger/stack/stackTraceRep",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/debugger/watch/watchPanel",
-    "firebug/debugger/grips/clientCache",
-    "firebug/debugger/grips/functionClient",
+    "firebug/debugger/clients/clientCache",
+    "firebug/debugger/clients/functionClient",
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
-    "firebug/debugger/grips/remoteNodeListRep",
+    "firebug/debugger/clients/remoteNodeListRep",
 ],
 function(FBTrace, ObjectClient) {
 

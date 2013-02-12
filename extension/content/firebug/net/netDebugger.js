@@ -11,7 +11,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/array",
     "firebug/net/netUtils",
-    "firebug/debugger/breakpoint/breakpointGroup",
+    "firebug/debugger/breakpoints/breakpointGroup",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils,
     BreakpointGroup) {

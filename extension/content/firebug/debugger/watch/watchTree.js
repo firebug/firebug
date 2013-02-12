@@ -10,7 +10,7 @@ define([
     "firebug/lib/array",
     "firebug/chrome/domTree",
     "firebug/lib/locale",
-    "firebug/debugger/grips/scopeClient",
+    "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
 function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeClient, WatchExpression) {

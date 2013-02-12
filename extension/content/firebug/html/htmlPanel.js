@@ -22,7 +22,7 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
-    "firebug/debugger/breakpoint/breakpointGroup",
+    "firebug/debugger/breakpoints/breakpointGroup",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",

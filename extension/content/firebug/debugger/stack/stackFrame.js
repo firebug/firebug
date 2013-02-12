@@ -6,7 +6,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/debugger/script/sourceLink",
-    "firebug/debugger/grips/scopeClient",
+    "firebug/debugger/clients/scopeClient",
 ],
 function (FBTrace, Url, Locale, Str, SourceLink, ScopeClient) {
 

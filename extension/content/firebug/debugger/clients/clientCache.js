@@ -5,8 +5,8 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/promise",
-    "firebug/debugger/grips/objectClient",
-    "firebug/debugger/grips/clientFactory",
+    "firebug/debugger/clients/objectClient",
+    "firebug/debugger/clients/clientFactory",
 ],
 function (FBTrace, Firebug, Obj, Promise, ObjectClient, ClientFactory) {
 

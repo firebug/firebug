@@ -12,7 +12,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/persist",
-    "firebug/debugger/breakpoint/breakpointGroup",
+    "firebug/debugger/breakpoints/breakpointGroup",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
     BreakpointGroup) {

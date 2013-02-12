@@ -30,7 +30,7 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/chrome/firefox",
-    "firebug/debugger/breakpoint/breakpointGroup",
+    "firebug/debugger/breakpoints/breakpointGroup",
     "firebug/cookies/legacy",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,

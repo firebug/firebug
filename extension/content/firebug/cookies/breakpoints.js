@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/events",
     "firebug/cookies/cookieUtils",
-    "firebug/debugger/breakpoint/breakpointConditionEditor",
+    "firebug/debugger/breakpoints/breakpointConditionEditor",
 ],
 function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils, ConditionEditor) {
 
