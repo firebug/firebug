@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/grips/objectGrip",
+    "firebug/debugger/grips/objectClient",
     "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
     "firebug/debugger/debugger",
     "firebug/debugger/script/scriptPanel",
@@ -16,13 +16,13 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/debugger/watch/watchPanel",
-    "firebug/debugger/grips/gripCache",
-    "firebug/debugger/grips/functionGrip",
+    "firebug/debugger/grips/clientCache",
+    "firebug/debugger/grips/functionClient",
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/grips/remoteNodeListRep",
 ],
-function(FBTrace, ObjectGrip) {
+function(FBTrace, ObjectClient) {
 
 // ********************************************************************************************* //
 // Debugger
@@ -30,9 +30,9 @@ function(FBTrace, ObjectGrip) {
 // This module just defines a list of dependencies for JSD2 debugger so,
 // all necessary modules are properyly loaded.
 
-// xxxHonza: can't be in ObjectGrip since firebug/firebug is not loaded at that moment
+// xxxHonza: can't be in ObjectClient since firebug/firebug is not loaded at that moment
 // is there a better place?
-Firebug.registerDefaultGrip(ObjectGrip);
+Firebug.registerDefaultGrip(ObjectClient);
 
 // Register stylesheet with DBG_* styles
 // xxxHonza: any better way how to register global Firebug stylesheth with trace styles?

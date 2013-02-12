@@ -14,7 +14,7 @@ var Trace = FBTrace.to("DBG_SCRIPTPANEL");
 // ********************************************************************************************* //
 // Factory
 
-var GripFactory =
+var ClientFactory =
 {
     classes: {},
     defaultGrip: null,
@@ -64,7 +64,7 @@ var GripFactory =
 // ********************************************************************************************* //
 // Registration
 
-return GripFactory;
+return ClientFactory;
 
 // ********************************************************************************************* //
 });

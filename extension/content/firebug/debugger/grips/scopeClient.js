@@ -5,21 +5,21 @@ define([
     "firebug/lib/object",
     "firebug/lib/string",
     "firebug/lib/locale",
-    "firebug/debugger/grips/objectGrip",
+    "firebug/debugger/grips/objectClient",
 ],
-function (FBTrace, Obj, Str, Locale, ObjectGrip) {
+function (FBTrace, Obj, Str, Locale, ObjectClient) {
 
 // ********************************************************************************************* //
 // Scope
 
-function ScopeGrip(grip, cache)
+function ScopeClient(grip, cache)
 {
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
 }
 
-ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
+ScopeClient.prototype = Obj.descend(new ObjectClient(),
 {
     getName: function()
     {
@@ -68,7 +68,7 @@ ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
         if (object)
             return object.getValue();
 
-        return ObjectGrip.prototype.getValue.apply(this, arguments);
+        return ObjectClient.prototype.getValue.apply(this, arguments);
     },
 
     hasProperties: function()
@@ -91,7 +91,7 @@ ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
             case "with":
             case "object":
                 var actor = this.grip.object.actor;
-                return ObjectGrip.prototype.getPrototypeAndProperties.call(this, actor);
+                return ObjectClient.prototype.getPrototypeAndProperties.call(this, actor);
 
             case "block":
             case "function":
@@ -125,7 +125,7 @@ ScopeGrip.prototype = Obj.descend(new ObjectGrip(),
 // ********************************************************************************************* //
 // Registration
 
-return ScopeGrip;
+return ScopeClient;
 
 // ********************************************************************************************* //
 });

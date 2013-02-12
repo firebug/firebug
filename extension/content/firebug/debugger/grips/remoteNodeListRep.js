@@ -7,9 +7,9 @@ define([
     "firebug/lib/promise",
     "firebug/chrome/reps",
     "firebug/lib/domplate",
-    "firebug/debugger/grips/objectGrip",
+    "firebug/debugger/grips/objectClient",
 ],
-function (FBTrace, Arr, RDP, Promise, FirebugReps, Domplate, ObjectGrip) {
+function (FBTrace, Arr, RDP, Promise, FirebugReps, Domplate, ObjectClient) {
 with (Domplate) {
 
 // ********************************************************************************************* //

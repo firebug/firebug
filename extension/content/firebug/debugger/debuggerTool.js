@@ -13,13 +13,13 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/remoting/debuggerClientModule",
-    "firebug/debugger/grips/gripCache",
+    "firebug/debugger/grips/clientCache",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoint/breakpointStore",
     "firebug/lib/options",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, GripCache, SourceFile, BreakpointStore, Options) {
+    DebuggerClientModule, ClientCache, SourceFile, BreakpointStore, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -119,7 +119,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.attachListeners(context);
 
         // Create grip cache
-        context.gripCache = new GripCache(DebuggerClientModule.client);
+        context.gripCache = new ClientCache(DebuggerClientModule.client);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).

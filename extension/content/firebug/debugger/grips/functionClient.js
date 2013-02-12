@@ -3,14 +3,14 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/debugger/grips/objectGrip",
+    "firebug/debugger/grips/objectClient",
 ],
-function (FBTrace, Obj, ObjectGrip) {
+function (FBTrace, Obj, ObjectClient) {
 
 // ********************************************************************************************* //
 // Function Grip
 
-function FunctionGrip(grip, cache)
+function FunctionClient(grip, cache)
 {
     this.grip = grip;
     this.cache = cache;
@@ -23,7 +23,7 @@ function FunctionGrip(grip, cache)
     this.displayName = grip.name;
 }
 
-FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
+FunctionClient.prototype = Obj.descend(new ObjectClient(),
 {
     toString: function()
     {
@@ -63,7 +63,7 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
     getValue: function()
     {
         //xxxHonza: This method is executed 2x more than it should be, why?
-        //FBTrace.sysout("FunctionGrip.getValue; " + this.signature)
+        //FBTrace.sysout("FunctionClient.getValue; " + this.signature)
 
         if (!this.signature)
             return this.getSignature();
@@ -76,9 +76,9 @@ FunctionGrip.prototype = Obj.descend(new ObjectGrip(),
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerGrip("Function", FunctionGrip);
+Firebug.registerGrip("Function", FunctionClient);
 
-return FunctionGrip;
+return FunctionClient;
 
 // ********************************************************************************************* //
 });

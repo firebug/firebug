@@ -5,21 +5,21 @@ define([
     "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/promise",
-    "firebug/debugger/grips/objectGrip",
-    "firebug/debugger/grips/gripFactory",
+    "firebug/debugger/grips/objectClient",
+    "firebug/debugger/grips/clientFactory",
 ],
-function (FBTrace, Firebug, Obj, Promise, ObjectGrip, GripFactory) {
+function (FBTrace, Firebug, Obj, Promise, ObjectClient, ClientFactory) {
 
 // ********************************************************************************************* //
 // Constants
 
-var gripNull = new ObjectGrip({type: "null"});
-var gripUndefined = new ObjectGrip({type: "undefined"});
+var gripNull = new ObjectClient({type: "null"});
+var gripUndefined = new ObjectClient({type: "undefined"});
 
 // ********************************************************************************************* //
-// GripCache
+// ClientCache
 
-function GripCache(debuggerClient)
+function ClientCache(debuggerClient)
 {
     this.debuggerClient = debuggerClient;
 
@@ -27,7 +27,7 @@ function GripCache(debuggerClient)
     this.clear();
 }
 
-GripCache.prototype =
+ClientCache.prototype =
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Objects
@@ -61,7 +61,7 @@ GripCache.prototype =
         if (object)
             return object;
 
-        object = GripFactory.createGripObject(grip, this);
+        object = ClientFactory.createGripObject(grip, this);
         this.grips[grip.actor] = object;
 
         return object;
@@ -90,7 +90,7 @@ GripCache.prototype =
 // ********************************************************************************************* //
 // Registration
 
-return GripCache;
+return ClientCache;
 
 // ********************************************************************************************* //
 });

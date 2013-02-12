@@ -23,11 +23,11 @@ define([
     "firebug/lib/http",
     "firebug/trace/traceListener",
     "firebug/console/commandLineExposed",
-    "firebug/debugger/grips/gripFactory",
+    "firebug/debugger/grips/clientFactory",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
     Wrapper, Url, Css, Win, Str, Arr, Dom, Http, TraceListener, CommandLineExposed,
-    GripFactory) {
+    ClientFactory) {
 
 // ********************************************************************************************* //
 // Constants
@@ -678,17 +678,17 @@ window.Firebug =
 
     registerGrip: function(gripClass, gripType)
     {
-        return GripFactory.registerGrip(gripClass, gripType);
+        return ClientFactory.registerGrip(gripClass, gripType);
     },
 
     unregisterGrip: function(gripClass)
     {
-        return GripFactory.unregisterGrip(gripClass);
+        return ClientFactory.unregisterGrip(gripClass);
     },
 
     registerDefaultGrip: function(gripType)
     {
-        return GripFactory.registerDefaultGrip(gripType);
+        return ClientFactory.registerDefaultGrip(gripType);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

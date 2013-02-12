@@ -3,10 +3,10 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/debugger/grips/gripProvider",
+    "firebug/debugger/grips/clientProvider",
     "firebug/debugger/stack/stackFrame",
 ],
-function (FBTrace, Obj, GripProvider, StackFrame) {
+function (FBTrace, Obj, ClientProvider, StackFrame) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -21,7 +21,7 @@ function WatchPanelProvider(panel)
  * The provider is responsible for joining list of user-expressions with the
  * list of the current scopes (displayed when the debugger is halted).
  */
-var BaseProvider = GripProvider.prototype;
+var BaseProvider = ClientProvider.prototype;
 WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 /** @lends WatchPanelProvider */
 {

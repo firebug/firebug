@@ -11,7 +11,7 @@ function (FBTrace, Obj, Str, Arr) {
 // ********************************************************************************************* //
 // Watch Panel Provider
 
-function GripProvider(cache)
+function ClientProvider(cache)
 {
     this.cache = cache;
 }
@@ -19,8 +19,8 @@ function GripProvider(cache)
 /**
  * @provider
  */
-GripProvider.prototype =
-/** @lends GripProvider */
+ClientProvider.prototype =
+/** @lends ClientProvider */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Provider
@@ -87,7 +87,7 @@ GripProvider.prototype =
 // ********************************************************************************************* //
 // Registration
 
-return GripProvider;
+return ClientProvider;
 
 // ********************************************************************************************* //
 });

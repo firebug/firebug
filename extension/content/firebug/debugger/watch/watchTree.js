@@ -10,10 +10,10 @@ define([
     "firebug/lib/array",
     "firebug/chrome/domTree",
     "firebug/lib/locale",
-    "firebug/debugger/grips/scopeGrip",
+    "firebug/debugger/grips/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeGrip, WatchExpression) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeClient, WatchExpression) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -78,7 +78,7 @@ WatchTree.prototype = domplate(BaseTree,
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
-        if (object instanceof ScopeGrip)
+        if (object instanceof ScopeClient)
             return "scopes";
         else if (object instanceof WatchExpression)
             return "watch";

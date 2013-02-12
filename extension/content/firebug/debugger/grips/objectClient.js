@@ -11,14 +11,14 @@ function (FBTrace, RDP, Promise, Arr) {
 // ********************************************************************************************* //
 // Object Grip
 
-function ObjectGrip(grip, cache)
+function ObjectClient(grip, cache)
 {
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
 }
 
-ObjectGrip.prototype =
+ObjectClient.prototype =
 {
     getActor: function()
     {
@@ -52,7 +52,7 @@ ObjectGrip.prototype =
         // Basic grip data packet contains also list of some properties so, it's
         // possible to display some useful info about the object without additional
         // request. Let's use these properties for the value label.
-        // See also {@ObjectGrip}
+        // See also {@ObjectClient}
         if (this.grip.ownProperties)
             return Arr.values(this.grip.ownProperties);
 
@@ -93,7 +93,7 @@ ObjectGrip.prototype =
             type: RDP.DebugProtocolTypes.prototypeAndProperties
         };
 
-        // 'null' and 'undefined' grips don't have cache reference (see GripCache and
+        // 'null' and 'undefined' grips don't have cache reference (see ClientCache and
         // gripNull and gripUndefined constants).
         if (!this.cache)
         {
@@ -128,7 +128,7 @@ ObjectGrip.prototype =
 
     createProperty: function(name, packet)
     {
-        return new ObjectGrip.Property(name, packet, this.cache);
+        return new ObjectClient.Property(name, packet, this.cache);
     },
 
     parseProperties: function(props)
@@ -162,7 +162,7 @@ function createGripProxy(grip)
 // ********************************************************************************************* //
 // Property
 
-ObjectGrip.Property = function(name, desc, cache)
+ObjectClient.Property = function(name, desc, cache)
 {
     this.name = name;
 
@@ -173,13 +173,13 @@ ObjectGrip.Property = function(name, desc, cache)
     this.cache = cache;
 }
 
-ObjectGrip.Property.prototype =
+ObjectClient.Property.prototype =
 {
     hasChildren: function()
     {
         var result = false;
 
-        if (this.value instanceof ObjectGrip)
+        if (this.value instanceof ObjectClient)
             result = this.value.hasProperties();
 
         return result;
@@ -187,7 +187,7 @@ ObjectGrip.Property.prototype =
 
     getChildren: function()
     {
-        if (this.value instanceof ObjectGrip)
+        if (this.value instanceof ObjectClient)
             return this.value.getProperties();
 
         return [];
@@ -195,7 +195,7 @@ ObjectGrip.Property.prototype =
 
     getValue: function()
     {
-        if (this.value instanceof ObjectGrip)
+        if (this.value instanceof ObjectClient)
             return this.value.getValue();
 
         return this.value;
@@ -203,7 +203,7 @@ ObjectGrip.Property.prototype =
 
     getType: function()
     {
-        if (this.value instanceof ObjectGrip)
+        if (this.value instanceof ObjectClient)
             return this.value.getType();
 
         return typeof(this.value);
@@ -213,7 +213,7 @@ ObjectGrip.Property.prototype =
 // ********************************************************************************************* //
 // Registration
 
-return ObjectGrip;
+return ObjectClient;
 
 // ********************************************************************************************* //
 });
