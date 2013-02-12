@@ -1688,6 +1688,44 @@ function comparePropertyNames(lhs, rhs)
     return (lhs === rhs ? 0 : 1);
 }
 
+// See autoCompleteEval. This reorders a sorted array to look as if it had been
+// sorted by comparePropertyNames.
+function reorderPropertyNames(ar)
+{
+    var buckets = [];
+    for (var i = 0; i < ar.length; ++i)
+    {
+        var s = ar[i];
+        if (s.charAt(0) === "_")
+        {
+            var count = 0, j = 0;
+            while (count < s.length && s.charAt(count) === "_")
+                ++count;
+            --count;
+            if (!buckets[count])
+                buckets[count] = [];
+            buckets[count].push(s);
+        }
+    }
+
+    if (!buckets.length)
+        return ar;
+
+    var res = [];
+    for (var i = 0; i < ar.length; ++i)
+    {
+        if (ar[i].charAt(0) !== "_")
+            res.push(ar[i]);
+    }
+    for (var i = 0; i < buckets.length; ++i)
+    {
+        var ar2 = buckets[i];
+        if (ar2)
+            res.push.apply(res, ar2);
+    }
+    return res;
+}
+
 function propertiesToHide(expr, obj)
 {
     var ret = [];
@@ -2284,10 +2322,12 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
         }
 
         // Sort the completions, and avoid duplicates.
-        // XXX: If we make it possible to show both regular and hidden completions
-        // at the same time, completions must shadow hiddenCompletions.
-        out.completions = Arr.sortUnique(out.completions, comparePropertyNames);
-        out.hiddenCompletions = Arr.sortUnique(out.hiddenCompletions, comparePropertyNames);
+        // Note: If we make it possible to show both regular and hidden completions
+        // at the same time, completions should shadow hiddenCompletions here.
+        // XXX Normally we'd just do sortUnique(completions, comparePropertyNames),
+        // but JSD makes that slow (issue 6256). Sort and do manual reordering instead.
+        out.completions = reorderPropertyNames(Arr.sortUnique(out.completions));
+        out.hiddenCompletions = reorderPropertyNames(Arr.sortUnique(out.hiddenCompletions));
     }
     catch (exc)
     {
