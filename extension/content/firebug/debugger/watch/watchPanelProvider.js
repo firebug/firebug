@@ -5,8 +5,9 @@ define([
     "firebug/lib/object",
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/clients/scopeClient",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame) {
+function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -31,12 +32,48 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
         {
             var children = [];
             children.push.apply(children, this.panel.watches);
-            children.push.apply(children, object.getScopes());
+            children.push.apply(children, this.getScopes(object));
             return children;
         }
 
-        return BaseProvider.getChildren.call(this, object);
+        return BaseProvider.getChildren.apply(this, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Scopes
+
+    getScopes: function(stackFrame)
+    {
+        if (stackFrame.scopes)
+            return stackFrame.scopes;
+
+        stackFrame.scopes = [];
+
+        var cache = stackFrame.context.gripCache;
+
+        // Append 'this' as the first scope. This is not a real 'scope',
+        // but useful for debugging.
+        var thisScope = cache.getObject(stackFrame.nativeFrame["this"]);
+        thisScope.name = "this";
+        stackFrame.scopes.push(thisScope);
+
+        // Now iterate all parent scopes. This represents the chain of scopes
+        // in the Watch panel.
+        var scope = stackFrame.nativeFrame.environment;
+        while (scope)
+        {
+            stackFrame.scopes.push(new ScopeClient(scope, cache));
+            scope = scope.parent;
+        }
+
+        return stackFrame.scopes;
+    },
+
+    getTopScope: function(stackFrame)
+    {
+        var scopes = this.getScopes(stackFrame);
+        return (scopes.length > 1) ? scopes[1] : null;
+    }
 });
 
 // ********************************************************************************************* //

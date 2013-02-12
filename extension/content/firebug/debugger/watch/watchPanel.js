@@ -188,7 +188,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Pre-expand the first top scope.
         if (object instanceof StackFrame)
         {
-            var scope = object.getTopScope();
+            var scope = this.tree.provider.getTopScope(object);
             this.tree.expandObject(scope);
         }
 

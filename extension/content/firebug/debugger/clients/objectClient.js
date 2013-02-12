@@ -5,8 +5,9 @@ define([
     "firebug/debugger/rdp",
     "firebug/lib/promise",
     "firebug/lib/array",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (FBTrace, RDP, Promise, Arr) {
+function (FBTrace, RDP, Promise, Arr, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -46,6 +47,11 @@ ObjectClient.prototype =
                 return;
         }
 
+        // xxxHonza: hack, get the value localy.
+        var value = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
+        if (value)
+            return value;
+
         if (this.properties)
             return createGripProxy(this);
 
@@ -54,7 +60,7 @@ ObjectClient.prototype =
         // request. Let's use these properties for the value label.
         // See also {@ObjectClient}
         if (this.grip.ownProperties)
-            return Arr.values(this.grip.ownProperties);
+            return this.grip.ownProperties;
 
         return {type: this.grip.type};
     },

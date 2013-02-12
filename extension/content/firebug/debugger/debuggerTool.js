@@ -119,7 +119,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         this.attachListeners(context);
 
         // Create grip cache
-        context.gripCache = new ClientCache(DebuggerClientModule.client);
+        context.gripCache = new ClientCache(DebuggerClientModule.client, context);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).

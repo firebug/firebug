@@ -81,8 +81,13 @@ DomTree.prototype = domplate(
 
     getValue: function(member)
     {
+        // xxxHonza: |this| is wrong at this moment (callback from Domplate uses wrong context).
+        // That's why we access the provider through the 'member' object.
+        // xxxHonza: It should be possible to provide the tag through a decorator or provider.
         if (member.provider)
         {
+            // Get proper template for the value. |member.value| should refer to remote
+            // object implementation.
             var value = member.provider.getValue(member.value);
             if (isPromise(value))
                 return member.tree.resolvePromise(value, member.value);
@@ -95,13 +100,11 @@ DomTree.prototype = domplate(
 
     getValueTag: function(member)
     {
-        // xxxHonza: |this| is wrong at this moment (callback from Domplate uses wrong context).
-        // That's why we access the provider through the 'member' object.
-        // xxxHonza: It should be possible to provide the tag through a decorator or provider.
-
-        // Get proper template for the value. |member.value| should refer to remote
-        // object implementation.
-        var rep = Firebug.getRep(member.value);
+        // xxxHonza: if value is fetched asynchronously and the actual return value
+        // here is a promise the tree should probably use a generic template with
+        // a throbber and wait for async update.
+        var value = this.getValue(member);
+        var rep = Firebug.getRep(value);
         return rep.shortTag ? rep.shortTag : rep.tag;
     },
 

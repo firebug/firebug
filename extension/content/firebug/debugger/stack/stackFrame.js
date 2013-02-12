@@ -6,9 +6,8 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/debugger/script/sourceLink",
-    "firebug/debugger/clients/scopeClient",
 ],
-function (FBTrace, Url, Locale, Str, SourceLink, ScopeClient) {
+function (FBTrace, Url, Locale, Str, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -19,7 +18,7 @@ var Trace = FBTrace.to("DBG_STACK");
 // ********************************************************************************************* //
 // Stack Frame
 
-// xxxHonza: should be derived from Grip
+// xxxHonza: should be derived from a client
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
     // Essential fields
@@ -131,39 +130,6 @@ StackFrame.prototype =
     {
         return this.nativeFrame.actor;
     },
-
-    getScopes: function()
-    {
-        if (this.scopes)
-            return this.scopes;
-
-        this.scopes = [];
-
-        var cache = this.context.gripCache;
-
-        // Append 'this' as the first scope. This is not a real 'scope',
-        // but useful for debugging.
-        var thisScope = cache.getObject(this.nativeFrame["this"]);
-        thisScope.name = "this";
-        this.scopes.push(thisScope);
-
-        // Now iterate all parent scopes. This represents the chain of scopes
-        // in the Watch panel.
-        var scope = this.nativeFrame.environment;
-        while (scope)
-        {
-            this.scopes.push(new ScopeClient(scope, cache));
-            scope = scope.parent;
-        }
-
-        return this.scopes;
-    },
-
-    getTopScope: function()
-    {
-        var scopes = this.getScopes();
-        return (scopes.length > 1) ? scopes[1] : null;
-    }
 };
 
 // ********************************************************************************************* //

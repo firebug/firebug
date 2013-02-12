@@ -19,9 +19,10 @@ var gripUndefined = new ObjectClient({type: "undefined"});
 // ********************************************************************************************* //
 // ClientCache
 
-function ClientCache(debuggerClient)
+function ClientCache(debuggerClient, context)
 {
     this.debuggerClient = debuggerClient;
+    this.context = context;
 
     // Initialization
     this.clear();

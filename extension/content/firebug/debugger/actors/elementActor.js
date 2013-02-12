@@ -72,8 +72,6 @@ ElementActor.prototype = Obj.extend(ElementActor.prototype,
             "attributes": attrs,
         };
 
-        FBTrace.sysout("elementActor.grip; ", grip);
-
         return grip;
     },
 

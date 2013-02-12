@@ -375,7 +375,47 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             send.apply(self.transport, arguments);
         }
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Local Access (hack for easier transition to JSD2/RDP)
+
+    /**
+     * The next step is to make this method asynchronous to be closer to the
+     * remote debugging requirements. Of course, it should use Promise
+     * as the return value.
+     *
+     * @param {Object} context
+     * @param {Object} actorId
+     */
+    getObject: function(context, actorId)
+    {
+        try
+        {
+            // xxxHonza: access server side objects, of course even hacks needs
+            // good architecure, refactor.
+            // First option: implement a provider used by UI widgets (e.g. DomTree)
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
+            var conn = DebuggerServer._connections["conn0."];
+            var tabActor = conn.rootActor._tabActors.get(context.browser);
+            var pool = tabActor.threadActor.threadLifetimePool;
+            var actor = pool.get(actorId);
+
+            if (!actor && tabActor.threadActor._pausePool)
+                actor = tabActor.threadActor._pausePool.get(actorId);
+
+            var obj = actor.obj;
+
+            if (typeof(obj.unsafeDereference) != "undefined")
+                return obj.unsafeDereference();
+
+            return obj;
+        }
+        catch (e)
+        {
+            TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+        }
+    },
 });
 
 // ********************************************************************************************* //
