@@ -339,13 +339,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             });
         };
         var special = {
-            "": ["document", "console", "frames", "window", "parseInt", "undefined",
+            "": ["document", "console", "frames", "window", "parseInt", "undefined", "navigator",
                 "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
             "console.": ["log"],
-            "document.": ["getElementById", "addEventListener", "createElement",
-                "documentElement"],
+            "document.": ["getElementById", "addEventListener", "createElement", "documentElement"],
             "Object.prototype.toString.": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
@@ -382,7 +381,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             "toSource": "toString",
             "toFixed": "toString",
             "watch": "toString",
-            "pattern": "parentNode"
+            "pattern": "parentNode",
+            "inspect": "include",
+            "home": "history"
         };
         if (replacements.hasOwnProperty(list[ind]))
         {
@@ -800,7 +801,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 this.selectedPopupElement = hbox;
 
             if (!this.completionBase.expr && CommandLineExposed.completionList.indexOf(completion) !== -1)
-                pre.style.color = '#940000';
+                hbox.style.fontStyle = 'italic';
 
             hbox.appendChild(pre);
             hbox.appendChild(post);

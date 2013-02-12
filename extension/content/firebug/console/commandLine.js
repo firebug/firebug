@@ -449,6 +449,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, true);
 
+        // Allow the use of plain "help"
+        if (expr === "help")
+            expr = "help()";
+
         var goodOrBad = Obj.bind(Firebug.Console.log, Firebug.Console);
         this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
 
