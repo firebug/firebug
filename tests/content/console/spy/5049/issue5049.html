@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Issue 5049: onreadystatechange fails for back-to-back XMLHTTP requests</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<link href="https://getfirebug.com/tests/head/_common/testcase.css"
+    type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5049">Issue 5049</a>:
+        onreadystatechange fails for back-to-back XMLHTTP requests</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug</li>
+            <li>Enable and switch to the <em>Console</em> panel</li>
+            <li>Click this button <button id="testButton" onclick="onExecuteTest()">Click Me!</button></li>
+            <li>Two XMLHttpRequest logs to <code>issue5049.txt</code> should be displayed</li>
+            <li>Both requests should have HTTP status and time (displayed at the end)</li>
+        </ol>
+    </section>
+    <script type="text/javascript">
+    function onExecuteTest()
+    {
+        var xhr = new XMLHttpRequest();
+        var url = "issue5049-1.txt";
+        xhr.onreadystatechange = function()
+        {
+            if (xhr.readyState == 4 && xhr.status == 200)
+            {
+                url = "issue5049-2.txt";
+                xhr.onreadystatechange = function() {};
+                xhr.open("GET", url);
+                xhr.send(null);
+            }
+        }
+        xhr.open("GET", url);
+        xhr.send(null);
+    }
+    </script>
+    <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
+</div>
+</body>
+</html>
