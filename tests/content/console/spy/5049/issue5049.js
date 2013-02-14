@@ -58,6 +58,6 @@ function waitForDisplayedElementAsync(panelName, config, callback)
         setTimeout(function(element)
         {
             callback(element);
-        });
+        }, 1000);
     });
 }
