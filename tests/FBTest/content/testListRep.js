@@ -253,7 +253,8 @@ var TestList = domplate(
 
     onOpenTestPage: function(test)
     {
-        Win.openNewTab(test.testCasePath + test.testPage);
+        var remoteFBL = FBTestApp.FBTest.FirebugWindow.FBL;
+        remoteFBL.openNewTab(test.testCasePath + test.testPage);
     },
 
     onRunFromHere: function(test)
