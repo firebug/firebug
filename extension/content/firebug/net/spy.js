@@ -553,8 +553,11 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         spy = context.spies[i];
         if (spy.request == request)
         {
-            FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " +
-                Http.safeGetRequestName(request) + ", " + Url.getFileName(spy.href));
+            if (FBTrace.DBG_SPY)
+            {
+                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " +
+                    Http.safeGetRequestName(request) + ", " + Url.getFileName(spy.href));
+            }
             return spy;
         }
     }
