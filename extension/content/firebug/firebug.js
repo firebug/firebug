@@ -2520,6 +2520,13 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
+        if (!object)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Rep.getTitle; ERROR No object provided");
+            return "null object";
+        }
+
         try
         {
             if (object.constructor && typeof(object.constructor) == 'function')

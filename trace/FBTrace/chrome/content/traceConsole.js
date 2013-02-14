@@ -1,37 +1,57 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
-// Shorcuts and Services
+define([
+    "fbtrace/trace",
+    "fbtrace/lib/locale",
+    "fbtrace/lib/object",
+    "fbtrace/lib/css",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/options",
+    "fbtrace/lib/array",
+    "fbtrace/serializer",
+    "fbtrace/traceMessage",
+    "fbtrace/messageTemplate",
+    "fbtrace/commonBaseUI",
+    "fbtrace/traceCommandLine",
+    "fbtrace/traceModule",
+    "fbtrace/lib/reps",
+    "fbtrace/lib/menu",
+],
+function(FBTrace, Locale, Obj, Css, Dom, Options, Arr, Serializer, TraceMessage,
+    MessageTemplate, CommonBaseUI, TraceCommandLine, TraceModule, Reps, Menu) {
+
+// ********************************************************************************************* //
+// Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 try
 {
-    Components.utils["import"]("resource://moduleLoader/moduleLoader.js");
-    Components.utils["import"]("resource://fbtrace/firebug-trace-service.js");
+    Cu["import"]("resource://fbtrace/firebug-trace-service.js");
 }
 catch (err)
 {
     dump("TraceConsole; Loading modules EXCEPTION " + err + "\n");
 }
 
-var traceService = traceConsoleService;
-
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const directoryService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
-var gFindBar;
-
-const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
-const reDBG_FBS = /DBG_FBS_(.*)/;
-
 // Cache messages that are fired before the content of the window is loaded.
 var queue = [];
 
-// ************************************************************************************************
+// Get trace service (we need to register/unregister a listener later)
+var scope = {};
+Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
+var traceService = scope.traceConsoleService;
+
+Locale.registerStringBundle("chrome://fbtrace/locale/firebug-tracing.properties");
+
+// ********************************************************************************************* //
 // Trace Window Implementation
 
 var TraceConsole =
@@ -48,15 +68,12 @@ var TraceConsole =
         // to this pref-domain will be displayed. The current domain is displyaed
         // in window title.
         this.prefDomain = args.prefDomain;
-        document.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
+        document.title = Locale.$STR("title.Tracing") + ": " + this.prefDomain;
 
         try
         {
             for( var p in args)
                 window.dump("args "+p+"\n");
-
-            // Firebug is already initialized in main.js (where chrome is created).
-            // Firebug.initialize();
 
             window.dump("FBTrace; Firebug for Tracing Console is initialized\n");
             this.initializeConsole();
@@ -64,9 +81,10 @@ var TraceConsole =
         catch (exc)
         {
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-            window.dump("FBTrace; Firebug.TraceModule.initialize EXCEPTION " + msg + "\n");
-            window.dump(FBL.getStackDump()+"\n");
+            window.dump("FBTrace; TraceModule.initialize EXCEPTION " + msg);
         }
+
+        window.gFindBar = document.getElementById("FindToolbar");
     },
 
     initializeConsole: function()
@@ -85,19 +103,13 @@ var TraceConsole =
         };
 
         // Make sure the UI is localized.
-        Firebug.internationalizeUI(window.document);
-
-        if (!Firebug.TraceModule)
-        {
-            window.dump("FBTrace; Firebug.TraceModule == NULL\n");
-            return;
-        }
+        this.internationalizeUI(window.document);
 
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
 
-        Firebug.TraceModule.CommonBaseUI.initializeContent(
+        CommonBaseUI.initializeContent(
             this.consoleNode, this, this.prefDomain,
-            FBL.bind(this.initializeContent, this));
+            Obj.bind(this.initializeContent, this));
 
         gFindBar = document.getElementById("FindToolbar");
     },
@@ -109,7 +121,7 @@ var TraceConsole =
             this.logs = logNode;
 
             // Notify listeners
-            Firebug.TraceModule.onLoadConsole(window, logNode);
+            TraceModule.onLoadConsole(window, logNode);
 
             this.updateTimeInfo();
 
@@ -135,65 +147,13 @@ var TraceConsole =
         }
     },
 
-    createLoader: function(prefDomain, baseUrl)
-    {
-        try
-        {
-            // Require JS configuration
-            var config = {};
-            config.prefDomain = prefDomain;
-            config.baseUrl = baseUrl;
-            config.paths = {"arch": "inProcess"};
-
-            config.onDebug = function()
-            {
-                window.dump("FBTrace; onDebug: ");
-                for(var i = 0; i < arguments.length; i++)
-                    window.dump(arguments[i] + ",");
-                window.dump(".\n");
-                //Components.utils.reportError(arguments[0]);
-            }
-
-            config.onError = function()
-            {
-                FBTrace.sysout("FBTrace; onError: " + arguments + "\n");
-                window.dump("FBTrace; onError: ");
-                for(var i = 0; i < arguments.length; i++)
-                    window.dump(arguments[i] + ",");
-                window.dump(".\n");
-                Components.utils.reportError(arguments[0]);
-            }
-
-            // Defalt globals for all modules loaded using this loader.
-            var firebugScope =
-            {
-                window : window,
-                Firebug: Firebug,
-                FBL: FBL,
-                FBTrace: FBTrace,
-                FirebugReps: FirebugReps,
-                domplate: domplate,
-                TraceConsole: this,
-            };
-
-            Firebug.loadConfiguration = config;
-
-            // Create loader and load tracing module.
-            return new ModuleLoader(firebugScope, config);
-        }
-        catch (err)
-        {
-            FBTrace.sysout("FBTrace; EXCEPTION " + err + "\n");
-        }
-    },
-
     updateTimeInfo: function()
     {
-        var showTime = Firebug.Options.get("trace.showTime");
+        var showTime = Options.get("trace.showTime");
         if (showTime)
-            FBL.setClass(this.logs.firstChild, "showTime");
+            Css.setClass(this.logs.firstChild, "showTime");
         else
-            FBL.removeClass(this.logs.firstChild, "showTime");
+            Css.removeClass(this.logs.firstChild, "showTime");
     },
 
     shutdown: function()
@@ -201,7 +161,7 @@ var TraceConsole =
         traceService.removeObserver(this, "firebug-trace-on-message");
         prefs.removeObserver(this.prefDomain, this, false);
 
-        Firebug.TraceModule.onUnloadConsole(window);
+        TraceModule.onUnloadConsole(window);
 
         // Unregister from the opener
         if (this.addedOnCloseOpener)
@@ -220,11 +180,37 @@ var TraceConsole =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Localization
+
+    /**
+     *  Substitute strings in the UI, with fall back to en-US
+     */
+    internationalizeUI: function(doc)
+    {
+        if (!doc)
+            return;
+
+        var elements = doc.getElementsByClassName("fbInternational");
+        elements = Arr.cloneArray(elements);
+        var attributes = ["label", "tooltiptext", "aria-label"];
+        for (var i=0; i<elements.length; i++)
+        {
+            var element = elements[i];
+            Css.removeClass(elements[i], "fbInternational");
+            for (var j=0; j<attributes.length; j++)
+            {
+                if (element.hasAttribute(attributes[j]))
+                    Locale.internationalize(element, attributes[j]);
+            }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Asynchronous display
 
     initLayoutTimer: function()
     {
-        var layoutTimeout = Firebug.Options.getPref(this.prefDomain, "fbtrace.layoutTimeout");
+        var layoutTimeout = Options.get("fbtrace.layoutTimeout");
         if (typeof(layoutTimeout) == "undefined")
             return;
 
@@ -234,7 +220,7 @@ var TraceConsole =
         if (this.layoutTimeout)
             clearTimeout(this.layoutTimeout);
 
-        var handler = FBL.bindFixed(this.flushCachedMessages, this);
+        var handler = Obj.bindFixed(this.flushCachedMessages, this);
         this.layoutTimeout = setTimeout(handler, layoutTimeout);
     },
 
@@ -267,8 +253,7 @@ var TraceConsole =
             if (messageInfo.type != this.prefDomain)
                 return;
 
-            var message = new Firebug.TraceModule.TraceMessage(
-                messageInfo.type, data, messageInfo.obj, messageInfo.scope,
+            var message = new TraceMessage(messageInfo.type, data, messageInfo.obj,
                 messageInfo.time);
 
             this.initLayoutTimer();
@@ -293,9 +278,6 @@ var TraceConsole =
 
     getScrollingNode: function()
     {
-        //window.dump(FBL.getStackDump());
-        //window.dump("traceConsole getScrollingNode this.scrollingNode "+this.scrollingNode+"\n");
-
         return this.scrollingNode;
     },
 
@@ -306,9 +288,6 @@ var TraceConsole =
 
     getTargetNode: function()
     {
-        //window.dump(FBL.getStackDump());
-        //window.dump("traceConsole getTargetgNode this.scrollingNode "+this.logs.firstChild+"\n");
-
         return this.logs.firstChild;
     },
 
@@ -317,12 +296,12 @@ var TraceConsole =
 
     dump: function(message)
     {
-        Firebug.TraceModule.dump(message, this);
+        MessageTemplate.dump(message, this);
     },
 
     dumpSeparator: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
+        MessageTemplate.dumpSeparator(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -330,22 +309,22 @@ var TraceConsole =
 
     onClearConsole: function()
     {
-        FBL.clearNode(this.logs.firstChild);
+        Dom.clearNode(this.logs.firstChild);
     },
 
     onSeparateConsole: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
+        this.dumpSeparator();
     },
 
     onSaveToFile: function()
     {
-        TraceConsole.Serializer.onSaveToFile(this);
+        Serializer.onSaveToFile(this);
     },
 
     onLoadFromFile: function()
     {
-        TraceConsole.Serializer.onLoadFromFile(this);
+        Serializer.onLoadFromFile(this);
     },
 
     onRestartFirefox: function()
@@ -371,7 +350,7 @@ var TraceConsole =
             cache.evictEntries(Ci.nsICache.STORE_ON_DISK);
             cache.evictEntries(Ci.nsICache.STORE_IN_MEMORY);
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("traceConsole.onClearCache EXCEPTION " + exc, exc);
@@ -382,9 +361,9 @@ var TraceConsole =
     {
         try
         {
-            FBL.jsd.GC();
+            Cu.forceGC();
         }
-        catch(exc)
+        catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("traceConsole.onForceGC EXCEPTION " + exc, exc);
@@ -402,8 +381,7 @@ var TraceConsole =
 
     openFirefox: function(context)
     {
-        var handler = Components.classes["@mozilla.org/browser/clh;1"]
-            .getService(Components.interfaces.nsIBrowserHandler);
+        var handler = Cc["@mozilla.org/browser/clh;1"].getService(Ci.nsIBrowserHandler);
         var defaultArgs = handler.defaultArgs;
 
         window.openDialog("chrome://browser/content/", "_blank",
@@ -412,7 +390,7 @@ var TraceConsole =
 
     toggleFirebug: function(on)
     {
-        Components.utils.import("resource://gre/modules/Services.jsm");
+        Cu["import"]("resource://gre/modules/Services.jsm");
         Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
         var BOOTSTRAP_REASONS = {
@@ -425,7 +403,7 @@ var TraceConsole =
             ADDON_UPGRADE   : 7,
             ADDON_DOWNGRADE : 8
         };
-        var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm");
+        var XPIProviderBP = Cu["import"]("resource://gre/modules/XPIProvider.jsm");
         var id = "firebug@software.joehewitt.com";
         var XPIProvider = XPIProviderBP.XPIProvider;
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
@@ -433,17 +411,43 @@ var TraceConsole =
 
         var t1 = Date.now();
         XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-                                XPIProvider.bootstrappedAddons[id].type, file,
-                                "shutdown", BOOTSTRAP_REASONS.ADDON_DISABLE);
+            XPIProvider.bootstrappedAddons[id].type, file,
+            "shutdown", BOOTSTRAP_REASONS.ADDON_DISABLE);
+
         FBTrace.sysout("shutdown time :" + (Date.now() - t1) + "ms");
+
         if (!on)
             return;
 
         t1 = Date.now()
         XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
-                                XPIProvider.bootstrappedAddons[id].type, file,
-                                "startup", BOOTSTRAP_REASONS.APP_STARTUP);
+            XPIProvider.bootstrappedAddons[id].type, file,
+            "startup", BOOTSTRAP_REASONS.APP_STARTUP);
+
         FBTrace.sysout("startup time :" + (Date.now() - t1) + "ms");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Command Line
+
+    toggleCommandLine: function()
+    {
+        TraceCommandLine.toggleCommandLine();
+    },
+
+    evaluate: function()
+    {
+        TraceCommandLine.evaluate();
+    },
+
+    onCmdContextMenuShowing: function(event)
+    {
+        TraceCommandLine.onContextMenuShowing(event);
+    },
+
+    onCmdContextMenuHidden: function(event)
+    {
+        TraceCommandLine.onContextMenuHidden(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -458,7 +462,7 @@ var TraceConsole =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = Firebug.Options.get(option);
+                    var checked = Options.get(option);
                     child.setAttribute("checked", checked);
                 }
             }
@@ -471,9 +475,97 @@ var TraceConsole =
         if (!option)
             return;
 
-        var value = Firebug.Options.get(option);
-        Firebug.Options.set(option, !value);
-    }
+        var value = Options.get(option);
+        Options.set(option, !value);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
+    onContextShowing: function(event)
+    {
+        var popup = event.target;
+        if (popup.id != "fbContextMenu")
+            return false;
+
+        var target = document.popupNode;
+
+        Dom.eraseNode(popup);
+
+        var object;
+        if (target)
+            object = Reps.getRepObject(target);
+
+        var rep = Reps.getRep(object);
+        var realObject = rep ? rep.getRealObject(object) : null;
+        var realRep = realObject ? Reps.getRep(realObject) : null;
+
+        // 1. Add the custom menu items from the realRep
+        if (realObject && realRep)
+        {
+            var items = realRep.getContextMenuItems(realObject, target);
+            if (items)
+                Menu.createMenuItems(popup, items);
+        }
+
+        // 2. Add the custom menu items from the original rep
+        if (object && rep && rep != realRep)
+        {
+            var items = rep.getContextMenuItems(object, target);
+            if (items)
+                Menu.createMenuItems(popup, items);
+        }
+
+        if (!popup.firstChild)
+            return false;
+
+        return true;
+    },
+
+    onTooltipShowing: function(event)
+    {
+        var tooltip = window.document.getElementById("fbTooltip");
+        var target = document.tooltipNode;
+
+        var object;
+
+        if (target && target.ownerDocument == document)
+            object = Reps.getRepObject(target);
+
+        var rep = object ? Reps.getRep(object) : null;
+        object = rep ? rep.getRealObject(object) : null;
+        rep = object ? Reps.getRep(object) : null;
+
+        if (object && rep)
+        {
+            var label = rep.getTooltip(object);
+            if (label)
+            {
+                tooltip.setAttribute("label", label);
+                return true;
+            }
+        }
+
+        if (Css.hasClass(target, 'noteInToolTip'))
+            Css.setClass(tooltip, 'noteInToolTip');
+        else
+            Css.removeClass(tooltip, 'noteInToolTip');
+
+        if (target && target.hasAttribute("title"))
+        {
+            tooltip.setAttribute("label", target.getAttribute("title"));
+            return true;
+        }
+
+        return false;
+    },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
+
+return TraceConsole;
+
+// ********************************************************************************************* //
+});
+

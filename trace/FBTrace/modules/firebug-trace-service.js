@@ -141,7 +141,7 @@ var traceConsoleService =
     },
 
     // Prepare trace-object and dispatch to all observers.
-    dispatch: function(messageType, message, obj, scope)
+    dispatch: function(messageType, message, obj)
     {
         // Translate string object.
         if (typeof(obj) == "string") {
@@ -156,7 +156,6 @@ var traceConsoleService =
         var messageInfo = {
             obj: obj,
             type: messageType,
-            scope: scope,
             time: (new Date()).getTime()
         };
 
@@ -292,11 +291,6 @@ var TraceAPI =
         this.dump("no-message-type", message, obj);
     },
 
-    setScope: function(scope)
-    {
-        this.scopeOfFBTrace = scope;
-    },
-
     matchesNode: function(node)
     {
         return (node.getAttribute('anonid')=="title-box");
@@ -364,13 +358,12 @@ TraceBase.prototype.sysout = function(message, obj)
 
     try
     {
-        traceConsoleService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
-        delete this.scopeOfFBTrace;
+        traceConsoleService.dispatch(this.prefDomain, message, obj);
     }
     catch(exc)
     {
         if (toOSConsole)
-            traceConsoleService.osOut("traceConsoleService.dispatch FAILS "+exc+"\n");
+            traceConsoleService.osOut("traceConsoleService.dispatch FAILS " + exc + "\n");
     }
     finally
     {

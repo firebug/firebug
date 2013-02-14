@@ -2,47 +2,44 @@
 
 // ********************************************************************************************* //
 
+var gFindBar;
+
+(function() {
+
+// ********************************************************************************************* //
+// Constants
+
 var config =
 {
-    baseLoaderUrl: "resource://fbtrace-firebug/",
-    baseUrl: "resource://fbtrace_rjs/",
+    baseUrl: "chrome://fbtrace/",
     paths: {
-        "arch": "firebug/content/bti/inProcess",
-        "firebug": "firebug/content",
         "fbtrace": "content"
     },
-    coreModules: ["lib/options", "lib/xpcom"],
-    xhtml: true,
 };
 
+// ********************************************************************************************* //
+// Application Load
 
-window.dump("FBTrace; main.js begin module loading\n");
-
-require(config,
-[
-    "firebug/chrome/chrome",
-    "firebug/lib/lib",
-    "firebug/chrome/reps",
-    "firebug/lib/domplate",
-    "firebug/firebug",
-    "fbtrace/serializer", // save to file, load from file
-    "fbtrace/firebugExplorer",
-
-    // Overrides the default Firebug.TraceModule implementation that only
-    // collects tracing listeners (customization of logs)
+require(config, [
+    "fbtrace/trace",
+    "fbtrace/traceConsole",
+    "fbtrace/lib/options",
     "fbtrace/traceModule",
+    "fbtrace/unblocker",
     "fbtrace/globalTab",
 ],
-function(ChromeFactory)
+function(FBTrace, TraceConsole, Options, TraceModule)
 {
     if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
         FBTrace.sysout("FBTrace; main.js require!\n");
 
-    Firebug.Options.initialize("extensions.firebug");
-    Firebug.TraceModule.initialize();
+    // Needed for XUL. This should be the only global (singleton).
+    window.TraceConsole = TraceConsole;
 
-    var chrome = ChromeFactory.createFirebugChrome(window);
-    chrome.initialize();
+    Options.initialize("extensions.firebug");
+    TraceModule.initialize();
 });
 
 // ********************************************************************************************* //
+})();
+

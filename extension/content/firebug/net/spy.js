@@ -552,7 +552,14 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     {
         spy = context.spies[i];
         if (spy.request == request)
+        {
+            if (FBTrace.DBG_SPY)
+            {
+                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " +
+                    Http.safeGetRequestName(request) + ", " + Url.getFileName(spy.href));
+            }
             return spy;
+        }
     }
 
     if (noCreate)
@@ -564,16 +571,16 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
 
+    if (FBTrace.DBG_SPY)
+    {
+        FBTrace.sysout("spy.getSpyForXHR; NEW spy object (" +
+            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
+    }
+
     // Attach spy only to the original request. Notice that there can be more network requests
     // made by the same XHR if redirects are involved.
     if (name == origName)
         spy.attach();
-
-    if (FBTrace.DBG_SPY)
-    {
-        FBTrace.sysout("spy.getSpyForXHR; New spy object created (" +
-            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
-    }
 
     return spy;
 }
@@ -647,7 +654,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         }
 
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
+        {
+            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request) + ", " +
+                Url.getFileName(this.href));
+        }
     },
 
     detach: function(force)
@@ -670,7 +680,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             return;
 
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.detach; " + this.href);
+        {
+            FBTrace.sysout("spy.detach; " + Http.safeGetRequestName(this.request) + ", " +
+                Url.getFileName(this.href));
+        }
 
         // Remove itself from the list of active spies.
         Arr.remove(this.context.spies, this);
@@ -726,11 +739,32 @@ function onHTTPSpyReadyStateChange(spy, event)
     if (FBTrace.DBG_SPY)
     {
         FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
-            " (multipart: " + spy.xhrRequest.multipart + ")");
+            " (multipart: " + spy.xhrRequest.multipart + ") " +
+            Http.safeGetRequestName(spy.request) + ", " + Url.getFileName(spy.href));
     }
 
     // Remember just in case spy is detached (readyState == 4).
     var originalHandler = spy.onreadystatechange;
+
+    // ReadyStateChange event with readyState == 1 is fired when the page calls  the |open| method.
+    // This event is usually not cought since spy object is attached when HTTP-ON-OPENING-REQUEST
+    // http even is fired - which happens after |readyState == 1|
+    // This scenario happens if the xhr object is reused synchronously in page callback handler
+    // (onreadystatechange) for another request. In such case we need to quickly detach our
+    // Spy object. New one will be immediatelly created when HTTP-ON-OPENING-REQUEST is fired.
+    // See issue 5049
+    if (spy.xhrRequest.readyState == 1)
+    {
+        if (FBTrace.DBG_SPY)
+        {
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
+                "reused, detach" + Http.safeGetRequestName(spy.request) + ", " +
+                Url.getFileName(spy.href));
+        }
+
+        spy.detach(false);
+        return;
+    }
 
     // Force response text to be updated in the UI (in case the console entry
     // has been already expanded and the response tab selected).
@@ -820,11 +854,19 @@ function callPageHandler(spy, event, originalHandler)
 function onHTTPSpyLoad(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href);
+    {
+        FBTrace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
+            Url.getFileName(spy.href) + ", state: " + spy.xhrRequest.readyState);
+    }
 
-    // Detach must be done in onLoad (not in onreadystatechange) otherwise
-    // onAbort would not be handled.
-    spy.detach(false);
+    // Detach must be done in onLoad (not in onreadystatechange) otherwise onAbort would
+    // not be handled. Note that onAbort, onError and onLoad events are fired after
+    // onreadystatechange and must also be handled.
+    // Issue 5049: only detach if XHR state == 4. It can happen that XHR object is being
+    // reused for another request and onLoad fires too soon. See also onHTTPSpyReadyStateChange
+    // for more details.
+    if (spy.xhrRequest.readyState == 4)
+        spy.detach(false);
 
     // If the spy is not loaded yet (and so, the response was not cached), do it now.
     // This can happen since synchronous XHRs don't fire onReadyStateChange event (issue 2868).

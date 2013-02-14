@@ -83,7 +83,7 @@ this.onToggleOption = function(target)
         Firebug.chrome.onToggleOption(target);
 
         // Open automatically if set to "always open", close otherwise.
-        if (Firebug.Options.getPref(Firebug.prefDomain, "alwaysOpenTraceConsole"))
+        if (Firebug.Options.get("alwaysOpenTraceConsole"))
             self.openConsole();
         else
             self.closeConsole();
@@ -96,8 +96,10 @@ this.openConsole = function(prefDomain, windowURL)
         prefDomain = "extensions.firebug";
 
     var consoleWindow = null;
-    FBL.iterateBrowserWindows("FBTraceConsole", function(win) {
-        if (win.TraceConsole && win.TraceConsole.prefDomain == prefDomain) {
+    FBL.iterateBrowserWindows("FBTraceConsole", function(win)
+    {
+        if (win.TraceConsole && win.TraceConsole.prefDomain == prefDomain)
+        {
             consoleWindow = win;
             return true;
         }
@@ -139,8 +141,10 @@ this.closeConsole = function(prefDomain)
         prefDomain = this.prefDomain;
 
     var consoleWindow = null;
-    FBL.iterateBrowserWindows("FBTraceConsole", function(win) {
-        if (win.TraceConsole && win.TraceConsole.prefDomain == prefDomain) {
+    FBL.iterateBrowserWindows("FBTraceConsole", function(win)
+    {
+        if (win.TraceConsole && win.TraceConsole.prefDomain == prefDomain)
+        {
             consoleWindow = win;
             return true;
         }
