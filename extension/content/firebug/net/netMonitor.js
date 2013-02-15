@@ -717,7 +717,7 @@ NetCacheListener.prototype =
     {
         // Remember the response for this request.
         var file = this.netProgress.getRequestFile(request, null, true);
-        if (file)
+        if (file && responseText)
             file.responseText = responseText;
 
         Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
