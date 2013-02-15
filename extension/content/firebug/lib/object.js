@@ -151,6 +151,27 @@ Obj.getUniqueId = function()
 
 Obj.getObjHash = function(obj)
 {
+    function getPropString(obj, level)
+    {
+        if (level > 3 || typeof obj != "object")
+            return "";
+
+        var str = "";
+        try
+        {
+            for (var prop in obj)
+            {
+                str += prop +
+                    (typeof obj == "object" ? getPropString(obj[prop], level + 1) : obj[prop]);
+            }
+        }
+        catch(e)
+        {
+        }
+
+        return str;
+    }
+
     function toHexString(charCode)
     {
         return ("0" + charCode.toString(16)).slice(-2);
@@ -163,9 +184,7 @@ Obj.getObjHash = function(obj)
     }
     catch(e)
     {
-        // Object has a cyclic reference, is a wrapped Object, etc.
-        // TODO: Find a way to stringify the object in case JSON.stringify() fails
-        str = "notStringifyable";
+        str = getPropString(obj, 1);
     }
 
     var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
