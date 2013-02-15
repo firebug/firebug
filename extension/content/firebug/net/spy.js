@@ -23,13 +23,12 @@ define([
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
-    "firebug/lib/options",
     "firebug/net/netPanel",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper, Xpcom, Options) {
+    TraceListener, TraceModule, Wrapper, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -43,7 +42,9 @@ var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
 // List of contexts with XHR spy attached.
 var contexts = [];
 
-var redirectionLimit = Options.getPref("network.http", "redirection-limit");
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -285,11 +286,7 @@ var SpyHttpObserver =
     {
         try
         {
-            var redirect = (request.redirectionLimit < redirectionLimit);
-
-            // There is no http-on-opening-request in case of redirect so, we need
-            // to use http-on-modify-request.
-            if ((topic == "http-on-modify-request" && redirect) ||
+            if ((topic == "http-on-modify-request" && !fx18) ||
                 topic == "http-on-opening-request" ||
                 topic == "http-on-examine-response" ||
                 topic == "http-on-examine-cached-response")
@@ -314,8 +311,6 @@ var SpyHttpObserver =
         if (!win || !xhr)
             return;
 
-        var redirect = (request.redirectionLimit < redirectionLimit);
-
         for (var i=0; i<contexts.length; ++i)
         {
             var context = contexts[i];
@@ -325,9 +320,9 @@ var SpyHttpObserver =
                 var requestName = request.URI.asciiSpec;
                 var requestMethod = request.requestMethod;
 
-                if (topic == "http-on-modify-request" && redirect)
+                if (topic == "http-on-modify-request" && !fx18)
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
-                else if (topic == "http-on-opening-request")
+                if (topic == "http-on-opening-request")
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-examine-response")
                     this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
@@ -370,7 +365,9 @@ var SpyHttpObserver =
 
         // Notify registered listeners. The onStart event is fired once for entire XHR
         // (even if there is more redirects within the process).
-        if (!isRedirect(request))
+        var name = request.URI.asciiSpec;
+        var origName = request.originalURI.asciiSpec;
+        if (name == origName)
             Events.dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
 
         // Remember the start time et the end, so it's most accurate.
@@ -505,8 +502,6 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
             spy.endTime = time;
             spy.transactionClosed = true;
 
-            updateTime(spy);
-
             // This should be the proper time to detach the Spy object, but only
             // in the case when the XHR is already loaded. If the XHR is made as part of the
             // page load, it may happen that the event (readyState == 4) comes later
@@ -560,9 +555,8 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         {
             if (FBTrace.DBG_SPY)
             {
-                var name = Url.getFileName(spy.request.URI.asciiSpec);
-                var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
-                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " + name + ", " + origName);
+                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " +
+                    Http.safeGetRequestName(request) + ", " + Url.getFileName(spy.href));
             }
             return spy;
         }
@@ -579,18 +573,13 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
 
     if (FBTrace.DBG_SPY)
     {
-        var redirect = isRedirect(request);
         FBTrace.sysout("spy.getSpyForXHR; NEW spy object (" +
-            (redirect ? "redirected XHR" : "new XHR") + ") for: " +
-            Url.getFileName(name) + ", " + Url.getFileName(origName));
+            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
     }
 
     // Attach spy only to the original request. Notice that there can be more network requests
     // made by the same XHR if redirects are involved.
-
-    // The Console panel should display XHR entry for evere redirect so we need to
-    // attach spy for each request (even redirects). See issue 4009
-    //if (name == origName)
+    if (name == origName)
         spy.attach();
 
     return spy;
@@ -665,7 +654,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         }
 
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
+        {
+            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request) + ", " +
+                Url.getFileName(this.href));
+        }
     },
 
     detach: function(force)
@@ -746,11 +738,9 @@ function onHTTPSpyReadyStateChange(spy, event)
 {
     if (FBTrace.DBG_SPY)
     {
-        var name = Url.getFileName(spy.request.URI.asciiSpec);
-        var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
-
         FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
-            " (multipart: " + spy.xhrRequest.multipart + ") " + name + ", " + origName);
+            " (multipart: " + spy.xhrRequest.multipart + ") " +
+            Http.safeGetRequestName(spy.request) + ", " + Url.getFileName(spy.href));
     }
 
     // Remember just in case spy is detached (readyState == 4).
@@ -811,9 +801,8 @@ function onHTTPSpyReadyStateChange(spy, event)
 
         // Notify the Net panel about a request being loaded.
         // xxxHonza: I don't think this is necessary.
-        // stopFile this breaks layout of the net panel in case of redirects.
         var netProgress = spy.context.netProgress;
-        if (netProgress && !isRedirect(spy.request))
+        if (netProgress)
             netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText,
                 spy.responseText]);
 
@@ -1181,11 +1170,11 @@ Firebug.XHRSpyListener =
 
 function updateTime(spy)
 {
-    if (spy.logRow)
+    if(spy.logRow)
     {
         var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
-        if (spy.sendTime && spy.endTime)
-            timeBox.textContent = " " + Str.formatTime(spy.endTime - spy.sendTime);
+        if (spy.responseTime)
+            timeBox.textContent = " " + Str.formatTime(spy.responseTime);
     }
 }
 
@@ -1321,21 +1310,6 @@ function getResponseHeaders(spy)
     }
 
     return headers;
-}
-
-function isRedirect(request)
-{
-    try
-    {
-        var name = request.URI.asciiSpec;
-        var origName = request.originalURI.asciiSpec;
-        return (name != origName);
-    }
-    catch (e)
-    {
-    }
-
-    return false;
 }
 
 // ********************************************************************************************* //
