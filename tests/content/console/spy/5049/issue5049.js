@@ -15,7 +15,6 @@ function runTest()
 
             waitForDisplayedElementAsync("console", options, function(row)
             {
-                setTimeout(function() {
                 var panel = FBTest.getPanel("console");
                 var root = panel.panelNode;
 
@@ -26,8 +25,6 @@ function runTest()
                         statuses[0].textContent);
                     FBTest.ok(statuses[1].textContent, "There must be a status info: " +
                         statuses[1].textContent);
-                    
-                    FBTrace.sysout("statuses", statuses)
                 }
 
                 var times = root.querySelectorAll(".spyRow .spyTime");
@@ -37,12 +34,9 @@ function runTest()
                         times[0].textContent);
                     FBTest.ok(times[1].textContent, "There must be a time info: " +
                         times[1].textContent);
-
-                    FBTrace.sysout("times", times)
                 }
 
-                    FBTest.testDone("issue5049.DONE");
-                });
+                FBTest.testDone("issue5049.DONE");
             });
 
             // Execute test implemented on the test page.
