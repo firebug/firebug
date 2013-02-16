@@ -38,6 +38,7 @@ const mimeExtensionMap =
     "png": "image/png",
     "bmp": "image/bmp",
     "swf": "application/x-shockwave-flash",
+    "xap": "application/x-silverlight-app",
     "flv": "video/x-flv",
     "webm": "video/webm"
 };
@@ -64,8 +65,9 @@ const mimeCategoryMap =
     "image/gif": "image",
     "image/png": "image",
     "image/bmp": "image",
-    "application/x-shockwave-flash": "flash",
-    "video/x-flv": "flash",
+    "application/x-shockwave-flash": "plugin",
+    "video/x-flv": "plugin",
+    "application/x-silverlight-app": "plugin",
     "audio/mpeg3": "media",
     "audio/x-mpeg-3": "media",
     "video/mpeg": "media",
@@ -91,7 +93,7 @@ const fileCategories =
     "js": 1,
     "xhr": 1,
     "image": 1,
-    "flash": 1,
+    "plugin": 1,
     "media": 1,
     "txt": 1,
     "bin": 1
@@ -109,14 +111,14 @@ const textFileCategories =
 const binaryFileCategories =
 {
     "bin": 1,
-    "flash": 1,
+    "plugin": 1,
     "media": 1
 };
 
 const binaryCategoryMap =
 {
     "image": 1,
-    "flash" : 1
+    "plugin" : 1
 };
 
 // ********************************************************************************************* //

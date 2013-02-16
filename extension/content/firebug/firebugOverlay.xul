@@ -312,11 +312,11 @@
                                                 class="toolbar-text-button fbInternational"
                                                 group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'image')"/>
-                                            <toolbarbutton id="fbNetFilter-flash"
-                                                label="firebug.Flash" type="radio"
+                                            <toolbarbutton id="fbNetFilter-plugin"
+                                                label="net.filter.label.Plugins" type="radio"
                                                 class="toolbar-text-button fbInternational"
                                                 group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'flash')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'plugin')"/>
                                             <toolbarbutton id="fbNetFilter-media"
                                                 label="net.filter.Media" type="radio"
                                                 class="toolbar-text-button fbInternational"
