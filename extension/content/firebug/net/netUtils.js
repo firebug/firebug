@@ -82,7 +82,15 @@ const mimeCategoryMap =
     "audio/x-midi": "media",
     "music/crescendo": "media",
     "audio/wav": "media",
-    "audio/x-wav": "media"
+    "audio/x-wav": "media",
+    "application/x-woff": "font",
+    "application/x-font-woff": "font",
+    "application/x-ttf": "font",
+    "application/x-font-ttf": "font",
+    "font/ttf": "font",
+    "font/woff": "font",
+    "application/x-otf": "font",
+    "application/x-font-otf": "font"
 };
 
 const fileCategories =
