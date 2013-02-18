@@ -73,6 +73,8 @@ const mimeCategoryMap =
     "video/mpeg": "media",
     "video/x-mpeg": "media",
     "video/webm": "media",
+    "video/mp4": "media",
+    "video/ogg": "media",
     "audio/ogg": "media",
     "application/ogg": "media",
     "application/x-ogg": "media",
