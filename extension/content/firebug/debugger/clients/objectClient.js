@@ -5,9 +5,10 @@ define([
     "firebug/debugger/rdp",
     "firebug/lib/promise",
     "firebug/lib/array",
+    "firebug/lib/wrapper",
     "firebug/remoting/debuggerClientModule",
 ],
-function (FBTrace, RDP, Promise, Arr, DebuggerClientModule) {
+function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -86,7 +87,66 @@ ObjectClient.prototype =
 
     getProperties: function()
     {
-        return this.getPrototypeAndProperties(this.getActor());
+        var object = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
+
+        // Get object properties asynchronously over RDP.
+        if (!object)
+            return this.getPrototypeAndProperties(this.getActor());
+
+        var deferred = Promise.defer();
+
+        var props = this.getObjectProperties(object);
+        props = Arr.sortUnique(props);
+
+        var contentView = Wrapper.getContentView(object);
+
+        //xxxHonza: Duplicated in firebug/dom/domPanel
+        var result = [];
+        for (var i=0; i<props.length; i++)
+        {
+            var val;
+            var name = props[i];
+
+            try
+            {
+                val = contentView[name];
+            }
+            catch (exc)
+            {
+                val = undefined;
+            }
+
+            result.push(this.createProperty(name, {value: val}, this.cache));
+        }
+
+        deferred.resolve(result);
+        return deferred.promise;
+    },
+
+    //xxxHonza: Duplicated in firebug/dom/domPanel
+    getObjectProperties: function(object, enumerableOnly, ownOnly)
+    {
+        var props = [];
+
+        // Get all enumerable-only or all-properties of the object (but not inherited).
+        if (enumerableOnly)
+            props = Object.keys(object);
+        else
+            props = Object.getOwnPropertyNames(object);
+
+        // Not interested in inherited properties, bail out.
+        if (ownOnly)
+            return props;
+
+        // Climb the prototype chain.
+        var inheritedProps = [];
+        var parent = Object.getPrototypeOf(object);
+        if (parent)
+            inheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
+
+        // Push everything onto the returned array, to avoid O(nm) runtime behavior.
+        inheritedProps.push.apply(inheritedProps, props);
+        return inheritedProps;
     },
 
     getPrototypeAndProperties: function(actor)

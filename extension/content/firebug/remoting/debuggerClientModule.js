@@ -113,10 +113,6 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     loadActors: function(callback)
     {
-        callback();
-
-        //xxxHonza: Not necessary for now, see {@DebuggerClientModule.getObject}
-        /*
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
         // actor types.
@@ -131,7 +127,6 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             callback();
         });
-        */
     },
 
     onActorsLoaded: function()
