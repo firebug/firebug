@@ -488,6 +488,23 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
+    updateOption: function(name, value)
+    {
+        // xxxHonza: how to properly share logic with the DOM panel,
+        // but not through inheritance?
+        return Firebug.DOMBasePanel.prototype.updateOption.call(this);
+    },
+
+    getOptionsMenuItems: function()
+    {
+        // xxxHonza: how to properly share logic with the DOM panel,
+        // but not through inheritance?
+        return Firebug.DOMBasePanel.prototype.getOptionsMenuItems.call(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
     /**
