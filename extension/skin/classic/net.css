@@ -12,8 +12,9 @@
 .hideCategory-js .category-js,
 .hideCategory-image .category-image,
 .hideCategory-xhr .category-xhr,
-.hideCategory-flash .category-flash,
+.hideCategory-plugin .category-plugin,
 .hideCategory-media .category-media,
+.hideCategory-font .category-font,
 .hideCategory-txt .category-txt,
 .hideCategory-bin .category-bin {
     display: none!important;

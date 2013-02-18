@@ -103,6 +103,7 @@ const fileCategories =
     "image": 1,
     "plugin": 1,
     "media": 1,
+    "font": 1,
     "txt": 1,
     "bin": 1
 };
@@ -126,7 +127,8 @@ const binaryFileCategories =
 const binaryCategoryMap =
 {
     "image": 1,
-    "plugin" : 1
+    "plugin" : 1,
+    "font": 1
 };
 
 // ********************************************************************************************* //
