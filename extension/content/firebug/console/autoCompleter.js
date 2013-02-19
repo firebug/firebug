@@ -11,9 +11,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/console/closureInspector",
+    "firebug/console/commandLineExposed",
     "firebug/editor/editor"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector, Editor) {
+function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector,
+    CommandLineExposed, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -207,7 +209,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completionBase.expr = preExpr;
             this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                preParsed, spreParsed, this.options.includeCurrentScope);
+                preParsed, spreParsed, this.options);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
@@ -337,13 +339,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             });
         };
         var special = {
-            "": ["document", "console", "frames", "window", "parseInt", "undefined",
+            "": ["document", "console", "frames", "window", "parseInt", "undefined", "navigator",
                 "Array", "Math", "Object", "String", "XMLHttpRequest", "Window"],
             "window.": ["console"],
             "location.": ["href"],
             "console.": ["log"],
-            "document.": ["getElementById", "addEventListener", "createElement",
-                "documentElement"],
+            "document.": ["getElementById", "addEventListener", "createElement", "documentElement"],
             "Object.prototype.toString.": ["call"]
         };
         if (special.hasOwnProperty(this.completionBase.expr))
@@ -380,7 +381,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             "toSource": "toString",
             "toFixed": "toString",
             "watch": "toString",
-            "pattern": "parentNode"
+            "pattern": "parentNode",
+            "inspect": "include",
+            "home": "history"
         };
         if (replacements.hasOwnProperty(list[ind]))
         {
@@ -796,6 +799,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
             if (i === selIndex)
                 this.selectedPopupElement = hbox;
+
+            if (!this.completionBase.expr && CommandLineExposed.completionList.indexOf(completion) !== -1)
+                hbox.style.fontStyle = 'italic';
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
@@ -2227,7 +2233,7 @@ function evalPropChain(out, preExpr, origExpr, context)
     return true;
 }
 
-function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, includeCurrentScope)
+function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, options)
 {
     var out = {
         spreExpr: spreExpr,
@@ -2280,7 +2286,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(out.window);
-            if (context.stopped && includeCurrentScope)
+            if (context.stopped && options.includeCurrentScope)
             {
                 out.completions = Firebug.Debugger.getCurrentFrameKeys(context);
             }
@@ -2295,7 +2301,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
                 setCompletionsFromObject(out, context.global, context);
             }
 
-            // Also add names of variables declared previously in the typed code.
+            // Add names of variables declared previously in the typed code.
             var previousDeclarations = getNewlyDeclaredNames(spreParsed);
             out.completions.push.apply(out.completions, previousDeclarations);
         }
@@ -2328,6 +2334,16 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, inc
         // but JSD makes that slow (issue 6256). Sort and do manual reordering instead.
         out.completions = reorderPropertyNames(Arr.sortUnique(out.completions));
         out.hiddenCompletions = reorderPropertyNames(Arr.sortUnique(out.hiddenCompletions));
+
+        // Add things from the Command Line API, if we are signalled to,
+        // and it is not unavailable due to being stopped in the debugger
+        // (issue 5321).
+        // need unique
+        if (!spreExpr && options.includeCommandLineAPI && !context.stopped)
+        {
+            out.completions.push.apply(out.completions, CommandLineExposed.completionList);
+        }
+
     }
     catch (exc)
     {
