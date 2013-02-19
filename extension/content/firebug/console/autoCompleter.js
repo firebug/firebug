@@ -776,14 +776,25 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             }
         }
 
+        var separatorInserted = false;
+
+        var separator = this.completionPopup.ownerDocument.
+            createElementNS("http://www.w3.org/1999/xhtml", "div");
+        separator.textContent = Locale.$STR("Firefox DOM API");
+        separator.classList.add("fbPopupSeparator");
+        vbox.appendChild(separator);
+
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
             var prefixLen = this.completions.prefix.length;
             var completion = list[i];
 
+            var isCmdAPI = CommandLineExposed.completionList.indexOf(completion) !== -1;
+
             var hbox = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml", "div");
             hbox.completionIndex = i;
+            hbox.classList.add("fbPopupEntry");
 
             var pre = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml", "span");
@@ -800,8 +811,24 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             if (i === selIndex)
                 this.selectedPopupElement = hbox;
 
-            if (!this.completionBase.expr && CommandLineExposed.completionList.indexOf(completion) !== -1)
-                hbox.style.fontStyle = 'italic';
+            if (!this.completionBase.expr && isCmdAPI)
+            {
+                if (!separatorInserted)
+                {
+                    var separator = this.completionPopup.ownerDocument.
+                        createElementNS("http://www.w3.org/1999/xhtml", "div");
+                    separator.textContent = Locale.$STR("Firebug Command Line API");
+                    separator.classList.add("fbPopupSeparator");
+                    vbox.appendChild(separator);
+
+                    separatorInserted = true;
+                }
+            }
+
+            if (!this.completionBase.expr && isCmdAPI)
+                hbox.classList.add("cmd");
+            else
+                hbox.classList.add("dom");
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
@@ -816,6 +843,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         // plus apparent padding, is a good enough approximation of this.
         var chWidth = this.getCharWidth(this.completionBase.pre);
         var offsetX = Math.round(this.completionBase.pre.length * chWidth) + 2;
+
+        // xxxHonza: needs to be properly calculated
+        offsetX -= 23;
+
         this.completionPopup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
     };
 

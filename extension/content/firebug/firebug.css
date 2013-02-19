@@ -61,26 +61,60 @@ textbox#fbCommandEditor {
 
 .fbCommandLineCompletionPanel {
     /* height: 270px; */
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
 }
 
 .fbCommandLineCompletions {
     cursor: default;
     font-family: monospace;
     white-space: pre;
+    background-color: white;
+    border: 1px solid #BEBEBE;
+    margin: 4px;
 }
 
 .fbPopupTitle {
     font-family: Lucida Grande, Tahoma, sans-serif;
     padding: 2px 18px;
     background-color: LightYellow;
-    border-bottom: 1px solid #BEBEBE;
     color: #666666;
+}
+
+.fbPopupSeparator {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    padding: 2px 18px;
+    color: DarkGrey;
+    border-top: 1px solid #BEBEBE;
+    border-bottom: 1px solid #BEBEBE;
+    margin: 3px 0 3px 0;
+    background-color: rgb(243,243,243);
+}
+
+/* The first separator doesn't need margin-top */
+.fbPopupTitle + .fbPopupSeparator {
+    margin-top: 0;
+}
+
+.fbPopupEntry {
+    padding: 0 2px 0 20px;
+}
+
+.fbPopupEntry.dom {
+    background: url("chrome://firebug/skin/autocompletion-bullet-dom.png") no-repeat;
+    background-position: 6px 6px;
+}
+
+.fbPopupEntry.cmd {
+    background: url("chrome://firebug/skin/autocompletion-bullet-cmd.png") no-repeat;
+    background-position: 6px 6px;
 }
 
 .completionText {
     color: #666666;
     margin-right: 1px;
 }
+
 [selected="true"] > .completionText {
     background-color: highlight;
     border-color: highlight;
