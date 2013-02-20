@@ -120,7 +120,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // All calls to this method must call cleanupSheets first
 
     updateCascadeView: function(element)
     {
@@ -200,7 +199,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // All calls to this method must call cleanupSheets first
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
@@ -216,7 +214,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         }
     },
 
-    // All calls to this method must call cleanupSheets first
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
         var pseudoElements = [""];
@@ -511,12 +508,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
-        var result = CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
-
-        // If cleanupSheets returns false there was an exception thrown when accessing
-        // a styleshet (probably since it isn't fully loaded yet). So, delay the panel
-        // update and try it again a bit later (issue 5654).
-        if (!result)
+        // We can properly update the view only if the page is fully loaded (see issue 5654).
+        var doc = element.ownerDocument;
+        if (doc.readyState != "complete")
         {
             this.context.setTimeout(Obj.bindFixed(this.updateView, this, element), 200);
             return;
