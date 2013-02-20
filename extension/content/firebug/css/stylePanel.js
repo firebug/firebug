@@ -15,6 +15,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/xpath",
+    "firebug/lib/string",
     "firebug/lib/fonts",
     "firebug/lib/options",
     "firebug/css/cssModule",
@@ -22,7 +23,7 @@ define([
     "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
-    SourceLink, Dom, Css, Xpath, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -32,9 +33,6 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIDOMCSSStyleRule = Ci.nsIDOMCSSStyleRule;
-
-// before firefox 6 getCSSStyleRules accepted only one argument
-const DOMUTILS_SUPPORTS_PSEUDOELEMENTS = Dom.domUtils.getCSSStyleRules.length > 1;
 
 // See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
 const STATE_ACTIVE  = 0x01;
@@ -227,9 +225,15 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         var inspectedRules, displayedRules = {};
 
         // Firefox 6+ allows inspecting of pseudo-elements (see issue 537)
-        if (DOMUTILS_SUPPORTS_PSEUDOELEMENTS && !inheritMode)
-            pseudoElements = Arr.extendArray(pseudoElements,
-                [":first-letter", ":first-line", ":before", ":after"]);
+        if (!inheritMode)
+            pseudoElements = Arr.extendArray(pseudoElements, Css.pseudoElements);
+
+        // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon 
+        pseudoElements.forEach(function(pseudoElement, i)
+        {
+        	if (Str.hasPrefix(pseudoElement, "::"))
+                pseudoElements[i] = pseudoElement.substr(1);
+        });
 
         for (var p in pseudoElements)
         {

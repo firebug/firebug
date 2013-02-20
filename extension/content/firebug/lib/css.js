@@ -2708,7 +2708,8 @@ Css.pseudoElements =
     "::-moz-math-anonymous",
     "::-moz-math-stretchy",
     "::-moz-progress-bar",
-    "::-moz-selection"
+    "::-moz-selection",
+    "::-moz-placeholder"
 ];
 
 Css.nonEditableTags =
