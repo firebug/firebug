@@ -2693,7 +2693,7 @@ Css.pseudoClasses =
     ":-moz-window-inactive"
 ];
 
-// http://mxr.mozilla.org/mozilla-central/source/browser/devtools/styleinspector/CssLogic.jsm
+// https://developer.mozilla.org/en-US/docs/CSS/CSS_Reference/Mozilla_Extensions#Pseudo-elements_and_pseudo-classes
 Css.pseudoElements =
 [
     "::after",
@@ -2701,15 +2701,37 @@ Css.pseudoElements =
     "::first-letter",
     "::first-line",
     "::selection",
+    "::-moz-anonymous-block",
+    "::-moz-anonymous-positioned-block",
+    "::-moz-canvas",
+    "::-moz-cell-content",
     "::-moz-focus-inner",
     "::-moz-focus-outer",
+    "::-moz-inline-table",
     "::-moz-list-bullet",
     "::-moz-list-number",
     "::-moz-math-anonymous",
     "::-moz-math-stretchy",
+    "::-moz-page",
+    "::-moz-page-sequence",
+    "::-moz-pagebreak",
+    "::-moz-pagecontent",
+    "::-moz-placeholder",
     "::-moz-progress-bar",
     "::-moz-selection",
-    "::-moz-placeholder"
+    "::-moz-scrolled-canvas",
+    "::-moz-scrolled-content",
+    "::-moz-scrolled-page-sequence",
+    "::-moz-svg-foreign-content",
+    "::-moz-table",
+    "::-moz-table-cell",
+    "::-moz-table-column",
+    "::-moz-table-column-group",
+    "::-moz-table-outer",
+    "::-moz-table-row",
+    "::-moz-table-row-group",
+    "::-moz-viewport",
+    "::-moz-viewport-scroll"
 ];
 
 Css.nonEditableTags =
