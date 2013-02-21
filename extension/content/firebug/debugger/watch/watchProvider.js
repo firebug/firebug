@@ -15,7 +15,7 @@ function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvid
 // ********************************************************************************************* //
 // Watch Panel Provider
 
-function WatchPanelProvider(panel)
+function WatchProvider(panel)
 {
     this.panel = panel;
     this.memberProvider = new DOMMemberProvider(panel.context);
@@ -35,8 +35,8 @@ function WatchPanelProvider(panel)
  * removed as soon as remote debuggin is supported.
  */
 var BaseProvider = ClientProvider.prototype;
-WatchPanelProvider.prototype = Obj.extend(BaseProvider,
-/** @lends WatchPanelProvider */
+WatchProvider.prototype = Obj.extend(BaseProvider,
+/** @lends WatchProvider */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Data Provider
@@ -145,7 +145,7 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 // ********************************************************************************************* //
 // Registration
 
-return WatchPanelProvider;
+return WatchProvider;
 
 // ********************************************************************************************* //
 });
