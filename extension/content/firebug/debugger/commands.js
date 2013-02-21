@@ -9,6 +9,14 @@ function(FBTrace, RDP) {
 // ********************************************************************************************* //
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+
 // ********************************************************************************************* //
 // Command Implementation
 
@@ -37,6 +45,8 @@ function pauseGrip(context, args)
     return Firebug.Console.getDefaultReturnValue(context.window);
 }
 
+// ********************************************************************************************* //
+
 function tabGrip(context, args)
 {
     var actor = args[0];
@@ -62,6 +72,44 @@ function tabGrip(context, args)
 }
 
 // ********************************************************************************************* //
+
+function threadPool(context, args)
+{
+    try
+    {
+        var conn = DebuggerServer._connections["conn0."];
+        var tabActor = conn.rootActor._tabActors.get(context.browser);
+        var pool = tabActor.threadActor.threadLifetimePool;
+        Firebug.Console.log(pool);
+    }
+    catch (e)
+    {
+        TraceError.sysout("commands.threadPool; EXCEPTION " + e, e);
+    }
+
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
+
+function pausePool(context, args)
+{
+    try
+    {
+        var conn = DebuggerServer._connections["conn0."];
+        var tabActor = conn.rootActor._tabActors.get(context.browser);
+        var pool = tabActor.threadActor._pausePool;
+        Firebug.Console.log(pool);
+    }
+    catch (e)
+    {
+        TraceError.sysout("commands.threadPool; EXCEPTION " + e, e);
+    }
+
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerCommand("pauseGrip", {
@@ -72,6 +120,16 @@ Firebug.registerCommand("pauseGrip", {
 Firebug.registerCommand("tabGrip", {
     handler: tabGrip.bind(this),
     description: "Helper command for accessing server side tab child Grips. For debugging purposes only."
+})
+
+Firebug.registerCommand("threadPool", {
+    handler: threadPool.bind(this),
+    description: "Helper command for accessing server side thread pool. For debugging purposes only."
+})
+
+Firebug.registerCommand("pausePool", {
+    handler: pausePool.bind(this),
+    description: "Helper command for accessing server side pause pool. For debugging purposes only."
 })
 
 return {};
