@@ -1449,8 +1449,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var maxWidth = netHrefCol.clientWidth;
 
-        // This call must precede all getCSSStyleRules calls  FIXME not needed after 3.6
-        Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, this.context);
         var rules = Dom.domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
         {

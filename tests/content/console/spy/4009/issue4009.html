@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4009: XHR messages are different in the Net and Console panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="https://getfirebug.com/tests/head/_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+    <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4009">Issue 4009</a>:
+            XHR messages are different in the Net and Console panel</h1>
+    </header>
+    <div>
+        <section id="description">
+            <h3>Steps to reproduce</h3>
+            <ol>
+                <li>Open Firebug</li>
+                <li>Enable and switch to the <em>Console</em> panel</li>
+                <li>Click this button <button id="testButton" onclick="onExecuteTest();">Click Me!</button></li>
+                <li>There should be 4 requets</li>
+            </ol>
+        </section>
+        <footer>Jan Odvarko, odvarko@gmail.com</footer>
+    </div>
+    <script type="text/javascript">
+    function onExecuteTest()
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "issue4009-1.php");
+        xhr.send(null);
+    }
+    </script>
+</body>
+</html>

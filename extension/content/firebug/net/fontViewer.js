@@ -30,6 +30,7 @@ var contentTypes =
     "application/x-ttf",
     "application/x-font-ttf",
     "font/ttf",
+    "font/woff",
     "application/x-otf",
     "application/x-font-otf"
 ];

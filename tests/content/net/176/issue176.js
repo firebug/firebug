@@ -12,15 +12,16 @@ function runTest()
             var config = {
                 counter: 2,
                 tagName: "tr",
-                classes: "netRow category-flash hasHeaders loaded",
+                classes: "netRow category-media hasHeaders loaded",
             };
 
-            waitForDisplayedElement("net", config, function(row)
+            FBTest.waitForDisplayedElement("net", config, function(row)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
 
-                // Set "Flash" filter and wait for relayout.
-                FW.Firebug.NetMonitor.onToggleFilter(FW.Firebug.currentContext, "flash");
+                // Set "Media" filter and wait for relayout.
+                FBTest.clickToolbarButton(null, "fbNetFilter-media");
+
                 setTimeout(checkNetPanelUI, 300);
             });
 
@@ -30,27 +31,13 @@ function runTest()
     });
 }
 
-function waitForDisplayedElement(panelName, config, callback)
-{
-    FBTest.waitForDisplayedElement(panelName, config, function(row)
-    {
-        var panelNode = FBTest.getPanel(panelName).panelNode;
-        var nodes = panelNode.getElementsByClassName(config.classes);
-
-        if (nodes.length < config.counter)
-            waitForDisplayedElement(panelName, config, callback);
-        else
-            callback();
-    });
-}
-
 // Make sure the Net panel's UI is properly filtered.
 function checkNetPanelUI()
 {
     var panelNode = FBTest.getPanel("net").panelNode;
 
     // Check number of requests. Must be exactly two.
-    var netRows = FW.FBL.getElementsByClass(panelNode, "netRow", "category-flash", "hasHeaders", "loaded");
+    var netRows = panelNode.getElementsByClassName("netRow category-media hasHeaders loaded");
     FBTest.compare(2, netRows.length, "There must be exactly two requests displayed!");
 
     // Each row can specify just one category.
