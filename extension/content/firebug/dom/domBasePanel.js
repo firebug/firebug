@@ -5,13 +5,12 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
-    "firebug/js/sourceLink",
-    "firebug/js/stackFrame",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/stack/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/search",
@@ -24,345 +23,39 @@ define([
     "firebug/chrome/menu",
     "firebug/dom/domMemberProvider",
     "firebug/dom/domEditor",
+    "firebug/dom/domReps",
     "firebug/editor/editor",
     "firebug/debugger/breakpoints/breakpointModule",
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
     "firebug/console/autoCompleter"
 ],
-function(Obj, Firebug, D, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
+function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor) {
+    DOMMemberProvider, DOMEditor, DOMReps) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const insertSliceSize = 18;
-const insertInterval = 40;
-
 const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
 
 // ********************************************************************************************* //
 
-var WatchRowTag =
-    D.TR({"class": "watchNewRow", level: 0},
-        D.TD({"class": "watchEditCell", colspan: 3},
-            D.DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
-                "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
-                    Locale.$STR("NewWatch")
-            )
-        )
-    );
-
-var SizerRow =
-    D.TR({role: "presentation"},
-        D.TD(),
-        D.TD({width: "30%"}),
-        D.TD({width: "70%"})
-    );
-
-var DirTablePlate = D.domplate(Firebug.Rep,
+/**
+ * @panel Base class for panels displaying hierarchy of objects.
+ */
+Firebug.DOMBasePanel = function()
 {
-    memberRowTag:
-        D.TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
-            $hasChildren: "$member.hasChildren",
-            role: "presentation",
-            level: "$member.level",
-            breakable: "$member.breakable",
-            breakpoint: "$member.breakpoint",
-            disabledBreakpoint: "$member.disabledBreakpoint"},
-            D.TD({"class": "memberHeaderCell"},
-                D.DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
-                    "&nbsp;"
-               )
-            ),
-            D.TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
-                role: "presentation"},
-                D.DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
-                    D.SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
-                    D.SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
-                )
-            ),
-            D.TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
-                role: "presentation"},
-                D.TAG("$member.tag", {object: "$member.value"})
-            )
-        ),
+}
 
-    tag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            _repObject: "$object", role: "tree",
-            "aria-label": Locale.$STR("aria.labels.dom properties")},
-            D.TBODY({role: "presentation"},
-                SizerRow,
-                D.FOR("member", "$object|memberIterator",
-                    D.TAG("$memberRowTag", {member: "$member"})
-                )
-            )
-        ),
-
-    watchTag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
-               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
-            D.TBODY({role: "presentation"},
-                SizerRow,
-                WatchRowTag
-            )
-        ),
-
-    tableTag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
-            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
-            role: "tree", "aria-label": Locale.$STR("a11y.labels.dom_properties")},
-            D.TBODY({role: "presentation"},
-                SizerRow
-            )
-        ),
-
-    rowTag:
-        D.FOR("member", "$members",
-            D.TAG("$memberRowTag", {member: "$member"})
-        ),
-
-    memberIterator: function(object)
-    {
-        var members = Firebug.DOMBasePanel.prototype.getMembers(object, 0, null);
-        if (members.length)
-            return members;
-
-        return [{
-            name: Locale.$STR("firebug.dom.noChildren2"),
-            type: "string",
-            rowClass: "memberRow-string",
-            tag: Firebug.Rep.tag,
-            prefix: ""
-        }];
-    },
-
-    getMemberNameTooltip: function(member)
-    {
-        return member.title || member.scopeNameTooltip;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onClick: function(event)
-    {
-        if (!Events.isLeftClick(event))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "memberRow");
-        var label = Dom.getAncestorByClass(event.target, "memberLabel");
-        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
-        var object = Firebug.getRepObject(event.target);
-        var target = row.lastChild.firstChild;
-        var isString = Css.hasClass(target,"objectBox-string");
-        var inValueCell = (event.target === valueCell || event.target === target);
-
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
-        {
-            row = label.parentNode.parentNode;
-            this.toggleRow(row);
-            Events.cancelEvent(event);
-        }
-        else
-        {
-            if (typeof(object) === "function")
-            {
-                Firebug.chrome.select(object, "script");
-                Events.cancelEvent(event);
-            }
-            else if (Events.isDoubleClick(event) && !object)
-            {
-                var panel = row.parentNode.parentNode.domPanel;
-                if (panel)
-                {
-                    // XXX this should use member.value
-                    var rowValue = panel.getRowPropertyValue(row);
-                    if (typeof rowValue === "boolean")
-                        panel.setPropertyValue(row, ""+!rowValue);
-                    else
-                        panel.editProperty(row);
-                    Events.cancelEvent(event);
-                }
-            }
-        }
-    },
-
-    toggleRow: function(row)
-    {
-        var level = parseInt(row.getAttribute("level"), 10);
-        var table = Dom.getAncestorByClass(row, "domTable");
-        var toggles = table.toggles;
-        if (!toggles)
-            toggles = table.repObject.toggles;
-
-        var domPanel = table.domPanel;
-        if (!domPanel)
-        {
-            var panel = Firebug.getElementPanel(row);
-            domPanel = panel.context.getPanel("dom");
-        }
-
-        if (!domPanel)
-            return;
-
-        var context = domPanel.context;
-        var target = row.lastChild.firstChild;
-        var isString = Css.hasClass(target, "objectBox-string");
-
-        if (Css.hasClass(row, "opened"))
-        {
-            Css.removeClass(row, "opened");
-
-            if (isString)
-            {
-                var rowValue = row.domObject.value;
-                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
-            }
-            else
-            {
-                if (toggles)
-                {
-                    var path = getPath(row);
-
-                    // Remove the path from the toggle tree
-                    for (var i = 0; i < path.length; ++i)
-                    {
-                        if (i === path.length-1)
-                            toggles.remove(path[i]);
-                        else
-                            toggles = toggles.get(path[i]);
-                    }
-                }
-
-                var rowTag = this.rowTag;
-                var tbody = row.parentNode;
-
-                setTimeout(function()
-                {
-                    for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
-                    {
-                        if (parseInt(firstRow.getAttribute("level"), 10) <= level)
-                            break;
-
-                        tbody.removeChild(firstRow);
-                    }
-                }, row.insertTimeout ? row.insertTimeout : 0);
-            }
-        }
-        else
-        {
-            Css.setClass(row, "opened");
-            if (isString)
-            {
-                var rowValue = row.domObject.value;
-                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
-            }
-            else
-            {
-                if (toggles)
-                {
-                    var path = getPath(row);
-
-                    // Mark the path in the toggle tree
-                    for (var i = 0; i < path.length; ++i)
-                    {
-                        var name = path[i];
-                        if (toggles.get(name))
-                            toggles = toggles.get(name);
-                        else
-                            toggles = toggles.set(name, new ToggleBranch.ToggleBranch());
-                    }
-                    if (FBTrace.DBG_DOMPLATE)
-                        FBTrace.sysout("toggleRow mark path "+toggles);
-                }
-
-                var members = domPanel.getMembers(target.repObject, level+1, context);
-
-                var rowTag = this.rowTag;
-                var lastRow = row;
-
-                var delay = 0;
-                var setSize = members.length;
-                var rowCount = 1;
-                while (members.length)
-                {
-                    let slice = members.splice(0, insertSliceSize);
-                    let isLast = !members.length;
-                    setTimeout(function()
-                    {
-                        if (lastRow.parentNode)
-                        {
-                            var result = rowTag.insertRows({members: slice}, lastRow);
-                            lastRow = result[1];
-                            Events.dispatch(Firebug.DOMModule.fbListeners,
-                                "onMemberRowSliceAdded", [null, result, rowCount, setSize]);
-                            rowCount += insertSliceSize;
-                        }
-
-                        if (isLast)
-                            delete row.insertTimeout;
-                    }, delay);
-
-                    delay += insertInterval;
-                }
-
-                row.insertTimeout = delay;
-            }
-        }
-    },
-
-    onClickRowHeader: function(event)
-    {
-        Events.cancelEvent(event);
-
-        var rowHeader = event.target;
-        if (!Css.hasClass(rowHeader, "memberRowHeader"))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "memberRow");
-        if (!row)
-            return;
-
-        var panel = row.parentNode.parentNode.domPanel;
-        if (panel)
-        {
-            // xxxHonza: reimplement using JSD2
-            //var scriptPanel = panel.context.getPanel("script", true);
-            //if (!scriptPanel || !scriptPanel.isEnabled())
-            //    return;     // set the breakpoint only if the script panel will respond.
-            //panel.breakOnProperty(row);
-        }
-    }
-});
-
-var ToolboxPlate = D.domplate(
-{
-    tag:
-        D.DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
-            D.IMG({"class": "watchDeleteButton closeButton", src: "blank.gif"})
-        ),
-
-    onClick: function(event)
-    {
-        var toolbox = event.currentTarget;
-        toolbox.domPanel.deleteWatch(toolbox.watchRow);
-    }
-});
-
-// ********************************************************************************************* //
-
-Firebug.DOMBasePanel = function() {};
-
-Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
-
+Firebug.DOMBasePanel.ToolboxPlate = DOMReps.ToolboxPlate;
 Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
+/** lends Firebug.DOMBasePanel */
 {
-    tag: DirTablePlate.tableTag,
-    dirTablePlate: DirTablePlate,
+    tag: DOMReps.DirTablePlate.tableTag,
+    dirTablePlate: DOMReps.DirTablePlate,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
@@ -941,7 +634,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         // Insert the first slice immediately
         var setSize = members.length;
-        var slice = members.splice(0, insertSliceSize);
+        var slice = members.splice(0, DOMReps.insertSliceSize);
         var result = rowTag.insertRows({members: slice}, tbody.lastChild);
         var rowCount = 1;
         var panel = this;
@@ -954,11 +647,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var delay = 0;
         while (members.length)
         {
-            let slice = members.splice(0, insertSliceSize);
+            let slice = members.splice(0, DOMReps.insertSliceSize);
             timeouts.push(this.context.setTimeout(function addMemberRowSlice()
             {
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
-                rowCount += insertSliceSize;
+                rowCount += DOMReps.insertSliceSize;
 
                 Events.dispatch(Firebug.DOMModule.fbListeners, "onMemberRowSliceAdded",
                     [panel, result, rowCount, setSize]);
@@ -968,7 +661,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
             }, delay));
 
-            delay += insertInterval;
+            delay += DOMReps.insertInterval;
         }
 
         if (offscreen)
