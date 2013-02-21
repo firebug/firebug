@@ -113,6 +113,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     loadActors: function(callback)
     {
+/*
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
         // actor types.
@@ -127,6 +128,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             callback();
         });
+*/
+        callback();
     },
 
     onActorsLoaded: function()
@@ -398,18 +401,24 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
             var conn = DebuggerServer._connections["conn0."];
             var tabActor = conn.rootActor._tabActors.get(context.browser);
-            var pool = tabActor.threadActor.threadLifetimePool;
-            var actor = pool.get(actorId);
+            var threadActor = tabActor.threadActor;
 
-            if (!actor && tabActor.threadActor._pausePool)
-                actor = tabActor.threadActor._pausePool.get(actorId);
+            var actor = threadActor.threadLifetimePool.get(actorId);
+
+            if (!actor && threadActor._pausePool)
+                actor = threadActor._pausePool.get(actorId);
+
+            if (!actor)
+                return null;
 
             var obj = actor.obj;
+            if (!obj)
+                FBTrace.sysout("no obj", actor)
 
             if (typeof(obj.unsafeDereference) != "undefined")
                 return obj.unsafeDereference();
 
-            return obj;
+            return null;
         }
         catch (e)
         {
