@@ -190,11 +190,24 @@ DomTree.prototype = domplate(
         if (!level)
             level = 0;
 
-        var members = [];
+        var members;
 
+        // If member provider is availble use it to crate all tree member
+        // data structures. Note that these structures are directly consumed by
+        // Domplate templates.
+        if (this.memberProvider)
+            members = this.memberProvider.getMembers(object, level);
+
+        if (members)
+            return members;
+
+        members = [];
+
+        // Create default members for children coming from a data provider
+        // or for properties of given object if data provider is not available.
         if (this.provider)
         {
-            // Use data provider if it's available.
+            // Children can be provided asychronously.
             var children = this.fetchChildren(object);
             if (isPromise(children))
                 return children;
@@ -207,23 +220,23 @@ DomTree.prototype = domplate(
 
                 var member = this.createMember(type, null, child, level, hasChildren);
                 member.provider = this.provider;
-                member.tree = this; // Domplate derivation doesn't work properly
+
+                // Domplate inheritance doesn't work properly so, let's store back reference.
+                member.tree = this;
                 members.push(member);
             }
         }
         else
         {
-            // If there is no provider, iterate the object properties.
-            // xxxHonza: Introduce an interator that is customizable (e.g. from derived objects)
-            for (var p in object)
+            this.getObjectProperties(object, function(prop, value)
             {
-                var value = object[p];
                 var valueType = typeof(value);
                 var hasChildren = (valueType === "object" && this.hasProperties(value));
                 var type = this.getType(value);
 
-                members.push(this.createMember(type, p, value, level, hasChildren));
-            }
+                var member = this.createMember(type, prop, value, level, hasChildren);
+                members.push(member);
+            });
         }
 
         return members;
@@ -253,18 +266,6 @@ DomTree.prototype = domplate(
 
     getType: function(object)
     {
-        // Type is used for UI decoration of a tree row.
-        // A 'decorator' should be introduced for these things. This object should be
-        // used to change style of a row like for example: append icons, badges, prefixes, etc.
-        // xxxHonza: Use Decorator pattern and introduce a Decorator interface.
-        // var Decorator =
-        // {
-        //     decorateLabel: function(object),
-        //     decorateStyle: function(object),
-        // }
-        //
-        // return this.decorator.decorateStyle(object);
-
         return "dom";
     },
 
@@ -283,16 +284,44 @@ DomTree.prototype = domplate(
         return member;
     },
 
-    hasProperties: function(ob)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Object Properties
+
+    hasProperties: function(obj)
     {
-        if (typeof(ob) == "string")
+        if (typeof(obj) == "string")
             return false;
 
-        try {
-            for (var name in ob)
+        try
+        {
+            for (var name in obj)
                 return true;
-        } catch (exc) {}
+        }
+        catch (exc)
+        {
+        }
+
         return false;
+    },
+
+    getObjectProperties: function(obj, callback)
+    {
+        // Check custom object property iterator first.
+        if (this.objectPropIterator)
+            return this.objectPropIterator.getObjectProperties(obj, callback);
+
+        for (var p in obj)
+        {
+            try
+            {
+                callback.call(this, p, obj[p]);
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("domTree.getObjectProperties; EXCEPTION " + e, e);
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
