@@ -26,7 +26,7 @@ ScopeClient.prototype = Obj.descend(new ObjectClient(),
         // Construct the scope name.
         var name = Str.capitalize(this.grip.type);
 
-        // Call the outermost scope Global.
+        // If there is no parent the scope is global.
         if (!this.grip.parent)
             name = Locale.$STR("Global Scope");
 

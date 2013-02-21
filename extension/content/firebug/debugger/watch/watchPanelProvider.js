@@ -6,8 +6,11 @@ define([
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
+    "firebug/dom/domMemberProvider",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient) {
+function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
+    DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -15,17 +18,29 @@ function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient) {
 function WatchPanelProvider(panel)
 {
     this.panel = panel;
+    this.memberProvider = new DOMMemberProvider(panel.context);
 }
 
 /**
- * @provider The object represent a custom provider for the Watch panel.
- * The provider is responsible for joining list of user-expressions with the
- * list of the current scopes (displayed when the debugger is halted).
+ * @provider This object represents a default provider for the Watch panel.
+ * The provider is responsible for joining the list of user-expressions with the
+ * list of current scopes (all displayed when the debugger is halted). In the
+ * debugger is resumed global scope (usually a window) is displayed.
+ *
+ * The Watch panel provider uses two ways to get data:
+ * 1) Asynchronously over the RDP (e.g. frames, user-expr eval results, function scope, etc.),
+ * 2) Synchronously through direct access to the server side (JS objects).
+ * 
+ * xxxHonza: add #2) This is a hack that allows Firebug to adopt JSD2 faster. It should be
+ * removed as soon as remote debuggin is supported.
  */
 var BaseProvider = ClientProvider.prototype;
 WatchPanelProvider.prototype = Obj.extend(BaseProvider,
 /** @lends WatchPanelProvider */
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Data Provider
+
     getChildren: function(object)
     {
         if (object instanceof StackFrame)
@@ -37,6 +52,15 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
         }
 
         return BaseProvider.getChildren.apply(this, arguments);
+    },
+
+    getValue: function(object)
+    {
+        var localObject = this.getLocalObject(object);
+        if (localObject)
+            return localObject;
+
+        return BaseProvider.getValue.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +97,49 @@ WatchPanelProvider.prototype = Obj.extend(BaseProvider,
     {
         var scopes = this.getScopes(stackFrame);
         return (scopes.length > 1) ? scopes[1] : null;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Member Provider
+
+    getMembers: function(object, level)
+    {
+        object = this.getLocalObject(object);
+
+        if (object)
+            return this.memberProvider.getMembers(object, level);
+
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Private Helpers
+
+    /**
+     * This is the place where we break the RDP feature and access server side objects
+     * localy. It's used for providing data to the Watch panel.
+     *
+     * @param {Object} object Client object with an actor.
+     */
+    getLocalObject: function(object)
+    {
+        var actor;
+
+        if (object instanceof ScopeClient)
+        {
+            if (object.grip.object)
+                actor = object.grip.object.actor;
+        }
+        else if (typeof(object.getActor) == "function")
+        {
+            actor = object.getActor();
+        }
+
+        if (!actor)
+            return null;
+
+        return DebuggerClientModule.getObject(this.panel.context, actor);
+    },
 });
 
 // ********************************************************************************************* //

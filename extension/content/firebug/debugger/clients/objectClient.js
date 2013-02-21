@@ -6,9 +6,8 @@ define([
     "firebug/lib/promise",
     "firebug/lib/array",
     "firebug/lib/wrapper",
-    "firebug/remoting/debuggerClientModule",
 ],
-function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerClientModule) {
+function (FBTrace, RDP, Promise, Arr, Wrapper) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -48,11 +47,6 @@ ObjectClient.prototype =
                 return;
         }
 
-        // xxxHonza: hack, get the value localy.
-        var value = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
-        if (value)
-            return value;
-
         if (this.properties)
             return createGripProxy(this);
 
@@ -87,40 +81,7 @@ ObjectClient.prototype =
 
     getProperties: function()
     {
-        var object = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
-
-        // Get object properties asynchronously over RDP.
-        if (!object)
-            return this.getPrototypeAndProperties(this.getActor());
-
-        var deferred = Promise.defer();
-
-        var props = this.getObjectProperties(object);
-        props = Arr.sortUnique(props);
-
-        var contentView = Wrapper.getContentView(object);
-
-        //xxxHonza: Duplicated in firebug/dom/domPanel
-        var result = [];
-        for (var i=0; i<props.length; i++)
-        {
-            var val;
-            var name = props[i];
-
-            try
-            {
-                val = contentView[name];
-            }
-            catch (exc)
-            {
-                val = undefined;
-            }
-
-            result.push(this.createProperty(name, {value: val}, this.cache));
-        }
-
-        deferred.resolve(result);
-        return deferred.promise;
+        return this.getPrototypeAndProperties(this.getActor());
     },
 
     //xxxHonza: Duplicated in firebug/dom/domPanel
@@ -241,6 +202,12 @@ ObjectClient.Property = function(name, desc, cache)
 
 ObjectClient.Property.prototype =
 {
+    getActor: function()
+    {
+        if (this.value instanceof ObjectClient)
+            return this.value.getActor();
+    },
+
     hasChildren: function()
     {
         var result = false;
