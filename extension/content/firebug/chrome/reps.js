@@ -1619,6 +1619,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSKeyframeRule";
         }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return "CSSPageRule";
+        }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
             return "CSSNameSpaceRule";
@@ -1658,6 +1662,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
             rule instanceof window.MozCSSKeyframeRule)
         {
             return rule.keyText;
+        }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return "";
         }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
