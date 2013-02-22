@@ -739,6 +739,10 @@
     border-bottom: none;
 }
 
+.logRow-spy .objectLink-sourceLink {
+    top: 4px;
+}
+
 .spyTitle {
     color: #000000;
     font-weight: bold;
