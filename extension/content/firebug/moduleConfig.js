@@ -47,6 +47,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         //"firebug/console/memoryProfiler", xxxHonza: removed from 1.10 (issue 5599)
         "firebug/chrome/tableRep",
         "firebug/html/htmlPanel",
+        "firebug/dom/domSidePanel",
         "firebug/console/commandLinePopup",
         "firebug/accessible/a11y",
         "firebug/js/scriptPanel",
