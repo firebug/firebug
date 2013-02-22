@@ -420,7 +420,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             callback(response, bpClient);
         };
-
+        lineNumber = lineNumber + 1;
         return context.activeThread.setBreakpoint({
             url: url,
             line: lineNumber
@@ -487,6 +487,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             FBTrace.sysout("debuggerTool.removeBreakpoint; Can't remove breakpoints.");
             return;
         }
+
+        // Convert to line numbers(one-based);
+        lineNumber = lineNumber + 1;
 
         // We need to get the breakpoint client object for this context. The client.
         // knowns how to remove the breakpoint on the server side.
