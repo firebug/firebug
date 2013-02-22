@@ -442,12 +442,14 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 }
                 else if (rule instanceof window.CSSNameSpaceRule &&
                     !(rule instanceof window.MozCSSKeyframesRule ||
-                        rule instanceof window.MozCSSKeyframeRule))
+                        rule instanceof window.MozCSSKeyframeRule ||
+                        (window.CSSPageRule && rule instanceof window.CSSPageRule)))
                 {
-                    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
-                    // MozCSSKeyframesRules and MozCSSKeyframeRules are recognized as
-                    // CSSNameSpaceRules, so explicitly check whether the rule is not a
-                    // MozCSSKeyframesRule or a MozCSSKeyframeRule
+
+                	// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
+                    // MozCSSKeyframesRules, MozCSSKeyframeRules and CSSPageRules are recognized
+                	// as CSSNameSpaceRules, so explicitly check whether the rule is not a
+                    // MozCSSKeyframesRule, a MozCSSKeyframeRule or a CSSPageRule
 
                     var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
                     var namespace = rule.cssText.match(reNamespace);
