@@ -3,7 +3,7 @@ function runTest()
     FBTest.sysout("issue6281.START");
     FBTest.openNewTab(basePath + "css/6281/issue6281.html", function(win)
     {
-    	var elementID = "textinput";
+        var elementID = "textinput";
         FBTest.openFirebug();
         FBTest.selectPanel("html");
 
@@ -26,14 +26,14 @@ function runTest()
                 var selector = rules[i].getElementsByClassName("cssSelector").item(0).textContent;
                 if (selector == "#" + elementID + "::-moz-placeholder")
                 {
-                	FBTest.ok(true, "::-moz-placeholder pseudo-element rule exists");
-                	ruleExists = true;
+                    FBTest.ok(true, "::-moz-placeholder pseudo-element rule exists");
+                    ruleExists = true;
                     break;
                 }
             }
 
             if (!ruleExists)
-            	FBTest.ok(false, "::-moz-placeholder pseudo-element rule does not exist");
+                FBTest.ok(false, "::-moz-placeholder pseudo-element rule does not exist");
 
             FBTest.testDone("issue6281.DONE");
         });

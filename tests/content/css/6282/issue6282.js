@@ -10,8 +10,8 @@ function runTest()
         FBTest.selectPanelLocationByName(panel, "issue6282.html");
 
         FBTest.searchInCssPanel("style1", function(node)
-	    {
+        {
             FBTest.testDone("issue6282; DONE");
-	    });
+        });
     });
 }
