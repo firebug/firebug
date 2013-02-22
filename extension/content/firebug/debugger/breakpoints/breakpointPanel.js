@@ -347,6 +347,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.refresh();
     },
+
+    onBreakpointLineChanged: function (bp, oldLineNo)
+    {
+        this.refresh();
+    },
 });
 
 // ********************************************************************************************* //

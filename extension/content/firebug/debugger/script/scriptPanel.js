@@ -469,6 +469,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         function callback(response, bpClient)
         {
+            var actualLocation = response.actualLocation;
+
             // The breakpoint is set on the server side even if the script doesn't
             // exist yet i.e. error == 'noScript' so, doesn't count this case as
             // an error.
@@ -477,6 +479,36 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 TraceError.sysout("scriptPanel.onBreakpointAdd; ERROR " + response,
                     {response: response, bpClient: bpClient});
                 return;
+            }
+
+            if (actualLocation && actualLocation.line != bp.lineNo)
+            {
+                var newLineNo = actualLocation.line - 1; //line index(zero-based).
+
+                var existedBp = BreakpointStore.findBreakpoint(bp.href, newLineNo)
+                // A breakpoint has already existed, it needs
+                // to be scrolled in order to show to the user.
+                if (existedBp)
+                {
+                    self.scrollToLine(existedBp.href, newLineNo);
+                    BreakpointStore.removeBreakpoint(bp.href,
+                        bp.lineNo);
+                    return;
+                }
+
+                // We need to update breakpoint client object in order
+                // to be found when it needs removing.
+                bpClient.location.line = actualLocation.line;
+
+                var newBp = new Breakpoint();
+                for (var item in bp)
+                    newBp[item] = bp[item];
+
+                var updatedBp = BreakpointStore.updateBreakpointLineNo(bp.href,
+                    bp.lineNo, newLineNo);
+                // Scroll to actual line.
+                self.scrollToLine(updatedBp.url, updatedBp.lineNo);
+                bp = updatedBp;
             }
 
             // Cache the breakpoint-client object since it has API for removing itself.
@@ -497,9 +529,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // But, what if the script is loaded later?
         this.tool.setBreakpoint(this.context, bp.href, bp.lineNo, callback);
 
-        // Ass breakpoint to the UI.
-        // xxxHonza: we should add a disabled breakpoint and wait for async response.
-        this.scriptView.addBreakpoint(bp);
     },
 
     onBreakpointRemoved: function(bp)
@@ -544,6 +573,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     onBreakpointModified: function(bp)
     {
         this.scriptView.updateBreakpoint(bp);
+    },
+
+    onBreakpointLineChanged: function(bp, oldlineNo)
+    {
+        var lineNo = bp.lineNo;
+        bp.lineNo = oldlineNo;
+        this.scriptView.removeBreakpoint(bp);
+
+        bp.lineNo = lineNo;
+        this.scriptView.addBreakpoint(bp);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
