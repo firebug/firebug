@@ -259,7 +259,7 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         for (var name in object)
         {
             var val = object[name];
-            this.addMember(object, "user", members, name, val, level, 0);
+            this.addMember(object, "user", members, name, val, level);
         }
 
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }

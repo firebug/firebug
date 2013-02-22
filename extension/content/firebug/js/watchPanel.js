@@ -152,7 +152,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                     }
                 );
 
-                this.addMember(scopes[0], "watch", members, expr, value, 0, 0);
+                this.addMember(scopes[0], "watch", members, expr, value, 0);
 
                 if (FBTrace.DBG_DOM)
                 {
@@ -166,13 +166,13 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         {
             var thisVar = frame.getThisValue();
             if (thisVar)
-                this.addMember(scopes[0], "user", members, "this", thisVar, 0, 0);
+                this.addMember(scopes[0], "user", members, "this", thisVar, 0);
 
             // locals, pre-expanded
             members.push.apply(members, this.getMembers(scopes[0], 0, context));
 
             for (var i=1; i<scopes.length; i++)
-                this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0, 0);
+                this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, context);
