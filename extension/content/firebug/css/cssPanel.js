@@ -164,6 +164,40 @@ var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
         )
 });
 
+var CSSPageRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssPageRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@page"),
+                SPAN({"class": "separator"}, "$rule.selectorText|getSeparator"),
+                SPAN({"class": "cssPageRuleSelector", $editable: "$rule|isEditable"},
+                    "$rule.selectorText|getSelectorText"),
+                SPAN(" {")
+            ),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        ),
+
+    getSeparator: function(selector)
+    {
+        return (!selector || selector == "") ? "" : " ";
+    },
+
+    getSelectorText: function(selector)
+    {
+        return selector || "";
+    }
+});
+
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -440,10 +474,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isNotEditable: true
                     });
                 }
+                else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+                {
+                    props = this.parseCSSProps(rule.style);
+                    this.sortProperties(props);
+                    rules.push({
+                        tag: CSSPageRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet,
+                        isNotEditable: true
+                    });
+                }
                 else if (rule instanceof window.CSSNameSpaceRule &&
                     !(rule instanceof window.MozCSSKeyframesRule ||
-                        rule instanceof window.MozCSSKeyframeRule ||
-                        (window.CSSPageRule && rule instanceof window.CSSPageRule)))
+                        rule instanceof window.MozCSSKeyframeRule))
                 {
 
                 	// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
