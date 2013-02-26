@@ -184,6 +184,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.scrollToLine(url, lineNo/*, this.highlightLine(lineNo, this.context)*/);
         //this.context.throttle(this.updateInfoTip, this);
+
+        this.setDebugLocation(lineNo);
     },
 
     showNoStackFrame: function()
@@ -244,6 +246,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     removeExeLineHighlight: function(href, lineNo, highlighter)
     {
         this.scriptView.removeDebugLocation();
+    },
+
+    setDebugLocation: function(lineNo)
+    {
+        this.scriptView.setDebugLocation(lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

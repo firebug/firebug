@@ -409,6 +409,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             topIndex = firstVisible;
 
         this.editor.setTopIndex(topIndex);
+    },
+
+    setDebugLocation: function(line)
+    {
         this.editor.setDebugLocation(line);
     },
 
