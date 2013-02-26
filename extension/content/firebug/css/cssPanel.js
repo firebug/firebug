@@ -938,6 +938,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Inspector.stopInspecting(true);
 
         this.showToolbarButtons("fbCSSButtons", true);
+        this.showToolbarButtons("fbLocationSeparator", true);
+        this.showToolbarButtons("fbLocationButtons", true);
+        this.showToolbarButtons("fbLocationList", true);
 
         CSSModule.updateEditButton();
 
