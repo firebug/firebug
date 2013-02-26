@@ -490,10 +490,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     !(rule instanceof window.MozCSSKeyframesRule ||
                         rule instanceof window.MozCSSKeyframeRule))
                 {
-
-                	// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
+                    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
                     // MozCSSKeyframesRules, MozCSSKeyframeRules and CSSPageRules are recognized
-                	// as CSSNameSpaceRules, so explicitly check whether the rule is not a
+                    // as CSSNameSpaceRules, so explicitly check whether the rule is not a
                     // MozCSSKeyframesRule, a MozCSSKeyframeRule or a CSSPageRule
 
                     var reNamespace = /^@namespace ((.+) )?url\("(.*?)"\);$/;
@@ -1201,26 +1200,26 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var prop = Dom.getAncestorByClass(target, "cssProp");
         if (prop)
         {
-        	items.push(
-        		{
-        			label: "css.label.Copy_Property_Declaration",
-        			tooltiptext: "css.tip.Copy_Property_Declaration",
-        			id: "fbCopyPropertyDeclaration",
-        			command: Obj.bindFixed(this.copyPropertyDeclaration, this, prop)
-        		},
-        		{
-        			label: "css.label.Copy_Property_Name",
-        			tooltiptext: "css.tip.Copy_Property_Name",
-        			id: "fbCopyPropertyName",
-        			command: Obj.bindFixed(this.copyPropertyName, this, prop)
-        		},
-        		{
-        			label: "css.label.Copy_Property_Value",
-        			tooltiptext: "css.tip.Copy_Property_Value",
-        			id: "fbCopyPropertyValue",
-        			command: Obj.bindFixed(this.copyPropertyValue, this, prop)
-        		}
-        	);
+            items.push(
+                {
+                    label: "css.label.Copy_Property_Declaration",
+                    tooltiptext: "css.tip.Copy_Property_Declaration",
+                    id: "fbCopyPropertyDeclaration",
+                    command: Obj.bindFixed(this.copyPropertyDeclaration, this, prop)
+                },
+                {
+                    label: "css.label.Copy_Property_Name",
+                    tooltiptext: "css.tip.Copy_Property_Name",
+                    id: "fbCopyPropertyName",
+                    command: Obj.bindFixed(this.copyPropertyName, this, prop)
+                },
+                {
+                    label: "css.label.Copy_Property_Value",
+                    tooltiptext: "css.tip.Copy_Property_Value",
+                    id: "fbCopyPropertyValue",
+                    command: Obj.bindFixed(this.copyPropertyValue, this, prop)
+                }
+            );
         }
 
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
@@ -1294,13 +1293,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         command: Obj.bindFixed(this.insertPropertyRow, this, target)
                     }
                 );
-    
+
                 var propRow = Dom.getAncestorByClass(target, "cssProp");
                 if (propRow)
                 {
                     var propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
                     var isDisabled = Css.hasClass(propRow, "disabledStyle");
-    
+
                     items.push(
                         {
                             label: Locale.$STRF("EditProp", [propName]),
@@ -1327,7 +1326,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     );
                 }
             }
-    
+
             if (Css.hasClass(cssRule, "importRule"))
             {
                 items.push(
@@ -1739,21 +1738,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     copyPropertyDeclaration: function(prop)
     {
-    	// xxxsz: repObject should be used instead
+        // xxxsz: repObject should be used instead
         System.copyToClipboard(Str.trim(prop.textContent));
     },
 
     copyPropertyName: function(prop)
     {
-    	// xxxsz: repObject should be used instead
-    	var propName = prop.getElementsByClassName("cssPropName")[0];
+        // xxxsz: repObject should be used instead
+        var propName = prop.getElementsByClassName("cssPropName")[0];
         System.copyToClipboard(propName.textContent);
     },
 
     copyPropertyValue: function(prop)
     {
-    	// xxxsz: repObject should be used instead
-    	var propValue = prop.getElementsByClassName("cssPropValue")[0];
+        // xxxsz: repObject should be used instead
+        var propValue = prop.getElementsByClassName("cssPropValue")[0];
         System.copyToClipboard(propValue.textContent);
     }
 });
@@ -1806,10 +1805,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 if (prop && prop.classList.contains("disabledStyle"))
                 {
                     prop.classList.remove("disabledStyle");
-    
+
                     this.panel.removeDisabledProperty(rule, propName);
                 }
-    
+
                 if (Css.hasClass(target, "cssPropName"))
                 {
                     // Actual saving is done in endEditing, see the comment there.
@@ -1818,15 +1817,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 else if (Dom.getAncestorByClass(target, "cssPropValue"))
                 {
                     target.textContent = CSSDomplateBase.getPropertyValue({value: value});
-    
+
                     propName = Dom.getChildByClass(prop, "cssPropName").textContent;
-    
+
                     if (FBTrace.DBG_CSS)
                     {
                         FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" + value + "\"");
                        // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
                     }
-    
+
                     if (value && value != "null")
                     {
                         var parsedValue = parsePriority(value);
@@ -1838,7 +1837,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         CSSModule.removeProperty(rule, propName);
                     }
                 }
-    
+
                 if (value)
                 {
                     var saveSuccess = false;
@@ -1848,7 +1847,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                         {
                             return match[1].toUpperCase();
                         });
-    
+
                         if (propName in rule.style || propName == "float")
                             saveSuccess = "almost";
                     }
@@ -1856,7 +1855,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     {
                         saveSuccess = !!rule.style.getPropertyValue(propName);
                     }
-    
+
                     this.box.setAttribute("saveSuccess", saveSuccess);
                 }
                 else
