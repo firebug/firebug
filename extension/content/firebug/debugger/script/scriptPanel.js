@@ -490,7 +490,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             if (actualLocation && actualLocation.line != bp.lineNo)
             {
-                var newLineNo = actualLocation.line - 1; //line index(zero-based).
+                // Convert to line index(zero-based).
+                var newLineNo = actualLocation.line - 1;
 
                 var existedBp = BreakpointStore.findBreakpoint(bp.href, newLineNo)
                 // A breakpoint has already existed, it needs
@@ -507,15 +508,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 // to be found when it needs removing.
                 bpClient.location.line = actualLocation.line;
 
-                var newBp = new Breakpoint();
-                for (var item in bp)
-                    newBp[item] = bp[item];
-
-                var updatedBp = BreakpointStore.updateBreakpointLineNo(bp.href,
+                BreakpointStore.updateBreakpointLineNo(bp.href,
                     bp.lineNo, newLineNo);
                 // Scroll to actual line.
-                self.scrollToLine(updatedBp.url, updatedBp.lineNo);
-                bp = updatedBp;
+                self.scrollToLine(bp.url, bp.lineNo);
             }
 
             // Cache the breakpoint-client object since it has API for removing itself.

@@ -272,28 +272,16 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     updateBreakpointLineNo: function(url, oldLineNo, newLineNo)
     {
-        var updatedBp = null;
-        var bps = this.getBreakpoints(url);
-
-        if (!bps)
+        var bp = this.findBreakpoint(url, oldLineNo);
+        if (!bp)
             return null;
 
-        for (var i = 0, bpsLength = bps.length; i < bpsLength; i++)
-        {
-            var bp = bps[i];
-
-            if (bp.lineNo === oldLineNo)
-            {
-                updatedBp = bp;
-                bp.lineNo = newLineNo;
-            }
-        }
-
+        bp.lineNo = newLineNo;
         this.save(url);
 
-        this.dispatch("onBreakpointLineChanged", [updatedBp, oldLineNo]);
+        this.dispatch("onBreakpointLineChanged", [bp, oldLineNo]);
 
-        return updatedBp;
+        return bp;
     },
 
     hasBreakpoint: function(url, lineNo)
