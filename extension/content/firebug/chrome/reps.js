@@ -1665,7 +1665,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         }
         else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
         {
-        	return "";
+        	return rule.selectorText || "";
         }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
