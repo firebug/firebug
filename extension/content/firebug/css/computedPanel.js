@@ -17,10 +17,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/persist",
     "firebug/css/cssModule",
-    "firebug/css/cssReps"
+    "firebug/css/cssReps",
+    "firebug/css/loadHandler",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
-    Options, Str, Persist, CSSModule, CSSInfoTip) {
+    Options, Str, Persist, CSSModule, CSSInfoTip, LoadHandler) {
 
 with (Domplate) {
 
@@ -159,26 +160,9 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         if (!element)
             return;
 
-        var doc = element.ownerDocument;
-        var win = doc.defaultView;
-
         // Update now if the document is loaded, otherwise wait for "load" event.
-        if (doc.readyState == "complete")
-            return this.doUpdateComputedView(element);
-
-        if (this.updateInProgress)
-            return;
-
-        var self = this;
-        var onWindowLoadHandler = function()
-        {
-            self.context.removeEventListener(win, "load", onWindowLoadHandler, true);
-            self.updateInProgress = false;
-            self.doUpdateComputedView(element);
-        };
-
-        this.context.addEventListener(win, "load", onWindowLoadHandler, true);
-        this.updateInProgress = true;
+        var loadHandler = new LoadHandler();
+        loadHandler.handle(this.context, Obj.bindFixed(this.doUpdateComputedView, this, element));
     },
 
     doUpdateComputedView: function(element)
