@@ -24,13 +24,14 @@ define([
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/css/selectorEditor",
+    "firebug/lib/trace",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor) {
+    SelectorEditor, FBTrace) {
 
 with (Domplate) {
 
@@ -1025,7 +1026,18 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     updateLocation: function(styleSheet)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
+        {
+            FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href :
+                "no stylesheet"));
+        }
+
+        // We can properly update the view only if the page is fully loaded (see issue 4893).
+        var doc = this.context.window.document;
+        if (doc.readyState != "complete")
+        {
+            this.context.setTimeout(Obj.bindFixed(this.updateLocation, this, styleSheet), 200);
+            return;
+        }
 
         var rules = [];
         if (styleSheet)
