@@ -21,6 +21,7 @@
 /extension/build/
 /extension/release/
 /tests/FBTest/release/
+/trace/FBTrace/release/
 *.graphml
 /extension/bz-locale/
 

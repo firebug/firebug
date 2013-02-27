@@ -9,9 +9,9 @@ function runTest()
 
         FBTest.selectPanelLocationByName(panel, "issue6282.html");
 
-        FBTest.searchInCssPanel("style1", function(node)
-        {
-            FBTest.testDone("issue6282; DONE");
-        });
+        var rules = FBTest.getStyleRulesBySelector("#teststyle");
+
+        FBTest.compare(2, rules.length, "There must be two style rules shown");
+        FBTest.testDone("issue6282; DONE");
     });
 }
