@@ -6,6 +6,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/console/autoCompleter",    // Firebug.JSEditor
 ],
 function(Firebug, Domplate, Events, Dom, Css) {
 with (Domplate) {
