@@ -1,47 +1,48 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Issue 3292: console is not defined in iframes</title>
+        <title>Issue 872: Refreshing an iframe doesn't show its errors</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
         <style type="text/css">
         #iframe {
-            width: 100px;
+            width: 200px;
             height: 50px;
             border: none;
         }
+
+        #refreshIFrame
+        {
+            display: block;
+        }
         </style>
         <script type="text/javascript">
-        console.log("parent log");
+        function refreshIFrame()
+        {
+            var iframe = document.getElementById("iframe");
+            iframe.src = iframe.src;
+        }
         </script>
-        <script type="text/javascript" src="issue3292-log.js"></script>
     </head>
     <body>
         <header>
-            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3292">Issue 3292</a>: console is not defined in iframes</h1>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=872">Issue 872</a>: Refreshing an iframe doesn't show its errors</h1>
         </header>
         <div>
             <section id="content">
-                <iframe id="iframe" src="issue3292-iframe.html"></iframe>
+                <iframe id="iframe" src="issue872-iframe.html"></iframe>
+                <button id="refreshIFrame" onclick="refreshIFrame();">Refresh iframe</button>
             </section>
             <section id="description">
-                <p class="note">This test also covers <a href="http://code.google.com/p/fbug/issues/detail?id=3327">issue 3327</a> (Firebug Console token changed! never stops outputting)</p>
                 <h3>Steps to reproduce</h3>
                 <ol>
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>Console</em> panel</li>
-                    <li>Reload the page</li>
+                    <li>Click the button <em>Refresh iframe</em></li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>
-                        Three logs should be listed inside the console:<br/>
-                        <code>
-parent log
-include log (2 grouped logs)
-iframe log
-</code>
-                    </li>
+                    <li>The error coming from the iframe should be listed inside the console.</li>
                 </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
