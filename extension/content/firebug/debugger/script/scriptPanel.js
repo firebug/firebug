@@ -87,7 +87,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
         delete this.selection;
 
-        Persist.persistObjects(this, state);
+        // Remember data for Script panel restore.
+        state.location = this.location;
+        state.scrollTop = this.scriptView.getScrollTop();
 
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
@@ -110,19 +112,26 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         Trace.sysout("scriptPanel.show;", state);
 
-        // Initialize the source view. In case of Orion initialization here, when the 
-        // parentNode is actualy visible, also solves Orion's problem:
+        // Initialize the source view. Orion initialization here, when the
+        // parentNode is actualy visible, solves the following problem:
         // Error: TypeError: this._iframe.contentWindow is undefined
         // Save for muliple calls.
         this.scriptView.initialize(this.panelNode);
 
-        // Restore location the first time.
-        if (!this.restored)
+        if (state && state.location)
         {
-            // remove the default location, if any
-            delete this.location;
-            Persist.restoreLocation(this, state);
-            this.restored = true;
+            var sourceLink = new SourceLink(state.location.getURL(), state.scrollTop, "js");
+
+            // Causes the Script panel to show the proper location.
+            // Do not highlight the line (second argument true), we just want
+            // to restore the position.
+            // Also do it asynchronously, the script doesn't have to be
+            // available immediately.
+            this.showSourceLinkAsync(sourceLink);
+
+            // Do not restore the location again, it could happen during
+            // the single stepping and overwrite the debugger location.
+            delete state.location;
         }
 
         var active = true;
@@ -155,6 +164,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Show Stack Frames
+
     showStackFrame: function(frame)
     {
         if (this.context.stopped)
@@ -168,25 +180,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Make sure the current frame seen by the user is set (issue 4818)
         this.context.currentFrame = frame;
 
-        var url = frame.getURL();
-        var lineNo = frame.getLineNumber();
-
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("showStackFrame: " + url + "@" + lineNo, frame);
+        Trace.sysout("scriptPanel.showStackFrame: " + frame, frame);
 
         if (this.context.breakingCause)
             this.context.breakingCause.lineNo = lineNo;
 
-        // Make sure the right script (compilation unit) is displayed in the Script panel.
-        // Note that navigate() sets |this.location| and also triggers updateLocation().
-        // Consequently updateLocation() gets the source code and sets it into the ScriptView
-        // using showSource().
-        // Since getting source code can be asynchronous, the following scrollToLine() doesn't
-        // have to have the right effect. So, there is another scrollToLine in showSource()'s
-        // callback. The callback gets the lineNo from |this.context.currentFrame|.
-        this.navigate(this.context.getCompilationUnit(url));
-
-        this.scrollToLine(url, lineNo);
+        this.navigate(frame.toSourceLink());
     },
 
     showNoStackFrame: function()
@@ -236,15 +235,60 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             this.showStackFrame(object);
     },
 
+    showSourceLink: function(sourceLink)
+    {
+        this.navigate(sourceLink);
+    },
+
+    /**
+     * Some source files (compilation units) can be loaded asynchronously (e.g. when using
+     * RequireJS). If this case happens, this method tries it again after a short timeout.
+     *
+     * @param {Object} sourceLink  Link to the script and line to be displayed.
+     * @param {Boolean} noHighlight Do not highlight the line
+     * @param {Number} counter  Number of async attempts.
+     */
+    showSourceLinkAsync: function(sourceLink, counter)
+    {
+        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
+        if (compilationUnit)
+        {
+            this.showSourceLink(sourceLink);
+        }
+        else
+        {
+            if (typeof(counter) == "undefined")
+                counter = 15;
+
+            // Stop trying. The target script is probably not going to appear. At least,
+            // make sure default script (location) is displayed.
+            if (counter < 0)
+            {
+                if (!this.location)
+                    this.navigate(null);
+                return;
+            }
+
+            var self = this;
+            this.context.setTimeout(function()
+            {
+                // If JS execution is stopped at a breakpoint, do not restore the previous
+                // location. The user wants to see the breakpoint now.
+                if (!self.context.stopped)
+                    self.showSourceLinkAsync(sourceLink, --counter);
+            }, 50);
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Scrolling & Highlighting
 
-    scrollToLine: function(href, lineNo)
+    scrollToLine: function(lineNo)
     {
-        this.scriptView.scrollToLine(href, lineNo);
+        this.scriptView.scrollToLine(lineNo);
     },
 
-    removeExeLineHighlight: function(href, lineNo)
+    removeExeLineHighlight: function()
     {
         this.scriptView.removeDebugLocation();
     },
@@ -271,14 +315,31 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return compilationUnit.getURL();
     },
 
-    updateLocation: function(compilationUnit)
+    updateLocation: function(object)
     {
-        Trace.sysout("scriptPanel.updateLocation; " + (compilationUnit ? compilationUnit.url :
-            "no compilation unit"), compilationUnit);
+        Trace.sysout("scriptPanel.updateLocation; " + object, object);
 
-        this.showSource(compilationUnit);
+        var sourceLink = object;
 
-        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, compilationUnit]);
+        if (object instanceof CompilationUnit)
+            sourceLink = new SourceLink(object.getURL(), null, "js");
+
+        if (sourceLink instanceof SourceLink)
+            this.showSource(sourceLink);
+
+        // xxxHonza: Do extensions use this event? The argument used to be compilationUnit.
+        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getCurrentURL: function()
+    {
+        if (this.location instanceof CompilationUnit)
+            return this.location.getURL();
+
+        if (this.location instanceof SourceLink)
+            return this.location.getURL();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -322,11 +383,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Source
 
-    showSource: function(compilationUnit)
+    showSource: function(sourceLink)
     {
-        Trace.sysout("scriptPanel.showSource; " + (compilationUnit ? compilationUnit.url :
-            "no compilation unit"), compilationUnit);
-
+        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (!compilationUnit)
             compilationUnit = this.getDefaultLocation();
 
@@ -340,16 +399,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
+            // There could have been more asynchronouse requests done at the same time
+            // (e.g. show default script and restore the last visible script).
+            // Use only the callback that corresponds to the current location URL.
+            if (!self.location || self.location.getURL() != unit.getURL())
+                return;
+
             self.scriptView.showSource(lines.join(""));
 
-            // Since we have the source code now, we can scroll to the right line. 
-            var frame = self.context.currentFrame;
-            if (frame)
-            {
-                var url = frame.getURL();
-                var lineNo = frame.getLineNumber();
-                self.scrollToLine(url, lineNo);
-            }
+            // If the location object is SourceLink automatically scroll to specified line.
+            if (self.location && self.location.line)
+                self.scrollToLine(self.location.line);
         }
 
         compilationUnit.getSourceLines(-1, -1, callback);
@@ -373,14 +433,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     addBreakpoint: function(bp)
     {
-        var url = this.location.href;
         // Persist the breakpoint on the client side.
+        var url = this.getCurrentURL();
         BreakpointStore.addBreakpoint(url, bp.line);
     },
 
     removeBreakpoint: function(bp)
     {
-        var url = this.location.href;
+        var url = this.getCurrentURL();
 
         bp = BreakpointStore.findBreakpoint(url, bp.line);
         if (!bp)
@@ -397,10 +457,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     getBreakpoints: function(breakpoints)
     {
-        if (!this.location)
+        var url = this.getCurrentURL();
+        if (!url)
             return;
 
-        var url = this.location.href;
         var bps = BreakpointStore.getBreakpoints(url);
         if (!bps || !bps.length)
             return;
@@ -440,12 +500,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // should be created automatically if the user provide a condition.
         var tempBp = {
             lineNo: lineNo,
-            href: this.location.getURL(),
+            href: this.getCurrentURL(),
             condition: "",
         }
 
         // The breakpoint doesn't have to exist.
-        var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo);
+        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
         var condition = bp ? bp.condition : tempBp.condition;
 
         // xxxHonza: displaying BP conditions in the Watch panel is not supported yet.
@@ -633,7 +693,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             });
         }
 
-        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, lineNo);
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.getCurrentURL(), lineNo);
         items.push("-",
         {
             label: "SetBreakpoint",
@@ -645,7 +705,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (hasBreakpoint)
         {
-            var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = BreakpointStore.isBreakpointDisabled(this.getCurrentURL(), lineNo);
             items.push({
                 label: "breakpoints.Disable_Breakpoint",
                 tooltiptext: "breakpoints.tip.Disable_Breakpoint",
@@ -739,20 +799,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.toggleBreakpoint; " + line);
 
-        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.location.href, line);
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(this.getCurrentURL(), line);
         if (hasBreakpoint)
-            BreakpointStore.removeBreakpoint(this.location.href, line);
+            BreakpointStore.removeBreakpoint(this.getCurrentURL(), line);
         else
-            BreakpointStore.addBreakpoint(this.location.href, line);
+            BreakpointStore.addBreakpoint(this.getCurrentURL(), line);
     },
 
     toggleDisableBreakpoint: function(line)
     {
-        var isDisabled = BreakpointStore.isBreakpointDisabled(this.location.href, line);
+        var isDisabled = BreakpointStore.isBreakpointDisabled(this.getCurrentURL(), line);
         if (isDisabled)
-            BreakpointStore.enableBreakpoint(this.location.href, line);
+            BreakpointStore.enableBreakpoint(this.getCurrentURL(), line);
         else
-            BreakpointStore.disableBreakpoint(this.location.href, line);
+            BreakpointStore.disableBreakpoint(this.getCurrentURL(), line);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1062,7 +1122,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     populateBreakpointInfoTip: function(infoTip, target)
     {
         var lineNo = this.scriptView.getLineIndex(target);
-        var bp = BreakpointStore.findBreakpoint(this.location.href, lineNo);
+        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
         var expr = bp.condition;
         if (!expr)
             return false;

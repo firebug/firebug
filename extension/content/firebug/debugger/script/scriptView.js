@@ -120,7 +120,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.showSource(this.defaultSource);
 
         if (this.defaultLine > 0)
-            this.scrollToLine("", this.defaultLine);
+            this.scrollToLine(this.defaultLine);
 
         this.initBreakpoints();
     },
@@ -370,9 +370,17 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Highlight Line
+    // Content Scroll
 
-    scrollToLine: function(href, lineNo, highlighter)
+    getScrollTop: function()
+    {
+        if (!this.initialized)
+            return 0;
+
+        return this.editor.getTopIndex();
+    },
+
+    scrollToLine: function(lineNo, highlighter)
     {
         if (!this.initialized)
         {
@@ -412,6 +420,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.setDebugLocation(line);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debug Location
+
     removeDebugLocation: function()
     {
         if (!this.initialized)
@@ -425,7 +436,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     removeDebugLocationAsync: function()
     {
-        this.editor.setDebugLocation(-1);
+        if (this.editor)
+            this.editor.setDebugLocation(-1);
     },
 
     asyncUpdate: function(callback)

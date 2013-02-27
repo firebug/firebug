@@ -20,6 +20,11 @@ function SourceLink(url, line, type, object, instance, col)
 
 SourceLink.prototype =
 {
+    getURL: function()
+    {
+        return this.href;
+    },
+
     toString: function()
     {
         return this.href + "@" + (this.line || "?");
