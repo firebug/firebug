@@ -167,23 +167,27 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     showStackFrameTrue: function(frame)
     {
         // Make sure the current frame seen by the user is set (issue 4818)
-        // xxxHonza: Better solution (important for remoting)
-        // Set this.context.currentFrame = frame (meaning frameXB) and pass the value of
-        // frameXB during evaluation calls, causing the backend to select the appropriate
-        // frame for frame.eval().
-        //this.context.currentFrame = frame.nativeFrame;
+        this.context.currentFrame = frame;
 
         var url = frame.getURL();
         var lineNo = frame.getLineNumber();
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("showStackFrame: " + url + "@" + lineNo);
+            FBTrace.sysout("showStackFrame: " + url + "@" + lineNo, frame);
 
         if (this.context.breakingCause)
             this.context.breakingCause.lineNo = lineNo;
 
-        this.scrollToLine(url, lineNo/*, this.highlightLine(lineNo, this.context)*/);
-        //this.context.throttle(this.updateInfoTip, this);
+        // Make sure the right script (compilation unit) is displayed in the Script panel.
+        // Note that navigate() sets |this.location| and also triggers updateLocation().
+        // Consequently updateLocation() gets the source code and sets it into the ScriptView
+        // using showSource().
+        // Since getting source code can be asynchronous, the following scrollToLine() doesn't
+        // have to have the right effect. So, there is another scrollToLine in showSource()'s
+        // callback. The callback gets the lineNo from |this.context.currentFrame|.
+        this.navigate(this.context.getCompilationUnit(url));
+
+        this.scrollToLine(url, lineNo);
     },
 
     showNoStackFrame: function()
@@ -236,12 +240,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Scrolling & Highlighting
 
-    scrollToLine: function(href, lineNo, highlighter)
+    scrollToLine: function(href, lineNo)
     {
-        this.scriptView.scrollToLine(href, lineNo, highlighter);
+        this.scriptView.scrollToLine(href, lineNo);
     },
 
-    removeExeLineHighlight: function(href, lineNo, highlighter)
+    removeExeLineHighlight: function(href, lineNo)
     {
         this.scriptView.removeDebugLocation();
     },
@@ -275,8 +279,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         this.showSource(compilationUnit);
 
-        Events.dispatch(this.fbListeners, "onUpdateScriptLocation",
-            [this, compilationUnit]);
+        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, compilationUnit]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -323,6 +326,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
             self.scriptView.showSource(lines.join(""));
+
+            // Since we have the source code now, we can scroll to the right line. 
+            var frame = self.context.currentFrame;
+            if (frame)
+            {
+                var url = frame.getURL();
+                var lineNo = frame.getLineNumber();
+                self.scrollToLine(url, lineNo);
+            }
         }
 
         compilationUnit.getSourceLines(-1, -1, callback);
@@ -904,6 +916,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Firebug.chrome.select(this.context.currentFrame, "script", null, true);
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
+
+            //this.updateSelection(this.context.currentFrame);
         }
         catch (exc)
         {
