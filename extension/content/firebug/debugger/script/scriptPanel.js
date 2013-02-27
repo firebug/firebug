@@ -15,13 +15,14 @@ define([
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/lib/persist",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
     "firebug/lib/keywords",
     "firebug/lib/system",
     "firebug/editor/editor",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, Breakpoint, BreakpointStore,
+    StackFrame, SourceLink, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor) {
 
 // ********************************************************************************************* //
@@ -83,6 +84,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     destroy: function(state)
     {
+        // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
+        delete this.selection;
+
+        Persist.persistObjects(this, state);
+
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
 
@@ -91,22 +97,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         BasePanel.destroy.apply(this, arguments);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends ActivablePanel
-
-    onActivationChanged: function(enable)
-    {
-        // xxxHonza: needs to be revisited
-        if (enable)
-        {
-            Firebug.Debugger.addObserver(this);
-        }
-        else
-        {
-            Firebug.Debugger.removeObserver(this);
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -125,6 +115,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Error: TypeError: this._iframe.contentWindow is undefined
         // Save for muliple calls.
         this.scriptView.initialize(this.panelNode);
+
+        // Restore location the first time.
+        if (!this.restored)
+        {
+            // remove the default location, if any
+            delete this.location;
+            Persist.restoreLocation(this, state);
+            this.restored = true;
+        }
 
         var active = true;
 
@@ -280,6 +279,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showSource(compilationUnit);
 
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, compilationUnit]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // extends ActivablePanel
+
+    onActivationChanged: function(enable)
+    {
+        // xxxHonza: needs to be revisited
+        if (enable)
+        {
+            Firebug.Debugger.addObserver(this);
+        }
+        else
+        {
+            Firebug.Debugger.removeObserver(this);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
