@@ -380,7 +380,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         return this.editor.getTopIndex();
     },
 
-    scrollToLine: function(lineNo, highlighter)
+    scrollToLine: function(lineNo)
     {
         if (!this.initialized)
         {
@@ -417,6 +417,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             topIndex = firstVisible;
 
         this.editor.setTopIndex(topIndex);
+
+        FBTrace.sysout("setDebugLocation " + line);
         this.editor.setDebugLocation(line);
     },
 
