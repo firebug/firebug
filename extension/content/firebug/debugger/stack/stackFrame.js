@@ -176,12 +176,13 @@ StackFrame.buildStackFrame = function(frame, context)
         sourceFile = {href: frame.where.url};
 
     var args = [];
-    var arguments = frame.arguments;
+    var arguments = frame.environment.bindings.arguments;
     for (var i=0; i<arguments.length; i++)
     {
+        var arg = arguments[i];
         args.push({
-            name: getArgName(arguments[i]),
-            value: getArgValue(frame.arguments[i])
+            name: getArgName(arg),
+            value: getArgValue(arg, context)
         });
     }
 
@@ -240,9 +241,16 @@ function getArgName(arg)
         return p;
 }
 
-function getArgValue(arg)
+function getArgValue(arg, context)
 {
-    return arg["class"] ? arg["class"] : arg;
+    var name = getArgName(arg);
+    var grip = arg[name].value;
+
+    var object = context.clientCache.getObject(grip);
+    if (typeof(object) == "object")
+        return object.getValue();
+
+    return object;
 }
 
 // ********************************************************************************************* //

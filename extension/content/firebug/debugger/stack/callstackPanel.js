@@ -98,7 +98,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
         delete this.location;
 
-        //xxxHonza: would it ne more logical to call this.show() here?
+        //xxxHonza: would it be more logical to call this.show() here?
         this.showStackTrace(null);
     },
 
