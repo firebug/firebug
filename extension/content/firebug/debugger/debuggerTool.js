@@ -90,6 +90,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     initContext: function(context, persistedState)
     {
         Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
+
+        // If page reload happens the thread client remains the same so,
+        // preserve also all existing breakpoint clients.
+        // See also {@DebuggerClientModule.initConext}
+        if (persistedState)
+        {
+            context.breakpointClients = persistedState.breakpointClients;
+        }
     },
 
     showContext: function(browser, context)
@@ -104,6 +112,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     destroyContext: function(context, persistedState, browser)
     {
         this.detachListeners(context);
+
+        persistedState.breakpointClients = context.breakpointClients;
 
         Trace.sysout("debuggerTool.destroyContext; context ID: " + context.getId());
     },
@@ -420,10 +430,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             callback(response, bpClient);
         };
-        lineNumber = lineNumber + 1;
+
         return context.activeThread.setBreakpoint({
             url: url,
-            line: lineNumber
+            line: lineNumber + 1
         }, doSetBreakpoint);
     },
 
@@ -495,7 +505,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // knowns how to remove the breakpoint on the server side.
         var client = this.removeBreakpointClient(context, url, lineNumber);
         if (client)
+        {
             client.remove(callback);
+        }
+        else
+        {
+            TraceError.sysout("debuggerToo.removeBreakpoint; ERROR removing " +
+                "non existing breakpoint. " + url + ", " + lineNumber);
+        }
     },
 
     removeBreakpointClient: function(context, url, lineNumber)
