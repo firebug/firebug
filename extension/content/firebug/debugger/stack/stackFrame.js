@@ -18,17 +18,13 @@ var Trace = FBTrace.to("DBG_STACK");
 // ********************************************************************************************* //
 // Stack Frame
 
-// xxxHonza: should be derived from a client
+// xxxHonza: should be derived from a client object
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
-
-    //var fn = StackFrame.getDisplayName(nativeFrame ? nativeFrame.scope : null);
-    //this.fn = fn || functionName;  // cache?
-    this.fn = functionName;  // cache?
-
+    this.fn = functionName || "(anonymous)";
     this.context = context;
 
     // the newest frame in the stack containing 'this' frame
@@ -186,7 +182,11 @@ StackFrame.buildStackFrame = function(frame, context)
         });
     }
 
-    var funcName = frame.callee ? frame.callee.name : "";
+    // Get function name
+    var funcName = frame.callee ? frame.callee.displayName : "";
+    if (!funcName)
+        funcName = frame.callee ? frame.callee.name : "";
+
     return new StackFrame(sourceFile, frame.where.line, funcName,
         args, frame, 0, context);
 };
