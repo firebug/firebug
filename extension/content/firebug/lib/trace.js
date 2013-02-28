@@ -60,8 +60,11 @@ tracer.to = function(option)
 {
     // Automatically create corresponding DBG_ + <option> preference so, it appears
     // in the FBTrace Console window and can be checked on/off
+    // Note that FBTrace Console is already initialized and do not refresh if a new
+    // pref is created. So, the option appears after restart.
+    // xxxHonza: FIX ME
     var value = prefLoaderScope.PrefLoader.getPref(option);
-    if (typeof(value) == "undefined")
+    if (typeof(value) != "boolean")
         prefLoaderScope.PrefLoader.setPref(option, false);
 
     return new TraceWrapper(this, option);
