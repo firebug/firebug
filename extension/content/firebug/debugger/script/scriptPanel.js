@@ -327,7 +327,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (sourceLink instanceof SourceLink)
             this.showSource(sourceLink);
 
-        // xxxHonza: Do extensions use this event? The argument used to be compilationUnit.
         Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, sourceLink]);
     },
 
