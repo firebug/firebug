@@ -45,6 +45,10 @@ var contexts = [];
 
 var redirectionLimit = Options.getPref("network.http", "redirection-limit");
 
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx20 = versionChecker.compare(appInfo.version, "20") >= 0;
+
 // ********************************************************************************************* //
 // Spy Module
 
@@ -763,7 +767,8 @@ function onHTTPSpyReadyStateChange(spy, event)
     // (onreadystatechange) for another request. In such case we need to quickly detach our
     // Spy object. New one will be immediatelly created when HTTP-ON-OPENING-REQUEST is fired.
     // See issue 5049
-    if (spy.xhrRequest.readyState == 1)
+    // This approach doesn't work in Firefox 19 (see issue 6304) so, let's enable it for 20+ only.
+    if (spy.xhrRequest.readyState == 1 && fx20)
     {
         if (FBTrace.DBG_SPY)
         {
