@@ -1120,6 +1120,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 if (sourceFile)
                 {
                     Dom.clearNode(this.panelNode);  // replace rendered stylesheets
+
+                    // xxxHonza: huh, this method doesn't even exist?
                     this.showSourceFile(sourceFile);
 
                     var lineNo = object.line;
