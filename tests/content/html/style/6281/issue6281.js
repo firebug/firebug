@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("issue6281.START");
-    FBTest.openNewTab(basePath + "css/6281/issue6281.html", function(win)
+    FBTest.openNewTab(basePath + "html/style/6281/issue6281.html", function(win)
     {
         var elementID = "textinput";
         FBTest.openFirebug();
