@@ -375,6 +375,85 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         BreakpointStore.removeBreakpoint(url, bp.lineNo);
     },
 
+    onBreakpointInitialized: function(lineIndex)
+    {
+        Trace.sysout("scriptPanel.onBreakpointInitialized;", {lineNo: lineIndex});
+
+        var self = this;
+        function doSetBreakpoint(response, bpClient)
+        {
+            var actualLocation = response.actualLocation;
+            var url = bpClient.location.url;
+
+            // The breakpoint is set on the server side even if the script doesn't
+            // exist yet i.e. error == 'noScript' so, doesn't count this case as
+            // an error.
+            if (response.error && response.error != "noScript")
+            {
+                TraceError.sysout("scriptPanel.onBreakpointInitialized; ERROR " + response,
+                    {response: response, bpClient: bpClient});
+                return;
+            }
+
+            // If the line that a breakpoint is set, isn't
+            // a executable line.
+            if (actualLocation && actualLocation.line != lineIndex)
+            {
+                // Convert to line index(zero-based).
+                var newLineNo = actualLocation.line - 1;
+
+                var existedBp = BreakpointStore.findBreakpoint(url, newLineNo);
+
+                // We need to update breakpoint client object in
+                // order to be found when it needs removing.
+                bpClient.location.line = actualLocation.line;
+
+                // A breakpoint has already existed, it needs:
+                // 1 - remove loading icon.
+                // 2 - remove breakpoint client object.
+                // 3 - to be scrolled in order to show the user existed bp.
+                if (existedBp)
+                {
+                    function removeCallback(res)
+                    {
+                        Trace.sysout("scriptPanel.onBreakpointInitialized; "+
+                            "Response received:", res);
+                    }
+                    self.tool.removeBreakpoint(self.context, url, newLineNo,
+                        removeCallback);
+
+                    self.scrollToLine(existedBp.href, newLineNo);
+                    self.scriptView.removeBreakpoint({lineNo: lineIndex});
+                    return;
+                }
+
+                // Remove temporary breakpoint(loading icon), that
+                // is waiting for actual line to be found.
+                self.scriptView.removeBreakpoint({lineNo: lineIndex});
+
+                // Set a breakpoint to the actual location
+                self.scriptView.addBreakpoint({lineNo: newLineNo});
+                self.addBreakpoint({line: newLineNo});
+
+                // Scroll to actual line.
+                self.scrollToLine(url, newLineNo);
+            }
+            else
+            {
+                // In case the line is executable, we need to save
+                // breakpoint and replace loading icon with red dot.
+                self.scriptView.removeBreakpoint({lineNo: lineIndex});
+                self.scriptView.addBreakpoint({lineNo: lineIndex});
+                self.addBreakpoint({line: lineIndex});
+            }
+
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("scriptPanel.onBreakpointInitialized; breakpoint added", bpClient);
+        }
+
+        this.tool.setBreakpoint(this.context, this.location.href, lineIndex, doSetBreakpoint);
+    },
+
     getBreakpoints: function(breakpoints)
     {
         if (!this.location)
@@ -472,7 +551,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("scriptPanel.onBreakpointAdded;", bp);
 
-        var self = this;
+        /*var self = this;
 
         function callback(response, bpClient)
         {
@@ -522,16 +601,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // instances stored in the context pointing to the right BreakpointClient object.
             // This should be probably done in DebuggerTool
             //bp.params.client = bpClient;
-
-            if (FBTrace.DBG_BP)
-                FBTrace.sysout("scriptPanel.onBreakpointAdd; breakpoint added", bpClient);
-        }
-
-        // Append the new breakpoint to the panel/context.
-        // xxxHonza: append the breakpoint only if the script is loaded in this context?
-        // But, what if the script is loaded later?
-        this.tool.setBreakpoint(this.context, bp.href, bp.lineNo, callback);
-
+        }*/
     },
 
     onBreakpointRemoved: function(bp)
