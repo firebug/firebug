@@ -1988,7 +1988,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     {
         if (sourceLink.type == "js")
         {
-            var scriptFile = Firebug.SourceFile.getSourceFileByHref(sourceLink.href, context);
+            var scriptFile = context.sourceFileMap[sourceLink.href];
             if (scriptFile)
                 return Firebug.chrome.select(sourceLink);
         }
