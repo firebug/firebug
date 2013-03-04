@@ -403,6 +403,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         options = options || {};
 
+        Trace.sysout("scriptView.scrollToLine; " + line, options);
+
         var editorHeight = this.editor._view.getClientArea().height;
         var lineHeight = this.editor._view.getLineHeight();
         var linesVisible = Math.floor(editorHeight/lineHeight);
@@ -444,11 +446,16 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
 
         this.editor.setDebugLocation(line);
-        this.scrollToLine(line);
+
+        // If the debug location is being removed (line == -1) do not scroll.
+        if (line > 0)
+            this.scrollToLine(line);
     },
 
     asyncUpdate: function(callback)
     {
+        Trace.sysout("scriptView.asyncUpdate;");
+
         // If there is an update in progress cancel it. E.g. removeDebugLocation should not
         // be called if scrollToLine is about to execute.
         if (this.updateTimer)
