@@ -44,7 +44,7 @@ DomTree.prototype = domplate(
 
     rowTag:
         TR({"class": "memberRow $member.open $member.type\\Row",
-            $hasChildren: "$member|hasChildren",
+            $hasChildren: "$member|hasChildren", _domObject: "$member",
             _repObject: "$member", level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
                 SPAN({"class": "memberLabel $member.type\\Label"}, "$member|getLabel")
@@ -129,7 +129,10 @@ DomTree.prototype = domplate(
         var row = Dom.getAncestorByClass(event.target, "memberRow");
         var label = Dom.getAncestorByClass(event.target, "memberLabel");
         if (label && Css.hasClass(row, "hasChildren"))
+        {
             this.toggleRow(row);
+            Events.cancelEvent(event);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -217,8 +220,9 @@ DomTree.prototype = domplate(
                 var child = children[i];
                 var hasChildren = this.provider.hasChildren(child);
                 var type = this.getType(child);
+                var name = this.getLabel(child);
 
-                var member = this.createMember(type, null, child, level, hasChildren);
+                var member = this.createMember(type, name, child, level, hasChildren);
                 member.provider = this.provider;
 
                 // Domplate inheritance doesn't work properly so, let's store back reference.

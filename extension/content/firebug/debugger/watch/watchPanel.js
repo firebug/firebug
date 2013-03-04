@@ -19,9 +19,11 @@ define([
     "firebug/debugger/watch/watchTree",
     "firebug/debugger/watch/watchProvider",
     "firebug/debugger/watch/watchExpression",
+    "firebug/dom/domBasePanel",
 ],
 function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, Menu,
-    StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression) {
+    StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
+    DOMBasePanel) {
 
 with (Domplate) {
 
@@ -67,7 +69,7 @@ function WatchPanel()
  * allows variable inspection during debugging. It's possible to inspect existing
  * variables in the scope-chaine as well as evaluating user expressions.
  */
-var BasePanel = Firebug.Panel;
+var BasePanel = DOMBasePanel.prototype;
 WatchPanel.prototype = Obj.extend(BasePanel,
 /** @lends WatchPanel */
 {
@@ -643,10 +645,20 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (member && member.readOnly)
             return;
 
+        // Logic related to watch variables.
         if (Css.hasClass(row, "watchNewRow"))
         {
             Firebug.Editor.startEditing(row, "");
+            return;
         }
+        else if (Css.hasClass(row, "watchRow"))
+        {
+            Firebug.Editor.startEditing(row, getRowName(row));
+            return;
+        }
+
+        // Use basic editing logic implemented in {@DomBasePanel}.
+        BasePanel.editProperty.apply(this, arguments);
     },
 
     getEditor: function(target, value)
@@ -655,7 +667,22 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.editor = new WatchEditor(this.document);
 
         return this.editor;
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editing Helpers (override the default DomBasePanel implementation)
+
+    getRealRowObject: function(row)
+    {
+        var object = this.getRowObject(row);
+
+        // The row object can be ObjectClient instance so, make sure to use a provider
+        // to get the actual value.
+        object = this.provider.getValue(object);
+
+        // Unwrapping
+        return this.getObjectView(object);
+    },
 });
 
 // ********************************************************************************************* //
