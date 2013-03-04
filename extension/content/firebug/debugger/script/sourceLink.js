@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace"
+    "firebug/lib/trace",
+    "firebug/lib/object",
 ],
-function(FBTrace) {
+function(FBTrace, Obj) {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,6 +17,7 @@ function SourceLink(url, line, type, object, instance, col)
     this.type = type;
     this.object = object;
     this.col = col;
+    this.options = {};
 };
 
 SourceLink.prototype =
@@ -36,6 +38,11 @@ SourceLink.prototype =
             (this.line ? ("\"line\":" + this.line + ","):"") +
             (this.type ? (" \"type\":\"" + this.type + "\","):"") +
             "}";
+    },
+
+    getOptions: function()
+    {
+        return Obj.extend(this.options, {});
     }
 };
 

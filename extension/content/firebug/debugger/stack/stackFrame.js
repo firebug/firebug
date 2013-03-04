@@ -66,7 +66,12 @@ StackFrame.prototype =
 
     toSourceLink: function()
     {
-        return new SourceLink(this.sourceFile.href, this.line, "js");
+        var sourceLink = new SourceLink(this.sourceFile.href, this.line, "js");
+
+        // Source link from a frame is always marked as the current debug location so,
+        // the underlying source view knows that the target line should be decorated.
+        sourceLink.options.debugLocation = true;
+        return sourceLink;
     },
 
     toString: function()

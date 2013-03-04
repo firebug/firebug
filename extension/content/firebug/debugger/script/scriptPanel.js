@@ -190,7 +190,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showNoStackFrame: function()
     {
-        this.removeExeLineHighlight();
+        this.removeDebugLocation();
 
         // Clear the stack on the panel toolbar
         var panelStatus = Firebug.chrome.getPanelStatusElements();
@@ -283,14 +283,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Scrolling & Highlighting
 
-    scrollToLine: function(lineNo)
+    scrollToLine: function(lineNo, options)
     {
-        this.scriptView.scrollToLine(lineNo);
+        this.scriptView.scrollToLineAsync(lineNo, options);
     },
 
-    removeExeLineHighlight: function()
+    removeDebugLocation: function()
     {
-        this.scriptView.removeDebugLocation();
+        this.scriptView.setDebugLocationAsync(-1);
+    },
+
+    setDebugLocation: function(line)
+    {
+        this.scriptView.setDebugLocationAsync(line - 1);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -406,9 +411,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             self.scriptView.showSource(lines.join(""));
 
-            // If the location object is SourceLink automatically scroll to specified line.
+            var options = sourceLink.getOptions();
+
+            // Make sure the current execution line is marked if the current frame
+            // is coming from the current location.
+            var frame = self.context.currentFrame;
+            if (frame && frame.href == self.location.href)
+                options.debugLocation = true;
+
+            // If the location object is SourceLink automatically scroll to the
+            // specified line.
             if (self.location && self.location.line)
-                self.scrollToLine(self.location.line);
+                self.scrollToLine(self.location.line, options);
         }
 
         compilationUnit.getSourceLines(-1, -1, callback);
