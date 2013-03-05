@@ -8,8 +8,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
+    "firebug/lib/string",
+    "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, Str, FBTrace) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -142,10 +144,35 @@ DomTree.prototype = domplate(
         if (!row)
             return;
 
+        var member = row.repObject;
+        if (!member)
+            return;
+
         var level = parseInt(row.getAttribute("level"));
         if (forceOpen && Css.hasClass(row, "opened"))
             return;
 
+        // Handle long strings. These don't have children, but can be shortened and
+        // expanding them allows the user to see the entire string.
+        var rowValue = this.getValue(member);
+        var isString = typeof(rowValue) == "string";
+        if (isString)
+        {
+            if (Css.hasClass(row, "opened"))
+            {
+                Css.removeClass(row, "opened");
+                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
+            }
+            else
+            {
+                Css.setClass(row, "opened");
+                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
+            }
+
+            return;
+        }
+
+        // Handle child items expanding and collapsing.
         if (Css.hasClass(row, "opened"))
         {
             Css.removeClass(row, "opened");
@@ -161,25 +188,21 @@ DomTree.prototype = domplate(
         }
         else
         {
-            var member = row.repObject;
-            if (member)
-            {
-                // Do not expand if the member says there are no children.
-                if (!member.hasChildren)
-                    return;
+            // Do not expand if the member says there are no children.
+            if (!member.hasChildren)
+                return;
 
-                Css.setClass(row, "opened");
+            Css.setClass(row, "opened");
 
-                // Get children object for the next level.
-                var members = this.getMembers(member.value, level + 1);
+            // Get children object for the next level.
+            var members = this.getMembers(member.value, level + 1);
 
-                // Insert rows if they are immediatelly available. Otherwise set a spinner
-                // and wait for the update.
-                if (members && members.length)
-                    this.loop.insertRows({members: members}, row, this);
-                else if (isPromise(members))
-                    Css.setClass(row, "spinning");
-            }
+            // Insert rows if they are immediatelly available. Otherwise set a spinner
+            // and wait for the update.
+            if (members && members.length)
+                this.loop.insertRows({members: members}, row, this);
+            else if (isPromise(members))
+                Css.setClass(row, "spinning");
         }
     },
 

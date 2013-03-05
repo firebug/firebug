@@ -219,7 +219,14 @@ ObjectClient.Property.prototype =
         var result = false;
 
         if (this.value instanceof ObjectClient)
+        {
             result = this.value.hasProperties();
+        }
+        else
+        {
+            var valueType = typeof(this.value);
+            result = (valueType === "string" && this.value.length > Firebug.stringCropLength);
+        }
 
         return result;
     },
