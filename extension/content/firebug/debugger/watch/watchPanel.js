@@ -495,58 +495,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Options
-
-    updateOption: function(name, value)
-    {
-        // xxxHonza: how to properly share logic with the DOM panel,
-        // but not through inheritance?
-        var options = new Set();
-        options.add("showUserProps");
-        options.add("showUserFuncs");
-        options.add("showDOMProps");
-        options.add("showDOMFuncs");
-        options.add("showDOMConstants");
-        options.add("showInlineEventHandlers");
-        options.add("showClosures");
-        options.add("showOwnProperties");
-        options.add("showEnumerableProperties");
-
-        if (options.has(name))
-            this.rebuild(true);
-    },
-
-    getOptionsMenuItems: function()
-    {
-        // xxxHonza: how to properly share logic with the DOM panel,
-        // but not through inheritance?
-        return [
-            Menu.optionMenu("ShowUserProps", "showUserProps",
-                "dom.option.tip.Show_User_Props"),
-            Menu.optionMenu("ShowUserFuncs", "showUserFuncs",
-                "dom.option.tip.Show_User_Funcs"),
-            Menu.optionMenu("ShowDOMProps", "showDOMProps",
-                "dom.option.tip.Show_DOM_Props"),
-            Menu.optionMenu("ShowDOMFuncs", "showDOMFuncs",
-                "dom.option.tip.Show_DOM_Funcs"),
-            Menu.optionMenu("ShowDOMConstants", "showDOMConstants",
-                "dom.option.tip.Show_DOM_Constants"),
-            Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
-                "ShowInlineEventHandlersTooltip"),
-            Menu.optionMenu("ShowClosures", "showClosures",
-                "dom.option.tip.Show_Closures"),
-            "-",
-            Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
-                "ShowOwnPropertiesTooltip"),
-            Menu.optionMenu("ShowEnumerableProperties",
-                "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
-            "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true),
-                tooltiptext: "panel.tip.Refresh"}
-        ];
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
     /**
