@@ -91,6 +91,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         state.location = this.location;
         state.scrollTop = this.scriptView.getScrollTop();
 
+        Trace.sysout("scriptPanel.destroy; " + state.scrollTop + ", " + state.location, state);
+
         this.scriptView.removeListener(this);
         this.scriptView.destroy();
 
@@ -120,7 +122,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (state && state.location)
         {
+            // Create source link used to restore script view location. Specified source line
+            // should be displayed at the top (as the first line).
             var sourceLink = new SourceLink(state.location.getURL(), state.scrollTop, "js");
+            sourceLink.options.scrollTo = "top";
 
             // Causes the Script panel to show the proper location.
             // Do not highlight the line (second argument true), we just want
@@ -250,6 +255,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
      */
     showSourceLinkAsync: function(sourceLink, counter)
     {
+        Trace.sysout("scriptPanel.showSourceLinkAsync; " + counter + ", " +
+            sourceLink, sourceLink);
+
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (compilationUnit)
         {
@@ -389,6 +397,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showSource: function(sourceLink)
     {
+        Trace.sysout("scriptPanel.showSource; " + sourceLink, sourceLink);
+
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (!compilationUnit)
             compilationUnit = this.getDefaultLocation();
@@ -407,7 +417,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // (e.g. show default script and restore the last visible script).
             // Use only the callback that corresponds to the current location URL.
             if (!self.location || self.location.getURL() != unit.getURL())
+            {
+                Trace.sysout("scriptPanel.showSource; Bail out, different location now");
                 return;
+            }
+
+            Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
             self.scriptView.showSource(lines.join(""));
 
@@ -1018,7 +1033,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onStopDebugging: function(context, event, packet)
     {
-        Trace.sysout("scriptPanel.onStopDebugging; " + this.context.getName());
+        Trace.sysout("scriptPanel.onStopDebugging; " + this.context.getName(), packet);
 
         try
         {

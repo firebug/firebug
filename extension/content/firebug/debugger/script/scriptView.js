@@ -382,6 +382,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     scrollToLineAsync: function(lineNo, options)
     {
+        Trace.sysout("scriptView.scrollToLineAsync; " + lineNo, options);
+
         if (!this.initialized)
         {
             this.defaultLine = lineNo;
@@ -412,9 +414,17 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var firstVisible = this.editor.getTopIndex();
         var lastVisible = this.editor._view.getBottomIndex(true);
 
-        // Calculate center line
-        var topIndex = Math.max(line - halfVisible, 0);
-        topIndex = Math.min(topIndex, this.editor.getLineCount());
+        var topIndex;
+        if (options.scrollTo == "top")
+        {
+            topIndex = line;
+        }
+        else
+        {
+            // Calculate center line
+            topIndex = Math.max(line - halfVisible, 0);
+            topIndex = Math.min(topIndex, this.editor.getLineCount());
+        }
 
         // If the target line is in view, keep the top index
         if (line <= lastVisible && line >= firstVisible)
@@ -459,7 +469,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // If there is an update in progress cancel it. E.g. removeDebugLocation should not
         // be called if scrollToLine is about to execute.
         if (this.updateTimer)
+        {
+            Trace.sysout("scriptView.asyncUpdate; Cancel existing update");
             clearTimeout(this.updateTimer);
+        }
 
         var self = this;
         this.updateTimer = setTimeout(function()
