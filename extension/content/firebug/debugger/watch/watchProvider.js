@@ -134,6 +134,11 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         {
             actor = object.getActor();
         }
+        else
+        {
+            // The object is already the underlying JS object.
+            return object;
+        }
 
         if (!actor)
             return null;
