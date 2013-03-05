@@ -271,6 +271,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
         // context.currentFrame: the frame we show to user, depends on selection.
+        // xxxHonza: if there are any watch expressions in the Watch panel, the
+        // currentFrame is reset by 'clientEvaluated' packet (round trip). The current frame
+        // selection should be remembered (as an index?) and updated when the 'clientEvaluated'
+        // is received.
         var frame = StackFrame.buildStackFrame(packet.frame, context);
         context.stoppedFrame = frame;
         context.currentFrame = frame;

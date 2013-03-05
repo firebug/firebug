@@ -177,7 +177,8 @@ StackFrame.buildStackFrame = function(frame, context)
         sourceFile = {href: frame.where.url};
 
     var args = [];
-    var arguments = frame.environment.bindings.arguments;
+    var bindings = frame.environment.bindings;
+    var arguments = bindings ? bindings.arguments : [];
     for (var i=0; i<arguments.length; i++)
     {
         var arg = arguments[i];
@@ -252,7 +253,7 @@ function getArgValue(arg, context)
     var grip = arg[name].value;
 
     var object = context.clientCache.getObject(grip);
-    if (typeof(object) == "object")
+    if (object && typeof(object) == "object")
         return object.getValue();
 
     return object;
