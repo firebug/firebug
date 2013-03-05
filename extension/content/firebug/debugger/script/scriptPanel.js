@@ -385,6 +385,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             var actualLocation = response.actualLocation;
             var url = bpClient.location.url;
+            var existedBp = null;
+            var removeCallback = function(response)
+            {
+                Trace.sysout("scriptPanel.onBreakpointInitialized; "+
+                    "Response received:", response);
+            };
 
             // The breakpoint is set on the server side even if the script doesn't
             // exist yet i.e. error == 'noScript' so, doesn't count this case as
@@ -403,11 +409,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 // Convert to line index(zero-based).
                 var newLineNo = actualLocation.line - 1;
 
-                var existedBp = BreakpointStore.findBreakpoint(url, newLineNo);
+                existedBp = BreakpointStore.findBreakpoint(url, newLineNo);
 
                 // We need to update breakpoint client object in
                 // order to be found when it needs removing.
                 bpClient.location.line = actualLocation.line;
+
+                var popupMenu = document.getElementById("fbScriptViewPopup");
+                // If the user set a breakpoint via popop menu, the menu
+                // should be closed, because the line, popup is showed on,
+                // isn't a executional line.
+                if (popupMenu.state === "open")
+                    popupMenu.hidePopup();
 
                 // Scroll to actual line.
                 self.scrollToLine(url, newLineNo);
@@ -417,11 +430,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 // 2 - to be scrolled in order to show the user existed bp.
                 if (existedBp)
                 {
-                    function removeCallback(res)
-                    {
-                        Trace.sysout("scriptPanel.onBreakpointInitialized; "+
-                            "Response received:", res);
-                    }
                     self.tool.removeBreakpoint(self.context, url, newLineNo,
                         removeCallback);
 
@@ -452,11 +460,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 self.scriptView.removeBreakpoint({lineNo: lineIndex});
                 if (condition !== undefined)
                 {
+                    existedBp = BreakpointStore.findBreakpoint(url, lineIndex);
+                    // If there was already another breakpoint, its breakpoint
+                    // client object must be removed.
+                    if (existedBp)
+                        self.tool.removeBreakpoint(self.context, url, lineIndex,
+                            removeCallback);
+
                     self.startEditingConditionAsyn(lineIndex, condition);
                     return;
                 }
                 // In case the line is executable, we need to save
                 // breakpoint and replace loading icon with red dot.
+                self.tool.removeBreakpoint(self.context, url, newLineNo,
+                        removeCallback);
                 self.scriptView.addBreakpoint({lineNo: lineIndex});
                 self.addBreakpoint({lineNo: lineIndex});
             }
@@ -883,7 +900,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (hasBreakpoint)
             BreakpointStore.removeBreakpoint(this.location.href, line);
         else
-            BreakpointStore.addBreakpoint(this.location.href, line);
+            this.scriptView.initializeBreakpoint(line);
     },
 
     toggleDisableBreakpoint: function(line)
@@ -1067,10 +1084,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
 
+            --this.context.currentFrame.line
             // This is how the Watch panel is synchronized.
             Firebug.chrome.select(this.context.currentFrame, "script", null, true);
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
+            ++this.context.currentFrame.line
         }
         catch (exc)
         {
