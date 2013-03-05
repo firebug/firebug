@@ -360,7 +360,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
     },
 
-    initializeBreakpoint: function(lineIndex)
+    initializeBreakpoint: function(lineIndex, condition)
     {
         var lineStart = this.editor.getLineStart(lineIndex);
         var lineEnd = this.editor.getLineEnd(lineIndex);
@@ -376,7 +376,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.editor._annotationModel.addAnnotation(annotation);
 
-        this.dispatch("onBreakpointInitialized", [lineIndex]);
+        this.dispatch("onBreakpointInitialized", [lineIndex, condition]);
     },
 
     updateBreakpoint: function(bp)

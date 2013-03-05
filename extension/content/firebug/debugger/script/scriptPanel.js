@@ -355,7 +355,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var url = this.location.href;
         // Persist the breakpoint on the client side.
-        BreakpointStore.addBreakpoint(url, bp.line);
+        BreakpointStore.addBreakpoint(url, bp.line || bp.lineNo);
     },
 
     removeBreakpoint: function(bp)
@@ -375,9 +375,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         BreakpointStore.removeBreakpoint(url, bp.lineNo);
     },
 
-    onBreakpointInitialized: function(lineIndex)
+    onBreakpointInitialized: function(lineIndex, condition)
     {
-        Trace.sysout("scriptPanel.onBreakpointInitialized;", {lineNo: lineIndex});
+        Trace.sysout("scriptPanel.onBreakpointInitialized;",
+            {lineNo: lineIndex, condition: condition});
 
         var self = this;
         function doSetBreakpoint(response, bpClient)
@@ -397,7 +398,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // If the line that a breakpoint is set, isn't
             // a executable line.
-            if (actualLocation && actualLocation.line != lineIndex)
+            if (actualLocation && actualLocation.line != (lineIndex + 1))
             {
                 // Convert to line index(zero-based).
                 var newLineNo = actualLocation.line - 1;
@@ -408,10 +409,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 // order to be found when it needs removing.
                 bpClient.location.line = actualLocation.line;
 
+                // Scroll to actual line.
+                self.scrollToLine(url, newLineNo);
+
                 // A breakpoint has already existed, it needs:
-                // 1 - remove loading icon.
-                // 2 - remove breakpoint client object.
-                // 3 - to be scrolled in order to show the user existed bp.
+                // 1 - remove breakpoint client object.
+                // 2 - to be scrolled in order to show the user existed bp.
                 if (existedBp)
                 {
                     function removeCallback(res)
@@ -422,7 +425,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     self.tool.removeBreakpoint(self.context, url, newLineNo,
                         removeCallback);
 
-                    self.scrollToLine(existedBp.href, newLineNo);
+                    if (condition !== undefined)
+                    {
+                        self.startEditingConditionAsyn(newLineNo, existedBp.condition);
+                    }
                     self.scriptView.removeBreakpoint({lineNo: lineIndex});
                     return;
                 }
@@ -431,20 +437,28 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 // is waiting for actual line to be found.
                 self.scriptView.removeBreakpoint({lineNo: lineIndex});
 
+                if (condition !== undefined)
+                {
+                    self.startEditingConditionAsyn(newLineNo, condition);
+                    return;
+                }
+
                 // Set a breakpoint to the actual location
                 self.scriptView.addBreakpoint({lineNo: newLineNo});
-                self.addBreakpoint({line: newLineNo});
-
-                // Scroll to actual line.
-                self.scrollToLine(url, newLineNo);
+                self.addBreakpoint({lineNo: newLineNo});
             }
             else
             {
+                self.scriptView.removeBreakpoint({lineNo: lineIndex});
+                if (condition !== undefined)
+                {
+                    self.startEditingConditionAsyn(lineIndex, condition);
+                    return;
+                }
                 // In case the line is executable, we need to save
                 // breakpoint and replace loading icon with red dot.
-                self.scriptView.removeBreakpoint({lineNo: lineIndex});
                 self.scriptView.addBreakpoint({lineNo: lineIndex});
-                self.addBreakpoint({line: lineIndex});
+                self.addBreakpoint({lineNo: lineIndex});
             }
 
             if (FBTrace.DBG_BP)
@@ -489,10 +503,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     editBreakpointCondition: function(lineNo)
     {
-        var target = this.scriptView.getAnnotationTarget(lineNo);
-        if (!target)
-            return;
-
         // Create helper object for remembering the line and URL. It's used when
         // the user right clicks on a line with no breakpoint and picks
         // Edit Breakpoint Condition. This should still work and the breakpoint
@@ -501,7 +511,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             lineNo: lineNo,
             href: this.location.getURL(),
             condition: "",
-        }
+        };
 
         // The breakpoint doesn't have to exist.
         var bp = BreakpointStore.findBreakpoint(this.location.getURL(), lineNo);
@@ -518,19 +528,64 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Reference to the edited breakpoint.
         var editor = this.getEditor();
         editor.breakpoint = bp ? bp : tempBp;
+        this.scriptView.initializeBreakpoint(lineNo, condition);
+    },
+
+    startEditingCondition: function(lineNo, condition)
+    {
+        var target = this.scriptView.getAnnotationTarget(lineNo);
+        if (!target)
+            return;
+
+        var conditionEditor = this.getEditor();
+        conditionEditor.breakpoint.lineNo = lineNo;
 
         Firebug.Editor.startEditing(target, condition, null, null, this);
     },
 
-    onSetBreakpointCondition: function(bp, value)
+    startEditingConditionAsyn: function(lineNo, condition)
     {
-        // If the breakpoint doesn't yet exist create it now. This allows to create
-        // conditional breakpoints in one step.
-        var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
-        if (!availableBp)
-            BreakpointStore.addBreakpoint(bp.href, bp.lineNo, value);
+        // This should be called with a delay to sure some
+        // async operations like scrollToLine is done.
+        var self = this;
+        setTimeout(function()
+        {
+            self.startEditingCondition(lineNo, condition);
+        }, 200);
+    },
 
-        BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
+    onSetBreakpointCondition: function(bp, value, cancel)
+    {
+        var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+        if (!cancel)
+        {
+            this.scriptView.addBreakpoint(bp);
+            if (!availableBp)
+            {
+                this.addBreakpoint(bp);
+            }
+            value = value ? value : null;
+            BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
+        }
+        else
+        {
+            if (!availableBp)
+            {
+                function removeCallback(response)
+                {
+                    Trace.sysout("scriptPanel.onSetBreakpointCondition; "+
+                        "Response received:", response);
+                }
+                this.tool.removeBreakpoint(this.context, bp.href, bp.lineNo,
+                    removeCallback);
+            }
+            else
+            {
+                this.scriptView.addBreakpoint(bp);
+                value = availableBp.condition;
+                BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
+            }
+        }
     },
 
     getEditor: function(target, value)
