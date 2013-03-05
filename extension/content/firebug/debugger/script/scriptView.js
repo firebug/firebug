@@ -485,7 +485,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         {
             self.updateTimer = null;
             callback();
-        }, 2000);
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
