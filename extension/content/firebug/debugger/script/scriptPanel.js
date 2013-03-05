@@ -167,6 +167,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     hide: function(state)
     {
+        Trace.sysout("scriptPanel.hide: ", state);
+
+        state.location = this.location;
+        state.scrollTop = this.scriptView.getScrollTop();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -431,7 +435,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Make sure the current execution line is marked if the current frame
             // is coming from the current location.
             var frame = self.context.currentFrame;
-            if (frame && frame.href == self.location.href)
+            if (frame && frame.href == self.location.href && frame.line == self.location.line)
                 options.debugLocation = true;
 
             // If the location object is SourceLink automatically scroll to the

@@ -198,7 +198,9 @@
                         ", forceUpdate: " + forceUpdate + ", noRefresh: " + noRefresh +
                         ", needsUpdate: " + (panel ? panel.needsRefresh : ""));
 
-                this.hideSelectedPanel();
+                // Do not hide the panel if it's going to be selected.
+                if (!(this.selectedPanel && this.selectedPanel.name == panelName))
+                    this.hideSelectedPanel();
 
                 //xxxHonza: can be removed, but Chromebug needs it for now.
                 this.tabBox.removeAttribute("collapsed");
