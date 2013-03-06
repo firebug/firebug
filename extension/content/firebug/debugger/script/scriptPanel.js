@@ -397,6 +397,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // an error.
             if (response.error && response.error != "noScript")
             {
+                // Remove loading icon
+                self.scriptView.removeBreakpoint({lineNo: lineIndex});
+
                 TraceError.sysout("scriptPanel.onBreakpointInitialized; ERROR " + response,
                     {response: response, bpClient: bpClient});
                 return;
