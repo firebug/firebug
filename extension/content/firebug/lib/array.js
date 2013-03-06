@@ -149,10 +149,17 @@ Arr.extendArray = function(array, array2)
 
 Arr.arrayInsert = function(array, index, other)
 {
-   for (var i = 0; i < other.length; ++i)
-       array.splice(i+index, 0, other[i]);
+    // Prepare arguments for Array.splice()
+    // 1) index: at which to start inserting the 'other' array.
+    // 2) howMany: elements to remove (none in this case)
+    // 3-N) elements: to insert
+    var args = [index, 0];
+    args.push.apply(args, other);
 
-   return array;
+    // Insert 'other' array into 'array'
+    array.splice.apply(array, args);
+
+    return array;
 };
 
 /**
