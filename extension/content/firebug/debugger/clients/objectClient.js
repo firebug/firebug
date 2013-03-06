@@ -6,8 +6,9 @@ define([
     "firebug/lib/promise",
     "firebug/lib/array",
     "firebug/lib/wrapper",
+    "firebug/remoting/debuggerClientModule",
 ],
-function (FBTrace, RDP, Promise, Arr, Wrapper) {
+function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -46,6 +47,11 @@ ObjectClient.prototype =
             case "undefined":
                 return;
         }
+
+        // Break RDP and get the remote object directly
+        var object = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
+        if (object)
+            return object;
 
         if (this.properties)
             return createGripProxy(this);
@@ -213,7 +219,14 @@ ObjectClient.Property.prototype =
         var result = false;
 
         if (this.value instanceof ObjectClient)
+        {
             result = this.value.hasProperties();
+        }
+        else
+        {
+            var valueType = typeof(this.value);
+            result = (valueType === "string" && this.value.length > Firebug.stringCropLength);
+        }
 
         return result;
     },

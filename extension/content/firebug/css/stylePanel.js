@@ -20,10 +20,12 @@ define([
     "firebug/lib/options",
     "firebug/css/cssModule",
     "firebug/css/cssPanel",
-    "firebug/chrome/menu"
+    "firebug/chrome/menu",
+    "firebug/css/loadHandler",
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url, Arr,
-    SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu) {
+    SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu,
+    LoadHandler) {
 
 with (Domplate) {
 
@@ -513,13 +515,12 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     updateView: function(element)
     {
         // We can properly update the view only if the page is fully loaded (see issue 5654).
-        var doc = element.ownerDocument;
-        if (doc.readyState != "complete")
-        {
-            this.context.setTimeout(Obj.bindFixed(this.updateView, this, element), 200);
-            return;
-        }
+        var loadHandler = new LoadHandler();
+        loadHandler.handle(this.context, Obj.bindFixed(this.doUpdateView, this, element));
+    },
 
+    doUpdateView: function(element)
+    {
         // All stylesheets should be ready now, update the view.
         this.updateCascadeView(element);
 

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6283: Console and DOM panel fail on interpreting @page</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @page {
+            margin: 0.5cm;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6283">Issue 6283</a>: Console and DOM panel fail on interpreting @page</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue6283.html</em> from the Location Menu</li>
+                    <li>
+                        Right-click the Location Button and choose <em>Inspect in DOM panel</em> from the context menu<br/>
+                        <span class="ok">&rArr; Firebug should switch to the <em>DOM</em> panel and display the stylesheet</span>
+                    </li>
+                    <li>
+                        Expand the <code>cssRules</code> property<br/>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>There should be a <code>CSSPageRule</code> rule listed.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

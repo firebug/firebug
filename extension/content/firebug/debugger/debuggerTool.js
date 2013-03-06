@@ -90,6 +90,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     initContext: function(context, persistedState)
     {
         Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
+
+        // If page reload happens the thread client remains the same so,
+        // preserve also all existing breakpoint clients.
+        // See also {@DebuggerClientModule.initConext}
+        if (persistedState)
+        {
+            context.breakpointClients = persistedState.breakpointClients;
+        }
     },
 
     showContext: function(browser, context)
@@ -104,6 +112,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     destroyContext: function(context, persistedState, browser)
     {
         this.detachListeners(context);
+
+        persistedState.breakpointClients = context.breakpointClients;
 
         Trace.sysout("debuggerTool.destroyContext; context ID: " + context.getId());
     },
@@ -261,6 +271,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
         // context.currentFrame: the frame we show to user, depends on selection.
+        // xxxHonza: if there are any watch expressions in the Watch panel, the
+        // currentFrame is reset by 'clientEvaluated' packet (round trip). The current frame
+        // selection should be remembered (as an index?) and updated when the 'clientEvaluated'
+        // is received.
         var frame = StackFrame.buildStackFrame(packet.frame, context);
         context.stoppedFrame = frame;
         context.currentFrame = frame;
@@ -420,10 +434,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             callback(response, bpClient);
         };
-        lineNumber = lineNumber + 1;
+
         return context.activeThread.setBreakpoint({
             url: url,
-            line: lineNumber
+            line: lineNumber + 1
         }, doSetBreakpoint);
     },
 
@@ -495,7 +509,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         // knowns how to remove the breakpoint on the server side.
         var client = this.removeBreakpointClient(context, url, lineNumber);
         if (client)
+        {
             client.remove(callback);
+        }
+        else
+        {
+            TraceError.sysout("debuggerToo.removeBreakpoint; ERROR removing " +
+                "non existing breakpoint. " + url + ", " + lineNumber);
+        }
     },
 
     removeBreakpointClient: function(context, url, lineNumber)

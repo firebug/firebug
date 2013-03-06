@@ -120,7 +120,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.showSource(this.defaultSource);
 
         if (this.defaultLine > 0)
-            this.scrollToLine("", this.defaultLine);
+            this.scrollToLineAsync(this.defaultLine);
 
         this.initBreakpoints();
     },
@@ -405,29 +405,38 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Highlight Line
+    // Content Scroll
 
-    scrollToLine: function(href, lineNo, highlighter)
+    getScrollTop: function()
     {
+        if (!this.initialized)
+            return 0;
+
+        return this.editor.getTopIndex() + 1;
+    },
+
+    scrollToLineAsync: function(lineNo, options)
+    {
+        Trace.sysout("scriptView.scrollToLineAsync; " + lineNo, options);
+
         if (!this.initialized)
         {
             this.defaultLine = lineNo;
             return;
         }
 
-        // Convert to index based.
-        lineNo = lineNo - 1;
-
         // Scroll the content so the debug-location (execution line) is visible
         // xxxHonza: must be done asynchronously otherwise doesn't work :-(
         // xxxHonza: since it's async the content visualy jump to the top (y scroll
         // position being reset in _updatePage) and then scrolled at the right
         // position in doScrollToLine. Ask Mihai!
-        this.asyncUpdate(this.scrollToLineAsync.bind(this, lineNo));
+        this.asyncUpdate(this.scrollToLine.bind(this, lineNo, options));
     },
 
-    scrollToLineAsync: function(line)
+    scrollToLine: function(line, options)
     {
+        options = options || {};
+
         var editorHeight = this.editor._view.getClientArea().height;
         var lineHeight = this.editor._view.getLineHeight();
         var linesVisible = Math.floor(editorHeight/lineHeight);
@@ -435,44 +444,76 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var firstVisible = this.editor.getTopIndex();
         var lastVisible = this.editor._view.getBottomIndex(true);
 
-        // Calculate center line
-        var topIndex = Math.max(line - halfVisible, 0);
-        topIndex = Math.min(topIndex, this.editor.getLineCount());
+        // Convert to index based.
+        line = line - 1;
 
-        // If the target line is in view, keep the top index
-        if (line <= lastVisible && line >= firstVisible)
-            topIndex = firstVisible;
+        var topIndex;
+        if (options.scrollTo == "top")
+        {
+            topIndex = line;
+        }
+        else
+        {
+            // Calculate center line
+            topIndex = Math.max(line - halfVisible, 0);
+            topIndex = Math.min(topIndex, this.editor.getLineCount());
+
+            // If the target line is in view, keep the top index
+            if (line <= lastVisible && line >= firstVisible)
+            {
+                Trace.sysout("scriptView.scrollToLine; adjust line: " + line +
+                    ", firstVisible: " + firstVisible + ", lastVisible: " + lastVisible);
+
+                topIndex = firstVisible;
+            }
+        }
+
+        Trace.sysout("scriptView.scrollToLine; setTopIndex " + topIndex, options);
 
         this.editor.setTopIndex(topIndex);
+
+        if (options.debugLocation)
+            this.editor.setDebugLocation(line);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debug Location
+
+    setDebugLocationAsync: function(line)
+    {
+        if (!this.initialized)
+        {
+            this.defaultLine = line;
+            return;
+        }
+
+        this.asyncUpdate(this.setDebugLocation.bind(this, line));
     },
 
     setDebugLocation: function(line)
     {
-        this.editor.setDebugLocation(line);
-    },
-
-    removeDebugLocation: function()
-    {
         if (!this.initialized)
-        {
-            this.defaultLine = -1;
             return;
-        }
 
-        this.asyncUpdate(this.removeDebugLocationAsync.bind(this));
-    },
+        if (this.editor)
+            this.editor.setDebugLocation(line);
 
-    removeDebugLocationAsync: function()
-    {
-        this.editor.setDebugLocation(-1);
+        // If the debug location is being removed (line == -1) do not scroll.
+        if (line > 0)
+            this.scrollToLine(line);
     },
 
     asyncUpdate: function(callback)
     {
+        Trace.sysout("scriptView.asyncUpdate;");
+
         // If there is an update in progress cancel it. E.g. removeDebugLocation should not
         // be called if scrollToLine is about to execute.
         if (this.updateTimer)
+        {
+            Trace.sysout("scriptView.asyncUpdate; Cancel existing update");
             clearTimeout(this.updateTimer);
+        }
 
         var self = this;
         this.updateTimer = setTimeout(function()

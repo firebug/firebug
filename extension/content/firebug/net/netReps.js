@@ -502,7 +502,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                         SPAN(" " + Locale.$STR("FromCache")),
                         ")"
                     ),
-                    DIV({"class": "netTimeBar"},
+                    DIV({"class": "netTimeBar netSummaryLabel"},
                         SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
                     )
                 )

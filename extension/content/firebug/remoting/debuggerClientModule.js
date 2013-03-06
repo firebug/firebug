@@ -416,7 +416,14 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                 FBTrace.sysout("no obj", actor)
 
             if (typeof(obj.unsafeDereference) != "undefined")
+            {
                 return obj.unsafeDereference();
+            }
+            else
+            {
+                TraceError.sysout("debuggerClientModule.getObject; You need patch from " +
+                    "bug 837723");
+            }
 
             return null;
         }

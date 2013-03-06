@@ -32,6 +32,50 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 {
     dispatchName: "cssModule",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        this.editors = {};
+        this.registerEditor("Live",
+        {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startLiveEditing(stylesheet, context);
+            },
+            stopEditing: function()
+            {
+                Firebug.Editor.stopEditing();
+            }
+        });
+
+        this.registerEditor("Source",
+        {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startSourceEditing(stylesheet, context);
+            },
+            stopEditing: function()
+            {
+                Firebug.Editor.stopEditing();
+            }
+        });
+    },
+
+    initContext: function(context)
+    {
+        context.dirtyListener = new Firebug.CSSDirtyListener(context);
+        this.addListener(context.dirtyListener);
+    },
+
+    destroyContext: function(context)
+    {
+        this.removeListener(context.dirtyListener);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     freeEdit: function(styleSheet, value)
     {
         if (FBTrace.DBG_CSS)
@@ -379,48 +423,6 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             }
         ];
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Module functions
-
-    initialize: function()
-    {
-        this.editors = {};
-        this.registerEditor("Live",
-        {
-            startEditing: function(stylesheet, context, panel)
-            {
-                panel.startLiveEditing(stylesheet, context);
-            },
-            stopEditing: function()
-            {
-                Firebug.Editor.stopEditing();
-            }
-        });
-
-        this.registerEditor("Source",
-        {
-            startEditing: function(stylesheet, context, panel)
-            {
-                panel.startSourceEditing(stylesheet, context);
-            },
-            stopEditing: function()
-            {
-                Firebug.Editor.stopEditing();
-            }
-        });
-    },
-
-    initContext: function(context)
-    {
-        context.dirtyListener = new Firebug.CSSDirtyListener(context);
-        this.addListener(context.dirtyListener);
-    },
-
-    destroyContext: function(context)
-    {
-        this.removeListener(context.dirtyListener);
-    }
 });
 
 // ********************************************************************************************* //

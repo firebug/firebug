@@ -32,7 +32,7 @@ var StackFrameRep = domplate(Firebug.Rep,
     tag:
         FirebugReps.OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
             onclick: "$onToggleArguments"},
-            SPAN({"class":"stackFrameMarker"}, ""),
+            SPAN({"class": "stackFrameMarker"}, ""),
             A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             SPAN("("),
             SPAN({"class": "arguments"},

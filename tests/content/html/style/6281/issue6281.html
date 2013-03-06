@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6281: Placeholder rules are no longer displayed in HTML Style tab.</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #textinput::-moz-placeholder {
+            color: blue;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6281">Issue 6281</a>: Placeholder rules are no longer displayed in HTML Style tab.</h1>
+        </header>
+        <div>
+            <section id="content">
+                <input id="textinput" type="text" placeholder="Placeholder"/>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the input field above (<code>#textinput</code>)</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The <em>Style</em> side panel should contain a rule with the
+                        selector <code>#textinput::-moz-placeholder</code>.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

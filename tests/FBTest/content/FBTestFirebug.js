@@ -2320,6 +2320,24 @@ this.getSelectedNodeBox = function()
     return panel.panelNode.querySelector(".nodeBox.selected");
 }
 
+//********************************************************************************************* //
+// CSS panel
+this.getStyleRulesBySelector = function(selector)
+{
+    var panel = FBTest.selectPanel("stylesheet");
+    var selectors = panel.panelNode.getElementsByClassName("cssSelector");
+
+    var rules = [];
+    for (var i = 0, len = selectors.length; i < len; ++i)
+    {
+        if (selectors[i].textContent.indexOf(selector) != -1)
+            rules.push(FW.FBL.getAncestorByClass(selector, "cssRule"));
+    }
+
+    return rules;
+};
+
+
 // ********************************************************************************************* //
 // Context menu
 

@@ -97,12 +97,11 @@ DOMMemberProvier.prototype =
             }
 
             var name, val;
-            var add = function(type, where, order)
+            var add = function(type, where)
             {
-                this.addMember(object, type, where, name, val, level, order || 0, isScope);
+                this.addMember(object, type, where, name, val, level, isScope);
             }.bind(this);
 
-            var domMembers = Dom.getDOMMembers(object);
             for (var i=0; i<properties.length; i++)
             {
                 name = properties[i];
@@ -133,7 +132,7 @@ DOMMemberProvier.prototype =
 
                 if (!isNaN(parseInt(name, 10)))
                 {
-                    add("ordinal", ordinals, 0);
+                    add("ordinal", ordinals);
                 }
                 else if (typeof val === "function")
                 {
@@ -141,11 +140,11 @@ DOMMemberProvier.prototype =
                     var domMember = Dom.isDOMMember(object, name);
                     if (domMember && classFunc)
                     {
-                        add("domClass", domClasses, domMembers[name]);
+                        add("domClass", domClasses);
                     }
                     else if (domMember)
                     {
-                        add("domFunction", domFuncs, domMembers[name]);
+                        add("domFunction", domFuncs);
                     }
                     else if (classFunc)
                     {
@@ -169,7 +168,7 @@ DOMMemberProvier.prototype =
                     }
                     else if (Dom.isDOMMember(object, name))
                     {
-                        add("dom", domProps, domMembers[name]);
+                        add("dom", domProps);
                     }
                     else if (Dom.isDOMConstant(object, name))
                     {
@@ -284,7 +283,7 @@ DOMMemberProvier.prototype =
         }
     },
 
-    addMemberInternal: function(object, type, props, name, value, level, order, parentIsScope)
+    addMemberInternal: function(object, type, props, name, value, level, parentIsScope)
     {
         // Do this first in case a call to instanceof (= QI, for XPCOM things) reveals contents.
         var rep = Firebug.getRep(value);
@@ -339,7 +338,6 @@ DOMMemberProvier.prototype =
             type: type,
             rowClass: "memberRow-" + type,
             open: "",
-            order: order,
             level: level,
             indent: level * 16,
             hasChildren: hasChildren,
@@ -421,7 +419,6 @@ DOMMemberProvier.prototype =
             type: type,
             rowClass: "memberRow-" + type,
             open: "",
-            order: 0,
             level: level,
             indent: level*16,
             hasChildren: true,

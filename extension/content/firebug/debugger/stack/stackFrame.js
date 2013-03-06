@@ -18,17 +18,13 @@ var Trace = FBTrace.to("DBG_STACK");
 // ********************************************************************************************* //
 // Stack Frame
 
-// xxxHonza: should be derived from a client
+// xxxHonza: should be derived from a client object
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
-
-    //var fn = StackFrame.getDisplayName(nativeFrame ? nativeFrame.scope : null);
-    //this.fn = fn || functionName;  // cache?
-    this.fn = functionName;  // cache?
-
+    this.fn = functionName || "(anonymous)";
     this.context = context;
 
     // the newest frame in the stack containing 'this' frame
@@ -70,7 +66,12 @@ StackFrame.prototype =
 
     toSourceLink: function()
     {
-        return new SourceLink(this.sourceFile.href, this.line, "js");
+        var sourceLink = new SourceLink(this.sourceFile.href, this.line, "js");
+
+        // Source link from a frame is always marked as the current debug location so,
+        // the underlying source view knows that the target line should be decorated.
+        sourceLink.options.debugLocation = true;
+        return sourceLink;
     },
 
     toString: function()
@@ -176,16 +177,22 @@ StackFrame.buildStackFrame = function(frame, context)
         sourceFile = {href: frame.where.url};
 
     var args = [];
-    var arguments = frame.arguments;
+    var bindings = frame.environment.bindings;
+    var arguments = bindings ? bindings.arguments : [];
     for (var i=0; i<arguments.length; i++)
     {
+        var arg = arguments[i];
         args.push({
-            name: getArgName(arguments[i]),
-            value: getArgValue(frame.arguments[i])
+            name: getArgName(arg),
+            value: getArgValue(arg, context)
         });
     }
 
-    var funcName = frame.callee ? frame.callee.name : "";
+    // Get function name
+    var funcName = frame.callee ? frame.callee.displayName : "";
+    if (!funcName)
+        funcName = frame.callee ? frame.callee.name : "";
+
     return new StackFrame(sourceFile, frame.where.line, funcName,
         args, frame, 0, context);
 };
@@ -240,9 +247,16 @@ function getArgName(arg)
         return p;
 }
 
-function getArgValue(arg)
+function getArgValue(arg, context)
 {
-    return arg["class"] ? arg["class"] : arg;
+    var name = getArgName(arg);
+    var grip = arg[name].value;
+
+    var object = context.clientCache.getObject(grip);
+    if (object && typeof(object) == "object")
+        return object.getValue();
+
+    return object;
 }
 
 // ********************************************************************************************* //

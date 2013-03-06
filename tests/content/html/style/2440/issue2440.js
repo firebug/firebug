@@ -2,7 +2,7 @@ function runTest()
 {
     FBTest.sysout("issue2440.START");
 
-    FBTest.openNewTab(basePath + "css/2440/issue2440.html", function(win)
+    FBTest.openNewTab(basePath + "html/style/2440/issue2440.html", function(win)
     {
     	function test0(callback)
     	{

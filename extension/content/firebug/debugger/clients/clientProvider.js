@@ -5,8 +5,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/debugger/clients/objectClient",
 ],
-function (FBTrace, Obj, Str, Arr) {
+function (FBTrace, Obj, Str, Arr, ObjectClient) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -80,7 +81,10 @@ ClientProvider.prototype =
         if (Obj.isFunction(object.getValue))
             return object.getValue();
 
-        return object.value;
+        if (object instanceof ObjectClient)
+            return object.value;
+
+        return object;
     },
 }
 

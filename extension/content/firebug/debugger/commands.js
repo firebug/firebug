@@ -110,6 +110,26 @@ function pausePool(context, args)
 }
 
 // ********************************************************************************************* //
+
+function threadBreakpoints(context, args)
+{
+    try
+    {
+        var conn = DebuggerServer._connections["conn0."];
+        var tabActor = conn.rootActor._tabActors.get(context.browser);
+        var store = tabActor.threadActor._breakpointStore;
+        Firebug.Console.log(store);
+        FBTrace.sysout("Breakpoint Store:", store);
+    }
+    catch (e)
+    {
+        TraceError.sysout("commands.threadBreakpoints; EXCEPTION " + e, e);
+    }
+
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerCommand("pauseGrip", {
@@ -130,6 +150,11 @@ Firebug.registerCommand("threadPool", {
 Firebug.registerCommand("pausePool", {
     handler: pausePool.bind(this),
     description: "Helper command for accessing server side pause pool. For debugging purposes only."
+})
+
+Firebug.registerCommand("threadBreakpoints", {
+    handler: threadBreakpoints.bind(this),
+    description: "Helper command for accessing breakpoints on the server side. For debugging purposes only."
 })
 
 return {};

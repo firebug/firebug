@@ -13,7 +13,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
-var Trace = FBTrace;
+var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 // ********************************************************************************************* //
 // Source File
@@ -71,15 +71,22 @@ SourceFile.prototype =
 
     loadScriptLines: function(context, callback)
     {
+        // Alway remember the last passed callback that should be executed when the source
+        // is loaded. Note that the request-for-source can be already in progress.
+        this.callback = callback;
+
         if (this.loaded)
         {
-            callback(this.lines);
+            this.callback(this.lines);
             return;
         }
 
         // Ignore if the request-for-source is currently in progress.
         if (this.inProgress)
+        {
+            Trace.sysout("sourceFile.loadScriptLines; in-progress");
             return;
+        }
 
         this.inProgress = true;
 
@@ -98,7 +105,7 @@ SourceFile.prototype =
             self.inProgress = false;
             self.lines = Str.splitLines(response.source);
 
-            callback(self.lines);
+            self.callback(self.lines);
         });
     },
 }

@@ -1611,6 +1611,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSKeyframeRule";
         }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return "CSSPageRule";
+        }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
             return "CSSNameSpaceRule";
@@ -1650,6 +1654,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
             rule instanceof window.MozCSSKeyframeRule)
         {
             return rule.keyText;
+        }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return rule.selectorText || "";
         }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
@@ -1980,9 +1988,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     {
         if (sourceLink.type == "js")
         {
-            var scriptFile = Firebug.SourceFile.getSourceFileByHref(sourceLink.href, context);
-            if (scriptFile)
-                return Firebug.chrome.select(sourceLink);
+            return Firebug.chrome.select(sourceLink);
         }
         else if (sourceLink.type == "css")
         {

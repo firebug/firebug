@@ -13,8 +13,16 @@ define([
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeClient, WatchExpression) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeClient,
+    WatchExpression) {
+
 with (Domplate) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Trace = FBTrace.to("DBG_WATCH");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Tree Implementation
@@ -84,7 +92,68 @@ WatchTree.prototype = domplate(BaseTree,
             return "watch";
 
         return BaseTree.getType.apply(this, arguments);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClick: function(event)
+    {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
+        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
+        var target = row.lastChild.firstChild;
+        var isString = Css.hasClass(target, "objectBox-string");
+        var inValueCell = (event.target === valueCell || event.target === target);
+
+        var repNode = Firebug.getRepNode(event.target);
+        var memberRow = Css.hasClass(repNode, "memberRow");
+
+        // Here, we are interested in the object associated with the value rep
+        // (not the rep object associated with the row itself)
+        var object = memberRow ? null : repNode.repObject;
+
+        // Row member object created by the tree widget.
+        var member = row.repObject;
+
+        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        {
+            // Basic row toggling is implemented in {@DomTree}
+            BaseTree.onClick.apply(this, arguments);
+        }
+        else
+        {
+            // 1) Click on functions navigates the user to the right source location
+            // 2) Double click inverts boolean values and opens inline editor for others.
+            if (typeof(object) == "function")
+            {
+                Firebug.chrome.select(object, "script");
+                Events.cancelEvent(event);
+            }
+            else if (Events.isDoubleClick(event))
+            {
+                // The entire logic is part of the parent panel.
+                var panel = Firebug.getElementPanel(row);
+                if (!panel)
+                    return;
+
+                // Only primitive types can be edited.
+                var value = panel.provider.getValue(member.value);
+                if (typeof(value) == "object")
+                    return;
+
+                if (typeof(value) == "boolean")
+                    panel.setPropertyValue(row, "" + !value);
+                else
+                    panel.editProperty(row);
+
+                Events.cancelEvent(event);
+            }
+        }
+    },
 });
 
 // ********************************************************************************************* //
