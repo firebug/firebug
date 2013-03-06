@@ -10,10 +10,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/string",
     "firebug/dom/toggleBranch",
     "firebug/dom/domModule",
 ],
-function(Firebug, D, FirebugReps, Locale, Events, Dom, Css, ToggleBranch, DOMModule) {
+function(Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, ToggleBranch, DOMModule) {
 
 "use strict";
 
