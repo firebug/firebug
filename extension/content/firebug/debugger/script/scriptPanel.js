@@ -206,10 +206,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         panelStatus.clear();
 
         this.updateInfoTip();
-
-        var watchPanel = this.context.getPanel("watches", true);
-        if (watchPanel)
-            watchPanel.showEmptyMembers();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
