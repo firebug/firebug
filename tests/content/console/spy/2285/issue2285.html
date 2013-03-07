@@ -46,15 +46,14 @@ function onMultipart()
     request.open("POST", "issue2285.php", true);
     request.onreadystatechange = function()
     {
+        if (request.readyState == 3 && request.status == 200)
+            content.innerHTML = ++counter;
+
         if (request.readyState == 4 && request.status == 200)
         {
-            content.innerHTML = ++counter;
-            if (counter == 4)
-            {
-                var event = document.createEvent("Events");
-                event.initEvent("test-done", true, false);
-                document.dispatchEvent(event);
-            }
+            var event = document.createEvent("Events");
+            event.initEvent("test-done", true, false);
+            document.dispatchEvent(event);
         }
     }
 
