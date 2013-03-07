@@ -48,8 +48,6 @@ DomBaseTree.prototype = domplate(BaseTree,
             var row = rows[i];
             var path = this.getPath(row);
 
-FBTrace.sysout("saveState path: " + path.join("/"), path)
-
             // Mark the path in the toggle tree
             var toggles = state;
             for (var j=0; j<path.length; ++j)
@@ -61,8 +59,6 @@ FBTrace.sysout("saveState path: " + path.join("/"), path)
                     toggles = toggles.set(name, new ToggleBranch.ToggleBranch());
             }
         }
-
-FBTrace.sysout("saveState toggles: ", state)
     },
 
     restoreState: function(object, toggles, level)
@@ -72,7 +68,6 @@ FBTrace.sysout("saveState toggles: ", state)
             return;
 
         var members = this.getMembers(object, level);
-        FBTrace.sysout("RestoreState; members: ", members);
         for (var i=0; i<members.length; i++)
         {
             var member = members[i];
@@ -88,8 +83,6 @@ FBTrace.sysout("saveState toggles: ", state)
                 continue;
 
             toggles.remove(name);
-
-            FBTrace.sysout("RestoreState; expand id: " + name, member);
 
             // Get the member's object (the value) and expand it.
             var value = member.value;
@@ -149,13 +142,7 @@ FBTrace.sysout("saveState toggles: ", state)
             return;
         }
 
-try {
-	        BaseTree.toggleRow.apply(this, arguments);
-
-} catch (e) {
-FBTrace.sysout("EXCEPTION " + e, e);
-}
-
+        BaseTree.toggleRow.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -182,14 +169,8 @@ FBTrace.sysout("EXCEPTION " + e, e);
 
     getRowName: function(row)
     {
-try {
-	        var member = row.repObject;
+        var member = row.repObject;
         return this.provider.getId(member.value);
-
-} catch (e) {
-FBTrace.sysout("EXCEPTION "  + e, e)
-}
-
     }
 });
 
