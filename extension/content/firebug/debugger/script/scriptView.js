@@ -344,6 +344,41 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         });
     },
 
+    toggleBreakpoint: function(lineIndex)
+    {
+        var lineStart = this.editor.getLineStart(lineIndex);
+        var lineEnd = this.editor.getLineEnd(lineIndex);
+        var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
+        
+        if (annotations.length > 0)
+        {
+            this.editor.removeBreakpoint(lineIndex);
+        }
+        else
+        {
+            this.initializeBreakpoint(lineIndex);
+        }
+    },
+
+    initializeBreakpoint: function(lineIndex, condition)
+    {
+        var lineStart = this.editor.getLineStart(lineIndex);
+        var lineEnd = this.editor.getLineEnd(lineIndex);
+        var annotation = {
+            type: "orion.annotation.breakpoint",
+            start: lineStart,
+            end: lineEnd,
+            style: {styleClass: "annotation breakpointLoading"},
+            html: "<div class='annotationHTML'></div>",
+            overviewStyle: {styleClass: "annotationOverview"},
+            rangeStyle: {styleClass: "annotationRange"}
+        };
+
+        this.editor._annotationModel.addAnnotation(annotation);
+
+        this.dispatch("onBreakpointInitialized", [lineIndex, condition]);
+    },
+
     updateBreakpoint: function(bp)
     {
         var annotation = {
@@ -512,15 +547,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
 
-        this.editor._annotationRulerClick.call(this.editor, lineIndex, event);
+        this.toggleBreakpoint(lineIndex);
     },
 
     annotationRulerClick: function(lineIndex, event)
     {
         Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
 
-        // Clicking on a line number also toggles breakpoint.
-        this.editor._annotationRulerClick.call(this.editor, lineIndex, event);
+        this.toggleBreakpoint(lineIndex);
     },
 
     bodyMouseUp: function(event)

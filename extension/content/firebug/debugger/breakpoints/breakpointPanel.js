@@ -174,7 +174,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var line = bp.lineNo;
                 var unit = context.compilationUnits[url];
-                var name = StackFrame.guessFunctionName(url, line, unit.sourceFile);
+                var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
                 var sourceLine = context.sourceCache.getLine(url, line);
 
                 bp.setName(name);
@@ -344,6 +344,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     onBreakpointModified: function(bp)
+    {
+        this.refresh();
+    },
+
+    onBreakpointLineChanged: function (bp, oldLineNo)
     {
         this.refresh();
     },

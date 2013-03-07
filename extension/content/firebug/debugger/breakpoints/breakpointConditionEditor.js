@@ -97,8 +97,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 
     endEditing: function(target, value, cancel)
     {
-        if (!cancel)
-            this.callback(this.breakpoint, value);
+        this.callback(this.breakpoint, value, cancel);
     },
 });
 

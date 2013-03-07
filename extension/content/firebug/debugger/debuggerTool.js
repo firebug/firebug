@@ -323,7 +323,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         if (type == "breakpoint")
         {
             var location = packet.frame.where;
-            var bp = BreakpointStore.findBreakpoint(location.url, location.line);
+            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
             if (bp && bp.condition)
             {
                 Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +

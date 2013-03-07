@@ -66,6 +66,11 @@
     color: #000000;
 }
 
+.annotation.breakpointLoading > DIV.annotationHTML {
+    background-image: url(chrome://firebug/skin/loading.svg);
+    background-position: top !important;
+}
+
 /**
  * When the user right click on a line with no breakpoint and picks "Edit Breakpoint Condition"
  * The related annotation is marked as 'editing'. Use the style and display a breakpoint
