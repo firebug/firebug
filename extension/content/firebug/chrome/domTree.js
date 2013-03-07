@@ -8,10 +8,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/lib/string",
     "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, Str, FBTrace) {
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, FBTrace) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -90,6 +89,7 @@ DomTree.prototype = domplate(
         {
             // Get proper template for the value. |member.value| should refer to remote
             // object implementation.
+            // xxxHonza: the value should be always available synchronously.
             var value = member.provider.getValue(member.value);
             if (isPromise(value))
                 return member.tree.resolvePromise(value, member.value);
@@ -152,26 +152,6 @@ DomTree.prototype = domplate(
         if (forceOpen && Css.hasClass(row, "opened"))
             return;
 
-        // Handle long strings. These don't have children, but can be shortened and
-        // expanding them allows the user to see the entire string.
-        var rowValue = this.getValue(member);
-        var isString = typeof(rowValue) == "string";
-        if (isString)
-        {
-            if (Css.hasClass(row, "opened"))
-            {
-                Css.removeClass(row, "opened");
-                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
-            }
-            else
-            {
-                Css.setClass(row, "opened");
-                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
-            }
-
-            return;
-        }
-
         // Handle child items expanding and collapsing.
         if (Css.hasClass(row, "opened"))
         {
@@ -200,9 +180,14 @@ DomTree.prototype = domplate(
             // Insert rows if they are immediatelly available. Otherwise set a spinner
             // and wait for the update.
             if (members && members.length)
+            {
                 this.loop.insertRows({members: members}, row, this);
+            }
             else if (isPromise(members))
+            {
                 Css.setClass(row, "spinning");
+                return members;
+            }
         }
     },
 
@@ -218,9 +203,8 @@ DomTree.prototype = domplate(
 
         var members;
 
-        // If member provider is availble use it to crate all tree member
-        // data structures. Note that these structures are directly consumed by
-        // Domplate templates.
+        // If a member provider is available use it to create all tree members.
+        // Note that these member objects are directly consumed by Domplate templates.
         if (this.memberProvider)
             members = this.memberProvider.getMembers(object, level);
 
@@ -420,14 +404,15 @@ DomTree.prototype = domplate(
     append: function(parentNode, input)
     {
         this.parentNode = parentNode;
+        this.input = input;
 
         this.element = this.tag.append(input, parentNode, this);
         this.element.repObject = this;
 
-        this.input = input;
-
         // Expand the first node (root) by default
         // Do not expand if the root is an array with more than one element.
+        // xxxHonza: doesn't work if children are fetched asynchronously
+        // since the UI (rows) are not rendered yet (firstRow == null)
         var value = Arr.isArray(input) && input.length > 2;
         var firstRow = this.element.firstChild.firstChild;
         if (firstRow && !value)
@@ -444,8 +429,7 @@ DomTree.prototype = domplate(
             return;
         }
 
-        this.toggleRow(row, true);
-        return row;
+        return this.toggleRow(row, true);
     },
 
     collapseObject: function(object)
@@ -453,7 +437,6 @@ DomTree.prototype = domplate(
         var row = this.getRow(object);
         if (Css.hasClass(row, "opened"))
             this.toggleRow(row);
-        return row;
     },
 
     updateObject: function(object)
@@ -478,7 +461,7 @@ DomTree.prototype = domplate(
         // The input.object itself (the root) doesn't have a row.
         if (this.input.object == object)
         {
-            var members = this.getMembers(object); // xxxHonza: what about level?
+            var members = this.getMembers(object);
             if (members)
                 this.loop.insertRows({members: members}, this.element.firstChild, this);
             return;
@@ -505,7 +488,7 @@ DomTree.prototype = domplate(
         var rowTag = this.getRowTag();
         var rows = rowTag.insertRows({member: member}, row, this);
 
-        // Remove the old row before dealing (expanding) the new updated row. 
+        // Remove the old row before dealing (expanding) the new updated row.
         // Otherwise the old one would be used since it's associated with the same rep object.
         row.parentNode.removeChild(row);
 

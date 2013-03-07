@@ -893,7 +893,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         var object = this.getRealRowObject(row);
-        if (object && !(object instanceof StackFrame))
+        if (object && !(object instanceof StackFrame) && !(typeof(object) === "function"))
         {
             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
                 function success(result, context)
