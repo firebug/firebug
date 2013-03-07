@@ -65,10 +65,15 @@ FunctionClient.prototype = Obj.descend(new ObjectClient(),
         //xxxHonza: This method is executed 2x more than it should be, why?
         //FBTrace.sysout("FunctionClient.getValue; " + this.signature)
 
-        if (!this.signature)
-            return this.getSignature();
+        //if (!this.signature)
+        //    return this.getSignature();
 
-        // The Reps.Func will deal with this object.
+        // The Reps.Func will deal with the return value.
+
+        var value = ObjectClient.prototype.getValue.apply(this, arguments);
+        if (value)
+            return value;
+
         return this;
     }
 });
