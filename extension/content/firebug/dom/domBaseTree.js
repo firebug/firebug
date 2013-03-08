@@ -20,6 +20,9 @@ with (Domplate) {
 var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
+const insertSliceSize = 18;
+const insertInterval = 40;
+
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
@@ -28,7 +31,11 @@ function DomBaseTree()
 }
 
 /**
- * @domplate
+ * @domplate This tree widget is derived from basic {@DomTree} and appends logic such as:
+ * 1) Long string expansion
+ * 2) State persistence
+ * 3) Asynchronous population (so, the UI doesn't freeze when an item is exapanded and
+ *    there is a lot of children)
  */
 var BaseTree = DomTree.prototype;
 DomBaseTree.prototype = domplate(BaseTree,
@@ -108,6 +115,7 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Expanding/Collapsing
 
     toggleRow: function(row, forceOpen)
     {
@@ -118,7 +126,7 @@ DomBaseTree.prototype = domplate(BaseTree,
         if (!member)
             return;
 
-        var level = parseInt(row.getAttribute("level"));
+        var level = this.getRowLevel(row);
         if (forceOpen && Css.hasClass(row, "opened"))
             return;
 
@@ -142,7 +150,98 @@ DomBaseTree.prototype = domplate(BaseTree,
             return;
         }
 
-        BaseTree.toggleRow.apply(this, arguments);
+        // Owerwrite the default child items expanding/collapsing and implement
+        // asynchronous logic (so the UI doesn't freeze if there is huge amount
+        // of items).
+        if (Css.hasClass(row, "opened"))
+        {
+            Css.removeClass(row, "opened");
+
+            this.collapseRowAsync(row);
+        }
+        else
+        {
+            // Do not expand if the member says there are no children.
+            if (!member.hasChildren)
+                return;
+
+            Css.setClass(row, "opened");
+
+            // Get children object for the next level.
+            var members = this.getMembers(member.value, level + 1);
+
+            // Insert rows if they are immediatelly available. Otherwise set a spinner
+            // and wait for the update.
+            if (members && members.length)
+            {
+                this.expandRowAsync(row, members);
+            }
+            else if (isPromise(members))
+            {
+                Css.setClass(row, "spinning");
+                return members;
+            }
+        }
+    },
+
+    expandRowAsync: function(row, members)
+    {
+        var loop = this.loop;
+        var lastRow = row;
+
+        var delay = 0;
+        var setSize = members.length;
+        var rowCount = 1;
+
+        // xxxHonza: the logic should be improved
+        // The while loop generates bunch if timeouts in advance and if the row is
+        // collapsed before it's fully expanded they are not necessary.
+        while (members.length)
+        {
+            var slice = members.splice(0, insertSliceSize);
+            var isLast = !members.length;
+
+            setTimeout(function()
+            {
+                if (lastRow.parentNode)
+                {
+                    var result = loop.insertRows({members: slice}, lastRow);
+                    lastRow = result[1];
+
+                    //xxxHonza: for a11y
+                    //Events.dispatch(DOMModule.fbListeners, "onMemberRowSliceAdded",
+                    //    [null, result, rowCount, setSize]);
+
+                    rowCount += insertSliceSize;
+                }
+
+                if (isLast)
+                    delete row.insertTimeout;
+
+            }, delay);
+
+            delay += insertInterval;
+        }
+
+        row.insertTimeout = delay;
+    },
+
+    collapseRowAsync: function(row)
+    {
+        var level = this.getRowLevel(row);
+        var tbody = row.parentNode;
+        var timeout = row.insertTimeout ? row.insertTimeout : 0;
+
+        var self = this;
+        setTimeout(function()
+        {
+            for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+            {
+                if (self.getRowLevel(firstRow) <= level)
+                    break;
+                tbody.removeChild(firstRow);
+            }
+        }, timeout);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -152,10 +251,10 @@ DomBaseTree.prototype = domplate(BaseTree,
         var name = this.getRowName(row);
         var path = [name];
 
-        var level = parseInt(row.getAttribute("level"), 10) - 1;
+        var level = this.getRowLevel(row) - 1;
         for (row = row.previousSibling; row && level >= 0; row = row.previousSibling)
         {
-            if (parseInt(row.getAttribute("level"), 10) === level)
+            if (this.getRowLevel(row) === level)
             {
                 name = this.getRowName(row);
                 path.splice(0, 0, name);

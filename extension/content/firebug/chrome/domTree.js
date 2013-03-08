@@ -148,7 +148,7 @@ DomTree.prototype = domplate(
         if (!member)
             return;
 
-        var level = parseInt(row.getAttribute("level"));
+        var level = this.getRowLevel(row);
         if (forceOpen && Css.hasClass(row, "opened"))
             return;
 
@@ -160,7 +160,7 @@ DomTree.prototype = domplate(
             var tbody = row.parentNode;
             for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
             {
-                if (parseInt(firstRow.getAttribute("level")) <= level)
+                if (this.getRowLevel(firstRow) <= level)
                     break;
 
                 tbody.removeChild(firstRow);
@@ -189,6 +189,11 @@ DomTree.prototype = domplate(
                 return members;
             }
         }
+    },
+
+    getRowLevel: function(row)
+    {
+        return parseInt(row.getAttribute("level"), 10);
     },
 
     memberIterator: function(object)
