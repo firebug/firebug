@@ -478,7 +478,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         bp = BreakpointStore.findBreakpoint(url, bp.line);
         if (!bp)
         {
-            TraceError.sysout("scriptPanel.removeBreakpoint; ERROR doesn't exist!");
+            TraceError.sysout("scriptPanel.removeBreakpoint; ERROR doesn't exist! " + bp.line);
             return;
         }
 
