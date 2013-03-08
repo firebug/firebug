@@ -25,6 +25,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_STACK");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Callstack Panel
@@ -180,7 +181,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 this.selectFrame(frameIndex);
             }
 
-            Trace.sysout("callstackPanel.updateSelection" + object, object);
+            Trace.sysout("callstackPanel.updateSelection; stackFrame: " + object, object);
         }
     },
 
@@ -219,7 +220,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             rep.tag.replace({object:trace}, this.panelNode);
 
             if (trace.currentFrameIndex)
-                this.select(trace[trace.currentFrameIndex]);
+                this.select(trace.frames[trace.currentFrameIndex-1]);
 
             Events.dispatch(this.fbListeners, "onStackCreated", [this]);
         }
