@@ -558,7 +558,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (!this.memberProvider)
             this.memberProvider = new DOMMemberProvider(this.context);
 
-        this.memberProvider.addMember.apply(this.memberProvider, arguments);
+        return this.memberProvider.addMember.apply(this.memberProvider, arguments);
     },
 
     // recursion starts with offset=0, level=0
