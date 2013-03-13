@@ -1771,6 +1771,8 @@ function propertiesToHide(expr, obj)
         ret.push("fgColor", "vlinkColor", "linkColor");
     if (expr === "document.body.")
         ret.push("link", "aLink", "vLink");
+    if (expr === "console.")
+        ret.push("__exposedProps__");
 
     // Rather universal and feel like built-ins.
     ret.push("valueOf", "toSource", "constructor", "QueryInterface");

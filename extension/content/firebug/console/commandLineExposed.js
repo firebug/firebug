@@ -70,7 +70,10 @@ function createFirebugCommandLine(context, win)
     // The commandLine object.
     commandLine = dglobal.makeDebuggeeValue(Object.create(null));
 
-    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
+    // Get the console Object.
+    var defaultReturnValue = Firebug.Console.getDefaultReturnValue(win);
+    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win, defaultReturnValue);
+
     // The command line API instance.
     var commands = CommandLineAPI.getCommandLineAPI(context);
 
@@ -153,6 +156,9 @@ function createFirebugCommandLine(context, win)
         else
             commandLine[name] = createCommandHandler(command);
     }
+
+    // Register Console API (exposed to the command line).
+    commandLine.console = dglobal.makeDebuggeeValue(console);
 
     commandLineCache.set(win.document, commandLine);
 
@@ -441,7 +447,7 @@ function removeConflictingNames(commandLine, context, contentView)
     for (var name in commandLine)
     {
         // Note: we cannot trust contentView.hasOwnProperty, so we use the "in" operator.
-        if (name in contentView)
+        if (name in contentView && name !== "console")
             delete commandLine[name];
     }
 }
