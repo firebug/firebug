@@ -3184,22 +3184,9 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        try
-        {
-            return (object instanceof window.NamedNodeMap);
-        }
-        catch (err)
-        {
-            // Fails in Firefox 22
-        }
-
-        try
-        {
-            return (object instanceof window.MozNamedAttrMap);
-        }
-        catch (err)
-        {
-        }
+        // NamedNodeMap is no more since Fx 22 - see https://bugzilla.mozilla.org/show_bug.cgi?id=847195.
+        // The temporary Attr-only replacement is MozNamedAttrMap.
+        return (object instanceof (window.NamedNodeMap || window.MozNamedAttrMap));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
