@@ -153,12 +153,16 @@ var FirebugLoader =
         };
 
         require(config, [
-            "firebug/firefox/browserOverlay"
+            "firebug/firefox/browserOverlay",
+            "firebug/firefox/devtools/devToolsOverlay"
         ],
-        function(BrowserOverlay)
+        function(BrowserOverlay, DevToolsOverlay)
         {
             var overlay = win.Firebug.browserOverlay = new BrowserOverlay(win);
             overlay.initialize(reason);
+
+            var devToolsOverlay = win.Firebug.devToolsOverlay = new DevToolsOverlay(win);
+            devToolsOverlay.initialize(reason);
         });
 
         if (FBTrace.DBG_MODULES)

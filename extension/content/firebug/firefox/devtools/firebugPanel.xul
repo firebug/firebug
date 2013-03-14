@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        windowtype="Firebug:Devtools"
+        id="firebug-devtools"
+        title="Firebug"
+        onload="" onunload="" onclose="">
+
+    <browser id="fbMainContainer" flex="2" src="" disablehistory="true" />
+
+</window>

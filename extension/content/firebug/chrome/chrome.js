@@ -491,7 +491,9 @@ var FirebugChrome =
 
         if (!this.inDetachedScope)
         {
-            Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+            var mainFrame = Firefox.getElementById('fbMainFrame');
+            if (mainFrame)
+                mainFrame.setAttribute("collapsed", !shouldShow);
 
             var contentSplitter = Firefox.getElementById('fbContentSplitter');
             if (contentSplitter)
