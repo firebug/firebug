@@ -1179,7 +1179,7 @@ var FirebugChrome =
         {
             // important! must touch browser.contentDocument to initialize it
             a.contentDocument == b.contentDocument;
-            if (a.nodeName == "iframe")
+            if (a.nodeName == "iframe" || b.nodeName == "iframe")
                 a.QueryInterface(Ci.nsIFrameLoaderOwner).swapFrameLoaders(b);
             else
                 a.swapDocShells(b);

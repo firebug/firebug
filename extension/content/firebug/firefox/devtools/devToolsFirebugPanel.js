@@ -27,7 +27,7 @@ function DevToolsFirebugPanel(frame, target)
 
     this.target.on("navigate", this.navigate);
     this.target.on("will-navigate", this.beforeNavigate);
-    this.target.on("close", this.destroy);
+    //this.target.on("close", this.destroy);
 }
 
 DevToolsFirebugPanel.prototype =
@@ -39,10 +39,19 @@ DevToolsFirebugPanel.prototype =
 
         var deferred = Promise.defer();
 
-        this.startFirebug(function(Firebug)
+        // Asynchronously load all Firebug modules whenever DevTools UI is opened and the
+        // Firebug panel selected.
+        var self = this;
+        this.win.Firebug.browserOverlay.startFirebug(function(Firebug)
         {
+            // Embed entire Firebug UI (firebugFrame.xul) into Devtools Toolbox UI.
+            self.importFirebug();
+
+            // Make sure context is created.
             Firebug.toggleBar();
-            deferred.resolve();
+
+            // Loading done, notify the toolbox.
+            deferred.resolve(self);
         });
 
         return deferred.promise;
@@ -50,70 +59,56 @@ DevToolsFirebugPanel.prototype =
 
     destroy: function()
     {
-        FBTrace.sysout("DevToolsFirebugPanel.destroy");
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("DevToolsFirebugPanel.destroy");
+
+        // Undetach Firebug from DevTools toolbox so, it isn't destroyed with it.
+        this.exportFirebug();
     },
 
     beforeNavigate: function()
     {
-        FBTrace.sysout("DevToolsFirebugPanel.beforeNavigate");
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("DevToolsFirebugPanel.beforeNavigate");
     },
 
     navigate: function()
     {
-        FBTrace.sysout("DevToolsFirebugPanel.navigate");
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("DevToolsFirebugPanel.navigate");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Load Rest of Firebug
-
-    /**
-     * This method is called by the Fremework to load entire Firebug. It's executed when
-     * the user requires Firebug for the first time.
-     *
-     * @param {Object} callback Executed when Firebug is fully loaded
-     */
-    startFirebug: function(callback)
+    // xxxHonza: import/exportFirebug is also in firebug.xul, could we reuse?
+    importFirebug: function()
     {
-        if (this.win.Firebug.waitingForFirstLoad)
-            return;
+        var Firebug = this.win.Firebug, fbc = Firebug.chrome;
 
-        if (this.win.Firebug.isInitialized)
-            return callback && callback(this.win.Firebug);
+        Firebug.minimizeBar();
 
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("overlay; Load Firebug...", (callback ? callback.toString() : ""));
+        fbc.originalBrowser = this.win.top.document.getElementById("fbMainContainer");
+        fbc.inDetachedScope = true;
 
-        this.win.Firebug.waitingForFirstLoad = true;
-
-        // List of Firebug scripts that must be loaded into the global scope (browser.xul)
-        // FBTrace is no longer loaded into the global space.
-        var scriptSources = [
-            "chrome://firebug/content/legacy.js",
-            "chrome://firebug/content/moduleConfig.js"
-        ];
-
-        // Create script elements.
-        var self = this;
-        scriptSources.forEach(function(url)
-        {
-            $script(self.doc, url);
-        });
-
-        var container = this.frame.window.document.getElementById("fbMainContainer");
-        container.setAttribute("src", "chrome://firebug/content/firefox/firebugFrame.xul");
-
-        // When Firebug is fully loaded and initialized it fires a "FirebugLoaded"
-        // event to the browser document (browser.xul scope). Wait for that to happen.
-        this.doc.addEventListener("FirebugLoaded", function onLoad()
-        {
-            self.doc.removeEventListener("FirebugLoaded", onLoad, false);
-            self.win.Firebug.waitingForFirstLoad = false;
-
-            // xxxHonza: TODO find a better place for notifying extensions
-            FirebugLoader.dispatchToScopes("firebugFrameLoad", [self.win.Firebug]);
-            callback && callback(self.win.Firebug);
-        }, false);
+        var newBrowser = this.frame.document.getElementById("fbMainContainer");
+        fbc.swapBrowsers(
+            fbc.originalBrowser,
+            newBrowser
+        );
     },
+
+    exportFirebug: function()
+    {
+        var Firebug = this.win.Firebug, fbc = Firebug.chrome;
+
+        fbc.inDetachedScope = false;
+
+        var oldBrowser = this.frame.document.getElementById("fbMainContainer");
+        fbc.swapBrowsers(
+            oldBrowser,
+            fbc.originalBrowser
+        );
+
+        Firebug.setPlacement("minimized");
+    }
 };
 
 // ********************************************************************************************* //
