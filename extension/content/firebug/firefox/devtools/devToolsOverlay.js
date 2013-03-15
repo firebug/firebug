@@ -43,7 +43,7 @@ DevToolsOverlay.prototype =
         var firebugPanelDefinition =
         {
             id: "firebug",
-            ordinal: 10,
+            ordinal: -10,
             killswitch: "firebug.devtools.enabled",
             label: Locale.$STR("devtools.Firebug"),
             icon: "chrome://firebug/skin/firebug.png",
