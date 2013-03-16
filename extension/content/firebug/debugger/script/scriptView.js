@@ -374,9 +374,26 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             rangeStyle: {styleClass: "annotationRange"}
         };
 
-        this.editor._annotationModel.addAnnotation(annotation);
+        var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
 
-        this.dispatch("onBreakpointInitialized", [lineIndex, condition]);
+        if (annotations.length == 0)
+        {
+            this.editor._annotationModel.addAnnotation(annotation);
+        }
+        else
+        {
+            // If the user wanted to set a condition on a existed bp
+            // it's no need to show loading icon and wait to receive
+            // the response.
+            this.dispatch("startEditingCondition", [lineIndex, condition]);
+            return;
+        }
+
+        var event = {
+            added:[{lineNo: lineIndex, condition: condition}],
+            removed:[]
+        };
+        this.onBreakpointChange(event);
     },
 
     updateBreakpoint: function(bp)
@@ -547,14 +564,16 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
 
-        this.toggleBreakpoint(lineIndex);
+        if (lineIndex)
+            this.toggleBreakpoint(lineIndex);
     },
 
     annotationRulerClick: function(lineIndex, event)
     {
         Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
 
-        this.toggleBreakpoint(lineIndex);
+        if (lineIndex)
+            this.toggleBreakpoint(lineIndex);
     },
 
     bodyMouseUp: function(event)

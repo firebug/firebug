@@ -415,7 +415,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a breakpoint.");
             return;
         }
-
+        var self = this;
         var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)
         {
             Trace.sysout("debuggerTool.onSetBreakpoint; " + bpClient.location.url + " (" +
@@ -428,7 +428,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             if (!context.breakpointClients)
                 context.breakpointClients = [];
 
-            context.breakpointClients.push(bpClient);
+            //xxxFarshid: Shouldn't we save bpClient object only if there is no error?
+
+            // FF 19: uses same breakpoint client object for a executable line and
+            // all non-executable lines above that, so doesn't store breakpoint client
+            // objects if there is already one with same actor.
+            if (!self.breakpointAcotrExists(context, bpClient))
+                context.breakpointClients.push(bpClient);
 
             // TODO: update the UI?
 
@@ -535,6 +541,55 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 return client;
             }
         }
+    },
+
+    removeDuplicatedBpInstances: function(context, bpClient)
+    {
+        var clients = context.breakpointClients;
+        var client, location;
+        if (!clients)
+            return;
+
+        var url = bpClient.location.url;
+        var lineNumber = bpClient.location.line;
+        var bpIndex;
+        for (var i=0; i < clients.length; i++)
+        {
+            client = clients[i];
+            location = client.location;
+            if (location.url == url && location.line == lineNumber)
+            {
+                if(bpIndex || bpIndex == 0)
+                {
+                    clients[bpIndex].remove(function()
+                    {
+                    });
+                    clients.splice(bpIndex, 1);
+                    bpIndex = --i;
+                }
+                else
+                {
+                    bpIndex = i;
+                }
+            }
+        }
+    },
+
+    breakpointAcotrExists: function(context, bpClient)
+    {
+        var clients = context.breakpointClients;
+        if (!clients)
+            return false;
+        var client;
+        for (var i=0, len = clients.length; i < len; i++)
+        {
+            client = clients[i];
+            if (client.actor === bpClient.actor)
+            {
+                return true;
+            }
+        }
+        return false;
     },
 
     enableBreakpoint: function(context, url, lineNumber, callback)
