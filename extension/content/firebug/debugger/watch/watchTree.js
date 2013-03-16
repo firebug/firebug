@@ -8,12 +8,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/chrome/domTree",
+    "firebug/dom/domBaseTree",
     "firebug/lib/locale",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomTree, Locale, ScopeClient,
+function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale, ScopeClient,
     WatchExpression) {
 
 with (Domplate) {
@@ -35,7 +35,7 @@ function WatchTree(provider)
 /**
  * @domplate Represents a tree of properties/objects
  */
-var BaseTree = DomTree.prototype;
+var BaseTree = DomBaseTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
 {
     watchNewRowTag:
@@ -50,7 +50,7 @@ WatchTree.prototype = domplate(BaseTree,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
-               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
+            _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
             TBODY({role: "presentation"},
                 TAG("$watchNewRow|getWatchNewRowTag"),
                 FOR("member", "$object|memberIterator", 

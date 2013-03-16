@@ -15,6 +15,7 @@ define([
     "firebug/lib/url",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/stack/stackTrace",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",
@@ -29,7 +30,7 @@ define([
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
-    Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
+    Url, SourceLink, StackFrame, StackTrace, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     EventMonitor, ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
@@ -2295,7 +2296,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof StackFrame.StackTrace;
+        return object instanceof StackTrace;
     },
 
     frameIterator: function(frames)

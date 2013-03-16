@@ -59,7 +59,7 @@ ToggleBranch.prototype =
         else if (this.normal.hasOwnProperty(name))
             value = this.normal[name];
 
-        if (FBTrace.DBG_DOMPLATE)
+        if (FBTrace.DBG_DOM)
         {
             if (value && !(value instanceof ToggleBranch))
                 FBTrace.sysout("ERROR ToggleBranch.get(" + name + ") not set to a ToggleBranch!");
@@ -71,7 +71,7 @@ ToggleBranch.prototype =
     // value will be another toggle branch
     set: function(name, value)
     {
-        if (FBTrace.DBG_DOMPLATE)
+        if (FBTrace.DBG_DOM)
         {
             if (value && !(value instanceof ToggleBranch))
             {
@@ -101,6 +101,17 @@ ToggleBranch.prototype =
     {
         return "[ToggleBranch]";
     },
+
+    isEmpty: function()
+    {
+        for (var name in this.normal)
+            return false;
+
+        for (var name in this.meta)
+            return false;
+
+        return true;
+    }
 };
 
 // ********************************************************************************************* //

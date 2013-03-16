@@ -1001,11 +1001,14 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
             if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker"))
             {
                 var win = progress.DOMWindow;
+
                 // Another weird edge case here - when opening a new tab with about:blank,
                 // "unload" is dispatched to the document, but onLocationChange is not called
                 // again, so we have to call watchTopWindow here
 
-                if (win.parent == win && (win.location.href != "about:blank"))
+                // xxxHonza: we need to use (win.location.href == "about:blank")
+                // Otherwise the DOM panel is updated too soon (when doc.readyState == "loading")
+                if (win.parent == win && (win.location.href == "about:blank"))
                 {
                     Firebug.TabWatcher.watchTopWindow(win, win.location.href);
                     return;

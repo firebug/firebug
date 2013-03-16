@@ -113,6 +113,21 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // ID Provider
+
+    getId: function(object)
+    {
+        var label = this.getLabel(object);
+        if (label)
+            return label;
+
+        if (typeof(object.getActor) == "function")
+            return object.getActor();
+
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private Helpers
 
     /**

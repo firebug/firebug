@@ -58,6 +58,7 @@ function WatchPanel()
 {
     this.watches = [];
     this.tree = new WatchTree();
+    this.toggles = new ToggleBranch.ToggleBranch();
 
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
     this.onMouseOver = Obj.bind(this.onMouseOver, this);
@@ -165,8 +166,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
-        Dom.clearNode(this.panelNode);
-
         var cache = this.context.clientCache;
 
         var newFrame = frame && ("signature" in frame) &&
@@ -174,13 +173,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         if (newFrame)
         {
-            this.toggles = new ToggleBranch.ToggleBranch();
             this.frameSignature = frame.signature();
         }
 
         var object = frame;
         var input = {
-            toggles: this.toggles,
             object: object,
             domPanel: this,
             watchNewRow: true,
@@ -189,7 +186,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (object instanceof StackFrame)
             this.tree.provider = this.provider;
 
-        this.tree.append(this.panelNode, input);
+        this.tree.replace(this.panelNode, input);
+        this.tree.restoreState(input.object, this.toggles);
+
+        // Throw out the old state object.
+        this.toggles = new ToggleBranch.ToggleBranch();
 
         // Pre-expand the first top scope.
         if (object instanceof StackFrame)
@@ -219,7 +220,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     rebuild: function()
     {
         Trace.sysout("WatchPanel.rebuild", this.selection);
-
         this.updateSelection(this.selection);
     },
 
@@ -228,7 +228,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var input = {
             domPanel: this,
             object: this.context.getGlobalScope(),
-            toggles: this.toggles,
             watchNewRow: true,
         };
 
@@ -428,6 +427,15 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(context, event, packet)
     {
+    },
+
+    onStopDebugging: function(context, event, packet)
+    {
+        // Save state of the Watch panel for the next pause.
+        this.tree.saveState(this.toggles);
+
+        // Update the panel content.
+        this.showEmptyMembers();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

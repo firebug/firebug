@@ -583,9 +583,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 // sets newMembers.level to level+1
                 var newMembers = this.getMembers(member.value, level+1, context);
 
-                var args = [i+1, 0];
-                args.push.apply(args, newMembers);
-                members.splice.apply(members, args);
+                // Insert 'newMembers' into 'members'
+                Arr.arrayInsert(members, i+1, newMembers);
+
                 if (FBTrace.DBG_DOM)
                 {
                     FBTrace.sysout("expandMembers member.name "+member.name+" member "+member);
@@ -893,7 +893,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         var object = this.getRealRowObject(row);
-        if (object && !(object instanceof StackFrame))
+        if (object && !(object instanceof StackFrame) && !(typeof(object) === "function"))
         {
             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
                 function success(result, context)

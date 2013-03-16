@@ -206,10 +206,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         panelStatus.clear();
 
         this.updateInfoTip();
-
-        var watchPanel = this.context.getPanel("watches", true);
-        if (watchPanel)
-            watchPanel.showEmptyMembers();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -479,6 +475,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     addBreakpoint: function(bp)
     {
+
         Trace.sysout("scriptPanel.addBreakpoint;", bp);
 
         var self = this;
