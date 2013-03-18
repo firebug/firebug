@@ -413,7 +413,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             var obj = actor.obj;
             if (!obj)
-                FBTrace.sysout("no obj", actor)
+                return null;
 
             if (typeof(obj.unsafeDereference) != "undefined")
             {
