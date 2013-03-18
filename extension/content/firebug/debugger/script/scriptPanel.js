@@ -13,6 +13,7 @@ define([
     "firebug/chrome/menu",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/lib/persist",
@@ -22,7 +23,7 @@ define([
     "firebug/editor/editor",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, Breakpoint, BreakpointStore, Persist,
+    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor) {
 
 // ********************************************************************************************* //
@@ -243,6 +244,23 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     showSourceLink: function(sourceLink)
     {
         this.navigate(sourceLink);
+    },
+
+    showFunction: function(fn)
+    {
+        Trace.sysout("scriptPanel.showFunction; " + fn, fn);
+
+        var sourceLink = SourceFile.findSourceForFunction(fn, this.context);
+        if (sourceLink)
+        {
+            this.showSourceLink(sourceLink);
+        }
+        else
+        {
+            // Want to avoid the Script panel if possible
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("no sourcelink for function");
+        }
     },
 
     /**

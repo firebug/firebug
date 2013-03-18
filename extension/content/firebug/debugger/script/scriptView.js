@@ -481,12 +481,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (options.debugLocation)
             this.editor.setDebugLocation(line);
-        else
+        else if (options.highlight)
             this.highlightLine(line);
     },
 
-    highlightLine: function(aLineIndex)
+    highlightLine: function(lineIndex)
     {
+        Trace.sysout("scriptView.highlightLine; " + lineIndex);
+
         if (!this.editor)
             return;
 
@@ -499,12 +501,12 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
                 this.editor._annotationModel);
         }
 
-        if (aLineIndex < 0)
+        if (lineIndex < 0)
             return;
 
-        var lineStart = this.editor._model.getLineStart(aLineIndex);
-        var lineEnd = this.editor._model.getLineEnd(aLineIndex);
-        var lineText = this.editor._model.getLine(aLineIndex);
+        var lineStart = this.editor._model.getLineStart(lineIndex);
+        var lineEnd = this.editor._model.getLineEnd(lineIndex);
+        var lineText = this.editor._model.getLine(lineIndex);
 
         var annotation = {
             type: annonTypeHighlightedLine,

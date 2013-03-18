@@ -14,6 +14,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/url",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/script/sourceFile",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/stack/stackTrace",
     "firebug/lib/css",
@@ -30,8 +31,8 @@ define([
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
-    Url, SourceLink, StackFrame, StackTrace, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, ClosureInspector, Menu, CompilationUnit) {
+    Url, SourceLink, SourceFile, StackFrame, StackTrace, Css, Dom, Win, System, Xpath, Str, Xml,
+    ToggleBranch, EventMonitor, ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -257,11 +258,11 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     getTooltip: function(fn, context)
     {
-        var script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
+        var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
         {
-            return Locale.$STRF("Line", [Url.normalizeURL(script.fileName),
-                script.baseLineNumber]);
+            return Locale.$STRF("Line", [Url.normalizeURL(script.url),
+                script.startLine]);
         }
         else
         {
@@ -279,11 +280,11 @@ FirebugReps.Func = domplate(Firebug.Rep,
     getContextMenuItems: function(fn, target, context, script)
     {
         if (!script)
-            script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
+            script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (!script)
             return;
 
-        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
+        //var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
         var monitored = false; // xxxHonza: FBS doesn't exist scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href,
             //scriptInfo.lineNo) : false;
 

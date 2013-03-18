@@ -192,7 +192,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             {
                 if (!Firebug.filterSystemURLs || !Url.isSystemURL(script.fileName))
                 {
-                    var sourceLink = Firebug.SourceFile.getSourceLinkForScript(script, context);
+                    var sourceLink = Firebug.SourceFile.toSourceLink(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)
                     {
                         var call = new ProfileCall(script, context, script.callCount,
