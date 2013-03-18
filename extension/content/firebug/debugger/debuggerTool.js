@@ -224,6 +224,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         var s = script;
 
+        if (!context.sourceFileMap)
+        {
+            TraceError.sysout("debuggerTool.addScript; ERROR Source File Map is NULL", script);
+            return;
+        }
+
         // xxxHonza: Ignore inner script for now
         if (context.sourceFileMap[s.url])
             return;
