@@ -17,23 +17,35 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
+Cu.import("resource:///modules/devtools/EventEmitter.jsm");
+
 // ********************************************************************************************* //
 // DevToolsOverlay Implementation
 
 function DevToolsFirebugPanel(frame, target)
 {
+    if (FBTrace.DBG_DEVTOOLS)
+        FBTrace.sysout("devToolsFirebugPanel.constructor;", arguments);
+
+    EventEmitter.decorate(this);
+
     this.frame = frame;
     this.target = target;
 
     this.target.on("navigate", this.navigate);
     this.target.on("will-navigate", this.beforeNavigate);
-    //this.target.on("close", this.destroy);
+    //this.target.on("close", this.close);
+    this.target.on("hidden", this.hidden);
+    this.target.on("visible",  this.visible);
 }
 
 DevToolsFirebugPanel.prototype =
 {
     open: function(win)
     {
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("devToolsFirebugPanel.open;", arguments);
+
         this.win = win;
         this.doc = win.document;
 
@@ -74,8 +86,20 @@ DevToolsFirebugPanel.prototype =
 
     navigate: function()
     {
-        if (FBTrace.DBG_DEVTOOLS)
+       if (FBTrace.DBG_DEVTOOLS)
             FBTrace.sysout("DevToolsFirebugPanel.navigate");
+    },
+
+    hidden: function()
+    {
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("DevToolsFirebugPanel.hidden");
+    },
+
+    visible: function()
+    {
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("DevToolsFirebugPanel.visible");
     },
 
     // xxxHonza: import/exportFirebug is also in firebug.xul, could we reuse?

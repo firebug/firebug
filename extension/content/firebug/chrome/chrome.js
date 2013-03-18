@@ -1163,8 +1163,17 @@ var FirebugChrome =
         // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
         var rulePos = styleSheet.cssRules.length;
-        styleSheet.insertRule(
-            "panel{display:-moz-box!important; visibility:collapse!important;}", rulePos);
+        if (styleSheet)
+        {
+            styleSheet.insertRule(
+                "panel{display:-moz-box!important; visibility:collapse!important;}",
+                rulePos);
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("chrome.swapBrowsers; ERROR no stylesheet");
+        }
 
         // We need to deal with inner frames first since swapFrameLoaders
         // doesn't work for type="chrome" browser containing type="content" browsers
