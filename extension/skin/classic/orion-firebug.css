@@ -106,3 +106,12 @@
 .annotationLine.currentLine.debugLocation {
     background-color: lightgoldenrodyellow !important;
 }
+
+/*************************************************************************************************/
+/* Highlight Line */
+
+.annotationLine.highlightedLine {
+    margin-left: -10px;
+    padding-left: 10px;
+    background-color: rgb(196, 244, 255) !important;
+}
