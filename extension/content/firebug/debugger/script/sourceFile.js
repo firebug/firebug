@@ -117,7 +117,7 @@ SourceFile.prototype =
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dwin = DebuggerLib.getDebuggeeGlobal(context.window, context);
+    var dwin = DebuggerLib.getDebuggeeGlobal(context);
     var dfn = dwin.makeDebuggeeValue(fn);
     return dfn.script;
 };

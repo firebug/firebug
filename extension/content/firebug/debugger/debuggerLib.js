@@ -59,13 +59,14 @@ DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
  *
  * @return {Debuggee Window} The debuggee global
  */
-DebuggerLib.getDebuggeeGlobal = function(global, context)
+DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
-    var dbg;
+    global = global || context.getCurrentGlobal();
+
     var dglobal = dglobalWeakMap.get(global.document);
     if (!dglobal)
     {
-        dbg = getInactiveDebuggerForContext(context);
+        var dbg = getInactiveDebuggerForContext(context);
         if (!dbg)
             return;
 

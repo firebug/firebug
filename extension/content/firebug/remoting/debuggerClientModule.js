@@ -415,6 +415,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             if (!obj)
                 return null;
 
+            // xxxHonza: use DebuggerLib.unwrapDebuggeeValue();
             if (typeof(obj.unsafeDereference) != "undefined")
             {
                 return obj.unsafeDereference();
