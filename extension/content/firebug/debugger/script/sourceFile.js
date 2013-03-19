@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/string",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Str, SourceLink) {
+function(FBTrace, Str, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -116,8 +117,7 @@ SourceFile.prototype =
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    // xxxHonza: use DebuggerLib.getInactiveDebuggerForContext!
-    var dwin = Firebug.ClosureInspector.getDebuggeeObject(context, context.window);
+    var dwin = DebuggerLib.getDebuggeeGlobal(context.window, context);
     var dfn = dwin.makeDebuggeeValue(fn);
     return dfn.script;
 };
