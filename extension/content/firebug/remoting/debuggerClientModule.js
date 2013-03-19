@@ -188,9 +188,10 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerClientModule.onTabDetached;", arguments);
 
-        // xxxHonza: we need pass context to the listeners. 
-        this.dispatch("onThreadDetached", arguments);
-        this.dispatch("onTabDetached", arguments);
+        // xxxHonza: we need pass context to the listeners,
+        // but avoid using Firebug.currentContext.
+        this.dispatch("onThreadDetached", [Firebug.currentContext]);
+        this.dispatch("onTabDetached", [Firebug.currentContext]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
