@@ -185,7 +185,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         this.tree.provider = this.provider;
         this.tree.replace(this.panelNode, input);
-        this.tree.restoreState(input.object, this.toggles);
+        this.tree.restoreState(input, this.toggles);
 
         // Throw out the old state object.
         this.toggles = new ToggleBranch.ToggleBranch();

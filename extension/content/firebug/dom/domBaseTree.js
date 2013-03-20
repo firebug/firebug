@@ -10,8 +10,9 @@ define([
     "firebug/lib/trace",
     "firebug/chrome/domTree",
     "firebug/dom/toggleBranch",
+    "firebug/lib/promise",
 ],
-function(Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch) {
+function(Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch, Promise) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -70,20 +71,31 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     restoreState: function(object, toggles, level)
     {
+        level = level || 0;
+
         // Don't try to expand children if there are no expanded items.
         if (toggles.isEmpty())
             return;
 
-        var members = this.getMembers(object, level);
-        for (var i=0; i<members.length; i++)
+        // Async restore handler for recursion (see the loop below).
+        var onRestore = function(value, toggles, level)
         {
-            var member = members[i];
+            this.restoreState(value, toggles, level);
+        }
+
+        var rows = this.getChildRows(object, level);
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            var member = row.repObject;
+            if (!member)
+                continue;
 
             // Don't expand if the member doesn't have children any more.
             if (!member.hasChildren)
                 continue;
 
-            var name = this.provider.getId(member.value);
+            var name = this.getRowName(row);
 
             var newToggles = toggles.get(name);
             if (!newToggles)
@@ -99,19 +111,37 @@ DomBaseTree.prototype = domplate(BaseTree,
             if (newToggles.isEmpty())
                 continue;
 
-            if (promise)
+            if (!promise)
             {
-                var self = this;
-                promise.then(function()
-                {
-                    self.restoreState(value, newToggles, level+1);
-                })
+                TraceError.sysout("domBaseTree.restoreState; No promise!?");
+                continue;
             }
-            else
-            {
-                this.restoreState(value, newToggles, level+1);
-            }
+
+            // Bind the handler to the current arguments. They can change
+            // within the loop. The handler will be executed as soon as the
+            // promise is resolved.
+            promise.then(onRestore.bind(this, value, newToggles, level+1));
         }
+    },
+
+    getChildRows: function(object, level)
+    {
+        var rows = [];
+
+        var row = this.getRow(object);
+        if (!row && !level)
+            row = this.element.firstChild.firstChild;
+
+        if (!row)
+            return rows;
+
+        for (var firstRow = row.nextSibling; firstRow; firstRow = firstRow.nextSibling)
+        {
+            if (this.getRowLevel(firstRow) == level)
+                rows.push(firstRow);
+        }
+
+        return rows;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -174,7 +204,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             // and wait for the update.
             if (members && members.length)
             {
-                this.expandRowAsync(row, members);
+                return this.expandRowAsync(row, members);
             }
             else if (isPromise(members))
             {
@@ -192,6 +222,8 @@ DomBaseTree.prototype = domplate(BaseTree,
         var delay = 0;
         var setSize = members.length;
         var rowCount = 1;
+
+        var deferred = Promise.defer();
 
         // xxxHonza: the logic should be improved
         // The while loop generates bunch if timeouts in advance and if the row is
@@ -216,7 +248,10 @@ DomBaseTree.prototype = domplate(BaseTree,
                 }
 
                 if (isLast)
+                {
                     delete row.insertTimeout;
+                    deferred.resolve(lastRow);
+                }
 
             }, delay);
 
@@ -224,6 +259,8 @@ DomBaseTree.prototype = domplate(BaseTree,
         }
 
         row.insertTimeout = delay;
+
+        return deferred.promise;
     },
 
     collapseRowAsync: function(row)
@@ -269,7 +306,12 @@ DomBaseTree.prototype = domplate(BaseTree,
     getRowName: function(row)
     {
         var member = row.repObject;
-        return this.provider.getId(member.value);
+        var name = this.provider.getId(member.value);
+
+        if (!name)
+            name = member.name;
+
+        return name;
     }
 });
 
