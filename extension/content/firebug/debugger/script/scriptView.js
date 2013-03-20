@@ -127,7 +127,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.showSource(this.defaultSource);
 
         if (this.defaultLine > 0)
-            this.scrollToLineAsync(this.defaultLine);
+            this.scrollToLineAsync(this.defaultLine, this.defaultOptions);
 
         this.initBreakpoints();
     },
@@ -446,6 +446,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (!this.initialized)
         {
             this.defaultLine = lineNo;
+            this.defaultOptions = options;
             return;
         }
 
@@ -618,7 +619,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
 
-        if (lineIndex)
+        if (lineIndex || lineIndex == 0)
             this.toggleBreakpoint(lineIndex);
     },
 
@@ -626,7 +627,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
 
-        if (lineIndex)
+        if (lineIndex || lineIndex == 0)
             this.toggleBreakpoint(lineIndex);
     },
 
