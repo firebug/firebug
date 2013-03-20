@@ -58,7 +58,13 @@ ClientProvider.prototype =
 
     getLabel: function(object)
     {
-        var text = object.name;
+        var text;
+
+        if (object instanceof ObjectClient)
+            text = object.name;
+
+        if (object instanceof ObjectClient.Property)
+            text = object.name;
 
         if (Obj.isFunction(object.getName))
             text = object.getName();
@@ -66,6 +72,9 @@ ClientProvider.prototype =
         // Support for string type (children are String instances).
         if (typeof(object) == "string")
             text = object;
+
+        if (!text)
+            return text;
 
         // Make sure it's a string
         text += "";
