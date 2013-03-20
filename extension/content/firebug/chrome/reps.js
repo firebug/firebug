@@ -882,8 +882,6 @@ function instanceOf(object, Klass)
     return false;
 }
 
-
-
 // ********************************************************************************************* //
 
 FirebugReps.Element = domplate(Firebug.Rep,
@@ -906,9 +904,72 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 SPAN({"class": "selectorTag"}, "$object|getSelectorTag"),
                 SPAN({"class": "selectorId"}, "$object|getSelectorId"),
                 SPAN({"class": "selectorClass"}, "$object|getSelectorClass"),
-                SPAN({"class": "selectorValue"}, "$object|getValue")
+                TAG("$object|getValueTag", {object: "$object"})
             )
          ),
+
+    valueTag:
+        SPAN({"class": "selectorValue"}, "$object|getValue"),
+
+    multipleValueTag:
+        SPAN(
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.attribute_value") + " = "
+            ),
+            TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"}),
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.property_value") + " = " +
+                "$object|getValueFromProperty"
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getValueTag: function(elt)
+    {
+        if (elt instanceof window.HTMLInputElement)
+        {
+            var attrValue = elt.getAttribute("value");
+            var propValue = elt.value;
+
+            if (attrValue != propValue)
+                return this.multipleValueTag;
+        }
+
+        return this.valueTag;
+    },
+
+    getValueFromAttribute: function(elt)
+    {
+        return elt.getAttribute("value");
+    },
+
+    getValueFromProperty: function(elt)
+    {
+        return elt.value;
+    },
+
+    getValue: function(elt)
+    {
+        var value;
+
+        if (elt instanceof window.HTMLImageElement)
+            value = Url.getFileName(elt.getAttribute("src"));
+        else if (elt instanceof window.HTMLAnchorElement)
+            value = Url.getFileName(elt.getAttribute("href"));
+        else if (elt instanceof window.HTMLInputElement)
+            value = elt.getAttribute("value");
+        else if (elt instanceof window.HTMLFormElement)
+            value = Url.getFileName(elt.getAttribute("action"));
+        else if (elt instanceof window.HTMLScriptElement)
+            value = Url.getFileName(elt.getAttribute("src"));
+
+        return value ? " " + Str.cropMultipleLines(value, 20) : "";
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocalName: function(object)
     {
@@ -972,24 +1033,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
         {
             return "";
         }
-    },
-
-    getValue: function(elt)
-    {
-        var value;
-
-        if (elt instanceof window.HTMLImageElement)
-            value = Url.getFileName(elt.getAttribute("src"));
-        else if (elt instanceof window.HTMLAnchorElement)
-            value = Url.getFileName(elt.getAttribute("href"));
-        else if (elt instanceof window.HTMLInputElement)
-            value = elt.getAttribute("value");
-        else if (elt instanceof window.HTMLFormElement)
-            value = Url.getFileName(elt.getAttribute("action"));
-        else if (elt instanceof window.HTMLScriptElement)
-            value = Url.getFileName(elt.getAttribute("src"));
-
-        return value ? " " + Str.cropMultipleLines(value, 20) : "";
     },
 
     attrIterator: function(elt)
