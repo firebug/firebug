@@ -208,18 +208,25 @@ FirebugReps.Warning = domplate(Firebug.Rep,
 
 FirebugReps.Func = domplate(Firebug.Rep,
 {
+    className: "function",
+
     tag:
         OBJECTLINK("$object|summarizeFunction"),
 
     summarizeFunction: function(fn)
     {
         var fnText = Str.safeToString(fn);
+
+        // xxxHonza: Simon this regexpr doesn't return 'myFunc' for:
+        // "function myFunc(event) { ... }". Any tips?
         var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
         var anonFn  = /^function \(/.test(fnText);
         var displayName = fn.displayName;
 
-        return namedFn ? namedFn[1] : (displayName ? displayName + "()" :
+        var result = namedFn ? namedFn[1] : (displayName ? displayName + "()" :
             (anonFn ? "function()" : fnText));
+
+        return Str.cropString(result, 100);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -239,8 +246,6 @@ FirebugReps.Func = domplate(Firebug.Rep,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "function",
 
     supportsObject: function(object, type)
     {
