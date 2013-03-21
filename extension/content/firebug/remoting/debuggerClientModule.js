@@ -400,10 +400,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             // good architecure, refactor.
             // First option: implement a provider used by UI widgets (e.g. DomTree)
             // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
-            var conn = DebuggerServer._connections["conn0."];
-            var tabActor = conn.rootActor._tabActors.get(context.browser);
-            var threadActor = tabActor.threadActor;
-
+            var threadActor = this.getThreadActor(context);
             var actor = threadActor.threadLifetimePool.get(actorId);
 
             if (!actor && threadActor._pausePool)
@@ -412,28 +409,46 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             if (!actor)
                 return null;
 
-            var obj = actor.obj;
-            if (!obj)
-                return null;
-
-            // xxxHonza: use DebuggerLib.unwrapDebuggeeValue();
-            if (typeof(obj.unsafeDereference) != "undefined")
-            {
-                return obj.unsafeDereference();
-            }
-            else
-            {
-                TraceError.sysout("debuggerClientModule.getObject; You need patch from " +
-                    "bug 837723");
-            }
-
-            return null;
+            return this.unwrapObject(actor.obj);
         }
         catch (e)
         {
             TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
         }
     },
+
+    getThreadActor: function(context)
+    {
+        try
+        {
+            var conn = DebuggerServer._connections["conn0."];
+            var tabActor = conn.rootActor._tabActors.get(context.browser);
+            return tabActor.threadActor;
+        }
+        catch (e)
+        {
+            TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+        }
+    },
+
+    unwrapObject: function(obj)
+    {
+        if (!obj)
+            return null;
+
+        // xxxHonza: use DebuggerLib.unwrapDebuggeeValue();
+        if (typeof(obj.unsafeDereference) != "undefined")
+        {
+            return obj.unsafeDereference();
+        }
+        else
+        {
+            TraceError.sysout("debuggerClientModule.getObject; You need patch from " +
+                "bug 837723");
+        }
+
+        return null;
+    }
 });
 
 // ********************************************************************************************* //
