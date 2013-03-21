@@ -96,8 +96,8 @@ ScopeClient.prototype = Obj.descend(new ObjectClient(),
             case "block":
             case "function":
                 var ps = this.properties = [];
-                ps.push.apply(ps, this.parseProperties(this.grip.bindings.variables));
                 ps.push.apply(ps, this.parseArguments(this.grip.bindings.arguments));
+                ps.push.apply(ps, this.parseProperties(this.grip.bindings.variables));
                 break;
         }
 
