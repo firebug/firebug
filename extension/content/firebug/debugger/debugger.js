@@ -242,6 +242,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Evaluation
 
+    // xxxHonza: this entire methods should share API with the CommandLine if possible.
     evaluate: function(js, context, scope)
     {
         Trace.sysout("debugger.evaluate; " + js, scope);
