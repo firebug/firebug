@@ -564,7 +564,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
 
-        if (lineIndex)
+        if (lineIndex || lineIndex == 0)
             this.toggleBreakpoint(lineIndex);
     },
 
@@ -572,7 +572,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
 
-        if (lineIndex)
+        if (lineIndex || lineIndex == 0)
             this.toggleBreakpoint(lineIndex);
     },
 
