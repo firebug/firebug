@@ -3,8 +3,10 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/string",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Str) {
+function(FBTrace, Str, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -109,6 +111,34 @@ SourceFile.prototype =
         });
     },
 }
+
+// ********************************************************************************************* //
+// Static Methods (aka class methods)
+
+SourceFile.findScriptForFunctionInContext = function(context, fn)
+{
+    var dwin = DebuggerLib.getDebuggeeGlobal(context);
+    var dfn = dwin.makeDebuggeeValue(fn);
+    return dfn.script;
+};
+
+SourceFile.findSourceForFunction = function(fn, context)
+{
+    var script = SourceFile.findScriptForFunctionInContext(context, fn);
+    return script ? SourceFile.toSourceLink(script, context) : null;
+};
+
+SourceFile.toSourceLink = function(script, context)
+{
+    var sourceLink = new SourceLink(script.url, script.startLine, "js");
+
+    // Make sure the target line is highlighted.
+    sourceLink.options.highlight = true;
+    return sourceLink;
+};
+
+//xxxHonza: Back comp, do we need this?
+SourceFile.getSourceLinkForScript = SourceFile.toSourceLink;
 
 // ********************************************************************************************* //
 

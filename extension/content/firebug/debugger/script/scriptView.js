@@ -31,6 +31,8 @@ Cu["import"]("resource:///modules/source-editor.jsm");
 var Trace = FBTrace.to("DBG_SCRIPTVIEW");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
+var annonTypeHighlightedLine = "firefox.annotation.highlightedLine";
+
 // ********************************************************************************************* //
 // Source View
 
@@ -105,6 +107,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.onMouseMoveListener);
         this.editor.addEventListener(SourceEditor.EVENTS.MOUSE_OUT,
             this.onMouseOutListener);
+
+        // Register custom annotation type
+        this.editor._annotationRuler.addAnnotationType(annonTypeHighlightedLine);
+        this.editor._overviewRuler.addAnnotationType(annonTypeHighlightedLine);
+        this.editor._annotationStyler.addAnnotationType(annonTypeHighlightedLine);
 
         // Hook annotation and lines ruler clicks
         this.editor._annotationRuler.onClick = this.annotationRulerClick.bind(this);
@@ -349,7 +356,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var lineStart = this.editor.getLineStart(lineIndex);
         var lineEnd = this.editor.getLineEnd(lineIndex);
         var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
-        
+
         if (annotations.length > 0)
         {
             this.editor.removeBreakpoint(lineIndex);
@@ -491,6 +498,53 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (options.debugLocation)
             this.editor.setDebugLocation(line);
+        else if (options.highlight)
+            this.highlightLine(line);
+    },
+
+    highlightLine: function(lineIndex)
+    {
+        Trace.sysout("scriptView.highlightLine; " + lineIndex);
+
+        if (!this.editor)
+            return;
+
+        var annotations = this.getAnnotationsByType(annonTypeHighlightedLine, 0,
+            this.editor.getCharCount());
+
+        if (annotations.length > 0)
+        {
+            annotations.forEach(this.editor._annotationModel.removeAnnotation,
+                this.editor._annotationModel);
+        }
+
+        if (lineIndex < 0)
+            return;
+
+        var lineStart = this.editor._model.getLineStart(lineIndex);
+        var lineEnd = this.editor._model.getLineEnd(lineIndex);
+        var lineText = this.editor._model.getLine(lineIndex);
+
+        var annotation = {
+            type: annonTypeHighlightedLine,
+            start: lineStart,
+            end: lineEnd,
+            title: "",
+            style: {styleClass: "annotation highlightedLine"},
+            html: "<div class='annotationHTML highlightedLine'></div>",
+            overviewStyle: {styleClass: "annotationOverview highlightedLine"},
+            rangeStyle: {styleClass: "annotationRange highlightedLine"},
+            lineStyle: {styleClass: "annotationLine highlightedLine"},
+        };
+
+        this.editor._annotationModel.addAnnotation(annotation);
+
+        // Unhighlight after timeout.
+        var self = this;
+        setTimeout(function()
+        {
+            self.highlightLine(-1);
+        }, 1300);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -654,6 +708,18 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         return null;
+    },
+
+    getAnnotationsByType: function(aType, aStart, aEnd)
+    {
+        var annotations = this.editor._annotationModel.getAnnotations(aStart, aEnd);
+        var annotation, result = [];
+        while (annotation = annotations.next())
+        {
+            if (annotation.type == aType)
+                result.push(annotation);
+        }
+        return result;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
