@@ -622,6 +622,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         return this.editor;
     },
 
+    setPropertyValue: function(row, value)
+    {
+        // Save state of the tree before evaluation will cause rebuild.
+        this.tree.saveState(this.toggles);
+
+        BasePanel.setPropertyValue.apply(this, arguments);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Editing Helpers (override the default DomBasePanel implementation)
 

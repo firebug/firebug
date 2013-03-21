@@ -742,7 +742,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
         try
         {
-            if (object instanceof StackFrame)
+            if (typeof(object) == "function")
+                return Firebug.Debugger.evaluate(propName, this.context);
+            else if (object instanceof StackFrame)
                 return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
@@ -947,6 +949,14 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             // variables have been changed during a debugging session.
             if (object instanceof StackFrame)
                 object.clearScopes();
+
+            // xxxHonza: rebuilding the content (tree) is not enough if the user changes
+            // e.g. a local variable within the current scope (i.e. a binding or an argument).
+            // In such case we need to refetch the environment from the server to get
+            // updated values.
+            // It could be done through "clientEvaluate", which does resume-pause roundtrip.
+            // This is also the reason why object.clearScopes() has been used for JSD1
+            // (see above).
         }
 
         this.rebuild(true);

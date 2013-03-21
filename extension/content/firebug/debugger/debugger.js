@@ -5,8 +5,10 @@ define([
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/firebug",
+    "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Obj, Locale, Firebug) {
+function(FBTrace, Obj, Locale, Firebug, DebuggerClientModule, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,6 +17,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DEBUGGER");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
@@ -241,6 +244,43 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     evaluate: function(js, context, scope)
     {
+        Trace.sysout("debugger.evaluate; " + js, scope);
+
+        var currentFrame = context.currentFrame;
+        if (!currentFrame)
+            return;
+
+        var threadActor = DebuggerClientModule.getThreadActor(context);
+        var frameActor = currentFrame.getActor();
+        var frame = threadActor._requestFrame(frameActor);
+
+        try
+        {
+            var result;
+
+            var dGlobal = DebuggerLib.getDebuggeeGlobal(context);
+            scope = dGlobal.makeDebuggeeValue(scope);
+
+            if (scope)
+                result = frame.evalWithBindings(js, scope);
+            else
+                result = frame.eval(js);
+
+            Trace.sysout("debugger.evaluate; RESULT:", result);
+
+            if (result.hasOwnProperty("return"))
+            {
+                result = result["return"];
+                if (typeof(result) == "object")
+                    return DebuggerClientModule.unwrapObject(result["return"]);
+                else
+                    return result;
+            }
+        }
+        catch (e)
+        {
+            TraceError.sysout("debugger.evaluate; EXCEPTION " + e, e);
+        }
     },
 
     evaluateInCallingFrame: function(js, fileName, lineNo)
@@ -255,6 +295,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     hasValidStack: function(context)
     {
+        return context.stopped;
     },
 
     getCurrentFrameKeys: function(context)
