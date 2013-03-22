@@ -72,13 +72,17 @@ DevToolsOverlay.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
-    onToolboxReady: function(toolbox)
+    onToolboxReady: function(type, toolbox)
     {
-        if (FBTrace.DBG_DEVTOOLS)
+        if (FBTrace.DBG_DEVTOOLS) 
             FBTrace.sysout("devToolsOverlay.onToolboxReady;", toolbox);
 
-        // xxxHonza: the toolbox has been opened, hide Firebug (if visible) and make sure
-        // it'll appear inside the toolbox if the Firebug panel is selected
+        // If Firebug UI is opened when the toolbox is opened, hide Firebug since it's
+        // available within the toolbox UI. Hide it only if the Firebug panel doesn't exist
+        // yet, otherwise the panel would be empty.
+        var panel = toolbox.getPanel("firebug");
+        if (!panel && this.win.Firebug.isInitialized)
+            this.win.Firebug.minimizeBar();
     }
 };
 
