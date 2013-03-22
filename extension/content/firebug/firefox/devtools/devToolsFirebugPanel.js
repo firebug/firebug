@@ -69,6 +69,9 @@ DevToolsFirebugPanel.prototype =
             // Make sure context is created.
             Firebug.toggleBar();
 
+            // Also solve the case when Firebug is detached.
+            Firebug.showBar(true);
+
             // Loading done, notify the toolbox.
             deferred.resolve(self);
         });
