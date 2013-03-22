@@ -34,6 +34,10 @@ DevToolsOverlay.prototype =
     {
         FBTrace.sysout("devToolsOverlay.initialize;");
 
+        // Register event handlers
+        gDevTools.on("toolbox-ready", this.onToolboxReady.bind(this));
+
+        // Register a new panel
         this.createFirebugPanel();
     },
 
@@ -55,15 +59,27 @@ DevToolsOverlay.prototype =
                 return target.isLocalTab;
             },
 
-            build: function(frame, target)
+            build: function(frame, toolbox)
             {
-                self.firebugPanel = new DevToolsFirebugPanel(frame, target);
+                self.firebugPanel = new DevToolsFirebugPanel(frame, toolbox);
                 return self.firebugPanel.open(self.win);
             }
        };
 
        gDevTools.registerTool(firebugPanelDefinition);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onToolboxReady: function(toolbox)
+    {
+        if (FBTrace.DBG_DEVTOOLS)
+            FBTrace.sysout("devToolsOverlay.onToolboxReady;", toolbox);
+
+        // xxxHonza: the toolbox has been opened, hide Firebug (if visible) and make sure
+        // it'll appear inside the toolbox if the Firebug panel is selected
+    }
 };
 
 // ********************************************************************************************* //

@@ -1162,9 +1162,9 @@ var FirebugChrome =
         // Panels remember the top window, for which they were first opened.
         // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
-        var rulePos = styleSheet.cssRules.length;
         if (styleSheet)
         {
+            var rulePos = styleSheet.cssRules.length;
             styleSheet.insertRule(
                 "panel{display:-moz-box!important; visibility:collapse!important;}",
                 rulePos);
@@ -1219,7 +1219,8 @@ var FirebugChrome =
 
         temp.parentNode.removeChild(temp);
 
-        styleSheet.deleteRule(rulePos);
+        if (styleSheet)
+            styleSheet.deleteRule(rulePos);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -17,12 +17,12 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu.import("resource:///modules/devtools/EventEmitter.jsm");
+Cu["import"]("resource:///modules/devtools/EventEmitter.jsm");
 
 // ********************************************************************************************* //
 // DevToolsOverlay Implementation
 
-function DevToolsFirebugPanel(frame, target)
+function DevToolsFirebugPanel(frame, toolbox)
 {
     if (FBTrace.DBG_DEVTOOLS)
         FBTrace.sysout("devToolsFirebugPanel.constructor;", arguments);
@@ -30,11 +30,16 @@ function DevToolsFirebugPanel(frame, target)
     EventEmitter.decorate(this);
 
     this.frame = frame;
-    this.target = target;
+    this.toolbox = toolbox;
+    this.target = toolbox.target;
+
+    this.navigate = this.navigate.bind(this);
+    this.willNavigate = this.willNavigate.bind(this);
+    this.hidden = this.hidden.bind(this);
+    this.visible = this.visible.bind(this);
 
     this.target.on("navigate", this.navigate);
-    this.target.on("will-navigate", this.beforeNavigate);
-    //this.target.on("close", this.close);
+    this.target.on("will-navigate", this.willNavigate);
     this.target.on("hidden", this.hidden);
     this.target.on("visible",  this.visible);
 }
@@ -56,6 +61,8 @@ DevToolsFirebugPanel.prototype =
         var self = this;
         this.win.Firebug.browserOverlay.startFirebug(function(Firebug)
         {
+            self.Firebug = Firebug;
+
             // Embed entire Firebug UI (firebugFrame.xul) into Devtools Toolbox UI.
             self.importFirebug();
 
@@ -74,11 +81,16 @@ DevToolsFirebugPanel.prototype =
         if (FBTrace.DBG_DEVTOOLS)
             FBTrace.sysout("DevToolsFirebugPanel.destroy");
 
+        this.target.on("navigate", this.navigate);
+        this.target.on("will-navigate", this.willNavigate);
+        this.target.on("hidden", this.hidden);
+        this.target.on("visible",  this.visible);
+
         // Undetach Firebug from DevTools toolbox so, it isn't destroyed with it.
         this.exportFirebug();
     },
 
-    beforeNavigate: function()
+    willNavigate: function()
     {
         if (FBTrace.DBG_DEVTOOLS)
             FBTrace.sysout("DevToolsFirebugPanel.beforeNavigate");
@@ -90,45 +102,65 @@ DevToolsFirebugPanel.prototype =
             FBTrace.sysout("DevToolsFirebugPanel.navigate");
     },
 
-    hidden: function()
+    hidden: function(type, event)
     {
         if (FBTrace.DBG_DEVTOOLS)
-            FBTrace.sysout("DevToolsFirebugPanel.hidden");
+            FBTrace.sysout("DevToolsFirebugPanel.hidden; " + this.target._tab.label, event);
+
+        this.exportFirebug();
     },
 
-    visible: function()
+    visible: function(type, event)
     {
+        var tab = event.target;
+
         if (FBTrace.DBG_DEVTOOLS)
-            FBTrace.sysout("DevToolsFirebugPanel.visible");
+            FBTrace.sysout("DevToolsFirebugPanel.visible; " + this.target._tab.label, event);
+
+        // xxxHonza: the order of hidden and visible events is wrong. The visible event
+        // should be fired after hidden, but it isn't. So, use timeout to make sure
+        // Firebug is imported after being exported in hidden handler.
+        var self = this;
+        this.win.setTimeout(function()
+        {
+            self.importFirebug();
+            self.Firebug.toggleBar(true);
+        });
     },
 
     // xxxHonza: import/exportFirebug is also in firebug.xul, could we reuse?
     importFirebug: function()
     {
-        var Firebug = this.win.Firebug, fbc = Firebug.chrome;
+        var Firebug = this.win.Firebug;
+        var chrome = Firebug.chrome;
 
         Firebug.minimizeBar();
 
-        fbc.originalBrowser = this.win.top.document.getElementById("fbMainContainer");
-        fbc.inDetachedScope = true;
-
+        var originalBrowser = this.win.top.document.getElementById("fbMainContainer");
         var newBrowser = this.frame.document.getElementById("fbMainContainer");
-        fbc.swapBrowsers(
-            fbc.originalBrowser,
+
+        chrome.originalBrowser = originalBrowser;
+        chrome.inDetachedScope = true;
+
+        chrome.swapBrowsers(
+            originalBrowser,
             newBrowser
         );
     },
 
     exportFirebug: function()
     {
-        var Firebug = this.win.Firebug, fbc = Firebug.chrome;
+        var Firebug = this.win.Firebug;
+        var chrome = Firebug.chrome;
 
-        fbc.inDetachedScope = false;
+        chrome.inDetachedScope = false;
 
-        var oldBrowser = this.frame.document.getElementById("fbMainContainer");
-        fbc.swapBrowsers(
-            oldBrowser,
-            fbc.originalBrowser
+        var originalBrowser = this.win.top.document.getElementById("fbMainContainer");
+        var currentBrowser = this.frame.document.getElementById("fbMainContainer");
+
+        chrome.swapBrowsers(
+            currentBrowser,
+            originalBrowser
         );
 
         Firebug.setPlacement("minimized");
