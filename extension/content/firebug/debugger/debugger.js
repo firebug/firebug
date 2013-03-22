@@ -113,29 +113,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Debugging and monitoring
+    // Tracing (see issue 6220)
 
     traceAll: function(context)
     {
     },
 
     untraceAll: function(context)
-    {
-    },
-
-    monitorFunction: function(fn, mode)
-    {
-    },
-
-    unmonitorFunction: function(fn, mode)
-    {
-    },
-
-    monitorScript: function(fn, script, mode)
-    {
-    },
-
-    unmonitorScript: function(fn, script, mode)
     {
     },
 

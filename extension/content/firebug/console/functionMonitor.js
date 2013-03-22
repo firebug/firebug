@@ -6,12 +6,21 @@ define([
     "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/script/sourceFile",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/url",
+    "firebug/lib/locale",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) { with (Domplate) {
+function(FBTrace, Obj, Domplate, Reps, StackFrame, SourceFile, Events, Css, Dom, Url, Locale) {
+with (Domplate) {
+
+// ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_FUNCTIONMONITOR");
 
 // ********************************************************************************************* //
 // Function Monitor
@@ -60,6 +69,108 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             Firebug.Console.openGroup([frame, "depth:" + depth], context);
         else
             Firebug.Console.closeGroup(context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Debugging and monitoring
+
+    monitorFunction: function(context, fn, mode)
+    {
+        FBTrace.sysout("monitorFunction " + fn, fn)
+        if (typeof(fn) == "function" || fn instanceof Function)
+        {
+            var script = SourceFile.findScriptForFunctionInContext(context, fn);
+            if (script)
+            {
+                this.monitorScript(context, fn, script, mode);
+            }
+            else
+            {
+                // xxxHonza: localization
+                Firebug.Console.logFormatted(
+                    ["Firebug unable to locate script for function", fn], context, "info");
+            }
+        }
+        else
+        {
+            Firebug.Console.logFormatted(
+                ["Firebug.Debugger.monitorFunction requires a function", fn], context, "info");
+        }
+    },
+
+    unmonitorFunction: function(context, fn, mode)
+    {
+        if (typeof(fn) == "function" || fn instanceof Function)
+        {
+            var script = SourceFile.findScriptForFunctionInContext(context, fn);
+            if (script)
+                this.unmonitorScript(context, fn, script, mode);
+        }
+    },
+
+    monitorScript: function(context, fn, script, mode)
+    {
+        var tool = context.getTool("debugger");
+        var script = SourceFile.findScriptForFunctionInContext(context, fn);
+        if (script)
+        {
+            Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " + script.startLine);
+
+            if (mode == "debug")
+            {
+                // xxxHonza: how to easily set a breakpoint here and do not worry about
+                // server side correction?
+            }
+            else if (mode == "monitor")
+            {
+                this.monitor(context, scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
+            }
+        }
+    },
+
+    unmonitorScript: function(context, fn, script, mode)
+    {
+        var tool = context.getTool("debugger");
+        var script = SourceFile.findScriptForFunctionInContext(context, fn);
+        if (script)
+        {
+            Trace.sysout("functionMonitor.unmonitorScript; " + fn, scriptInfo);
+
+            if (mode == "debug")
+                tool.removeBreakpoint(context, script.url, script.startLine);
+            else if (mode == "monitor")
+                this.unmonitor(context, scriptInfo.sourceFile.href, scriptInfo.lineNo);
+        }
+    },
+
+    monitor: function(context, sourceFile, lineNo, debuggr)
+    {
+        // xxxHonza
+        return;
+
+        if (lineNo == -1)
+            return null;
+
+        var bp = this.addBreakpoint(BP_MONITOR, sourceFile, lineNo, null, debuggr);
+        if (bp)
+        {
+            ++monitorCount;
+            dispatch(debuggers, "onToggleMonitor", [sourceFile.href, lineNo, true]);
+        }
+
+        return bp;
+    },
+
+    unmonitor: function(href, lineNo)
+    {
+        // xxxHonza
+        return;
+
+        if (lineNo != -1 && this.removeBreakpoint(BP_MONITOR, href, lineNo))
+        {
+            --monitorCount;
+            dispatch(debuggers, "onToggleMonitor", [ href, lineNo, false]);
+        }
     },
 });
 
@@ -180,7 +291,66 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// CommandLine Support
+
+function debug(context, args)
+{
+    var fn = args[0];
+
+    FunctionMonitor.monitorFunction(context, fn, "debug");
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+function undebug(context, args)
+{
+    var fn = args[0];
+
+    FunctionMonitor.unmonitorFunction(context, fn, "debug");
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+function monitor(context, args)
+{
+    var fn = args[0];
+
+    FunctionMonitor.monitorFunction(context, fn, "monitor");
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+function unmonitor(fn)
+{
+    var fn = args[0];
+
+    FunctionMonitor.unmonitorFunction(context, fn, "monitor");
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
 // Registration
+
+Firebug.registerCommand("debug", {
+    handler: debug.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/debug",
+    description: Locale.$STR("console.cmd.help.debug")
+});
+
+Firebug.registerCommand("undebug", {
+    handler: undebug.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/undebug",
+    description: Locale.$STR("console.cmd.help.undebug")
+});
+
+Firebug.registerCommand("monitor", {
+    handler: monitor.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/monitor",
+    description: Locale.$STR("console.cmd.help.monitor")
+});
+
+Firebug.registerCommand("unmonitor", {
+    handler: unmonitor.bind(this),
+    helpUrl: "http://getfirebug.com/wiki/index.php/unmonitor",
+    description: Locale.$STR("console.cmd.help.unmonitor")
+});
 
 Firebug.registerModule(FunctionMonitor);
 Firebug.registerRep(FunctionMonitorRep);

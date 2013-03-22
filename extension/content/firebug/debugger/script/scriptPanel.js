@@ -384,8 +384,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.addBreakpoint(bp);
 
         // Persist the breakpoint on the client side.
-        BreakpointStore.addBreakpoint(url , bp.lineNo);
+        BreakpointStore.addBreakpoint(url, bp.lineNo);
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends ActivablePanel
 
@@ -493,13 +494,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     addBreakpoint: function(bp)
     {
-
         Trace.sysout("scriptPanel.addBreakpoint;", bp);
 
         var self = this;
         function doSetBreakpoint(response, bpClient)
         {
             var actualLocation = response.actualLocation;
+
             // Remove temporary breakpoint(loading icon), is waiting for the response.
             self.scriptView.removeBreakpoint(bp);
 
@@ -535,6 +536,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     return;
                 }
             }
+
             if (bp.condition !== undefined)
                 self.startEditingConditionAsyn(bp.lineNo, bp.condition);
             else
@@ -552,6 +554,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             if (FBTrace.DBG_BP)
                 FBTrace.sysout("scriptPanel.addBreakpoint; breakpoint added", bpClient);
         }
+
         this.tool.setBreakpoint(this.context, this.location.href, bp.lineNo, doSetBreakpoint);
     },
 

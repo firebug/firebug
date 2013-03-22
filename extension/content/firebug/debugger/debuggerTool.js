@@ -444,7 +444,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
             // TODO: update the UI?
 
-            callback(response, bpClient);
+            if (callback)
+                callback(response, bpClient);
         };
 
         return context.activeThread.setBreakpoint({

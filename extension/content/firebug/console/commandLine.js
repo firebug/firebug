@@ -1146,30 +1146,6 @@ function FirebugCommandLineAPI(context)
         return Arr.values(o);
     };
 
-    this.debug = function(fn)
-    {
-        Firebug.Debugger.monitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.undebug = function(fn)
-    {
-        Firebug.Debugger.unmonitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.monitor = function(fn)
-    {
-        Firebug.Debugger.monitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
-    this.unmonitor = function(fn)
-    {
-        Firebug.Debugger.unmonitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
-    };
-
     this.traceAll = function()
     {
         // See issue 6220

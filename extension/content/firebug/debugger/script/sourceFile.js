@@ -115,6 +115,12 @@ SourceFile.prototype =
 // ********************************************************************************************* //
 // Static Methods (aka class methods)
 
+SourceFile.getSourceFileByScript = function(context, script)
+{
+    if (context.sourceFileMap)
+        return context.sourceFileMap[script.url];
+};
+
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
     var dwin = DebuggerLib.getDebuggeeGlobal(context);
