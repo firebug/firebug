@@ -76,7 +76,6 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     monitorFunction: function(context, fn, mode)
     {
-        FBTrace.sysout("monitorFunction " + fn, fn)
         if (typeof(fn) == "function" || fn instanceof Function)
         {
             var script = SourceFile.findScriptForFunctionInContext(context, fn);
