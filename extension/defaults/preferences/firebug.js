@@ -100,6 +100,7 @@ pref("extensions.firebug.breakOnExceptions", false);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
+pref("extensions.firebug.hideStackFrameArguments", false);
 
 // DOM
 pref("extensions.firebug.showUserProps", true);

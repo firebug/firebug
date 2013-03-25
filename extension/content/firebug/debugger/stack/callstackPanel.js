@@ -253,11 +253,17 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
+        var items = [];
+
         // an option handled by chrome.js
-        var items = [
-            Menu.optionMenu("OmitObjectPathStack", "omitObjectPathStack",
-                "callstack.option.tip.Omit_Object_Path_Stack"),
-        ];
+        items.push(Menu.optionMenu("OmitObjectPathStack",
+            "omitObjectPathStack",
+            "callstack.option.tip.Omit_Object_Path_Stack"));
+
+        // Show/hide stack frame arguments.
+        items.push(Menu.optionMenu("callstack.option.Hide_Arguments",
+            "hideStackFrameArguments",
+            "callstack.option.tip.Hide_Arguments"));
 
         return items;
     },
@@ -289,6 +295,17 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         var elements = this.panelNode.querySelectorAll(".objectBox-stackFrame");
         for (var i=0; i<elements.length; i++)
             StackFrameRep.collapseArguments(elements[i]);
+    },
+
+    updateOption: function(name, value)
+    {
+        if (name == "hideStackFrameArguments")
+        {
+            if (value)
+                Css.setClass(this.panelNode, "hideArguments");
+            else
+                Css.removeClass(this.panelNode, "hideArguments");
+        }
     },
 });
 

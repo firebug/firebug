@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/url",
@@ -13,7 +14,7 @@ define([
     "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
 ],
-function(Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
+function(FBTrace, Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
     SourceLink, Css) {
 
 with (Domplate) {
@@ -169,6 +170,8 @@ var StackFrameRep = domplate(Firebug.Rep,
 
     expandArguments: function(target)
     {
+        FBTrace.sysout("expandArguments");
+        
         if (Css.hasClass(target, "opened"))
             return;
 
