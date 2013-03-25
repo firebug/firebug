@@ -76,7 +76,7 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     monitorFunction: function(context, fn, mode)
     {
-        if (typeof(fn) == "function" || fn instanceof Function)
+        if (typeof(fn) == "function")
         {
             var script = SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
@@ -99,7 +99,7 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     unmonitorFunction: function(context, fn, mode)
     {
-        if (typeof(fn) == "function" || fn instanceof Function)
+        if (typeof(fn) == "function")
         {
             var script = SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
