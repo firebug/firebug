@@ -87,7 +87,7 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             {
                 // xxxHonza: localization
                 Firebug.Console.logFormatted(
-                    ["Firebug unable to locate script for function", fn], context, "info");
+                    ["Firebug unable to locate source for function", fn], context, "info");
             }
         }
         else
