@@ -6,9 +6,9 @@ define([
     "firebug/lib/promise",
     "firebug/lib/array",
     "firebug/lib/wrapper",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerClientModule) {
+function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Object Grip
@@ -49,7 +49,7 @@ ObjectClient.prototype =
         }
 
         // Break RDP and get the remote object directly
-        var object = DebuggerClientModule.getObject(this.cache.context, this.grip.actor);
+        var object = DebuggerLib.getObject(this.cache.context, this.grip.actor);
         if (object)
             return object;
 

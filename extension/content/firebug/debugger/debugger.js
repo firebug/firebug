@@ -5,10 +5,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/firebug",
-    "firebug/remoting/debuggerClientModule",
     "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Obj, Locale, Firebug, DebuggerClientModule, DebuggerLib) {
+function(FBTrace, Obj, Locale, Firebug, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -235,7 +234,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!currentFrame)
             return;
 
-        var threadActor = DebuggerClientModule.getThreadActor(context);
+        var threadActor = DebuggerLib.getThreadActor(context);
         var frameActor = currentFrame.getActor();
         var frame = threadActor._requestFrame(frameActor);
 
@@ -257,7 +256,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 result = result["return"];
                 if (typeof(result) == "object")
-                    return DebuggerClientModule.unwrapObject(result["return"]);
+                    return DebuggerLib.unwrapDebuggeeValue(result["return"]);
                 else
                     return result;
             }

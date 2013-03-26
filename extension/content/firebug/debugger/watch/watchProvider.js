@@ -7,10 +7,10 @@ define([
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
     "firebug/dom/domMemberProvider",
-    "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/debuggerLib",
 ],
 function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
-    DebuggerClientModule) {
+    DebuggerLib) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -158,7 +158,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         if (!actor)
             return null;
 
-        return DebuggerClientModule.getObject(this.panel.context, actor);
+        return DebuggerLib.getObject(this.panel.context, actor);
     },
 });
 

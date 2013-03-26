@@ -39,8 +39,14 @@ DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
     if (typeof obj !== "object" || obj === null)
         return obj;
 
-    if (obj.unsafeDereference)
+    if (typeof(obj.unsafeDereference) != "undefined")
         return obj.unsafeDereference();
+
+    if (!global || !dglobal)
+    {
+        TraceError.sysout("debuggerClientModule.getObject; You need patch from bug 837723");
+        return;
+    }
 
     // Define a new property to get the debuggee value.
     dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
@@ -82,8 +88,6 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 // ********************************************************************************************* //
 // Local Access (hack for easier transition to JSD2/RDP)
 
-// xxxHonza: for now duplicated in debuggerClientModule, will be only here soon.
-
 /**
  * The next step is to make this method asynchronous to be closer to the
  * remote debugging requirements. Of course, it should use Promise
@@ -109,7 +113,7 @@ DebuggerLib.getObject = function(context, actorId)
         if (!actor)
             return null;
 
-        return this.unwrapObject(actor.obj);
+        return this.unwrapDebuggeeValue(actor.obj);
     }
     catch (e)
     {
@@ -129,25 +133,6 @@ DebuggerLib.getThreadActor = function(context)
     {
         TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
     }
-}
-
-DebuggerLib.unwrapObject = function(obj)
-{
-    if (!obj)
-        return null;
-
-    // xxxHonza: use DebuggerLib.unwrapDebuggeeValue();
-    if (typeof(obj.unsafeDereference) != "undefined")
-    {
-        return obj.unsafeDereference();
-    }
-    else
-    {
-        TraceError.sysout("debuggerClientModule.getObject; You need patch from " +
-            "bug 837723");
-    }
-
-    return null;
 }
 
 // ********************************************************************************************* //
