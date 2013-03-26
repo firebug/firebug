@@ -27,6 +27,7 @@ const BP_ERROR = 16;
 const BP_TRACE = 32; // BP used to initiate traceCalls
 
 var Trace = FBTrace.to("DBG_BREAKPOINTSTORE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Breakpoint Store
@@ -203,10 +204,16 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     addBreakpoint: function(url, lineNo)
     {
+        if (!url || !lineNo)
+        {
+            TraceError.sysout("breakpointStore.addBreakpoint; ERROR invalid arguments " +
+                "url: " + url + ", lineNo: " + lineNo);
+            return;
+        }
+
         if (this.findBreakpoint(url, lineNo))
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("breakpointStore.addBreakpoint; ERROR There is alread a bp");
+            TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp");
             return;
         }
 

@@ -13,6 +13,8 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
+Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
+
 // Debugees
 var dglobalWeakMap = new WeakMap();
 
@@ -76,6 +78,120 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
     }
     return dglobal;
 };
+
+// ********************************************************************************************* //
+// Local Access (hack for easier transition to JSD2/RDP)
+
+// xxxHonza: for now duplicated in debuggerClientModule, will be only here soon.
+
+/**
+ * The next step is to make this method asynchronous to be closer to the
+ * remote debugging requirements. Of course, it should use Promise
+ * as the return value.
+ *
+ * @param {Object} context
+ * @param {Object} actorId
+ */
+DebuggerLib.getObject = function(context, actorId)
+{
+    try
+    {
+        // xxxHonza: access server side objects, of course even hacks needs
+        // good architecure, refactor.
+        // First option: implement a provider used by UI widgets (e.g. DomTree)
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
+        var threadActor = this.getThreadActor(context);
+        var actor = threadActor.threadLifetimePool.get(actorId);
+
+        if (!actor && threadActor._pausePool)
+            actor = threadActor._pausePool.get(actorId);
+
+        if (!actor)
+            return null;
+
+        return this.unwrapObject(actor.obj);
+    }
+    catch (e)
+    {
+        TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+    }
+}
+
+DebuggerLib.getThreadActor = function(context)
+{
+    try
+    {
+        var conn = DebuggerServer._connections["conn0."];
+        var tabActor = conn.rootActor._tabActors.get(context.browser);
+        return tabActor.threadActor;
+    }
+    catch (e)
+    {
+        TraceError.sysout("debuggerClientModule.getObject; EXCEPTION " + e, e);
+    }
+}
+
+DebuggerLib.unwrapObject = function(obj)
+{
+    if (!obj)
+        return null;
+
+    // xxxHonza: use DebuggerLib.unwrapDebuggeeValue();
+    if (typeof(obj.unsafeDereference) != "undefined")
+    {
+        return obj.unsafeDereference();
+    }
+    else
+    {
+        TraceError.sysout("debuggerClientModule.getObject; You need patch from " +
+            "bug 837723");
+    }
+
+    return null;
+}
+
+// ********************************************************************************************* //
+// Executable Lines
+
+DebuggerLib.getNextExecutableLine = function(context, aLocation)
+{
+    var threadClient = this.getThreadActor(context);
+
+    var scripts = threadClient.dbg.findScripts(aLocation);
+    if (scripts.length == 0)
+        return;
+
+    for (var i=0; i<scripts.length; i++)
+    {
+        var script = scripts[i];
+        var offsets = script.getLineOffsets(aLocation.line);
+        if (offsets.length > 0)
+            return aLocation;
+    }
+
+    var scripts = threadClient.dbg.findScripts({
+        url: aLocation.url,
+        line: aLocation.line,
+        innermost: true
+    });
+
+    for (var i=0; i<scripts.length; i++)
+    {
+        var script = scripts[i];
+        var offsets = script.getAllOffsets();
+        for (var line = aLocation.line; line < offsets.length; ++line)
+        {
+            if (offsets[line])
+            {
+                return {
+                    url: aLocation.url,
+                    line: line,
+                    column: aLocation.column
+                };
+            }
+        }
+    }
+}
 
 // ********************************************************************************************* //
 // Local helpers

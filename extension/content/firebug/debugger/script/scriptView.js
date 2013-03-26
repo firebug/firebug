@@ -64,7 +64,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     initialize: function(parentNode)
     {
         if (this.initializeExecuted)
+        {
+            this.showSource();
             return;
+        }
 
         this.initializeExecuted = true;
 
@@ -159,8 +162,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     showSource: function(source)
     {
-        Trace.sysout("scriptView.showSource; initialized: " + this.initialized, source);
-
         if (!this.initialized)
         {
             this.defaultSource = source;
@@ -168,13 +169,15 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         var text = this.editor.getText();
-        if (text == source)
+        if (text == source && !this.forceRefresh)
             return;
 
         this.editor.setText(source);
 
         // Breakpoints and annotations in general must be set again after setText.
         this.initBreakpoints();
+
+        this.forceRefresh = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -332,6 +335,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     removeBreakpoint: function(bp)
     {
+        if (!this.editor)
+            return;
+
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {
@@ -341,6 +347,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     addBreakpoint: function(bp)
     {
+        if (!this.editor)
+            return;
+
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {
@@ -353,6 +362,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     toggleBreakpoint: function(lineIndex)
     {
+        if (!this.editor)
+            return;
+
         var lineStart = this.editor.getLineStart(lineIndex);
         var lineEnd = this.editor.getLineEnd(lineIndex);
         var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
@@ -396,11 +408,12 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        var event = {
+        // Simulate editor event sent when the user creates a breakpoint by
+        // clicking on the breakpoint ruler.
+        this.onBreakpointChange({
             added:[{lineNo: lineIndex, condition: condition}],
             removed:[]
-        };
-        this.onBreakpointChange(event);
+        });
     },
 
     updateBreakpoint: function(bp)

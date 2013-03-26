@@ -12,8 +12,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/url",
     "firebug/lib/locale",
+    "firebug/debugger/debuggerLib",
+    "firebug/debugger/breakpoints/breakpointStore",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, SourceFile, Events, Css, Dom, Url, Locale) {
+function(FBTrace, Obj, Domplate, Reps, StackFrame, SourceFile, Events, Css, Dom,
+    Url, Locale, DebuggerLib, BreakpointStore) {
+
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -113,12 +117,24 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
         {
-            Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " + script.startLine);
+            Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
+                script.startLine, fn);
 
             if (mode == "debug")
             {
-                // xxxHonza: how to easily set a breakpoint here and do not worry about
-                // server side correction?
+                var location = {line: script.startLine, url: script.url};
+
+                // If the first line of the script contains no code, slide down to
+                // the nextline the has runnable code.
+                location = DebuggerLib.getNextExecutableLine(context, location);
+
+                // Create a new breakpoint.
+                tool.setBreakpoint(context, location.url, location.line - 1,
+                function(response, bpClient)
+                {
+                    BreakpointStore.addBreakpoint(bpClient.location.url,
+                        bpClient.location.line - 1);
+                });
             }
             else if (mode == "monitor")
             {
@@ -133,12 +149,19 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
         {
-            Trace.sysout("functionMonitor.unmonitorScript; " + fn, scriptInfo);
+            Trace.sysout("functionMonitor.unmonitorScript; " + script.url + ", " +
+                script.startLine, fn);
 
             if (mode == "debug")
-                tool.removeBreakpoint(context, script.url, script.startLine);
+            {
+                var location = {line: script.startLine, url: script.url};
+                location = DebuggerLib.getNextExecutableLine(context, location);
+                BreakpointStore.removeBreakpoint(location.url, location.line - 1);
+            }
             else if (mode == "monitor")
+            {
                 this.unmonitor(context, scriptInfo.sourceFile.href, scriptInfo.lineNo);
+            }
         }
     },
 

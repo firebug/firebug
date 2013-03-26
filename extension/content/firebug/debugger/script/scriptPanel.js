@@ -379,12 +379,20 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     setBreakpoint: function(bp)
     {
-        var url = bp.href ? bp.href : this.location.href;
+        Trace.sysout("scriptPanel.setBreakpoint; " + bp.lineNo, bp);
 
-        this.scriptView.addBreakpoint(bp);
+        var existedBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+        if (!existedBp)
+        {
+            this.scriptView.addBreakpoint(bp);
 
-        // Persist the breakpoint on the client side.
-        BreakpointStore.addBreakpoint(url, bp.lineNo);
+            // Persist the breakpoint on the client side.
+            BreakpointStore.addBreakpoint(bp.href, bp.lineNo);
+        }
+        else
+        {
+            Trace.sysout("scriptPanel.setBreakpoint; ERROR Can't set breakpoint", existedBp);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -518,29 +526,28 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             if (actualLocation && actualLocation.line != (bp.lineNo + 1))
             {
                 bp.lineNo = actualLocation.line - 1;
-                // To be found when it needs removing.
-                bpClient.location.line = actualLocation.line;
                 // If the user sets a breakpoint via popup menu.
                 self.closePopupMenu();
                 // Scroll to actual line.
                 self.scrollToLine(bp.lineNo);
-
-                var existedBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
-                if (existedBp)
-                {
-                    // FF 18- creates a instance of bpClient with different actor for
-                    // any excutable and non-excutable lines.
-                    self.tool.removeDuplicatedBpInstances(self.context, bpClient);
-                    if (bp.condition !== undefined)
-                        self.startEditingConditionAsyn(bp.lineNo, existedBp.condition);
-                    return;
-                }
             }
 
-            if (bp.condition !== undefined)
+            Trace.sysout("scriptPanel.addBreakpoint; callback " + bp.condition, bp);
+
+            if (bp.condition != null)
+            {
+                var existedBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+                if (existedBp)
+                    bp.condition = existedBp.condition;
                 self.startEditingConditionAsyn(bp.lineNo, bp.condition);
+            }
             else
-                self.setBreakpoint(bp);
+            {
+                self.setBreakpoint({
+                    lineNo: bp.lineNo,
+                    href: self.location.href
+                });
+            }
 
             // Cache the breakpoint-client object since it has API for removing itself.
             // (removal happens in the Script panel when the user clicks a breakpoint
@@ -663,13 +670,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onSetBreakpointCondition: function(bp, value, cancel)
     {
+        Trace.sysout("scriptPanel.onSetBreakpointCondition; " + value, bp);
+
         var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
         if (!cancel)
         {
             if (!availableBp)
-            {
                 this.setBreakpoint(bp);
-            }
+
             value = value ? value : null;
             BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
         }
@@ -682,6 +690,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     Trace.sysout("scriptPanel.onSetBreakpointCondition; "+
                         "Response received:", response);
                 }
+
                 this.tool.removeBreakpoint(this.context, bp.href, bp.lineNo,
                     removeCallback);
             }
@@ -704,6 +713,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onBreakpointAdded: function(bp)
     {
+        this.scriptView.addBreakpoint(bp);
     },
 
     onBreakpointRemoved: function(bp)
@@ -720,7 +730,16 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         // xxxHonza: we should mark it as disabled and wait for the response from the server.
-        this.scriptView.removeBreakpoint(bp);
+
+        // xxxHonza: if the breakpoint is added while the Script panel is not the selected
+        // panel there is an exception coming from Orion:
+        // "TypeError: sel is null" {file: "chrome://browser/content/orion.js" line: 8581}]
+        // It causes the script-view to be broken and so, we need to reset it at the time
+        // when it's selected again.
+        if (!this.visible)
+            this.scriptView.forceRefresh = true;
+        else
+            this.scriptView.removeBreakpoint(bp);
     },
 
     onBreakpointEnabled: function(bp)
@@ -1245,6 +1264,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var lineNo = this.scriptView.getLineIndex(target);
         var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
+        if (!bp)
+            return false;
+
         var expr = bp.condition;
         if (!expr)
             return false;

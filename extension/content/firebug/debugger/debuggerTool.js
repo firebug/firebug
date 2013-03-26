@@ -421,11 +421,20 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a breakpoint.");
             return;
         }
+
         var self = this;
         var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)
         {
+            var actualLocation = response.actualLocation;
+
             Trace.sysout("debuggerTool.onSetBreakpoint; " + bpClient.location.url + " (" +
                 bpClient.location.line + ")", bpClient);
+
+            if (actualLocation && actualLocation.line != bpClient.location.line)
+            {
+                // To be found when it needs removing.
+                bpClient.location.line = actualLocation.line;
+            }
 
             // TODO: error logging?
 
@@ -439,10 +448,8 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             // FF 19: uses same breakpoint client object for a executable line and
             // all non-executable lines above that, so doesn't store breakpoint client
             // objects if there is already one with same actor.
-            if (!self.breakpointAcotrExists(context, bpClient))
+            if (!self.breakpointActorExists(context, bpClient))
                 context.breakpointClients.push(bpClient);
-
-            // TODO: update the UI?
 
             if (callback)
                 callback(response, bpClient);
@@ -550,39 +557,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         }
     },
 
-    removeDuplicatedBpInstances: function(context, bpClient)
-    {
-        var clients = context.breakpointClients;
-        var client, location;
-        if (!clients)
-            return;
-
-        var url = bpClient.location.url;
-        var lineNumber = bpClient.location.line;
-        var bpIndex;
-        for (var i=0; i < clients.length; i++)
-        {
-            client = clients[i];
-            location = client.location;
-            if (location.url == url && location.line == lineNumber)
-            {
-                if(bpIndex || bpIndex == 0)
-                {
-                    clients[bpIndex].remove(function()
-                    {
-                    });
-                    clients.splice(bpIndex, 1);
-                    bpIndex = --i;
-                }
-                else
-                {
-                    bpIndex = i;
-                }
-            }
-        }
-    },
-
-    breakpointAcotrExists: function(context, bpClient)
+    breakpointActorExists: function(context, bpClient)
     {
         var clients = context.breakpointClients;
         if (!clients)
