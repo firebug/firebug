@@ -18,13 +18,12 @@ var Cu = Components.utils;
 
 Cu["import"]("resource://firebug/storageService.js");
 
-// xxxHonza: create shared space for breakpoint constants.
-const BP_NORMAL = 1;
-const BP_MONITOR = 2;
-const BP_UNTIL = 4;
-const BP_ONRELOAD = 8;  // XXXjjb: This is a mark for the UI to test
-const BP_ERROR = 16;
-const BP_TRACE = 32; // BP used to initiate traceCalls
+var BP_NORMAL = 1;
+var BP_MONITOR = 2;
+var BP_UNTIL = 4;
+var BP_ONRELOAD = 8;  // XXXjjb: This is a mark for the UI to test
+var BP_ERROR = 16;
+var BP_TRACE = 32; // BP used to initiate traceCalls
 
 var Trace = FBTrace.to("DBG_BREAKPOINTSTORE");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -47,6 +46,16 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 {
     dispatchName: "BreakpointStore",
     breakpoints: {},
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoint Types
+
+    BP_NORMAL: BP_NORMAL,
+    BP_MONITOR: BP_MONITOR,
+    BP_UNTIL: BP_UNTIL,
+    BP_ONRELOAD: BP_ONRELOAD,
+    BP_ERROR: BP_ERROR,
+    BP_TRACE: BP_TRACE,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
@@ -178,15 +187,16 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         {
             var bp = bps[i];
 
+            // xxxHonza: what if BP_NORMAL is set too?
             if (bp.type == BP_UNTIL)
                 continue;
 
             var cleanBP = {};
-            
+
             for (var p in bp)
                 cleanBP[p] = bp[p];
 
-            // Convert line indexes(zero-based) to line numbers(one-based)
+            // Convert line indexes (zero-based) to line numbers(one-based)
             cleanBP.lineNo = cleanBP.lineNo + 1;
 
             // Do not persist 'params' field. It's for transient data only.
@@ -202,8 +212,10 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addBreakpoint: function(url, lineNo)
+    addBreakpoint: function(url, lineNo, type)
     {
+        type = type || BP_NORMAL;
+
         if (!url || !lineNo)
         {
             TraceError.sysout("breakpointStore.addBreakpoint; ERROR invalid arguments " +
@@ -211,28 +223,47 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             return;
         }
 
-        if (this.findBreakpoint(url, lineNo))
+        var bp = this.findBreakpoint(url, lineNo, -1);
+
+        // Bail out if exactly the same breakpoint already exists.
+        if (bp && bp.type & type)
         {
             TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp");
             return;
         }
 
-        if (!this.breakpoints[url])
-            this.breakpoints[url] = [];
+        // Either extend an existing breakpoint type (in case there are two different bps
+        // on the same line) else crate a new breakpoint.
+        if (bp)
+        {
+            bp.type |= type;
 
-        var bp = new Breakpoint(url, lineNo, false);
-        this.breakpoints[url].push(bp);
+            Trace.sysout("breakpointStore.addBreakpoint; EXTENDED BP: " +
+                url + " (" + lineNo + ")", bp);
+        }
+        else
+        {
+            if (!this.breakpoints[url])
+                this.breakpoints[url] = [];
+
+            var bp = new Breakpoint(url, lineNo, false, type);
+            this.breakpoints[url].push(bp);
+
+            Trace.sysout("breakpointStore.addBreakpoint; NEW BP: " +
+                url + " (" + lineNo + ")", bp);
+        }
+
+        // Do not forget to save immediatelly and notify listenrs (typically UI update).
         this.save(url);
-
-        Trace.sysout("breakpointStore.addBreakpoint; " + url + " (" + lineNo + ")", bp);
-
         this.dispatch("onBreakpointAdded", [bp]);
 
         return bp;
     },
 
-    removeBreakpoint: function(url, lineNo)
+    removeBreakpoint: function(url, lineNo, type)
     {
+        type = type || BP_NORMAL;
+
         var bps = this.getBreakpoints(url);
         if (!bps)
             return null;
@@ -243,8 +274,13 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             var bp = bps[i];
             if (bp.lineNo === lineNo)
             {
-                bps.splice(i, 1);
-                removedBp = bp;
+                bp.type &= ~type;
+
+                if (!bp.type)
+                {
+                    bps.splice(i, 1);
+                    removedBp = bp;
+                }
             }
         }
 
@@ -261,8 +297,10 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         return removedBp;
     },
 
-    findBreakpoint: function(url, lineNo)
+    findBreakpoint: function(url, lineNo, type)
     {
+        type = type || BP_NORMAL;
+
         var bps = this.getBreakpoints(url);
         if (!bps)
             return null;
@@ -270,7 +308,10 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-            if (bp.lineNo === lineNo)
+            if (bp.lineNo != lineNo)
+                continue;
+
+            if (bp.type & type || type == -1)
                 return bp;
         }
 
@@ -392,8 +433,26 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
     },
 
-    enumerateMonitors: function()
+    enumerateMonitors: function(url, callback)
     {
+        if (url)
+        {
+            var urlBreakpoints = this.getBreakpoints(url);
+            if (urlBreakpoints)
+            {
+                for (var i=0; i<urlBreakpoints.length; ++i)
+                {
+                    var bp = urlBreakpoints[i];
+                    if (bp.type & BP_MONITOR)
+                        callback(bp);
+                }
+            }
+        }
+        else
+        {
+            for (var url in breakpoints)
+                this.enumerateBreakpoints(url, callback);
+        }
     }
 });
 

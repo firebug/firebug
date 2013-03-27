@@ -7,7 +7,7 @@ function(FBTrace) {
 
 // ********************************************************************************************* //
 
-function Breakpoint(href, lineNumber, disabled)
+function Breakpoint(href, lineNumber, disabled,type)
 {
     this.href = href;
     this.lineNo = lineNumber;
@@ -16,6 +16,7 @@ function Breakpoint(href, lineNumber, disabled)
     this.hitCount = -1;
     this.hit = 0;
     this.condition = null;
+    this.type = type;
 
     // Transient parameters (not serialized into breakpoints.json)
     this.params = {};
@@ -54,6 +55,11 @@ Breakpoint.prototype =
     isDisabled: function()
     {
         return this.disabled;
+    },
+
+    isNormal: function()
+    {
+        return this.type & 1; //BP_NORMAL
     }
 }
 

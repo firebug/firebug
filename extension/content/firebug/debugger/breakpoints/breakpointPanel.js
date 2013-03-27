@@ -160,6 +160,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
     },
 
+    // xxxHonza: this function is also responsible for setting the bp name
+    // it should be done just once and probably somewhere else.
     extractBreakpoints: function(context)
     {
         var breakpoints = [];
@@ -170,10 +172,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         for (var url in context.compilationUnits)
         {
+            var unit = context.compilationUnits[url];
+
             BreakpointStore.enumerateBreakpoints(url, function(bp)
             {
                 var line = bp.lineNo;
-                var unit = context.compilationUnits[url];
                 var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
                 var sourceLine = context.sourceCache.getLine(url, line);
 
@@ -193,17 +196,19 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
                 var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
                 var source = context.sourceCache.getLine(url, line);
                 errorBreakpoints.push(new Breakpoint(name, url, line, true, source));
-            }});
-
-            BreakpointStore.enumerateMonitors(url, {call: function(url, line, props)
-            {
-                // some url in this sourceFileMap has changed, we'll be back.
-                if (renamer.checkForRename(url, line, props))
-                    return;
-
-                var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
-                monitors.push(new Breakpoint(name, url, line, true, ""));
             }});*/
+
+            BreakpointStore.enumerateMonitors(url, function(bp)
+            {
+                var line = bp.lineNo;
+                var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
+                var sourceLine = context.sourceCache.getLine(url, line);
+
+                bp.setName(name);
+                bp.setSourceLine(sourceLine);
+
+                monitors.push(bp);
+            });
         }
 
         var result = {

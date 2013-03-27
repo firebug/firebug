@@ -287,8 +287,21 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.stopped = true;
         context.currentPauseActor = packet.actor;
 
+        // Notify listeners, about debugger pause event. Listeners can used this event
+        // to decide whether the debugger should really pause (return value false) or
+        // rather be immediatelly resumed (return value true).
+        // xxxHonza: all listeners should be executed, which is not the case of dispatch2
+        // Do we need dispatch3? Or a new parameter?
+        if (this.dispatch2("onDebuggerPaused", [context, event, packet]))
+        {
+            Trace.sysout("debuggerTool.paused; Listeners want to resume debugger.");
+            this.resume(context);
+            return;
+        }
+
         // Apply breakpoint condition logic. If a breakpoint-condition evaluation
         // result is false, the debugger is immediatelly resumed.
+        // xxxHonza: the logic could be implemented as a listener.
         if (!this.checkBreakpointCondition(context, event, packet))
             return;
 

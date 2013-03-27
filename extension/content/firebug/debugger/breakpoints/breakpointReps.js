@@ -136,7 +136,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         }
         else if (groupName == "monitors")
         {
-            //FBS.unmonitor(href, lineNumber);
+            BreakpointStore.removeBreakpoint(href, lineNumber, BreakpointStore.BP_MONITOR);
         }
     },
 

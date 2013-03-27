@@ -377,22 +377,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return this.location.getURL();
     },
 
-    setBreakpoint: function(bp)
+    setBreakpoint: function(url, lineNo)
     {
-        Trace.sysout("scriptPanel.setBreakpoint; " + bp.lineNo, bp);
+        Trace.sysout("scriptPanel.setBreakpoint; " + url + " (" + lineNo + ")");
 
-        var existedBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
-        if (!existedBp)
-        {
-            this.scriptView.addBreakpoint(bp);
+        var bp = BreakpointStore.findBreakpoint(url, lineNo);
 
-            // Persist the breakpoint on the client side.
-            BreakpointStore.addBreakpoint(bp.href, bp.lineNo);
-        }
-        else
+        // Bail out if a (normal) breakpoint is already there.
+        if (bp && bp.isNormal())
         {
-            Trace.sysout("scriptPanel.setBreakpoint; ERROR Can't set breakpoint", existedBp);
+            Trace.sysout("scriptPanel.setBreakpoint; ERROR breakpoint already exists", bp);
+            return;
         }
+
+        // Persist the breakpoint on the client side.
+        BreakpointStore.addBreakpoint(url, lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -507,6 +506,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var self = this;
         function doSetBreakpoint(response, bpClient)
         {
+            Trace.sysout("scriptPanel.addBreakpoint; doSetBreakpoint", arguments);
+
             var actualLocation = response.actualLocation;
 
             // Remove temporary breakpoint(loading icon), is waiting for the response.
@@ -532,8 +533,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 self.scrollToLine(bp.lineNo);
             }
 
-            Trace.sysout("scriptPanel.addBreakpoint; callback " + bp.condition, bp);
-
             if (bp.condition != null)
             {
                 var existedBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
@@ -543,10 +542,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             }
             else
             {
-                self.setBreakpoint({
-                    lineNo: bp.lineNo,
-                    href: self.location.href
-                });
+                self.setBreakpoint(self.location.href, bp.lineNo);
             }
 
             // Cache the breakpoint-client object since it has API for removing itself.
@@ -676,7 +672,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!cancel)
         {
             if (!availableBp)
-                this.setBreakpoint(bp);
+                this.setBreakpoint(bp.href, bp.lineNo);
 
             value = value ? value : null;
             BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
@@ -713,6 +709,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onBreakpointAdded: function(bp)
     {
+        Trace.sysout("scriptPanel.onBreakpointAdded;", bp);
+
         this.scriptView.addBreakpoint(bp);
     },
 

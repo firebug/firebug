@@ -48,16 +48,64 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
     },
 
+    initContext: function(context)
+    {
+        var tool = context.getTool("debugger");
+        tool.addListener(this);
+    },
+
+    destroyContext: function(context)
+    {
+        var tool = context.getTool("debugger");
+        tool.removeListener(this);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Firebug.Debugger listener
+    // DebuggerTool Listener
+
+    onDebuggerPaused: function(context, event, packet)
+    {
+        // The function monitor is only interested in 'breakpoint' type of interrupts.
+        var type = packet.why.type;
+        if (type != "breakpoint")
+            return false;
+
+        var frame = context.stoppedFrame;
+        var bp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1,
+            BreakpointStore.BP_MONITOR);
+
+        Trace.sysout("functionMonitor.onDebuggerPaused; " + frame.href + " (" +
+            frame.line + ") " + (bp ? "monitor exists" : "no monitor"), packet);
+
+        if (!bp)
+            return false;
+
+        // Log into the Console panel if there is a monitor.
+        this.onMonitorScript(context, frame);
+
+        // Let's see if there is also a standard breakpoint. If yes, make sure the
+        // debugger breaks (by returning false).
+        bp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1);
+        if (bp)
+        {
+            Trace.sysout("functionMonitor.onDebuggerPaused; There is also a normal BP", bp);
+            return false;
+        }
+
+        // ... otherwise do not break and just resume the debugger.
+        return true;
+    },
 
     onMonitorScript: function(context, frame)
     {
-        var stackTrace = StackFrame.buildStackTrace(frame);
+        Trace.sysout("functionMonitor.onMonitorScript;", frame);
+
+        // xxxHonza: how to get the current stack trace?
+        var stackTrace = null;//StackFrame.buildStackTrace(frame);
         Firebug.Console.log(new FunctionLog(frame, stackTrace), context);
     },
 
-    onFunctionCall: function(context, frame, depth, calling)
+    /*onFunctionCall: function(context, frame, depth, calling)
     {
         //var url = Url.normalizeURL(frame.script.fileName);
         //var sourceFile = context.sourceFileMap[url];
@@ -73,7 +121,7 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             Firebug.Console.openGroup([frame, "depth:" + depth], context);
         else
             Firebug.Console.closeGroup(context);
-    },
+    },*/
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debugging and monitoring
@@ -120,26 +168,22 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             Trace.sysout("functionMonitor.monitorScript; " + script.url + ", " +
                 script.startLine, fn);
 
-            if (mode == "debug")
-            {
-                var location = {line: script.startLine, url: script.url};
+            var location = {line: script.startLine, url: script.url};
 
-                // If the first line of the script contains no code, slide down to
-                // the nextline the has runnable code.
-                location = DebuggerLib.getNextExecutableLine(context, location);
+            // If the first line of the script contains no code, slide down to
+            // the nextline the has runnable code.
+            location = DebuggerLib.getNextExecutableLine(context, location);
 
-                // Create a new breakpoint.
-                tool.setBreakpoint(context, location.url, location.line - 1,
-                function(response, bpClient)
-                {
-                    BreakpointStore.addBreakpoint(bpClient.location.url,
-                        bpClient.location.line - 1);
-                });
-            }
-            else if (mode == "monitor")
+            // Create a new breakpoint.
+            tool.setBreakpoint(context, location.url, location.line - 1,
+            function(response, bpClient)
             {
-                this.monitor(context, scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
-            }
+                var type = (mode == "monitor") ? BreakpointStore.BP_MONITOR :
+                    BreakpointStore.BP_NORMAL;
+
+                BreakpointStore.addBreakpoint(bpClient.location.url,
+                    bpClient.location.line - 1, type);
+            });
         }
     },
 
@@ -152,48 +196,22 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             Trace.sysout("functionMonitor.unmonitorScript; " + script.url + ", " +
                 script.startLine, fn);
 
-            if (mode == "debug")
-            {
-                var location = {line: script.startLine, url: script.url};
-                location = DebuggerLib.getNextExecutableLine(context, location);
-                BreakpointStore.removeBreakpoint(location.url, location.line - 1);
-            }
-            else if (mode == "monitor")
-            {
-                this.unmonitor(context, scriptInfo.sourceFile.href, scriptInfo.lineNo);
-            }
+            var location = {line: script.startLine, url: script.url};
+            location = DebuggerLib.getNextExecutableLine(context, location);
+
+            var type = (mode == "monitor") ? BreakpointStore.BP_MONITOR :
+                BreakpointStore.BP_NORMAL;
+
+            BreakpointStore.removeBreakpoint(location.url, location.line - 1, type);
         }
     },
 
-    monitor: function(context, sourceFile, lineNo, debuggr)
+    // xxxHonza: this will be needed for the context menu.
+    isMonitored: function(url, linNo)
     {
-        // xxxHonza
-        return;
-
-        if (lineNo == -1)
-            return null;
-
-        var bp = this.addBreakpoint(BP_MONITOR, sourceFile, lineNo, null, debuggr);
-        if (bp)
-        {
-            ++monitorCount;
-            dispatch(debuggers, "onToggleMonitor", [sourceFile.href, lineNo, true]);
-        }
-
-        return bp;
-    },
-
-    unmonitor: function(href, lineNo)
-    {
-        // xxxHonza
-        return;
-
-        if (lineNo != -1 && this.removeBreakpoint(BP_MONITOR, href, lineNo))
-        {
-            --monitorCount;
-            dispatch(debuggers, "onToggleMonitor", [ href, lineNo, false]);
-        }
-    },
+        var bp = lineNo != -1 ? BreakpointStore.findBreakpoint(url, lineNo) : null;
+        return bp && bp.type & BreakpointStore.BP_MONITOR;
+    }
 });
 
 // ********************************************************************************************* //
@@ -239,7 +257,7 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 
     hasStackTrace: function(object)
     {
-        return true;
+        return !!object.stackTrace;
     },
 
     getTitle: function(object)
@@ -318,32 +336,36 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 function debug(context, args)
 {
     var fn = args[0];
-
     FunctionMonitor.monitorFunction(context, fn, "debug");
+    var msg = Locale.$STRF("functionMonitor.Breakpoint_created", [fn.name]);
+    Firebug.Console.logFormatted([msg], context, "info");
     return Firebug.Console.getDefaultReturnValue(context.window);
 }
 
 function undebug(context, args)
 {
     var fn = args[0];
-
     FunctionMonitor.unmonitorFunction(context, fn, "debug");
+    var msg = Locale.$STRF("functionMonitor.Breakpoint_removed", [fn.name]);
+    Firebug.Console.logFormatted([msg], context, "info");
     return Firebug.Console.getDefaultReturnValue(context.window);
 }
 
 function monitor(context, args)
 {
     var fn = args[0];
-
     FunctionMonitor.monitorFunction(context, fn, "monitor");
+    var msg = Locale.$STRF("functionMonitor.Monitor_created", [fn.name]);
+    Firebug.Console.logFormatted([msg], context, "info");
     return Firebug.Console.getDefaultReturnValue(context.window);
 }
 
-function unmonitor(fn)
+function unmonitor(context, args)
 {
     var fn = args[0];
-
     FunctionMonitor.unmonitorFunction(context, fn, "monitor");
+    var msg = Locale.$STRF("functionMonitor.Monitor_removed", [fn.name]);
+    Firebug.Console.logFormatted([msg], context, "info");
     return Firebug.Console.getDefaultReturnValue(context.window);
 }
 

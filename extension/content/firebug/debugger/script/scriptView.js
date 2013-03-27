@@ -293,7 +293,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.dispatch("getBreakpoints", [bps]);
 
         for (var i=0; i<bps.length; i++)
-            this.addBreakpoint(bps[i]);
+        {
+            var bp = bps[i];
+
+            // Only standard breakpoints are displayed as red circles
+            // in the breakpoint column.
+            if (bp.isNormal())
+                this.addBreakpoint(bp);
+        }
     },
 
     onBreakpointChange: function(event)
@@ -348,6 +355,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     addBreakpoint: function(bp)
     {
         if (!this.editor)
+            return;
+
+        if (!bp.isNormal())
             return;
 
         var self = this;
