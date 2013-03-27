@@ -193,7 +193,7 @@ Menu.optionMenu = function(label, option, tooltiptext)
     return {
         label: label,
         type: "checkbox",
-        checked: Firebug[option],
+        checked: Options.get(option),
         option: option,
         tooltiptext: tooltiptext,
         command: function() {

@@ -94,7 +94,7 @@ pref("extensions.firebug.maxScriptLineLength", 10000);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
-pref("extensions.firebug.hideStackFrameArguments", false);
+pref("extensions.firebug.showStackFrameArguments", true);
 
 // DOM
 pref("extensions.firebug.showUserProps", true);
