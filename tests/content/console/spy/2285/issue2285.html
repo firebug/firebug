@@ -19,7 +19,13 @@
 <ol>
 <li>Open Firebug and enable the Console panel.</li>
 <li>Make sure <i>Show XMLHttpRequests</i> option is on.</li>
-<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+
+<li>Firefox -21: Click on the <code style="color:green">Execute Test</code> button 
+<button id="testButton1" onclick="onMultipart1()">Execute Test</button></li>
+
+<li>Firefox 22+: Click on the <code style="color:green">Execute Test</code> button 
+<button id="testButton2" onclick="onMultipart2()">Execute Test</button></li>
+
 <li>Click button below and wait till you see number
     <span style="color:green">4</span> here:
     <span id="content" style="color:red">0</span>
@@ -30,10 +36,8 @@
 </li>
 </ol>
 
-<button id="testButton" onclick="onMultipart()">Execute Test</button>
-
 <script type="text/javascript">
-function onMultipart()
+function onMultipart1()
 {
     var content = document.getElementById("content");
 
@@ -55,6 +59,33 @@ function onMultipart()
                 event.initEvent("test-done", true, false);
                 document.dispatchEvent(event);
             }
+        }
+    }
+
+    request.send(null);
+}
+
+function onMultipart2()
+{
+    var content = document.getElementById("content");
+
+    var request = new XMLHttpRequest();
+    request.multipart = true;
+
+    var counter = 0;
+    content.innerHTML = counter;
+
+    request.open("POST", "issue2285-1.php", true);
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 3 && request.status == 200)
+            content.innerHTML = ++counter;
+
+        if (request.readyState == 4 && request.status == 200)
+        {
+            var event = document.createEvent("Events");
+            event.initEvent("test-done", true, false);
+            document.dispatchEvent(event);
         }
     }
 
