@@ -6,6 +6,7 @@ define([
     "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/stack/stackFrameRep",
     "firebug/debugger/script/sourceFile",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -14,9 +15,10 @@ define([
     "firebug/lib/locale",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/debugger/stack/stackTrace",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, SourceFile, Events, Css, Dom,
-    Url, Locale, DebuggerLib, BreakpointStore) {
+function(FBTrace, Obj, Domplate, Reps, StackFrame, StackFrameRep, SourceFile, Events, Css, Dom,
+    Url, Locale, DebuggerLib, BreakpointStore, StackTrace) {
 
 with (Domplate) {
 
@@ -98,10 +100,11 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     onMonitorScript: function(context, frame)
     {
-        Trace.sysout("functionMonitor.onMonitorScript;", frame);
+        var frames = DebuggerLib.getCurrentFrames(context);
+        var stackTrace = StackTrace.buildStackTrace(context, frames);
 
-        // xxxHonza: how to get the current stack trace?
-        var stackTrace = null;//StackFrame.buildStackTrace(frame);
+        Trace.sysout("functionMonitor.onMonitorScript; stackTrace:", stackTrace);
+
         Firebug.Console.log(new FunctionLog(frame, stackTrace), context);
     },
 
@@ -230,6 +233,7 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 {
     className: "functionCall",
 
+    // xxxHonza: StackFrameRep duplication
     tag:
         Reps.OBJECTBLOCK({$hasTwisty: "$object|hasStackTrace", _repObject: "$object",
             onclick: "$onToggleStackTrace"},
@@ -272,17 +276,17 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
 
     getSourceLink: function(object)
     {
-        return Reps.StackFrame.getSourceLink(object.frame);
+        return StackFrameRep.getSourceLink(object.frame);
     },
 
     getSourceLinkTitle: function(object)
     {
-        return Reps.StackFrame.getSourceLinkTitle(object.frame);
+        return StackFrameRep.getSourceLinkTitle(object.frame);
     },
 
     argIterator: function(object)
     {
-        return Reps.StackFrame.argIterator(object.frame);
+        return StackFrameRep.argIterator(object.frame);
     },
 
     onToggleStackTrace: function(event)
@@ -307,7 +311,9 @@ var FunctionMonitorRep = domplate(Firebug.Rep,
         if (Css.hasClass(traceBox, "opened"))
         {
             var functionCall = objectBox.repObject;
-            Reps.StackTrace.tag.append({object: functionCall.stackTrace}, traceBox);
+            var stackTrace = functionCall.stackTrace;
+            var rep = Firebug.getRep(stackTrace);
+            rep.tag.append({object: stackTrace}, traceBox);
         }
         else
         {

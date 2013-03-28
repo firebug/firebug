@@ -84,6 +84,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (this.context.consoleReloadWarning)  // we have not yet injected the console
                 this.insertReloadWarning();
         }
+
+        // Update visibility of stack frame arguments.
+        var name = "showStackFrameArguments";
+        this.updateOption(name, Options.get(name));
     },
 
     destroy: function(state)
@@ -210,6 +214,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             {
                 Firebug.Console.onToggleFilter(context, value);
             });
+        }
+        else if (name == "showStackFrameArguments")
+        {
+            if (value)
+                Css.removeClass(this.panelNode, "hideArguments");
+            else
+                Css.setClass(this.panelNode, "hideArguments");
         }
     },
 

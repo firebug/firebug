@@ -68,6 +68,9 @@
  * (see extensions.firebug.showStackFrameArguments).
  */
 .objectBox-stackFrame.opened .arguments,
+.objectBox-stackFrame .arguments.hide,
+.panelNode-console.hideArguments .objectBox-stackFrame .arguments,
+.panelNode-console.hideArguments .objectBox-functionCall .arguments,
 .panelNode-callstack.hideArguments .objectBox-stackFrame .arguments {
     display: none;
 }

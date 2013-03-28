@@ -50,7 +50,7 @@ StackTrace.prototype =
 // ********************************************************************************************* //
 // Static Methods
 
-StackTrace.buildStackTrace = function(frames, context)
+StackTrace.buildStackTrace = function(context, frames)
 {
     var trace = new StackTrace();
     for (var i=0; frames && i<frames.length; i++)

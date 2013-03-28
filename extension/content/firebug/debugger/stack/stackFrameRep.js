@@ -13,9 +13,11 @@ define([
     "firebug/chrome/reps",
     "firebug/debugger/script/sourceLink",
     "firebug/lib/css",
+    "firebug/lib/options",
+    "firebug/lib/dom",
 ],
 function(FBTrace, Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
-    SourceLink, Css) {
+    SourceLink, Css, Options, Dom) {
 
 with (Domplate) {
 
@@ -30,6 +32,8 @@ const Ci = Components.interfaces;
 
 var StackFrameRep = domplate(Firebug.Rep,
 {
+    className: "stackFrame",
+
     tag:
         FirebugReps.OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
             onclick: "$onToggleArguments"},
@@ -126,10 +130,6 @@ var StackFrameRep = domplate(Firebug.Rep,
 
                 items.push({value: arg, tag: tag, delim: delim});
             }
-
-            if (FBTrace.DBG_DOMPLATE)
-                FBTrace.sysout("reps.stackframe args[" + i + "]: " + arg.name + " = " +
-                    arg.value, {arg: arg, item: items[items.length - 1]});
         }
 
         return items;
@@ -170,8 +170,6 @@ var StackFrameRep = domplate(Firebug.Rep,
 
     expandArguments: function(target)
     {
-        FBTrace.sysout("expandArguments");
-        
         if (Css.hasClass(target, "opened"))
             return;
 
@@ -200,8 +198,6 @@ var StackFrameRep = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Rep
-
-    className: "stackFrame",
 
     supportsObject: function(object, type)
     {

@@ -136,6 +136,17 @@ DebuggerLib.getThreadActor = function(context)
 }
 
 // ********************************************************************************************* //
+// Stack Frames
+
+DebuggerLib.getCurrentFrames = function(context)
+{
+    var threadActor = this.getThreadActor(context);
+    var request = {};
+    var response = threadActor.onFrames(request);
+    return response.frames;
+}
+
+// ********************************************************************************************* //
 // Executable Lines
 
 DebuggerLib.getNextExecutableLine = function(context, aLocation)

@@ -404,12 +404,12 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     framesadded: function(context)
     {
-        Trace.sysout("debuggerTool.framesadded; ", arguments);
-
         // Get frames from ThreadClient's stack-frame cache and build stack trace object,
         // which is stored in the context.
         var frames = context.activeThread.cachedFrames;
-        context.currentTrace = StackTrace.buildStackTrace(frames, context);
+        Trace.sysout("debuggerTool.framesadded; frames: ", frames);
+
+        context.currentTrace = StackTrace.buildStackTrace(context, frames);
 
         // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
         this.dispatch("framesadded", [context.currentTrace]);
