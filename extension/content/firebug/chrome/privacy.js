@@ -15,6 +15,14 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
+try
+{
+    Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
+}
+catch (err)
+{
+}
+
 // ********************************************************************************************* //
 
 /**
@@ -80,13 +88,10 @@ var Privacy = Obj.extend(Firebug.Module,
     {
         try
         {
-            // First check existence of the new PB API
-            Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
-
-            // Get firebugFrame.xul and check privaate mode (it's the same as
-            // for the top parent window).
-            var win = Firebug.chrome.window;
-            return PrivateBrowsingUtils.isWindowPrivate(win);
+            // First check existence of the new PB API. Get firebugFrame.xul and check
+            // private mode (it's the same as for the top parent window).
+            if (typeof PrivateBrowsingUtils != "undefined")
+                return PrivateBrowsingUtils.isWindowPrivate(Firebug.chrome.window);
         }
         catch (e)
         {

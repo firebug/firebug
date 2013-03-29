@@ -18,6 +18,14 @@ Cu.import("resource://gre/modules/FileUtils.jsm");
 
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
+try
+{
+    Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
+}
+catch (err)
+{
+}
+
 // ********************************************************************************************* //
 // Implementation
 
@@ -324,12 +332,10 @@ var ObjectPersister =
 
         try
         {
-            // For Fx 22+
-            Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
-
             // Get firebugFrame.xul and check privaate mode (it's the same as
             // for the top parent window).
-            return PrivateBrowsingUtils.isWindowPrivate(win);
+            if (typeof PrivateBrowsingUtils != "undefined")
+                return PrivateBrowsingUtils.isWindowPrivate(win);
         }
         catch (e)
         {
