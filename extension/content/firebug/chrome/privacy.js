@@ -78,14 +78,9 @@ var Privacy = Obj.extend(Firebug.Module,
 
     isPrivateBrowsing: function()
     {
-        // In case where nsIPrivateBrowsingService still exists and the following
-        // property is properly initialized in update() method (before Fx22)
-        if (typeof this.privateBrowsingEnabled != "undefined")
-            return this.privateBrowsingEnabled;
-
         try
         {
-            // For Fx 22+
+            // First check existence of the new PB API
             Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
 
             // Get firebugFrame.xul and check privaate mode (it's the same as
@@ -95,9 +90,11 @@ var Privacy = Obj.extend(Firebug.Module,
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Privacy.isPrivateBrowsing; EXCEPTION " + e, e);
         }
+
+        // OK, use nsIPrivateBrowsingService, it should still exist and the following
+        // property should be properly initialized in update() method
+        return this.privateBrowsingEnabled;
     }
 });
 
