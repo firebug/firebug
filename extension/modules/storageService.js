@@ -311,21 +311,6 @@ var ObjectPersister =
     {
         try
         {
-            // Unfortunatelly the "firebug/chrome/privacy" module can't be used
-            // since this scope is JavaScript code module.
-            // xxxHonza: storageService should be converted into AMD (but it's used
-            // in firebug-service.js, which is also JS code module).
-            // firebug-service.js is gone in JSD2 branch
-            var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-                .getService(Components.interfaces.nsIPrivateBrowsingService);
-            return pbs.privateBrowsingEnabled;
-        }
-        catch (e)
-        {
-        }
-
-        try
-        {
             // If |win| is null, the top most window is used to figure out
             // whether the private mode is on or off.
             if (!win)
@@ -348,8 +333,21 @@ var ObjectPersister =
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("storageService.isPrivateBrowsing; EXCEPTION " + e, e);
+        }
+
+        try
+        {
+            // Unfortunatelly the "firebug/chrome/privacy" module can't be used
+            // since this scope is JavaScript code module.
+            // xxxHonza: storageService should be converted into AMD (but it's used
+            // in firebug-service.js, which is also JS code module).
+            // firebug-service.js is gone in JSD2 branch
+            var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+                .getService(Components.interfaces.nsIPrivateBrowsingService);
+            return pbs.privateBrowsingEnabled;
+        }
+        catch (e)
+        {
         }
 
         return false;
