@@ -339,7 +339,13 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     getStore: function()
     {
         if (!this.store)
-            this.store = storageScope.StorageService.getStorage("includeAliases.json");
+        {
+            // Pass also the parent window to the new storage. The window will be
+            // used to figure out whether the browser is running in private mode.
+            // If yes, no data will be persisted.
+            this.store = storageScope.StorageService.getStorage("includeAliases.json",
+                Firebug.chrome.window);
+        }
 
         // let's log when the store could not be opened:
         if (!this.store)

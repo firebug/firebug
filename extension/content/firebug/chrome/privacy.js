@@ -11,14 +11,18 @@ function(FBTrace, Obj, Arr, Events) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
 
 // ********************************************************************************************* //
 
 /**
  * No data should be written if Firefox is set to privatebrowsing.
  * don't forget to check it before access (issue 2923).
+ * 
+ * xxxHonza: as soon as Fx 22 is the min for Firebug most of the methods can be removed.
+ * The most important one will be the isPrivateBrowsing
  */
 var Privacy = Obj.extend(Firebug.Module,
 {
@@ -27,8 +31,8 @@ var Privacy = Obj.extend(Firebug.Module,
         if (this.observerService)
             return;
 
-        this.observerService = Components.classes["@mozilla.org/observer-service;1"]
-            .getService(Components.interfaces.nsIObserverService);
+        this.observerService = Cc["@mozilla.org/observer-service;1"]
+            .getService(Ci.nsIObserverService);
 
         this.observerService.addObserver(this, "private-browsing", false);
 
@@ -44,8 +48,10 @@ var Privacy = Obj.extend(Firebug.Module,
     {
         try
         {
-            var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-                .getService(Components.interfaces.nsIPrivateBrowsingService);
+            // xxxHonza: this component has been removed in Firefox 22
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=845063
+            var pbs = Cc["@mozilla.org/privatebrowsing;1"]
+                .getService(Ci.nsIPrivateBrowsingService);
 
             this.privateBrowsingEnabled = pbs.privateBrowsingEnabled;
 
@@ -57,8 +63,10 @@ var Privacy = Obj.extend(Firebug.Module,
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Privacy.update EXCEPTION " + e, e);
+            // nsIPrivateBrowsingService has been removed since Fx 22 so, don't display
+            // the error message.
+            //if (FBTrace.DBG_ERRORS)
+            //    FBTrace.sysout("Privacy.update EXCEPTION " + e, e);
         }
     },
 
@@ -70,8 +78,27 @@ var Privacy = Obj.extend(Firebug.Module,
 
     isPrivateBrowsing: function()
     {
-        return this.privateBrowsingEnabled;
-    },
+        // In case where nsIPrivateBrowsingService still exists and the following
+        // property is properly initialized in update() method (before Fx22)
+        if (typeof this.privateBrowsingEnabled != "undefined")
+            return this.privateBrowsingEnabled;
+
+        try
+        {
+            // For Fx 22+
+            Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
+
+            // Get firebugFrame.xul and check privaate mode (it's the same as
+            // for the top parent window).
+            var win = Firebug.chrome.window;
+            return PrivateBrowsingUtils.isWindowPrivate(win);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Privacy.isPrivateBrowsing; EXCEPTION " + e, e);
+        }
+    }
 });
 
 // ********************************************************************************************* //
