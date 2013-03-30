@@ -25,7 +25,7 @@ function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Cons
  * @param {Object} context
  * @param {Object} win
  */
-function createFirebugConsole(context, win, defaultReturnValue)
+function createFirebugConsole(context, win, defaultReturnValue, showSourceLink)
 {
     // Defined as a chrome object, but exposed into the web content scope.
     var console = {
@@ -37,22 +37,22 @@ function createFirebugConsole(context, win, defaultReturnValue)
 
     console.log = function log()
     {
-        return logFormatted(arguments, "log", true);
+        return logFormatted(arguments, "log", showSourceLink);
     };
 
     console.debug = function debug()
     {
-        return logFormatted(arguments, "debug", true);
+        return logFormatted(arguments, "debug", showSourceLink);
     };
 
     console.info = function info()
     {
-        return logFormatted(arguments, "info", true);
+        return logFormatted(arguments, "info", showSourceLink);
     };
 
     console.warn = function warn()
     {
-        return logFormatted(arguments, "warn", true);
+        return logFormatted(arguments, "warn", showSourceLink);
     };
 
     console.exception = function exception()
@@ -152,7 +152,7 @@ function createFirebugConsole(context, win, defaultReturnValue)
             var frameCounter = context.frameCounters[frameId];
             if (!frameCounter)
             {
-                var logRow = logFormatted(["0"], null, true, true);
+                var logRow = logFormatted(["0"], null, showSourceLink, true);
 
                 frameCounter = {logRow: logRow, count: 1};
                 context.frameCounters[frameId] = frameCounter;
@@ -248,7 +248,7 @@ function createFirebugConsole(context, win, defaultReturnValue)
         else
         {
             Errors.increaseCount(context);
-            return logFormatted(arguments, "error", true);  // user already added info
+            return logFormatted(arguments, "error", showSourceLink);  // user already added info
         }
     };
 

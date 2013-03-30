@@ -72,7 +72,8 @@ function createFirebugCommandLine(context, win)
 
     // Get the console Object.
     var defaultReturnValue = Firebug.Console.getDefaultReturnValue(win);
-    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win, defaultReturnValue);
+    var console = Firebug.ConsoleExposed.createFirebugConsole(context, win,
+        defaultReturnValue, false);
 
     // The command line API instance.
     var commands = CommandLineAPI.getCommandLineAPI(context);
