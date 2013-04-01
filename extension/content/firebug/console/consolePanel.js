@@ -493,7 +493,22 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // are dynamically consumed during the rendering process.
         // This allows to derive new templates from an existing ones, without breaking
         // the default subject set within domplate() function.
-        return rep.tag.append({object: object}, row, rep);
+        try
+        {
+            // XXX Hack until we get IF support in domplate (or bug 116083 gets fixed).
+            var tag = rep.tag;
+            if (rep === FirebugReps.Text)
+                tag = rep.getWhitespaceCorrectedTag(object);
+            return tag.append({object: object}, row, rep);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
+                FBTrace.sysout("consolePanel.appendObject; rep " + rep.className, rep);
+            }
+        }
     },
 
     appendFormatted: function(objects, row, rep)
@@ -590,7 +605,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
             else
             {
-                node = FirebugReps.Text.tag.append({object: part}, row);
+                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
+                node = tag.append({object: part}, row);
             }
 
             // Apply custom style if available.
