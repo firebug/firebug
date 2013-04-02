@@ -41,12 +41,10 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
     initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
-        Firebug.connection.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.connection.removeListener(this);
         Firebug.Module.shutdown.apply(this, arguments);
     },
 
