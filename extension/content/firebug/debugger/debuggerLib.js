@@ -190,6 +190,16 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
 }
 
 // ********************************************************************************************* //
+// Debugger
+
+// xxxHonza: of course we need remote protocol support for this.
+DebuggerLib.breakNow = function(context, callback)
+{
+    var dGlobal = this.getDebuggeeGlobal(context);
+    return dGlobal.evalInGlobal("debugger");
+}
+
+// ********************************************************************************************* //
 // Local helpers
 
 /**

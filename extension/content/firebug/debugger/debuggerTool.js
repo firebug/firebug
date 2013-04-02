@@ -295,7 +295,14 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         if (this.dispatch2("onDebuggerPaused", [context, event, packet]))
         {
             Trace.sysout("debuggerTool.paused; Listeners want to resume debugger.");
-            this.resume(context);
+
+            // Get resume limit type from the context (doesn't have to be set).
+            var resumeLimit = context.resumeLimit;
+            delete context.resumeLimit;
+
+            // Resume debugger
+            this.resume(context, null, resumeLimit);
+
             return;
         }
 
@@ -614,9 +621,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
     },
 
-    resume: function(context, callback)
+    resume: function(context, callback, limit)
     {
-        return context.activeThread.resume(callback);
+        return context.activeThread.resume(callback, limit);
     },
 
     stepOver: function(context, callback)
