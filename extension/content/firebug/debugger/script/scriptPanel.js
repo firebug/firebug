@@ -193,7 +193,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.showStackFrame: " + frame, frame);
 
         if (this.context.breakingCause)
-            this.context.breakingCause.lineNo = lineNo;
+            this.context.breakingCause.lineNo = frame.getLineNumber();
 
         this.navigate(frame.toSourceLink());
     },

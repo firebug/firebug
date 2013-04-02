@@ -68,7 +68,9 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var scriptPanel = panel.context.getPanel("script");
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");
-        var scriptActive = tool && tool.getActive();
+
+        // xxxHonza: when JSD2 is not active?
+        var scriptActive = true;//tool && tool.getActive();
         var supported = panel.supportsBreakOnNext();
 
         // Enable by default and disable if needed.
