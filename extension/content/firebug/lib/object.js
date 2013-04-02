@@ -79,6 +79,13 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         if (!ob)
             return false;
 
+        var type = typeof(ob);
+        if (type == "string" && ob.length)
+            return true;
+         
+        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
+            return false;
+
         try
         {
             // This is probably unnecessary in Firefox 19 or so.
@@ -96,12 +103,6 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             return false;
         }
 
-        var type = typeof(ob);
-        if (type == "string" && ob.length)
-            return true;
-         
-        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
-            return false;
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);

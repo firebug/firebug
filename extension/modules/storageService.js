@@ -16,8 +16,22 @@ var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://gre/modules/FileUtils.jsm");
 
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+
+try
+{
+    Cu["import"]("resource://gre/modules/PrivateBrowsingUtils.jsm");
+}
+catch (err)
+{
+}
+
 // ********************************************************************************************* //
 // Implementation
+
+// xxxHonza: the entire JSM should be converted into AMD.
+// But there could be extensions
+// see: https://groups.google.com/d/msg/firebug/C5dlQ2S1e0U/ZJ76nxtUAAMJ
 
 /**
  * http://dev.w3.org/html5/webstorage/#storage-0
@@ -30,9 +44,11 @@ Cu.import("resource://gre/modules/FileUtils.jsm");
  *     void clear();
  * };
  */
-function Storage(leafName)
+function Storage(leafName, win)
 {
     this.leafName = leafName;
+    this.win = win;
+
     this.objectTable = {};
 }
 
@@ -104,9 +120,9 @@ Storage.prototype =
  */
 var StorageService =
 {
-    getStorage: function(leafName)
+    getStorage: function(leafName, win)
     {
-        var store = new Storage(leafName);
+        var store = new Storage(leafName, win);
 
         try
         {
@@ -131,10 +147,13 @@ var StorageService =
         if (!store || !store.leafName || !store.objectTable)
             throw new Error("StorageService.setStorage requires Storage Object argument");
 
+        // xxxHonza: writeNow() doesn't check private browsing mode, which is not safe.
+        // But |now| is currently set to true only in clear() method, which works
+        // (and should work I guess) even in private browsing mode.
         if (now)
             ObjectPersister.writeNow(store.leafName,  store.objectTable);
         else
-            ObjectPersister.writeObject(store.leafName,  store.objectTable);
+            ObjectPersister.writeObject(store.leafName,  store.objectTable, store.win);
     },
 
     removeStorage: function(leafName)
@@ -221,9 +240,9 @@ var ObjectPersister =
     // Batch the writes for each event loop
     writeDelay: 250,
 
-    writeObject: function(leafName, obj)
+    writeObject: function(leafName, obj, win)
     {
-        if (this.isPrivateBrowsing())
+        if (this.isPrivateBrowsing(win))
             throw new Error("No storage is written while in private browsing mode");
 
         if (ObjectPersister.flushTimeout)
@@ -294,14 +313,41 @@ var ObjectPersister =
         }
     },
 
-    isPrivateBrowsing: function()
+    // xxxHonza: this entire method is duplicated from firebug/lib/privacy module
+    // As soon as this JSM is AMD we should just use firebug/lib/privacy.
+    isPrivateBrowsing: function(win)
     {
+        try
+        {
+            // If |win| is null, the top most window is used to figure out
+            // whether the private mode is on or off.
+            if (!win)
+                win = wm.getMostRecentWindow("navigator:browser");
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("storageService.isPrivateBrowsing; EXCEPTION " + e, e);
+        }
+
+        try
+        {
+            // Get firebugFrame.xul and check privaate mode (it's the same as
+            // for the top parent window).
+            if (typeof PrivateBrowsingUtils != "undefined")
+                return PrivateBrowsingUtils.isWindowPrivate(win);
+        }
+        catch (e)
+        {
+        }
+
         try
         {
             // Unfortunatelly the "firebug/chrome/privacy" module can't be used
             // since this scope is JavaScript code module.
             // xxxHonza: storageService should be converted into AMD (but it's used
-            // in firebug-service, which is also JS code module).
+            // in firebug-service.js, which is also JS code module).
+            // firebug-service.js is gone in JSD2 branch
             var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
                 .getService(Components.interfaces.nsIPrivateBrowsingService);
             return pbs.privateBrowsingEnabled;
