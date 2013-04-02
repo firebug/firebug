@@ -6,8 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/debugger/debuggerHalter",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Obj, Locale, Firebug, DebuggerHalter) {
+function(FBTrace, Obj, Locale, Firebug, DebuggerHalter, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
