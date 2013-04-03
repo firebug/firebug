@@ -3,15 +3,18 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
     "firebug/lib/xpcom",
     "firebug/console/console",
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/array",
-    "firebug/lib/string"
+    "firebug/lib/string",
+    "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/console/errorMessageObj",
+    "firebug/lib/events",
 ],
-function(Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str) {
+function(Obj, Firebug, Xpcom, Console, Css, Win, Arr, Str, BreakpointStore,
+    ErrorMessageObj, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -49,6 +52,11 @@ const pointlessErrors =
 const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
+
+var ERROR_BREAKPOINT = BreakpointStore.BP_NORMAL | BreakpointStore.BP_ERROR;
+
+var Trace = FBTrace.to("DBG_ERRORLOG");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
@@ -362,7 +370,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         var isJSError = category == "js" && !isWarning;
 
         // the sourceLine will cause the source to be loaded.
-        var error = new FirebugReps.ErrorMessageObj(object.errorMessage, object.sourceName,
+        var error = new ErrorMessageObj(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, null, msgId);
 
         // Display column info only if it isn't zero.
@@ -657,10 +665,36 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             }
         }
 
-        var error = new FirebugReps.ErrorMessageObj(msg, sourceFile,
-            sourceLineNo, sourceLine, "error", context, null);
-        return error;
-    }
+        return new ErrorMessageObj(msg, sourceFile, sourceLineNo, sourceLine,
+            "error", context, null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Error Breakpoints
+
+    setErrorBreakpoint: function(context, url, line)
+    {
+        Trace.sysout("errors.setErrorBreakpoint; " + url + " (" + line + ")");
+
+        var tool = context.getTool("debugger");
+        tool.setBreakpoint(context, url, line, function(response, bpClient)
+        {
+            BreakpointStore.addBreakpoint(bpClient.location.url,
+                bpClient.location.line - 1, ERROR_BREAKPOINT);
+        });
+    },
+
+    clearErrorBreakpoint: function(url, line)
+    {
+        Trace.sysout("errors.clearErrorBreakpoint; " + url + " (" + line + ")");
+
+        BreakpointStore.removeBreakpoint(url, line, ERROR_BREAKPOINT);
+    },
+
+    hasErrorBreakpoint: function(url, line)
+    {
+        return BreakpointStore.findBreakpoint(url, line, ERROR_BREAKPOINT) != null;
+    },
 });
 
 // ********************************************************************************************* //

@@ -106,6 +106,7 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         Firebug.Console.log(new FunctionLog(frame, stackTrace), context);
     },
 
+    // xxxHonza: this was there for tracing command line api, I guess.
     /*onFunctionCall: function(context, frame, depth, calling)
     {
         //var url = Url.normalizeURL(frame.script.fileName);

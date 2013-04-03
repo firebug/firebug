@@ -13,11 +13,13 @@ define([
     "firebug/lib/options",
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
+    "firebug/console/errorMessageObj",
+    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/profiler",
-    "firebug/chrome/searchBox"
+    "firebug/chrome/searchBox",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom) {
+    Wrapper, Xpcom, ErrorMessageObj, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -48,7 +50,11 @@ const logTypes =
     "spy": 1
 };
 
+var Trace = FBTrace.to("DBG_CONSOLE");
+var TraceError = FBTrace.to("DBG_ERRORS");
+
 // ********************************************************************************************* //
+// ConsolePanel Implementation
 
 Firebug.ConsolePanel = function () {};
 
@@ -88,6 +94,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Update visibility of stack frame arguments.
         var name = "showStackFrameArguments";
         this.updateOption(name, Options.get(name));
+
+        // The Console panel displays error breakpoints and so, its UI must be updated
+        // when a new error-breakpoint is created or removed.
+        BreakpointStore.addListener(this);
     },
 
     destroy: function(state)
@@ -109,6 +119,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
+
+        BreakpointStore.removeListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
@@ -795,7 +807,56 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return false;
 
         return rep.showInfoTip(infoTip, target, x, y);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BreakpointStore Listener
+
+    onBreakpointAdded: function(bp)
+    {
+        // The Console panel is only interested in error breakpoints.
+        if (!(bp.type & BreakpointStore.BP_ERROR))
+            return;
+
+        Trace.sysout("consolePanel.onBreakpointAdded", bp);
+
+        this.updateErrorBreakpoints(bp, true);
+    },
+
+    onBreakpointRemoved: function(bp)
+    {
+        if (!(bp.type & BreakpointStore.BP_ERROR))
+            return;
+
+        Trace.sysout("consolePanel.onBreakpointRemoved", bp);
+
+        this.updateErrorBreakpoints(bp, false);
+    },
+
+    /**
+     * Update Error Breakpoints
+     * @param {Object} bp Breakpoint instance.
+     * @param {Object} isSet If true, an error breakpoint has been added, otherwise false.
+     */
+    updateErrorBreakpoints: function(bp, isSet)
+    {
+        for (var row = this.panelNode.firstChild; row; row = row.nextSibling)
+        {
+            var error = row.firstChild.repObject;
+            if (!(error instanceof ErrorMessageObj))
+                continue;
+
+            // Errors use real line numbers (1 based) while breakpoints
+            // use zero based numbers.
+            if (error.href == bp.href && error.lineNo - 1 == bp.lineNo)
+            {
+                if (isSet)
+                    Css.setClass(row.firstChild, "breakForError");
+                else
+                    Css.removeClass(row.firstChild, "breakForError");
+            }
+        }
+    } 
 });
 
 // ********************************************************************************************* //

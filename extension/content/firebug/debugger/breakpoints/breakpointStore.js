@@ -216,10 +216,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
         type = type || BP_NORMAL;
 
+        Trace.sysout("addBreakpoint; " + url + " (" + lineNo + "), type: " + type);
+
         if (!url || !lineNo)
         {
             TraceError.sysout("breakpointStore.addBreakpoint; ERROR invalid arguments " +
-                "url: " + url + ", lineNo: " + lineNo);
+                "url: " + url + ", lineNo: " + lineNo + ", type: " + type);
             return;
         }
 
@@ -228,7 +230,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // Bail out if exactly the same breakpoint already exists.
         if (bp && bp.type & type)
         {
-            TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp");
+            TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp", bp);
             return;
         }
 
@@ -250,7 +252,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             this.breakpoints[url].push(bp);
 
             Trace.sysout("breakpointStore.addBreakpoint; NEW BP: " +
-                url + " (" + lineNo + ")", bp);
+                url + " (" + lineNo + ") type: " + type, bp);
         }
 
         // Do not forget to save immediatelly and notify listenrs (typically UI update).
@@ -264,6 +266,8 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     {
         type = type || BP_NORMAL;
 
+        Trace.sysout("removeBreakpoint; " + url + " (" + lineNo + "), type: " + type);
+
         var bps = this.getBreakpoints(url);
         if (!bps)
             return null;
@@ -274,12 +278,20 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             var bp = bps[i];
             if (bp.lineNo === lineNo)
             {
-                bp.type &= ~type;
-
-                if (!bp.type)
+                // If removing the passed type makes the bp.type == zero, there is no
+                // other breakpoint type associated and we can remove the breakpoint
+                // entirely from the list.
+                // Keep the original type in the breakpoint instance since it's passed
+                // to listener which can check it.
+                if (!(bp.type & ~type))
                 {
                     bps.splice(i, 1);
                     removedBp = bp;
+                }
+                else
+                {
+                    // There are other types yet so, just remove the one passed to this mehtod.
+                    bp.type &= ~type;
                 }
             }
         }
@@ -311,7 +323,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             if (bp.lineNo != lineNo)
                 continue;
 
-            if (bp.type & type || type == -1)
+            if (bp.type & type)
                 return bp;
         }
 
@@ -429,8 +441,26 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         }
     },
 
-    enumerateErrorBreakpoints: function()
+    enumerateErrorBreakpoints: function(url, callback)
     {
+        if (url)
+        {
+            var urlBreakpoints = this.getBreakpoints(url);
+            if (urlBreakpoints)
+            {
+                for (var i=0; i<urlBreakpoints.length; ++i)
+                {
+                    var bp = urlBreakpoints[i];
+                    if (bp.type & BP_ERROR)
+                        callback(bp);
+                }
+            }
+        }
+        else
+        {
+            for (var url in breakpoints)
+                this.enumerateBreakpoints(url, callback);
+        }
     },
 
     enumerateMonitors: function(url, callback)
