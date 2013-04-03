@@ -10,7 +10,7 @@ function runTest()
             var expression = "document.getElementsByTagName('span')";
             var expected = "HTMLCollection[span.test, span#root]";
 
-            var config = {tagName: "pre", classes: "objectBox-array"};
+            var config = {tagName: "span", classes: "objectBox-array"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 FBTest.compare(expected, row.textContent, "Verify: " +
