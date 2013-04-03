@@ -506,7 +506,7 @@ var BrowserMenu =
                     id: "toolsmenu_firebugMenuPopup",
                     "class": "fbFirebugMenuPopup",
                     onpopupshowing: "return Firebug.browserOverlay.onMenuShowing(this, event);",
-                    onpopupshowing: "return Firebug.browserOverlay.onMenuHiding(this, event);"
+                    onpopuphiding: "return Firebug.browserOverlay.onMenuHiding(this, event);"
                 })
             ])
         ]);
