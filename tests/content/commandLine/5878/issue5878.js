@@ -12,9 +12,9 @@ function runTest()
             var tasks = new FBTest.TaskList();
 
             tasks.push(executeIncludeCommand, 'include("./myScript.js");');
-            tasks.push(FBTest.executeCommandAndVerify, 'window.a', "1", "pre", "objectBox-number");
+            tasks.push(FBTest.executeCommandAndVerify, 'window.a', "1", "span", "objectBox-number");
             tasks.push(executeIncludeCommand, 'include("./myScript.js", "myscript");');
-            tasks.push(FBTest.executeCommandAndVerify, 'window.a', "2", "pre", "objectBox-number");
+            tasks.push(FBTest.executeCommandAndVerify, 'window.a', "2", "span", "objectBox-number");
             var contextMenuTarget = null;
             var expectedMyScriptURL = basePath5878 + "myScript.js";
             tasks.push(checkTableContent, "myscript", function(table, row, aliasName, url)
@@ -35,7 +35,7 @@ function runTest()
                     FBTest.executeContextMenuCommand(contextMenuTarget, "fbInclude", callback);
             });
             tasks.push(FBTest.executeCommandAndVerify, 'window.a', "3",
-                "pre", "objectBox-number", false);
+                "span", "objectBox-number", false);
             // (2): test copy location
             tasks.push(function(callback)
             {
@@ -65,7 +65,7 @@ function runTest()
             });
             // test for pending scripts
             tasks.push(executeIncludeCommand, 'include("./pendingScript.php")');
-            tasks.push(FBTest.executeCommandAndVerify, "window.pendingDone", "1", "pre",
+            tasks.push(FBTest.executeCommandAndVerify, "window.pendingDone", "1", "span",
                 "objectBox-number");
             tasks.run(function()
             {
