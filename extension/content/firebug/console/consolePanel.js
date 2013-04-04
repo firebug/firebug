@@ -493,7 +493,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // the default subject set within domplate() function.
         try
         {
-            return rep.tag.append({object: object}, row, rep);
+            // XXX Hack until we get IF support in domplate (or bug 116083 gets fixed).
+            var tag = rep.tag;
+            if (rep === FirebugReps.Text)
+                tag = rep.getWhitespaceCorrectedTag(object);
+            return tag.append({object: object}, row, rep);
         }
         catch (e)
         {
@@ -599,7 +603,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
             else
             {
-                node = FirebugReps.Text.tag.append({object: part}, row);
+                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
+                node = tag.append({object: part}, row);
             }
 
             // Apply custom style if available.
