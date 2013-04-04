@@ -13,7 +13,7 @@ define([
     "firebug/debugger/stack/stackTrace",
 ],
 function(Firebug, FBTrace, Obj, Domplate, ErrorMessageObj, ErrorMessage, ErrorCopy,
-    StackFrame, StackTrace) {
+    FirebugReps, StackFrame, StackTrace) {
 
 with (Domplate) {
 
@@ -77,9 +77,8 @@ var Exception = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        // xxxHonza: we should replace Obj.XW_instanceof by the following:
-        // Object.prototype.toString(object) === "[object Error]"
-        return (object instanceof ErrorCopy) || Obj.XW_instanceof(object, Error);
+        var str = Object.prototype.toString.call(object);
+        return (object instanceof ErrorCopy) || str == "[object Error]";
     }
 });
 
