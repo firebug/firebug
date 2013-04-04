@@ -228,7 +228,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         var bp = this.findBreakpoint(url, lineNo, -1);
 
         // Bail out if exactly the same breakpoint already exists.
-        if (bp && bp.type & type)
+        if (bp && (bp.type & type == bp.type))
         {
             TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp", bp);
             return;
@@ -421,7 +421,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 for (var i=0; i<urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if (bp.type & BP_NORMAL && !(bp.type & BP_ERROR))
+                    if (bp.isNormal())
                     {
                         var rc = cb(bp);
                         if (rc)
@@ -451,7 +451,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 for (var i=0; i<urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if (bp.type & BP_ERROR)
+                    if (bp.isError())
                         callback(bp);
                 }
             }

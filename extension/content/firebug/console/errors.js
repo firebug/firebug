@@ -53,8 +53,6 @@ const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleSe
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
-var ERROR_BREAKPOINT = BreakpointStore.BP_NORMAL | BreakpointStore.BP_ERROR;
-
 var Trace = FBTrace.to("DBG_ERRORLOG");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
@@ -680,7 +678,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         tool.setBreakpoint(context, url, line, function(response, bpClient)
         {
             BreakpointStore.addBreakpoint(bpClient.location.url,
-                bpClient.location.line - 1, ERROR_BREAKPOINT);
+                bpClient.location.line - 1, BreakpointStore.BP_ERROR);
         });
     },
 
@@ -688,12 +686,12 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     {
         Trace.sysout("errors.clearErrorBreakpoint; " + url + " (" + line + ")");
 
-        BreakpointStore.removeBreakpoint(url, line, ERROR_BREAKPOINT);
+        BreakpointStore.removeBreakpoint(url, line, BreakpointStore.BP_ERROR);
     },
 
     hasErrorBreakpoint: function(url, line)
     {
-        return BreakpointStore.findBreakpoint(url, line, ERROR_BREAKPOINT) != null;
+        return BreakpointStore.findBreakpoint(url, line, BreakpointStore.BP_ERROR) != null;
     },
 });
 

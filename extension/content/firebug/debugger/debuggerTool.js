@@ -438,9 +438,11 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         if (!context.activeThread)
         {
-            FBTrace.sysout("debuggerTool.setBreakpoint; Can't set a breakpoint.");
+            TraceError.sysout("debuggerTool.setBreakpoint; ERROR Can't set a breakpoint.");
             return;
         }
+
+        Trace.sysout("debuggerTool.setBreakpoint; " + url + " (" + lineNumber + ")");
 
         var self = this;
         var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)

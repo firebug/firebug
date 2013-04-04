@@ -815,7 +815,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     onBreakpointAdded: function(bp)
     {
         // The Console panel is only interested in error breakpoints.
-        if (!(bp.type & BreakpointStore.BP_ERROR))
+        if (!bp.isError())
             return;
 
         Trace.sysout("consolePanel.onBreakpointAdded", bp);
@@ -825,7 +825,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     onBreakpointRemoved: function(bp)
     {
-        if (!(bp.type & BreakpointStore.BP_ERROR))
+        if (!bp.isError())
             return;
 
         Trace.sysout("consolePanel.onBreakpointRemoved", bp);

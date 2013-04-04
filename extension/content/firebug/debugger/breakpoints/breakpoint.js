@@ -60,6 +60,11 @@ Breakpoint.prototype =
     isNormal: function()
     {
         return this.type & 1; //BP_NORMAL
+    },
+
+    isError: function()
+    {
+        return this.type & 16; //BP_ERROR
     }
 }
 
