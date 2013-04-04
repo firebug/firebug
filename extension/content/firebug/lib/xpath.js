@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/string"
+    "firebug/lib/string",
+    "firebug/lib/xml"
 ],
-function(Str) {
+function(Str, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -42,7 +43,7 @@ Xpath.getElementTreeXPath = function(element)
                 ++index;
         }
 
-        var tagName = element.nodeName.toLowerCase();
+        var tagName = element.localName;
         var pathIndex = (index ? "[" + (index+1) + "]" : "");
         paths.splice(0, 0, tagName + pathIndex);
     }
