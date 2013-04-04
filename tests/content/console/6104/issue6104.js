@@ -8,7 +8,7 @@ function runTest()
 
         FBTest.enableConsolePanel(function(win)
         {
-            var config = {tagName: "pre", classes: "objectBox-array"};
+            var config = {tagName: "span", classes: "objectBox-array"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 var expected = /DOMTokenList\[\"test1\"\, \"test2\"\]/;

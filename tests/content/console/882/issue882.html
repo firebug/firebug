@@ -7,13 +7,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script language="javascript" type="text/javascript">
 
-   function init() {
-     console.info("init");
+   function log() {
+     console.info("log");
      external();
-   };
-
-   window.onload = function() {
-     init();
    };
 
     </script>
@@ -23,10 +19,10 @@
   <body>
     <h1>Console Source File and Line Number Reporting Bug</h1>
     <ol>
-      <li>Load this page.</li>
-      <li>Observe that console reports that "init" is written from
-      line 10 of this file.  <br/>
-      <b>Issue a:</b> Line 10 is not in the script section.</li>
+      <li>Click this button: <input type="button" onclick="log()" id="button" value="Click me!"> </li>
+      <li>Observe that console reports that "log" is written from
+      line 11 of this file.  <br/>
+      <b>Issue a:</b> Line 11 is not in the script section.</li>
       <li>Observe that console reports that "external" is written from
       line 2 of this file.<br/>
       <b>Issue b:</b> It should report the file name as "external.js",
