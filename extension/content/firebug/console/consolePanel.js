@@ -63,6 +63,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
+    name: "console",
+    searchable: true,
+    breakable: true,
+    editable: false,
+    enableA11y: true,
+
     wasScrolledToBottom: false,
     messageCount: 0,
     lastLogTime: 0,
@@ -71,13 +77,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     order: 10,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
-
-    name: "console",
-    searchable: true,
-    breakable: true,
-    editable: false,
-    enableA11y: true,
 
     initialize: function()
     {
@@ -98,6 +97,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // The Console panel displays error breakpoints and so, its UI must be updated
         // when a new error-breakpoint is created or removed.
         BreakpointStore.addListener(this);
+
+        this.context.getTool("debugger").addListener(this);
     },
 
     destroy: function(state)
@@ -121,6 +122,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
         BreakpointStore.removeListener(this);
+
+        this.context.getTool("debugger").removeListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
@@ -234,14 +237,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
                 Css.setClass(this.panelNode, "hideArguments");
         }
-    },
-
-    shouldBreakOnNext: function()
-    {
-        // xxxHonza: shouldn't the breakOnErrors be context related?
-        // xxxJJB, yes, but we can't support it because we can't yet tell
-        // which window the error is on.
-        return Options.get("breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -384,11 +379,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             [this, text, this.matchSet]);
 
         return true;
-    },
-
-    breakOnNext: function(breaking)
-    {
-        Options.set("breakOnErrors", breaking);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -870,7 +860,39 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     Css.removeClass(message, "breakForError");
             }
         }
-    } 
+    }, 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
+
+    onDebuggerPaused: function(context, event, packet)
+    {
+        // The function monitor is only interested in 'breakpoint' type of interrupts.
+        var type = packet.why.type;
+        if (type != "exception")
+            return false;
+
+        // Reset the break-on-next-error flag after an exception break happens.
+        // xxxHonza: this is how the other BON implementations work, but we could reconsider it.
+        this.context.breakOnErrors = false;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Break On Error
+
+    shouldBreakOnNext: function()
+    {
+        return this.context.breakOnErrors;
+    },
+
+    breakOnNext: function(breaking)
+    {
+        this.context.breakOnErrors = breaking;
+
+        // Set the flag on the server.
+        var tool = this.context.getTool("debugger");
+        tool.breakOnExceptions(this.context, breaking);
+    },
 });
 
 // ********************************************************************************************* //

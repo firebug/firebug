@@ -734,7 +734,10 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     breakOnExceptions: function(context, flag)
     {
-        return context.activeThread.pauseOnExceptions(flag);
+        return context.activeThread.pauseOnExceptions(flag, function(response)
+        {
+            Trace.sysout("debuggerTool.breakOnExceptions; Set to " + flag, response);
+        });
     },
 });
 
