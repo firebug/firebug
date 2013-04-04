@@ -22,7 +22,7 @@ function runTest()
 
 function test1(callback)
 {
-    var config = {tagName: "pre", classes: "objectBox-array"};
+    var config = {tagName: "span", classes: "objectBox-array"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
         var expected = /\[\[\"123\"\]\,\s*\[\"1\"\]\]/;
@@ -44,7 +44,7 @@ function test1(callback)
 
 function test2(callback)
 {
-    var config = {tagName: "pre", classes: "objectBox-array"};
+    var config = {tagName: "span", classes: "objectBox-array"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
         var expected = /\[1\,\s*Window\s*issue5382\.html\]/;
