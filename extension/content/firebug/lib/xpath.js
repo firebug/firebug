@@ -1,10 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/string",
-    "firebug/lib/xml"
+    "firebug/lib/string"
 ],
-function(Str, Xml) {
+function(Str) {
 
 // ********************************************************************************************* //
 // Constants
