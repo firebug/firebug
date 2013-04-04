@@ -1243,6 +1243,11 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return elts && elts.length ? elts[0] : null;
     },
 
+    reloadFrame: function(frame)
+    {
+        frame.contentDocument.location.reload();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "element",
@@ -1255,14 +1260,10 @@ FirebugReps.Element = domplate(Firebug.Rep,
     browseObject: function(elt, context)
     {
         var tag = elt.localName.toLowerCase();
-        if (tag == "script")
+        if (tag == "script" || tag == "img" || tag == "iframe" || tag == "frame")
             Win.openNewTab(elt.src);
-        else if (tag == "link")
+        else if (tag == "link" || tag == "a")
             Win.openNewTab(elt.href);
-        else if (tag == "a")
-            Win.openNewTab(elt.href);
-        else if (tag == "img")
-            Win.openNewTab(elt.src);
 
         return true;
     },
@@ -1408,7 +1409,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
         ]);
 
         var tag = elt.localName.toLowerCase();
-        if (tag == "script" || tag == "link" || tag == "a" || tag == "img")
+        if (tag == "script" || tag == "link" || tag == "a" || tag == "img" || tag == "iframe" ||
+            tag == "frame")
         {
             items = items.concat([
                 "-",
@@ -1420,6 +1422,17 @@ FirebugReps.Element = domplate(Firebug.Rep,
             ]);
         }
 
+        if (tag == "iframe" || tag == "frame")
+        {
+            items = items.concat([
+                {
+                    label: "html.menu.Reload_Frame",
+                    tooltiptext: "html.menu.tip.Reload_Frame",
+                    command: Obj.bindFixed(this.reloadFrame, this, elt)
+                }
+            ]);
+        }
+        
         items = items.concat([
             "-",
             {
