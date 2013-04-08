@@ -402,7 +402,6 @@ BrowserOverlay.prototype =
         // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
         if (typeof(contextMenu.prototype.isTargetAFormControl) != "undefined")
         {
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
             var setTargetOriginal = this.setTargetOriginal = contextMenu.prototype.setTarget;
             contextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
             {
@@ -437,8 +436,11 @@ BrowserOverlay.prototype =
         if (typeof(contextMenu) == "undefined")
             return;
 
-        contextMenu.prototype.setTarget = this.setTargetOriginal;
-        contextMenu.prototype.initItems = this.initItemsOriginal;
+        if (this.setTargetOriginal)
+            contextMenu.prototype.setTarget = this.setTargetOriginal;
+
+        if (this.initItemsOriginal)
+            contextMenu.prototype.initItems = this.initItemsOriginal;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
