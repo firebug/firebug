@@ -918,6 +918,8 @@ function instanceOf(object, Klass)
 
 FirebugReps.Element = domplate(Firebug.Rep,
 {
+    className: "element",
+
     tag:
         OBJECTLINK(
             "&lt;",
@@ -940,20 +942,38 @@ FirebugReps.Element = domplate(Firebug.Rep,
             )
          ),
 
+    // Generic template for various element values
     valueTag:
         SPAN({"class": "selectorValue"}, "$object|getValue"),
 
-    multipleValueTag:
+    // Template for <input> element with a single value coming from attribute.
+    singleInputTag:
         SPAN(
             SPAN("&nbsp;"),
             SPAN({"class": "selectorValue"},
                 Locale.$STR("firebug.reps.element.attribute_value") + " = "
             ),
-            TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"}),
+            SPAN({"class": "attributeValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"})
+            )
+        ),
+
+    // Template for <input> element with two different values (attribute and property)
+    multipleInputTag:
+        SPAN(
             SPAN("&nbsp;"),
             SPAN({"class": "selectorValue"},
-                Locale.$STR("firebug.reps.element.property_value") + " = " +
-                "$object|getValueFromProperty"
+                Locale.$STR("firebug.reps.element.property_value") + " = "
+            ),
+            SPAN({"class": "propertyValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromProperty"})
+            ),
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.attribute_value") + " = "
+            ),
+            SPAN({"class": "attributeValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"})
             )
         ),
 
@@ -961,13 +981,18 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getValueTag: function(elt)
     {
+        // Use proprietary template for <input> elements that can have two
+        // different values. One coming from attribute 'value' and one coming
+        // from property 'value'.
         if (elt instanceof window.HTMLInputElement)
         {
             var attrValue = elt.getAttribute("value");
             var propValue = elt.value;
 
             if (attrValue != propValue)
-                return this.multipleValueTag;
+                return this.multipleInputTag;
+            else
+                return this.singleInputTag;
         }
 
         return this.valueTag;
@@ -975,12 +1000,15 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getValueFromAttribute: function(elt)
     {
-        return elt.getAttribute("value");
+        var limit = Options.get("stringCropLength");
+        var value = elt.getAttribute("value");
+        return Str.cropString(value, limit);
     },
 
     getValueFromProperty: function(elt)
     {
-        return elt.value;
+        var limit = Options.get("stringCropLength");
+        return Str.cropString(elt.value, limit);
     },
 
     getValue: function(elt)
@@ -1250,8 +1278,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    className: "element",
-
     supportsObject: function(object, type)
     {
         return object instanceof window.Element;
@@ -1294,10 +1320,29 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return Css.getElementCSSSelector(element);
     },
 
-    getTooltip: function(elt)
+    getTooltip: function(elt, context, target)
     {
-        var tooltip = this.getXPath(elt);
+        // If the mouse cursor hovers over cropped value of an input element
+        // display the full value in the tooltip.
+        if (Css.hasClass(target, "objectBox-string"))
+        {
+            var inputValue = Dom.getAncestorByClass(target, "inputValue");
+            if (inputValue)
+            {
+                var limit = Options.get("stringCropLength");
+                var value;
+                if (Css.hasClass(inputValue, "attributeValue"))
+                    value = elt.getAttribute("value");
+                else if (Css.hasClass(inputValue, "propertyValue"))
+                    value = elt.value;
 
+                if (value && value.length > limit)
+                    return value;
+            }
+        }
+
+        // Display xpath of the element.
+        var tooltip = this.getXPath(elt);
         if (elt.namespaceURI)
             tooltip += " (" + elt.namespaceURI + ")";
 
