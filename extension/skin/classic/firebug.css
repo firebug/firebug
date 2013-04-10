@@ -175,18 +175,19 @@
     -moz-border-left-colors: #96969D;
     font: message-box;
     font-size: 11px;
+    font-size-adjust: inherit;
     direction: ltr;
 }
 
 .fbsearch-icon {
     cursor: default!important;
-    background: url(chrome://firebug/skin/search.png) no-repeat;
+    background: url(chrome://firebug/skin/search.png) no-repeat 0 50%;
     width: 16px;
     height: 16px;
 }
 
 .fbsearch-textbox[active-search='true'] > .fbsearch-icon {
-    background: url(chrome://firebug/skin/search-close.png) no-repeat;
+    background-image: url(chrome://firebug/skin/search-close.png);
 }
 
 #fbSearchOptionsPanel {
