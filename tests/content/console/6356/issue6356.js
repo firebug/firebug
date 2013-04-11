@@ -10,7 +10,7 @@ function runTest()
         {
             var tasks = new FBTest.TaskList();
             tasks.push(test1, win);
-            tasks.push(test1, win);
+            tasks.push(test2, win);
 
             tasks.run(function() {
                 FBTest.testDone("issue6356.DONE");
@@ -24,10 +24,8 @@ function test1(callback, win)
     var config = {tagName: "div", classes: "logRow-log"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        row = row.getElementsByClass("objectBox-array")[0];
-        var expected = "Object[input#myInput property value = \"1. This is very long" +
-            " va... definitely be cropped.\" attribute value = \"2. This is also a very " +
-            "...e need to make shorter.\"]";
+        row = row.getElementsByClassName("objectBox-array")[0];
+        var expected = /Object\[input\#myInput\s*property value\s*\=\s*\"1\. This is very long va\.\.\. definitely be cropped\.\"\s*attribute value\s*\=\s*\"2\. This is also a very \.\.\.e need to make shorter\.\"\]/;
 
         FBTest.compare(expected, row.textContent, "The log must match: " +
             row.textContent);
@@ -43,8 +41,8 @@ function test2(callback, win)
     var config = {tagName: "div", classes: "logRow-log"};
     FBTest.waitForDisplayedElement("console", config, function(row)
     {
-        row = row.getElementsByClass("objectBox-array")[0];
-        var expected = "Object[input#myInput attribute value = \"test\"]";
+        row = row.getElementsByClassName("objectBox-array")[0];
+        var expected = /Object\[input\#myInput\s*attribute\s*value\s*\=\s*\"test\"]/;
 
         FBTest.compare(expected, row.textContent, "The log must match: " +
             row.textContent);
