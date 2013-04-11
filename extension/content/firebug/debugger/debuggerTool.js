@@ -98,7 +98,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         context.activeThread.addListener("framesadded", context._onFramesAdded);
         context.activeThread.addListener("framescleared", context._onFramesCleared);
 
-        DebuggerClientModule.client.addListener("newScript", context._onNewScript);
+        DebuggerClientModule.client.addListener("newSources", context._onNewScript);
     },
 
     detachListeners: function(context)
@@ -114,7 +114,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         context.activeThread.removeListener("framesadded", context._onFramesAdded);
         context.activeThread.removeListener("framescleared", context._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newScript", context._onNewScript);
+        DebuggerClientModule.client.removeListener("newSources", context._onNewScript);
 
         context._onPause = null;
         context._onDetached = null;
@@ -130,16 +130,18 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     updateScriptFiles: function(context)
     {
         var self = this;
-        context.activeThread.getScripts(function(response)
+        context.activeThread.getSources(function(response)
         {
-            var scripts = response.scripts;
-            for (var i=0; i<scripts.length; i++)
-                self.addScript(context, scripts[i]);
+            var sources = response.sources;
+            for (var i=0; i<sources.length; i++)
+                self.addScript(context, sources[i]);
         });
     },
 
     newScript: function(context, type, response)
     {
+        Trace.sysout("debuggerToo.newScript;", response);
+
         this.addScript(context, response);
     },
 
@@ -150,8 +152,6 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         if (script.url == "debugger eval code")
             return;
 
-        var s = script;
-
         if (!context.sourceFileMap)
         {
             TraceError.sysout("debuggerTool.addScript; ERROR Source File Map is NULL", script);
@@ -159,11 +159,11 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         // xxxHonza: Ignore inner script for now
-        if (context.sourceFileMap[s.url])
+        if (context.sourceFileMap[script.url])
             return;
 
         // Create a source file and append it into the context.
-        var sourceFile = new SourceFile(s.source, s.url, s.startLine, s.lineCount);
+        var sourceFile = new SourceFile(script.actor, script.url);
         context.addSourceFile(sourceFile);
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen

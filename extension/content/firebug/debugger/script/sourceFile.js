@@ -23,23 +23,18 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 /**
  * SourceFile one for every compilation unit.
  */
-function SourceFile(actor, href, startLine, lineCount)
+function SourceFile(actor, href)
 {
     this.compilation_unit_type = "remote-script";
 
-    this.sourceActor = actor;
+    this.actor = actor;
     this.href = href;
-    this.startLine = startLine;
-    this.lineCount = lineCount;
+    //this.startLine = startLine;
+    //this.lineCount = lineCount;
 }
 
 SourceFile.prototype =
 {
-    getBaseLineOffset: function()
-    {
-        return this.startLine;
-    },
-
     getURL: function()
     {
         return this.href;
@@ -93,7 +88,7 @@ SourceFile.prototype =
         this.inProgress = true;
 
         var self = this;
-        var sourceClient = context.activeThread.source(this.sourceActor);
+        var sourceClient = context.activeThread.source(this);
         sourceClient.source(function(response)
         {
             if (response.error)
