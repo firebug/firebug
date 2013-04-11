@@ -2,20 +2,24 @@
 
 define([
     "firebug/lib/object",
+    "firebug/lib/trace",
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/array",
-    "firebug/lib/persist",
     "firebug/chrome/menu",
+    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/editor/editor",
-    "firebug/console/autoCompleter"
+    "firebug/console/autoCompleter",
 ],
-function(Obj, Firebug, Locale, Events, Dom, Arr, Menu) {
+function(Obj, FBTrace, Firebug, Locale, Events, Dom, Arr, Menu, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_BREAKPOINTMODULE");
 
 // ********************************************************************************************* //
 // Breakpoints
@@ -23,6 +27,24 @@ function(Obj, Firebug, Locale, Events, Dom, Arr, Menu) {
 Firebug.Breakpoint = Obj.extend(Firebug.Module,
 {
     dispatchName: "BreakpointModule",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initContext: function(context)
+    {
+        var tool = context.getTool("debugger");
+        tool.addListener(this);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        var tool = context.getTool("debugger");
+        tool.removeListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BON
 
     toggleBreakOnNext: function(panel)
     {
@@ -104,28 +126,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
             Menu.createMenuItem(menuPopup, menuItems[i]);
     },
 
-    /* see issue 5618
-    toggleTabHighlighting: function(event)
-    {
-        // Don't continue if it's the wrong animation phase
-        if (Math.floor(event.elapsedTime * 10) % (animationDuration * 20) != 0)
-            return;
-
-        Events.removeEventListener(event.target, "animationiteration",
-            Firebug.Breakpoint.toggleTabHighlighting, true);
-
-        var panel = Firebug.currentContext.getPanel(event.target.panelType.prototype.name);
-        if (!panel)
-            return;
-
-        if (!panel.context.delayedArmedTab)
-            return;
-
-        panel.context.delayedArmedTab.setAttribute("breakOnNextArmed", "true");
-        delete panel.context.delayedArmedTab;
-    },
-    */
-
     updateBreakOnNextTooltips: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
@@ -165,37 +165,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var tab = panelBar.getTab(panel.name);
         if (tab)
             tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
-
-        /* see issue 5618
-        {
-            if (armed)
-            {
-                // If there is already a panel armed synchronize highlighting of the panel tabs
-                var tabPanel = tab.parentNode;
-                var otherTabIsArmed = false;
-                for (var i = 0; i < tabPanel.children.length; ++i)
-                {
-                    var panelTab = tabPanel.children[i];
-                    if (panelTab !== tab && panelTab.getAttribute("breakOnNextArmed") == "true")
-                    {
-                        panel.context.delayedArmedTab = tab;
-                        Events.addEventListener(panelTab, "animationiteration",
-                            this.toggleTabHighlighting, true);
-                        otherTabIsArmed = true;
-                        break;
-                    }
-                }
-
-                if (!otherTabIsArmed)
-                    tab.setAttribute("breakOnNextArmed", "true");
-            }
-            else
-            {
-                delete panel.context.delayedArmedTab;
-                tab.setAttribute("breakOnNextArmed", "false");
-            }
-        }
-        */
     },
 
     updatePanelTabs: function(context)
@@ -213,12 +182,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         }
     },
 
-    // supports non-JS break on next
-    breakNow: function(panel)
-    {
-        this.updatePanelTab(panel, false);
-        Firebug.Debugger.breakNow(panel.context);  // TODO BTI
-    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
 
     updateOption: function(name, value)
     {
@@ -232,22 +197,71 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
                 checkboxes[i].checked = !value;
         }
     },
-});
 
-// ********************************************************************************************* //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
 
-function countBreakpoints(context)
-{
-    var count = 0;
-    for (var url in context.sourceFileMap)
+    shouldBreakDebugger: function(context, event, packet)
     {
-        FBS.enumerateBreakpoints(url, {call: function(url, lineNo)
+        var type = packet.why.type;
+        var tool = context.getTool("debugger");
+
+        Trace.sysout("breakpointModule.shouldBreakDebugger;");
+
+        // If paused by a breakpoint, evaluate optional condition expression.
+        if (type == "breakpoint")
         {
-            ++count;
-        }});
-    }
-    return count;
-}
+            var location = packet.frame.where;
+            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
+            if (!bp)
+                return false;
+
+            // If there is normal disabled breakpoint, do not break.
+            if (bp.isNormal() && bp.isDisabled())
+                return false;
+
+            // Evaluate optional condition
+            if (bp.condition)
+            {
+                Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +
+                    bp.condition, bp);
+
+                // xxxHonza: the condition-eval could be done server-side
+                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
+                tool.eval(context, context.currentFrame, bp.condition);
+                context.conditionalBreakpointEval = true;
+                return false;
+            }
+        }
+
+        // Resolve evaluated breakpoint condition expression (if there is one in progress).
+        if (type == "clientEvaluated" && context.conditionalBreakpointEval)
+        {
+            context.conditionalBreakpointEval = false;
+
+            var result = packet.why.frameFinished["return"];
+
+            Trace.sysout("debuggerTool.paused; Breakpoint condition evaluated: " +
+                result, result);
+
+            // Resume debugger if the breakpoint condition evaluation is false
+            if (!result || tool.isFalse({value: result}))
+                return false;
+        }
+
+        // Yeah, please break into the debugger.
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // supports non-JS break on next
+
+    breakNow: function(panel)
+    {
+        this.updatePanelTab(panel, false);
+        Firebug.Debugger.breakNow(panel.context);  // TODO BTI
+    },
+});
 
 // ********************************************************************************************* //
 // Registration

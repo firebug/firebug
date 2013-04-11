@@ -63,7 +63,12 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     dispatchName: "errors",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Module
+    // Initialization
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+    },
 
     shutdown: function()
     {
@@ -75,7 +80,26 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     initContext: function(context)
     {
+        var tool = context.getTool("debugger");
+        tool.addListener(this);
+
         this.clear(context);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        var tool = context.getTool("debugger");
+        tool.removeListener(this);
+
+        this.showCount(0);
+
+        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && "initTime" in this)
+        {
+            var deltaT = new Date().getTime() - this.initTime.getTime();
+
+            FBTrace.sysout("errors.destroyContext sheets: " + Css.totalSheets + " rules: " +
+                Css.totalRules + " time: " + deltaT);
+        }
     },
 
     showContext: function(browser, context)
@@ -88,19 +112,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     {
         // If we ever get errors by window from Firefox we can cache by window.
         this.clear(context);
-    },
-
-    destroyContext: function(context, persistedState)
-    {
-        this.showCount(0);
-
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && "initTime" in this)
-        {
-            var deltaT = new Date().getTime() - this.initTime.getTime();
-
-            FBTrace.sysout("errors.destroyContext sheets: " + Css.totalSheets + " rules: " +
-                Css.totalRules + " time: " + deltaT);
-        }
     },
 
     updateOption: function(name, value)
@@ -668,18 +679,34 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
+
+    shouldBreakDebugger: function(context, event, packet)
+    {
+        // The logic is only interested in 'breakpoint' interrupts.
+        var type = packet.why.type;
+        if (type != "breakpoint")
+            return false;
+
+        var frame = context.stoppedFrame;
+        var errorBp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1,
+            BreakpointStore.BP_ERROR);
+
+        Trace.sysout("Errors.shouldBreakDebugger; " + frame.href + " (" +
+            frame.line + ") " + (errorBp ? "error bp exists" : "no error bp"), packet);
+
+        // Break only if there is an error breakpoint (break == return true).
+        return (bp != null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Error Breakpoints
 
     setErrorBreakpoint: function(context, url, line)
     {
         Trace.sysout("errors.setErrorBreakpoint; " + url + " (" + line + ")");
 
-        var tool = context.getTool("debugger");
-        tool.setBreakpoint(context, url, line, function(response, bpClient)
-        {
-            BreakpointStore.addBreakpoint(bpClient.location.url,
-                bpClient.location.line - 1, BreakpointStore.BP_ERROR);
-        });
+        BreakpointStore.addBreakpoint(url, line, BreakpointStore.BP_ERROR);
     },
 
     clearErrorBreakpoint: function(url, line)

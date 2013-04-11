@@ -51,7 +51,7 @@ var DebuggerHalter = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerTool Listener
 
-    onDebuggerPaused: function(context, event, packet)
+    shouldResumeDebugger: function(context, event, packet)
     {
         var where = packet.frame ? packet.frame.where : {};
         if (where.url != "debugger eval code")

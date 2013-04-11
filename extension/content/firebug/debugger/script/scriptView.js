@@ -289,17 +289,15 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     initBreakpoints: function()
     {
+        this.removeAllBreakpoints();
+
         var bps = [];
         this.dispatch("getBreakpoints", [bps]);
 
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-
-            // Only standard breakpoints are displayed as red circles
-            // in the breakpoint column.
-            if (bp.isNormal())
-                this.addBreakpoint(bp);
+            this.addBreakpoint(bp);
         }
     },
 
@@ -355,9 +353,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     addBreakpoint: function(bp)
     {
         if (!this.editor)
-            return;
-
-        if (!bp.isNormal())
             return;
 
         var self = this;
@@ -421,8 +416,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // Simulate editor event sent when the user creates a breakpoint by
         // clicking on the breakpoint ruler.
         this.onBreakpointChange({
-            added:[{lineNo: lineIndex, condition: condition}],
-            removed:[]
+            added: [{line: lineIndex, condition: condition}],
+            removed: []
         });
     },
 
@@ -449,6 +444,23 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         this.modifyAnnotation("breakpoint", bp.lineNo, annotation);
+    },
+
+    removeAllBreakpoints: function()
+    {
+        Trace.sysout("scriptView.removeAllBreakpoints;");
+
+        if (!this.editor)
+            return;
+
+        var annotations = this.editor._getAnnotationsByType("breakpoint", 0,
+            this.editor.getCharCount());
+
+        if (annotations.length > 0)
+        {
+            annotations.forEach(this.editor._annotationModel.removeAnnotation,
+                this.editor._annotationModel);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -33,6 +33,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
     this.windows = [];
     this.panelMap = {};
+    this.toolMap = {};
     this.sidePanelNames = {};
 
     this.compilationUnits = {};
@@ -79,7 +80,19 @@ Firebug.TabContext.prototype =
 
     getTool: function(name)
     {
-        return Firebug.getTool(name);
+        var tool = this.toolMap[name];
+        if (tool)
+            return tool;
+
+        var toolType = Firebug.getToolType(name);
+        if (!toolType)
+            return null;
+
+        // Create an instance of required tool. There is one instance per context.
+        tool = new toolType(this);
+        this.toolMap[name] = tool;
+
+        return tool;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

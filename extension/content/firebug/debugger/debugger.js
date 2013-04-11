@@ -7,8 +7,12 @@ define([
     "firebug/firebug",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/clients/clientCache",
+    "firebug/remoting/debuggerClientModule",
+    "firebug/debugger/debuggerTool",
 ],
-function(FBTrace, Obj, Locale, Firebug, DebuggerHalter, DebuggerLib) {
+function(FBTrace, Obj, Locale, Firebug, DebuggerHalter, DebuggerLib, ClientCache,
+    DebuggerClientModule, DebuggerTool) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,11 +35,95 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     initialize: function()
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
+
+        // Listen to the debugger-client, which represents the connection to the server.
+        // The debugger-client object represents the source of all RDP events.
+        DebuggerClientModule.addListener(this);
+
+        // Hook XUL stepping buttons.
+        var chrome = Firebug.chrome;
+        chrome.setGlobalAttribute("cmd_firebug_rerun", "oncommand",
+            "Firebug.Debugger.rerun(Firebug.currentContext)");
+        chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "oncommand",
+            "Firebug.Debugger.resume(Firebug.currentContext)");
+        chrome.setGlobalAttribute("cmd_firebug_stepOver", "oncommand",
+            "Firebug.Debugger.stepOver(Firebug.currentContext)");
+        chrome.setGlobalAttribute("cmd_firebug_stepInto", "oncommand",
+            "Firebug.Debugger.stepInto(Firebug.currentContext)");
+        chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
+            "Firebug.Debugger.stepOut(Firebug.currentContext)");
     },
 
     shutdown: function()
     {
+        Firebug.unregisterTracePrefix("debuggerTool.");
+
+        DebuggerClientModule.removeListener(this);
+
         Firebug.ActivableModule.shutdown.apply(this, arguments);
+    },
+
+    initContext: function(context, persistedState)
+    {
+        Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
+
+        // If page reload happens the thread client remains the same so,
+        // preserve also all existing breakpoint clients.
+        // See also {@DebuggerClientModule.initConext}
+        if (persistedState)
+        {
+            context.breakpointClients = persistedState.breakpointClients;
+        }
+    },
+
+    showContext: function(browser, context)
+    {
+        // xxxHonza: see TabWatcher.unwatchContext
+        if (!context)
+            return;
+
+        Trace.sysout("debugger.showContext; context ID: " + context.getId());
+    },
+
+    destroyContext: function(context, persistedState, browser)
+    {
+        var tool = context.getTool("debugger");
+        tool.detach();
+
+        persistedState.breakpointClients = context.breakpointClients;
+
+        Trace.sysout("debugger.destroyContext; context ID: " + context.getId());
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Connection
+
+    onThreadAttached: function(context, reload)
+    {
+        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload + ", context ID: " +
+            context.getId(), context);
+
+        // Create grip cache
+        context.clientCache = new ClientCache(DebuggerClientModule.client, context);
+
+        // Attach debugger tool
+        var tool = context.getTool("debugger");
+        tool.attach();
+    },
+
+    onThreadDetached: function(context)
+    {
+        Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
+
+        var tool = context.getTool("debugger");
+        tool.detach();
+    },
+
+    onTabNavigated: function()
+    {
+        this.dispatch("onTabNavigated");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -80,7 +168,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
-    setBreakpoint: function(sourceFile, lineNo)  // TODO: arg should be url
+    setBreakpoint: function(sourceFile, lineNo)
     {
     },
 
@@ -144,10 +232,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     rerun: function(context)
     {
+        context.getTool("debugger").rerun(context);
     },
 
     resume: function(context)
     {
+        context.getTool("debugger").resume(context);
     },
 
     abort: function(context)
@@ -156,14 +246,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     stepOver: function(context)
     {
+        context.getTool("debugger").stepOver(context);
     },
 
     stepInto: function(context)
     {
+        context.getTool("debugger").stepInto(context);
     },
 
     stepOut: function(context)
     {
+        context.getTool("debugger").stepOut(context);
     },
 
     suspend: function(context)

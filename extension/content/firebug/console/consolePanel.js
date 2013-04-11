@@ -96,8 +96,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // The Console panel displays error breakpoints and so, its UI must be updated
         // when a new error-breakpoint is created or removed.
-        BreakpointStore.addListener(this);
-
         this.context.getTool("debugger").addListener(this);
     },
 
@@ -120,8 +118,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
-
-        BreakpointStore.removeListener(this);
 
         this.context.getTool("debugger").removeListener(this);
 
@@ -800,9 +796,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BreakpointStore Listener
+    // DebuggerTool Listener
 
-    onBreakpointAdded: function(bp)
+    onBreakpointAdded: function(context, bp)
     {
         // The Console panel is only interested in error breakpoints.
         if (!bp.isError())
@@ -813,13 +809,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.updateErrorBreakpoints(bp, true);
     },
 
-    onBreakpointRemoved: function(bp)
+    onBreakpointRemoved: function(context, bp)
     {
-        if (!bp.isError())
-            return;
-
         Trace.sysout("consolePanel.onBreakpointRemoved", bp);
 
+        // It isn't possible to check the |bp.type| since the possible error flag has
+        // been already removed at this point. See {@BreakpointStore.removeBreakpoint}.
+        // So, let's try to remove the breakpoint from the Script panel view in any case.
         this.updateErrorBreakpoints(bp, false);
     },
 
@@ -867,7 +863,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     onDebuggerPaused: function(context, event, packet)
     {
-        // The function monitor is only interested in 'breakpoint' type of interrupts.
+        // Check the packet type, only "exception" is interesting in this case.
         var type = packet.why.type;
         if (type != "exception")
             return false;

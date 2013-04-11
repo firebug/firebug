@@ -30,121 +30,49 @@ var Trace = FBTrace.to("DBG_DEBUGGERTOOL");
 // ********************************************************************************************* //
 // Debugger Tool
 
+function DebuggerTool(context)
+{
+    this.context = context;
+}
+
 /**
- * @module
+ * @object
  */
-var DebuggerTool = Obj.extend(Firebug.Module,
+DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",
 
-    toolName: "debugger",
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    initialize: function()
+    attach: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Trace.sysout("debuggerTool.initialize; context ID: " + this.context.getId());
 
-        Firebug.registerTracePrefix("debuggerTool.", "DBG_DEBUGGERTOOL", false);
-
-        // Listen to the debugger-client, which represents the connection to the server.
-        // The debugger-client object represents the source of all RDP events.
-        DebuggerClientModule.addListener(this);
-
-        // Hook XUL stepping buttons.
-        var chrome = Firebug.chrome;
-        chrome.setGlobalAttribute("cmd_firebug_rerun", "oncommand",
-            "Firebug.DebuggerTool.rerun(Firebug.currentContext)");
-        chrome.setGlobalAttribute("cmd_firebug_resumeExecution", "oncommand",
-            "Firebug.DebuggerTool.resume(Firebug.currentContext)");
-        chrome.setGlobalAttribute("cmd_firebug_stepOver", "oncommand",
-            "Firebug.DebuggerTool.stepOver(Firebug.currentContext)");
-        chrome.setGlobalAttribute("cmd_firebug_stepInto", "oncommand",
-            "Firebug.DebuggerTool.stepInto(Firebug.currentContext)");
-        chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
-            "Firebug.DebuggerTool.stepOut(Firebug.currentContext)");
-
-        Trace.sysout("debuggerTool.initialized;");
-    },
-
-    shutdown: function()
-    {
-        Firebug.unregisterTracePrefix("debuggerTool.");
-
-        DebuggerClientModule.removeListener(this);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Tabs
-
-    onTabNavigated: function()
-    {
-        this.dispatch("onTabNavigated");
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Context
-
-    initContext: function(context, persistedState)
-    {
-        Trace.sysout("debuggerTool.initContext; context ID: " + context.getId());
-
-        // If page reload happens the thread client remains the same so,
-        // preserve also all existing breakpoint clients.
-        // See also {@DebuggerClientModule.initConext}
-        if (persistedState)
-        {
-            context.breakpointClients = persistedState.breakpointClients;
-        }
-    },
-
-    showContext: function(browser, context)
-    {
-        // xxxHonza: see TabWatcher.unwatchContext
-        if (!context)
-            return;
-
-        Trace.sysout("debuggerTool.showContext; context ID: " + context.getId());
-    },
-
-    destroyContext: function(context, persistedState, browser)
-    {
-        this.detachListeners(context);
-
-        persistedState.breakpointClients = context.breakpointClients;
-
-        Trace.sysout("debuggerTool.destroyContext; context ID: " + context.getId());
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Connection
-
-    onThreadAttached: function(context, reload)
-    {
-        Trace.sysout("debuggerTool.onThreadAttached; reload: " + reload + ", context ID: " +
-            context.getId(), context);
-
-        this.attachListeners(context);
-
-        // Create grip cache
-        context.clientCache = new ClientCache(DebuggerClientModule.client, context);
+        this.attachListeners(this.context);
 
         // Get scripts from the server. Source as fetched on demand (e.g. when
         // displayed in the Script panel).
-        this.updateScriptFiles(context);
+        this.updateScriptFiles(this.context);
 
         // Initialize break on exception flag.
-        this.breakOnExceptions(context, Options.get("breakOnExceptions"));
+        this.breakOnExceptions(this.context, Options.get("breakOnExceptions"));
+
+        BreakpointStore.addListener(this);
     },
 
-    onThreadDetached: function(context)
+    detach: function()
     {
-        Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
+        Trace.sysout("debuggerTool.destroyContext; context ID: " + this.context.getId());
 
-        this.detachListeners(context);
+        this.detachListeners(this.context);
+
+        BreakpointStore.removeListener(this);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Listeners
 
     attachListeners: function(context)
     {
@@ -264,15 +192,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
         // Avoid double-break at the same line (e.g. breakpoint + step-over)
-        /*if (context.lastDebuggerLocation &&
-            context.lastDebuggerLocation.url == packet.frame.where.url &&
-            context.lastDebuggerLocation.line == packet.frame.where.line)
-        {
-            Trace.sysout("debuggerTool.Resume pause since it happens at the same location: " +
-                packet.frame.where.url + " (" + packet.frame.where.line + ")");
-            this.stepOver(context);
-            return;
-        }*/
 
         // Create stack of frames and initialize context.
         // context.stoppedFrame: the frame we stopped in, don't change this elsewhere.
@@ -287,32 +206,35 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.stopped = true;
         context.currentPauseActor = packet.actor;
 
-        // Notify listeners, about debugger pause event. Listeners can used this event
-        // to decide whether the debugger should really pause (return value false) or
-        // rather be immediatelly resumed (return value true).
-        // xxxHonza: all listeners should be executed, which is not the case of dispatch2
-        // Do we need dispatch3? Or a new parameter?
-        if (this.dispatch2("onDebuggerPaused", [context, event, packet]))
-        {
-            Trace.sysout("debuggerTool.paused; Listeners want to resume debugger.");
+        // Notify listeners, about debugger pause event.
+        this.dispatch("onDebuggerPaused", [context, event, packet])
 
+        // Helper resume function
+        function doResume(tool)
+        {
             // Get resume limit type from the context (doesn't have to be set).
             var resumeLimit = context.resumeLimit;
             delete context.resumeLimit;
 
             // Resume debugger
-            this.resume(context, null, resumeLimit);
-
-            return;
+            return tool.resume(context, null, resumeLimit);
         }
 
-        // Apply breakpoint condition logic. If a breakpoint-condition evaluation
-        // result is false, the debugger is immediatelly resumed.
-        // xxxHonza: the logic could be implemented as a listener.
-        if (!this.checkBreakpointCondition(context, event, packet))
-            return;
+        // Send event allowing immediate resume. If at least one listener returns
+        // true, the debugger will resume.
+        if (this.dispatch2("shouldResumeDebugger", [context, event, packet]))
+        {
+            Trace.sysout("debuggerTool.paused; Listeners want to resume the debugger.");
+            return doResume(this);
+        }
 
-        //context.lastDebuggerLocation = packet.frame.where;
+        // Send event asking whether the debugger should really break. If at least
+        // one listeners returns true, the debugger just conntinues with pause.
+        if (!this.dispatch2("shouldBreakDebugger", [context, event, packet]))
+        {
+            Trace.sysout("debuggerTool.paused; Listeners don't want to break the debugger.");
+            return doResume(this);
+        }
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
@@ -320,10 +242,9 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         context.activeThread.fillFrames(50);
 
         // Panels are created when first used by the user, but in this case we need to break
-        // JS execution and update the Script panel immediatelly so, make sure it exists before
-        // we distribute 'onStartDebugging' event. The panel doesn't have to exist in case 
-        // the page breaks before it's fully loaded (e.g. in an 'onLoad' handler).
-        var scriptPanel = context.getPanel("script");
+        // JS execution and show it in the Script panel immediatelly so, it needs to exist before
+        // firing 'onStartDebugging' event.
+        context.getPanel("script");
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
         this.dispatch("onStartDebugging", [context, event, packet]);
@@ -339,50 +260,6 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             context.evalCallback(context, event, packet);
             context.evalCallback = null;
         }
-    },
-
-    checkBreakpointCondition: function(context, event, packet)
-    {
-        var type = packet.why.type;
-
-        // If paused by a breakpoint, evaluate optional condition expression.
-        if (type == "breakpoint")
-        {
-            var location = packet.frame.where;
-            var bp = BreakpointStore.findBreakpoint(location.url, location.line - 1);
-            if (bp && bp.condition)
-            {
-                Trace.sysout("debuggerTool.paused; Evaluate breakpoint condition: " +
-                    bp.condition, bp);
-
-                // xxxHonza: the condition-eval could be done server-side
-                // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
-                this.eval(context, context.currentFrame, bp.condition);
-                context.conditionalBreakpointEval = true;
-                return false;
-            }
-        }
-
-        // Resolve evaluated breakpoint condition expression (if there is one in progress).
-        if (type == "clientEvaluated" && context.conditionalBreakpointEval)
-        {
-            context.conditionalBreakpointEval = false;
-
-            var result = packet.why.frameFinished["return"];
-
-            Trace.sysout("debuggerTool.paused; Breakpoint condition evaluated: " +
-                result, result);
-
-            // Resume debugger if the breakpoint condition evaluation is false
-            if (!result || this.isFalse({value: result}))
-            {
-                this.resume(context);
-                return false;
-            }
-        }
-
-        // Continue with pause
-        return true;
     },
 
     resumed: function(context, event, packet)
@@ -432,18 +309,95 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BreakpointStore Event Listener
+
+    // Debugger Tools is handling events coming from the BreakpointStore performing async
+    // operation with the server side and forwarding results to all registered listeners
+    // (usually panel objects)
+
+    onAddBreakpoint: function(bp)
+    {
+        var self = this;
+        this.setBreakpoint(this.context, bp.href, bp.lineNo, function(response, bpClient)
+        {
+            // Autocorrect shared breakpoint object if necessary and store the original
+            // line so, listeners (like e.g. the Script panel) can update the UI.
+            var currentLine = bpClient.location.line - 1
+            if (bp.lineNo != currentLine)
+            {
+                // bpClient deals with 1-based line numbers. Firebug uses 0-based
+                // line numbers (indexes)
+                bp.params.originLineNo = bp.lineNo;
+                bp.lineNo = currentLine;
+            }
+
+            // Breakpoint is ready on the server side, let's notify all listeners so,
+            // the UI is properly (and asynchronously) updated everywhere.
+            self.dispatch("onBreakpointAdded", [self.context, bp]);
+
+            // The info about the original line should not be needed any more.
+            delete bp.params.originLineNo;
+        });
+    },
+
+    onRemoveBreakpoint: function(bp)
+    {
+        var self = this;
+        this.removeBreakpoint(this.context, bp.href, bp.lineNo, function(response, bpClient)
+        {
+            self.dispatch("onBreakpointRemoved", [self.context, bp]);
+        });
+    },
+
+    onEnableBreakpoint: function(bp)
+    {
+        var self = this;
+        this.enableBreakpoint(this.context, bp.href, bp.lineNo, function(response, bpClient)
+        {
+            self.dispatch("onBreakpointEnabled", [self.context, bp]);
+        });
+    },
+
+    onDisableBreakpoint: function(bp)
+    {
+        var self = this;
+        this.disableBreakpoint(this.context, bp.href, bp.lineNo, function(response, bpClient)
+        {
+            self.dispatch("onBreakpointDisabled", [self.context, bp]);
+        });
+    },
+
+    onModifyBreakpoint: function(bp)
+    {
+        this.dispatch("onBreakpointModified", [this.context, bp]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     setBreakpoint: function(context, url, lineNumber, callback)
     {
         if (!context.activeThread)
         {
-            TraceError.sysout("debuggerTool.setBreakpoint; ERROR Can't set a breakpoint.");
+            TraceError.sysout("debuggerTool.setBreakpoint; ERROR Can't set BP, no thread.");
             return;
         }
 
         Trace.sysout("debuggerTool.setBreakpoint; " + url + " (" + lineNumber + ")");
 
+        // Do not create two server side breakpoints at the same line.
+        var bpClient = this.getBreakpointClient(this.context, url, lineNumber);
+        if (bpClient)
+        {
+            Trace.sysout("debuggerTool.onAddBreakpoint; BP client already exists", bpClient);
+
+            //xxxHonza: the callback expects a packet, it should not.
+            if (callback)
+                callback({}, bpClient);
+            return;
+        }
+
+        // Prepare a callback to handle response from the server side.
         var self = this;
         var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)
         {
@@ -452,21 +406,22 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             Trace.sysout("debuggerTool.onSetBreakpoint; " + bpClient.location.url + " (" +
                 bpClient.location.line + ")", bpClient);
 
+            // Note that both actualLocation and bpClient.location deal with 1-based
+            // line numbers.
             if (actualLocation && actualLocation.line != bpClient.location.line)
             {
                 // To be found when it needs removing.
                 bpClient.location.line = actualLocation.line;
             }
 
-            // TODO: error logging?
-
-            // Store breakpoint clients so, we can use the actors to remove the
-            // breakpoint later.
+            // Store breakpoint clients so, we can use the actors to remove breakpoints.
+            // xxxFarshid: Shouldn't we save bpClient object only if there is no error?
+            // xxxHonza: yes, we probably should.
+            // xxxHonza: we also need an error logging
             if (!context.breakpointClients)
                 context.breakpointClients = [];
 
-            //xxxFarshid: Shouldn't we save bpClient object only if there is no error?
-
+            // xxxHonza: Florent, do we still need this? The min FF is 20+
             // FF 19: uses same breakpoint client object for a executable line and
             // all non-executable lines above that, so doesn't store breakpoint client
             // objects if there is already one with same actor.
@@ -477,12 +432,15 @@ var DebuggerTool = Obj.extend(Firebug.Module,
                 callback(response, bpClient);
         };
 
+        // Send RDP packet to set a breakpoint on the server side. The callback will be
+        // executed as soon as we receive a response.
         return context.activeThread.setBreakpoint({
             url: url,
             line: lineNumber + 1
         }, doSetBreakpoint);
     },
 
+    // xxxHonza: execute the callback as soon as all breakpoints are set on the server side.
     setBreakpoints: function(context, arr, cb)
     {
         var thread = context.activeThread;
@@ -501,17 +459,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
             // Iterate all breakpoints and set them step by step. The thread is
             // paused at this point.
             for (var i=0; i<arr.length; i++)
-            {
-                var bp = arr[i];
-                self.setBreakpoint(context, bp.href, bp.lineNo, function(response, bpClient)
-                {
-                    cb(response, bpClient);
-                });
-            }
-
-            // xxxHonza: At this point responses are not received yet, is it ok to resume?
-            if (callback)
-                callback();
+                self.onAddBreakpoint(arr[i]);
         };
 
         // If the thread is currently paused, go to set all the breakpoints.
@@ -540,12 +488,19 @@ var DebuggerTool = Obj.extend(Firebug.Module,
     {
         if (!context.activeThread)
         {
-            FBTrace.sysout("debuggerTool.removeBreakpoint; Can't remove breakpoints.");
+            TraceError.sysout("debuggerTool.removeBreakpoint; Can't remove breakpoints.");
             return;
         }
 
-        // Convert to line numbers(one-based);
-        lineNumber = lineNumber + 1;
+        // Do note remove server-side breakpoint if there are still some client side
+        // breakpoint at the line.
+        if (BreakpointStore.hasAnyBreakpoint(url, lineNumber))
+        {
+            // xxxHonza: the callback expects a packet as an argument, it should not.
+            if (callback)
+                callback({});
+            return;
+        }
 
         // We need to get the breakpoint client object for this context. The client.
         // knowns how to remove the breakpoint on the server side.
@@ -561,6 +516,21 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         }
     },
 
+    getBreakpointClient: function(context, url, lineNumber)
+    {
+        var clients = context.breakpointClients;
+        if (!clients)
+            return;
+
+        for (var i=0; i<clients.length; i++)
+        {
+            var client = clients[i];
+            var loc = client.location;
+            if (loc.url == url && (loc.line - 1) == lineNumber)
+                return client;
+        }
+    },
+
     removeBreakpointClient: function(context, url, lineNumber)
     {
         var clients = context.breakpointClients;
@@ -571,7 +541,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
         {
             var client = clients[i];
             var loc = client.location;
-            if (loc.url == url && loc.line == lineNumber)
+            if (loc.url == url && (loc.line - 1) == lineNumber)
             {
                 clients.splice(i, 1);
                 return client;
@@ -598,11 +568,13 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 
     enableBreakpoint: function(context, url, lineNumber, callback)
     {
+        // Enable breakpoint means adding it to the server side.
         this.setBreakpoint(context, url, lineNumber, callback);
     },
 
     disableBreakpoint: function(context, url, lineNumber, callback)
     {
+        // Disable breakpoint means removing it from the server side.
         this.removeBreakpoint(context, url, lineNumber, callback);
     },
 
@@ -744,11 +716,7 @@ var DebuggerTool = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerTool(DebuggerTool);
-Firebug.registerModule(DebuggerTool);
-
-// Expose to XUL stepping buttons
-Firebug.DebuggerTool = DebuggerTool;
+Firebug.registerTool("debugger", DebuggerTool);
 
 return DebuggerTool;
 

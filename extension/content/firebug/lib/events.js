@@ -135,7 +135,7 @@ Events.dispatch2 = function(listeners, name, args)
             if (exc.stack)
                 exc.stack = exc.stack.split('/n');
 
-            FBTrace.sysout(" Exception in lib.dispatch2 "+ name+" exc:"+exc, exc);
+            FBTrace.sysout("Events.dispatch2; EXCEPTION " + name + " Exc: " + exc, exc);
         }
     }
 };

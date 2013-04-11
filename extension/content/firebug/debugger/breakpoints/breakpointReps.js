@@ -13,9 +13,10 @@ define([
     "firebug/debugger/breakpoints/breakpoint",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/errors",
+    "firebug/console/functionMonitor",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom,
-    Breakpoint, BreakpointStore, Errors) {
+    Breakpoint, BreakpointStore, Errors, FunctionMonitor) {
 
 with (Domplate) {
 
@@ -137,7 +138,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         }
         else if (groupName == "monitors")
         {
-            BreakpointStore.removeBreakpoint(href, lineNumber, BreakpointStore.BP_MONITOR);
+            FunctionMonitor.clearMonitorBreakpoint(href, lineNumber);
         }
     },
 

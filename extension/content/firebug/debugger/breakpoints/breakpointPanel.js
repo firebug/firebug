@@ -57,7 +57,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         // Listen to breakpoint changes (add/remove/enable/disable).
         // These events are used to refresh the panel content.
-        BreakpointStore.addListener(this);
+        var tool = this.context.getTool("debugger");
+        tool.addListener(this);
     },
 
     destroy: function(state)
@@ -66,7 +67,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.Panel.destroy.apply(this, arguments);
 
-        BreakpointStore.removeListener(this);
+        var tool = this.context.getTool("debugger");
+        tool.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -326,7 +328,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BreakpointStore Listener
+    // DebuggerTool Listener
 
     onBreakpointAdded: function(bp)
     {

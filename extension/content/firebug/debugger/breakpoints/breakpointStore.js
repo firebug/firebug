@@ -34,7 +34,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 /**
  * @Module BreakpointStore module is responsible for saving and loading breakpoints
  * on the client side.
- * 
+ *
  * TODO:
  * 1) Methods should expect zero-based line numbers so, it's consistent across
  *    Firebug framework. The line numbers should be auto-converted into one-based
@@ -117,10 +117,12 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         // Filter out disabled breakpoints. These won't be set on the server side
         // (unless the user enables them later).
-        bps = bps.filter(function(bp, index, array)
+        // xxxHonza: we shouldn't create server-side breakpoints for normal disabled
+        // breakpoints, but not in case there are other breakpoints at the same line.
+        /*bps = bps.filter(function(bp, index, array)
         {
             return bp.isEnabled();
-        });
+        });*/
 
         Trace.sysout("breakpointStore.onThreadAttached; Initialize server " +
             "side breakpoints", bps);
@@ -130,9 +132,10 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // panels can also deal with breakpoints (BON) and so, a panel doesn't seem to be
         // the right center place, where the perform the initialization.
         var tool = context.getTool("debugger");
-        tool.setBreakpoints(context, bps, function(response, bpClient)
+        tool.setBreakpoints(context, bps, function()
         {
-            // TODO: any async UI update or logging here?
+            // Some breakpoint could have been auto-corrected so, save all now.
+            self.save();
         });
     },
 
@@ -157,10 +160,11 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 return (element.type != BP_UNTIL);
             });
 
-            // Convert to Breakpoint type
+            // Convert to Breakpoint object type
             bps = bps.map(function(bp)
             {
                 var breakpoint = new Breakpoint();
+
                 // Convert to line index (zero-based)
                 bp.lineNo = bp.lineNo - 1;
                 for (var p in bp)
@@ -170,7 +174,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
             this.breakpoints[url] = bps;
 
-            // 'params' contains data, which are not persisted.
+            // 'params' contains transient data (not persistent).
             for (var j=0; j<bps.length; j++)
                 bps[j].params = {};
         }
@@ -227,21 +231,21 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         var bp = this.findBreakpoint(url, lineNo, -1);
 
-        // Bail out if exactly the same breakpoint already exists.
+        // Bail out if exactly the same breakpoint already exists. This is not an error
+        // since the store is shared across all contexts.
         if (bp && (bp.type & type == bp.type))
-        {
-            TraceError.sysout("breakpointStore.addBreakpoint; ERROR There is already a bp", bp);
-            return;
-        }
+            return bp;
 
         // Either extend an existing breakpoint type (in case there are two different bps
-        // on the same line) else crate a new breakpoint.
+        // at the same line) else create a new breakpoint.
+        // Every bit in the |type| property represents one type of a breakpoint. This way
+        // the user can create different breakpoints at the same line.
         if (bp)
         {
             bp.type |= type;
 
-            Trace.sysout("breakpointStore.addBreakpoint; EXTENDED BP: " +
-                url + " (" + lineNo + ")", bp);
+            Trace.sysout("breakpointStore.addBreakpoint; EXTEND BP: " + url + " (" +
+                lineNo + ")", bp);
         }
         else
         {
@@ -255,9 +259,13 @@ var BreakpointStore = Obj.extend(Firebug.Module,
                 url + " (" + lineNo + ") type: " + type, bp);
         }
 
-        // Do not forget to save immediatelly and notify listenrs (typically UI update).
         this.save(url);
-        this.dispatch("onBreakpointAdded", [bp]);
+
+        // This event is handled by DebuggerTool instances (one tool per context), which
+        // are responsible for creating the server side breakpoints.
+        // As soon as the breakpoint is (asynchronously) created on the server side and
+        // response received, each tool instance fires "onBreakpointAdded" event.
+        this.dispatch("onAddBreakpoint", [bp]);
 
         return bp;
     },
@@ -276,35 +284,40 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         for (var i=0; i<bps.length; i++)
         {
             var bp = bps[i];
-            if (bp.lineNo === lineNo)
+            if (bp.lineNo != lineNo)
+                continue;
+
+            // If removing the passed type makes the bp.type == zero, there is no
+            // other breakpoint type associated and we can remove the breakpoint
+            // entirely from the list.
+            // Keep the original type in the breakpoint instance since it's passed
+            // to listener which can check it.
+            if (!(bp.type & ~type))
             {
-                // If removing the passed type makes the bp.type == zero, there is no
-                // other breakpoint type associated and we can remove the breakpoint
-                // entirely from the list.
-                // Keep the original type in the breakpoint instance since it's passed
-                // to listener which can check it.
-                if (!(bp.type & ~type))
-                {
-                    bps.splice(i, 1);
-                    removedBp = bp;
-                }
-                else
-                {
-                    // There are other types yet so, just remove the one passed to this mehtod.
-                    bp.type &= ~type;
-                }
+                bps.splice(i, 1);
             }
+            else
+            {
+                // There are other types yet so, just remove the one passed to this method.
+                // xxxHonza: the type is removed and so listeners can't check it (e.g. isError)
+                bp.type &= ~type;
+            }
+
+            removedBp = bp;
+            break;
         }
 
         if (!removedBp)
+        {
+            Trace.sysout("breakpointStore.removeBreakpoint; Bail out, no such breakpoint.");
             return;
+        }
 
         this.save(url);
 
-        Trace.sysout("breakpointStore.removeBreakpoint; " + url +
-            " (" + lineNo + ")", removedBp);
+        Trace.sysout("breakpointStore.removeBreakpoint; " + url + " (" + lineNo + ")", removedBp);
 
-        this.dispatch("onBreakpointRemoved", [removedBp]);
+        this.dispatch("onRemoveBreakpoint", [removedBp]);
 
         return removedBp;
     },
@@ -330,6 +343,22 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         return null;
     },
 
+    hasAnyBreakpoint : function(url, lineNo)
+    {
+        var bps = this.getBreakpoints(url);
+        if (!bps)
+            return false;
+
+        for (var i=0; i<bps.length; i++)
+        {
+            var bp = bps[i];
+            if (bp.lineNo == lineNo)
+                return true;
+        }
+
+        return false;
+    },
+
     hasBreakpoint: function(url, lineNo)
     {
         var bp = this.findBreakpoint(url, lineNo);
@@ -346,7 +375,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         this.save(url);
 
-        this.dispatch("onBreakpointEnabled", [bp]);
+        this.dispatch("onEnableBreakpoint", [bp]);
     },
 
     disableBreakpoint: function(url, lineNo)
@@ -359,7 +388,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         this.save(url);
 
-        this.dispatch("onBreakpointDisabled", [bp]);
+        this.dispatch("onDisableBreakpoint", [bp]);
     },
 
     setBreakpointCondition: function(url, lineNo, condition)
@@ -372,7 +401,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         this.save(url);
 
-        this.dispatch("onBreakpointModified", [bp]);
+        this.dispatch("onModifyBreakpoint", [bp]);
     },
 
     isBreakpointDisabled: function(url, lineNo)

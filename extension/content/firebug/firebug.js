@@ -694,10 +694,19 @@ window.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // BTI Tools
 
-    registerTool: function(tool)
+    /**
+     * Registers a new tool with Firebug. The tool is automatially instanciated by the
+     * framework for each context. Just like it does for registered panels. The difference
+     * between a panel and a tool is that tool doesn't have any UI, it's just an object
+     * with direct access to the context and with the same life cycle as the context.
+     *
+     * @param {Object} toolName Unique tool name
+     * @param {Object} tool Tool's constructor function.
+     */
+    registerTool: function(toolName, tool)
     {
-        if (tool.toolName)
-            tools[tool.toolName] = tool;
+        if (toolName)
+            tools[toolName] = tool;
     },
 
     unregisterTool: function(tool)
@@ -705,7 +714,7 @@ window.Firebug =
         // TODO
     },
 
-    getTool: function(name)
+    getToolType: function(name)
     {
         return tools[name];
     },

@@ -68,32 +68,19 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
         // The function monitor is only interested in 'breakpoint' type of interrupts.
         var type = packet.why.type;
         if (type != "breakpoint")
-            return false;
+            return;
 
         var frame = context.stoppedFrame;
-        var bp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1,
+        var monitorBp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1,
             BreakpointStore.BP_MONITOR);
 
         Trace.sysout("functionMonitor.onDebuggerPaused; " + frame.href + " (" +
-            frame.line + ") " + (bp ? "monitor exists" : "no monitor"), packet);
-
-        if (!bp)
-            return false;
+            frame.line + ") " + (monitorBp ? "BP monitor exists" : "No BP monitor"),
+            monitorBp);
 
         // Log into the Console panel if there is a monitor.
-        this.onMonitorScript(context, frame);
-
-        // Let's see if there is also a standard breakpoint. If yes, make sure the
-        // debugger breaks (by returning false).
-        bp = BreakpointStore.findBreakpoint(frame.href, frame.line - 1);
-        if (bp)
-        {
-            Trace.sysout("functionMonitor.onDebuggerPaused; There is also a normal BP", bp);
-            return false;
-        }
-
-        // ... otherwise do not break and just resume the debugger.
-        return true;
+        if (monitorBp)
+            this.onMonitorScript(context, frame);
     },
 
     onMonitorScript: function(context, frame)
@@ -105,25 +92,6 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
         Firebug.Console.log(new FunctionLog(frame, stackTrace), context);
     },
-
-    // xxxHonza: this was there for tracing command line api, I guess.
-    /*onFunctionCall: function(context, frame, depth, calling)
-    {
-        //var url = Url.normalizeURL(frame.script.fileName);
-        //var sourceFile = context.sourceFileMap[url];
-        // Firebug.errorStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
-        //var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
-        if (Url.isSystemURL(Url.normalizeURL(frame.script.fileName)))
-            return;
-
-        // xxxHonza: traceCall and traceCallAll need to be fixed yet.
-        FBTrace.sysout("functionMonitor.onFunctionCall; ", sourceFile);
-
-        if (calling)
-            Firebug.Console.openGroup([frame, "depth:" + depth], context);
-        else
-            Firebug.Console.closeGroup(context);
-    },*/
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debugging and monitoring
@@ -163,7 +131,6 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     monitorScript: function(context, fn, script, mode)
     {
-        var tool = context.getTool("debugger");
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
         {
@@ -173,25 +140,16 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             var location = {line: script.startLine, url: script.url};
 
             // If the first line of the script contains no code, slide down to
-            // the nextline the has runnable code.
+            // the nextline that has runnable code.
             location = DebuggerLib.getNextExecutableLine(context, location);
 
-            // Create a new breakpoint.
-            tool.setBreakpoint(context, location.url, location.line - 1,
-            function(response, bpClient)
-            {
-                var type = (mode == "monitor") ? BreakpointStore.BP_MONITOR :
-                    BreakpointStore.BP_NORMAL;
-
-                BreakpointStore.addBreakpoint(bpClient.location.url,
-                    bpClient.location.line - 1, type);
-            });
+            var type = this.getBreakpointType(mode);
+            BreakpointStore.addBreakpoint(location.url, location.line - 1, type);
         }
     },
 
     unmonitorScript: function(context, fn, script, mode)
     {
-        var tool = context.getTool("debugger");
         var script = SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
         {
@@ -201,18 +159,25 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
             var location = {line: script.startLine, url: script.url};
             location = DebuggerLib.getNextExecutableLine(context, location);
 
-            var type = (mode == "monitor") ? BreakpointStore.BP_MONITOR :
-                BreakpointStore.BP_NORMAL;
-
+            var type = this.getBreakpointType(mode);
             BreakpointStore.removeBreakpoint(location.url, location.line - 1, type);
         }
     },
 
-    // xxxHonza: this will be needed for the context menu.
-    isMonitored: function(url, linNo)
+    getBreakpointType: function(mode)
+    {
+        return (mode == "monitor") ? BreakpointStore.BP_MONITOR : BreakpointStore.BP_NORMAL;
+    },
+
+    isMonitored: function(url, lineNo)
     {
         var bp = lineNo != -1 ? BreakpointStore.findBreakpoint(url, lineNo) : null;
         return bp && bp.type & BreakpointStore.BP_MONITOR;
+    },
+
+    clearMonitorBreakpoint: function(url, line)
+    {
+        BreakpointStore.removeBreakpoint(url, line, BreakpointStore.BP_MONITOR);
     }
 });
 
