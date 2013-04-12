@@ -232,12 +232,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     rerun: function(context)
     {
-        context.getTool("debugger").rerun(context);
+        context.getTool("debugger").rerun();
     },
 
     resume: function(context)
     {
-        context.getTool("debugger").resume(context);
+        context.getTool("debugger").resume();
     },
 
     abort: function(context)
@@ -246,17 +246,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     stepOver: function(context)
     {
-        context.getTool("debugger").stepOver(context);
+        context.getTool("debugger").stepOver();
     },
 
     stepInto: function(context)
     {
-        context.getTool("debugger").stepInto(context);
+        context.getTool("debugger").stepInto();
     },
 
     stepOut: function(context)
     {
-        context.getTool("debugger").stepOut(context);
+        context.getTool("debugger").stepOut();
     },
 
     suspend: function(context)

@@ -711,7 +711,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     updateOption: function(name, value)
     {
         if (name == "breakOnExceptions")
-            this.tool.breakOnExceptions(this.context, value);
+            this.tool.breakOnExceptions(value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1106,7 +1106,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Initialize existing breakpoints
         //var bps = BreakpointStore.getBreakpoints(sourceFile.href);
-        //self.tool.setBreakpoints(self.context, bps, function(response){});
+        //self.tool.setBreakpoints(bps, function(response){});
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1160,7 +1160,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return false;
 
         var self = this;
-        this.tool.eval(this.context, null, expr, function (context, event, packet)
+        this.tool.eval(null, expr, function (context, event, packet)
         {
             var result = packet.why.frameFinished["return"];
             self.onPopulateInfoTip(infoTip, result);

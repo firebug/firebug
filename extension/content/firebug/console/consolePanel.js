@@ -887,7 +887,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // Set the flag on the server.
         var tool = this.context.getTool("debugger");
-        tool.breakOnExceptions(this.context, breaking);
+        tool.breakOnExceptions(breaking);
     },
 });
 

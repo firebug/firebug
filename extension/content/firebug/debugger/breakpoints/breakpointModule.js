@@ -228,7 +228,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
                 // xxxHonza: the condition-eval could be done server-side
                 // see: https://bugzilla.mozilla.org/show_bug.cgi?id=812172 
-                tool.eval(context, context.currentFrame, bp.condition);
+                tool.eval(context.currentFrame, bp.condition);
                 context.conditionalBreakpointEval = true;
                 return false;
             }

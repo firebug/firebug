@@ -370,7 +370,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Eval through the debuggerTool.
         this.context.evalInProgress = true;
-        this.tool.eval(this.context, this.context.currentFrame, expression, onEvaluated);
+        this.tool.eval(this.context.currentFrame, expression, onEvaluated);
     },
 
     onEvalWatches: function(resultGrip)
