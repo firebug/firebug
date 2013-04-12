@@ -6,8 +6,9 @@ define([
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/lib/events",
+    "firebug/chrome/tabWatcher",
 ],
-function(Firebug, FBTrace, Obj, Options, Events) {
+function(Firebug, FBTrace, Obj, Options, Events, TabWatcher) {
 
 // ********************************************************************************************* //
 // Constants
@@ -179,9 +180,16 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     onTabNavigated: function(type, packet)
     {
-        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url);
+        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url, packet);
 
-        this.dispatch("onTabNavigated", arguments);
+        var context = TabWatcher.getContextByTabActor(packet.from);
+        if (!context)
+        {
+            TraceError.sysout("debuggerClientModule.onTabNavigated; ERROR no context!", packet);
+            return;
+        }
+
+        this.dispatch("onTabNavigated", [context, packet.url, packet.state]);
     },
 
     onTabDetached: function()

@@ -29,8 +29,6 @@ function SourceFile(actor, href)
 
     this.actor = actor;
     this.href = href;
-    //this.startLine = startLine;
-    //this.lineCount = lineCount;
 }
 
 SourceFile.prototype =
@@ -68,6 +66,8 @@ SourceFile.prototype =
 
     loadScriptLines: function(context, callback)
     {
+        Trace.sysout("sourceFile.loadScriptLines;");
+
         // Alway remember the last passed callback that should be executed when the source
         // is loaded. Note that the request-for-source can be already in progress.
         this.callback = callback;
@@ -91,6 +91,8 @@ SourceFile.prototype =
         var sourceClient = context.activeThread.source(this);
         sourceClient.source(function(response)
         {
+            Trace.sysout("sourceFile.loadScriptLines; response:", response);
+
             if (response.error)
             {
                 TraceError.sysout("sourceFile.loadScriptLines; ERROR " +

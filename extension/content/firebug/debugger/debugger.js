@@ -121,9 +121,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         tool.detach();
     },
 
-    onTabNavigated: function()
+    onTabNavigated: function(context, url, state)
     {
-        this.dispatch("onTabNavigated");
+        Trace.sysout("debuggerTool.onTabNavigated;", arguments);
+
+        var tool = context.getTool("debugger");
+        tool.onTabNavigated(url, state);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

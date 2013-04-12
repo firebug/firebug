@@ -102,7 +102,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.activeThread.addListener("framesadded", this._onFramesAdded);
         this.context.activeThread.addListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.addListener("newSources", this._onNewScript);
+        DebuggerClientModule.client.addListener("newSource", this._onNewScript);
     },
 
     detachListeners: function()
@@ -118,7 +118,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.activeThread.removeListener("framesadded", this._onFramesAdded);
         this.context.activeThread.removeListener("framescleared", this._onFramesCleared);
 
-        DebuggerClientModule.client.removeListener("newSources", this._onNewScript);
+        DebuggerClientModule.client.removeListener("newSource", this._onNewScript);
 
         this._onPause = null;
         this._onDetached = null;
@@ -129,10 +129,27 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onTabNavigated: function(url, state)
+    {
+        Trace.sysout("debuggerTool.onTabNavigated; " + url + ", state: " + state);
+
+        switch (state)
+        {
+            case "start":
+                break;
+            case "stop":
+                break;
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Script Sources
 
     updateScriptFiles: function()
     {
+        Trace.sysout("debuggerTool.updateScriptFiles");
+
         var self = this;
         this.context.activeThread.getSources(function(response)
         {
@@ -144,9 +161,9 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     newScript: function(type, response)
     {
-        Trace.sysout("debuggerToo.newScript;", response);
+        Trace.sysout("debuggerTool.newScript;", response);
 
-        this.addScript(response);
+        this.addScript(response.source);
     },
 
     addScript: function(script)

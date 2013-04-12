@@ -289,7 +289,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // Stop trying. The target script is probably not going to appear. At least,
             // make sure default script (location) is displayed.
-            if (counter < 0)
+            if (counter <= 0)
             {
                 if (!this.location)
                     this.navigate(null);

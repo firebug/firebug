@@ -743,6 +743,19 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         return this.getContextByWindow(global) || this.getContextBySandbox(global);
     },
 
+    getContextByTabActor: function(tabActor)
+    {
+        if (!tabActor)
+            return;
+
+        for (var i=0; i<contexts.length; i++)
+        {
+            var context = contexts[i];
+            if (context.tabClient._actor == tabActor)
+                return context;
+        }
+    },
+
     // deprecated, use Win.getBrowserByWindow
     getBrowserByWindow: function(win)
     {
