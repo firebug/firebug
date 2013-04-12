@@ -23,15 +23,19 @@ function runTest()
                 if (FBTest.ok(XMLTab, "There must be an XML tab."))
                 {
                     FBTest.click(XMLTab);
-                    var nodeTag = requestInfo.getElementsByClassName("netInfoXMLText")[0].
-                        getElementsByClassName("nodeTag")[2];
 
-                    if (FBTest.ok(nodeTag && nodeTag.textContent == "node", "There must be a <node> tag."))
+                    var root = requestInfo.getElementsByClassName("netInfoXMLText")[0];
+                    var nodeTag = root.getElementsByClassName("nodeTag")[1];
+
+                    if (FBTest.ok(nodeTag && nodeTag.textContent ==
+                        "node", "There must be a <node> tag."))
                     {
-                        FBTest.mouseOver(nodeTag);
-                        var tooltip = FW.FBL.$("fbTooltip");
-                        FBTest.compare("/root/node", tooltip.label, "The tooltip of the <node> tag must be correct.");
-                        FBTest.testDone("issue5742.DONE");
+                        FBTest.showTooltip(nodeTag, function(tooltip)
+                        {
+                            FBTest.compare("/root/node", tooltip.label,
+                                "The tooltip of the <node> tag must be correct.");
+                            FBTest.testDone("issue5742.DONE");
+                        });
                     }
                 }
             });
