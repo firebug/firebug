@@ -51,45 +51,7 @@
 .logRow > div {
     display: table-row;
 }
-<<<<<<< HEAD
-=======
 
-.logContent {
-    display: table-cell;
-    padding: 2px 0 2px 4px;
-}
-
-.logContent:empty {
-    display: none;
-}
-
-.logCounter {
-    display: none;
-    padding: 2px 0 2px 5px;
-    width: 20px;
-}
-
-.logCounter[count] {
-    display: table-cell;
-}
-
-.logCounterValue:empty {
-    display: none;
-}
-
-.logCounterValue {
-    border: 0.1em solid rgba(0, 0, 0, 0.4);
-    border-radius: 40px 40px 40px 40px;
-    background-color: #ffffff;
-    font-weight: bold;
-    padding: 0 4px;
-    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.4) 30%, transparent);
-}
-
-/*************************************************************************************************/
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
-
-<<<<<<< HEAD
 .logContent {
     display: table-cell;
     padding: 2px 0 2px 4px;
@@ -124,8 +86,6 @@
 
 /*****************************************************************************************/
 
-=======
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
 .logRow-command > div > .logContent > .objectBox-text {
     font-family: monospace;
     color: #0000FF;
@@ -544,7 +504,6 @@
 
 .logRow-help .commandDesc {
     color: gray;
-<<<<<<< HEAD
 }
 
 .logRow-help .tipsContent .tip {
@@ -554,8 +513,6 @@
 .logRow-help .tipsContent .tip .example {
     color: green;
     font-family: monospace;
-=======
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
 }
 
 /*************************************************************************************************/
@@ -920,11 +877,7 @@
 
 /************************************************************************************************/
 /* include() command */
-<<<<<<< HEAD
-.tableCommandLineInclude td{
-=======
 .tableCommandLineInclude td {
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
     height: 17px;
 }
 .tableCommandLineInclude .closeButton {
@@ -934,28 +887,16 @@
 .tableCommandLineInclude tr:hover .closeButton {
     display: block;
 }
-<<<<<<< HEAD
 
 .tableCommandLineInclude .url {
     float: left;
 }
 
-.tableCommandLineInclude .commands { 
-    float: right;
-    height:100%;
-=======
-.tableCommandLineInclude .url {
-    float: left;
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
-}
-
-<<<<<<< HEAD
-=======
 .tableCommandLineInclude .commands {
     float: right;
     height: 100%;
 }
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
+
 .tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 

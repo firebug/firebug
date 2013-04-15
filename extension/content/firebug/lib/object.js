@@ -7,15 +7,6 @@ define([
     "firebug/lib/string"
 ],
 function(FBTrace, Xpcom, Arr, Str) {
-<<<<<<< HEAD
-
-// ********************************************************************************************* //
-// Constants
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-=======
->>>>>>> branch 'issue4979' of https://github.com/firebug/firebug.git
 
 // ********************************************************************************************* //
 // Constants
