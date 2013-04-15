@@ -1,8 +1,13 @@
 /* See license.txt for terms of usage */
 
+/*jshint esnext:true, es5:true, curly:false*/
+/*global FBTrace:true, Components:true, define:true */
+
+
 define([
+    "firebug/lib/wrapper",
 ],
-function() {
+function(Wrapper) {
 
 "use strict";
 
@@ -81,12 +86,32 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         if (!dbg)
             return;
 
-        dglobal = dbg.addDebuggee(global);
-        dbg.removeDebuggee(global);
+        // xxxFlorent: For a reason I ignore, there are some conflicts with the ShareMeNot addon.
+        //   As a workaround, we unwrap the global object.
+        //   TODO see what cause that behaviour, why, and if there are no other addons in that case.
+        var contentView = Wrapper.getContentView(global);
+        dglobal = dbg.addDebuggee(contentView);
+        dbg.removeDebuggee(contentView);
         dglobalWeakMap.set(global.document, dglobal);
+
+        if (FBTrace.DBG_DEBUGGER)
+            FBTrace.sysout("new debuggee global instance created", dglobal);
     }
     return dglobal;
 };
+
+/**
+ * Returns true if the frame location refers to the command entered by the user
+ * through the command line.
+ *
+ * @param {string} frameLocation
+ *
+ * @return {boolean}
+ */
+DebuggerLib.isFrameLocationEval = function(frameFilename)
+{
+    return frameFilename === "debugger eval code";
+}
 
 // ********************************************************************************************* //
 // Local Access (hack for easier transition to JSD2/RDP)

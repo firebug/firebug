@@ -54,7 +54,7 @@ var DebuggerHalter = Obj.extend(Firebug.Module,
     shouldResumeDebugger: function(context, event, packet)
     {
         var where = packet.frame ? packet.frame.where : {};
-        if (where.url != "debugger eval code")
+        if (!DebuggerLib.isFrameLocationEval(where.url))
             return false;
 
         Trace.sysout("debuggerHalter.onDebuggerPaused; " + where.url, packet);
