@@ -1284,6 +1284,11 @@ function getInfoBox(spy)
     return spy.logRow.querySelector(".spyHead > .netInfoBody");
 }
 
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
+}
+
 // ********************************************************************************************* //
 
 function getRequestHeaders(spy)
