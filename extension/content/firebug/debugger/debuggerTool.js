@@ -332,8 +332,9 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // BreakpointStore Event Listener
 
-    // Debugger Tools is handling events coming from the BreakpointStore performing async
-    // operation with the server side and forwarding results to all registered listeners
+    // DebuggerTool (one instance per context) object is handling events coming from
+    // BreakpointStore (one instance per Firebug). It consequently performs async operation
+    // with the server side (using RDP) and forwarding results to all registered listeners
     // (usually panel objects)
 
     onAddBreakpoint: function(bp)
