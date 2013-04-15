@@ -2192,12 +2192,9 @@ this.searchInHtmlPanel = function(searchText, callback)
 {
     var panel = FBTest.selectPanel("html");
 
-    // Set search string into the search box.
+    // Reset the search box.
     var searchBox = FW.Firebug.chrome.$("fbSearchBox");
-
-    // FIXME: characters should be sent into the search box individually
-    // (using key events) to simulate incremental search.
-    searchBox.value = searchText;
+    searchBox.value = "";
 
     // The listener is automatically removed when the test window
     // is unloaded in case the seletion actually doesn't occur,
@@ -2212,10 +2209,29 @@ this.searchInHtmlPanel = function(searchText, callback)
         }
     });
 
-    // Setting the 'value' property doesn't fire an 'input' event so,
-    // press enter instead (asynchronously).
+    // Focus the search box.
+    var doc = searchBox.ownerDocument;
+    doc.defaultView.focus();
+    FBTest.focus(searchBox);
+
+    // Send text into the input box.
+    this.synthesizeText(searchText, doc.defaultView);
+
     FBTest.sendKey("RETURN", "fbSearchBox");
 };
+
+this.synthesizeText = function(str, win)
+{
+    synthesizeText({
+        composition: {
+            string: str,
+            clauses: [
+                { length: str.length, attr: Ci.nsIDOMWindowUtils.COMPOSITION_ATTR_RAWINPUT }
+            ]
+        },
+        caret: { start: str.length, length: 0 }
+    }, win);
+}
 
 // ********************************************************************************************* //
 // HTML Panel

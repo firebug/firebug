@@ -1646,7 +1646,7 @@ var FirebugChrome =
 
         if (object && rep)
         {
-            var label = rep.getTooltip(object, Firebug.currentContext);
+            var label = rep.getTooltip(object, Firebug.currentContext, target);
             if (label)
             {
                 tooltip.setAttribute("label", label);

@@ -12,26 +12,26 @@ function runTest()
 
             taskList.push(FBTest.executeCommandAndVerify, "$x(\"//button\")",
                 "[button#btn1, button#btn2, button#btn3, button#btn4, button#btn5]",
-                "pre", "objectBox objectBox-array");
-            taskList.push(FBTest.executeCommandAndVerify, "$x(\"count(//button)\")", "5", "pre",
+                "span", "objectBox objectBox-array");
+            taskList.push(FBTest.executeCommandAndVerify, "$x(\"count(//button)\")", "5", "span",
                 "objectBox objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify, "$x(\"string(//button/text())\")",
-                "\"Button 1\"", "pre", "objectBox objectBox-string");
+                "\"Button 1\"", "span", "objectBox objectBox-string");
             taskList.push(FBTest.executeCommandAndVerify, "$x(\"count(//button)>2\")", "true",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify,
                 "$x(\".//button\", document.getElementById(\"buttonGroup2\"))",
-                "[button#btn4, button#btn5]", "pre", "objectBox objectBox-array");
+                "[button#btn4, button#btn5]", "span", "objectBox objectBox-array");
             taskList.push(FBTest.executeCommandAndVerify, "$x(\"//button\", document, \"node\")",
                 /<button\sid="btn1">/, "a", "objectLink objectLink-element");
             taskList.push(FBTest.executeCommandAndVerify,
-                "$x(\"count(//button)>2\", document, \"number\")", "1", "pre",
+                "$x(\"count(//button)>2\", document, \"number\")", "1", "span",
                 "objectBox objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify,
-                "$x(\"count(//button)>2\", document, \"string\")", "\"true\"", "pre",
+                "$x(\"count(//button)>2\", document, \"string\")", "\"true\"", "span",
                 "objectBox objectBox-string");
             taskList.push(FBTest.executeCommandAndVerify,
-                "$x(\"//button\", document, \"bool\")", "true", "pre",
+                "$x(\"//button\", document, \"bool\")", "true", "span",
                 "objectBox objectBox-number");
 
             taskList.run(function() {

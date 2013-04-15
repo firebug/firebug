@@ -730,6 +730,7 @@ const categoryMap =
     "javascript": "js",
     "JavaScript": "js",
     "DOM": "js",
+    "DOM:HTML": "js",
     "Events": "js",
     "CSS": "css",
     "HTML": "xml",
@@ -771,23 +772,24 @@ function whyNotShown(url, categoryList, isWarning)
         {
             return "showCSSErrors";
         }
-        else if ((category == "HTML" || category == "XML" || category == "malformed-xml" ) &&
+        else if ((category == "HTML" || category == "XML" || category == "malformed-xml") &&
             !Firebug.showXMLErrors)
         {
             return "showXMLErrors";
         }
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
-                && !isWarning && !Firebug.showJSErrors)
+            && !isWarning && !Firebug.showJSErrors)
         {
             return "showJSErrors";
         }
-        else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
-                && isWarning && !Firebug.showJSWarnings)
+        else if ((category == "javascript" || category == "JavaScript" || category == "DOM" ||
+                category == "DOM:HTML")
+            && isWarning && !Firebug.showJSWarnings)
         {
             return "showJSWarnings";
         }
         else if (errorScheme == "chrome" || category == "XUL" || category == "chrome" ||
-                category == "XBL" || category == "component")
+            category == "XBL" || category == "component")
         {
             isChrome = true;
         }

@@ -225,7 +225,6 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             switch (colID)
             {
                 case "netTimeCol":
-                    FBTrace.sysout("row.repObject", row.repObject);
                     value = row.repObject.requestNumber;
                     break;
                 case "netSizeCol":

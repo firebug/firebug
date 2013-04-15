@@ -42,7 +42,7 @@ Xpath.getElementTreeXPath = function(element)
                 ++index;
         }
 
-        var tagName = element.nodeName.toLowerCase();
+        var tagName = (element.prefix ? element.prefix + ":" : "") + element.localName;
         var pathIndex = (index ? "[" + (index+1) + "]" : "");
         paths.splice(0, 0, tagName + pathIndex);
     }

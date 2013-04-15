@@ -164,7 +164,7 @@ function runTest()
                 {
                     // Test that evaluations work.
                     FBTest.executeCommandAndVerify(step3, "a.%global",
-                        "1", "pre", "objectBox-number");
+                        "1", "span", "objectBox-number");
                 }
                 function step3()
                 {
@@ -182,7 +182,7 @@ function runTest()
                 function step5()
                 {
                     // Check that it hit at the right point.
-                    FBTest.executeCommandAndVerify(step6, "i", "4", "pre", "objectBox-number");
+                    FBTest.executeCommandAndVerify(step6, "i", "4", "span", "objectBox-number");
                 }
                 function step6()
                 {
@@ -221,19 +221,19 @@ function runTest()
                     "Error: permission denied to access cross origin scope", "span", "errorMessage");
             }
             taskList.push(FBTest.executeCommandAndVerify, "frames[0].location.%framePriv",
-                "2", "pre", "objectBox-number");
+                "2", "span", "objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify, "frames[0].%framePriv",
-                "2", "pre", "objectBox-number");
+                "2", "span", "objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify, "frames[0].frameA.%framePriv",
-                "2", "pre", "objectBox-number");
+                "2", "span", "objectBox-number");
 
             // Test getting
             taskList.push(FBTest.executeCommandAndVerify, "a.%global",
-                "1", "pre", "objectBox-number");
+                "1", "span", "objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify, "typeof a.%values",
-                "\"function\"", "pre", "objectBox-string");
+                "\"function\"", "span", "objectBox-string");
             taskList.push(FBTest.executeCommandAndVerify, "a.%nonExistent",
-                "undefined", "pre", "objectBox-undefined");
+                "undefined", "span", "objectBox-undefined");
 
             taskList.push(FBTest.executeCommandAndVerify, "emptyObject.%blah",
                 "Error: missing closure", "span", "errorMessage");
@@ -241,9 +241,9 @@ function runTest()
                 "TypeError: can't get scope of non-object", "span", "errorMessage");
 
             taskList.push(FBTest.executeCommandAndVerify, "innerA.%b",
-                "2", "pre", "objectBox-number");
+                "2", "span", "objectBox-number");
             taskList.push(FBTest.executeCommandAndVerify, "innerB.%a",
-                "1", "pre", "objectBox-number");
+                "1", "span", "objectBox-number");
 
             // Test setting
             taskList.push(FBTest.executeCommandAndVerify, "a.%nonExistent = 1",
@@ -253,16 +253,16 @@ function runTest()
             taskList.push(FBTest.executeCommandAndVerify, "delete a.%unused",
                 "Error: can't delete closure variable", "span", "errorMessage");
             taskList.push(FBTest.executeCommandAndVerify, "++a.%local",
-                "6", "pre", "objectBox-number");
+                "6", "span", "objectBox-number");
 
             taskList.push(FBTest.executeCommandAndVerify, "emptyObject.%blah = 1",
                 "Error: missing closure", "span", "errorMessage");
 
             // Verify the setting
             taskList.push(FBTest.executeCommandAndVerify, "a.%unused",
-                "(optimized away)", "pre", "objectBox-optimizedAway");
+                "(optimized away)", "span", "objectBox-optimizedAway");
             taskList.push(FBTest.executeCommandAndVerify, "a.%local",
-                "6", "pre", "objectBox-number");
+                "6", "span", "objectBox-number");
 
             // Test that error sources are faked
             taskList.push(FBTest.executeCommandAndVerify, "innerA.%a()",
@@ -275,22 +275,22 @@ function runTest()
             // Test object->function heuristics:
             // * already a function
             taskList.push(FBTest.executeCommandAndVerify, "func.%priv",
-                "1", "pre", "objectBox-number");
+                "1", "span", "objectBox-number");
             // * already a function, but would need scope anyway
             taskList.push(FBTest.executeCommandAndVerify, "scopelessFunc.%priv",
                 "Error: missing closure", "span", "errorMessage");
             // * use of own functions
             taskList.push(FBTest.executeCommandAndVerify, "funcWithProto.prototype.%priv",
-                "10", "pre", "objectBox-number");
+                "10", "span", "objectBox-number");
             // * use of own "constructor"
             taskList.push(FBTest.executeCommandAndVerify, "func.prototype.%priv",
-                "1", "pre", "objectBox-number");
+                "1", "span", "objectBox-number");
             // * use of inherited functions
             taskList.push(FBTest.executeCommandAndVerify, "new funcWithProto().%priv",
-                "10", "pre", "objectBox-number");
+                "10", "span", "objectBox-number");
             // * use of "constructor"
             taskList.push(FBTest.executeCommandAndVerify, "new func().%priv",
-                "1", "pre", "objectBox-number");
+                "1", "span", "objectBox-number");
 
             // Test completion
             taskList.push(testCompletion, "new func().%pr", true);
