@@ -108,7 +108,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!enabled)
             return;
 
-        Trace.sysout("scriptPanel.show;", state);
+        Trace.sysout("scriptPanel.show; ", {
+            state: state,
+            location: this.location,
+            selection: this.selection
+        });
 
         // Initialize the source view. Orion initialization here, when the
         // parentNode is actualy visible, solves the following problem:
@@ -173,6 +177,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         state.location = this.location;
         state.scrollTop = this.scriptView.getScrollTop();
+
+        // xxxHonza: workaround, two instances of Orion doesn't work in one document.
+        // So, destroy it if the panel is hidden.
+        this.scriptView.destroy();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

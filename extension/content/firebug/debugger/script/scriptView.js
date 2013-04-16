@@ -151,9 +151,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_OUT,
             this.onMouseOutListener);
 
-        if (this.initialized)
-            this.editor.destroy();
+        this.editor.destroy();
 
+        this.initialized = false;
+        this.initializeExecuted = false;
         this.editor = null;
     },
 
@@ -171,6 +172,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var text = this.editor.getText();
         if (text == source && !this.forceRefresh)
             return;
+
+        Trace.sysout("scriptView.showSource; ", {
+            source: source,
+            text: text
+        });
 
         this.editor.setText(source);
 

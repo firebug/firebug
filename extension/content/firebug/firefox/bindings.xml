@@ -198,8 +198,10 @@
                         ", forceUpdate: " + forceUpdate + ", noRefresh: " + noRefresh +
                         ", needsUpdate: " + (panel ? panel.needsRefresh : ""));
 
-                // Do not hide the panel if it's going to be selected.
-                if (!(this.selectedPanel && this.selectedPanel.name == panelName))
+                // Do not hide the panel if it's going to be selected. But, don't forget
+                // that the new selected panel (with the same name) can come from different
+                // context.
+                if (this.selectedPanel != panel)
                     this.hideSelectedPanel();
 
                 //xxxHonza: can be removed, but Chromebug needs it for now.
@@ -300,7 +302,7 @@
                 var oldPanel = this.selectedPanel;
                 if (oldPanel)
                 {
-                    var state = FBL.getPersistedState(Firebug.currentContext, oldPanel.name);
+                    var state = FBL.getPersistedState(oldPanel.context, oldPanel.name);
                     oldPanel.hide(state);
 
                     oldPanel.visible = false; // xxxjjb Why three ways to un-show the panel?

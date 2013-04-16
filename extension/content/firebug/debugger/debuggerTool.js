@@ -130,26 +130,11 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onTabNavigated: function(url, state)
-    {
-        Trace.sysout("debuggerTool.onTabNavigated; " + url + ", state: " + state);
-
-        switch (state)
-        {
-            case "start":
-                break;
-            case "stop":
-                break;
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Script Sources
 
     updateScriptFiles: function()
     {
-        Trace.sysout("debuggerTool.updateScriptFiles");
+        Trace.sysout("debuggerTool.updateScriptFiles; context id: " + this.context.getId());
 
         var self = this;
         this.context.activeThread.getSources(function(response)
@@ -162,7 +147,14 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     newScript: function(type, response)
     {
-        Trace.sysout("debuggerTool.newScript;", response);
+        Trace.sysout("debuggerTool.newScript; context id: " + this.context.getId() +
+            ", script url: " + response.source.url, response);
+
+        // Ignore scripts coming from different threads.
+        // This is because 'newScript' listener is registered in 'DebuggerClient' not
+        // in 'ThreadClient'.
+        if (this.context.activeThread.actor != response.from)
+            return;
 
         this.addScript(response.source);
     },
@@ -170,7 +162,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     addScript: function(script)
     {
         // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
-        // create as the user is evaluating expressions in the watch window.
+        // created e.g. as the user is evaluating expressions in the watch window.
         if (DebuggerLib.isFrameLocationEval(script.url))
             return;
 
@@ -625,17 +617,31 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     stepOver: function(callback)
     {
-        return this.context.activeThread.stepOver(callback);
+        // The callback must be passed into the stepping functions, otherwise there is
+        // an exception.
+        return this.context.activeThread.stepOver(function()
+        {
+            if (callback)
+                callback();
+        });
     },
 
     stepInto: function(callback)
     {
-        return this.context.activeThread.stepIn(callback);
+        return this.context.activeThread.stepIn(function()
+        {
+            if (callback)
+                callback();
+        });
     },
 
     stepOut: function(callback)
     {
-        return this.context.activeThread.stepOut(callback);
+        return this.context.activeThread.stepOut(function()
+        {
+            if (callback)
+                callback();
+        });
     },
 
     runUntil: function(compilationUnit, lineNumber, callback)

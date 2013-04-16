@@ -181,15 +181,6 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     onTabNavigated: function(type, packet)
     {
         Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url, packet);
-
-        var context = TabWatcher.getContextByTabActor(packet.from);
-        if (!context)
-        {
-            TraceError.sysout("debuggerClientModule.onTabNavigated; ERROR no context!", packet);
-            return;
-        }
-
-        this.dispatch("onTabNavigated", [context, packet.url, packet.state]);
     },
 
     onTabDetached: function()
@@ -258,6 +249,16 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var self = this;
         this.client.listTabs(function(response)
         {
+            // Use the current context. The previous one could have been already destroyed
+            // (happens e.g. for about:blank).
+            // xxxHonza: FIX ME, this is rather a hack.
+            context = Firebug.currentContext;
+            if (!context)
+            {
+                FBTrace.sysout("ERROR? no context");
+                return;
+            }
+
             // The response contains list of all tab and global actors registered
             // on the server side. We need to cache it since these IDs will be
             // needed later (for communication to these actors).
@@ -371,7 +372,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                     return;
 
                 Trace.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
-                self.client.onPacket(packet);
+                self.client.onPacket.apply(self.client, arguments);
             },
 
             onClosed: function(status)

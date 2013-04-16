@@ -751,7 +751,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         for (var i=0; i<contexts.length; i++)
         {
             var context = contexts[i];
-            if (context.tabClient._actor == tabActor)
+            if (context.tabClient && context.tabClient._actor == tabActor)
                 return context;
         }
     },
