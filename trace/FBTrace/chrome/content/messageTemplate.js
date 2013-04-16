@@ -355,18 +355,18 @@ var MessageTemplate = domplate(Reps.Rep,
         if (Dom.getAncestorByClass(target, "messageInfoStackText"))
         {
             items.push({
-              label: Locale.$STR("Copy Stack"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCopyStack, this, message)
+                label: Locale.$STR("tracing.cmd.Copy_Stack"),
+                nol10n: true,
+                command: Obj.bindFixed(this.onCopyStack, this, message)
             });
         }
 
         if (Dom.getAncestorByClass(target, "messageInfoExcText"))
         {
             items.push({
-              label: Locale.$STR("Copy Exception"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCopyException, this, message)
+                label: Locale.$STR("tracing.cmd.Copy_Exception"),
+                nol10n: true,
+                command: Obj.bindFixed(this.onCopyException, this, message)
             });
         }
 
