@@ -1221,7 +1221,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     showThisCompilationUnit: function(compilationUnit)
     {
-        if (compilationUnit.getURL().substr(0, 9) == "chrome://")
+        if (compilationUnit.getURL().lastIndexOf("chrome://", 0) === 0)
             return false;
 
         if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)

@@ -20,9 +20,28 @@ function runTest()
                 "Current window: Window cd.html",
                 "div", "logRow-info");
 
+            tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)", 
+                "Error: Object must be a window.", "div", "subLogRow", false);
+
+            tasks.push(testErrorInfo);
+
             tasks.run(function() {
                 FBTest.testDone("commandline.cd.DONE");
             });
         });
     });
+}
+
+function testErrorInfo(callback)
+{
+    var panelNode = FBTest.getPanel("console").panelNode;
+    var row = panelNode.querySelector(".logRow-errorMessage");
+    FBTest.click(row.querySelector(".subLogRow"));
+    FBTest.compare(1, row.getElementsByClassName("objectBox-stackFrame").length, 
+        "there should be exactly one element in the stack trace");
+    FBTest.compare("cd(undefined)", row.querySelector(".errorSourceCode").textContent,
+        "the source of the error should be : \"cd(undefined)\"");
+    // xxxFlorent: TODO ?: check the result of clicking the source link
+    FBTest.clearConsole();
+    callback();
 }
