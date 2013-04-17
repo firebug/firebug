@@ -475,7 +475,6 @@ var FirebugChrome =
         var watchPanel = context.getPanel("watches", true);
         if (watchPanel)
         {
-            Firebug.CommandLine.isReadyElsePreparing(context);
             watchPanel.editNewWatch();
         }
     },

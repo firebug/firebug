@@ -162,6 +162,7 @@ Arr.arrayInsert = function(array, index, other)
     return array;
 };
 
+// xxxFlorent: [ES6-SET] [ES6-SPREAD]
 /**
  * Filter out unique values of an array, saving only the first occurrence of
  * every value. In case the array is sorted, a faster path is taken.
