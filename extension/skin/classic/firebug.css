@@ -181,13 +181,21 @@
 
 .fbsearch-icon {
     cursor: default!important;
-    background: url(chrome://firebug/skin/search.png) no-repeat 0 50%;
+    background: url(chrome://firebug/skin/search.svg) no-repeat 0 50%;
     width: 16px;
     height: 16px;
 }
 
-.fbsearch-textbox[active-search='true'] > .fbsearch-icon {
-    background-image: url(chrome://firebug/skin/search-close.png);
+.fbsearch-textbox[active-search="true"] > .fbsearch-icon {
+    background-image: url(chrome://firebug/skin/searchClose.svg);
+}
+
+.fbsearch-textbox > .fbsearch-icon:hover {
+    filter: url("chrome://firebug/skin/filters.svg#darken");
+}
+
+.fbsearch-textbox > .fbsearch-icon:active {
+    filter: url("chrome://firebug/skin/filters.svg#deepDarken");
 }
 
 #fbSearchOptionsPanel {
