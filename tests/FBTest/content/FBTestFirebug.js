@@ -322,7 +322,7 @@ this.sendMouseEvent = function(event, target, win)
     }
 
     var targetIsString = typeof target == "string";
- 
+
     if (!win)
     {
         win = targetIsString ?
@@ -1290,8 +1290,10 @@ this.typeCommand = function(string, useCommandEditor)
  * @param {String} tagName Name of the displayed element.
  * @param {String} class Class of the displayed element.
  * @param {Boolean} if set to false, does not clear the console logs
+ * @param {Boolean} if set to true, use the Command Editor instead of the Command Line
  */
-this.executeCommandAndVerify = function(callback, expression, expected, tagName, classes, clear)
+this.executeCommandAndVerify = function(callback, expression, expected, tagName, classes, clear,
+    useCommandEditor)
 {
     if (clear !== false)
         FBTest.clearConsole();
@@ -1309,7 +1311,7 @@ this.executeCommandAndVerify = function(callback, expression, expected, tagName,
     });
 
     FBTest.progress("Execute expression: " + expression);
-    FBTest.executeCommand(expression);
+    FBTest.executeCommand(expression, undefined, useCommandEditor);
 };
 
 /**

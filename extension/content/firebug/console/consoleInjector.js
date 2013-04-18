@@ -220,15 +220,6 @@ function createConsoleHandler(context, win)
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("FirebugConsoleHandler(" + this.handler_name + ") " +
                 Dom.getMappedData(win.document, "firebug-methodName") + ", event", event);
-
-        if (!Firebug.CommandLine.CommandHandler.handle(event, this.console, win))
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("FirebugConsoleHandler", this);
-
-            var methodName = Dom.getMappedData(win.document, "firebug-methodName");
-            Firebug.Console.log(Locale.$STRF("console.MethodNotSupported", [methodName]));
-        }
     };
 
     handler.setEvaluatedCallback = function( fnOfResult )
