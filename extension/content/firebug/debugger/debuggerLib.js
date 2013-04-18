@@ -47,8 +47,8 @@ DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
     if (typeof obj !== "object" || obj === null)
         return obj;
 
-    if (typeof(obj.unsafeDereference) != "undefined")
-        return obj.unsafeDereference();
+    if (obj.unsafeDereference)
+        return Wrapper.unwrapObject(obj.unsafeDereference());
 
     if (!global || !dglobal)
     {
