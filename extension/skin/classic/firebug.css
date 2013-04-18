@@ -191,11 +191,11 @@
 }
 
 .fbsearch-textbox > .fbsearch-icon:hover {
-    filter: url("chrome://firebug/skin/filters.svg#darken");
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 .fbsearch-textbox > .fbsearch-icon:active {
-    filter: url("chrome://firebug/skin/filters.svg#deepDarken");
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 #fbSearchOptionsPanel {
@@ -295,11 +295,11 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbDebuggerButtons toolbarbutton:hover,
 #fbDebuggerButtons toolbarbutton:active {
-    filter: url("chrome://firebug/skin/filters.svg#darken");
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 #fbDebuggerButtons toolbarbutton[disabled="true"] {
-    filter: url("chrome://firebug/skin/filters.svg#greyscale");
+    filter: url(chrome://firebug/skin/filters.svg#greyscale);
 }
 
 #fbRerunButton {
@@ -369,11 +369,11 @@ textbox[type="fbSearchBox"] > panel {
 /*************************************************************************************************/
 
 #fbCommandPopupButton {
-    list-style-image: url(chrome://firebug/skin/commandLine.png);
+    list-style-image: url(chrome://firebug/skin/commandLinePopup.svg);
 }
 
 #fbCommandPopupButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/commandLineDisabled.png);
+    filter: url(chrome://firebug/skin/filters.svg#brighten);
 }
 
 /************************************************************************************************/
