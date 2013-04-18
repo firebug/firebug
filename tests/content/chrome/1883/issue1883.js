@@ -8,6 +8,8 @@ function runTest()
     {
         win = FBTest.FirebugWindow.FBL.getContentView(win);
 
+        FBTest.progress("Test page opened " + win);
+
         with (FBTest.FirebugWindow.FBL) { with (FBTest.FirebugWindow)
         {
             function ArrayIterator(array) {
@@ -43,6 +45,8 @@ function runTest()
             var table = win.document.createElement("table");
             var tbody = win.document.createElement("tbody");
             table.appendChild(tbody);
+
+            FBTest.progress("table created " + table);
 
             iterTag.tag.insertRows({ test: 10 }, tbody);
 

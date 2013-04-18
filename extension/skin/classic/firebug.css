@@ -181,13 +181,21 @@
 
 .fbsearch-icon {
     cursor: default!important;
-    background: url(chrome://firebug/skin/search.png) no-repeat 0 50%;
+    background: url(chrome://firebug/skin/search.svg) no-repeat 0 50%;
     width: 16px;
     height: 16px;
 }
 
-.fbsearch-textbox[active-search='true'] > .fbsearch-icon {
-    background-image: url(chrome://firebug/skin/search-close.png);
+.fbsearch-textbox[active-search="true"] > .fbsearch-icon {
+    background-image: url(chrome://firebug/skin/searchClose.svg);
+}
+
+.fbsearch-textbox > .fbsearch-icon:hover {
+    filter: url("chrome://firebug/skin/filters.svg#darken");
+}
+
+.fbsearch-textbox > .fbsearch-icon:active {
+    filter: url("chrome://firebug/skin/filters.svg#deepDarken");
 }
 
 #fbSearchOptionsPanel {
@@ -285,37 +293,33 @@ textbox[type="fbSearchBox"] > panel {
     margin-right: 2px;
 }
 
-#fbDebuggerButtons toolbarbutton {
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
 #fbDebuggerButtons toolbarbutton:hover,
 #fbDebuggerButtons toolbarbutton:active {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url("chrome://firebug/skin/filters.svg#darken");
 }
 
 #fbDebuggerButtons toolbarbutton[disabled="true"] {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
+    filter: url("chrome://firebug/skin/filters.svg#greyscale");
 }
 
 #fbRerunButton {
-    list-style-image: url(chrome://firebug/skin/rerun.png);
+    list-style-image: url(chrome://firebug/skin/rerun.svg);
 }
 
 #fbContinueButton {
-    list-style-image: url(chrome://firebug/skin/continue.png);
+    list-style-image: url(chrome://firebug/skin/continue.svg);
 }
 
 #fbStepOverButton {
-    list-style-image: url(chrome://firebug/skin/stepOver.png);
+    list-style-image: url(chrome://firebug/skin/stepOver.svg);
 }
 
 #fbStepIntoButton {
-    list-style-image: url(chrome://firebug/skin/stepInto.png);
+    list-style-image: url(chrome://firebug/skin/stepInto.svg);
 }
 
 #fbStepOutButton {
-    list-style-image: url(chrome://firebug/skin/stepOut.png);
+    list-style-image: url(chrome://firebug/skin/stepOut.svg);
 }
 
 /*************************************************************************************************/

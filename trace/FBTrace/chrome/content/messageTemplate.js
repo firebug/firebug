@@ -355,18 +355,20 @@ var MessageTemplate = domplate(Reps.Rep,
         if (Dom.getAncestorByClass(target, "messageInfoStackText"))
         {
             items.push({
-              label: Locale.$STR("Copy Stack"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCopyStack, this, message)
+                label: Locale.$STR("tracing.cmd.Copy Stack"),
+                tooltiptext: Locale.$STR("tracing.cmd.tip.Copy Stack"),
+                nol10n: true,
+                command: Obj.bindFixed(this.onCopyStack, this, message)
             });
         }
 
         if (Dom.getAncestorByClass(target, "messageInfoExcText"))
         {
             items.push({
-              label: Locale.$STR("Copy Exception"),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCopyException, this, message)
+                label: Locale.$STR("tracing.cmd.Copy Exception"),
+                tooltiptext: Locale.$STR("tracing.cmd.tip.Copy Exception"),
+                nol10n: true,
+                command: Obj.bindFixed(this.onCopyException, this, message)
             });
         }
 
@@ -378,12 +380,14 @@ var MessageTemplate = domplate(Reps.Rep,
 
         items.push({
           label: Locale.$STR("tracing.cmd.Expand All"),
+          tooltiptext: Locale.$STR("tracing.cmd.tip.Expand All"),
           nol10n: true,
           command: Obj.bindFixed(this.onExpandAll, this, message)
         });
 
         items.push({
           label: Locale.$STR("tracing.cmd.Collapse All"),
+          tooltiptext: Locale.$STR("tracing.cmd.tip.Collapse All"),
           nol10n: true,
           command: Obj.bindFixed(this.onCollapseAll, this, message)
         });
