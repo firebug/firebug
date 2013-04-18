@@ -21,10 +21,11 @@ define([
     "firebug/lib/keywords",
     "firebug/lib/system",
     "firebug/editor/editor",
+    "firebug/debugger/script/scriptPanelWarning",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor) {
+    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning) {
 
 // ********************************************************************************************* //
 // Constants
@@ -114,13 +115,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             selection: this.selection
         });
 
+        var active = !ScriptPanelWarning.showWarning(this);
+
         // Initialize the source view. Orion initialization here, when the
         // parentNode is actualy visible, solves the following problem:
         // Error: TypeError: this._iframe.contentWindow is undefined
         // Save for muliple calls.
         this.scriptView.initialize(this.panelNode);
 
-        if (state && state.location)
+        if (active && state && state.location)
         {
             // Create source link used to restore script view location. Specified source line
             // should be displayed at the top (as the first line).
@@ -138,8 +141,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // the single stepping and overwrite the debugger location.
             delete state.location;
         }
-
-        var active = true;
 
         // These buttons are visible only, if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", active);
@@ -363,6 +364,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     updateLocation: function(object)
     {
         Trace.sysout("scriptPanel.updateLocation; " + object, object);
+
+        // Make sure the update panel's content. If there is currently a warning displayed
+        // it might disappers since no longer valid (e.g. "Debugger is already active").
+        if (ScriptPanelWarning.updateLocation(this))
+            return;
 
         var sourceLink = object;
 
@@ -895,7 +901,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     supportsBreakOnNext: function()
     {
-        return this.breakable && Firebug.jsDebuggerOn;
+        // xxxHonza: jsDebuggerOn is an artifact from JSD1. Do we need a replacement for JSD2?
+        return this.breakable/* && Firebug.jsDebuggerOn;*/
     },
 
     breakOnNext: function(enabled)

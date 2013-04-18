@@ -930,7 +930,11 @@ var FirebugChrome =
         }
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("chrome.syncSidePanels; selected side panel " + panelBar1.selectedPanel);
+        {
+            FBTrace.sysout("chrome.syncSidePanels; selected side panel " +
+                (panelBar2.selectedPanel ? panelBar2.selectedPanel.name : "no panel"),
+                panelBar2.selectedPanel);
+        }
 
         sidePanelDeck.selectedPanel = panelBar2;
 

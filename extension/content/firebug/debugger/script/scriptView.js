@@ -151,7 +151,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_OUT,
             this.onMouseOutListener);
 
-        this.editor.destroy();
+        try
+        {
+            this.editor.destroy();
+        }
+        catch (e)
+        {
+            TraceError.sysout("scriptView.destroy; EXCEPTION " + e, e);
+        }
 
         this.initialized = false;
         this.initializeExecuted = false;
