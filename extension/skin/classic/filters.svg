@@ -8,6 +8,13 @@
             <feFuncB type="linear" intercept="-0.1" slope="1"/>
         </feComponentTransfer>
     </filter>
+    <filter id="deepDarken">
+        <feComponentTransfer>
+            <feFuncR type="linear" intercept="-0.2" slope="1"/>
+            <feFuncG type="linear" intercept="-0.2" slope="1"/>
+            <feFuncB type="linear" intercept="-0.2" slope="1"/>
+        </feComponentTransfer>
+    </filter>
     <filter id="greyscale">
         <feColorMatrix type="saturate" values="0"/>
     </filter>
