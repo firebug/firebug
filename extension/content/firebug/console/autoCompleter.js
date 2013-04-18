@@ -1763,9 +1763,7 @@ function propertiesToHide(expr, obj)
         );
 
         // Hide ourselves.
-        ret.push("_FirebugCommandLine", "_firebug",
-            "_firebugUnwrappedDebuggerObject", "__fb_scopedVars"
-        );
+        ret.push("_firebug", "_firebugUnwrappedDebuggerObject", "__fb_scopedVars");
     }
 
     // Old and ugly.

@@ -11,8 +11,10 @@ define([
     "firebug/trace/debug",
     "firebug/console/console",
     "firebug/lib/options",
+    "firebug/debugger/debuggerLib",
 ],
-function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options) {
+function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
+    DebuggerLib) {
 
 // ********************************************************************************************* //
 
@@ -401,7 +403,12 @@ function createFirebugConsole(context, win)
 
     function getStackLink()
     {
-        return StackFrame.getFrameSourceLink(getComponentsStackDump());
+        var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
+        // xxxFlorent: should be reverted if we integrate 
+        // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+        if (DebuggerLib.isFrameLocationEval(sourceLink.href))
+            return null;
+        return sourceLink;
     };
 
     function getJSDUserStack()
@@ -423,6 +430,11 @@ function createFirebugConsole(context, win)
 
                 // firebug-service scope reached, in some cases the url starts with file://
                 if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+                    continue;
+
+                // xxxFlorent: should be reverted if we integrate
+                // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+                if (DebuggerLib.isFrameLocationEval(frames[i].href))
                     continue;
 
                 // command line

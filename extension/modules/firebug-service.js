@@ -4188,6 +4188,8 @@ function isFilteredURL(rawJSD_script_filename)
         return false;
     if (rawJSD_script_filename == "XPCSafeJSObjectWrapper.cpp")
         return true;
+    if (rawJSD_script_filename === "debugger eval code")
+        return true;
     if (fbs.filterSystemURLs)
         return systemURLStem(rawJSD_script_filename);
 

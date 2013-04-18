@@ -58,6 +58,13 @@ Obj.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
+Obj.isFunction = function(ob)
+{
+    return typeof(ob) == "function";
+}
+
+// ************************************************************************************************
+
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
  *
@@ -70,13 +77,6 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
     try
     {
         if (!ob)
-            return false;
-
-        var type = typeof(ob);
-        if (type == "string" && ob.length)
-            return true;
-         
-        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
             return false;
 
         try
@@ -96,6 +96,12 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             return false;
         }
 
+        var type = typeof(ob);
+        if (type == "string" && ob.length)
+            return true;
+
+        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
+            return false;
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);
@@ -223,6 +229,30 @@ Obj.isNonNativeGetter = function(obj, propName)
 
     return true;
 };
+
+// xxxFlorent: [ES6-getPropertyNames]
+// http://wiki.ecmascript.org/doku.php?id=harmony:extended_object_api&s=getownpropertynames
+/**
+ * Gets property names from an object.
+ *
+ * @param {*} subject The object
+ * @return {Array} The property names
+ *
+ */
+Obj.getPropertyNames = Object.getPropertyNames || function(subject)
+{
+    var props = Object.getOwnPropertyNames(subject);
+    var proto = Object.getPrototypeOf(subject);
+    while (proto !== null)
+    {
+        props = props.concat(Object.getOwnPropertyNames(proto));
+        proto = Object.getPrototypeOf(proto);
+    }
+    // only keep unique elements from props (not optimised):
+    //    props = [...new Set(props)];
+    return Arr.unique(props);
+};
+
 
 // ********************************************************************************************* //
 
