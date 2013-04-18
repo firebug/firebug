@@ -434,11 +434,6 @@ function createFirebugConsole(context, win)
                 if (DebuggerLib.isFrameLocationEval(frames[i].href))
                     continue;
 
-                // xxxFlorent: should be reverted if we integrate
-                // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-                if (DebuggerLib.isFrameLocationEval(frames[i].href))
-                    continue;
-
                 // command line
                 var fn = frames[i].getFunctionName() + "";
                 if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
