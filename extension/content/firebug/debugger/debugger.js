@@ -365,6 +365,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     getCurrentStackTrace: function(context)
     {
+        return DebuggerHalter.getCurrentStackTrace(context);
     },
 
     hasValidStack: function(context)

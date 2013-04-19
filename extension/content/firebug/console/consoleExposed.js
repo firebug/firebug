@@ -13,9 +13,10 @@ define([
     "firebug/console/console",
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
+    "firebug/console/errorMessageObj",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
-    Errors, Debug, Console, Options, DebuggerLib) {
+    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj) {
 
 // ********************************************************************************************* //
 
@@ -93,11 +94,8 @@ function createFirebugConsole(context, win)
 
     console.trace = function firebugDebuggerTracer()
     {
-        var unwrapped = Wrapper.unwrapObject(win);
-        unwrapped.top._firebugStackTrace = "console-tracer";
-        debugger;
-        delete unwrapped.top._firebugStackTrace;
-
+        var trace = getJSDUserStack(context);
+        Firebug.Console.log(trace, context, "stackTrace");
         return Console.getDefaultReturnValue(win);
     };
 
@@ -335,6 +333,8 @@ function createFirebugConsole(context, win)
             }
             else if (context.stackTrace)
             {
+                // xxxHonza: I don't see context.stackTrace being set anywhere.
+                // Can we remove this?
                 trace = context.stackTrace;
                 if (FBTrace.DBG_CONSOLE)
                     FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
@@ -353,8 +353,7 @@ function createFirebugConsole(context, win)
 
         // we may have only the line popped above
         var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0;
-        var errorObject = new FirebugReps.ErrorMessageObj(msg, url, lineNo, "",
-            category, context, trace);
+        var errorObject = new ErrorMessageObj(msg, url, lineNo, "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
             errorObject.correctWithStackTrace(trace);

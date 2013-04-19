@@ -256,7 +256,7 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
 // ********************************************************************************************* //
 // Debugger
 
-DebuggerLib.breakNow = function(context, callback)
+DebuggerLib.breakNow = function(context)
 {
     // getDebugeeGlobal uses the current global (ie. stopped frame, current iframe or
     // top level window associated with the context object).
