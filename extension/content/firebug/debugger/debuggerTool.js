@@ -232,7 +232,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
             delete tool.context.resumeLimit;
 
             // Resume debugger
-            return tool.resume(tool.context, null, resumeLimit);
+            return tool.resume(null, resumeLimit);
         }
 
         // Send event allowing immediate resume. If at least one listener returns
@@ -613,7 +613,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     resume: function(callback, limit)
     {
-        return this.context.activeThread.resume(callback, limit);
+        // xxxHonza: do not use _doResume. Use stepping methods instead.
+        return this.context.activeThread._doResume(limit, callback);
     },
 
     stepOver: function(callback)
