@@ -62,11 +62,11 @@
 
 /* Display brekpoint disc */
 .memberRow .memberRowHeader {
-    background-position: 5px 2px;
+    background-position: 5px 4px;
 }
 
 .memberRow[breakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader {
@@ -76,11 +76,11 @@
 .memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader::before {
     content: "";
     position: absolute;
-    top: 3px;
+    top: 4px;
     left: 5px;
-    width: 13px;
-    height: 14px;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
     opacity: 0.5;
 }
 
