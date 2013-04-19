@@ -120,7 +120,26 @@
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
+    background-image: none;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    width: 13px;
+    height: 14px;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    opacity: 0.5;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    width: 13px;
+    height: 14px;
+    background: url(chrome://firebug/skin/exe.png) no-repeat;
 }
 
 .sourceLine.editing {
