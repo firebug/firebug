@@ -169,9 +169,45 @@ DebuggerLib.getThreadActor = function(context)
 DebuggerLib.getCurrentFrames = function(context)
 {
     var threadActor = this.getThreadActor(context);
-    var request = {};
-    var response = threadActor.onFrames(request);
-    return response.frames;
+    return onFrames.call(threadActor, {});
+}
+
+// xxxHonza: hack, the original method, returns a promise now.
+// TODO: refactor
+function onFrames(aRequest)
+{
+    if (this.state !== "paused")
+    {
+        return {
+            error: "wrongState",
+            message: "Stack frames are only available while the debuggee is paused."
+        };
+    }
+
+    var start = aRequest.start ? aRequest.start : 0;
+    var count = aRequest.count;
+
+    // Find the starting frame...
+    var frame = this._youngestFrame;
+    var i = 0;
+    while (frame && (i < start))
+    {
+        frame = frame.older;
+        i++;
+    }
+
+    // Return request.count frames, or all remaining
+    // frames if count is not defined.
+    var frames = [];
+    var promises = [];
+    for (; frame && (!count || i < (start + count)); i++, frame=frame.older)
+    {
+        var form = this._createFrameActor(frame).form();
+        form.depth = i;
+        frames.push(form);
+    }
+
+    return frames;
 }
 
 // ********************************************************************************************* //
