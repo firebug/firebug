@@ -59,23 +59,6 @@
     display: block;
 }
 
-/* Display brekpoint disc */
-.memberRow .memberRowHeader {
-    background-position: 5px 2px;
-}
-
-.memberRow[breakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
-}
-
-.memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
-}
-
-.memberRow[breakable="true"]:hover .memberRowHeader {
-    background-color: #F6F6F6;
-}
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .memberRow.hasChildren > .memberLabelCell > .memberLabel:hover {

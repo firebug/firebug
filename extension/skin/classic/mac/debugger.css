@@ -110,10 +110,6 @@
     background-image: url(chrome://firebug/skin/breakpointCondition.png);
 }
 
-.sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
-}
-
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/exe.png), url(chrome://firebug/skin/breakpoint.png);
 }
@@ -122,7 +118,7 @@
     background-image: none;
 }
 
-.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::before {
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine::before {
     content: "";
     position: absolute;
     left: 2px;

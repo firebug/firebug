@@ -182,12 +182,14 @@
 }
 
 .cookieRowHeader {
+    position: relative;
+    height: 15px;
     margin-right: 0 !important;
 }
 
 /* Display breakpoint disc */
 .cookieRow .cookieRowHeader {
-    background-position: 5px 1px;
+    background-position: 5px 2px;
 }
 
 .cookieRow[breakpoint="true"] .cookieRowHeader {
@@ -195,7 +197,18 @@
 }
 
 .cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 13px;
+    height: 14px;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    opacity: 0.5;
 }
 
 #cookieBreakpointBar {

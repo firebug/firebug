@@ -48,6 +48,7 @@
 }
 
 .memberRowHeader {
+    position: relative;
     cursor: pointer;
     display: none;
     height: 100%;
@@ -69,7 +70,18 @@
 }
 
 .memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    width: 13px;
+    height: 14px;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    opacity: 0.5;
 }
 
 .memberRow[breakable="true"]:hover .memberRowHeader {
