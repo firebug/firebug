@@ -696,7 +696,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             frame.line + ") " + (errorBp ? "error bp exists" : "no error bp"), packet);
 
         // Break only if there is an error breakpoint (break == return true).
-        return (bp != null);
+        return (errorBp != null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
