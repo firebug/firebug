@@ -115,7 +115,7 @@
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointExe.png);
+    background-image: url(chrome://firebug/skin/exe.png), url(chrome://firebug/skin/breakpoint.png);
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
