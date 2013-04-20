@@ -99,7 +99,8 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/exe.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-position: 7px 1px;
     color: #000000;
 }
 
@@ -127,8 +128,8 @@
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/exe.png), url(chrome://firebug/skin/breakpoint.svg);
-    background-position: 4px 0px, 5px 1px;
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 7px 1px, 5px 1px;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
@@ -149,10 +150,10 @@
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::after {
     content: "";
     position: absolute;
-    left: 4px;
-    width: 13px;
-    height: 14px;
-    background: url(chrome://firebug/skin/exe.png) no-repeat;
+    left: 7px;
+    width: 11px;
+    height: 12px;
+    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
 }
 
 .sourceLine.editing {
