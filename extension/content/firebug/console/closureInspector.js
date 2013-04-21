@@ -8,11 +8,10 @@
 define([
     "firebug/firebug",
     "firebug/lib/wrapper",
-    "firebug/lib/object",
     "firebug/debugger/debuggerLib",
     "firebug/console/commandLineExposed",
 ],
-function(Firebug, Wrapper, Obj, DebuggerLib, CommandLineExposed) {
+function(Firebug, Wrapper, DebuggerLib, CommandLineExposed) {
 "use strict";
 
 // ********************************************************************************************* //
