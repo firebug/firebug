@@ -440,7 +440,8 @@ function removeConflictingNames(commandLine, context, contentView)
 {
     for (var name in commandLine)
     {
-        if (contentView.hasOwnProperty(name))
+        // Note: we cannot trust contentView.hasOwnProperty, so we use the "in" operator.
+        if (name in contentView)
             delete commandLine[name];
     }
 }
