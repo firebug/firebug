@@ -29,11 +29,12 @@ function runTest()
                 var frames = panelNode.getElementsByClassName("objectBox-stackFrame");
                 if (FBTest.compare(1, frames.length, "There must be one frame"))
                 {
-                    FBTest.compare(/onclick/, frames[0].textContent,
-                        "The function name must be correct " + frames[0].textContent);
+                    FBTest.compare("onclick",
+                        frames[0].getElementsByClassName("objectLink")[0].textContent,
+                        "The function name must be correct");
                 }
 
-                var sourceBox = row.querySelector(".errorSourceBox.errorSource-show");
+                var sourceBox = row.getElementsByClassName("objectLink-sourceLink")[0];
                 if (FBTest.ok(node, "Source line must be there"))
                 {
                     var expected = /\s*onclick\s*\(line\s*2\)\s*/;
