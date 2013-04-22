@@ -42,12 +42,13 @@
 /************************************************************************************************/
 
 .sourceLine {
+    position: relative;
     -moz-user-select: none;
     margin-right: 10px;
     border-bottom: 1px solid #EEEEEE;
     border-right: 1px solid #CCCCCC;
     padding: 0px 4px 0 20px;
-    background: #EEEEEE no-repeat 2px 0px;
+    background: #EEEEEE no-repeat 5px 1px;
     color: #A0A0A0;
     white-space: pre;
     font-family: monospace; /* see issue 2953 */
@@ -98,32 +99,77 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/exe.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-position: 7px 1px;
     color: #000000;
 }
 
 .sourceRow[breakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png);
+    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 9px 3px, 5px 1px;
 }
 
-.sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+.sourceRow[breakpoint="true"][disabledbreakpoint="true"] > .sourceLine {
+    background-image: none;
+}
+
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"]:not([condition="true"]) > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
+}
+
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"][condition="true"] > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpointCondition.svg) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointExe.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 7px 1px, 5px 1px;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
+    background-image: none;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    width: 11px;
+    height: 12px;
+    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
 }
 
 .sourceLine.editing {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 /************************************************************************************************/

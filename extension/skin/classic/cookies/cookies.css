@@ -111,11 +111,11 @@
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);    
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.png);
+    background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
 .cookieHeaderSorted:hover:active {
@@ -182,20 +182,33 @@
 }
 
 .cookieRowHeader {
+    position: relative;
+    height: 15px;
     margin-right: 0 !important;
 }
 
 /* Display breakpoint disc */
 .cookieRow .cookieRowHeader {
-    background-position: 5px 1px;
+    background-position: 5px 3px;
 }
 
 .cookieRow[breakpoint="true"] .cookieRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
 }
 
 #cookieBreakpointBar {

@@ -4,14 +4,12 @@
 
 define([
     "firebug/lib/wrapper",
-    "firebug/lib/events",
-    "firebug/lib/dom",
     "firebug/debugger/debuggerLib",
     "firebug/lib/object",
     "firebug/console/commandLineAPI",
     "firebug/lib/locale",
 ],
-function(Wrapper, Events, Dom, DebuggerLib, Obj, CommandLineAPI, Locale) {
+function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
 "use strict";
 
 // ********************************************************************************************* //
@@ -129,7 +127,7 @@ function createFirebugCommandLine(context, win)
                 }
             }
         };
-    };
+    }
 
     // Define command line methods.
     for (var commandName in commands)
@@ -442,7 +440,8 @@ function removeConflictingNames(commandLine, context, contentView)
 {
     for (var name in commandLine)
     {
-        if (contentView.hasOwnProperty(name))
+        // Note: we cannot trust contentView.hasOwnProperty, so we use the "in" operator.
+        if (name in contentView)
             delete commandLine[name];
     }
 }
@@ -463,7 +462,7 @@ function executeInWindowContext(win, func, args)
     {
         win.document.removeEventListener("firebugCommandLine", listener);
         func.apply(null, args);
-    }
+    };
     win.document.addEventListener("firebugCommandLine", listener);
     var event = document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);

@@ -97,9 +97,11 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
  *
  * @return {boolean}
  */
+// xxxHonza: should be renamed. It's not only related to the CommandLine, but
+// to all bogus scripts, e.g. generated from 'clientEvaluate' packets.
 DebuggerLib.isFrameLocationEval = function(frameFilename)
 {
-    return frameFilename === "debugger eval code";
+    return frameFilename === "debugger eval code" || frameFilename === "self-hosted";
 }
 
 // ********************************************************************************************* //

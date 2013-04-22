@@ -5,15 +5,14 @@
 
 /* Inspector button */
 #firebug-inspectorButton {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
     list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
-    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
+    filter: url(chrome://firebug/skin/filters.svg#grayscale);
 }
 
 #firebug-button[firebugActive="true"] {
@@ -99,13 +98,15 @@
 }
 
 #menu_firebug_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/inspect.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    list-style-image: url(chrome://firebug/skin/inspect.svg);
 }
 
-#menu_firebug_firebugInspect:hover,
+#menu_firebug_firebugInspect:hover {
+    filter: url(chrome://firebug/skin/filters.svg#darken);
+}
+
 #menu_firebug_firebugInspect:active {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/
