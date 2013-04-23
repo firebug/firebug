@@ -25,6 +25,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 const removeConfirmation = "commandline.include.removeConfirmation";
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+const storeFilename = "includeAliases.json";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,6 +44,10 @@ catch(ex)
 
 var storageScope = {};
 Cu.import("resource://firebug/storageService.js", storageScope);
+
+var defaultAliases = {
+    "jquery": "http://code.jquery.com/jquery-latest.js"
+};
 
 // ********************************************************************************************* //
 // Implementation
@@ -340,14 +345,22 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     {
         if (!this.store)
         {
+            var isNewStore = !storageScope.StorageService.hasStorage(storeFilename);
             // Pass also the parent window to the new storage. The window will be
             // used to figure out whether the browser is running in private mode.
             // If yes, no data will be persisted.
-            this.store = storageScope.StorageService.getStorage("includeAliases.json",
+            this.store = storageScope.StorageService.getStorage(storeFilename,
                 Firebug.chrome.window);
+
+            // If the file did not exist, we put in there the default aliases.
+            if (isNewStore)
+            {
+                for (var alias in defaultAliases)
+                    this.store.setItem(alias, defaultAliases[alias]);
+            }
         }
 
-        // let's log when the store could not be opened:
+        // Let's log when the store could not be opened.
         if (!this.store)
         {
             if (FBTrace.DBG_COMMANDLINE)

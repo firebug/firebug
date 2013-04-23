@@ -159,6 +159,12 @@ var StorageService =
     removeStorage: function(leafName)
     {
         ObjectPersister.deleteObject(leafname);
+    },
+
+    hasStorage: function(leafName)
+    {
+        var file = ObjectPersister.getFile(leafName);
+        return file.exists();
     }
 };
 
@@ -175,7 +181,7 @@ var ObjectPersister =
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister read from leafName "+leafName);
 
-        var file = FileUtils.getFile("ProfD", ["firebug", leafName]);
+        var file = this.getFile(leafName);
 
         if (!file.exists())
         {
@@ -235,6 +241,11 @@ var ObjectPersister =
         }
     },
 
+    getFile: function(leafName)
+    {
+        return FileUtils.getFile("ProfD", ["firebug", leafName]);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Batch the writes for each event loop
@@ -276,7 +287,7 @@ var ObjectPersister =
         {
             // Convert data to JSON.
             var jsonString = JSON.stringify(obj);
-            var file = FileUtils.getFile("ProfD", ["firebug", leafName]);
+            var file = this.getFile(leafName);
             ObjectPersister.writeTextToFile(file, jsonString);
         }
         catch(exc)
