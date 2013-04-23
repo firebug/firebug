@@ -114,14 +114,14 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     loadActors: function(callback)
     {
-/*
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
         // actor types.
         var config = Firebug.getModuleLoaderConfig();
         Firebug.require(config, [
-            "firebug/debugger/actors/threadActor",
-            "firebug/debugger/actors/objectActor"
+            //"firebug/debugger/actors/threadActor",
+            //"firebug/debugger/actors/objectActor"
+            "firebug/debugger/actors/browserRootActor"
         ],
         function()
         {
@@ -129,8 +129,6 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
             callback();
         });
-*/
-        callback();
     },
 
     onActorsLoaded: function()
@@ -183,14 +181,17 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url, packet);
     },
 
-    onTabDetached: function()
+    onTabDetached: function(type, packet)
     {
-        Trace.sysout("debuggerClientModule.onTabDetached;", arguments);
+        var context = TabWatcher.getContextByTabActor(packet.from);
 
-        // xxxHonza: we need pass context to the listeners,
-        // but avoid using Firebug.currentContext.
-        this.dispatch("onThreadDetached", [Firebug.currentContext]);
-        this.dispatch("onTabDetached", [Firebug.currentContext]);
+        Trace.sysout("debuggerClientModule.onTabDetached; " +
+            (context ? context.getId() : "no context"));
+
+        // xxxHonza: what if the context is null?
+        // should we dispatch to the contex/debuggerTool?
+        this.dispatch("onThreadDetached", [context]);
+        this.dispatch("onTabDetached", [context]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

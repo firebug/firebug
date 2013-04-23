@@ -70,6 +70,9 @@ var WarningRep = domplate(Firebug.Rep,
             Trace.sysout("scriptPanelWarning.onFocusDebugger; win: " +
                 Win.safeGetWindowLocation(win));
 
+            if (!win.Firebug)
+                return;
+
             return win.Firebug.TabWatcher.iterateContexts(function(context)
             {
                 if (context.stopped)

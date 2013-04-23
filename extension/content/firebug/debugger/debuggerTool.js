@@ -54,7 +54,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     attach: function()
     {
-        Trace.sysout("debuggerTool.initialize; context ID: " + this.context.getId());
+        Trace.sysout("debuggerTool.attach; context ID: " + this.context.getId());
 
         this.attachListeners();
 
@@ -70,8 +70,31 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     detach: function()
     {
-        Trace.sysout("debuggerTool.destroyContext; context ID: " + this.context.getId());
+        Trace.sysout("debuggerTool.detach; context ID: " + this.context.getId());
 
+        if (this.context.stopped)
+        {
+            // If Firefox tab with active debugger has been closed, the resumed packet
+            // is not received and so, fire it now. This is to make sure that
+            // onStopDebugging is dispatched to the listeners (e.g. to the Script panel).
+            this.resumed();
+
+            // xxxHonza: not sure where this belongs, but if the currently selected panel
+            // (in the new selected context) is the Script panel, we should make sure
+            // to update it so the "Debugger is already active" message is removed.
+            var currContext = Firebug.currentContext;
+            if (currContext && currContext != this.context)
+            {
+                var panel = currContext.getPanel("script");
+                if (panel && panel === Firebug.chrome.getSelectedPanel())
+                {
+                    var state = Firebug.getPanelState(panel);
+                    panel.show(state);
+                }
+            }
+        }
+
+        // Detach client-thread listeners.
         this.detachListeners();
 
         BreakpointStore.removeListener(this);
@@ -262,7 +285,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.getPanel("script");
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
-        this.dispatch("onStartDebugging", [this.context, event, packet]);
+        this.dispatch("onStartDebugging", [this.context]);
 
         // Execute registered 'clientEvaluated' callback.
         // This must be done after "onStartDebugging" is dispatched to the Script panel, which
@@ -277,18 +300,19 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         }
     },
 
-    resumed: function(event, packet)
+    resumed: function()
     {
         Trace.sysout("debuggerTool.resumed; ", arguments);
 
-        this.context.clientCache.clear();
+        if (this.context.clientCache)
+            this.context.clientCache.clear();
 
         this.context.stopped = false;
         this.context.stoppedFrame = null;
         this.context.currentFrame = null;
         this.context.currentTrace = null;
 
-        this.dispatch("onStopDebugging", [this.context, event, packet]);
+        this.dispatch("onStopDebugging", [this.context]);
     },
 
     detached: function()

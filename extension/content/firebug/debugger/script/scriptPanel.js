@@ -109,13 +109,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!enabled)
             return;
 
-        Trace.sysout("scriptPanel.show; ", {
+        var active = !ScriptPanelWarning.showWarning(this);
+
+        Trace.sysout("scriptPanel.show; active: " + active, {
             state: state,
             location: this.location,
             selection: this.selection
         });
-
-        var active = !ScriptPanelWarning.showWarning(this);
 
         // Initialize the source view. Orion initialization here, when the
         // parentNode is actualy visible, solves the following problem:
@@ -148,18 +148,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
-
-        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
-        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
-        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
-        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
-        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut",
-                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
 
         // Additional debugger panels are visible only, if debugger is active.
         this.panelSplitter.collapsed = !active;
@@ -961,6 +949,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     syncCommands: function(context)
     {
+        Trace.sysout("debugger.syncCommands; " + context.getName());
+
         var chrome = Firebug.chrome;
         if (!chrome)
         {
@@ -1042,7 +1032,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tool Listener
 
-    onStartDebugging: function(context, event, packet)
+    onStartDebugging: function(context)
     {
         Trace.sysout("scriptPanel.onStartDebugging; " + this.context.getName());
 
@@ -1084,9 +1074,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
     },
 
-    onStopDebugging: function(context, event, packet)
+    onStopDebugging: function(context)
     {
-        Trace.sysout("scriptPanel.onStopDebugging; " + this.context.getName(), packet);
+        Trace.sysout("scriptPanel.onStopDebugging; " + this.context.getName());
 
         try
         {

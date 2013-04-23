@@ -54,6 +54,19 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             "Firebug.Debugger.stepInto(Firebug.currentContext)");
         chrome.setGlobalAttribute("cmd_firebug_stepOut", "oncommand",
             "Firebug.Debugger.stepOut(Firebug.currentContext)");
+
+        // Set tooltips to stepping buttons.
+        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
+        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
+        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
+        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
+        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut",
+                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
     },
 
     shutdown: function()
@@ -89,6 +102,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context, persistedState, browser)
     {
+        // xxxHonza: duplicated in onThreadDetached, do we need it?
         var tool = context.getTool("debugger");
         tool.detach();
 
@@ -117,6 +131,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
 
+        // xxxHonza: duplicated in destroyContext, do we need it?
         var tool = context.getTool("debugger");
         tool.detach();
     },
