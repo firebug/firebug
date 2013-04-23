@@ -438,7 +438,7 @@
     opacity: 0.5;
 }
 
-.netRow.fromCache .netHrefLabel {
+.netRow.fromCache:not(.responseError) .netHrefLabel {
     opacity: 1.0;
     color: gray;
 }
