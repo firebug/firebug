@@ -58,11 +58,11 @@
 
 .netHeaderSorted > .netHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;
+    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
 .netHeaderSorted.sortedAscending > .netHeaderCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.png);
+    background-image: url(chrome://firebug/skin/arrowUp.svg);
 }
 
 .netHeaderSorted:hover:active {
@@ -77,6 +77,7 @@
 }
 
 .netRowHeader {
+    position: relative;
     display: none;
     height: 15px;
     margin-right: 0 !important;
@@ -88,15 +89,28 @@
 
 /* Display breakpoint disc */
 .netRow .netRowHeader {
-    background-position: 5px 1px;
+    width: 3px;
+    height: 100%;
+    background-position: 5px 4px;
 }
 
 .netRow[breakpoint="true"] .netRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .netRow[breakpoint="true"][disabledBreakpoint="true"] .netRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.netRow[breakpoint="true"][disabledBreakpoint="true"] .netRowHeader::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
 }
 
 .netRow.category-xhr:hover .netRowHeader {
@@ -110,10 +124,6 @@
 
 #netHrefCol > .netHeaderCellBox {
     border-left: 0px;
-}
-
-.netRow .netRowHeader {
-    width: 3px;
 }
 
 .netInfoRow .netRowHeader {
@@ -428,7 +438,7 @@
     opacity: 0.5;
 }
 
-.netRow.fromCache .netHrefLabel {
+.netRow.fromCache:not(.responseError) .netHrefLabel {
     opacity: 1.0;
     color: gray;
 }

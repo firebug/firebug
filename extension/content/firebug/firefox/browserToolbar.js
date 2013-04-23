@@ -32,8 +32,7 @@ var BrowserToolbar =
             label: "firebug.Inspect",
             tooltiptext: "firebug.InspectElement",
             observes: "cmd_firebug_toggleInspecting",
-            style: "list-style-image: url(chrome://firebug/skin/inspect.png);" +
-                "-moz-image-region: rect(0, 16px, 16px, 0);"
+            style: "list-style-image: url(chrome://firebug/skin/inspect.svg);"
         });
 
         // Start Button Tooltip. As soon as Firebug is fully loaded, the tooltip content will be

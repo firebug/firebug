@@ -9,7 +9,8 @@ skin    fbtrace classic/1.0 chrome/skin/classic/
 skin    fbtrace-os classic/1.0 chrome/skin/classic/win/
 skin    fbtrace-os classic/1.0 chrome/skin/classic/mac/ os=Darwin
 
-locale  fbtrace en-US       chrome/locale/en-US/
+locale  fbtrace en-US    chrome/locale/en-US/
+locale  fbtrace de       chrome/locale/de/
 
 component {FBDD01C3-6D09-494c-B086-C5D56F346658} components/commandLine.js
 contract @mozilla.org/commandlinehandler/general-startup;1?type=FBTrace {FBDD01C3-6D09-494c-B086-C5D56F346658}

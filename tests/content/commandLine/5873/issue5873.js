@@ -211,7 +211,7 @@ function runTest()
             taskList.push(verifyCompletionPopupForA);
 
             // Verify cross-compartment permissions
-            taskList.push(FBTest.executeCommandAndVerify, "_FirebugCommandLine.%cmd",
+            taskList.push(FBTest.executeCommandAndVerify, "cd.%context",
                 "Error: permission denied to access cross origin scope", "span", "errorMessage");
             if ("sandbox" in document.createElement("iframe"))
             {

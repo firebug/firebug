@@ -250,17 +250,6 @@
     margin-left: 1px;
 }
 
-.errorBreak {
-    cursor: pointer;
-    display: none;
-    margin: 0 6px 0 0;
-    width: 13px;
-    height: 14px;
-    vertical-align: bottom;
-    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
-    opacity: 0.1;
-}
-
 .errorUnbreakable {
     display: none;
 }
@@ -381,11 +370,11 @@
 
 .headerSorted > .headerCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;
+    background: url(chrome://fbtrace/skin/arrowDown.svg) no-repeat calc(100% - 4px);
 }
 
 .headerSorted.sortedAscending > .headerCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.png);
+    background-image: url(chrome://fbtrace/skin/arrowUp.svg);
 }
 
 .headerSorted:hover:active {

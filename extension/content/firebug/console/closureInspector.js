@@ -7,9 +7,11 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/wrapper"
+    "firebug/lib/wrapper",
+    "firebug/debugger/debuggerLib",
+    "firebug/console/commandLineExposed",
 ],
-function(Firebug, Wrapper) {
+function(Firebug, Wrapper, DebuggerLib, CommandLineExposed) {
 "use strict";
 
 // ********************************************************************************************* //
@@ -25,60 +27,6 @@ Object.freeze(OptimizedAway);
 
 var ClosureInspector =
 {
-    hasInit: false,
-    Debugger: null,
-    debuggeeCache: new WeakMap(),
-
-    getInactiveDebuggerForContext: function(context)
-    {
-        if (context.inactiveDebugger)
-            return context.inactiveDebugger;
-
-        if (!this.hasInit)
-        {
-            this.hasInit = true;
-            try
-            {
-                Cu.import("resource://gre/modules/jsdebugger.jsm");
-                window.addDebuggerToGlobal(window);
-                this.Debugger = window.Debugger;
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_COMMANDLINE)
-                    FBTrace.sysout("ClosureInspector; Debugger not found", exc);
-            }
-        }
-        if (!this.Debugger)
-            return;
-
-        var dbg = new this.Debugger();
-        dbg.enabled = false;
-        context.inactiveDebugger = dbg;
-        return dbg;
-    },
-
-    getDebuggeeObject: function(context, global)
-    {
-        var dbg = this.getInactiveDebuggerForContext(context);
-
-        // Because (outer) windows persist between reloads, use their documents
-        // as keys into the cache instead.
-        var cacheKey = global.document || global;
-
-        var dglobal = this.debuggeeCache.get(cacheKey);
-        if (dglobal)
-            return dglobal;
-
-        // Note: for no purposes is it actually important that the global is
-        // held as a debuggee; it just makes things slower.
-        dglobal = dbg.addDebuggee(global);
-        dbg.removeDebuggee(global);
-
-        this.debuggeeCache.set(cacheKey, dglobal);
-        return dglobal;
-    },
-
     getVariableOrOptimizedAway: function(scope, name)
     {
         try
@@ -117,16 +65,6 @@ var ClosureInspector =
     isSimple: function(dobj)
     {
         return (typeof dobj !== "object" || dobj === OptimizedAway);
-    },
-
-    unwrap: function(global, dglobal, obj)
-    {
-        dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
-            value: obj,
-            writable: true,
-            configurable: true
-        });
-        return global._firebugUnwrappedDebuggerObject;
     },
 
     isScopeInteresting: function(scope)
@@ -200,10 +138,6 @@ var ClosureInspector =
     // Throws exceptions on error.
     getEnvironmentForObject: function(win, obj, context)
     {
-        var dbg = this.getInactiveDebuggerForContext(context);
-        if (!dbg)
-            throw new Error("debugger not available");
-
         if (!obj || !(typeof obj === "object" || typeof obj === "function"))
             throw new TypeError("can't get scope of non-object");
 
@@ -216,7 +150,7 @@ var ClosureInspector =
 
         // Create a view of the object as seen from its own global - 'environment'
         // will not be accessible otherwise.
-        var dglobal = this.getDebuggeeObject(context, objGlobal);
+        var dglobal = DebuggerLib.getDebuggeeGlobal(context, objGlobal);
 
         var dobj = dglobal.makeDebuggeeValue(obj);
 
@@ -243,13 +177,12 @@ var ClosureInspector =
             var env = this.getEnvironmentForObject(win, obj, context);
             for (var scope = env; scope; scope = scope.parent)
             {
-                if (scope.type === "with" && scope.getVariable("profileEnd"))
-                {
-                    // Almost certainly the with(_FirebugCommandLine) block,
-                    // which is at the top of the scope chain on objects
-                    // defined through the console. Hide it for a nicer display.
+                // Scope of the bindings for the command line's commands
+                // which is at the top of the scope chain on objects
+                // defined through the console. Hide it for a nicer display.
+                if (CommandLineExposed.isCommandLineScope(scope, win))
                     break;
-                }
+
                 if (!this.isScopeInteresting(scope))
                     break;
 
@@ -266,25 +199,10 @@ var ClosureInspector =
 
     getClosureWrapper: function(obj, win, context)
     {
-        function throwUserError(exc)
-        {
-            // Throw an exception into user-land, where we hope it lands
-            // safely in commandLineExposed.js for internals to be hidden.
-            exc._dropFrames = true;
-            throw exc;
-        }
-
         var env, dglobal;
-        try
-        {
-            env = this.getEnvironmentForObject(win, obj, context);
+        env = this.getEnvironmentForObject(win, obj, context);
 
-            dglobal = this.getDebuggeeObject(context, win);
-        }
-        catch (exc)
-        {
-            throwUserError(exc);
-        }
+        dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
 
         // Return a wrapper for its scoped variables.
         var self = this;
@@ -318,7 +236,7 @@ var ClosureInspector =
                         if (self.isSimple(dval))
                             return dval;
                         var uwWin = Wrapper.getContentView(win);
-                        return self.unwrap(uwWin, dglobal, dval);
+                        return DebuggerLib.unwrapDebuggeeValue(dval, uwWin, dglobal);
                     }
                     catch (exc)
                     {
@@ -333,9 +251,9 @@ var ClosureInspector =
                     var dvalue = dglobal.makeDebuggeeValue(value);
                     var scope = env.find(name);
                     if (!scope)
-                        throwUserError(new Error("can't create new closure variable"));
+                        throw new Error("can't create new closure variable");
                     if (self.getVariableOrOptimizedAway(scope, name) === OptimizedAway)
-                        throwUserError(new Error("can't set optimized-away closure variable"));
+                        throw new Error("can't set optimized-away closure variable");
                     scope.setVariable(name, dvalue);
                 }
             };
@@ -343,7 +261,7 @@ var ClosureInspector =
         handler.getPropertyDescriptor = handler.getOwnPropertyDescriptor;
         handler.delete = function(name)
         {
-            throwUserError(new Error("can't delete closure variable"));
+            throw new Error("can't delete closure variable");
         };
         // Other traps are syntactically inaccessible, so we don't need to implement them.
         return Proxy.create(handler);
@@ -368,7 +286,7 @@ var ClosureInspector =
             return;
         }
 
-        var dwin = this.getDebuggeeObject(context, win);
+        var dwin = DebuggerLib.getDebuggerGlobal(context, win);
 
         var scopeDataHolder = Object.create(ScopeProxy.prototype);
         scopeDataHolder.scope = scope;
@@ -412,7 +330,7 @@ var ClosureInspector =
                         if (self.isSimple(dval))
                             return dval;
                         var uwWin = Wrapper.getContentView(win);
-                        return self.unwrap(uwWin, dwin, dval);
+                        return DebuggerLib.unwrapDebuggeeValue(dval, uwWin, dwin);
                     },
                     set: (dval === OptimizedAway ? undefined : function(value) {
                         dval = dwin.makeDebuggeeValue(value);
