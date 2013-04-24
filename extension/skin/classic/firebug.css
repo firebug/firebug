@@ -402,19 +402,29 @@ textbox[type="fbSearchBox"] > panel {
 
 /* images */
 #fbBreakOnNextButton #fbBreakOnImage {
-    list-style-image: url("chrome://firebug/skin/breakNext.png");
+    list-style-image: url("chrome://firebug/skin/breakOn.svg");
+}
+
+#fbBreakOnNextButton:hover #fbBreakOnImage {
+    filter: url(chrome://firebug/skin/filters.svg#darken);
+}
+
+#fbBreakOnNextButton:active #fbBreakOnImage {
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 #fbBreakOnNextButton #fbBreakOnImageDisabled {
-    list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
+    list-style-image: url("chrome://firebug/skin/breakOn.svg");
+    filter: url(chrome://firebug/skin/filters.svg#grayscale);
 }
 
 #fbBreakOnNextButton #fbBreakOnImageActive {
-    list-style-image: url("chrome://firebug/skin/breakNextActive.png");
+    list-style-image: url("chrome://firebug/skin/breakOn.svg");
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 #fbBreakOnNextButton #fbBreakOnImageArmed {
-    list-style-image: url("chrome://firebug/skin/breakNextArmed.png");
+    list-style-image: url("chrome://firebug/skin/breakOnArmed.svg");
 }
 
 /* disabled */
@@ -470,25 +480,25 @@ textbox[type="fbSearchBox"] > panel {
 #fbBreakOnNextButton[panelName="script"] #fbBreakOnImageNext {
     visibility: visible;
     padding-right: 2px;
-    list-style-image: url("chrome://firebug/skin/breakOn/breakOnNextSingle.png");
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnNext.svg);
 }
 
 #fbBreakOnNextButton[panelName="net"] #fbBreakOnImageXHR {
     visibility: visible;
     padding-right: 2px;
-    list-style-image: url("chrome://firebug/skin/breakOn/breakOnXHRSingle.png");
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnXHR.svg);
 }
 
 #fbBreakOnNextButton[panelName="console"] #fbBreakOnImageError {
     visibility: visible;
     padding-right: 2px;
-    list-style-image: url("chrome://firebug/skin/breakOn/breakOnErrorSingle.png");
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnError.svg);
 }
 
 #fbBreakOnNextButton[panelName="html"] #fbBreakOnImageMutate {
     visibility: visible;
     padding-right: 2px;
-    list-style-image: url("chrome://firebug/skin/breakOn/breakOnMutateSingle.png");
+    list-style-image: url(chrome://firebug/skin/breakOn/breakOnMutate.svg);
 }
 
 #fbBreakOnNextButtonOld {
