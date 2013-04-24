@@ -56,13 +56,13 @@
 .closeButton {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/win/close.svg) no-repeat;
 }
 
 .closeButton:hover {
-    background-position: 0 -16px;
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
-.closeButton:hover:active {
-    background-position: 0 -32px;
+.closeButton:active {
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
