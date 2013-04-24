@@ -16,12 +16,11 @@ define([
     "firebug/debugger/clients/clientCache",
     "firebug/debugger/script/sourceFile",
     "firebug/debugger/breakpoints/breakpointStore",
-    "firebug/debugger/debuggerLib",
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, ClientCache, SourceFile, BreakpointStore, DebuggerLib, Options) {
+    DebuggerClientModule, ClientCache, SourceFile, BreakpointStore, Options, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -186,7 +185,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     addScript: function(script)
     {
         // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
-        // create as the user is evaluating expressions in the watch window.
+        // created e.g. as the user is evaluating expressions in the watch window.
         if (DebuggerLib.isFrameLocationEval(script.url))
             return;
 
