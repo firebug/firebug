@@ -130,6 +130,38 @@ function threadBreakpoints(context, args)
 }
 
 // ********************************************************************************************* //
+
+function getSource(context, args)
+{
+    try
+    {
+        if (!context.activeThread)
+            return "No active thread";
+
+        var actor = args[0];
+        if (!actor)
+            return "No actor specified";
+
+        var sourceClient = context.activeThread.source({actor: actor});
+        sourceClient.source(function(response)
+        {
+            FBTrace.sysout("commands.getSource:", response);
+
+            if (response.error)
+                return Firebug.Console.log(response.error);
+
+            return Firebug.Console.log(response.source);
+        });
+    }
+    catch (e)
+    {
+        TraceError.sysout("commands.threadBreakpoints; EXCEPTION " + e, e);
+    }
+
+    return Firebug.Console.getDefaultReturnValue(context.window);
+}
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerCommand("pauseGrip", {
@@ -155,6 +187,11 @@ Firebug.registerCommand("pausePool", {
 Firebug.registerCommand("threadBreakpoints", {
     handler: threadBreakpoints.bind(this),
     description: "Helper command for accessing breakpoints on the server side. For debugging purposes only."
+})
+
+Firebug.registerCommand("getSource", {
+    handler: getSource.bind(this),
+    description: "Helper command for getting source from the server side. For debugging purposes only."
 })
 
 return {};
