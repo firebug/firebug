@@ -228,8 +228,10 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     loadedContext: function(context)
     {
-        for (var url in context.sourceFileMap)
-            return;  // if there are any sourceFiles, then do nothing
+        // xxxHonza: why this is here? In JSD2, the array map con contain files while
+        // the console isnot injected yet.
+        //for (var url in context.sourceFileMap)
+        //    return;  // if there are any sourceFiles, then do nothing
 
         // Inject console handler if not injected yet. It's injected only in the case that
         // the page has JS (and thus may call console) and Firebug has been activated after
