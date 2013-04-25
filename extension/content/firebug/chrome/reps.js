@@ -1029,6 +1029,18 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return value ? " " + Str.cropMultipleLines(value, 20) : "";
     },
 
+    toggleMonitorEvents: function(event, elt, type, context)
+    {
+        var checked = event.target.getAttribute("checked") == "true";
+        EventMonitor.toggleMonitorEvents(elt, type, checked, context);
+        Events.cancelEvent(event);
+
+        // Toggle the main "Log Events" option depending on whether all events are monitored  
+        var doc = event.target.ownerDocument;
+        var logEvents = doc.getElementById("fbShowEventsInConsole");
+        logEvents.setAttribute("checked", EventMonitor.areEventsMonitored(elt, null, context, false));
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocalName: function(object)
@@ -1387,6 +1399,21 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
         }
 
+        var logEventItems = [];
+        var eventFamilies = ["mouse", "key", "focus", "form", "drag"];
+
+        for (var i = 0, count = eventFamilies.length; i < count; ++i)
+        {
+            logEventItems.push({
+                label: eventFamilies[i],
+                tooltiptext: "Monitor "+eventFamilies[i]+" events",
+                id: "monitor"+eventFamilies[i]+"Events",
+                type: "checkbox",
+                checked: EventMonitor.areEventsMonitored(elt, eventFamilies[i], context),
+                command: Obj.bind(this.toggleMonitorEvents, this, elt, eventFamilies[i], context)
+            });
+        }
+
         items = items.concat([
             {
                 label: "CopyXPath",
@@ -1485,12 +1512,13 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 tooltiptext: "html.tip.Show_Events_In_Console",
                 id: "fbShowEventsInConsole",
                 type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, null, context),
-                command: function()
+                checked: EventMonitor.areEventsMonitored(elt, null, context, false),
+                command: Obj.bind(function(evt)
                 {
-                    var checked = this.hasAttribute("checked");
+                    var checked = evt.target.getAttribute("checked") == "true";
                     EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
-                }
+                }, elt),
+                items: logEventItems
             },
             "-",
             {

@@ -2089,7 +2089,9 @@ function onPanelMouseUp(event)
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
-        if (selection.focusNode === selection.anchorNode)
+        FBTrace.sysout("selection", {selection: selection, an: selection.anchorNode, ao: selection.anchorOffset, fn: selection.focusNode, fo: selection.focusOffset});
+        if (Dom.getAncestorByClass(selection.focusNode, "editable") &&
+            Dom.getAncestorByClass(selection.anchorNode, "editable"))
         {
             var editable = Dom.getAncestorByClass(target, "editable");
             if (editable || Css.hasClass(event.target, "inlineExpander"))

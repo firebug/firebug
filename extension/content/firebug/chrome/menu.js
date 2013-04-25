@@ -134,7 +134,10 @@ Menu.setItemIntoElement = function(element, item)
         element.setAttribute("name", item.name);
 
     if (item.items && (item.command || item.commandID))
+    {
         element.setAttribute("type", "splitmenu");
+        element.setAttribute("iconic", "true");
+    }
 
     return element;
 };

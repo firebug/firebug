@@ -22,12 +22,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
     destroyContext: function(context, persistedState)
     {
         // Clean up all existing monitors.
-        var eventsMonitored = context.eventsMonitored;
-        if (eventsMonitored)
+        var monitoredEvents = context.monitoredEvents;
+        if (monitoredEvents)
         {
-            for (var i=0; i<eventsMonitored.length; ++i)
+            for (var i=0; i<monitoredEvents.length; ++i)
             {
-                var m = eventsMonitored[i];
+                var m = monitoredEvents[i];
 
                 if (!m.type)
                     Events.detachAllListeners(m.object, context.onMonitorEvent, context);
@@ -40,12 +40,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Event Monitor
 
-    toggleMonitorEvents: function(object, types, state, context)
+    toggleMonitorEvents: function(object, types, monitor, context)
     {
-        if (state)
-            this.unmonitorEvents(object, types, context);
-        else
+        if (monitor)
             this.monitorEvents(object, types, context);
+        else
+            this.unmonitorEvents(object, types, context);
     },
 
     monitorEvents: function(object, types, context)
@@ -60,20 +60,25 @@ var EventMonitor = Obj.extend(Firebug.Module,
                 };
             }
 
-            if (!context.eventsMonitored)
-                context.eventsMonitored = [];
+            if (!context.monitoredEvents)
+                context.monitoredEvents = new Map();
 
+            var monitoredEvents = context.monitoredEvents;
             var eventTypes = getMonitoredEventTypes(types);
 
             if (FBTrace.DBG_EVENTS)
                 FBTrace.sysout("EventMonitor.monitorEvents", eventTypes);
 
-            for (var i = 0; i < eventTypes.length; ++i)
+            if (!context.monitoredEvents.has(object))
+                context.monitoredEvents.set(object, new Set());
+
+            var monitoredEventTypes = monitoredEvents.get(object);
+            for (var i = 0, len = eventTypes.length; i < len; ++i)
             {
                 if (!this.areEventsMonitored(object, eventTypes[i], context))
                 {
                     Events.addEventListener(object, eventTypes[i], context.onMonitorEvent, false);
-                    context.eventsMonitored.push({object: object, type: eventTypes[i]});
+                    monitoredEventTypes.add(eventTypes[i]);
                 }
             }
         }
@@ -81,31 +86,37 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
     unmonitorEvents: function(object, types, context)
     {
-        var eventsMonitored = context.eventsMonitored;
+        var monitoredEvents = context.monitoredEvents;
+
+        if (!monitoredEvents)
+            return;
+
         var eventTypes = getMonitoredEventTypes(types);
 
         if (FBTrace.DBG_EVENTS)
             FBTrace.sysout("EventMonitor.unmonitorEvents", eventTypes);
 
-        for (var i = 0; i < eventTypes.length; ++i)
+        if (object)
         {
-            for (var j = 0; j < eventsMonitored.length; ++j)
+            if (monitoredEvents.has(object))
             {
-                if (eventsMonitored[j].object == object && eventsMonitored[j].type == eventTypes[i])
+                var monitoredObjectEvents = monitoredEvents.get(object);
+                for (var i = 0, len = eventTypes.length; i < len; ++i)
                 {
-                    eventsMonitored.splice(j, 1);
-
-                    Events.removeEventListener(object, eventTypes[i], context.onMonitorEvent, false);
-                    break;
+                     if (monitoredObjectEvents.has(eventTypes[i]))
+                     {
+                        Events.removeEventListener(object, eventTypes[i], context.onMonitorEvent, false);
+                        monitoredObjectEvents.delete(eventTypes[i]);
+                     }
                 }
             }
         }
     },
 
-    areEventsMonitored: function(object, types, context)
+    areEventsMonitored: function(object, types, context, allMonitored)
     {
-        var eventsMonitored = context.eventsMonitored;
-        if (!eventsMonitored)
+        var monitoredEvents = context.monitoredEvents;
+        if (!monitoredEvents)
         {
             if (FBTrace.DBG_EVENTS)
                 FBTrace.sysout("EventMonitor.areEventsMonitored - No events monitored", object);
@@ -113,23 +124,17 @@ var EventMonitor = Obj.extend(Firebug.Module,
             return false;
         }
 
-        var eventTypes = [];
-        if (!types)
-            eventTypes = Events.getEventTypes();
-        else
-            eventTypes = typeof types == "string" ? [types] : types;
+        var eventTypes = getMonitoredEventTypes(types);
+        var monitoredObjectEvents = monitoredEvents.get(object);
+        if (!monitoredObjectEvents)
+            return;
 
-        for (var i = 0; i < eventTypes.length; ++i)
+        if (typeof allMonitored == "undefined")
+            allMonitored = true;
+
+        for (var i = 0, len = eventTypes.length; i < len; ++i)
         {
-            var monitored = false;
-            for (var j = 0; j < eventsMonitored.length; ++j)
-            {
-                if (eventsMonitored[j].object == object && eventsMonitored[j].type == eventTypes[i])
-                {
-                    monitored = true;
-                    break;
-                }
-            }
+            var monitored = monitoredObjectEvents.has(eventTypes[i]);
 
             if (!monitored)
             {
@@ -139,7 +144,8 @@ var EventMonitor = Obj.extend(Firebug.Module,
                         eventTypes[i] + "'");
                 }
 
-                return false;
+                if (allMonitored)
+                    return false;
             }
             else
             {
@@ -148,10 +154,13 @@ var EventMonitor = Obj.extend(Firebug.Module,
                     FBTrace.sysout("EventMonitor.areEventsMonitored - Events monitored for '" +
                         eventTypes[i] + "'");
                 }
+
+                if (!allMonitored)
+                    return true;
             }
         }
 
-        return true;
+        return allMonitored;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
