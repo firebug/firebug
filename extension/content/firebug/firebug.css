@@ -343,7 +343,7 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 
 /************************************************************************************************/
 
-@-moz-keyframes armedBlinking {
+@keyframes armedBlinking {
     100% {
         text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange;
     }
@@ -357,8 +357,8 @@ panelTab[breakOnNextArmed="true"] > .panelTab-text {
 /* see issue 5618
 panelTab.highlighted {
     text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange !important;
-    -moz-transition-property: text-shadow;
-    -moz-transition-duration: 0.8s;
+    transition-property: text-shadow;
+    transition-duration: 0.8s;
 }
 */
 
