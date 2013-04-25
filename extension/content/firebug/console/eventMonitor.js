@@ -8,11 +8,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/lib/domplate",
-    "firebug/lib/array",
     "firebug/chrome/reps",
     "firebug/chrome/menu",
 ],
-function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, Arr, FirebugReps, Menu) {
+function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
 
 // ********************************************************************************************* //
 // EventMonitor Module
@@ -220,17 +219,19 @@ var EventMonitor = Obj.extend(Firebug.Module,
             });
         }
 
+        function onCommand()
+        {
+            var checked = this.areEventsMonitored(elt, null, context, false);
+            this.toggleMonitorEvents(elt, null, !checked, context);
+        }
+
         var item = {
             label: "ShowEventsInConsole",
             tooltiptext: "html.tip.Show_Events_In_Console",
             id: "fbShowEventsInConsole",
             type: "checkbox",
             checked: this.areEventsMonitored(elt, null, context, false),
-            command: Obj.bind(function(evt)
-            {
-                var checked = evt.target.getAttribute("checked") == "true";
-                EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
-            }, elt),
+            command: onCommand.bind(this),
             items: logEventItems
         };
 
@@ -247,7 +248,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
         Events.cancelEvent(event);
 
-        // Toggle the main "Log Events" option depending on whether all events are monitored  
+        // Toggle the main "Log Events" option depending on whether all events are monitored.
         var doc = event.target.ownerDocument;
         var logEvents = doc.getElementById("fbShowEventsInConsole");
         logEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, false));
