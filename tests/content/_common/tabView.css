@@ -46,7 +46,7 @@
 .tab[selected="true"] {
     cursor: default !important;
     border-color: #D7D7D7;
-    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
     background-color: #FFFFFF;
 }
 
