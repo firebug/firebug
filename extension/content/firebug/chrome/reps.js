@@ -23,14 +23,13 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
-    "firebug/console/eventMonitor",
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, ClosureInspector, Menu, CompilationUnit) {
+    ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -1029,18 +1028,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return value ? " " + Str.cropMultipleLines(value, 20) : "";
     },
 
-    toggleMonitorEvents: function(event, elt, type, context)
-    {
-        var checked = event.target.getAttribute("checked") == "true";
-        EventMonitor.toggleMonitorEvents(elt, type, checked, context);
-        Events.cancelEvent(event);
-
-        // Toggle the main "Log Events" option depending on whether all events are monitored  
-        var doc = event.target.ownerDocument;
-        var logEvents = doc.getElementById("fbShowEventsInConsole");
-        logEvents.setAttribute("checked", EventMonitor.areEventsMonitored(elt, null, context, false));
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocalName: function(object)
@@ -1399,21 +1386,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
         }
 
-        var logEventItems = [];
-        var eventFamilies = ["mouse", "key", "focus", "form", "drag"];
-
-        for (var i = 0, count = eventFamilies.length; i < count; ++i)
-        {
-            logEventItems.push({
-                label: eventFamilies[i],
-                tooltiptext: "Monitor "+eventFamilies[i]+" events",
-                id: "monitor"+eventFamilies[i]+"Events",
-                type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, eventFamilies[i], context),
-                command: Obj.bind(this.toggleMonitorEvents, this, elt, eventFamilies[i], context)
-            });
-        }
-
         items = items.concat([
             {
                 label: "CopyXPath",
@@ -1504,22 +1476,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 }
             ]);
         }
-        
+
         items = items.concat([
-            "-",
-            {
-                label: "ShowEventsInConsole",
-                tooltiptext: "html.tip.Show_Events_In_Console",
-                id: "fbShowEventsInConsole",
-                type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, null, context, false),
-                command: Obj.bind(function(evt)
-                {
-                    var checked = evt.target.getAttribute("checked") == "true";
-                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
-                }, elt),
-                items: logEventItems
-            },
             "-",
             {
                 label: "ScrollIntoView",
@@ -1978,52 +1936,6 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         return "Event " + event.type;
     }
-});
-
-// ********************************************************************************************* //
-
-FirebugReps.EventLog = domplate(FirebugReps.Event,
-{
-    className: "eventLog",
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    tag:
-        TAG("$copyEventTag", {object: "$object|copyEvent"}),
-
-    copyEventTag:
-        SPAN(
-            OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
-            SPAN("&#187;"),
-            SPAN("&nbsp"),
-            TAG("$object|getTargetTag", {object: "$object|getTarget"})
-        ),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    copyEvent: function(log)
-    {
-        return new Dom.EventCopy(log.event);
-    },
-
-    getTarget: function(event)
-    {
-        return event.target;
-    },
-
-    getTargetTag: function(event)
-    {
-        var rep = Firebug.getRep(event.target);
-        return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    supportsObject: function(object, type)
-    {
-        return object instanceof EventMonitor.EventLog;
-    },
 });
 
 // ********************************************************************************************* //
@@ -3552,7 +3464,6 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog,
     FirebugReps.ClosureScope,
     FirebugReps.OptimizedAway
 );

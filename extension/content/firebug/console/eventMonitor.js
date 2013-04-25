@@ -6,8 +6,13 @@ define([
     "firebug/lib/trace",
     "firebug/lib/events",
     "firebug/lib/locale",
+    "firebug/lib/dom",
+    "firebug/lib/domplate",
+    "firebug/lib/array",
+    "firebug/chrome/reps",
+    "firebug/chrome/menu",
 ],
-function(Obj, Firebug, FBTrace, Events, Locale) {
+function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, Arr, FirebugReps, Menu) {
 
 // ********************************************************************************************* //
 // EventMonitor Module
@@ -18,6 +23,18 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        Firebug.registerUIListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.unregisterUIListener(this);
+        Firebug.Module.shutdown.apply(this, arguments);
+    },
 
     destroyContext: function(context, persistedState)
     {
@@ -105,8 +122,9 @@ var EventMonitor = Obj.extend(Firebug.Module,
                 {
                      if (monitoredObjectEvents.has(eventTypes[i]))
                      {
-                        Events.removeEventListener(object, eventTypes[i], context.onMonitorEvent, false);
-                        monitoredObjectEvents.delete(eventTypes[i]);
+                        Events.removeEventListener(object, eventTypes[i],
+                            context.onMonitorEvent, false);
+                        monitoredObjectEvents["delete"](eventTypes[i]);
                      }
                 }
             }
@@ -168,17 +186,73 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
     onMonitorEvent: function(event, context)
     {
-        var obj = new EventMonitor.EventLog(event);
+        var obj = new EventLog(event);
         Firebug.Console.log(obj, context);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // UI Listener
+
+    onContextMenu: function(items, object, target, context, panel, popup)
+    {
+        if (panel.name != "html")
+            return;
+
+        var before = popup.querySelector("#fbScrollIntoView");
+        if (!before)
+            return [];
+
+        var elt = object;
+
+        // Create sub-menu-items for "Log Event"
+        var logEventItems = [];
+        var eventFamilies = Events.getEventFamilies();
+        for (var i=0, count=eventFamilies.length; i<count; ++i)
+        {
+            logEventItems.push({
+                label: eventFamilies[i],
+                tooltiptext: "Monitor " + eventFamilies[i] + " events",
+                id: "monitor" + eventFamilies[i] + "Events",
+                type: "checkbox",
+                checked: this.areEventsMonitored(elt, eventFamilies[i], context),
+                command: Obj.bind(this.onToggleMonitorEvents, this, elt,
+                    eventFamilies[i], context)
+            });
+        }
+
+        var item = {
+            label: "ShowEventsInConsole",
+            tooltiptext: "html.tip.Show_Events_In_Console",
+            id: "fbShowEventsInConsole",
+            type: "checkbox",
+            checked: this.areEventsMonitored(elt, null, context, false),
+            command: Obj.bind(function(evt)
+            {
+                var checked = evt.target.getAttribute("checked") == "true";
+                EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
+            }, elt),
+            items: logEventItems
+        };
+
+        var logEventsItem = Menu.createMenuItem(popup, item, before);
+        var separator = Menu.createMenuItem(popup, "-", before);
+
+        return [];
+    },
+
+    onToggleMonitorEvents: function(event, elt, type, context)
+    {
+        var checked = event.target.getAttribute("checked") == "true";
+        this.toggleMonitorEvents(elt, type, checked, context);
+
+        Events.cancelEvent(event);
+
+        // Toggle the main "Log Events" option depending on whether all events are monitored  
+        var doc = event.target.ownerDocument;
+        var logEvents = doc.getElementById("fbShowEventsInConsole");
+        logEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, false));
+    },
 });
-
-// ********************************************************************************************* //
-
-EventMonitor.EventLog = function(event)
-{
-    this.event = event;
-};
 
 // ********************************************************************************************* //
 // Helpers
@@ -218,6 +292,62 @@ function getMonitoredEventTypes(types)
 }
 
 // ********************************************************************************************* //
+// Rep Object
+
+var EventLog = function(event)
+{
+    this.event = event;
+};
+
+// ********************************************************************************************* //
+// Rep Template
+
+with (Domplate) {
+var EventLogRep = domplate(FirebugReps.Event,
+{
+    className: "eventLog",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    tag:
+        TAG("$copyEventTag", {object: "$object|copyEvent"}),
+
+    copyEventTag:
+        SPAN(
+            FirebugReps.OBJECTLINK("$object|summarizeEvent"),
+            SPAN("&nbsp"),
+            SPAN("&#187;"),
+            SPAN("&nbsp"),
+            TAG("$object|getTargetTag", {object: "$object|getTarget"})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    copyEvent: function(log)
+    {
+        return new Dom.EventCopy(log.event);
+    },
+
+    getTarget: function(event)
+    {
+        return event.target;
+    },
+
+    getTargetTag: function(event)
+    {
+        var rep = Firebug.getRep(event.target);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    supportsObject: function(object, type)
+    {
+        return object instanceof EventLog;
+    },
+})};
+
+// ********************************************************************************************* //
 // CommandLine Support
 
 function monitorEvents(context, args)
@@ -242,6 +372,7 @@ function unmonitorEvents(context, args)
 // Registration
 
 Firebug.registerModule(EventMonitor);
+Firebug.registerRep(EventLogRep);
 
 Firebug.registerCommand("monitorEvents", {
     handler: monitorEvents.bind(this),
