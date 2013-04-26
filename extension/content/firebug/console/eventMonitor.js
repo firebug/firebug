@@ -203,19 +203,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
         var elt = object;
 
-        // Ignore events that are not meant for elements
-        // xxxHonza: how to make those accessible through UI?
-        var ignore = ["clipboard"];
-
         // Create sub-menu-items for "Log Event"
         var logEventItems = [];
         var eventFamilies = Events.getEventFamilies();
         for (var i=0, count=eventFamilies.length; i<count; ++i)
         {
             var family = eventFamilies[i];
-
-            if (ignore.indexOf(family) != -1)
-                continue;
 
             // Compose a tooltip for the menu item.
             var tooltipText = "Monitor " + eventFamilies[i] + " events:";
