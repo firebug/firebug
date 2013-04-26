@@ -221,7 +221,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
                 Element.getSelectorId(elt) +
                 Element.getSelectorClass(elt);
 
-            tooltipText += "\n\nCommand Line:\nmonitor($('" + selector + "'), '" + family + "')";
+            tooltipText += "\n\nCommand Line:\nmonitorEvents($('" + selector + "'), '" + family + "')";
 
             logEventItems.push({
                 nol10n: true,
