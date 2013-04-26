@@ -195,27 +195,49 @@ var EventMonitor = Obj.extend(Firebug.Module,
     onContextMenu: function(items, object, target, context, panel, popup)
     {
         if (panel.name != "html")
-            return;
+            return items;
 
         var before = popup.querySelector("#fbScrollIntoView");
         if (!before)
-            return [];
+            return items;
 
         var elt = object;
+
+        // Ignore events that are not meant for elements
+        // xxxHonza: how to make those accessible through UI?
+        var ignore = ["clipboard"];
 
         // Create sub-menu-items for "Log Event"
         var logEventItems = [];
         var eventFamilies = Events.getEventFamilies();
         for (var i=0, count=eventFamilies.length; i<count; ++i)
         {
+            var family = eventFamilies[i];
+
+            if (ignore.indexOf(family) != -1)
+                continue;
+
+            // Compose a tooltip for the menu item.
+            var tooltipText = "Monitor " + eventFamilies[i] + " events:";
+            var types = Events.getEventTypes(family);
+            tooltipText += "\n" + types.join(", ");
+
+            // xxxHonza: there could be a helper for getting the CSS selector
+            var Element = FirebugReps.Element;
+            var selector = Element.getSelectorTag(elt) +
+                Element.getSelectorId(elt) +
+                Element.getSelectorClass(elt);
+
+            tooltipText += "\n\nCommand Line:\nmonitor($('" + selector + "'), '" + family + "')";
+
             logEventItems.push({
-                label: eventFamilies[i],
-                tooltiptext: "Monitor " + eventFamilies[i] + " events",
-                id: "monitor" + eventFamilies[i] + "Events",
+                nol10n: true,
+                label: Locale.$STR(family),
+                tooltiptext: tooltipText,
+                id: "monitor" + family + "Events",
                 type: "checkbox",
-                checked: this.areEventsMonitored(elt, eventFamilies[i], context),
-                command: Obj.bind(this.onToggleMonitorEvents, this, elt,
-                    eventFamilies[i], context)
+                checked: this.areEventsMonitored(elt, family, context),
+                command: Obj.bind(this.onToggleMonitorEvents, this, elt, family, context)
             });
         }
 
@@ -238,7 +260,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
         var logEventsItem = Menu.createMenuItem(popup, item, before);
         var separator = Menu.createMenuItem(popup, "-", before);
 
-        return [];
+        return items;
     },
 
     onToggleMonitorEvents: function(event, elt, type, context)
