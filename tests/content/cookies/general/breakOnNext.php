@@ -18,7 +18,7 @@
 <ol>
 <li>Open Firebug and enable the <b>Cookies</b> panel.</li>
 <li>Click on <code>Break on Cookie</code> button
-(<img src="chrome://firebug/skin/breakNextActive.png" style="vertical-align: bottom;"/>).</li>
+(<img src="chrome://firebug/skin/breakOn.svg" style="vertical-align: bottom;"/>).</li>
 <li>Click on one of the buttons bellow.</li>
 <li>The script execution must be stopped by Firebug debugger and
 the propert source code line must be displayed.</li>

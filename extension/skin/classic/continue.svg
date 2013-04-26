@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- See license.txt for terms of usage -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -8,10 +7,34 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    width="16"
    height="16"
-   id="svg2">
+   id="svg2"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="continue.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1138"
+     id="namedview20"
+     showgrid="false"
+     inkscape:zoom="59"
+     inkscape:cx="12.138575"
+     inkscape:cy="7.848025"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
   <defs
      id="defs4">
     <linearGradient
@@ -73,7 +96,16 @@
        id="linearGradient3813"
        xlink:href="#linearGradient3858"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0.99999983,0.99999978)" />
+       gradientTransform="translate(14.576271,0.76271164)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3858"
+       id="linearGradient3805"
+       x1="7.5084748"
+       y1="12.491526"
+       x2="4.3220339"
+       y2="1.559322"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <metadata
      id="metadata7">
@@ -94,9 +126,5 @@
   <path
      d="M 11.788236,8.0000005 7.9999992,4.602219 4.2117642,1.2044378 l 0,6.7955629 0,6.7955613 3.7882362,-3.397781 z"
      id="path3802-4"
-     style="fill:url(#linearGradient3154);fill-opacity:1;stroke:none" />
-  <path
-     d="m 4.1809975,0.71079738 a 0.50005,0.50005 0 0 0 -0.46875,0.50000002 l 0,6.8125 0,6.7812506 a 0.50005,0.50005 0 0 0 0.8125,0.375 l 3.8125,-3.40625 3.7812505,-3.3750006 a 0.50005,0.50005 0 0 0 0,-0.75 l -3.7812505,-3.40625 -3.8125,-3.40625002 a 0.50005,0.50005 0 0 0 -0.34375,-0.125 z m 0.53125,1.62500002 2.9375,2.65625 3.3750005,3.03125 -3.3750005,3.0312506 -2.9375,2.625 0,-5.6562506 0,-5.6875 z"
-     id="path3802"
-     style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:url(#linearGradient3813);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+     style="fill:url(#linearGradient3154);fill-opacity:1;stroke:url(#linearGradient3805);stroke-opacity:1;stroke-linejoin:round" />
 </svg>
