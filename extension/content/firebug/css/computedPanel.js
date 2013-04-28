@@ -138,10 +138,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         formatValue: function(value)
         {
-            if (Options.get("colorDisplay") == "hex")
-                value = Css.rgbToHex(value);
-            else if (Options.get("colorDisplay") == "hsl")
-                value = Css.rgbToHSL(value);
+            value = formatColor(value);
 
             var limit = Options.get("stringCropLength");
             if (limit > 0)
@@ -610,7 +607,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var propInfo = Firebug.getRepObject(target);
 
-            var prop = propInfo.property, value = propInfo.value;
+            var prop = propInfo.property;
+            var value = formatColor(propInfo.value);
             var cssValue;
 
             if (prop == "font" || prop == "font-family")
@@ -700,7 +698,27 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 });
 
 //********************************************************************************************* //
-//Helpers
+// Helpers
+
+function formatColor(color)
+{
+    var colorDisplay = Options.get("colorDisplay");
+
+    switch (colorDisplay)
+    {
+        case "hex":
+            return Css.rgbToHex(color);
+
+        case "hsl":
+            return Css.rgbToHSL(color);
+
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
+        default:
+            return value;
+    }
+}
 
 const styleGroups =
 {

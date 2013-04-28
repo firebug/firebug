@@ -2732,8 +2732,11 @@ function formatColor(color)
         case "hsl":
             return Css.rgbToHSL(color);
             
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
         default:
-            return color;
+            return value;
     }
 }
 
