@@ -266,29 +266,14 @@ function createFirebugConsole(context, win, defaultReturnValue, showSourceLink)
     };*/
 
     // Expose only these properties to the content scope (read only).
-    console.__exposedProps__.log = "r";
-    console.__exposedProps__.debug = "r";
-    console.__exposedProps__.info = "r";
-    console.__exposedProps__.warn = "r";
-    console.__exposedProps__.exception = "r";
-    console.__exposedProps__.assert = "r";
-    console.__exposedProps__.dir = "r";
-    console.__exposedProps__.dirxml = "r";
-    console.__exposedProps__.trace = "r";
-    console.__exposedProps__.group = "r";
-    console.__exposedProps__.groupEnd = "r";
-    console.__exposedProps__.groupCollapsed = "r";
-    console.__exposedProps__.time = "r";
-    console.__exposedProps__.timeEnd = "r";
-    console.__exposedProps__.timeStamp = "r";
-    console.__exposedProps__.profile = "r";
-    console.__exposedProps__.profileEnd = "r";
-    console.__exposedProps__.count = "r";
-    console.__exposedProps__.clear = "r";
-    console.__exposedProps__.table = "r";
-    console.__exposedProps__.error = "r";
-    //console.__exposedProps__.memoryProfile = "r";
-    //console.__exposedProps__.memoryProfileEnd = "r";
+    for (var name in console)
+    {
+        if (console.hasOwnProperty(name))
+        {
+            console.__exposedProps__[name] = "rw";
+            console[name].displayName = "function";
+        }
+    }
 
     // DBG console.uid = Math.random();
 

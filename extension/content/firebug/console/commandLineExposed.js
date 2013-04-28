@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 /*jshint esnext:true, es5:true, curly:false, evil:true, forin: false*/
-/*global Firebug:true, FBTrace:true, Components:true, define:true */
+/*global Firebug:true, FBTrace:true, Components:true, define:true, Proxy:true */
 
 define([
     "firebug/lib/wrapper",
@@ -8,8 +8,9 @@ define([
     "firebug/lib/object",
     "firebug/console/commandLineAPI",
     "firebug/lib/locale",
+    "firebug/lib/array",
 ],
-function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
+function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale, Arr) {
 "use strict";
 
 // ********************************************************************************************* //
@@ -159,7 +160,7 @@ function createFirebugCommandLine(context, win)
     }
 
     // Register Console API (exposed to the command line).
-    commandLine.console = dglobal.makeDebuggeeValue(console);
+    commandLine.console = evalCreateCommandLineConsole(context, win, dglobal, console);
 
     commandLineCache.set(win.document, commandLine);
 
@@ -474,6 +475,175 @@ function executeInWindowContext(win, func, args)
     var event = document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);
+}
+
+function createCommandLineConsole(commandConsole, exposedConsole)
+{
+    // xxxFlorent: Not sure we really need this `target` object... 
+    var target = {};
+    // Make the __exposedProps__ object always return "rw" (for any property).
+    // xxxFlorent: for Object.freeze() => see bugzilla issues 793210 + 795903 (!!)
+
+    target.__exposedProps__ = new Proxy(Object.freeze({}), {
+        get: function()
+        {
+            return "rw";
+        },
+
+        getOwnPropertyDescriptor: function()
+        {
+            // Return the same descriptor than commandConsole.__exposedProps__.log for any property.
+            return Object.getOwnPropertyDescriptor(commandConsole.__exposedProps__, "log");
+        },
+
+        hasOwn: function()
+        {
+            return true;
+        },
+
+        has: function()
+        {
+            return true;
+        }
+    });
+
+    return new Proxy(Object.freeze(target), {
+        deleteProperty: function(_target, name)
+        {
+            // Note: Let this raise exception if it has to.
+            var ret = delete target[name];
+            // xxxFlorent: [ES6-FOR_OF]
+            [commandConsole, exposedConsole].forEach(function(obj)
+            {
+                var desc = Object.getOwnPropertyDescriptor(obj, name);
+                if (desc && desc.configurable)
+                    delete obj[name];
+            });
+            return ret;
+        },
+
+        has: function(_target, name)
+        {
+            return (name in target) || (name in commandConsole) || (name in exposedConsole);
+        },
+
+        hasOwn: function(_target, name)
+        {
+            // Note: we cannot trust exposedConsole.hasOwnProperty (if the webpage redefined it).
+            var hasOwn = ({}).hasOwnProperty;
+            return hasOwn.call(target, name) ||
+                hasOwn.call(commandConsole, name) ||
+                hasOwn.call(exposedConsole, name);
+        },
+
+        get: function(_target, name)
+        {
+            // Note: we cannot trust exposedConsole.hasOwnProperty (if the webpage redefined it).
+            var hasOwn = ({}).hasOwnProperty;
+            if (hasOwn.call(target, name))
+                return target[name];
+            if (hasOwn.call(commandConsole, name))
+                return commandConsole[name];
+            // Note: No problem if this is trapped since there is no value for this property in
+            //       target nor in commandConsole.
+            if (hasOwn.call(exposedConsole, name))
+                return exposedConsole[name];
+        },
+
+        set: function(_target, name, value)
+        {
+            // Reuse this.defineProperty.
+            this.defineProperty(_target, name, {
+                value: value,
+                configurable: true,
+                enumerable: true,
+                writable:true
+            });
+            return value;
+        },
+
+        enumerate: function(_target)
+        {
+            return Arr.keys(target)
+                .concat( Arr.keys(commandConsole) )
+                .concat( Arr.keys(exposedConsole) );
+        },
+
+        keys: function(_target)
+        {
+            return Object.keys(target)
+                .concat( Object.keys(commandConsole) )
+                .concat( Object.keys(exposedConsole) );
+        },
+
+        getOwnPropertyNames: function(_target)
+        {
+            return Object.getOwnPropertyNames(target)
+                .concat( Object.getOwnPropertyNames(commandConsole) )
+                .concat( Object.getOwnPropertyNames(exposedConsole) );
+        },
+
+        getOwnPropertyDescriptor: function(_target, name)
+        {
+            return Object.getOwnPropertyDescriptor(target, name) ||
+                Object.getOwnPropertyDescriptor(commandConsole, name) ||
+                Object.getOwnPropertyDescriptor(exposedConsole, name);
+        },
+
+        defineProperty: function(_target, name, desc)
+        {
+            // Note: Let this raise exception if it has to.
+            Object.defineProperty(target, name, desc);
+            // Note: should be safe if exposedConsole is not a proxy object.
+            var exposedPropDesc = Object.getOwnPropertyDescriptor(exposedConsole, name);
+            if (!(name in exposedConsole) || exposedPropDesc.configurable)
+                Object.defineProperty(exposedConsole, name, desc);
+        }
+    });
+}
+
+/**
+ * Evaluates the expression that allows to create the command-line-side console Proxy object:
+ * - the methods of the Console API are prevented from being overridden webpage-side;
+ * - each method overrided via this Proxy is also overridden in the webpage console instance;
+ * - each expando property added via this Proxy is also added in the webpage console instance;
+ * - each expando property in the webpage instance is returned by this proxy, except if a property
+ *      of the same name has not been created via this Proxy;
+ *
+ * For more information, see issue 6268.
+ *
+ * @param win
+ * @param dglobal
+ *
+ * @return The created instance.
+ */
+function evalCreateCommandLineConsole(context, win, dglobal, console)
+{
+    // Ensure we get the exposed console instance we created and not a webpage-defined proxy.
+    var exposedConsoleInstance = Firebug.Console.injector.getExposedConsoleInstance(win);
+
+    var bindings = {
+        createCommandLineConsole: dglobal.makeDebuggeeValue(createCommandLineConsole),
+        commandConsole: dglobal.makeDebuggeeValue(console),
+        exposedConsole: dglobal.makeDebuggeeValue(exposedConsoleInstance),
+    };
+    var expr = "createCommandLineConsole(commandConsole, exposedConsole);";
+
+    // Create the console proxy Debuggee-side (we can't pass a proxy as a binding unfortunately).
+    var retEval = dglobal.evalInGlobalWithBindings(expr, bindings);
+
+    if (retEval.hasOwnProperty("return"))
+        return retEval.return;
+    else
+    {
+        // xxxFlorent: localize?
+        var errorMessage = "Internal error: cannot create the Command Line console object: %s.";
+        var errorDetail = "";
+        if (retEval.hasOwnProperty("throw"))
+            errorDetail = DebuggerLib.unwrapDebuggeeValue(retEval.throw, win, dglobal).message;
+        Firebug.Console.logFormatted([errorMessage, errorDetail], context, "error");
+        return;
+    }
 }
 
 // ********************************************************************************************* //
