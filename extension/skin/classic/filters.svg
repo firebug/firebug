@@ -22,7 +22,7 @@
             <feFuncB type="linear" intercept="0.2" slope="1"/>
         </feComponentTransfer>
     </filter>
-    <filter id="greyscale">
+    <filter id="grayscale">
         <feColorMatrix type="saturate" values="0"/>
     </filter>
 </svg>

@@ -285,7 +285,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbDebuggerButtons toolbarbutton[disabled="true"] {
-    filter: url(chrome://firebug/skin/filters.svg#greyscale);
+    filter: url(chrome://firebug/skin/filters.svg#grayscale);
 }
 
 #fbRerunButton {
