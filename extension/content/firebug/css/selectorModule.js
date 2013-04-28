@@ -42,7 +42,7 @@ var SelectorModule = Obj.extend(Firebug.Module,
             return;
 
         var rule = cssRule.repObject;
-        if (!rule)
+        if (!rule || !rule.selectorText)
             return;
 
         var panel = context.getPanel("selector");

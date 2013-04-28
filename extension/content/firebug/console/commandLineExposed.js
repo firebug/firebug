@@ -39,6 +39,13 @@ var props = ["$0", "$1"];
 // Registered commands, name -> config object.
 var userCommands = Object.create(null);
 
+// List of command line APIs to auto-complete, kept equal to the concatenation
+// of the above minus trace*.
+var completionList = [
+        "$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+        "values", "debug", "undebug", "monitor", "unmonitor", "copy"
+    ].concat(consoleShortcuts, props);
+
 // ********************************************************************************************* //
 // Command Line Implementation
 
@@ -192,6 +199,7 @@ function registerCommand(name, config)
     }
 
     userCommands[name] = config;
+    completionList.push(name);
     return true;
 }
 
@@ -214,6 +222,9 @@ function unregisterCommand(name)
     }
 
     delete userCommands[name];
+    var ind = completionList.indexOf(name);
+    if (ind !== -1)
+        completionList.splice(ind, 1);
     return true;
 }
 
@@ -660,6 +671,7 @@ Firebug.CommandLineExposed =
     unregisterCommand: unregisterCommand,
     isCommandLineScope: isCommandLineScope,
     evaluate: evaluateInPageContext,
+    completionList: completionList,
 };
 
 return Firebug.CommandLineExposed;

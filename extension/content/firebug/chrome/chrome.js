@@ -2089,32 +2089,44 @@ function onPanelMouseUp(event)
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
-        if (selection.focusNode === selection.anchorNode)
+        
+        if (Dom.getAncestorByClass(selection.focusNode, "editable") ===
+            Dom.getAncestorByClass(selection.anchorNode, "editable"))
         {
             var editable = Dom.getAncestorByClass(target, "editable");
             if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
-                var selFO = selection.focusOffset,selAO = selection.anchorOffset;
+                var unselectedRange = event.target.ownerDocument.createRange();
+                var selectedRange = selection.getRangeAt(0);
+                unselectedRange.setStart(editable.firstElementChild || editable, 0);
+                unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
-                // selection is collapsed
-                if (selFO == selAO)
+                if (selectedRange.collapsed)
                 {
                     var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
                         Math.abs(event.screenY - this.lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
                     if (distance > 3)
-                        selectionData = {start: selFO, end: selFO};
+                    {
+                        selectionData =
+                        {
+                            start: selectedRange.startOffset,
+                            end: selectedRange.endOffset
+                        };
+                    }
                     // otherwise leave selectionData undefined to select all text
-                }
-                else if (selFO < selAO)
-                {
-                    selectionData = {start: selFO, end: selAO};
                 }
                 else
                 {
-                    selectionData = {start: selAO, end: selFO};
+                    var unselectedRangeLength = unselectedRange.toString().length;
+                    var selectedRangeLength = selection.getRangeAt(0).toString().length;
+                    selectionData =
+                    {
+                        start: unselectedRangeLength,
+                        end: unselectedRangeLength + selectedRangeLength
+                    };
                 }
 
                 if (editable)
@@ -2123,7 +2135,7 @@ function onPanelMouseUp(event)
                 }
                 else
                 {
-                    Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO});
+                    Firebug.Editor.setSelection(selectionData);
                     selection.removeAllRanges();
                 }
 

@@ -85,12 +85,10 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             ),
 
         CSSFontPropValueTag:
-            SPAN({"class": "cssFontPropValue"},
                 FOR("part", "$propValueParts",
                     SPAN({"class": "$part.type|getClass", _repObject: "$part.font"}, "$part.value"),
                     SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
-                )
-            ),
+                ),
 
         getSeparator: function(part)
         {
@@ -163,6 +161,8 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     var propValueElem = prop.getElementsByClassName("cssPropValue").item(0);
                     var propValue = propValueElem.textContent;
                     var fontPropValueParts = getFontPropValueParts(element, propValue, propName);
+
+                    Css.setClass(propValueElem, "cssFontPropValue");
 
                     // xxxsz: Web fonts not being loaded at display time
                     // won't be marked as used. See issue 5420.
