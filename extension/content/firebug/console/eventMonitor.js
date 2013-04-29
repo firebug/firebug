@@ -236,8 +236,10 @@ var EventMonitor = Obj.extend(Firebug.Module,
             });
         }
 
-        function onCommand()
+        function onCommand(event)
         {
+            Events.cancelEvent(event);
+
             var checked = this.areEventsMonitored(elt, null, context, false);
             this.toggleMonitorEvents(elt, null, !checked, context);
         }
