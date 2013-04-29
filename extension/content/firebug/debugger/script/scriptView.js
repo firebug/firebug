@@ -12,8 +12,9 @@ define([
     "firebug/chrome/menu",
     "firebug/chrome/infotip",
     "firebug/chrome/firefox",
+    "firebug/editor/sourceEditor",
 ],
-function (FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox) {
+function (FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,12 +22,6 @@ function (FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
-
-// Introduced in Firefox 8
-// We might want to switch to CodeMirror:
-// Bug 816756 - CodeMirror as an alternative to Orion
-// Issue 5353: please integrate Codemirror2 instead of Orion editor
-Cu["import"]("resource:///modules/source-editor.jsm");
 
 var Trace = FBTrace.to("DBG_SCRIPTVIEW");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -63,7 +58,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     initialize: function(parentNode)
     {
-        if (this.initializeExecuted)
+        // XXFarshid: Thess lines is Commented to test CM and should be backed out.
+        
+        /*if (this.initializeExecuted)
         {
             this.showSource();
             return;
@@ -85,14 +82,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             showAnnotationRuler: true,
             showOverviewRuler: true,
             theme: "chrome://firebug/skin/orion-firebug.css",
-        };
+        };*/
 
         this.editor = new SourceEditor();
-        this.editor.init(parentNode, config, this.onEditorLoad.bind(this));
-
-        // xxxHonza: use CSS?
-        this.editor._iframe.style.width = "100%";
-        this.editor._iframe.style.height = "100%";
+        this.editor.init(parentNode, {}, this.onEditorLoad.bind(this));
     },
 
     onEditorLoad: function()
