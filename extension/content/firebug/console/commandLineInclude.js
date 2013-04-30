@@ -42,8 +42,9 @@ catch(ex)
     // Scratchpad does not exists (when using Seamonkey ...)
 }
 
-var storageScope = {};
+var storageScope = {}, StorageService;
 Cu.import("resource://firebug/storageService.js", storageScope);
+StorageService = storageScope.StorageService;
 
 var defaultAliases = {
     "jquery": "http://code.jquery.com/jquery-latest.js"
@@ -345,11 +346,11 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     {
         if (!this.store)
         {
-            var isNewStore = !storageScope.StorageService.hasStorage(storeFilename);
+            var isNewStore = !StorageService.hasStorage(storeFilename);
             // Pass also the parent window to the new storage. The window will be
             // used to figure out whether the browser is running in private mode.
             // If yes, no data will be persisted.
-            this.store = storageScope.StorageService.getStorage(storeFilename,
+            this.store = StorageService.getStorage(storeFilename,
                 Firebug.chrome.window);
 
             // If the file did not exist, we put in there the default aliases.
@@ -512,9 +513,11 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
 
     resetAllOptions: function()
     {
-        var store = this.getStore();
-        if (store)
-            store.clear(true);
+        if (StorageService.hasStorage(storeFilename))
+        {
+            StorageService.removeStorage(storeFilename);
+            this.store = null;
+        }
     }
 });
 

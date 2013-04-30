@@ -158,7 +158,7 @@ var StorageService =
 
     removeStorage: function(leafName)
     {
-        ObjectPersister.deleteObject(leafname);
+        ObjectPersister.deleteObject(leafName);
     },
 
     hasStorage: function(leafName)
@@ -322,6 +322,12 @@ var ObjectPersister =
                 FBTrace.sysout("ObjectPersister.writeTextToFile; EXCEPTION for " + file.path +
                     ": "+err, {exception: err, string: string});
         }
+    },
+
+    deleteObject: function(leafName)
+    {
+        var file = this.getFile(leafName);
+        return file.remove(false);
     },
 
     // xxxHonza: this entire method is duplicated from firebug/lib/privacy module
