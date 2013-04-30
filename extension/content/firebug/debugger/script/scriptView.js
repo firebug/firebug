@@ -79,8 +79,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             readOnly: true,
             mode: "javascript",
             lineNumbers: true,
-            // xxxHonza: why this is here?
-            //gutters: ["CodeMirror-lineNumbers"],
+            gutters: ["breakpoint"],
             theme: "firebug"
         };
 
