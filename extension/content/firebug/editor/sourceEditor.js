@@ -1,34 +1,49 @@
+/* See license.txt for terms of usage */
+
 define([
     "firebug/firebug",
-    "firebug/editor/codemirror/CodeMirror",
+    "firebug/lib/http",
+    "firebug/editor/codemirror/codemirror",
 ],
-function (Firebug, CodeMirror)
+function (Firebug, Http, CodeMirror) {
+
+// ********************************************************************************************* //
+// Constants
+
+// xxxHonza: just temporary default text
+var defaultText = Http.getResource("chrome://firebug/content/net/netPanel.js");
+
+// ********************************************************************************************* //
+// Source Editor Implementation
+
+function SourceEditor()
 {
+    this.view = null;
+    this.editorObject = null;
+}
 
-    function SourceEditor()
+SourceEditor.prototype =
+{
+    init: function (parentNode, config, callBcak)
     {
-        this._view = null;
-        this._editorObject = null;
-    }
-
-    SourceEditor.prototype =
-    {
-        init: function (parentNode, config, callBcak)
+        this.editorObject = CodeMirror(function(elt)
         {
+            parentNode.appendChild(elt);
+            this.view = elt;
+        },
+        {
+            mode: "javascript",
+            value: defaultText,
+            lineNumbers: true,
+            gutters: ["CodeMirror-lineNumbers"]
+        });
+    }
+};
 
-            this._editorObject = CodeMirror(function (elt)
-            {
-                parentNode.appendChild(elt);
-                this._view = elt;
-            },
-            {
-                value: "A text to test CM initializing only! ",
-                lineNumbers: true,
-                gutters: ["CodeMirror-lineNumbers"]
-            });
-        }
-    };
+// ********************************************************************************************* //
+// Registration
 
-    // ********************************************************************************************* //
-    return SourceEditor;
+return SourceEditor;
+
+// ********************************************************************************************* //
 });
