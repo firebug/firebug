@@ -11,10 +11,10 @@ function (Firebug, Http, Dom) {
 // Constants
 
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
-var jsMode = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
+var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 
-// xxxHonza: just temporary default text
-var defaultText = Http.getResource("chrome://firebug/content/net/netPanel.js");
+var Trace = FBTrace.to("DBG_SCRIPTEDITOR");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Source Editor Implementation
@@ -33,28 +33,53 @@ SourceEditor.prototype =
 
         // Append CM scripts into the panel.html
         Dom.addScript(doc, "cm", Http.getResource(codeMirrorSrc));
-        Dom.addScript(doc, "cm-js", Http.getResource(jsMode));
+        Dom.addScript(doc, "cm-js", Http.getResource(jsModeSrc));
 
-        var self = this;
-        this.editorObject = doc.defaultView.CodeMirror(function(elt)
+        function onEditorCreate(elt)
         {
             parentNode.appendChild(elt);
-            self.view = elt;
-        },
-        {
-            readOnly: true,
-            mode: "javascript",
-            value: defaultText,
-            lineNumbers: true,
-            // xxxHonza: why this is here?
-            //gutters: ["CodeMirror-lineNumbers"],
-            theme: "firebug"
-        });
+
+            this.view = elt;
+
+            callback();
+        }
+
+        // Create editor;
+        this.editorObject = doc.defaultView.CodeMirror(
+            onEditorCreate.bind(this), config);
+
+        Trace.sysout("sourceEditor.init; ", this.view);
+    },
+
+    destroy: function()
+    {
+        // TODO
     },
 
     setText: function(text)
     {
+        this.editorObject.setValue(text);
+    },
+
+    getText: function()
+    {
+        return this.editorObject.getValue();
+    },
+
+    getCharCount: function()
+    {
         // TODO
+    },
+
+    setDebugLocation: function()
+    {
+        // TODO
+    },
+
+    getTopIndex: function()
+    {
+        // TODO
+        return 0
     }
 };
 

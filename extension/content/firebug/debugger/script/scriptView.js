@@ -59,8 +59,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     initialize: function(parentNode)
     {
         // XXFarshid: Thess lines is Commented to test CM and should be backed out.
-        
-        /*if (this.initializeExecuted)
+
+        if (this.initializeExecuted)
         {
             this.showSource();
             return;
@@ -76,16 +76,16 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseOutListener = this.onMouseOut.bind(this);
 
         var config = {
-            mode: SourceEditor.MODES.JAVASCRIPT,
-            showLineNumbers: true,
             readOnly: true,
-            showAnnotationRuler: true,
-            showOverviewRuler: true,
-            theme: "chrome://firebug/skin/orion-firebug.css",
-        };*/
+            mode: "javascript",
+            lineNumbers: true,
+            // xxxHonza: why this is here?
+            //gutters: ["CodeMirror-lineNumbers"],
+            theme: "firebug"
+        };
 
         this.editor = new SourceEditor();
-        this.editor.init(parentNode, {}, this.onEditorLoad.bind(this));
+        this.editor.init(parentNode, config, this.onEditorLoad.bind(this));
     },
 
     onEditorLoad: function()
@@ -95,7 +95,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.initialized = true;
 
         // Add editor listeners
-        this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
+        /*this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
             this.onContextMenuListener);
         this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
             this.onBreakpointChangeListener);
@@ -118,7 +118,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Focus so, keyboard works as expected.
         this.editor.focus();
-
+*/
         if (this.defaultSource)
             this.showSource(this.defaultSource);
 
@@ -134,7 +134,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (!this.initialized)
             return;
-
+/*
         this.editor.removeEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
             this.onContextMenuListener);
         this.editor.removeEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
@@ -143,7 +143,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.onMouseMoveListener);
         this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_OUT,
             this.onMouseOutListener);
-
+*/
         try
         {
             this.editor.destroy();
@@ -458,6 +458,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (!this.editor)
             return;
+
+        // xxxHonza: TODO support for breakpoints.
+        return;
 
         var annotations = this.editor._getAnnotationsByType("breakpoint", 0,
             this.editor.getCharCount());
