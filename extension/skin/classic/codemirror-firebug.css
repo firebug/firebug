@@ -1,0 +1,123 @@
+﻿/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Firebug CodeMirror Theme */
+
+.cm-s-firebug.CodeMirror {
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    position: relative;
+    overflow: hidden;
+    background: white;
+    color: black;
+}
+
+.cm-s-firebug .linehighlighting {
+    background-color: lightgoldenrodyellow;
+}
+
+.cm-s-firebug .CodeMirror-activeline-background {
+    background: #00FFFF;
+}
+
+.cm-s-firebug .CodeMirror-scroll {
+    overflow: hidden;
+}
+
+.cm-s-firebug .CodeMirror-lines {
+    padding-left: 10px;
+    cursor: text;
+}
+
+.cm-s-firebug.CodeMirror pre {
+    padding-left:0px;
+}
+
+.cm-s-firebug .CodeMirror-scrollbar-filler {
+    background-color: white;
+}
+
+.cm-s-firebug .CodeMirror-gutters {
+    border-right: 1px solid #ddd;
+    background-color: rgb(238, 238, 238);
+    overflow: hidden;
+    position: absolute; left: 0; top: 0;
+    height: 100%;
+    padding-bottom: 30px;
+    z-index: 3;
+}
+
+.cm-s-firebug .CodeMirror-linenumbers {
+}
+
+.cm-s-firebug .CodeMirror-linenumber {
+    min-width: 20px;
+    text-align: right;
+    color: #999;
+    padding-left: 8px !important;
+    padding-right: 25px !important;
+}
+
+.cm-s-firebug .CodeMirror div.CodeMirror-cursor.CodeMirror-overwrite {
+}
+
+.cm-s-firebug .cm-tab {
+    display: inline-block;
+}
+
+.cm-s-firebug .cm-keyword {color: blue;}
+.cm-s-firebug .cm-atom {color: #219;}
+.cm-s-firebug .cm-number {color: #164;}
+.cm-s-firebug .cm-def {color: #00f;}
+.cm-s-firebug .cm-variable {color: black;}
+.cm-s-firebug .cm-variable-2 {color: black;}
+.cm-s-firebug .cm-variable-3 {color: black;}
+.cm-s-firebug .cm-property {color: black;}
+.cm-s-firebug .cm-operator {color: black;}
+.cm-s-firebug .cm-comment {color: Silver;}
+.cm-s-firebug .cm-string {color: Red;}
+.cm-s-firebug .cm-string-2 {color: Red;}
+.cm-s-firebug .cm-meta {color: #555;}
+.cm-s-firebug .cm-error {color: #f00;}
+.cm-s-firebug .cm-qualifier {color: #555;}
+.cm-s-firebug .cm-builtin {color: #30a;}
+.cm-s-firebug .cm-bracket {color: #997;}
+.cm-s-firebug .cm-tag {color: #170;}
+.cm-s-firebug .cm-attribute {color: #00c;}
+.cm-s-firebug .cm-header {color: blue;}
+.cm-s-firebug .cm-quote {color: #090;}
+.cm-s-firebug .cm-hr {color: #999;}
+.cm-s-firebug .cm-link {color: #00c;}
+
+.cm-s-firebug .CodeMirror-gutter {
+    padding-right:4px;
+    padding-bottom: 30px;
+    margin-bottom: -32px;
+}
+.cm-s-firebug .CodeMirror-gutter-elt {
+    position: absolute;
+    cursor: default;
+    z-index: 4;
+}
+
+/************************************************************************************************/
+/* Print */
+
+@media print {
+  /* Hide the cursor when printing */
+  .CodeMirror div.CodeMirror-cursor {
+    visibility: hidden;
+  }
+}
+
+/************************************************************************************************/
+/* No vertical padding in Firebug theme */
+
+.CodeMirror-lines {
+    padding: 0 0; /* Vertical padding around content */
+}
+
+.CodeMirror pre {
+    padding: 0 0; /* Horizontal padding of content */
+}
