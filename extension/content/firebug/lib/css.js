@@ -2649,6 +2649,21 @@ Css.charsets =
     "Windows-1258"
 ];
 
+// http://www.w3.org/TR/CSS21/media.html#media-types
+Css.mediaTypes =
+[
+    "all",
+    "aural",
+    "braille",
+    "embossed",
+    "handheld",
+    "print",
+    "projection",
+    "screen",
+    "tty",
+    "tv"
+];
+
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
 // but that's not relevant for our purposes.

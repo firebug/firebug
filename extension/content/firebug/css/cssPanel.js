@@ -78,7 +78,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             role: "option"},
 
             // Use spaces for indent to make "copy to clipboard" nice.
-            SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"),
+            SPAN({"class": "cssPropIndent"}, "&nbsp;&nbsp;&nbsp;&nbsp;"),
             SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
                 "$prop.name"
             ),
@@ -122,6 +122,28 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
             "&nbsp;&quot;",
             SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
             "&quot;;"
+        )
+});
+
+var CSSMediaRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@media"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
+                    "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
         )
 });
 
@@ -465,7 +487,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 else if (rule instanceof window.CSSMediaRule ||
                     rule instanceof window.CSSMozDocumentRule)
                 {
-                    rules = Arr.extendArray(rules, createRules(Css.safeGetCSSRules(rule)));
+                    rules.push({
+                        tag: CSSMediaRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
                 }
                 else if (rule instanceof window.CSSFontFaceRule)
                 {
@@ -882,8 +909,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     clickedDisableButton: function(event)
     {
+        if (!Css.hasClass(event.target, "cssPropIndent"))
+            return false;
+
         // XXX hack
-        if (event.clientX > 20)
+        var clientOffset = Dom.getClientOffset(event.target);
+        if (event.clientX - clientOffset.x > 20)
             return false;
         if (Css.hasClass(event.target, "textEditor inlineExpander"))
             return false;
@@ -1912,6 +1943,21 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
+        else if (rule instanceof window.CSSMediaRule && Css.hasClass(target, "cssMediaRuleCondition"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
+                        previousValue + "->" + value);
+            }
+            
+            rule.conditionText = value;
+            
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (rule instanceof window.CSSCharsetRule)
         {
             target.textContent = value;
@@ -2027,6 +2073,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
             return Css.getCSSPropertyNames(nodeType);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssMediaRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.mediaTypes;
         }
         else
         {
