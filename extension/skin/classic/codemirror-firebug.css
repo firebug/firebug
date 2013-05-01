@@ -121,3 +121,11 @@
 .CodeMirror pre {
     padding: 0 0; /* Horizontal padding of content */
 }
+
+/************************************************************************************************/
+/* Debug Location */
+
+.CodeMirror-debugLocation {
+    outline: 1px solid #D9D9B6;
+    background-color: lightgoldenrodyellow;
+}

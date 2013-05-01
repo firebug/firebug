@@ -58,11 +58,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     initialize: function(parentNode)
     {
-        // XXFarshid: Thess lines is Commented to test CM and should be backed out.
-
         if (this.initializeExecuted)
         {
-            this.showSource();
+            //this.showSource();
             return;
         }
 
@@ -498,43 +496,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         options = options || {};
 
-        // TODO
-        return;
-
-        var editorHeight = this.editor._view.getClientArea().height;
-        var lineHeight = this.editor._view.getLineHeight();
-        var linesVisible = Math.floor(editorHeight/lineHeight);
-        var halfVisible = Math.round(linesVisible/2);
-        var firstVisible = this.editor.getTopIndex();
-        var lastVisible = this.editor._view.getBottomIndex(true);
-
         // Convert to index based.
         line = line - 1;
 
-        var topIndex;
-        if (options.scrollTo == "top")
-        {
-            topIndex = line;
-        }
-        else
-        {
-            // Calculate center line
-            topIndex = Math.max(line - halfVisible, 0);
-            topIndex = Math.min(topIndex, this.editor.getLineCount());
-
-            // If the target line is in view, keep the top index
-            if (line <= lastVisible && line >= firstVisible)
-            {
-                Trace.sysout("scriptView.scrollToLine; adjust line: " + line +
-                    ", firstVisible: " + firstVisible + ", lastVisible: " + lastVisible);
-
-                topIndex = firstVisible;
-            }
-        }
-
-        Trace.sysout("scriptView.scrollToLine; setTopIndex " + topIndex, options);
-
-        this.editor.setTopIndex(topIndex);
+        this.editor.scrollToLine(line, options);
 
         if (options.debugLocation)
             this.editor.setDebugLocation(line);
@@ -545,6 +510,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     highlightLine: function(lineIndex)
     {
         Trace.sysout("scriptView.highlightLine; " + lineIndex);
+
+        // TODO:
+        return;
 
         if (!this.editor)
             return;

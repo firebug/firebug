@@ -20,6 +20,9 @@ var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
 var Trace = FBTrace.to("DBG_SCRIPTEDITOR");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
+var WRAP_CLASS = "CodeMirror-debugLocation";
+var BACK_CLASS = "CodeMirror-debugLocation-background";
+
 // ********************************************************************************************* //
 // Source Editor Implementation
 
@@ -28,6 +31,7 @@ function SourceEditor()
     this.view = null;
     this.config = {};
     this.editorObject = null;
+    this.debugLocation = -1;
 }
 
 SourceEditor.DefaultConfig =
@@ -94,7 +98,11 @@ SourceEditor.prototype =
 
         function onEditorCreate(elt)
         {
+            Trace.sysout("sourceEditor.onEditorCreate;", this.view);
+
             parentNode.appendChild(elt);
+
+            this.view = elt;
 
             callback();
         }
@@ -200,6 +208,9 @@ SourceEditor.prototype =
 
     setText: function (text)
     {
+        Trace.sysout("sourceEditor.setText", text);
+
+        text = text || "";
         this.editorObject.setValue(text);
     },
 
@@ -213,15 +224,71 @@ SourceEditor.prototype =
         this.editorObject.getValue().length;
     },
 
-    setDebugLocation: function ()
+    setDebugLocation: function(line)
     {
-        // TODO
+        Trace.sysout("sourceEditor.setDebugLocation; line: " + line);
+
+        if (this.debugLocation == line)
+            return;
+
+        if (this.debugLocation != -1)
+        {
+            var handle = this.editorObject.getLineHandle(this.debugLocation);
+            this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
+            this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
+        }
+
+        this.debugLocation = line;
+
+        if (this.debugLocation != -1)
+        {
+            var handle = this.editorObject.getLineHandle(line);
+            this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
+            this.editorObject.addLineClass(handle, "background", BACK_CLASS);
+        } 
     },
 
-    getTopIndex: function ()
+    scrollToLine: function(line, options)
+    {
+        options = options || {};
+
+        if (options.scrollTo == "top")
+        {
+            // Scroll so, the specified line is displayed at the top of the editor.
+            this.editorObject.scrollIntoView({line: line});
+        }
+        else
+        {
+            var scrollInfo = this.editorObject.getScrollInfo();
+            var hScrollBar = this.view.getElementsByClassName("CodeMirror-hscrollbar")[0];
+
+            // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
+            // returns the visible area minus scrollbars, it doesn't seem to work).
+            var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
+            var coords = this.editorObject.charCoords({line: line, ch: 0}, "local");
+            var top = coords.top;
+            var bottom = coords.bottom;
+
+            var lineHeight = this.editorObject.defaultTextHeight();
+
+            // Scroll only if the target line is outside of the viewport.
+            if (top <= scrollInfo.top || bottom >= scrollInfo.top + editorHeight)
+            {
+                var middle = top - (editorHeight / 2);
+                this.editorObject.scrollTo(null, middle);
+            }
+        }
+    },
+
+    getTopIndex: function()
     {
         // TODO
         return 0;
+    },
+
+    setTopIndex: function()
+    {
+        // TODO
     }
 };
 
