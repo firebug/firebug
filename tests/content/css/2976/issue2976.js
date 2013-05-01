@@ -17,7 +17,23 @@ function runTest()
                 var cssSelector = stylePanel.panelNode.querySelector(".cssSelector");
                 FBTest.executeContextMenuCommand(cssSelector, "fbCopyStyleDeclaration", function()
                 {
-                    var expected = /background-color: LightYellow;\s*color: red !important;\s*font-weight: bold;/;
+                    var backgroundColorValue = "";
+                    var colorValue = "";
+
+                    // Since FF 22.0a2 inIDOMUtils has a function colorNameToRGB()
+                    if (FBTest.compareFirefoxVersion("22.0a2") >= 0)
+                    {
+                        backgroundColorValue = "#FFFFE0";
+                        colorValue = "#FF0000";
+                    }
+                    else
+                    {
+                        backgroundColorValue = "LightYellow";
+                        colorValue = "red";
+                    }
+
+                    var expected = new RegExp("background-color: " + backgroundColorValue +
+                        ";\\s*color: " + colorValue + " !important;\\s*font-weight: bold;");
                     FBTest.waitForClipboard(expected, function(cssDecl)
                     {
                         FBTest.compare(expected, cssDecl,

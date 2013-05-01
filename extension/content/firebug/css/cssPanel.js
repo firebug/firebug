@@ -430,10 +430,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         var isSystemSheet = Url.isSystemStyleSheet(styleSheet);
 
-        var rules = [];
-        var appendRules = function(cssRules)
+        var createRules = function(cssRules)
         {
-            var i, props;
+            var i;
+            var props;
+            var rules = [];
 
             if (!cssRules)
                 return;
@@ -464,7 +465,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 else if (rule instanceof window.CSSMediaRule ||
                     rule instanceof window.CSSMozDocumentRule)
                 {
-                    appendRules(Css.safeGetCSSRules(rule));
+                    rules = Arr.extendArray(rules, createRules(Css.safeGetCSSRules(rule)));
                 }
                 else if (rule instanceof window.CSSFontFaceRule)
                 {
@@ -510,10 +511,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
                 }
             }
+
+            return rules;
         }.bind(this);
 
-        appendRules(Css.safeGetCSSRules(styleSheet));
-        return rules;
+        return createRules(Css.safeGetCSSRules(styleSheet));
     },
 
     parseCSSProps: function(style, inheritMode)
@@ -2732,8 +2734,11 @@ function formatColor(color)
         case "hsl":
             return Css.rgbToHSL(color);
             
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
         default:
-            return color;
+            return value;
     }
 }
 
