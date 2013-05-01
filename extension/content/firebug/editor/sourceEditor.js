@@ -10,9 +10,13 @@ function (Firebug, Http, Dom) {
 // ********************************************************************************************* //
 // Constants
 
+// CodeMirror files. These scripts are dynamically included into panel.html.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
+var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
+var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
 
+// Tracing helpers
 var Trace = FBTrace.to("DBG_SCRIPTEDITOR");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
@@ -29,7 +33,7 @@ function SourceEditor()
 SourceEditor.DefaultConfig =
 {
     value: "",
-    mode: "javascript",
+    mode: "htmlmixed",
     theme: "firebug",
     indentUnit: 2,
     tabSize: 4,
@@ -38,12 +42,16 @@ SourceEditor.DefaultConfig =
     lineWrapping: false,
     lineNumbers: true,
     firstLineNumber: 1,
-    gutters: [],
+    gutters: ["breakpoint"],
     fixedGutter: false,
     readOnly: true,
     showCursorWhenSelecting: true,
     undoDepth: 200,
-    autofocus: true
+
+    // xxxHonza: this is weird, wnen this props is set the editor is displayed twice
+    // (there is one-line editor created at the bottom of the Script panel just switch
+    // to the CSS panel and back).
+    //autofocus: true
 };
 
 SourceEditor.Events =
@@ -75,6 +83,8 @@ SourceEditor.prototype =
         // Append CM scripts into the panel.html
         Dom.addScript(doc, "cm", Http.getResource(codeMirrorSrc));
         Dom.addScript(doc, "cm-js", Http.getResource(jsModeSrc));
+        Dom.addScript(doc, "cm-xml", Http.getResource(xmlModeSrc));
+        Dom.addScript(doc, "cm-htmlmixed", Http.getResource(htmlMixedModeSrc));
 
         for (var prop in SourceEditor.DefaultConfig)
         {

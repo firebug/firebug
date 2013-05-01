@@ -75,16 +75,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
 
-        var config = {
-            readOnly: true,
-            mode: "javascript",
-            lineNumbers: true,
-            gutters: ["breakpoint"],
-            theme: "firebug"
-        };
-
+        // Initialize source editor.
         this.editor = new SourceEditor();
-        this.editor.init(parentNode, config, this.onEditorLoad.bind(this));
+        this.editor.init(parentNode, SourceEditor.DefaultConfig, this.onEditorLoad.bind(this));
     },
 
     onEditorLoad: function()
@@ -504,6 +497,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     scrollToLine: function(line, options)
     {
         options = options || {};
+
+        // TODO
+        return;
 
         var editorHeight = this.editor._view.getClientArea().height;
         var lineHeight = this.editor._view.getLineHeight();
