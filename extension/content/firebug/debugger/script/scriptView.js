@@ -113,7 +113,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.showSource(this.defaultSource);
 
         if (this.defaultLine > 0)
-            this.scrollToLineAsync(this.defaultLine, this.defaultOptions);
+            this.scrollToLine(this.defaultLine, this.defaultOptions);
 
         this.initBreakpoints();
     },
@@ -473,25 +473,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         return this.editor.getTopIndex() + 1;
     },
 
-    scrollToLineAsync: function(lineNo, options)
-    {
-        Trace.sysout("scriptView.scrollToLineAsync; " + lineNo, options);
-
-        if (!this.initialized)
-        {
-            this.defaultLine = lineNo;
-            this.defaultOptions = options;
-            return;
-        }
-
-        // Scroll the content so the debug-location (execution line) is visible
-        // xxxHonza: must be done asynchronously otherwise doesn't work :-(
-        // xxxHonza: since it's async the content visualy jump to the top (y scroll
-        // position being reset in _updatePage) and then scrolled at the right
-        // position in doScrollToLine. Ask Mihai!
-        this.asyncUpdate(this.scrollToLine.bind(this, lineNo, options));
-    },
-
     scrollToLine: function(line, options)
     {
         options = options || {};
@@ -558,17 +539,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debug Location
 
-    setDebugLocationAsync: function(line)
-    {
-        if (!this.initialized)
-        {
-            this.defaultLine = line;
-            return;
-        }
-
-        this.asyncUpdate(this.setDebugLocation.bind(this, line));
-    },
-
     setDebugLocation: function(line)
     {
         if (!this.initialized)
@@ -580,26 +550,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // If the debug location is being removed (line == -1) do not scroll.
         if (line > 0)
             this.scrollToLine(line);
-    },
-
-    asyncUpdate: function(callback)
-    {
-        Trace.sysout("scriptView.asyncUpdate;");
-
-        // If there is an update in progress cancel it. E.g. removeDebugLocation should not
-        // be called if scrollToLine is about to execute.
-        if (this.updateTimer)
-        {
-            Trace.sysout("scriptView.asyncUpdate; Cancel existing update");
-            clearTimeout(this.updateTimer);
-        }
-
-        var self = this;
-        this.updateTimer = setTimeout(function()
-        {
-            self.updateTimer = null;
-            callback();
-        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
