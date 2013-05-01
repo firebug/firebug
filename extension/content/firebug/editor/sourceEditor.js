@@ -117,7 +117,6 @@ SourceEditor.prototype =
                 editorNode.addEventListener(SourceEditor.Events[type], handler, false);
             }
         }
-
     },
 
     removeEventListener: function (type, handler)
@@ -216,8 +215,8 @@ SourceEditor.prototype =
     }
 };
 
-    // *********************************************************************************************
-    // Local Helpers
+// ********************************************************************************************* //
+// Local Helpers
 
 function editorSupportedEvenets()
 {
@@ -246,7 +245,9 @@ function getEventObject(type, eventArg)
 {
     var eventName = SourceEditor.Events[type];
     var event = {};
-    switch (type) {
+
+    switch (type)
+    {
         case "change":
         case "beforeChange":
             event.changedObj = eventArg[1];
@@ -264,12 +265,14 @@ function getEventObject(type, eventArg)
             event.rawEvent = eventArg[3];
             break;
     }
+
     return event;
 }
+
 // ********************************************************************************************* //
 // Registration
 
 return SourceEditor;
 
-    // ********************************************************************************************* //
+// ********************************************************************************************* //
 });
