@@ -154,4 +154,10 @@
     border: 1px solid grey;
 }
 
-/*************************************************************************************************/
+/************************************************************************************************/
+/* Debug Location */
+
+.cm-s-firebug .CodeMirror-debugLocation {
+    outline: 1px solid #D9D9B6;
+    background-color: lightgoldenrodyellow;
+}

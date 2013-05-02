@@ -309,17 +309,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     scrollToLine: function(lineNo, options)
     {
-        this.scriptView.scrollToLineAsync(lineNo, options);
+        this.scriptView.scrollToLine(lineNo, options);
     },
 
     removeDebugLocation: function()
     {
-        this.scriptView.setDebugLocationAsync(-1);
+        this.scriptView.setDebugLocation(-1);
     },
 
     setDebugLocation: function(line)
     {
-        this.scriptView.setDebugLocationAsync(line - 1);
+        this.scriptView.setDebugLocation(line - 1);
     },
 
     setDebugLocation: function(lineNo)
