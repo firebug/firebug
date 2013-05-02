@@ -1730,8 +1730,8 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSSupportsRule";
         }
-        else if ((window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule) ||
-            rule instanceof window.CSSDocumentRule)
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            rule instanceof window.CSSMozDocumentRule)
         {
             return "CSSDocumentRule";
         }
@@ -1783,8 +1783,8 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return rule.conditionText;
         }
-        else if ((window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule) ||
-            rule instanceof window.CSSDocumentRule)
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            rule instanceof window.CSSMozDocumentRule)
         {
             return rule.conditionText;
         }
