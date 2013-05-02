@@ -1625,6 +1625,11 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSStyleRule";
         }
+        else if ((window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule) ||
+            rule instanceof window.CSSDocumentRule)
+        {
+            return "CSSDocumentRule";
+        }
         else if (rule instanceof window.CSSFontFaceRule)
         {
             return "CSSFontFaceRule";
@@ -1668,6 +1673,11 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         if (rule instanceof window.CSSStyleRule)
         {
             return rule.selectorText;
+        }
+        else if ((window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule) ||
+            rule instanceof window.CSSDocumentRule)
+        {
+            return rule.conditionText;
         }
         else if (rule instanceof window.CSSFontFaceRule)
         {
