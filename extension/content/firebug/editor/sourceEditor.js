@@ -4,8 +4,9 @@ define([
     "firebug/firebug",
     "firebug/lib/http",
     "firebug/lib/dom",
+    "firebug/lib/css",
 ],
-function(Firebug, Http, Dom) {
+function(Firebug, Http, Dom, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -17,14 +18,15 @@ var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixe
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
 
 // Tracing helpers
-var Trace = FBTrace.to("DBG_SCRIPTEDITOR");
+var Trace = FBTrace.to("DBG_SOURCEEDITOR");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
+// Debug location style classes
 var WRAP_CLASS = "CodeMirror-debugLocation";
 var BACK_CLASS = "CodeMirror-debugLocation-background";
 
 // ********************************************************************************************* //
-// Source Editor Implementation
+// Source Editor Constructor
 
 function SourceEditor()
 {
@@ -56,9 +58,9 @@ SourceEditor.DefaultConfig =
     showCursorWhenSelecting: true,
     undoDepth: 200,
 
-    // xxxHonza: this is weird, wnen this props is set the editor is displayed twice
-    // (there is one-line editor created at the bottom of the Script panel just switch
-    // to the CSS panel and back).
+    // xxxHonza: this is weird, when this props is set the editor is displayed twice.
+    // There is one-line editor created at the bottom of the Script panel.
+    // Just switch to the CSS panel and back to reproduce the problem.
     //autofocus: true
 };
 
@@ -82,9 +84,21 @@ SourceEditor.Events =
     mouseOver: "mouseover"
 };
 
+// ********************************************************************************************* //
+// Source Editor Implementation
+
+/**
+ * @object This object represents a wrapper for CodeMirror editor. The rest of Firebug
+ * should access all CodeMirror features throug this object and so, e.g. make it easy to
+ * switch to another editor in the future.
+ */
 SourceEditor.prototype =
+/** lends SourceEditor */
 {
-    init: function(parentNode, config, callback)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    init: function (parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
 
@@ -104,13 +118,29 @@ SourceEditor.prototype =
         this.editorObject = doc.defaultView.CodeMirror(function(elt)
         {
             Trace.sysout("sourceEditor.onEditorCreate;", this.view);
-
             parentNode.appendChild(elt);
         }, config);
 
-        callback();
+        // Mark lines so, we can search for them (see e.g. getLineIndex method).
+        this.editorObject.on("renderLine", function(cm, lineHandle, element)
+        {
+            Css.setClass(element, "firebug-line");
+        });
+
+        // xxxHonza: "contextmenu" event provides wrong target (clicked) element.
+        // So, handle 'mousedown' first to remember the clicked element and use
+        // it within the getContextMenu item
+        var self = this;
+        var scroller = this.editorObject.display.scroller;
+        scroller.addEventListener("mousedown", function(event)
+        {
+            self.currentTarget = event.target;
+        });
 
         Trace.sysout("sourceEditor.init; ", this.view);
+
+        // Execute callback function. It could be done asynchronously (e.g. for Orion)
+        callback();
     },
 
     addEventListener: function(type, handler)
@@ -137,6 +167,10 @@ SourceEditor.prototype =
                     if (this.BuiltInEventsHandlers[type][i].handler == handler)
                         return;
                 }
+                FBTrace.sysout("addEventListener; " + type);
+
+                editorNode = this.editorObject.getWrapperElement();
+                editorNode.addEventListener(type, handler, false);
             }
 
             this.BuiltInEventsHandlers[type].push({ handler: handler, func: func });
@@ -234,9 +268,22 @@ SourceEditor.prototype =
         // TODO
     },
 
-    setText: function(text)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Text Content
+
+    setText: function (text, type)
     {
-        Trace.sysout("sourceEditor.setText", text);
+        Trace.sysout("sourceEditor.setText: " + type, text);
+
+        var mode = "htmlmixed";
+        switch (type)
+        {
+            case "js":
+                mode = "javascript";
+            break;
+        }
+
+        this.editorObject.setOption("mode", mode);
 
         text = text || "";
         this.editorObject.setValue(text);
@@ -252,6 +299,12 @@ SourceEditor.prototype =
         this.editorObject.getValue().length;
     },
 
+    getSelectedText: function()
+    {
+        return this.editorObject.getSelection();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     setDebugLocation: function(line)
     {
@@ -311,13 +364,14 @@ SourceEditor.prototype =
 
     getTopIndex: function()
     {
-        // TODO
-        return 0;
+        var rect = this.editorObject.getWrapperElement().getBoundingClientRect();
+        return this.editorObject.coordsChar(rect).line;
     },
 
-    setTopIndex: function()
+    setTopIndex: function(line)
     {
-        // TODO
+        var coords = {line: line, ch: 0};
+        this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
 
     focus: function()
@@ -408,8 +462,41 @@ SourceEditor.prototype =
     getGutterElement: function()
     {
         return this.editorObject.getGutterElement();
-    }
+    },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getLineFromEvent: function(e)
+    {
+        var pos = {
+            left: event.pageX,
+            top: event.pageY - 60 //xxxHonza: why the top is not zero but 60 in the event?
+        };
+
+        return this.editorObject.coordsChar(pos);
+    },
+
+    getLineIndex: function(target)
+    {
+        // xxxHonza: the target provided by 'contextmenu' event is wrong and so,
+        // use the one from 'mousedown'
+        if (this.currentTarget)
+            target = this.currentTarget;
+
+        var lineElement = Dom.getAncestorByClass(target, "firebug-line");
+        if (!lineElement)
+            return -1;
+
+        lineElement = lineElement.parentNode;
+
+        //var lineObj = lineElement.lineObj; // other useful info
+        var lineNo = parseInt(lineElement.lineNumber, 10);
+        if (isNaN(lineNo))
+            return -1;
+
+        // Return index (zero based)
+        return lineNo - 1;
+    },
 };
 
 // ********************************************************************************************* //

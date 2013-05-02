@@ -7,6 +7,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/array",
     "firebug/lib/css",
+    "firebug/lib/url",
     "firebug/lib/domplate",
     "firebug/debugger/script/scriptView",
     "arch/compilationunit",
@@ -23,7 +24,7 @@ define([
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
 ],
-function (Obj, Locale, Events, Dom, Arr, Css, Domplate, ScriptView, CompilationUnit, Menu,
+function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning) {
 
@@ -450,7 +451,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            self.scriptView.showSource(lines.join(""));
+            var type = Url.getFileExtension(sourceLink.href);
+            self.scriptView.showSource(lines.join(""), type);
 
             var options = sourceLink.getOptions();
 
@@ -730,13 +732,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var items = [];
 
-        // The target must be within viewConent DIV (Orion).
+        // The target must be within the right DIV (CodeMirror).
         // This could be changed if we decide to have a context menu displayed for
         // right-click on a breakpoint (in the column bar) instead of the condition-editor.
         // See issue 4378
-        var viewContent = Dom.getAncestorByClass(target, "viewContent");
-        if (!viewContent)
-            return items;
+        var content = Dom.getAncestorByClass(target, "CodeMirror");
+        if (!content)
+            return;
 
         var lineNo = this.scriptView.getLineIndex(target);
         var text = this.scriptView.getSelectedText();

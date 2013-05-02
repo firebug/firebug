@@ -68,7 +68,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         Trace.sysout("scriptView.initialize; " + parentNode);
 
-        this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
@@ -150,7 +149,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
 
-    showSource: function(source)
+    showSource: function(source, type)
     {
         if (!this.initialized)
         {
@@ -164,10 +163,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         Trace.sysout("scriptView.showSource; ", {
             source: source,
-            text: text
+            text: text,
+            type: type
         });
 
-        this.editor.setText(source);
+        this.editor.setText(source, type);
 
         // Breakpoints and annotations in general must be set again after setText.
         this.initBreakpoints();
@@ -547,18 +547,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     getLineIndex: function(target)
     {
-        // Compute the clicked line index (see _handleRulerEvent in orion.js).
-        var lineIndex = target.lineIndex;
-        var element = target;
-
-        while (element && !element._ruler)
-        {
-            if (lineIndex === undefined && element.lineIndex !== undefined)
-                lineIndex = element.lineIndex;
-            element = element.parentNode;
-        }
-
-        return lineIndex;
+        return this.editor.getLineIndex(target);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
