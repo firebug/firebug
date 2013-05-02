@@ -147,6 +147,28 @@ var CSSMediaRuleTag = domplate(CSSDomplateBase,
         )
 });
 
+var CSSSupportsRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@supports"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
 var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -496,6 +518,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         props: props,
                         isSystemSheet: isSystemSheet,
                         isSelectorEditable: true
+                    });
+                }
+                else if (rule instanceof window.CSSSupportsRule)
+                {
+                    rules.push({
+                        tag: CSSSupportsRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
                     });
                 }
                 else if (rule instanceof window.CSSImportRule)
@@ -1950,14 +1981,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
         }
-        else if (rule instanceof window.CSSMozDocumentRule &&
-            Css.hasClass(target, "cssDocumentRuleCondition"))
+        else if (rule instanceof window.CSSSupportsRule &&
+            Css.hasClass(target, "cssSupportsRuleCondition"))
         {
             target.textContent = value;
 
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
+                FBTrace.sysout("CSSEditor.saveEdit: @supports rule condition: " +
                     previousValue + "->" + value);
             }
 
@@ -1967,9 +1998,30 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (e)
             {
-                FBTrace.sysout("error", e);
             }
 
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSMozDocumentRule &&
+                Css.hasClass(target, "cssDocumentRuleCondition"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
+                        previousValue + "->" + value);
+            }
+            
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+            }
+            
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
