@@ -17,6 +17,7 @@
     background-color: lightgoldenrodyellow;
 }
 
+
 .cm-s-firebug .CodeMirror-activeline-background {
     background: #00FFFF;
 }
@@ -121,3 +122,36 @@
 .CodeMirror pre {
     padding: 0 0; /* Horizontal padding of content */
 }
+
+/*************************************************************************************************/
+/* Breakpoints */
+
+.cm-s-firebug .breakpoint
+{
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-repeat:no-repeat;
+    padding:7px;
+}
+
+.cm-s-firebug .breakpointLoading 
+{
+    background-image: url(chrome://firebug/skin/loading.svg);
+    background-repeat:no-repeat;
+    padding:7px;
+}
+
+.cm-s-firebug .breakpoint.condition{
+    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position:center;
+}
+
+.cm-s-firebug .breakpoint.disabled:not(.debugLocation){
+    opacity: 0.5;
+}
+
+.cm-s-firebug .breakpoint.disabled {
+    background-color: silver;
+    border: 1px solid grey;
+}
+
+/*************************************************************************************************/

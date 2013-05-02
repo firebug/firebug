@@ -14,7 +14,7 @@ define([
     "firebug/chrome/firefox",
     "firebug/editor/sourceEditor",
 ],
-function (FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
+function(FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,8 +58,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     initialize: function(parentNode)
     {
-        // XXFarshid: Thess lines is Commented to test CM and should be backed out.
-
         if (this.initializeExecuted)
         {
             this.showSource();
@@ -74,12 +72,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
+        this.onGutterClickListener = this.onGutterClick.bind(this);
 
         var config = {
             readOnly: true,
             mode: "javascript",
             lineNumbers: true,
-            gutters: ["breakpoint"],
+            gutters: [SourceEditor.Gutters.breakpoints],
             theme: "firebug"
         };
 
@@ -94,30 +93,25 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.initialized = true;
 
         // Add editor listeners
-        /*this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
+        this.editor.addEventListener(SourceEditor.Events.contextMenu,
             this.onContextMenuListener);
-        this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
+        this.editor.addEventListener(SourceEditor.Events.breakpointChange,
             this.onBreakpointChangeListener);
-        this.editor.addEventListener(SourceEditor.EVENTS.MOUSE_MOVE,
+        this.editor.addEventListener(SourceEditor.Events.mouseMove,
             this.onMouseMoveListener);
-        this.editor.addEventListener(SourceEditor.EVENTS.MOUSE_OUT,
+        this.editor.addEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
 
-        // Register custom annotation type
-        this.editor._annotationRuler.addAnnotationType(annonTypeHighlightedLine);
-        this.editor._overviewRuler.addAnnotationType(annonTypeHighlightedLine);
-        this.editor._annotationStyler.addAnnotationType(annonTypeHighlightedLine);
+        // Hook gutter clicks
+        this.editor.addEventListener(SourceEditor.Events.gutterClick,
+            this.onGutterClickListener);
 
-        // Hook annotation and lines ruler clicks
-        this.editor._annotationRuler.onClick = this.annotationRulerClick.bind(this);
-        this.editor._linesRuler.onClick = this.linesRulerClick.bind(this);
-
-        // Hook view body mouse up (for breakpoint condition editor).
+        /*// Hook view body mouse up (for breakpoint condition editor).
         this.editor._view._handleBodyMouseUp = this.bodyMouseUp.bind(this);
-
+*/
         // Focus so, keyboard works as expected.
         this.editor.focus();
-*/
+
         if (this.defaultSource)
             this.showSource(this.defaultSource);
 
@@ -133,16 +127,19 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (!this.initialized)
             return;
-/*
-        this.editor.removeEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
+
+        this.editor.removeEventListener(SourceEditor.Events.contextMenu,
             this.onContextMenuListener);
-        this.editor.removeEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
+        this.editor.removeEventListener(SourceEditor.Events.breakpointChange,
             this.onBreakpointChangeListener);
-        this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_MOVE,
+        this.editor.removeEventListener(SourceEditor.Events.mouseMove,
             this.onMouseMoveListener);
-        this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_OUT,
+        this.editor.removeEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
-*/
+
+        this.editor.removeEventListener(SourceEditor.Events.gutterClick,
+            this.onGutterClickListener);
+
         try
         {
             this.editor.destroy();
@@ -199,7 +196,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var commandDispatcher = browserWindow.document.commandDispatcher;
 
         var items = [];
-        this.dispatch("onContextMenu", [event.event, items]);
+        this.dispatch("onContextMenu", [event, items]);
 
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);
@@ -357,9 +354,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     addBreakpoint: function(bp)
     {
-        if (!this.editor)
-            return;
-
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {
@@ -372,14 +366,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     toggleBreakpoint: function(lineIndex)
     {
-        if (!this.editor)
-            return;
-
-        var lineStart = this.editor.getLineStart(lineIndex);
-        var lineEnd = this.editor.getLineEnd(lineIndex);
-        var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
-
-        if (annotations.length > 0)
+        var marker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints, lineIndex);
+        
+        if (marker)
         {
             this.editor.removeBreakpoint(lineIndex);
         }
@@ -389,66 +378,36 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
     },
 
-    initializeBreakpoint: function(lineIndex, condition)
+    initializeBreakpoint: function(lineIndex)
     {
-        var lineStart = this.editor.getLineStart(lineIndex);
-        var lineEnd = this.editor.getLineEnd(lineIndex);
-        var annotation = {
-            type: "orion.annotation.breakpoint",
-            start: lineStart,
-            end: lineEnd,
-            style: {styleClass: "annotation breakpointLoading"},
-            html: "<div class='annotationHTML'></div>",
-            overviewStyle: {styleClass: "annotationOverview"},
-            rangeStyle: {styleClass: "annotationRange"}
-        };
+        var bpWaiting = this.editor.getGutterElement().ownerDocument.createElement("div");
+        bpWaiting.className = "breakpointLoading";
 
-        var annotations = this.editor._getAnnotationsByType("breakpoint", lineStart, lineEnd);
-
-        if (annotations.length == 0)
-        {
-            this.editor._annotationModel.addAnnotation(annotation);
-        }
-        else
-        {
-            // If the user wanted to set a condition on a existed bp
-            // it's no need to show loading icon and wait to receive
-            // the response.
-            this.dispatch("startEditingCondition", [lineIndex, condition]);
-            return;
-        }
+        this.editor.setGutterMarker(SourceEditor.Gutters.breakpoints,
+            lineIndex, bpWaiting);
 
         // Simulate editor event sent when the user creates a breakpoint by
         // clicking on the breakpoint ruler.
         this.onBreakpointChange({
-            added: [{line: lineIndex, condition: condition}],
-            removed: []
+            added: [{ line: lineIndex}],
+            removed: []        
         });
     },
 
     updateBreakpoint: function(bp)
     {
-        var annotation = {
-            style: {styleClass: "annotation breakpoint"},
-            overviewStyle: {styleClass: "annotationOverview breakpoint"},
-            rangeStyle: {styleClass: "annotationRange breakpoint"}
-        };
+        var bpMarker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints,
+            bp.lineNo);
 
         if (bp.disabled)
         {
-            annotation.style.styleClass += " disabled";
-            annotation.overviewStyle.styleClass += " disabled";
-            annotation.rangeStyle.styleClass += " disabled";
+            bpMarker.className += " disabled";
         }
 
         if (bp.condition)
         {
-            annotation.style.styleClass += " condition";
-            annotation.overviewStyle.styleClass += " condition";
-            annotation.rangeStyle.styleClass += " condition";
+            bpMarker.className += " condition";
         }
-
-        this.modifyAnnotation("breakpoint", bp.lineNo, annotation);
     },
 
     removeAllBreakpoints: function()
@@ -641,37 +600,12 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Editor Enhancements
 
-    modifyAnnotation: function(type, lineIndex, props)
+    onGutterClick: function(event)
     {
-        var lineStart = this.editor.getLineStart(lineIndex);
-        var lineEnd = this.editor.getLineEnd(lineIndex);
+        Trace.sysout("scriptView.gutterClick; " + event);
 
-        var annotations = this.editor._getAnnotationsByType(type, lineStart, lineEnd);
-        annotations.forEach(function(annotation)
-        {
-            // Modify existing properties
-            for (var p in props)
-                annotation[p] = props[p];
-
-            // Apply modifications.
-            this.editor._annotationModel.modifyAnnotation(annotation);
-        }, this);
-    },
-
-    linesRulerClick: function(lineIndex, event)
-    {
-        Trace.sysout("scriptView.linesRulerClick; " + lineIndex, event);
-
-        if (lineIndex || lineIndex == 0)
-            this.toggleBreakpoint(lineIndex);
-    },
-
-    annotationRulerClick: function(lineIndex, event)
-    {
-        Trace.sysout("scriptView.annotationRulerClick; " + lineIndex, event);
-
-        if (lineIndex || lineIndex == 0)
-            this.toggleBreakpoint(lineIndex);
+        if (event.lineNo != null)
+            this.toggleBreakpoint(event.lineNo);
     },
 
     bodyMouseUp: function(event)
@@ -714,16 +648,14 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // InfoTip
 
-    onMouseMove: function(params)
+    onMouseMove: function(event)
     {
-        var event = params.event;
         var browser = Firefox.getCurrentBrowser();
         InfoTip.onMouseMove(event, browser);
     },
 
-    onMouseOut: function(params)
+    onMouseOut: function(event)
     {
-        var event = params.event;
         var browser = Firefox.getCurrentBrowser();
         InfoTip.onMouseOut(event, browser);
     },

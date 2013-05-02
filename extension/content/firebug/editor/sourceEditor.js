@@ -5,7 +5,7 @@ define([
     "firebug/lib/http",
     "firebug/lib/dom",
 ],
-function (Firebug, Http, Dom) {
+function(Firebug, Http, Dom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,7 +21,6 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 function SourceEditor()
 {
-    this.view = null;
     this.config = {};
     this.editorObject = null;
 }
@@ -46,6 +45,11 @@ SourceEditor.DefaultConfig =
     autofocus: true
 };
 
+SourceEditor.Gutters =
+{
+    breakpoints: "breakpoints"
+};
+
 SourceEditor.Events =
 {
     change: "change",
@@ -68,7 +72,7 @@ SourceEditor.Events =
 
 SourceEditor.prototype =
 {
-    init: function (parentNode, config, callback)
+    init: function(parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
 
@@ -82,144 +86,260 @@ SourceEditor.prototype =
                 SourceEditor.DefaultConfig[prop];
         }
 
-        function onEditorCreate(elt)
+        // Create editor;
+        this.editorObject = doc.defaultView.CodeMirror(function(elt)
         {
             parentNode.appendChild(elt);
+        }, config);
 
-            callback();
-        }
-
-        // Create editor;
-        this.editorObject = doc.defaultView.CodeMirror(
-            onEditorCreate.bind(this), config);
+        callback();
 
         Trace.sysout("sourceEditor.init; ", this.view);
     },
 
-    addEventListener: function (type, handler)
+    addEventListener: function(type, handler)
     {
-        if (type in SourceEditor.Editor)
+        if (isBuiltInEvent(type))
         {
-            if (isSupportedEvent(type))
+            var func = function()
             {
-                this.editorObject.on(SourceEditor.Events[type], function ()
-                {
-                    handler(getEventObject(type, arguments));
-                });
-            }
-            else if (type == SourceEditor.Events.breakpointChange)
+                handler(getEventObject(type, arguments));
+            };
+
+            if (!this.BuiltInEventsHandlers)
+                this.BuiltInEventsHandlers = {};
+
+            if (!this.BuiltInEventsHandlers[type])
             {
-                this.bpChangingHandler = handler;
+                this.BuiltInEventsHandlers[type] = [];
             }
             else
             {
-                editorNode = this.editorObject.getWrapperElement();
-                editorNode.addEventListener(SourceEditor.Events[type], handler, false);
+                for (var i = 0; i < this.BuiltInEventsHandlers[type].length; i++)
+                {
+                    // There is already the same handler.
+                    if (this.BuiltInEventsHandlers[type][i].handler == handler)
+                        return;
+                }
             }
+
+            this.BuiltInEventsHandlers[type].push({ handler: handler, func: func });
+            this.editorObject.on(type, func);
         }
-
-    },
-
-    removeEventListener: function (type, handler)
-    {
-        if (type in SourceEditor.Editor)
+        else if (type == SourceEditor.Events.breakpointChange)
         {
-            if (isSupportedEvent(type))
+            if (!this.bpChangingHandlers)
+                this.bpChangingHandlers = [];
+
+            this.bpChangingHandlers.push(handler);
+
+        }
+        else
+        {
+            var supportedEvent = false;
+            for (var eventType in SourceEditor.Events)
             {
-                this.editorObject.off(SourceEditor.Events[type], handler);
+                if (type == SourceEditor.Events[eventType])
+                {
+                    supportedEvent = true;
+                    break;
+                }
             }
-            else
+            if (supportedEvent)
             {
                 editorNode = this.editorObject.getWrapperElement();
-                editorNode.removeEventListener(SourceEditor.Events[type], handler, false);
+                editorNode.addEventListener(type, handler, false);
             }
         }
     },
 
-    addBreakpoint: function (lineNo, condition)
+    removeEventListener: function(type, handler)
     {
-        this.editorObject.on(SourceEditor.Events.gutterClick,
-            function (cmInstance, line, gutter, event)
+        if (isBuiltInEvent(type))
+        {
+            if (!this.BuiltInEventsHandlers || !this.BuiltInEventsHandlers[type])
+                return;
+
+            var func = function()
             {
-                if (gutter == "breakpoints")
+                handler(getEventObject(type, arguments));
+            };
+            for (var i = 0; i < this.BuiltInEventsHandlers[type].length; i++)
+            {
+                if (this.BuiltInEventsHandlers[type][i].handler == handler)
                 {
-                    // TODO: add breakpoint
 
-                    /*var info = this.editorObject.lineInfo(lineNo);
-                    if (info.gutterMarkers)
-                    this.editorObject.setGutterMarker(lineNo, "breakpoints", breakpointIcon);*/
+                    this.editorObject.off(type, this.BuiltInEventsHandlers[type][i].func);
 
-                    if (this.bpChangingHandler)
+                    this.BuiltInEventsHandlers[type].splice(i, 1);
+                    if (!this.BuiltInEventsHandlers[type].length)
                     {
-                        var event = {
-                            added: [{ line: lineNo, condition: condition}],
-                            removed: []
-                        };
-                        this.bpChangingHandler(event);
+                        delete this.BuiltInEventsHandlers[type];
+                        return;
                     }
                 }
-            });
-    },
+            }
+        }
+        else if (type == SourceEditor.Events.breakpointChange)
+        {
+            if (!this.bpChangingHandlers)
+                return;
 
-    removeBreakpoint: function (lineNo, condition)
-    {
-        this.editorObject.on(SourceEditor.Events.gutterClick,
-            function (cmInstance, line, gutter, event)
+            this.bpChangingHandlers = this.bpChangingHandlers.filter(function(func)
             {
-                if (gutter == "breakpoints")
-                {
-                    var info = this.editorObject.lineInfo(lineNo);
-                    if (info.gutterMarkers)
-                        this.editorObject.setGutterMarker(lineNo, "breakpoints", null);
-
-                    if (this.bpChangingHandler)
-                    {
-                        var event = {
-                            added: [],
-                            removed: [{ line: lineNo, condition: condition}]
-                        };
-                        this.bpChangingHandler(event);
-                    }
-                }
+                if (func != handler)
+                    return func;
             });
+
+            if (!this.bpChangingHandlers)
+                this.bpChangingHandlers = null;
+        }
+        else
+        {
+            var supportedEvent = false;
+            for (var eventType in SourceEditor.Events)
+            {
+                if (type == SourceEditor.Events[eventType])
+                {
+                    supportedEvent = true;
+                    break;
+                }
+            }
+            if (supportedEvent)
+            {
+                editorNode = this.editorObject.getWrapperElement();
+                editorNode.removeEventListener(type, handler, false);
+            }
+        }
     },
 
-    destroy: function ()
+    destroy: function()
     {
         // TODO
     },
 
-    setText: function (text)
+    setText: function(text)
     {
         this.editorObject.setValue(text);
     },
 
-    getText: function ()
+    getText: function()
     {
         return this.editorObject.getValue();
     },
 
-    getCharCount: function ()
+    getCharCount: function()
     {
         this.editorObject.getValue().length;
     },
 
-    setDebugLocation: function ()
+    setDebugLocation: function()
     {
         // TODO
     },
 
-    getTopIndex: function ()
+    getTopIndex: function()
     {
         // TODO
         return 0;
+    },
+
+    focus: function()
+    {
+        this.editorObject.focus();
+    },
+
+    // ********************************************************************************************* //
+    // Breakpoints
+
+    addBreakpoint: function(lineNo)
+    {
+        var info = this.editorObject.lineInfo(lineNo);
+        if (!info.gutterMarkers)
+        {
+            var breakpoint = this.getGutterElement().ownerDocument.createElement("div");
+            breakpoint.className = "breakpoint";
+            this.editorObject.setGutterMarker(lineNo, SourceEditor.Gutters.breakpoints, breakpoint);
+
+            // dispatch event;
+            if (this.bpChangingHandlers)
+            {
+                var event = {
+                    added: [{ line: lineNo}],
+                    removed: []
+                };
+
+                this.bpChangingHandlers.forEach(function(handler)
+                {
+                    handler(event);
+                });
+            }
+        }
+    },
+
+    removeBreakpoint: function(lineNo)
+    {
+        this.removeGutterMarker(SourceEditor.Gutters.breakpoints, lineNo);
+
+        // dispatch event;
+        if (this.bpChangingHandlers)
+        {
+            var event = {
+                added: [],
+                removed: [{ line: lineNo}]
+            };
+
+            this.bpChangingHandlers.forEach(function(handler)
+            {
+                handler(event);
+            });
+        }
+    },
+
+    // ************************************************************************************************** //
+    // Gutters and Marker API
+
+    setGutterMarker: function(gutter, lineNo, markerElt)
+    {
+        this.editorObject.setGutterMarker(lineNo, gutter, markerElt);
+    },
+
+    removeGutterMarker: function(gutter, lineNo)
+    {
+        this.editorObject.setGutterMarker(lineNo, gutter, null);
+    },
+
+    clearGutter: function(gutter)
+    {
+        this.editorObject.clearGutter(gutter);
+    },
+
+    getGutterMarker: function(gutter, lineNo)
+    {
+        var info = this.editorObject.lineInfo(lineNo);
+        return (info.gutterMarkers && info.gutterMarkers[gutter] ?
+            info.gutterMarkers[gutter] : null);
+    },
+
+    // ************************************************************************************************** //
+    // Editor DOM nodes
+
+    getViewElement: function()
+    {
+        return this.editorObject.getWrapperElement();
+    },
+
+    getGutterElement: function()
+    {
+        return this.editorObject.getGutterElement();
     }
+
 };
 
-    // *********************************************************************************************
-    // Local Helpers
+// ************************************************************************************************** //
+// Local Helpers
 
-function editorSupportedEvenets()
+function getBuiltInEvents()
 {
     return {
         change: "change",
@@ -236,17 +356,23 @@ function editorSupportedEvenets()
     };
 }
 
-function isSupportedEvent(eventType)
+function isBuiltInEvent(eventType)
 {
-    var supportedEvents = editorSupportedEvenets();
-    return (eventType in supportedEvents ? true : false);
+    var builtInEvents = getBuiltInEvents();
+    for (var event in builtInEvents)
+    {
+        if (eventType == builtInEvents[event])
+            return true;
+    }
+
+    return false;
 }
 
 function getEventObject(type, eventArg)
 {
-    var eventName = SourceEditor.Events[type];
     var event = {};
-    switch (type) {
+    switch (type)
+    {
         case "change":
         case "beforeChange":
             event.changedObj = eventArg[1];
@@ -259,17 +385,19 @@ function getEventObject(type, eventArg)
             event.to = eventArg[2];
             break;
         case "gutterClick":
-            event.line = eventArg[1];
+            event.lineNo = eventArg[1];
             event.gutter = eventArg[2];
             event.rawEvent = eventArg[3];
             break;
     }
     return event;
 }
+
+
 // ********************************************************************************************* //
 // Registration
 
 return SourceEditor;
 
-    // ********************************************************************************************* //
+// ********************************************************************************************* //
 });
