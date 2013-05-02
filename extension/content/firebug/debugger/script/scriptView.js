@@ -68,7 +68,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         Trace.sysout("scriptView.initialize; " + parentNode);
 
-        this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
@@ -85,9 +84,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.initialized = true;
 
         // Add editor listeners
-        /*this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
-            this.onContextMenuListener);
-        this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
+        /*this.editor.addEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
             this.onBreakpointChangeListener);
         this.editor.addEventListener(SourceEditor.EVENTS.MOUSE_MOVE,
             this.onMouseMoveListener);
@@ -105,10 +102,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Hook view body mouse up (for breakpoint condition editor).
         this.editor._view._handleBodyMouseUp = this.bodyMouseUp.bind(this);
-
+*/
         // Focus so, keyboard works as expected.
         this.editor.focus();
-*/
+
         if (this.defaultSource)
             this.showSource(this.defaultSource);
 
@@ -125,8 +122,6 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         if (!this.initialized)
             return;
 /*
-        this.editor.removeEventListener(SourceEditor.EVENTS.CONTEXT_MENU,
-            this.onContextMenuListener);
         this.editor.removeEventListener(SourceEditor.EVENTS.BREAKPOINT_CHANGE,
             this.onBreakpointChangeListener);
         this.editor.removeEventListener(SourceEditor.EVENTS.MOUSE_MOVE,
@@ -151,7 +146,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Public API
 
-    showSource: function(source)
+    showSource: function(source, type)
     {
         if (!this.initialized)
         {
@@ -165,40 +160,16 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         Trace.sysout("scriptView.showSource; ", {
             source: source,
-            text: text
+            text: text,
+            type: type
         });
 
-        this.editor.setText(source);
+        this.editor.setText(source, type);
 
         // Breakpoints and annotations in general must be set again after setText.
         this.initBreakpoints();
 
         this.forceRefresh = false;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Context Menu
-
-    onContextMenu: function(event)
-    {
-        Trace.sysout("scripView.onContextMenu;", event);
-
-        var popup = document.getElementById("fbScriptViewPopup");
-        Dom.eraseNode(popup);
-
-        var browserWindow = Firebug.chrome.window;
-        var commandDispatcher = browserWindow.document.commandDispatcher;
-
-        var items = [];
-        this.dispatch("onContextMenu", [event.event, items]);
-
-        for (var i=0; i<items.length; i++)
-            Menu.createMenuItem(popup, items[i]);
-
-        if (!popup.childNodes.length)
-            return;
-
-        popup.openPopupAtScreen(event.screenX, event.screenY, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -611,18 +582,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     getLineIndex: function(target)
     {
-        // Compute the clicked line index (see _handleRulerEvent in orion.js).
-        var lineIndex = target.lineIndex;
-        var element = target;
-
-        while (element && !element._ruler)
-        {
-            if (lineIndex === undefined && element.lineIndex !== undefined)
-                lineIndex = element.lineIndex;
-            element = element.parentNode;
-        }
-
-        return lineIndex;
+        return this.editor.getLineIndex(target);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
