@@ -2649,6 +2649,37 @@ Css.charsets =
     "Windows-1258"
 ];
 
+// http://www.w3.org/TR/CSS21/media.html#media-types
+Css.mediaTypes =
+[
+    "all",
+    "aural",
+    "braille",
+    "embossed",
+    "handheld",
+    "print",
+    "projection",
+    "screen",
+    "tty",
+    "tv"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@document
+Css.documentConditions =
+[
+    "url()",
+    "url-prefix()",
+    "domain()",
+    "regexp()"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@keyframes#Values
+Css.keyframeKeys =
+{
+    "from": "0%",
+    "to": "100%"
+};
+
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
 // but that's not relevant for our purposes.
