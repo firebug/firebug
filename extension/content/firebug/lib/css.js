@@ -2664,6 +2664,15 @@ Css.mediaTypes =
     "tv"
 ];
 
+// https://developer.mozilla.org/en-US/docs/CSS/@document
+Css.documentConditions =
+[
+    "url()",
+    "url-prefix()",
+    "domain()",
+    "regexp()"
+];
+
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
 // but that's not relevant for our purposes.

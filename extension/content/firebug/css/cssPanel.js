@@ -222,6 +222,28 @@ var CSSPageRuleTag = domplate(CSSDomplateBase,
     }
 });
 
+var CSSDocumentRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@-moz-document"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -484,11 +506,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSMediaRule ||
-                    rule instanceof window.CSSMozDocumentRule)
+                else if (rule instanceof window.CSSMediaRule)
                 {
                     rules.push({
                         tag: CSSMediaRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if (rule instanceof window.CSSMozDocumentRule)
+                {
+                    rules.push({
+                        tag: CSSDocumentRuleTag.tag,
                         rule: rule,
                         subRules: createRules(Css.safeGetCSSRules(rule)),
                         isSystemSheet: isSystemSheet
@@ -1920,6 +1950,29 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
         }
+        else if (rule instanceof window.CSSMozDocumentRule &&
+            Css.hasClass(target, "cssDocumentRuleCondition"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
+                    previousValue + "->" + value);
+            }
+
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+                FBTrace.sysout("error", e);
+            }
+
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
         {
             target.textContent = value;
@@ -1943,14 +1996,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
-        else if (rule instanceof window.CSSMediaRule && Css.hasClass(target, "cssMediaRuleCondition"))
+        else if (rule instanceof window.CSSMediaRule &&
+            Css.hasClass(target, "cssMediaRuleCondition"))
         {
             target.textContent = value;
             
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
-                        previousValue + "->" + value);
+                    previousValue + "->" + value);
             }
             
             rule.conditionText = value;
@@ -2073,6 +2127,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
             return Css.getCSSPropertyNames(nodeType);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssDocumentRule") &&
+                !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.documentConditions;
         }
         else if (Dom.getAncestorByClass(this.target, "cssMediaRule") &&
             !Css.hasClass(this.target, "cssPropValue"))
