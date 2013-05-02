@@ -78,7 +78,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             role: "option"},
 
             // Use spaces for indent to make "copy to clipboard" nice.
-            SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"),
+            SPAN({"class": "cssPropIndent"}, "&nbsp;&nbsp;&nbsp;&nbsp;"),
             SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
                 "$prop.name"
             ),
@@ -122,6 +122,99 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
             "&nbsp;&quot;",
             SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
             "&quot;;"
+        )
+});
+
+var CSSMediaRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@media"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
+                    "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}")
+        )
+});
+
+var CSSSupportsRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@supports"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
+});
+
+var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
+                "$rule.rule.name"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({role:"presentation"},
+            "}")
+        )
+});
+
+var CSSKeyframeRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+                $cssEditableRule: "$rule|isEditable",
+                $insertInto: "$rule|isEditable",
+                $editGroup: "$rule|isSelectorEditable",
+                _repObject: "$rule.rule",
+                role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssKeyText", $editable: "$rule|isEditable"},
+                    "$rule.rule.keyText"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
         )
 });
 
@@ -198,6 +291,28 @@ var CSSPageRuleTag = domplate(CSSDomplateBase,
     {
         return selector || "";
     }
+});
+
+var CSSDocumentRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@-moz-document"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
+                "$rule.rule.conditionText"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+            "}")
+        )
 });
 
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
@@ -430,10 +545,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         var isSystemSheet = Url.isSystemStyleSheet(styleSheet);
 
-        var rules = [];
-        var appendRules = function(cssRules)
+        var createRules = function(cssRules)
         {
-            var i, props;
+            var i;
+            var props;
+            var rules = [];
 
             if (!cssRules)
                 return;
@@ -453,6 +569,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isSelectorEditable: true
                     });
                 }
+                else if (rule instanceof window.CSSSupportsRule)
+                {
+                    rules.push({
+                        tag: CSSSupportsRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
+                }
                 else if (rule instanceof window.CSSImportRule)
                 {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
@@ -461,18 +586,33 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof window.CSSMediaRule ||
-                    rule instanceof window.CSSMozDocumentRule)
+                else if (rule instanceof window.CSSMediaRule)
                 {
-                    appendRules(Css.safeGetCSSRules(rule));
+                    rules.push({
+                        tag: CSSMediaRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if (rule instanceof window.CSSMozDocumentRule)
+                {
+                    rules.push({
+                        tag: CSSDocumentRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
                 }
                 else if (rule instanceof window.CSSFontFaceRule)
                 {
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSFontFaceRuleTag.tag, rule: rule,
-                        props: props, isSystemSheet: isSystemSheet,
+                        tag: CSSFontFaceRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet,
                         isNotEditable: true
                     });
                 }
@@ -488,9 +628,29 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isNotEditable: true
                     });
                 }
-                else if (rule instanceof window.CSSNameSpaceRule &&
-                    !(rule instanceof window.MozCSSKeyframesRule ||
-                        rule instanceof window.MozCSSKeyframeRule))
+                else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+                    rule instanceof window.MozCSSKeyframesRule)
+                {
+                    rules.push({
+                        tag: CSSKeyframesRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+                    rule instanceof window.MozCSSKeyframeRule)
+                {
+                    props = this.parseCSSProps(rule.style);
+                    this.sortProperties(props);
+                    rules.push({
+                        tag: CSSKeyframeRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if (rule instanceof window.CSSNameSpaceRule)
                 {
                     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
                     // MozCSSKeyframesRules, MozCSSKeyframeRules and CSSPageRules are recognized
@@ -510,10 +670,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
                 }
             }
+
+            return rules;
         }.bind(this);
 
-        appendRules(Css.safeGetCSSRules(styleSheet));
-        return rules;
+        return createRules(Css.safeGetCSSRules(styleSheet));
     },
 
     parseCSSProps: function(style, inheritMode)
@@ -880,8 +1041,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     clickedDisableButton: function(event)
     {
+        if (!Css.hasClass(event.target, "cssPropIndent"))
+            return false;
+
         // XXX hack
-        if (event.clientX > 20)
+        var clientOffset = Dom.getClientOffset(event.target);
+        if (event.clientX - clientOffset.x > 20)
             return false;
         if (Css.hasClass(event.target, "textEditor inlineExpander"))
             return false;
@@ -1816,7 +1981,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var cssRule = Dom.getAncestorByClass(target, "cssRule");
         var rule = Firebug.getRepObject(cssRule);
 
-        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
+        if (rule instanceof window.CSSStyleRule ||
+                ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+                    rule instanceof window.MozCSSKeyframeRule) &&
+                !Css.hasClass(target, "cssKeyText") ||
+            rule instanceof window.Element)
         {
             var prop = Dom.getAncestorByClass(target, "cssProp");
 
@@ -1887,6 +2056,67 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
         }
+        else if (rule instanceof window.CSSSupportsRule &&
+            Css.hasClass(target, "cssSupportsRuleCondition"))
+        {
+            target.textContent = value;
+
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @supports rule condition: " +
+                    previousValue + "->" + value);
+            }
+
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+            }
+
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+            rule instanceof window.MozCSSKeyframeRule) &&
+            Css.hasClass(target, "cssKeyText"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.keyText = value;
+            
+            var saveSuccess = (rule.keyText == value || rule.keyText == Css.keyframeKeys[value]);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSMozDocumentRule &&
+                Css.hasClass(target, "cssDocumentRuleCondition"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
+                        previousValue + "->" + value);
+            }
+            
+            try
+            {
+                rule.conditionText = value;
+            }
+            catch (e)
+            {
+            }
+            
+            var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
         else if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
         {
             target.textContent = value;
@@ -1908,6 +2138,22 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 value == "" ? "" : String.fromCharCode(160);
 
             var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (rule instanceof window.CSSMediaRule &&
+            Css.hasClass(target, "cssMediaRuleCondition"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.conditionText = value;
+            
+            var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
         else if (rule instanceof window.CSSCharsetRule)
@@ -2025,6 +2271,21 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
             return Css.getCSSPropertyNames(nodeType);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssDocumentRule") &&
+                !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.documentConditions;
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssKeyframesRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Object.getOwnPropertyNames(Css.keyframeKeys);
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssMediaRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Css.mediaTypes;
         }
         else
         {
@@ -2732,8 +2993,11 @@ function formatColor(color)
         case "hsl":
             return Css.rgbToHSL(color);
             
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
         default:
-            return color;
+            return value;
     }
 }
 
