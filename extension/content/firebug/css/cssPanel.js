@@ -169,6 +169,55 @@ var CSSSupportsRuleTag = domplate(CSSDomplateBase,
         )
 });
 
+var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+                SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
+                SPAN({"class": "separator"}, " "),
+                SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
+                "$rule.rule.name"),
+                SPAN(" {")
+            ),
+            DIV({"class": "cssRulesListBox", role: "listbox"},
+                FOR("subRule", "$rule.subRules",
+                    TAG("$subRule.tag", {rule: "$subRule"})
+                )
+            ),
+            DIV({role:"presentation"},
+            "}")
+        )
+});
+
+var CSSKeyframeRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule",
+                $cssEditableRule: "$rule|isEditable",
+                $insertInto: "$rule|isEditable",
+                $editGroup: "$rule|isSelectorEditable",
+                _repObject: "$rule.rule",
+                role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssKeyText", $editable: "$rule|isEditable"},
+                    "$rule.rule.keyText"),
+                " {"
+            ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
+});
+
 var CSSNamespaceRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -560,8 +609,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     props = this.parseCSSProps(rule.style);
                     this.sortProperties(props);
                     rules.push({
-                        tag: CSSFontFaceRuleTag.tag, rule: rule,
-                        props: props, isSystemSheet: isSystemSheet,
+                        tag: CSSFontFaceRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet,
                         isNotEditable: true
                     });
                 }
@@ -577,9 +628,29 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isNotEditable: true
                     });
                 }
-                else if (rule instanceof window.CSSNameSpaceRule &&
-                    !(rule instanceof window.MozCSSKeyframesRule ||
-                        rule instanceof window.MozCSSKeyframeRule))
+                else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+                    rule instanceof window.MozCSSKeyframesRule)
+                {
+                    rules.push({
+                        tag: CSSKeyframesRuleTag.tag,
+                        rule: rule,
+                        subRules: createRules(Css.safeGetCSSRules(rule)),
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+                    rule instanceof window.MozCSSKeyframeRule)
+                {
+                    props = this.parseCSSProps(rule.style);
+                    this.sortProperties(props);
+                    rules.push({
+                        tag: CSSKeyframeRuleTag.tag,
+                        rule: rule,
+                        props: props,
+                        isSystemSheet: isSystemSheet
+                    });
+                }
+                else if (rule instanceof window.CSSNameSpaceRule)
                 {
                     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=754772
                     // MozCSSKeyframesRules, MozCSSKeyframeRules and CSSPageRules are recognized
@@ -1910,7 +1981,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var cssRule = Dom.getAncestorByClass(target, "cssRule");
         var rule = Firebug.getRepObject(cssRule);
 
-        if (rule instanceof window.CSSStyleRule || rule instanceof window.Element)
+        if (rule instanceof window.CSSStyleRule ||
+                ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+                    rule instanceof window.MozCSSKeyframeRule) &&
+                !Css.hasClass(target, "cssKeyText") ||
+            rule instanceof window.Element)
         {
             var prop = Dom.getAncestorByClass(target, "cssProp");
 
@@ -2001,6 +2076,23 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
 
             var saveSuccess = (rule.conditionText == value);
+            this.box.setAttribute("saveSuccess", saveSuccess);
+        }
+        else if (((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+            rule instanceof window.MozCSSKeyframeRule) &&
+            Css.hasClass(target, "cssKeyText"))
+        {
+            target.textContent = value;
+            
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
+                    previousValue + "->" + value);
+            }
+            
+            rule.keyText = value;
+            
+            var saveSuccess = (rule.keyText == value || rule.keyText == Css.keyframeKeys[value]);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
         else if (rule instanceof window.CSSMozDocumentRule &&
@@ -2184,6 +2276,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 !Css.hasClass(this.target, "cssPropValue"))
         {
             return Css.documentConditions;
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssKeyframesRule") &&
+            !Css.hasClass(this.target, "cssPropValue"))
+        {
+            return Object.getOwnPropertyNames(Css.keyframeKeys);
         }
         else if (Dom.getAncestorByClass(this.target, "cssMediaRule") &&
             !Css.hasClass(this.target, "cssPropValue"))

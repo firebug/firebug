@@ -2673,6 +2673,13 @@ Css.documentConditions =
     "regexp()"
 ];
 
+// https://developer.mozilla.org/en-US/docs/CSS/@keyframes#Values
+Css.keyframeKeys =
+{
+    "from": "0%",
+    "to": "100%"
+};
+
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
 // but that's not relevant for our purposes.
