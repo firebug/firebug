@@ -95,9 +95,6 @@ Menu.setItemIntoElement = function(element, item)
     if (item.type == "checkbox" && !item.closemenu)
         element.setAttribute("closemenu", "none");
 
-    if (item.checked)
-        element.setAttribute("checked", "true");
-
     if (item.disabled)
         element.setAttribute("disabled", "true");
 
@@ -134,7 +131,15 @@ Menu.setItemIntoElement = function(element, item)
         element.setAttribute("name", item.name);
 
     if (item.items && (item.command || item.commandID))
+    {
         element.setAttribute("type", "splitmenu");
+        element.setAttribute("iconic", "true");
+    }
+
+    // xxxHonza: must be done after 'type' == 'splitmenu' otherwise the menu-item
+    // is not checked (the check icon is not displayed from some reason).
+    if (item.checked)
+        element.setAttribute("checked", "true");
 
     return element;
 };
