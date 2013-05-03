@@ -338,6 +338,14 @@ const eventTypes =
     ]
 };
 
+Events.getEventFamilies = function()
+{
+    var families = [];
+    for (var eventFamily in eventTypes)
+        families.push(eventFamily);
+    return families;
+};
+
 Events.getEventTypes = function(family)
 {
     var types = [];
