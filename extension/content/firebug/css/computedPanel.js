@@ -34,6 +34,8 @@ const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBe
 
 try
 {
+    // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
+    // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
     Cu.import("resource:///modules/devtools/CssLogic.jsm");
 }
 catch (err)
