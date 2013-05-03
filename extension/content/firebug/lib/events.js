@@ -311,7 +311,8 @@ const eventTypes =
         "DOMFocusOut"
     ],
 
-    xul: [
+    // xxxHonza: As Simon says, XUL events must die!
+    /*xul: [
         "popupshowing",
         "popupshown",
         "popuphiding",
@@ -320,7 +321,7 @@ const eventTypes =
         "command",
         "broadcast",
         "commandupdate"
-    ],
+    ],*/
 
     clipboard: [
         "cut",
