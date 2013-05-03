@@ -16,6 +16,7 @@ var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
+var cssModeSrc = "chrome://firebug/content/editor/codemirror/mode/css.js";
 
 // Tracing helpers
 var Trace = FBTrace.to("DBG_SOURCEEDITOR");
@@ -108,6 +109,7 @@ SourceEditor.prototype =
         Dom.addScript(doc, "cm", Http.getResource(codeMirrorSrc));
         Dom.addScript(doc, "cm-js", Http.getResource(jsModeSrc));
         Dom.addScript(doc, "cm-xml", Http.getResource(xmlModeSrc));
+        Dom.addScript(doc, "cm-css", Http.getResource(cssModeSrc));
         Dom.addScript(doc, "cm-htmlmixed", Http.getResource(htmlMixedModeSrc));
 
         for (var prop in SourceEditor.DefaultConfig)
