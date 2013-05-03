@@ -19,7 +19,7 @@
 .cookieRow > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
-    background-position: 2px 2px;
+    background-position: 2px calc(0.5em - 3px);
     min-height: 12px;
 }
 
@@ -39,10 +39,6 @@
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyOpen.png);
-}
-
-.twisty {
-    background-position: 4px 4px;
 }
 
 .hasHeaders .netHrefLabel,

@@ -22,7 +22,8 @@
     left: 0px;
     top: 0px;
     width: 14px;
-    height: 14px;
+    height: 1em;
+    padding: 4px 0;
 }
 
 .nodeChildBox {
