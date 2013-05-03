@@ -167,10 +167,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         state.location = this.location;
         state.scrollTop = this.scriptView.getScrollTop();
-
-        // xxxHonza: workaround, two instances of Orion doesn't work in one document.
-        // So, destroy it if the panel is hidden.
-        this.scriptView.destroy();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
