@@ -114,11 +114,14 @@ SourceEditor.prototype =
                 SourceEditor.DefaultConfig[prop];
         }
 
+        var self = this;
+
         // Create editor;
-        this.editorObject = doc.defaultView.CodeMirror(function(elt)
+        this.editorObject = doc.defaultView.CodeMirror(function(view)
         {
-            Trace.sysout("sourceEditor.onEditorCreate;", this.view);
-            parentNode.appendChild(elt);
+            Trace.sysout("sourceEditor.onEditorCreate;");
+            parentNode.appendChild(view);
+            self.view = view;
         }, config);
 
         // Mark lines so, we can search for them (see e.g. getLineIndex method).
@@ -130,7 +133,6 @@ SourceEditor.prototype =
         // xxxHonza: "contextmenu" event provides wrong target (clicked) element.
         // So, handle 'mousedown' first to remember the clicked element and use
         // it within the getContextMenu item
-        var self = this;
         var scroller = this.editorObject.display.scroller;
         scroller.addEventListener("mousedown", function(event)
         {
@@ -379,13 +381,13 @@ SourceEditor.prototype =
         this.editorObject.focus();
     },
 
-    // ********************************************************************************************* //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     addBreakpoint: function(lineNo)
     {
         var info = this.editorObject.lineInfo(lineNo);
-        if (!info.gutterMarkers)
+        if (!info || !info.gutterMarkers)
         {
             var breakpoint = this.getGutterElement().ownerDocument.createElement("div");
             breakpoint.className = "breakpoint";
@@ -426,7 +428,7 @@ SourceEditor.prototype =
         }
     },
 
-    // ************************************************************************************************** //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Gutters and Marker API
 
     setGutterMarker: function(gutter, lineNo, markerElt)
@@ -447,11 +449,11 @@ SourceEditor.prototype =
     getGutterMarker: function(gutter, lineNo)
     {
         var info = this.editorObject.lineInfo(lineNo);
-        return (info.gutterMarkers && info.gutterMarkers[gutter] ?
+        return (info && info.gutterMarkers && info.gutterMarkers[gutter] ?
             info.gutterMarkers[gutter] : null);
     },
 
-    // ************************************************************************************************** //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Editor DOM nodes
 
     getViewElement: function()
