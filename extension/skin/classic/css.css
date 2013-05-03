@@ -106,10 +106,6 @@
     display: none;
 }
 
-.cssComputedHeader > .twisty {
-    background-position: 4px 4px !important;
-}
-
 .cssInheritLabel,
 .cssComputedLabel {
     margin-right: 0.25em;
