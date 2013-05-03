@@ -501,6 +501,10 @@ SourceEditor.prototype =
         return this.editorObject.getGutterElement();
     },
 
+    getScrollerElement: function()
+    {
+      return this.editorObject.getScrollerElement();
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLineFromEvent: function(e)
