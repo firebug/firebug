@@ -360,7 +360,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     toggleBreakpoint: function(lineIndex)
     {
         var marker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints, lineIndex);
-        
+
         if (marker)
         {
             this.editor.removeBreakpoint(lineIndex);
@@ -383,7 +383,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // clicking on the breakpoint ruler.
         this.onBreakpointChange({
             added: [{ line: lineIndex}],
-            removed: []        
+            removed: []
         });
     },
 
@@ -453,48 +453,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.highlightLine; " + lineIndex);
 
-        // TODO:
-        return;
-
-        if (!this.editor)
-            return;
-
-        var annotations = this.getAnnotationsByType(annonTypeHighlightedLine, 0,
-            this.editor.getCharCount());
-
-        if (annotations.length > 0)
-        {
-            annotations.forEach(this.editor._annotationModel.removeAnnotation,
-                this.editor._annotationModel);
-        }
-
-        if (lineIndex < 0)
-            return;
-
-        var lineStart = this.editor._model.getLineStart(lineIndex);
-        var lineEnd = this.editor._model.getLineEnd(lineIndex);
-        var lineText = this.editor._model.getLine(lineIndex);
-
-        var annotation = {
-            type: annonTypeHighlightedLine,
-            start: lineStart,
-            end: lineEnd,
-            title: "",
-            style: {styleClass: "annotation highlightedLine"},
-            html: "<div class='annotationHTML highlightedLine'></div>",
-            overviewStyle: {styleClass: "annotationOverview highlightedLine"},
-            rangeStyle: {styleClass: "annotationRange highlightedLine"},
-            lineStyle: {styleClass: "annotationLine highlightedLine"},
-        };
-
-        this.editor._annotationModel.addAnnotation(annotation);
-
-        // Unhighlight after timeout.
-        var self = this;
-        setTimeout(function()
-        {
-            self.highlightLine(-1);
-        }, 1300);
+        this.editor.highlightLine(lineIndex);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

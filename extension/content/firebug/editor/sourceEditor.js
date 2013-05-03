@@ -24,6 +24,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // Debug location style classes
 var WRAP_CLASS = "CodeMirror-debugLocation";
 var BACK_CLASS = "CodeMirror-debugLocation-background";
+var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
 
 // ********************************************************************************************* //
 // Source Editor Constructor
@@ -33,6 +34,7 @@ function SourceEditor()
     this.config = {};
     this.editorObject = null;
     this.debugLocation = -1;
+    this.highlightedLine = -1;
 }
 
 SourceEditor.Gutters =
@@ -332,6 +334,35 @@ SourceEditor.prototype =
         } 
     },
 
+    highlightLine: function(line)
+    {
+        Trace.sysout("sourceEditor.highlightLine; line: " + line);
+
+        if (this.highlightedLine == line)
+            return;
+
+        if (this.highlightedLine != -1)
+        {
+            var handle = this.editorObject.getLineHandle(this.highlightedLine);
+            this.editorObject.removeLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+        }
+
+        this.highlightedLine = line;
+
+        if (this.highlightedLine == -1)
+            return;
+
+        var handle = this.editorObject.getLineHandle(line);
+        this.editorObject.addLineClass(handle, "wrap", HIGHLIGHTED_LINE_CLASS);
+
+        // Unhighlight after a timeout.
+        var self = this;
+        setTimeout(function()
+        {
+            self.highlightLine(-1);
+        }, 1300);
+    },
+
     scrollToLine: function(line, options)
     {
         options = options || {};
@@ -386,6 +417,8 @@ SourceEditor.prototype =
 
     addBreakpoint: function(lineNo)
     {
+        Trace.sysout("sourceEditor.addBreakpoint; line: " + lineNo);
+
         var info = this.editorObject.lineInfo(lineNo);
         if (!info || !info.gutterMarkers)
         {
@@ -411,6 +444,8 @@ SourceEditor.prototype =
 
     removeBreakpoint: function(lineNo)
     {
+        Trace.sysout("sourceEditor.removeBreakpoint; line: " + lineNo);
+
         this.removeGutterMarker(SourceEditor.Gutters.breakpoints, lineNo);
 
         // dispatch event;

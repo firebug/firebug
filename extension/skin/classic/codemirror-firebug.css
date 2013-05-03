@@ -27,8 +27,12 @@
 }
 
 .cm-s-firebug .CodeMirror-lines {
-    padding-left: 10px;
     cursor: text;
+}
+
+/* Text indent from the breakpoint column */
+.cm-s-firebug .firebug-line {
+    margin-left: 10px;
 }
 
 .cm-s-firebug.CodeMirror pre {
@@ -161,4 +165,11 @@
 .cm-s-firebug .CodeMirror-debugLocation {
     outline: 1px solid #D9D9B6;
     background-color: lightgoldenrodyellow;
+}
+
+/************************************************************************************************/
+/* Highlighted Line */
+
+.cm-s-firebug .CodeMirror-highlightedLine {
+    background-color: rgb(196, 244, 255);
 }
