@@ -222,7 +222,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
         Trace.sysout("addBreakpoint; " + url + " (" + lineNo + "), type: " + type);
 
-        if (!url || !lineNo)
+        if (!url || lineNo == null)
         {
             TraceError.sysout("breakpointStore.addBreakpoint; ERROR invalid arguments " +
                 "url: " + url + ", lineNo: " + lineNo + ", type: " + type);

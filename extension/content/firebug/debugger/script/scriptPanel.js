@@ -641,9 +641,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointAdded; origin line: " +
             bp.params.originLineNo, bp);
 
-        // Update the UI, if autocorrection happened.
+        // Update the UI, remove the temporary(loding) bp icon.
         if (bp.params.originLineNo)
             this.scriptView.removeBreakpoint({lineNo: bp.params.originLineNo});
+        else
+            this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
 
         // Now insert the breakpoint at the rigth location.
         this.scriptView.addBreakpoint(bp);

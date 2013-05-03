@@ -361,7 +361,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         {
             // Autocorrect shared breakpoint object if necessary and store the original
             // line so, listeners (like e.g. the Script panel) can update the UI.
-            var currentLine = bpClient.location.line - 1
+            var currentLine = bpClient.location.line - 1;
             if (bp.lineNo != currentLine)
             {
                 // bpClient deals with 1-based line numbers. Firebug uses 0-based
