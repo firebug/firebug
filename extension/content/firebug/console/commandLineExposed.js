@@ -495,16 +495,22 @@ function createCommandLineConsole(commandConsole, exposedConsole)
     // Make the __exposedProps__ object always return "rw" (for any property).
     // xxxFlorent: for Object.freeze() => see bugzilla issues 793210 + 795903 (!!)
 
-    target.__exposedProps__ = new Proxy(Object.freeze({}), {
-        get: function()
+    target.__exposedProps__ = Proxy.create({
+        get: function(/*_target, */name)
         {
             return "rw";
         },
 
-        getOwnPropertyDescriptor: function()
+        getOwnPropertyDescriptor: function(_target, name)
         {
             // Return the same descriptor than commandConsole.__exposedProps__.log for any property.
             return Object.getOwnPropertyDescriptor(commandConsole.__exposedProps__, "log");
+        },
+
+        // xxxFlorent: Remove once we can use the new API.
+        getPropertyDescriptor: function()
+        {
+            return this.getOwnPropertyDescriptor();
         },
 
         hasOwn: function()
@@ -516,12 +522,13 @@ function createCommandLineConsole(commandConsole, exposedConsole)
         {
             return true;
         }
-    });
+    }, {});
 
-    return new Proxy(Object.freeze(target), {
-        deleteProperty: function(_target, name)
+    return Proxy.create({
+        // deleteProperty: function(_target, name)
+        delete: function(name)
         {
-            // Note: Let this raise exception if it has to.
+            // Note: Let this raise exceptions if it has to.
             var ret = delete target[name];
             // xxxFlorent: [ES6-FOR_OF]
             [commandConsole, exposedConsole].forEach(function(obj)
@@ -533,12 +540,12 @@ function createCommandLineConsole(commandConsole, exposedConsole)
             return ret;
         },
 
-        has: function(_target, name)
+        has: function(/*_target, */name)
         {
             return (name in target) || (name in commandConsole) || (name in exposedConsole);
         },
 
-        hasOwn: function(_target, name)
+        hasOwn: function(/*_target, */name)
         {
             // Note: we cannot trust exposedConsole.hasOwnProperty (if the webpage redefined it).
             var hasOwn = ({}).hasOwnProperty;
@@ -549,22 +556,20 @@ function createCommandLineConsole(commandConsole, exposedConsole)
 
         get: function(_target, name)
         {
-            // Note: we cannot trust exposedConsole.hasOwnProperty (if the webpage redefined it).
-            var hasOwn = ({}).hasOwnProperty;
-            if (hasOwn.call(target, name))
+            if (name in target)
                 return target[name];
-            if (hasOwn.call(commandConsole, name))
+            if (name in commandConsole)
                 return commandConsole[name];
             // Note: No problem if this is trapped since there is no value for this property in
-            //       target nor in commandConsole.
-            if (hasOwn.call(exposedConsole, name))
+            //       `target` nor in `commandConsole`.
+            if (name in exposedConsole)
                 return exposedConsole[name];
         },
 
         set: function(_target, name, value)
         {
             // Reuse this.defineProperty.
-            this.defineProperty(_target, name, {
+            this.defineProperty(/*target, */name, {
                 value: value,
                 configurable: true,
                 enumerable: true,
@@ -573,43 +578,57 @@ function createCommandLineConsole(commandConsole, exposedConsole)
             return value;
         },
 
-        enumerate: function(_target)
+        enumerate: function(/*_target*/)
         {
-            return Arr.keys(target)
-                .concat( Arr.keys(commandConsole) )
-                .concat( Arr.keys(exposedConsole) );
+            return mapAndConcat([target, commandConsole, exposedConsole],
+                Arr.keys, ["__exposedProps__"]);
         },
 
-        keys: function(_target)
+        keys: function(/*_target*/)
         {
-            return Object.keys(target)
-                .concat( Object.keys(commandConsole) )
-                .concat( Object.keys(exposedConsole) );
+            return mapAndConcat([target, commandConsole, exposedConsole],
+                Object.keys, ["__exposedProps__"]);
         },
 
-        getOwnPropertyNames: function(_target)
+        getOwnPropertyNames: function(/*_target*/)
         {
-            return Object.getOwnPropertyNames(target)
-                .concat( Object.getOwnPropertyNames(commandConsole) )
-                .concat( Object.getOwnPropertyNames(exposedConsole) );
+            return mapAndConcat([target, commandConsole, exposedConsole],
+                Object.getOwnPropertyNames, ["__exposedProps__"]);
         },
 
-        getOwnPropertyDescriptor: function(_target, name)
+        getOwnPropertyDescriptor: function(/*_target, */name)
         {
             return Object.getOwnPropertyDescriptor(target, name) ||
                 Object.getOwnPropertyDescriptor(commandConsole, name) ||
                 Object.getOwnPropertyDescriptor(exposedConsole, name);
         },
 
-        defineProperty: function(_target, name, desc)
+        // xxxFlorent: Remove once we can use the new API.
+        getPropertyDescriptor: function()
         {
-            // Note: Let this raise exception if it has to.
+            return this.getOwnPropertyDescriptor.apply(this, arguments);
+        },
+
+        defineProperty: function(/*_target, */name, desc)
+        {
+            // Note: Let this raise exceptions if it has to.
             Object.defineProperty(target, name, desc);
             // Note: should be safe if exposedConsole is not a proxy object.
             var exposedPropDesc = Object.getOwnPropertyDescriptor(exposedConsole, name);
             if (!(name in exposedConsole) || exposedPropDesc.configurable)
                 Object.defineProperty(exposedConsole, name, desc);
         }
+    }, target);
+}
+
+function mapAndConcat(objects, fn, excludeObjects)
+{
+    var res = [];
+    for (var i = 0; i < objects.length; i++)
+        res = res.concat(fn(objects[i]));
+    return Arr.unique(res).filter(function(el)
+    {
+        return excludeObjects.indexOf(el) === -1;
     });
 }
 
@@ -618,8 +637,8 @@ function createCommandLineConsole(commandConsole, exposedConsole)
  * - the methods of the Console API are prevented from being overridden webpage-side;
  * - each method overrided via this Proxy is also overridden in the webpage console instance;
  * - each expando property added via this Proxy is also added in the webpage console instance;
- * - each expando property in the webpage instance is returned by this proxy, except if a property
- *      of the same name has not been created via this Proxy;
+ * - each expando property in the webpage instance is returned by this Proxy, except if a property
+ *      of the same name has been created via this Proxy;
  *
  * For more information, see issue 6268.
  *

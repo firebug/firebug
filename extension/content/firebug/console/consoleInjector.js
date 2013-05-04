@@ -68,14 +68,40 @@ Firebug.Console.injector =
     attachConsoleInjector: function(context, win)
     {
         // Get the 'console' object (this comes from chrome scope).
-        // console's methods return undefined by default.
         var console = Firebug.ConsoleExposed.createFirebugConsole(context, win, undefined, true);
 
         // Do not expose the chrome object as is but, rather do a wrapper, see below.
-        // xxxFlorent: I could not reproduce the error described in issue 4493. Do you?
-        win.wrappedJSObject.console = console;
-        exposedConsoleInstanceMap.set(win.document, console);
-        return;
+        //win.wrappedJSObject.console = console;
+        //return;
+
+        // Construct a script string that defines a function. This function returns
+        // an object that wraps every 'console' method. This function will be evaluated
+        // in a window content sandbox and return a wrapper for the 'console' object.
+        // Note that this wrapper appends an additional frame that shouldn't be displayed
+        // to the user.
+        var expr = "(function(x) { return {\n";
+        for (var p in console)
+        {
+            var func = console[p];
+            if (typeof(func) == "function")
+            {
+                expr += p + ": function() { return Function.apply.call(x." + p +
+                    ", x, arguments); },\n";
+            }
+        }
+        expr += "};})";
+
+        // Evaluate the function in the window sandbox/scope and execute. The return value
+        // is a wrapper for the 'console' object.
+        var sandbox = Cu.Sandbox(win);
+        var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
+        var exposedConsole = getConsoleWrapper(console);
+        win.wrappedJSObject.console = exposedConsole;
+        exposedConsoleInstanceMap.set(win.document, exposedConsole);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.attachConsoleInjector; Firebug console attached to: " +
+                context.getName());
     },
 
     getExposedConsoleInstance: function(win)
