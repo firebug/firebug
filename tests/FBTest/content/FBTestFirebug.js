@@ -2658,6 +2658,19 @@ this.TaskList.prototype =
         this.tasks.push(FW.FBL.bind.apply(this, args));
     },
 
+    /**
+     * Wrap a function that does not take a callback parameter and push it to the list.
+     */
+    wrapAndPush: function(func)
+    {
+        var args = Array.prototype.slice.call(arguments, 1);
+        this.push(function(callback)
+        {
+            func.apply(null, args);
+            callback();
+        });
+    },
+
     run: function(callback, delay)
     {
         FBTest.runTestSuite(this.tasks, callback, delay);
