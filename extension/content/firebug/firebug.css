@@ -350,17 +350,14 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 }
 
 panelTab[breakOnNextArmed="true"] > .panelTab-text {
-    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange !important;
-    /* animation: armedBlinking 0.8s ease-out infinite alternate; see issue 5618 */
+    animation: armedBlinking 0.8s steps(9, end) infinite alternate;
 }
 
-/* see issue 5618
 panelTab.highlighted {
     text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange !important;
     transition-property: text-shadow;
-    transition-duration: 0.8s;
+    transition-duration: 1.4s;
 }
-*/
 
 panelTab[aria-disabled='true'] {
     color: graytext !important;
