@@ -219,50 +219,31 @@ this.setToKnownState = function()
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
-    var watcherObserver =
-    {
-        observe: function(subject, topic, data)
-        {
-            if (topic == "domwindowopened")
-            {
-                winWatcher.unregisterNotification(watcherObserver);
-                setTimeout(function()
-                {
-                    var dialog = subject.QueryInterface(Ci.nsIDOMWindow);
-                    // Accept clearing the activation list
-                    dialog.Dialog.ui.button0.doCommand();
-
-                    if (Firebug.isDetached())
-                        Firebug.toggleDetachBar();
-
-                    // First clear all breakpoints and consequently the reset all options that
-                    // clears the breakpoints storage.
-                    Firebug.Debugger.clearAllBreakpoints(null);
-                    Firebug.resetAllOptions(false);
-
-                    // Console preview is hidden by default
-                    if (this.isConsolePreviewVisible())
-                        this.clickConsolePreviewButton();
-
-                    // Use default Firebug height and side panel width
-                    this.setBrowerWindowSize(1024, 768);
-                    this.setFirebugBarHeight(270);
-                    this.setSidePanelWidth(350);
-
-                    this.clearSearchField();
-
-                    // xxxHonza: xxxJJB how clear the persisted panel state?
-                }, 50); 
-            }
-        }
-    };
-
-    winWatcher.registerNotification(watcherObserver);
-
     var Firebug = FBTest.FirebugWindow.Firebug;
     Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
     Firebug.PanelActivation.toggleAll("none");
-    Firebug.PanelActivation.clearAnnotations();
+    Firebug.PanelActivation.clearAnnotations(true);
+
+    if (Firebug.isDetached())
+        Firebug.toggleDetachBar();
+
+    // First clear all breakpoints and consequently the reset all options that
+    // clears the breakpoints storage.
+    Firebug.Debugger.clearAllBreakpoints(null);
+    Firebug.resetAllOptions(false);
+
+    // Console preview is hiden by default
+    if (this.isConsolePreviewVisible())
+        this.clickConsolePreviewButton();
+
+    // Use default Firebug height and side panel width
+    this.setBrowerWindowSize(1024, 768);
+    this.setFirebugBarHeight(270);
+    this.setSidePanelWidth(350);
+
+    this.clearSearchField();
+
+    // xxxHonza: xxxJJB how clear the persisted panel state?
 };
 
 // ********************************************************************************************* //
