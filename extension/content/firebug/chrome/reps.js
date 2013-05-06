@@ -23,14 +23,13 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
-    "firebug/console/eventMonitor",
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, ClosureInspector, Menu, CompilationUnit) {
+    ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -1477,21 +1476,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 }
             ]);
         }
-        
+
         items = items.concat([
-            "-",
-            {
-                label: "ShowEventsInConsole",
-                tooltiptext: "html.tip.Show_Events_In_Console",
-                id: "fbShowEventsInConsole",
-                type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, null, context),
-                command: function()
-                {
-                    var checked = this.hasAttribute("checked");
-                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
-                }
-            },
             "-",
             {
                 label: "ScrollIntoView",
@@ -1968,52 +1954,6 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         return "Event " + event.type;
     }
-});
-
-// ********************************************************************************************* //
-
-FirebugReps.EventLog = domplate(FirebugReps.Event,
-{
-    className: "eventLog",
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    tag:
-        TAG("$copyEventTag", {object: "$object|copyEvent"}),
-
-    copyEventTag:
-        SPAN(
-            OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
-            SPAN("&#187;"),
-            SPAN("&nbsp"),
-            TAG("$object|getTargetTag", {object: "$object|getTarget"})
-        ),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    copyEvent: function(log)
-    {
-        return new Dom.EventCopy(log.event);
-    },
-
-    getTarget: function(event)
-    {
-        return event.target;
-    },
-
-    getTargetTag: function(event)
-    {
-        var rep = Firebug.getRep(event.target);
-        return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    supportsObject: function(object, type)
-    {
-        return object instanceof EventMonitor.EventLog;
-    },
 });
 
 // ********************************************************************************************* //
@@ -3540,7 +3480,6 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog,
     FirebugReps.ClosureScope,
     FirebugReps.OptimizedAway
 );

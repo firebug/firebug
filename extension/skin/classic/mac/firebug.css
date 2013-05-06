@@ -82,7 +82,7 @@
     background-color: transparent;
     margin-bottom: 2px;
     margin-right: -12px;
-    -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 stretch;
+    -moz-border-image: url(chrome://firebug/skin/mac/searchPanel.svg) 16 50 24 12 stretch;
     -moz-border-image-slice: 16 50 24 12 fill;
     border-width: 16px 50px 24px 12px;
     border-style: solid;
@@ -90,7 +90,7 @@
 }
 
 #fbSearchOptionsPanel[position="after_end"] {
-    -moz-border-image: url(chrome://firebug/skin/mac/search-panel-down.png) 25 50 18 12 stretch;
+    -moz-border-image: url(chrome://firebug/skin/mac/searchPanelDown.svg) 25 50 18 12 stretch;
     -moz-border-image-slice: 25 50 18 12 fill;
     border-width: 25px 50px 18px 12px;
 }

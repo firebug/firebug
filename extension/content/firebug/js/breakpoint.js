@@ -25,7 +25,7 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
 // ********************************************************************************************* //
 // Constants
 
-/* const animationDuration = 0.8; see issue 5618 */
+const animationDuration = 0.8;
 
 // ********************************************************************************************* //
 // Breakpoints
@@ -111,7 +111,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         Menu.createMenuItems(menuPopup, menuItems);
     },
 
-    /* see issue 5618
     toggleTabHighlighting: function(event)
     {
         // Don't continue if it's the wrong animation phase
@@ -131,7 +130,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         panel.context.delayedArmedTab.setAttribute("breakOnNextArmed", "true");
         delete panel.context.delayedArmedTab;
     },
-    */
 
     updateBreakOnNextTooltips: function(panel)
     {
@@ -171,9 +169,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(panel.name);
         if (tab)
-            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
-
-        /* see issue 5618
         {
             if (armed)
             {
@@ -202,7 +197,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
                 tab.setAttribute("breakOnNextArmed", "false");
             }
         }
-        */
     },
 
     updatePanelTabs: function(context)
