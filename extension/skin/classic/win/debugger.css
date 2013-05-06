@@ -27,8 +27,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .upsideDown {
-    background: linear-gradient(to bottom, #13D1FC, #00B0E6) no-repeat;
-    border-style: solid;
+    background-image: linear-gradient(to bottom, #13D1FC, #00B0E6);
     border-width: 28px 25px 19px 33px;
     -moz-border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.svg) 28 25 19 33 stretch;
 }
