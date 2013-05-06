@@ -105,6 +105,7 @@
     position: absolute;
     cursor: default;
     z-index: 4;
+    padding-left: 3px;
 }
 
 /************************************************************************************************/
@@ -131,26 +132,24 @@
 /*************************************************************************************************/
 /* Breakpoints */
 
-.cm-s-firebug .breakpoint
-{
+.cm-s-firebug .breakpoint {
     background-image: url(chrome://firebug/skin/breakpoint.svg);
-    background-repeat:no-repeat;
-    padding:7px;
+    background-repeat: no-repeat;
+    padding: 7px;
 }
 
-.cm-s-firebug .breakpointLoading 
-{
+.cm-s-firebug .breakpointLoading {
     background-image: url(chrome://firebug/skin/loading.svg);
-    background-repeat:no-repeat;
-    padding:7px;
+    background-repeat: no-repeat;
+    padding: 7px;
 }
 
-.cm-s-firebug .breakpoint.condition{
+.cm-s-firebug .breakpoint.condition {
     background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
-    background-position:center;
+    background-position: center;
 }
 
-.cm-s-firebug .breakpoint.disabled:not(.debugLocation){
+.cm-s-firebug .breakpoint.disabled:not(.debugLocation) {
     opacity: 0.5;
 }
 
