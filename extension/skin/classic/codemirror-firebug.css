@@ -99,6 +99,7 @@
     padding-right:4px;
     padding-bottom: 30px;
     margin-bottom: -32px;
+    width:.5em;
 }
 
 .cm-s-firebug .CodeMirror-gutter-elt {
