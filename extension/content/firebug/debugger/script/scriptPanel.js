@@ -663,17 +663,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointRemoved;", bp);
 
         // Remove breakpoint from the UI.
-        // xxxHonza: we should mark it as disabled and wait for the response from the server.
-
-        // xxxHonza: if the breakpoint is added while the Script panel is not the selected
-        // panel there is an exception coming from Orion:
-        // "TypeError: sel is null" {file: "chrome://browser/content/orion.js" line: 8581}]
-        // It causes the script-view to be broken and so, we need to reset it at the time
-        // when it's selected again.
-        if (!this.visible)
-            this.scriptView.forceRefresh = true;
-        else
-            this.scriptView.removeBreakpoint(bp);
+        this.scriptView.removeBreakpoint(bp);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
