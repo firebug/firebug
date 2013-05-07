@@ -16,6 +16,12 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Str, Opt
 with (Domplate) {
 
 // ********************************************************************************************* //
+// Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
+
+// ********************************************************************************************* //
 // Breapoint Notification
 
 /**
@@ -256,8 +262,7 @@ BreakNotification.prototype = domplate(Firebug.Rep,
 
     show: function(parentNode)
     {
-        if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakNotification.show; " + this.id);
+        Trace.sysout("breakNotification.show;");
 
         // Reneder the entire notification box.
         this.box = this.tag.append(this.cause, parentNode, this);
@@ -314,8 +319,7 @@ BreakNotification.prototype = domplate(Firebug.Rep,
 
     hide: function()
     {
-        if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakNotification.hide;");
+        Trace.sysout("breakNotification.hide; " + this.box);
 
         // xxxHonza: disable the animation, the interval seems to be frozen during debugger break.
         if (this.box.parentNode)
@@ -371,6 +375,8 @@ BreakNotification.show = function(context, parentNode, breakType)
     // Remember the box, we need to hide it when the debugger is resumed.
     context.breakingCauseBox = box
 
+    delete context.breakingCause;
+
     return box;
 }
 
@@ -379,6 +385,8 @@ BreakNotification.hide = function(context)
     var box = context.breakingCauseBox;
     if (box)
         box.hide();
+
+    delete context.breakingCauseBox;
 }
 
 // ********************************************************************************************* //
