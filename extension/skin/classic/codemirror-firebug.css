@@ -164,6 +164,7 @@
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .debugLocation {
     background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-position: 2px 0;
     color: #000000;
     background-repeat: no-repeat;
     padding: 7px;
@@ -171,6 +172,7 @@
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .breakpoint {
     background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 2px 0, 0 0;
 }
 
 .cm-s-firebug .CodeMirror-debugLocation {
