@@ -148,9 +148,7 @@
                                             tooltiptext="script.Break On Next" breakable="disabled"
                                             class="fbInternational">
                                             <stack id="fbBreakOnNextButtonStack">
-                                                <image id="fbBreakOnImageDisabled"></image>
                                                 <image id="fbBreakOnImage" class="fbBreakOnImage"></image>
-                                                <image id="fbBreakOnImageActive" class="fbBreakOnImage"></image>
                                                 <image id="fbBreakOnImageArmed" class="fbBreakOnImage"></image>
                                                 <!-- Badges -->
                                                 <image id="fbBreakOnImageError" class="fbBreakOnImage"></image>
