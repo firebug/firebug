@@ -38,10 +38,19 @@ function SourceEditor()
     this.highlightedLine = -1;
 }
 
+// ********************************************************************************************* //
+// Gutters
+
 SourceEditor.Gutters =
 {
-    breakpoints: "breakpoints"
+    breakpoints: "breakpoints",
 };
+
+// Shortcut
+var bpGutter = SourceEditor.Gutters.breakpoints;
+
+// ********************************************************************************************* //
+// Config
 
 SourceEditor.DefaultConfig =
 {
@@ -55,7 +64,7 @@ SourceEditor.DefaultConfig =
     lineWrapping: false,
     lineNumbers: true,
     firstLineNumber: 1,
-    gutters: [SourceEditor.Gutters.breakpoints],
+    gutters: [bpGutter],
     fixedGutter: false,
     readOnly: true,
     showCursorWhenSelecting: true,
@@ -324,6 +333,11 @@ SourceEditor.prototype =
             var handle = this.editorObject.getLineHandle(this.debugLocation);
             this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
             this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
+
+            // Remove debug location marker (we are reusing breakpoints gutter for it).
+            var marker = this.getGutterMarker(bpGutter, this.debugLocation);
+            if (marker && marker.className == "debugLocation")
+                this.removeGutterMarker(bpGutter, this.debugLocation);
         }
 
         this.debugLocation = line;
@@ -333,7 +347,18 @@ SourceEditor.prototype =
             var handle = this.editorObject.getLineHandle(line);
             this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
             this.editorObject.addLineClass(handle, "background", BACK_CLASS);
-        } 
+
+            // Debug location marker is using breakpoints gutter and so, create the marker
+            // only if there is no breakpoint marker already. This 'gutter reuse' allows to
+            // place the debug location icon over a breakpoint icon and save some space.
+            var marker = this.getGutterMarker(bpGutter, line);
+            if (!marker)
+            {
+                var marker = this.getGutterElement().ownerDocument.createElement("div");
+                marker.className = "debugLocation";
+                this.editorObject.setGutterMarker(line, bpGutter, marker);
+            }
+        }
     },
 
     highlightLine: function(line)
@@ -426,7 +451,7 @@ SourceEditor.prototype =
         {
             var breakpoint = this.getGutterElement().ownerDocument.createElement("div");
             breakpoint.className = "breakpoint";
-            this.editorObject.setGutterMarker(lineNo, SourceEditor.Gutters.breakpoints, breakpoint);
+            this.editorObject.setGutterMarker(lineNo, bpGutter, breakpoint);
 
             // dispatch event;
             if (this.bpChangingHandlers)
@@ -448,7 +473,7 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.removeBreakpoint; line: " + lineNo);
 
-        this.removeGutterMarker(SourceEditor.Gutters.breakpoints, lineNo);
+        this.removeGutterMarker(bpGutter, lineNo);
 
         // dispatch event;
         if (this.bpChangingHandlers)
@@ -505,8 +530,9 @@ SourceEditor.prototype =
 
     getScrollerElement: function()
     {
-      return this.editorObject.getScrollerElement();
+        return this.editorObject.getScrollerElement();
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLineFromEvent: function(e)
@@ -607,5 +633,4 @@ function getEventObject(type, eventArg)
 return SourceEditor;
 
 // ********************************************************************************************* //
-
 });
