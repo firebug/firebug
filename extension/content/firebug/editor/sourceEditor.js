@@ -158,6 +158,14 @@ SourceEditor.prototype =
         callback();
     },
 
+    destroy: function()
+    {
+        Trace.sysout("sourceEditor.destroy;");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Event Listeners
+
     addEventListener: function(type, handler)
     {
         if (isBuiltInEvent(type))
@@ -276,11 +284,6 @@ SourceEditor.prototype =
                 editorNode.removeEventListener(type, handler, false);
             }
         }
-    },
-
-    destroy: function()
-    {
-        // TODO
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
