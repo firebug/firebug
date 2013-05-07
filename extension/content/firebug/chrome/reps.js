@@ -1712,7 +1712,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSStyleRule";
         }
-        else if (rule instanceof window.CSSSupportsRule)
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
         {
             return "CSSSupportsRule";
         }
@@ -1765,7 +1765,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return rule.selectorText;
         }
-        else if (rule instanceof window.CSSSupportsRule)
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
         {
             return rule.conditionText;
         }

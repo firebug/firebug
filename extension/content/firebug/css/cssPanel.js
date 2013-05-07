@@ -569,7 +569,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         isSelectorEditable: true
                     });
                 }
-                else if (rule instanceof window.CSSSupportsRule)
+                else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
                 {
                     rules.push({
                         tag: CSSSupportsRuleTag.tag,
@@ -2056,7 +2056,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
         }
-        else if (rule instanceof window.CSSSupportsRule &&
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule &&
             Css.hasClass(target, "cssSupportsRuleCondition"))
         {
             target.textContent = value;
