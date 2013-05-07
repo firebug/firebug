@@ -396,10 +396,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (typeof object != "object")
             return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
-        // Group messages coming from the same location
-        if (object instanceof Object && object.href && object.lineNo && object.message)
-            return object.message + object.href + ":" + object.lineNo;
-
         // object may be NaN
         if (object !== object)
             return "NotANumber";
@@ -445,10 +441,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         else
         {
             var msgId = this.getMessageId(objects, sourceLink);
-            var previousMsgId = this.lastLogRow ?
-                this.getMessageId(this.lastLogRow.objects, this.lastLogRow.sourceLink) : "";
 
-            if (msgId && msgId == previousMsgId)
+            if (msgId && msgId == this.lastMsgId)
             {
                 this.increaseRowCount(container.lastChild);
 
@@ -457,6 +451,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
             {
                 row = this.createRow("logRow", className);
+                row.msgId = msgId;
                 var logContent = row.getElementsByClassName("logContent").item(0);
                 appender.apply(this, [objects, logContent, rep]);
 
@@ -469,7 +464,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 container.appendChild(row);
             }
 
-            this.lastLogRow = {objects: objects, sourceLink: sourceLink};
+            this.lastMsgId = msgId;
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -499,7 +494,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // Don't forget to clear opened groups, if any.
             this.groups = null;
 
-            this.lastLogRow = null;
+            this.lastMsgId = null;
         }
     },
 
