@@ -18,16 +18,17 @@ function runTest()
                 var rows = panel.panelNode.getElementsByClassName("logRow");
 
                 // The exact column number is not tested since it can differ
-                // from some uknown reason. Sounds like Firefox bug, but we
+                // for some unknown reason. Sounds like Firefox bug, but we
                 // don't have a test case.
+                // Also the full messages are not checked to avoid language conflicts
                 var expected = [
                 {
-                    msg: "Error in parsing value for 'background'.  Declaration dropped.",
+                    msg: /'background'/,
                     source: "background: not-existing-function();",
                     link: /cssWithErrors\.css\s*\(line\s*2\,\s*col\s*\d+\)/
                 },
                 {
-                    msg: "Expected color but found 'notacolor'.  Error in parsing value for 'color'.  Declaration dropped.",
+                    msg: /'notacolor'.*?'color'/,
                     source: "color: notacolor;",
                     link: /cssWithErrors\.css\s*\(line\s*6\,\s*col\s*\d+\)/
                 }]
