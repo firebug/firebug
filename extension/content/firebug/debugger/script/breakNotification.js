@@ -10,8 +10,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/options",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Str) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Str, Options) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -25,9 +26,8 @@ with (Domplate) {
  *   elements: target, relatedTarget: element
  *   objects: prevValue, newValue
  */
-function BreakNotification(doc, cause)
+function BreakNotification(cause)
 {
-    this.document = doc;
     this.cause = cause;
 }
 
@@ -345,6 +345,73 @@ BreakNotification.prototype = domplate(Firebug.Rep,
         }, 15);
     }
 });
+
+// ********************************************************************************************* //
+// Public API
+
+BreakNotification.show = function(context, parentNode, breakType)
+{
+    // There is a global option that can be used to swith off the break notification
+    // (it can be annoying sometimes)
+    if (!Options.get("showBreakNotification"))
+        return;
+
+    // Last chance to get breaking cause from the break-type field.
+    var cause = getBreakingCause(breakType);
+    if (cause)
+        context.breakingCause = cause;
+
+    // If ther is no breaking cause object, there is nothing to display so, bail out.
+    if (!context.breakingCause)
+        return;
+
+    var box = new BreakNotification(context.breakingCause);
+    box.show(parentNode);
+
+    // Remember the box, we need to hide it when the debugger is resumed.
+    context.breakingCauseBox = box
+
+    return box;
+}
+
+BreakNotification.hide = function(context)
+{
+    var box = context.breakingCauseBox;
+    if (box)
+        box.hide();
+}
+
+// ********************************************************************************************* //
+// Helpers
+
+function getBreakingCause(breakType)
+{
+    var cause;
+
+    if (breakType == "debuggerStatement")
+    {
+        cause = {
+            title: Locale.$STR("debugger keyword"),
+            skipActionTooltip: Locale.$STR("firebug.bon.tooltip.disableDebuggerKeyword2"),
+            message: Locale.$STR("firebug.bon.cause.disableDebuggerKeyword2"),
+            skipAction: function addSkipperAndGo()
+            {
+                // a breakpoint that never hits, but prevents debugger keyword
+                // (see FBS.onDebugger as well)
+                var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
+                FBS.disableBreakpoint(sourceFile.href, lineNo);
+
+                if (FBTrace.DBG_BP)
+                    FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+
+                        "@"+lineNo+" tag: "+frame.script.tag, bp);
+
+                Firebug.Debugger.resume(context);
+            },
+        };
+    }
+
+    return cause;
+}
 
 // ********************************************************************************************* //
 // Registration

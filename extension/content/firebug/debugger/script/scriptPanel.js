@@ -23,10 +23,12 @@ define([
     "firebug/lib/system",
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
+    "firebug/debugger/script/breakNotification",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning) {
+    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
+    BreakNotification) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1032,7 +1034,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tool Listener
 
-    onStartDebugging: function(context)
+    onStartDebugging: function(context, event, packet)
     {
         Trace.sysout("scriptPanel.onStartDebugging; " + this.context.getName());
 
@@ -1064,6 +1066,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
             //this.updateSelection(this.context.currentFrame);
+
+            // Display break notification box.
+            BreakNotification.show(this.context, this.panelNode, packet.why.type);
         }
         catch (exc)
         {
@@ -1094,6 +1099,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // After main panel is completely updated
             chrome.syncSidePanels();
+
+            // Make sure the break notification box is hidden when debugger resumes.
+            BreakNotification.hide(this.context);
         }
         catch (exc)
         {
