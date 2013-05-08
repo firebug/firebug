@@ -45,7 +45,8 @@ function openPopup(callback, win)
         FBTest.progress("Great, the popup is loaded");
 
         // close the popup window.
-        var popup = win.document.getUserData("popup-window");
+        var popup = win.wrappedJSObject.popup;
+        delete win.wrappedJSObject.popup; 
         popup.close();
 
         FBTest.progress("The popup should be closed now");

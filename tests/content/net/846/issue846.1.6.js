@@ -19,7 +19,7 @@ function runTest()
 
             FBTest.waitForDisplayedElement("net", options, function(row)
             {
-                var responses = win.document.getUserData("responses");
+                var responses = win.wrappedJSObject.responses;
                 FBTest.sysout("issue846.onRunTest " + responses.length);
 
                 // Expand all requests and select response bodies.
