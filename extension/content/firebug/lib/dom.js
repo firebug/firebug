@@ -6,8 +6,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/lib/xml",
+    "firebug/lib/wrapper",
 ],
-function(FBTrace, Deprecated, Css, Arr, Xml) {
+function(FBTrace, Deprecated, Css, Arr, Xml, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,6 +19,7 @@ var Cc = Components.classes;
 var Dom = {};
 var domMemberCache = null;
 var domMemberMap = {};
+var domMappedData = new WeakMap();
 
 Dom.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
@@ -747,6 +749,51 @@ Dom.scrollMenupopup = function(popup, item)
             scrollBox.scrollTop -= popupRect.bottom - itemRect.bottom - itemRect.height;
         }
     }
+}
+
+// ********************************************************************************************* //
+// MappedData
+
+function getElementData(element)
+{
+    var elementData;
+
+    // force element to be wrapped:
+    element = new XPCNativeWrapper(element);
+
+    if (!domMappedData.has(element))
+    {
+        elementData = {};
+        domMappedData.set(element, elementData);
+    }
+    else
+        elementData = domMappedData.get(element);
+
+    return elementData;
+}
+
+Dom.getMappedData = function(element, key)
+{
+    var elementData = getElementData(element);
+    return elementData[key];
+}
+
+Dom.setMappedData = function(element, key, value)
+{
+    if (!Dom.isNode(element))
+        throw new TypeError("expected an element as the first argument");
+
+    if (typeof key !== "string")
+        throw new TypeError("the key argument must be a string");
+
+    var elementData = getElementData(element);
+    elementData[key] = value;
+}
+
+Dom.deleteMappedData = function(element, key)
+{
+    var elementData = getElementData(element);
+    delete elementData[key];
 }
 
 // ********************************************************************************************* //
