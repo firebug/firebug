@@ -370,9 +370,19 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
                 bp.lineNo = currentLine;
             }
 
-            // Breakpoint is ready on the server side, let's notify all listeners so,
-            // the UI is properly (and asynchronously) updated everywhere.
-            self.dispatch("onBreakpointAdded", [self.context, bp]);
+            if (bp.condition != null)
+            {
+                // The actual location of bp is found, So just open the
+                // condition editor at the corrected line.
+                self.dispatch("openBreakpointConditionEditor",
+                    [bp.lineNo, bp.condition, bp.params.originLineNo]);
+            }
+            else
+            {
+                // Breakpoint is ready on the server side, let's notify all listeners so,
+                // the UI is properly (and asynchronously) updated everywhere.
+                self.dispatch("onBreakpointAdded", [self.context, bp]);
+            }
 
             // The info about the original line should not be needed any more.
             delete bp.params.originLineNo;

@@ -60,8 +60,9 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
         setTimeout(Obj.bindFixed(function()
         {
             var offset = Dom.getClientOffset(sourceLine);
-
+            
             var bottom = offset.y + sourceLine.offsetHeight;
+
             var y = bottom - this.box.offsetHeight;
             if (y < panel.scrollTop)
             {
@@ -73,7 +74,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
                 Css.removeClass(this.box, "upsideDown");
             }
 
-            this.box.style.top = y + "px";
+            this.box.style.top = (y - panel.scrollTop) + "px";
             Dom.hide(this.box, false);
 
             this.input.focus();

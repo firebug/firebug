@@ -72,6 +72,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
+        this.OnMouseUpListener = this.onEditorMouseUp.bind(this);
 
         // Initialize source editor.
         this.editor = new SourceEditor();
@@ -98,9 +99,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.addEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
 
-        /*// Hook view body mouse up (for breakpoint condition editor).
-        this.editor._view._handleBodyMouseUp = this.bodyMouseUp.bind(this);
-*/
+        // Hook view body mouse up (for breakpoint condition editor).
+        this.editor.addEventListener(SourceEditor.Events.mouseUp,
+            this.OnMouseUpListener);
+
         // Focus so, keyboard works as expected.
         this.editor.focus();
 
@@ -371,10 +373,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         }
     },
 
-    initializeBreakpoint: function(lineIndex)
+    initializeBreakpoint: function(lineIndex, condition)
     {
         var bpWaiting = this.editor.getGutterElement().ownerDocument.createElement("div");
         bpWaiting.className = "breakpointLoading";
+
 
         this.editor.setGutterMarker(SourceEditor.Gutters.breakpoints,
             lineIndex, bpWaiting);
@@ -382,7 +385,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         // Simulate editor event sent when the user creates a breakpoint by
         // clicking on the breakpoint ruler.
         this.onBreakpointChange({
-            added: [{ line: lineIndex}],
+            added: [{ line: lineIndex, condition: condition}],
             removed: []
         });
     },
@@ -392,6 +395,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var bpMarker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints,
             bp.lineNo);
 
+        bpMarker.className = "breakpoint";
         if (bp.disabled)
         {
             bpMarker.className += " disabled";
@@ -449,6 +453,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.highlightLine(line);
     },
 
+    getScrollInfo: function()
+    {
+        return this.editor.getScrollInfo();
+    },
+
     highlightLine: function(lineIndex)
     {
         Trace.sysout("scriptView.highlightLine; " + lineIndex);
@@ -480,28 +489,21 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         Trace.sysout("scriptView.gutterClick; " + event);
 
         if (event.lineNo != null)
-            this.toggleBreakpoint(event.lineNo);
+        {
+            // We are interested in right-click events to open
+            // breakpoint condition editor.
+            if (Events.isRightClick(event.rawEvent))
+                this.dispatch("startBreakpointConditionEditor", [event.lineNo, event.rawEvent]);
+            else
+                this.toggleBreakpoint(event.lineNo);
+        }
     },
 
-    bodyMouseUp: function(event)
+    onEditorMouseUp: function (event)
     {
-        Trace.sysout("scripView.bodyMouseUp;", event);
+        Trace.sysout("scripView.onEditorMouseUp;", event);
 
         this.dispatch("onEditorMouseUp", [event]);
-
-        // We are only interested in right-click events...
-        if (!Events.isRightClick(event))
-            return;
-
-        // ... on the breakpoint-column (to show the breakpoint condition editor).
-        var target = event.target;
-        var ruler = Dom.getAncestorByClass(target, "ruler");
-        if (!Css.hasClass(ruler, "annotations") && !Css.hasClass(ruler, "lines"))
-            return;
-
-        // The breakpoint condition editor is about to be opened.
-        var lineIndex = this.getLineIndex(target);
-        this.dispatch("openBreakpointConditionEditor", [lineIndex, event]);
     },
 
     getLineIndex: function(target)
@@ -531,20 +533,15 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
      * Returns related annotation target (an element) associated with the given line.
      * @param {Object} line Given line number. Line numbers are zero-based.
      */
-    getAnnotationTarget: function(line)
+    getGutterMarkerTarget: function(line, gutter)
     {
-        // This method is using Orion's private API.
-        var viewLeftRuler = this.editor._view._leftDiv;
-        var annotationsRuler = viewLeftRuler.querySelector(".ruler.annotations");
+        gutter = gutter || SourceEditor.Gutters.breakpoints;
 
-        // Search through the annotations for the one associated with the given
-        // line number.
-        var length = annotationsRuler.children.length;
-        for (var i=0; i<length; i++)
+        var marker = this.editor.getGutterMarker(gutter, line);
+        if (marker)
         {
-            var annotation = annotationsRuler.children[i];
-            if (annotation.lineIndex == line)
-                return annotation;
+
+            return marker;
         }
 
         return null;

@@ -59,7 +59,7 @@ SourceEditor.DefaultConfig =
     fixedGutter: false,
     readOnly: true,
     showCursorWhenSelecting: true,
-    undoDepth: 200,
+    undoDepth: 200
 
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
     // There is one-line editor created at the bottom of the Script panel.
@@ -84,7 +84,8 @@ SourceEditor.Events =
     contextMenu: "contextmenu",
     mouseMove: "mousemove",
     mouseOut: "mouseout",
-    mouseOver: "mouseover"
+    mouseOver: "mouseover",
+    mouseUp: "mouseup"
 };
 
 // ********************************************************************************************* //
@@ -395,6 +396,11 @@ SourceEditor.prototype =
                 this.editorObject.scrollTo(null, middle);
             }
         }
+    },
+
+    getScrollInfo: function()
+    {
+        return this.editorObject.getScrollInfo();
     },
 
     getTopIndex: function()

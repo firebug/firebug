@@ -216,7 +216,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addBreakpoint: function(url, lineNo, type)
+    addBreakpoint: function(url, lineNo, condition, type)
     {
         type = type || BP_NORMAL;
 
@@ -229,6 +229,17 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             return;
         }
 
+        // Saving the conditional bps physically should be defered until
+        // the user decides to save the bp.
+        if (condition != null)
+        {
+            var bp = new Breakpoint(url, lineNo, false, type);
+            bp.condition = condition;
+
+            // We just need to find the actual location of bp.
+            this.dispatch("onAddBreakpoint", [bp]);
+            return;
+        }
         var bp = this.findBreakpoint(url, lineNo, -1);
 
         // Bail out if exactly the same breakpoint already exists. This is not an error

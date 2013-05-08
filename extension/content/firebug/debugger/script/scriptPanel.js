@@ -488,10 +488,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.addBreakpoint;", bp);
 
         var url = this.getCurrentURL();
-        BreakpointStore.addBreakpoint(url, bp.line);
+        BreakpointStore.addBreakpoint(url, bp.line, bp.condition);
 
         // Enable by default.
-        BreakpointStore.enableBreakpoint(url, bp.line);
+        if (bp.condition == null)
+            BreakpointStore.enableBreakpoint(url, bp.line);
     },
 
     removeBreakpoint: function(bp)
@@ -523,11 +524,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Conditional Breakpoints
 
-    openBreakpointConditionEditor: function(lineIndex, event)
+    startBreakpointConditionEditor: function(lineIndex, event)
     {
-        Trace.sysout("scriptPanel.openBreakpointConditionEditor; Line: " + lineIndex);
+        Trace.sysout("scriptPanel.startBreakpointConditionEditor; Line: " + lineIndex);
 
-        this.editBreakpointCondition(lineIndex);
+        this.initializeEditBreakpointCondition(lineIndex);
         Events.cancelEvent(event);
     },
 
@@ -540,21 +541,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Editor.stopEditing(false);
     },
 
-    editBreakpointCondition: function(lineNo)
+    initializeEditBreakpointCondition: function(lineNo)
     {
-        // Create helper object for remembering the line and URL. It's used when
-        // the user right clicks on a line with no breakpoint and picks
-        // Edit Breakpoint Condition. This should still work and the breakpoint
-        // should be created automatically if the user provide a condition.
-        var tempBp = {
-            lineNo: lineNo,
-            href: this.getCurrentURL(),
-            condition: "",
-        };
-
+        var url = this.getCurrentURL(), editor = this.getEditor();
         // The breakpoint doesn't have to exist.
-        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
-        var condition = bp ? bp.condition : tempBp.condition;
+        var bp = BreakpointStore.findBreakpoint(url, lineNo);
+                
+        if (bp)
+        {
+            // Reference to the edited breakpoint.
+            editor.breakpoint = bp;
+
+            // if there is alreay a bp, the line is executable, so we just need to
+            // open the editor.
+            this.openBreakpointConditionEditor(lineNo, bp.condition);
+            return;
+        }
 
         // xxxHonza: displaying BP conditions in the Watch panel is not supported yet.
         /*if (condition)
@@ -564,21 +566,60 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             watchPanel.rebuild();
         }*/
 
-        // Reference to the edited breakpoint.
-        var editor = this.getEditor();
-        editor.breakpoint = bp ? bp : tempBp;
-        this.scriptView.initializeBreakpoint(lineNo, condition);
+        // Create helper object for remembering the line and URL. It's used when
+        // the user right clicks on a line with no breakpoint and picks
+        // Edit Breakpoint Condition. This should still work and the breakpoint
+        // should be created automatically if the user provide a condition.
+        var tempBp = {
+            lineNo: lineNo,
+            href: url,
+            condition: "",
+        };
+        
+        editor.breakpoint = tempBp;
+        this.scriptView.initializeBreakpoint(lineNo, tempBp.condition);
     },
 
-    startEditingCondition: function(lineNo, condition)
+    openBreakpointConditionEditor: function(lineNo, condition, originalLineNo)
     {
-        var target = this.scriptView.getAnnotationTarget(lineNo);
+        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
+        var target = null;
+
+        // If the line the user clicked wasn't a executable line, it's need
+        if (originalLineNo)
+            this.scriptView.removeBreakpoint({lineNo: originalLineNo});
+        
+        
+        if (!bp)
+        {
+            // If a bp didn't exist at the line, loading icon is showing
+            // and it's  need to remove it, otherwise the loading icon
+            // isn't shown if the uset wanted to set condition on a existed
+            // bp (See initializeEditBreakpointCondition()).
+             this.scriptView.removeBreakpoint({lineNo: lineNo});
+        }
+        else
+        {
+            // There is already a bp at the line, so get the element(target)
+            // of bp icon. we should also verify if the bp is a conditional
+            // bp, if so, load the expression into the editor.
+            target = this.scriptView.getGutterMarkerTarget(lineNo);
+            condition = bp.condition;   
+        }
+        
         if (!target)
-            return;
+        {
+            this.scriptView.addBreakpoint({lineNo: lineNo});
+            target = this.scriptView.getGutterMarkerTarget(lineNo);
+        }
 
         var conditionEditor = this.getEditor();
         conditionEditor.breakpoint.lineNo = lineNo;
 
+        // As Editor scrolls(not panel itself) with long scripts, we need to set
+        // scrollTop manually to show the editor properly(at the right y coord).
+        this.scrollTop = this.scriptView.getScrollInfo().top;
+        
         Firebug.Editor.startEditing(target, condition, null, null, this);
     },
 
@@ -598,10 +639,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onSetBreakpointCondition; " + value, bp);
 
         var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+
         if (!cancel)
         {
             if (!availableBp)
-                this.setBreakpoint(bp);
+                this.addBreakpoint({line: bp.lineNo});
 
             value = value ? value : null;
             BreakpointStore.setBreakpointCondition(bp.href, bp.lineNo, value);
@@ -609,7 +651,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         else
         {
             if (!availableBp)
-                BreakpointStore.removeBreakpoint(bp.href, bp.lineNo);
+                this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
         }
     },
 
