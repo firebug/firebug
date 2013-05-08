@@ -164,6 +164,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
 
         Trace.sysout("scriptView.showSource; ", {
+            equal: (source == text),
             source: source,
             text: text,
             type: type

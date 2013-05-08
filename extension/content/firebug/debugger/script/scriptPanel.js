@@ -23,10 +23,12 @@ define([
     "firebug/lib/system",
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
+    "firebug/debugger/script/breakNotification",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning) {
+    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
+    BreakNotification) {
 
 // ********************************************************************************************* //
 // Constants
@@ -703,17 +705,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointRemoved;", bp);
 
         // Remove breakpoint from the UI.
-        // xxxHonza: we should mark it as disabled and wait for the response from the server.
-
-        // xxxHonza: if the breakpoint is added while the Script panel is not the selected
-        // panel there is an exception coming from Orion:
-        // "TypeError: sel is null" {file: "chrome://browser/content/orion.js" line: 8581}]
-        // It causes the script-view to be broken and so, we need to reset it at the time
-        // when it's selected again.
-        if (!this.visible)
-            this.scriptView.forceRefresh = true;
-        else
-            this.scriptView.removeBreakpoint(bp);
+        this.scriptView.removeBreakpoint(bp);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
@@ -1074,7 +1066,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Tool Listener
 
-    onStartDebugging: function(context)
+    onStartDebugging: function(context, event, packet)
     {
         Trace.sysout("scriptPanel.onStartDebugging; " + this.context.getName());
 
@@ -1106,6 +1098,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
             //this.updateSelection(this.context.currentFrame);
+
+            // Display break notification box.
+            BreakNotification.show(this.context, this.panelNode, packet.why.type);
         }
         catch (exc)
         {
@@ -1136,6 +1131,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // After main panel is completely updated
             chrome.syncSidePanels();
+
+            // Make sure the break notification box is hidden when debugger resumes.
+            BreakNotification.hide(this.context);
         }
         catch (exc)
         {

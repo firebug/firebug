@@ -100,9 +100,15 @@ SourceFile.prototype =
                 return;
             }
 
+            // Convert all line delimiters to the unix style. The source editor
+            // (in the Script panel) also uses unix style and so we can compare
+            // if specific text is already set in the editor.
+            // See {@ScriptView.showSource}
+            var source = response.source.replace(/\r\n/gm, "\n");
+
             self.loaded = true;
             self.inProgress = false;
-            self.lines = Str.splitLines(response.source);
+            self.lines = Str.splitLines(source);
 
             self.callback(self.lines);
         });

@@ -284,7 +284,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.getPanel("script");
 
         // Notify listeners. E.g. the {@ScriptPanel} panel needs to update its UI.
-        this.dispatch("onStartDebugging", [this.context]);
+        this.dispatch("onStartDebugging", [this.context, event, packet]);
 
         // Execute registered 'clientEvaluated' callback.
         // This must be done after "onStartDebugging" is dispatched to the Script panel, which

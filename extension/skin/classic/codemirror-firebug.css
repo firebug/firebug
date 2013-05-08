@@ -1,6 +1,6 @@
 ﻿/* See license.txt for terms of usage */
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Firebug CodeMirror Theme */
 
 .cm-s-firebug.CodeMirror {
@@ -71,7 +71,10 @@
     display: inline-block;
 }
 
-.cm-s-firebug .cm-keyword {color: blue;}
+/*************************************************************************************************/
+/* Color Syntax */
+
+.cm-s-firebug .cm-keyword {color: BlueViolet; font-weight: bold;}
 .cm-s-firebug .cm-atom {color: #219;}
 .cm-s-firebug .cm-number {color: #164;}
 .cm-s-firebug .cm-def {color: #00f;}
@@ -83,17 +86,20 @@
 .cm-s-firebug .cm-comment {color: Silver;}
 .cm-s-firebug .cm-string {color: Red;}
 .cm-s-firebug .cm-string-2 {color: Red;}
-.cm-s-firebug .cm-meta {color: #555;}
+.cm-s-firebug .cm-meta {color: rgb(120, 120, 120); font-style: italic;}
 .cm-s-firebug .cm-error {color: #f00;}
 .cm-s-firebug .cm-qualifier {color: #555;}
 .cm-s-firebug .cm-builtin {color: #30a;}
 .cm-s-firebug .cm-bracket {color: #997;}
-.cm-s-firebug .cm-tag {color: #170;}
-.cm-s-firebug .cm-attribute {color: #00c;}
+.cm-s-firebug .cm-tag {color: blue;}
+.cm-s-firebug .cm-attribute {color: rgb(0, 0, 136);}
 .cm-s-firebug .cm-header {color: blue;}
 .cm-s-firebug .cm-quote {color: #090;}
 .cm-s-firebug .cm-hr {color: #999;}
 .cm-s-firebug .cm-link {color: #00c;}
+
+/*************************************************************************************************/
+/* Gutters */
 
 .cm-s-firebug .CodeMirror-gutter {
     padding-right:4px;
@@ -109,7 +115,7 @@
     padding-left: 3px;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Print */
 
 @media print {
@@ -119,7 +125,7 @@
   }
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* No vertical padding in Firebug theme */
 
 .CodeMirror-lines {
@@ -159,15 +165,28 @@
     border: 1px solid grey;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Debug Location */
+
+.cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .debugLocation {
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-position: 2px 0;
+    color: #000000;
+    background-repeat: no-repeat;
+    padding: 7px;
+}
+
+.cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .breakpoint {
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 2px 0, 0 0;
+}
 
 .cm-s-firebug .CodeMirror-debugLocation {
     outline: 1px solid #D9D9B6;
     background-color: lightgoldenrodyellow;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Highlighted Line */
 
 .cm-s-firebug .CodeMirror-highlightedLine {
