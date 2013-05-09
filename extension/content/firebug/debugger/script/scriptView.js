@@ -72,7 +72,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
-        this.OnMouseUpListener = this.onEditorMouseUp.bind(this);
+        this.onMouseUpListener = this.onEditorMouseUp.bind(this);
 
         // Initialize source editor.
         this.editor = new SourceEditor();
@@ -101,7 +101,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Hook view body mouse up (for breakpoint condition editor).
         this.editor.addEventListener(SourceEditor.Events.mouseUp,
-            this.OnMouseUpListener);
+            this.onMouseUpListener);
 
         // Focus so, keyboard works as expected.
         this.editor.focus();
@@ -376,9 +376,11 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     initializeBreakpoint: function(lineIndex, condition)
     {
+        Trace.sysout("scriptView.initializeBreakpoint; " + lineIndex + ", condition: " +
+            condition);
+
         var bpWaiting = this.editor.getGutterElement().ownerDocument.createElement("div");
         bpWaiting.className = "breakpointLoading";
-
 
         this.editor.setGutterMarker(SourceEditor.Gutters.breakpoints,
             lineIndex, bpWaiting);
@@ -397,15 +399,12 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             bp.lineNo);
 
         bpMarker.className = "breakpoint";
+
         if (bp.disabled)
-        {
             bpMarker.className += " disabled";
-        }
 
         if (bp.condition)
-        {
             bpMarker.className += " condition";
-        }
     },
 
     removeAllBreakpoints: function()
@@ -491,8 +490,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (event.lineNo != null)
         {
-            // We are interested in right-click events to open
-            // breakpoint condition editor.
+            // Right click on the breakpoint column opens the breakpoint condition editor.
             if (Events.isRightClick(event.rawEvent))
                 this.dispatch("startBreakpointConditionEditor", [event.lineNo, event.rawEvent]);
             else

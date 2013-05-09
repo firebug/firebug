@@ -528,14 +528,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     startBreakpointConditionEditor: function(lineIndex, event)
     {
-        Trace.sysout("scriptPanel.startBreakpointConditionEditor; Line: " + lineIndex);
+        Trace.sysout("scriptPanel.startBreakpointConditionEditor; line: " + lineIndex, event);
 
         this.initializeEditBreakpointCondition(lineIndex);
+
         Events.cancelEvent(event);
     },
 
     onEditorMouseUp: function(event)
     {
+        Trace.sysout("scriptPanel.onEditorMouseUp;", event);
+
         // Click anywhere in the script panel closes breakpoint-condition-editor
         // if it's currently opened. It's valid to close the editor this way
         // and that's why the 'cancel' argument is set to false.
@@ -545,10 +548,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     initializeEditBreakpointCondition: function(lineNo)
     {
-        var url = this.getCurrentURL(), editor = this.getEditor();
-        // The breakpoint doesn't have to exist.
+        Trace.sysout("scriptPanel.initializeEditBreakpointCondition; " + lineNo);
+
+        var url = this.getCurrentURL();
+        var editor = this.getEditor();
+
+        // The breakpoint doesn't have to exist. The editor can be also opened
+        // at line with no breakpoint. The breakpoint will be created eventually if the
+        // user creates a condition.
         var bp = BreakpointStore.findBreakpoint(url, lineNo);
-                
         if (bp)
         {
             // Reference to the edited breakpoint.
@@ -577,38 +585,40 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             href: url,
             condition: "",
         };
-        
+
         editor.breakpoint = tempBp;
         this.scriptView.initializeBreakpoint(lineNo, tempBp.condition);
     },
 
     openBreakpointConditionEditor: function(lineNo, condition, originalLineNo)
     {
+        Trace.sysout("scriptPanel.openBreakpointConditionEditor; " + lineNo +
+            ", condition: " + condition + ", original line: " + originalLineNo);
+
         var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
         var target = null;
 
-        // If the line the user clicked wasn't a executable line, it's need
+        // Remove the icon from non-executable line.
         if (originalLineNo)
             this.scriptView.removeBreakpoint({lineNo: originalLineNo});
-        
-        
+
         if (!bp)
         {
             // If a bp didn't exist at the line, loading icon is showing
-            // and it's  need to remove it, otherwise the loading icon
-            // isn't shown if the uset wanted to set condition on a existed
-            // bp (See initializeEditBreakpointCondition()).
-             this.scriptView.removeBreakpoint({lineNo: lineNo});
+            // and it needs to be removed.
+            // The loading icon isn't shown if the user wanted to set a condition
+            // on an existing bp (See initializeEditBreakpointCondition()).
+            this.scriptView.removeBreakpoint({lineNo: lineNo});
         }
         else
         {
-            // There is already a bp at the line, so get the element(target)
+            // There is already a bp at the line, so get the element (target)
             // of bp icon. we should also verify if the bp is a conditional
             // bp, if so, load the expression into the editor.
             target = this.scriptView.getGutterMarkerTarget(lineNo);
-            condition = bp.condition;   
+            condition = bp.condition;
         }
-        
+
         if (!target)
         {
             this.scriptView.addBreakpoint({lineNo: lineNo});
@@ -621,24 +631,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // As Editor scrolls(not panel itself) with long scripts, we need to set
         // scrollTop manually to show the editor properly(at the right y coord).
         this.scrollTop = this.scriptView.getScrollInfo().top;
-        
-        Firebug.Editor.startEditing(target, condition, null, null, this);
-    },
 
-    startEditingConditionAsyn: function(lineNo, condition)
-    {
-        // This should be called with a delay to sure some
-        // async operations like scrollToLine is done.
-        var self = this;
-        setTimeout(function()
-        {
-            self.startEditingCondition(lineNo, condition);
-        }, 200);
+        Firebug.Editor.startEditing(target, condition, null, null, this);
     },
 
     onSetBreakpointCondition: function(bp, value, cancel)
     {
-        Trace.sysout("scriptPanel.onSetBreakpointCondition; " + value, bp);
+        Trace.sysout("scriptPanel.onSetBreakpointCondition; " + value + "cancel: " + cancel, bp);
 
         var availableBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
 
@@ -693,6 +692,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Now insert the breakpoint at the rigth location.
         this.scriptView.addBreakpoint(bp);
+
+        // If BP condition is set, the breakpoint has been initialized by the condition
+        // editor. Note that the editor can be opened even on line with no breakpoint
+        // and is such case the bp is created after the condition is set.
+        // The breakpoint has been already created on the server side at this point,
+        // (its line location corrected), and we can now continue with the editor opening.
+        if (bp.condition != null)
+        {
+            // Just open the condition editor at the corrected line.
+            this.openBreakpointConditionEditor(bp.lineNo, bp.condition, bp.params.originLineNo);
+        }
     },
 
     onBreakpointRemoved: function(context, bp)

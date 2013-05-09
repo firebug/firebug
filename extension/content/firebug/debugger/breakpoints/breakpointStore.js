@@ -229,8 +229,9 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             return;
         }
 
-        // Saving the conditional bps physically should be defered until
-        // the user decides to save the bp.
+        // If the conditional editor is opened on a line with no breakpoint a temporary
+        // breakpoint must be created. If a condition is eventually created the breakpoint
+        // will be kept otherwise removed.
         if (condition != null)
         {
             var bp = new Breakpoint(url, lineNo, false, type);
@@ -240,6 +241,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             this.dispatch("onAddBreakpoint", [bp]);
             return;
         }
+
         var bp = this.findBreakpoint(url, lineNo, -1);
 
         // Bail out if exactly the same breakpoint already exists. This is not an error

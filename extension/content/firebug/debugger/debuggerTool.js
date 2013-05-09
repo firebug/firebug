@@ -356,9 +356,13 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     onAddBreakpoint: function(bp)
     {
+        Trace.sysout("debuggerTool.onAddBreakpoint;", bp);
+
         var self = this;
         this.setBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
         {
+            Trace.sysout("debuggerTool.onAddBreakpoint; callback executed", response);
+
             // Autocorrect shared breakpoint object if necessary and store the original
             // line so, listeners (like e.g. the Script panel) can update the UI.
             var currentLine = bpClient.location.line - 1;
@@ -370,19 +374,9 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
                 bp.lineNo = currentLine;
             }
 
-            if (bp.condition != null)
-            {
-                // The actual location of bp is found, So just open the
-                // condition editor at the corrected line.
-                self.dispatch("openBreakpointConditionEditor",
-                    [bp.lineNo, bp.condition, bp.params.originLineNo]);
-            }
-            else
-            {
-                // Breakpoint is ready on the server side, let's notify all listeners so,
-                // the UI is properly (and asynchronously) updated everywhere.
-                self.dispatch("onBreakpointAdded", [self.context, bp]);
-            }
+            // Breakpoint is ready on the server side, let's notify all listeners so,
+            // the UI is properly (and asynchronously) updated everywhere.
+            self.dispatch("onBreakpointAdded", [self.context, bp]);
 
             // The info about the original line should not be needed any more.
             delete bp.params.originLineNo;
