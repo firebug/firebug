@@ -129,7 +129,8 @@ FirebugReps.Nada = domplate(Firebug.Rep,
 
 FirebugReps.Number = domplate(Firebug.Rep,
 {
-    tag: OBJECTBOX("$object"),
+    tag: OBJECTBOX({"_repObject": "$object"}, "$object"),
+    tinyTag: OBJECTBOX("$object"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -151,9 +152,10 @@ FirebugReps.Number = domplate(Firebug.Rep,
 var reSpecialWhitespace = /  |[\t\n]/;
 FirebugReps.SpecialWhitespaceString = domplate(Firebug.Rep,
 {
-    tag: PREOBJECTBOX("&quot;$object&quot;"),
+    tag: PREOBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
 
-    shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
+    shortTag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object|cropMultipleLines&quot;"),
+    tinyTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -167,9 +169,10 @@ FirebugReps.SpecialWhitespaceString = domplate(Firebug.Rep,
 
 FirebugReps.String = domplate(Firebug.Rep,
 {
-    tag: OBJECTBOX("&quot;$object&quot;"),
+    tag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
 
-    shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
+    shortTag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object|cropMultipleLines&quot;"),
+    tinyTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -476,7 +479,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                 if (filter(t, value))
                 {
                     var rep = Firebug.getRep(value);
-                    var tag = rep.shortTag || rep.tag;
+                    var tag = rep.tinyTag || rep.shortTag || rep.tag;
                     if ((t == "object" || t == "function") && value)
                     {
                         value = rep.getTitle(value);
@@ -2163,6 +2166,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "CompilationUnit",
+    inspectable: false,
 
     supportsObject: function(object, type)
     {

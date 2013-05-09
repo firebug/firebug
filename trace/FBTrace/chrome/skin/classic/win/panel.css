@@ -44,25 +44,3 @@
 .twisty {
     background-position: 4px 4px;
 }
-
-.hasHeaders .netHrefLabel,
-.cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-position: 2px 50%;
-}
-
-/************************************************************************************************/
-/* DOM panel */
-
-.closeButton {
-    width: 16px;
-    height: 16px;
-    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
-}
-
-.closeButton:hover {
-    background-position: 0 -16px;
-}
-
-.closeButton:hover:active {
-    background-position: 0 -32px;
-}

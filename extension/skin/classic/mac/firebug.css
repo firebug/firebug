@@ -178,12 +178,12 @@
 
 #fbMinimizeButton,
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/min.png);
+    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
 #fbDetachButton,
 #fbToggleCommandLine {
-    list-style-image: url(chrome://firebug/skin/mac/detach.png);
+    list-style-image: url(chrome://firebug/skin/mac/detach.svg);
 }
 
 #fbToggleCommandLine,
@@ -192,32 +192,24 @@
 }
 
 #fbCloseButton {
-    list-style-image: url(chrome://firebug/skin/mac/close.png);
+    list-style-image: url(chrome://firebug/skin/mac/close.svg);
 }
 
 #fbCommandLineHistoryButton {
-    list-style-image: url(chrome://firebug/skin/mac/commandHistory.png);
+    list-style-image: url(chrome://firebug/skin/mac/commandHistory.svg);
 }
 
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/min.png);
-}
-
-#fbMinimizeButton,
-#fbDetachButton,
-#fbCloseButton,
-#fbToggleCommandLine,
-#fbToggleCommandEditor,
-#fbCommandLineHistoryButton {
-    -moz-image-region: rect(0, 13px, 13px, 0);
+    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
 #fbMinimizeButton:hover,
 #fbDetachButton:hover,
 #fbCloseButton:hover,
 #fbToggleCommandLine:hover,
-#fbToggleCommandEditor:hover {
-    -moz-image-region: rect(13px, 13px, 26px, 0);
+#fbToggleCommandEditor:hover,
+#fbCommandLineHistoryButton:hover {
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 #fbMinimizeButton:hover:active,
@@ -227,11 +219,11 @@
 #fbToggleCommandEditor:hover:active,
 #fbCommandLineHistoryButton:active,
 #fbCommandLineHistoryButton[checked="true"] {
-    -moz-image-region: rect(26px, 13px, 39px, 0);
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 #fbCommandLineHistoryButton[disabled] {
-    -moz-image-region: rect(39px, 13px, 52px, 0);
+    filter: url(chrome://firebug/skin/filters.svg#brighten);
 }
 
 /********************************************************************************************/

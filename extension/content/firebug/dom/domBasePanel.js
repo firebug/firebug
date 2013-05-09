@@ -210,10 +210,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
+        if (type == "number" || type == "string" || type == "boolean")
+            return 0;
         if (object == null)
-            return 1000;
-
-        if (typeof object === "undefined")
             return 1000;
         else if (object instanceof SourceLink.SourceLink)
             return 0;
