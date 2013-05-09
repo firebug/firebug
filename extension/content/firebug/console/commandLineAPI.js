@@ -142,21 +142,21 @@ CommandLineAPI.getCommandLineAPI = function(context)
 
         var format = Locale.$STR("commandline.CurrentWindow") + " %o";
         Firebug.Console.logFormatted([format, context.baseWindow], context, "info");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // no web page interaction
     commands.clear = function()
     {
         Firebug.Console.clear(context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // no web page interaction
     commands.inspect = function(obj, panelName)
     {
         Firebug.chrome.select(obj, panelName);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.keys = function(o)
@@ -174,25 +174,25 @@ CommandLineAPI.getCommandLineAPI = function(context)
     commands.debug = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.undebug = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "debug");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.monitor = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.unmonitor = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "monitor");
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.traceAll = function()
@@ -200,7 +200,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.traceAll(Firebug.currentContext);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.untraceAll = function()
@@ -208,7 +208,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.untraceAll(Firebug.currentContext);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.traceCalls = function(/*fn*/)
@@ -216,7 +216,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.untraceCalls = function(/*fn*/)
@@ -224,26 +224,26 @@ CommandLineAPI.getCommandLineAPI = function(context)
         // See issue 6220
         Firebug.Console.log(Locale.$STR("commandline.MethodDisabled"));
         //Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.copy = function(x)
     {
         System.copyToClipboard(x);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     // xxxHonza: removed from 1.10 (issue 5599)
     /*commands.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };
 
     commands.memoryProfileEnd = function()
     {
         Firebug.MemoryProfiler.stop(context);
-        return Firebug.Console.getDefaultReturnValue(context.window);
+        return Firebug.Console.getDefaultReturnValue();
     };*/
 
     return commands;

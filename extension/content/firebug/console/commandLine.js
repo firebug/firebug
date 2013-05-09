@@ -118,8 +118,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                         "and returned: "+ result, result);
                 }
 
-                var ignoreReturnValue = Console.getDefaultReturnValue(win);
-                if (result === ignoreReturnValue)
+                if (Console.isDefaultReturnValue(result))
                     return;
 
                 successConsoleFunction(result, context);

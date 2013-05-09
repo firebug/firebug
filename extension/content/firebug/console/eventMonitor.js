@@ -376,7 +376,7 @@ function monitorEvents(context, args)
     var types = args[1];
 
     EventMonitor.monitorEvents(object, types, context);
-    return Firebug.Console.getDefaultReturnValue(context.window);
+    return Firebug.Console.getDefaultReturnValue();
 }
 
 function unmonitorEvents(context, args)
@@ -385,7 +385,7 @@ function unmonitorEvents(context, args)
     var types = args[1];
 
     EventMonitor.unmonitorEvents(object, types, context);
-    return Firebug.Console.getDefaultReturnValue(context.window);
+    return Firebug.Console.getDefaultReturnValue();
 }
 
 // ********************************************************************************************* //
