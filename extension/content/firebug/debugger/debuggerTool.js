@@ -465,7 +465,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
                 self.context.breakpointClients = [];
 
             // xxxHonza: Florent, do we still need this? The min FF is 20+
-            // FF 19: uses same breakpoint client object for a executable line and
+            // xxxFarshid: Yes, we do.
+            // FF 19+: uses same breakpoint client object for a executable line and
             // all non-executable lines above that, so doesn't store breakpoint client
             // objects if there is already one with same actor.
             if (!self.breakpointActorExists(bpClient))

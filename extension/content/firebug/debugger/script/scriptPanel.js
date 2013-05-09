@@ -598,10 +598,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
         var target = null;
 
-        // Remove the icon from non-executable line.
-        if (originalLineNo)
-            this.scriptView.removeBreakpoint({lineNo: originalLineNo});
-
         if (!bp)
         {
             // If a bp didn't exist at the line, loading icon is showing
