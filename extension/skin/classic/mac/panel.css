@@ -141,15 +141,15 @@ body {
 .closeButton {
     width: 13px;
     height: 13px;
-    background: url(chrome://firebug/skin/mac/close.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/mac/close.svg) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    background-position: 0 -13px;
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 .closeButton:hover:active {
-    background-position: 0 -26px;
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 /************************************************************************************************/
