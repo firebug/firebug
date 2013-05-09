@@ -1347,7 +1347,10 @@ var FirebugChrome =
     obeyOmitObjectPathStack: function(value)
     {
         var panelStatus = this.getElementById("fbPanelStatus");
-        Dom.hide(panelStatus, (value?true:false));
+        // The element does not exist immediately at start-up.
+        if (!panelStatus)
+            return;
+        Dom.hide(panelStatus, (value ? true : false));
     },
 
     getPanelStatusElements: function()
@@ -1564,9 +1567,7 @@ var FirebugChrome =
         var items = [];
         Events.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
             Firebug.currentContext, panel, popup]);
-
-        if (items)
-            Menu.createMenuItems(popup, items);
+        Menu.createMenuItems(popup, items);
 
         if (!popup.firstChild)
             return false;
