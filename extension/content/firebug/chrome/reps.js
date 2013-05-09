@@ -33,7 +33,7 @@ define([
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, SourceFile, StackFrame, StackTrace, Css, Dom, Win, System,
-    Xpath, Str, Xml, ToggleBranch, EventMonitor, ClosureInspector, Menu, CompilationUnit,
+    Xpath, Str, Xml, ToggleBranch, ClosureInspector, Menu, CompilationUnit,
     ErrorMessageObj, ErrorCopy) {
 
 with (Domplate) {
