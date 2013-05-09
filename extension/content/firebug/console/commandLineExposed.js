@@ -314,7 +314,7 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError)
     {
         // Change source and line number of exceptions from commandline code
         // create new error since properties of nsIXPCException are not modifiable.
-        // Example of code raising nsIXPCException: `alert()` (without arguments)
+        // Example of code raising nsIXPCException: `alert({toString: function(){ throw "blah"; }})`
 
         // xxxFlorent: FIXME: we can't get the right stack trace with this example:
         //     function a(){

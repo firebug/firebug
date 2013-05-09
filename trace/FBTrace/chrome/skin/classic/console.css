@@ -243,8 +243,8 @@
 
 .errorColCaret {
     width: 7px;
-    height: 8px;
-    background: url(chrome://firebug/skin/console-error-caret.png) no-repeat;
+    height: 9px;
+    background: url(chrome://firebug/skin/errorColumnIndicator.svg) no-repeat 100% 100%;
     display: inline-block;
     vertical-align: top;
     margin-left: 1px;

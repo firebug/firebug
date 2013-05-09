@@ -40,13 +40,16 @@
                     <li>Open Firebug on this page</li>
                     <li>Enable and switch to the Console panel</li>
                     <li>
-                        Evaluate this expression: <code>alert()</code>
+                        Evaluate this expression:
+                            <code>alert({ toString: function(){ throw 1; }})</code>
                         <br/>&#x21b3; An exception should be displayed with the correct source and line
                     </li>
+                    <!--
                     <li>
                         Click on the source of the previous exception
                         <br/>&#x21b3; The source of the exception should be displayed in a new window
                     </li>
+                    -->
                     <li>
                         Evaluate: <code>console.log("some text via the command line");</code>
                         <br/>&#x21b3; No source link should be displayed
