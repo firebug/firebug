@@ -178,7 +178,7 @@ panelTab > panelTabMenu .menuTarget {
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
 panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
+    background: url(chrome://firebug-os/skin/optionsMenuTarget.svg) no-repeat center;
     width: 11px;
     height: 10px;
     vertical-align: middle;
@@ -186,7 +186,11 @@ panelTab:focus > panelTabMenu .menuTarget {
 }
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
+    background: url(chrome://firebug-os/skin/optionsMenuTargetHover.svg) no-repeat center;
+}
+
+panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
@@ -343,24 +347,21 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 
 /************************************************************************************************/
 
-@-moz-keyframes armedBlinking {
+@keyframes armedBlinking {
     100% {
         text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange;
     }
 }
 
 panelTab[breakOnNextArmed="true"] > .panelTab-text {
-    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange !important;
-    /* animation: armedBlinking 0.8s ease-out infinite alternate; see issue 5618 */
+    animation: armedBlinking 0.8s steps(9, end) infinite alternate;
 }
 
-/* see issue 5618
 panelTab.highlighted {
     text-shadow: 1px 1px 2px darkGray, 0px 0px 1em orange, 0px 0px 0.2em orange !important;
-    -moz-transition-property: text-shadow;
-    -moz-transition-duration: 0.8s;
+    transition-property: text-shadow;
+    transition-duration: 1.4s;
 }
-*/
 
 panelTab[aria-disabled='true'] {
     color: graytext !important;
@@ -383,6 +384,7 @@ panelBarTabList {
 
 /************************************************************************************************/
 /* splitmenu */
+
 menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {
     background-color: -moz-menuhover;
     color: -moz-menuhovertext;

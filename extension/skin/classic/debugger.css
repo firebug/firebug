@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+@import "chrome://firebug-os/skin/debugger.css";
+
 .panelNode-script {
     overflow: hidden;
     font-family: monospace;
@@ -183,38 +185,15 @@
     margin-top: 0;
     left: 5px;
     width: 90%;
-    background: linear-gradient(to bottom, #00CEFD, #00BAF6) no-repeat;
-    border-style: solid;
-    border-width: 19px 25px 33px 33px;
-    -moz-border-image: url(condCorners.png) 19 25 33 33 stretch;
-}
-
-.conditionCaption {
-    margin-bottom: 2px;
-    font-family: Lucida Grande, sans-serif;
-    font-weight: bold;
-    font-size: 11px;
-    color: #226679;
 }
 
 .conditionInput {
     width: 100%;
-    border: 1px solid #0096C0;
-    font-family: monospace;
     font-size: inherit;
 }
 
 .conditionInput.completionInput {
     position: relative;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-.upsideDown {
-    background: linear-gradient(to bottom, #00D1FE, #00ADE6) no-repeat;
-    border-style: solid;
-    border-width: 28px 25px 19px 33px;
-    -moz-border-image: url(condCornersUps.png) 28 25 19 33 stretch;
 }
 
 /*************************************************************************************************/

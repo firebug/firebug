@@ -15,6 +15,10 @@
     color: #000000;
 }
 
+.cssRulesListBox > .cssRule {
+    padding-left: 2em;
+}
+
 .cssRule:first-child {
     margin-top: 6px;
 }
@@ -100,10 +104,6 @@
 
 .computedStylesGroup.hidden {
     display: none;
-}
-
-.cssComputedHeader > .twisty {
-    background-position: 4px 4px !important;
 }
 
 .cssInheritLabel,

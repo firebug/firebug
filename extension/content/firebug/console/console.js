@@ -14,6 +14,7 @@ define([
     "firebug/console/consolePanel",
     "firebug/console/commandEditor",
     "firebug/console/functionMonitor",
+    "firebug/console/eventMonitor",
     "firebug/console/performanceTiming",
 ],
 function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {

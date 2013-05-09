@@ -1,0 +1,33 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Breakpoint condition */
+
+.conditionEditor {
+    background-image: linear-gradient(to bottom, #2DD0FC, #00BBF8);
+    background-repeat: no-repeat;
+    border-style: solid;
+    border-width: 19px 25px 33px 33px;
+    -moz-border-image: url(chrome://firebug/skin/win/breakpointConditionEditor.svg) 19 25 33 33 stretch;
+}
+
+.conditionCaption {
+    margin-bottom: 2px;
+    font-family: Lucida Grande, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    color: #226679;
+}
+
+.conditionInput {
+    border: 1px solid #0096C0;
+    font-family: monospace;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.upsideDown {
+    background-image: linear-gradient(to bottom, #13D1FC, #00B0E6);
+    border-width: 28px 25px 19px 33px;
+    -moz-border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.svg) 28 25 19 33 stretch;
+}

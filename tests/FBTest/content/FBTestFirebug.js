@@ -13,7 +13,16 @@
 
 ( /** @scope _FBTestFirebug_ @this FBTest */ function() {
 
-Components.utils["import"]("resource://fbtest/EventUtils.js");
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+Cu["import"]("resource://fbtest/EventUtils.js");
+
+//************************************************************************************************
+//Constants
+
+var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
 
 // ********************************************************************************************* //
 // Core test APIs (direct access to FBTestApp)
@@ -211,18 +220,9 @@ this.setToKnownState = function()
     FBTest.sysout("FBTestFirebug setToKnownState");
 
     var Firebug = FBTest.FirebugWindow.Firebug;
-    if (Firebug.PanelActivation)
-    {
-        Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
-        Firebug.PanelActivation.toggleAll("none");
-        Firebug.PanelActivation.clearAnnotations();
-    }
-    else // obsolete, remove
-    {
-        Firebug.Activation.toggleAll("off");
-        Firebug.Activation.toggleAll("none");
-        Firebug.Activation.clearAnnotations();
-    }
+    Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
+    Firebug.PanelActivation.toggleAll("none");
+    Firebug.PanelActivation.clearAnnotations(true);
 
     if (Firebug.isDetached())
         Firebug.toggleDetachBar();

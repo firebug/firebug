@@ -29,11 +29,11 @@
 }
 
 .opened > .testResultCol > .testResultMessage {
-    background-image: url(chrome://fbtest/skin/twistyOpen.png);
+    background-image: url(chrome://fbtest/skin/twistyOpen.svg);
 }
 
 .testResultMessage {
-    background-image: url(chrome://fbtest/skin/twistyClosed.png);
+    background-image: url(chrome://fbtest/skin/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 2px;
     padding-left: 18px;
@@ -70,7 +70,7 @@
     background: #EFEFEF;
     padding-left: 18px;
     position: absolute;
-    background-image: url(chrome://fbtest/skin/twistyClosed.png);
+    background-image: url(chrome://fbtest/skin/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 2px;
 }

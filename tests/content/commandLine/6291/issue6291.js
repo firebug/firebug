@@ -13,24 +13,25 @@ function runTest()
             var tasks = new FBTest.TaskList();
             // 3
             tasks.push(logProgress, "Testing the nsIXPCException's with alert()");
-            tasks.push(FBTest.executeCommandAndVerify, "alert()",
-                "Error: Not enough arguments [nsIDOMWindow.alert]", "span", "errorMessage", false);
-            tasks.push(testError, panelNode, "alert()", 2);
-            // xxxFlorent: TODO test click on the source of the error
-            // 5.
+            var alertCommand = "alert({toString: function(){ throw 1; }})";
+            tasks.push(FBTest.executeCommandAndVerify, alertCommand,
+                "Error: Could not convert JavaScript argument arg 0 [nsIDOMWindow.alert]", "span",
+                "errorMessage", false);
+            tasks.push(testError, panelNode, alertCommand, 2);
+            // 4.
             tasks.push(logProgress,
                 "Testing the calls of the console API through the Command Line");
             var textToLog = "some text via the command line";
             tasks.push(FBTest.executeCommandAndVerify, "console.log('"+textToLog+"')", textToLog, 
                 "div", "logRow-log");
 
-            // 6.
+            // 5.
             tasks.push(logProgress, "Testing the calls of the console API through the webpage");
             tasks.push(click, win.document.getElementById("logSomeText"));
             tasks.push(testLogMessageFromPage, panelNode, "some text via the webpage", 
                 "issue6291.html (line 20)");
 
-            // 7.
+            // 6.
             tasks.push(logProgress, "Testing the evaluation of |debugger;|");
             tasks.push(FBTest.executeCommandAndVerify, "debugger;", "undefined", 
                 "span", "objectBox-undefined", true, true);
@@ -40,13 +41,13 @@ function runTest()
                 callback();
             });
 
-            // 8.
+            // 7.
             tasks.push(logProgress, "Testing the click on \"debug Me\"");
             tasks.push(click, win.document.getElementById("debugMe"));
             // test whether the script panel is selected:
             tasks.push(testPanelSelected, "script");
 
-            // 9.
+            // 8.
             tasks.push(logProgress, "Testing the responsiveness of the Firebug UI");
             tasks.push(function(callback)
             {
@@ -55,7 +56,7 @@ function runTest()
             });
             tasks.push(testPanelSelected, "callstack");
 
-            // 10.
+            // 9.
             tasks.push(logProgress, "Go back to the Console Panel");
             tasks.push(function(callback)
             {
@@ -64,24 +65,24 @@ function runTest()
                 callback();
             });
 
-            // 11.
+            // 10.
             tasks.push(logProgress, "Testing throwing error with a string");
             tasks.push(FBTest.executeCommandAndVerify, 'throw "aaa";', "Error: aaa", "span",
                 "errorMessage");
 
-            // 12. 
+            // 11. 
             tasks.push(logProgress, "Testing overriding commands");
             tasks.push(FBTest.executeCommandAndVerify, "window.cd = 'ok';", '"ok"', "span",
                 "objectBox-string");
 
-            // 13.
+            // 12.
             tasks.push(FBTest.executeCommandAndVerify, "cd", '"ok"', "span", "objectBox-string");
 
-            // 14.
+            // 13.
             tasks.push(FBTest.executeCommandAndVerify, "delete window.cd;", "true",
                 "span", "objectBox-number");
 
-            // 15.
+            // 14.
             tasks.push(FBTest.executeCommandAndVerify, "cd.toSource()", '"function () {\n'+
                 '    [native code]\n}"', "pre", "objectBox-string");
 
