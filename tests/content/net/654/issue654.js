@@ -30,7 +30,7 @@ function runTest()
 
                 if (localIPs.length == 2 && remoteIPs.length == 2)
                 {
-                    var reIP = /\b(?:\d{1,3}\.){3}\d{1,3}\:\d{1,5}\b/;
+                    var reIP = /^((?:\d{1,3}\.){3}\d{1,3}|\[[0-9a-f:]*?\])\:\d{1,5}$/;
                     FBTest.progress("First Local IP: " + localIPs[0].textContent);
                     FBTest.compare(reIP, localIPs[0].textContent, "IP address and port number is expected.");
                     FBTest.progress("Second Local IP: " + localIPs[1].textContent);

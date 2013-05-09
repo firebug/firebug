@@ -311,7 +311,8 @@ const eventTypes =
         "DOMFocusOut"
     ],
 
-    xul: [
+    // xxxHonza: As Simon says, XUL events must die!
+    /*xul: [
         "popupshowing",
         "popupshown",
         "popuphiding",
@@ -320,7 +321,7 @@ const eventTypes =
         "command",
         "broadcast",
         "commandupdate"
-    ],
+    ],*/
 
     clipboard: [
         "cut",
@@ -336,6 +337,14 @@ const eventTypes =
         "touchleave",
         "touchcancel"
     ]
+};
+
+Events.getEventFamilies = function()
+{
+    var families = [];
+    for (var eventFamily in eventTypes)
+        families.push(eventFamily);
+    return families;
 };
 
 Events.getEventTypes = function(family)

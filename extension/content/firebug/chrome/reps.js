@@ -25,7 +25,6 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
-    "firebug/console/eventMonitor",
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
@@ -1485,21 +1484,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 }
             ]);
         }
-        
+
         items = items.concat([
-            "-",
-            {
-                label: "ShowEventsInConsole",
-                tooltiptext: "html.tip.Show_Events_In_Console",
-                id: "fbShowEventsInConsole",
-                type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, null, context),
-                command: function()
-                {
-                    var checked = this.hasAttribute("checked");
-                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
-                }
-            },
             "-",
             {
                 label: "ScrollIntoView",
@@ -1734,6 +1720,15 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSStyleRule";
         }
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
+        {
+            return "CSSSupportsRule";
+        }
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            rule instanceof window.CSSMozDocumentRule)
+        {
+            return "CSSDocumentRule";
+        }
         else if (rule instanceof window.CSSFontFaceRule)
         {
             return "CSSFontFaceRule";
@@ -1777,6 +1772,15 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         if (rule instanceof window.CSSStyleRule)
         {
             return rule.selectorText;
+        }
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
+        {
+            return rule.conditionText;
+        }
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            rule instanceof window.CSSMozDocumentRule)
+        {
+            return rule.conditionText;
         }
         else if (rule instanceof window.CSSFontFaceRule)
         {
@@ -1958,52 +1962,6 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         return "Event " + event.type;
     }
-});
-
-// ********************************************************************************************* //
-
-FirebugReps.EventLog = domplate(FirebugReps.Event,
-{
-    className: "eventLog",
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    tag:
-        TAG("$copyEventTag", {object: "$object|copyEvent"}),
-
-    copyEventTag:
-        SPAN(
-            OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
-            SPAN("&#187;"),
-            SPAN("&nbsp"),
-            TAG("$object|getTargetTag", {object: "$object|getTarget"})
-        ),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    copyEvent: function(log)
-    {
-        return new Dom.EventCopy(log.event);
-    },
-
-    getTarget: function(event)
-    {
-        return event.target;
-    },
-
-    getTargetTag: function(event)
-    {
-        var rep = Firebug.getRep(event.target);
-        return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    supportsObject: function(object, type)
-    {
-        return object instanceof EventMonitor.EventLog;
-    },
 });
 
 // ********************************************************************************************* //
@@ -2800,7 +2758,6 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog,
     FirebugReps.ClosureScope,
     FirebugReps.OptimizedAway
 );

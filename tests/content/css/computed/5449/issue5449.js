@@ -38,13 +38,13 @@ function fontFamily(callback)
 
 function color(callback)
 {
-    executeStylePropTest("background-color", "color", /rgb\(140,\s*140,\s*255\)/, callback);
+    executeStylePropTest("background-color", "color", /#8C8CFF/, callback);
 }
 
 function gradient(callback)
 {
     executeMatchedSelectorTest("background-image", "gradient",
-        /-moz-linear-gradient\(135deg,\s*rgb\(120,\s*140,\s*255\),\s*rgb\(180,\s*200,\s*255\)/,
+        /-moz-linear-gradient\(135deg,\s*#788CFF,\s*#B4C8FF\)/,
         0, callback);
 }
 

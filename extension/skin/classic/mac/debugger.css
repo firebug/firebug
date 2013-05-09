@@ -176,15 +176,13 @@
 /* Breakpoint condition */
 
 .conditionEditor {
-    z-index: 2147483647;
-    position: absolute;
-    margin-top: 0;
-    left: 5px;
-    width: 90%;
-    background: linear-gradient(to bottom, #00CEFD, #00BAF6) no-repeat;
+    /* A bug in Firefox requires to set a background image instead of a color,
+       otherwise the border will also be painted in the background color */
+    background-image: linear-gradient(to bottom, rgba(37, 37, 37, 0.863), rgba(37, 37, 37, 0.863));
+    background-repeat: no-repeat;
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    -moz-border-image: url(condCorners.png) 19 25 33 33 stretch;
+    -moz-border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.svg) 19 25 33 33 stretch;
 }
 
 .conditionCaption {
@@ -192,27 +190,23 @@
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
     font-size: 11px;
-    color: #226679;
+    color: #FFFFFF;
 }
 
 .conditionInput {
-    width: 100%;
-    border: 1px solid #0096C0;
+    border: 1px solid #96969D;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 2px -2px #000000 inset;
+    padding: 2px 12px;
     font-family: Monaco, monospace;
-    font-size: inherit;
-}
-
-.conditionInput.completionInput {
-    position: relative;
+    -moz-box-sizing: border-box;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .upsideDown {
-    background: linear-gradient(to bottom, #00D1FE, #00ADE6) no-repeat;
-    border-style: solid;
     border-width: 28px 25px 19px 33px;
-    -moz-border-image: url(condCornersUps.png) 28 25 19 33 stretch;
+    -moz-border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.svg) 28 25 19 33 stretch;
 }
 
 /************************************************************************************************/
