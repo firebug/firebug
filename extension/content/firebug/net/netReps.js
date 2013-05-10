@@ -496,13 +496,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
-                        "(",
-                        SPAN("0 B"),
-                        SPAN(" " + Locale.$STR("FromCache")),
-                        ")"
+                        "(" + Locale.$STRF("net.summary.from_cache", ["0 B"]) + ")"
                     ),
-                    DIV({"class": "netTimeBar netSummaryLabel"},
-                        SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
+                    DIV({"class": "netTotalTimeLabel netSummaryLabel"},
+                        "0ms"
                     )
                 )
             )
