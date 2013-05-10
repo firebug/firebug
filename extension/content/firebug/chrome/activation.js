@@ -7,8 +7,9 @@ define([
     "firebug/lib/url",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/annotations",
+    "firebug/chrome/firefox",
 ],
-function(Obj, Firebug, Locale, Url, TabWatcher, Annotations) {
+function(Obj, Firebug, Locale, Url, TabWatcher, Annotations, Firefox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -360,6 +361,26 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 return rc;
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
+    /**
+     * After all options (and annotations) have been reset make sure to set
+     * a new annotation for the current URL.
+     * The annotation will ensure Firebug to be visible after refresh.
+     */
+    allOptionsReseted: function()
+    {
+        // Only reset the annotation if Firebug is active for the current URL.
+        if (!Firebug.currentContext)
+            return;
+
+        var currentURI = Firefox.getCurrentURI();
+        var annotation = "firebugged.showFirebug";
+
+        this.setPageAnnotation(currentURI.spec, annotation);
+    }
 });
 
 // ********************************************************************************************* //

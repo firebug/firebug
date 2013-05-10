@@ -1169,16 +1169,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return;
 
         var countLabel = row.getElementsByClassName("netCountLabel").item(0); //childNodes[1].firstChild;
-        countLabel.firstChild.nodeValue = Locale.$STRP("plural.Request_Count2", [fileCount]);
+        countLabel.textContent = Locale.$STRP("plural.Request_Count2", [fileCount]);
 
         var sizeLabel = row.getElementsByClassName("netTotalSizeLabel").item(0); //childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
-        sizeLabel.firstChild.nodeValue = NetRequestEntry.formatSize(totalSize);
+        sizeLabel.textContent = NetRequestEntry.formatSize(totalSize);
 
         var cacheSizeLabel = row.getElementsByClassName("netCacheSizeLabel").item(0);
         cacheSizeLabel.setAttribute("collapsed", cachedSize == 0);
-        cacheSizeLabel.childNodes[1].firstChild.nodeValue =
-            NetRequestEntry.formatSize(cachedSize);
+        cacheSizeLabel.textContent = "(" + Locale.$STRF("net.summary.from_cache",
+            [NetRequestEntry.formatSize(cachedSize)]) + ")";
 
         var timeLabel = row.getElementsByClassName("netTotalTimeLabel").item(0);
         var timeText = NetRequestEntry.formatTime(totalTime);
