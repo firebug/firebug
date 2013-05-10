@@ -191,7 +191,6 @@ SourceEditor.prototype =
                     if (this.BuiltInEventsHandlers[type][i].handler == handler)
                         return;
                 }
-                FBTrace.sysout("addEventListener; " + type);
 
                 editorNode = this.editorObject.getWrapperElement();
                 editorNode.addEventListener(type, handler, false);
@@ -206,7 +205,6 @@ SourceEditor.prototype =
                 this.bpChangingHandlers = [];
 
             this.bpChangingHandlers.push(handler);
-
         }
         else
         {
@@ -219,6 +217,7 @@ SourceEditor.prototype =
                     break;
                 }
             }
+
             if (supportedEvent)
             {
                 editorNode = this.editorObject.getWrapperElement();
@@ -238,6 +237,7 @@ SourceEditor.prototype =
             {
                 handler(getEventObject(type, arguments));
             };
+
             for (var i = 0; i < this.BuiltInEventsHandlers[type].length; i++)
             {
                 if (this.BuiltInEventsHandlers[type][i].handler == handler)
@@ -279,6 +279,7 @@ SourceEditor.prototype =
                     break;
                 }
             }
+
             if (supportedEvent)
             {
                 editorNode = this.editorObject.getWrapperElement();
@@ -561,14 +562,28 @@ SourceEditor.prototype =
         if (this.currentTarget)
             target = this.currentTarget;
 
-        var lineElement = Dom.getAncestorByClass(target, "firebug-line");
+        this.currentTarget = null;
+
+        var lineElement;
+
+        if (Css.hasClass(target, "breakpoint"))
+        {
+            // Sadly, CM doesn't use much class attributes so, this needs to be hardcoded.
+            target = target.parentNode.parentNode.parentNode;
+            lineElement = target.getElementsByClassName("firebug-line").item(0);
+        }
+        else
+        {
+            lineElement = Dom.getAncestorByClass(target, "firebug-line");
+        }
+
         if (!lineElement)
             return -1;
 
         lineElement = lineElement.parentNode;
 
         //var lineObj = lineElement.lineObj; // other useful info
-        var lineNo = parseInt(lineElement.lineNumber, 10);
+        var lineNo = parseInt(lineElement.lineNumber.textContent, 10);
         if (isNaN(lineNo))
             return -1;
 

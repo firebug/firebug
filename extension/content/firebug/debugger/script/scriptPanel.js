@@ -1172,11 +1172,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
-        if (Css.hasClass(target, "breakpoint"))
+        if (Css.hasClass(target, "breakpoint condition"))
             return this.populateBreakpointInfoTip(infoTip, target);
 
-        // The source script must be within viewConent DIV (Orion).
-        var viewContent = Dom.getAncestorByClass(target, "viewContent");
+        // The source script must be within proper content.
+        var viewContent = Dom.getAncestorByClass(target, "CodeMirror");
         if (!viewContent)
             return;
 
