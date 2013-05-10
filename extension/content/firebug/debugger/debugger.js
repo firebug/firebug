@@ -360,8 +360,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (result.hasOwnProperty("return"))
             {
                 result = result["return"];
+
                 if (typeof(result) == "object")
-                    return DebuggerLib.unwrapDebuggeeValue(result["return"]);
+                    return DebuggerLib.unwrapDebuggeeValue(result);
                 else
                     return result;
             }

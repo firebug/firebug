@@ -155,7 +155,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         successConsoleFunction, exceptionFunction)
     {
         var result = null;
-
         if (!context.commandLineAPI)
             context.commandLineAPI = CommandLineAPI.getCommandLineAPI(context);
 

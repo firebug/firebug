@@ -24,11 +24,12 @@ define([
     "firebug/editor/editor",
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
+    "firebug/console/commandLine",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification) {
+    BreakNotification, CommandLine) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1207,33 +1208,42 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!frame)
             return false;
 
-        //xxxHonza: expression evaluation is not finished.
-        return false;
-
         var self = this;
-        this.tool.eval(null, expr, function (context, event, packet)
-        {
-            var result = packet.why.frameFinished["return"];
-            self.onPopulateInfoTip(infoTip, result);
-        });
 
-        // The result will be fetched asynchronously so, the tooltip should
-        // display a throbber or something...
-        return true;
-    },
+        // If the evaluate fails, then we report an error and don't show the infotip
+        CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
+            function success(result, context)
+            {
+                var rep = Firebug.getRep(result, context);
+                var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-    onPopulateInfoTip: function(infoTip, result)
-    {
-        var gripObj = this.context.clientCache.getObject(result);
-        gripObj.getProperties().then(function(props)
-        {
-            var value = gripObj.getValue();
+                Trace.sysout("scriptPanel.populateInfoTip result is " + result, result);
 
-            var rep = Firebug.getRep(value, context);
-            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+                tag.replace({object: result}, infoTip);
 
-            tag.replace({object: value}, infoTip);
-        });
+                // If the menu is never displayed, the contextMenuObject is not reset
+                // (back to null) and is reused at the next time the user opens the
+                // context menu, which is wrong.
+                // This line was appended when fixing:
+                // http://code.google.com/p/fbug/issues/detail?id=1700
+                // The object should be returned by getPopupObject(),
+                // that is called when the context menu is showing.
+                // The problem is, that the "onContextShowing" event doesn't have the
+                // rangeParent field set and so it isn't possible to get the
+                // expression under the cursor (see getExpressionAt).
+                //Firebug.chrome.contextMenuObject = result;
+
+                self.infoTipExpr = expr;
+            },
+            function failed(result, context)
+            {
+                Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
+
+                self.infoTipExpr = "";
+            }
+        );
+
+        return (this.infoTipExpr == expr);
     },
 
     populateBreakpointInfoTip: function(infoTip, target)
