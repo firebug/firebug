@@ -154,6 +154,7 @@
 .cm-s-firebug .breakpoint.condition {
     background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
     background-position: center;
+    padding: 6px;
 }
 
 .cm-s-firebug .breakpoint.disabled:not(.debugLocation) {
