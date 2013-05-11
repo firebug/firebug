@@ -8,13 +8,15 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/dom/toggleBranch",
     "firebug/dom/domModule",
 ],
-function(Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, ToggleBranch, DOMModule) {
+function(Firebug, D, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
+    DOMModule) {
 
 "use strict";
 
@@ -48,6 +50,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
     memberRowTag:
         D.TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
             $hasChildren: "$member.hasChildren",
+            $cropped: "$member.value|isCropped",
             role: "presentation",
             level: "$member.level",
             breakable: "$member.breakable",
@@ -122,6 +125,11 @@ var DirTablePlate = D.domplate(Firebug.Rep,
         }];
     },
 
+    isCropped: function(value)
+    {
+        return typeof value == "string" && value.length > Options.get("stringCropLength");
+    },
+
     getMemberNameTooltip: function(member)
     {
         return member.title || member.scopeNameTooltip;
@@ -142,7 +150,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
         var isString = Css.hasClass(target,"objectBox-string");
         var inValueCell = (event.target === valueCell || event.target === target);
 
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        if (label && (Css.hasClass(row, "hasChildren") || (isString && !inValueCell)))
         {
             row = label.parentNode.parentNode;
             this.toggleRow(row);
