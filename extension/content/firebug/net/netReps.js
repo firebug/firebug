@@ -484,25 +484,30 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             "aria-live": "polite"},
             TD({"class": "netCol"}, "&nbsp;"),
             TD({"class": "netCol netHrefCol a11yFocus", "role" : "rowheader"},
-                DIV({"class": "netCountLabel netSummaryLabel"}, "-")
+                DIV({"class": "netCountLabel netSummaryLabel",
+                    title: Locale.$STR("net.summary.tip.request count")},
+                    "-"
+                )
             ),
             TD({"class": "netCol netStatusCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netProtocolCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netDomainCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
-                DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0 B")
+                DIV({"class": "netTotalSizeLabel netSummaryLabel",
+                    title: Locale.$STR("net.summary.tip.total size")},
+                    "0 B"
+                )
             ),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role":
                 "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
-                    DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
-                        "(",
-                        SPAN("0 B"),
-                        SPAN(" " + Locale.$STR("FromCache")),
-                        ")"
+                    DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true",
+                        title: Locale.$STR("net.summary.tip.total cached size")},
+                        "(" + Locale.$STRF("net.summary.from_cache", ["0 B"]) + ")"
                     ),
-                    DIV({"class": "netTimeBar netSummaryLabel"},
-                        SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
+                    DIV({"class": "netTotalTimeLabel netSummaryLabel",
+                        title: Locale.$STR("net.summary.tip.total request time")},
+                        "0ms"
                     )
                 )
             )
