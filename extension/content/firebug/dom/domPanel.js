@@ -124,7 +124,8 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         if (!target)
             target = row.lastChild.firstChild;
 
-        if (!target || !target.repObject)
+        var object = target && target.repObject, type = typeof object;
+        if (!object || !this.supportsObject(object, type))
             return;
 
         this.pathToAppend = DOMBasePanel.getPath(row);
@@ -141,7 +142,7 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         // it might find the object in the existing path and not refresh it
         Firebug.chrome.clearStatusPath();
 
-        this.select(target.repObject, true);
+        this.select(object, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

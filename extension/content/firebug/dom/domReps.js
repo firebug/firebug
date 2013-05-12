@@ -158,12 +158,12 @@ var DirTablePlate = D.domplate(Firebug.Rep,
         }
         else
         {
-            if (typeof(object) === "function")
+            if (typeof object === "function")
             {
                 Firebug.chrome.select(object, "script");
                 Events.cancelEvent(event);
             }
-            else if (Events.isDoubleClick(event) && !object)
+            else if ((!object || typeof object !== "object") && Events.isDoubleClick(event))
             {
                 var panel = row.parentNode.parentNode.domPanel;
                 if (panel)
