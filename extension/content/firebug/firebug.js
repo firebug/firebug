@@ -1051,7 +1051,7 @@ window.Firebug =
         Events.dispatch(modules, "resetAllOptions", []);
 
         // Dispatch to all modules so 'after' actions can be executed.
-        Events.dispatch(modules, "allOptionsReseted", []);
+        Events.dispatch(modules, "afterResetAllOptions", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
