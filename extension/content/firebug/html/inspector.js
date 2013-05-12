@@ -14,10 +14,11 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/window",
     "firebug/lib/system",
-    "firebug/html/highlighterCache"
+    "firebug/html/highlighterCache",
+    "firebug/html/quickInfoBox",
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
-    Win, System, HighlighterCache) {
+    Win, System, HighlighterCache, QuickInfoBox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -732,7 +733,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     {
         try
         {
-            this.hideQuickInfoBox();
+            QuickInfoBox.hideQuickInfoBox();
+            this.inspectNode(null);
         }
         catch (ex)
         {
@@ -793,7 +795,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         }
         else if(name == "showQuickInfoBox")
         {
-            quickInfoBox.boxEnabled = value;
+            QuickInfoBox.boxEnabled = value;
         }
     },
 
@@ -808,44 +810,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (styleSheet)
             return styleSheet;
     },
-
-    /**
-     * Toggle the quick info box.
-     */
-    toggleQuickInfoBox: function()
-    {
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state == "open")
-            quickInfoBox.hide();
-
-        quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
-
-        Firebug.Options.set("showQuickInfoBox", quickInfoBox.boxEnabled);
-    },
-
-    /**
-     * Hide the quick info box.
-     */
-    hideQuickInfoBox: function()
-    {
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state==="open")
-            quickInfoBox.hide();
-
-        this.inspectNode(null);
-    },
-
-    /**
-     * Pass all quick info box events to quickInfoBox.handleEvent() for handling.
-     * @param {Event} event Event to handle
-     */
-    quickInfoBoxHandler: function(event)
-    {
-        quickInfoBox.handleEvent(event);
-    }
-
 });
 
 // ********************************************************************************************* //
@@ -1066,191 +1030,6 @@ function getImageMapHighlighter(context)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-var quickInfoBox =
-{
-    boxEnabled: undefined,
-    dragging: false,
-    storedX: null,
-    storedY: null,
-    prevX: null,
-    prevY: null,
-
-    show: function(element)
-    {
-        if (!this.boxEnabled || !element)
-            return;
-
-        this.needsToHide = false;
-
-        var domAttribs = ["nodeName", "id", "name", "offsetWidth", "offsetHeight"];
-        var cssAttribs = ["position"];
-        var compAttribs = [
-            "width", "height", "zIndex", "position", "top", "right", "bottom", "left",
-            "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
-            "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"];
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state==="closed")
-        {
-            this.storedX = this.storedX || Firefox.getElementById("content").tabContainer.boxObject.screenX + 5;
-            this.storedY = this.storedY || Firefox.getElementById("content").tabContainer.boxObject.screenY + 35;
-
-            // Dynamically set noautohide to avoid mozilla bug 545265.
-            if (!this.noautohideAdded)
-            {
-                this.noautohideAdded = true;
-                qiBox.addEventListener("popupshowing", function runOnce()
-                {
-                    qiBox.removeEventListener("popupshowing", runOnce, false);
-                    qiBox.setAttribute("noautohide", true);
-                }, false);
-            }
-            qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
-        }
-
-        qiBox.removeChild(qiBox.firstChild);
-        var vbox = document.createElement("vbox");
-        qiBox.appendChild(vbox);
-
-        var needsTitle = this.addRows(element, vbox, domAttribs);
-        var needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
-
-        var lab;
-        if (needsTitle || needsTitle2)
-        {
-            lab = document.createElement("label");
-            lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", Locale.$STR("quickInfo"));
-            vbox.insertBefore(lab, vbox.firstChild);
-        }
-
-        lab = document.createElement("label");
-        lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", Locale.$STR("computedStyle"));
-        vbox.appendChild(lab);
-
-        this.addRows(element, vbox, compAttribs, true);
-    },
-
-    hide: function()
-    {
-        // if mouse is over panel defer hiding to mouseout to not cause flickering
-        if (this.mouseover || this.dragging)
-        {
-            this.needsToHide = true;
-            return;
-        }
-
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        this.prevX = null;
-        this.prevY = null;
-        this.needsToHide = false;
-        qiBox.hidePopup();
-    },
-
-    handleEvent: function(event)
-    {
-        switch (event.type)
-        {
-            case "mousemove":
-                if(!this.dragging)
-                    return;
-
-                var diffX, diffY,
-                    boxX = this.qiBox.screenX,
-                    boxY = this.qiBox.screenY,
-                    x = event.screenX,
-                    y = event.screenY;
-
-                diffX = x - this.prevX;
-                diffY = y - this.prevY;
-
-                this.qiBox.moveTo(boxX + diffX, boxY + diffY);
-
-                this.prevX = x;
-                this.prevY = y;
-                this.storedX = boxX;
-                this.storedY = boxY;
-                break;
-            case "mousedown":
-                this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-                this.qiBox = this.qiPanel.boxObject;
-                Events.addEventListener(this.qiPanel, "mousemove", this, true);
-                Events.addEventListener(this.qiPanel, "mouseup", this, true);
-                this.dragging = true;
-                this.prevX = event.screenX;
-                this.prevY = event.screenY;
-                break;
-            case "mouseup":
-                Events.removeEventListener(this.qiPanel, "mousemove", this, true);
-                Events.removeEventListener(this.qiPanel, "mouseup", this, true);
-                this.qiPanel = this.qiBox = null;
-                this.prevX = this.prevY = null;
-                this.dragging = false;
-                break;
-            // this is a hack to find when mouse enters and leaves panel
-            // it requires that #fbQuickInfoPanel have border
-            case "mouseover":
-                if(this.dragging)
-                    return;
-                this.mouseover = true;
-                break;
-            case "mouseout":
-                if(this.dragging)
-                    return;
-                this.mouseover = false;
-                // if hiding was defered because mouse was over panel hide it
-                if (this.needsToHide && event.target.nodeName == "panel")
-                    this.hide();
-                break;
-        }
-    },
-
-    addRows: function(domBase, vbox, attribs, computedStyle)
-    {
-        if (!domBase)
-            return;
-
-        var needsTitle = false;
-        for (var i = 0; i < attribs.length; i++)
-        {
-            var value;
-            if (computedStyle)
-            {
-                var cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
-                value = cs.getPropertyValue(attribs[i]);
-
-                if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
-                    value = rgbToHex(value);
-            }
-            else
-            {
-                value = domBase[attribs[i]];
-            }
-
-            if (value)
-            {
-                needsTitle = true;
-                var hbox = document.createElement("hbox");
-                var lab = document.createElement("label");
-                lab.setAttribute("class", "fbQuickInfoName");
-                lab.setAttribute("value", attribs[i]);
-                hbox.appendChild(lab);
-                var desc = document.createElement("label");
-                desc.setAttribute("class", "fbQuickInfoValue");
-                desc.appendChild(document.createTextNode(": " + value));
-                hbox.appendChild(desc);
-                vbox.appendChild(hbox);
-            }
-        }
-
-        return needsTitle;
-    }
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 Firebug.Inspector.FrameHighlighter = function()
 {
 };
@@ -1300,13 +1079,15 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter " + element.tagName);
-            var body = getNonFrameBody(element);
+
+            var body = Dom.getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
 
             this.ihl && this.ihl.show(false);
 
-            quickInfoBox.show(element);
+            QuickInfoBox.show(element);
+
             var highlighter = this.getHighlighter(context, isMulti);
             var bgDiv = highlighter.firstChild;
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
@@ -1386,7 +1167,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (body)
         {
             body.removeChild(highlighter);
-            quickInfoBox.hide();
+            QuickInfoBox.hide();
         }
 
         this.ihl && this.ihl.destroy();
@@ -1452,7 +1233,7 @@ BoxModelHighlighter.prototype =
         {
             this.ihl && this.ihl.show(false);
 
-            quickInfoBox.show(element);
+            QuickInfoBox.show(element);
             context.highlightFrame = highlightFrame;
 
             if (highlightFrame)
@@ -1541,7 +1322,7 @@ BoxModelHighlighter.prototype =
                 moveImp(nodes.lines.left, left, 0);
             }
 
-            var body = getNonFrameBody(element);
+            var body = Dom.getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
 
@@ -1604,7 +1385,7 @@ BoxModelHighlighter.prototype =
     unhighlight: function(context)
     {
         HighlighterCache.clear();
-        quickInfoBox.hide();
+        QuickInfoBox.hide();
     },
 
     getNodes: function(context, isMulti)
@@ -1699,16 +1480,6 @@ BoxModelHighlighter.prototype =
 
 // ********************************************************************************************* //
 
-function getNonFrameBody(elt)
-{
-    if (Dom.isRange(elt))
-    {
-        elt = elt.commonAncestorContainer;
-    }
-    var body = Dom.getBody(elt.ownerDocument);
-    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
-}
-
 function attachStyles(context, doc)
 {
     if (!context.highlightStyleCache)
@@ -1773,14 +1544,6 @@ function createProxiesForDisabledElements(body)
         div.ident = ident.proxyElt;
         HighlighterCache.add(div);
     }
-}
-
-function rgbToHex(value)
-{
-    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b)
-    {
-        return "#"+((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
-    });
 }
 
 function isVisibleElement(elt)
