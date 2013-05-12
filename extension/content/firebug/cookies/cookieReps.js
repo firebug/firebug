@@ -71,7 +71,7 @@ CookieReps.Rep = domplate(Firebug.Rep,
 CookieReps.CookieRow = domplate(CookieReps.Rep,
 /** @lends CookieReps.CookieRow */
 {
-    inspectable: false,
+    inspectable: true,
 
     cookieTag:
         FOR("cookie", "$cookies",
@@ -235,7 +235,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     {
         return !!cookie.cookie.rejected;
     },
-    
+
     getRawSize: function(cookie)
     {
         var size = cookie.cookie.name.length + cookie.cookie.rawValue.length;

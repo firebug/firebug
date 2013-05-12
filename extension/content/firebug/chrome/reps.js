@@ -895,7 +895,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     getRealObject: function(file, context)
     {
-        return null;
+        return file.request;
     }
 });
 
