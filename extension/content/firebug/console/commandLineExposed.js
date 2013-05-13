@@ -25,7 +25,7 @@ var commandLineCache = new WeakMap();
 // Command Line APIs
 
 // List of command line APIs
-var commandNames = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
     "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
 
@@ -33,7 +33,7 @@ var commandNames = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1"];
+var props = ["$0", "$1", "$p"];
 
 // Registered commands, name -> config object.
 var userCommands = Object.create(null);
@@ -41,7 +41,7 @@ var userCommands = Object.create(null);
 // List of command line APIs to auto-complete, kept equal to the concatenation
 // of the above minus trace*.
 var completionList = [
-        "$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+        "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
         "values", "debug", "undebug", "monitor", "unmonitor", "copy"
     ].concat(consoleShortcuts, props);
 
@@ -443,6 +443,10 @@ function updateVars(commandLine, dglobal, context)
     var htmlPanel = context.getPanel("html", true);
     var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
 
+    for (var prop in vars)
+        commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
+
+    vars = Firebug.CommandLine.getAccessorVars(context);
     for (var prop in vars)
         commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
 }

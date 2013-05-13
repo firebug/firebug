@@ -401,7 +401,7 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
                 {
                     FBTrace.sysout("-> frameProgressListener.onStateChanged set load handler for: "+
                         safeGetName(request)+", win: "+progress.DOMWindow.location.href+ " "+
-                        getStateDescription(flag));
+                        Http.getStateDescription(flag));
                 }
             }
         }

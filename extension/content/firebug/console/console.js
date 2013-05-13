@@ -29,6 +29,9 @@ const Ci = Components.interfaces;
 
 var maxQueueRequests = 500;
 
+// Note: createDefaultReturnValueInstance() is a local helper (see below).
+var defaultReturnValue = createDefaultReturnValueInstance();
+
 // ********************************************************************************************* //
 
 Firebug.ConsoleBase =
@@ -446,22 +449,26 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getDefaultReturnValue: function(win)
+    /**
+     * Returns the value that the console must ignore.
+     *
+     * @return {*} The default value
+     */
+    getDefaultReturnValue: function()
     {
-        var defaultValue = "_firebugIgnore";
-        var console = win.wrappedJSObject.console;
-        if (!console)
-            return defaultValue;
+        return defaultReturnValue;
+    },
 
-        if (Obj.isNonNativeGetter(console, "__returnValue__"))
-            return defaultValue;
-
-        var returnValue = console.__returnValue__;
-        if (returnValue)
-            return returnValue;
-
-        return defaultValue;
+    /**
+     * Returns true if the passed object has to be ignored by the console.
+     *
+     * @param {*} o The object to test
+     *
+     * @return {boolean} The result of the test
+     */
+    isDefaultReturnValue: function(obj)
+    {
+        return obj === defaultReturnValue;
     }
 });
 
@@ -485,6 +492,24 @@ var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
 var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
 var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
 var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
+
+// ********************************************************************************************* //
+// Local Helpers
+
+function createDefaultReturnValueInstance()
+{
+    var proto = {
+        __exposedProps__: {
+            "toString": "rw"
+        },
+        toString: function()
+        {
+            return undefined;
+        }
+    };
+
+    return Object.preventExtensions(Object.create(proto));
+}
 
 // ********************************************************************************************* //
 // Registration

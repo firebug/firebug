@@ -296,7 +296,7 @@ var CommandLineHelp = domplate(
 function onExecuteCommand(context)
 {
     CommandLineHelp.render(context);
-    return Firebug.Console.getDefaultReturnValue(context.window);
+    return Firebug.Console.getDefaultReturnValue();
 }
 
 // ********************************************************************************************* //
