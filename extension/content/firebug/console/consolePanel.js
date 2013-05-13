@@ -800,18 +800,19 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /((^%|(?=.)%)(\d+)?(\.)([a-zA-Z]))|((^%|(?=.)%)([a-zA-Z]))/;
+    var reg = /(%{1,2})((\d+)?\.)?([a-zA-Z])/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
-        if (m[0].substr(0, 2) == "%%")
+        // If the percentage sign is escaped, then just output it
+        if (m[1] == "%%")
         {
-            parts.push(format.substr(0, m.index));
-            parts.push(m[0].substr(1));
+            parts.push(format.substr(0, m.index) + m[0].substr(1));
         }
+        // A pattern was found, so it needs to be interpreted
         else
         {
-            var type = m[8] ? m[8] : m[5];
-            var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
+            var type = m[4];
+            var precision = m[3] ? parseInt(m[3]) : (m[2] && m[2].substr(-1) == "." ? -1 : 0);
 
             var rep = null;
             switch (type)
@@ -832,11 +833,11 @@ function parseFormat(format)
                     break;
             }
 
-            parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
-            parts.push({rep: rep, precision: precision, type: ("%" + type)});
+            parts.push(format.substr(0, m.index));
+            parts.push({rep: rep, precision: precision, type: "%" + type});
         }
 
-        format = format.substr(m.index+m[0].length);
+        format = format.substr(m.index + m[0].length);
     }
 
     parts.push(format);
