@@ -295,8 +295,7 @@ DOMMemberProvier.prototype =
         var valueType = typeof value;
         var hasChildren = hasProperties && !(value instanceof FirebugReps.ErrorCopy) &&
             ((valueType === "function") ||
-             (valueType === "object" && value !== null) ||
-             (valueType === "string" && value.length > Firebug.stringCropLength));
+             (valueType === "object" && value !== null));
 
         // Special case for closure inspection.
         if (!hasChildren && valueType === "function" && Firebug.showClosures && this.context)

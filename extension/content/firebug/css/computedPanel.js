@@ -804,7 +804,7 @@ const styleGroups =
         "-moz-border-end-color",
         "-moz-border-end-style",
         "-moz-border-end-width",
-        "-moz-border-image",
+        "border-image",
         "-moz-border-start",
         "-moz-border-start-color",
         "-moz-border-start-style",

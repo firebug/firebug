@@ -931,7 +931,6 @@ Css.cssInfo.html =
     "border-top-right-radius": ["length"], // FF 4.0
     "border-bottom-right-radius": ["length"], // FF 4.0
     "border-bottom-left-radius": ["length"], // FF 4.0
-    "-moz-border-image": ["borderImageRepeat", "thickness", "url()", "none"],
     "border-image": ["borderImageRepeat", "thickness", "url()", "none"], // FF 15.0
     "border-image-outset": ["length"], // FF 15.0
     "border-image-repeat": ["borderImageRepeat"], // FF 15.0

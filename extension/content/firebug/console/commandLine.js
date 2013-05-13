@@ -28,6 +28,7 @@ define([
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, Menu, System, Str,
     Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI) {
+
 "use strict";
 
 // ********************************************************************************************* //
@@ -740,13 +741,16 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             command: useInCommandLine.bind(this)
         };
 
-        // Add the item before the first "Inspect in * Panel" option (or at the bottom together with
-        // a separator if there is none).
-        var before = Array.prototype.filter.call(popup.childNodes, function(node) {
+        // Add the item before the first "Inspect in * Panel" option (or at the bottom
+        // together with a separator if there is none).
+        var before = Array.prototype.filter.call(popup.childNodes, function(node)
+        {
             return Str.hasPrefix(node.id, "InspectIn");
         })[0];
+
         if (!before)
             Menu.createMenuSeparator(popup);
+
         Menu.createMenuItem(popup, item, before);
     },
 
@@ -759,7 +763,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getCommandLine: function(context)
     {
-        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ?
                 this.getCommandEditor():
                 this.getSingleRowCommandLine();
     },
@@ -773,7 +777,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getExpression: function(context)
     {
-        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ? 
+        return (!this.isInOtherPanel(context) && Firebug.commandEditor) ?
                 this.getCommandEditor().getExpression() :
                 this.getSingleRowCommandLine().value;
     },
@@ -794,6 +798,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     }
 });
 
+// ********************************************************************************************* //
+// Helpers
+
 var getNoScript = function()
 {
     // The wrappedJSObject here is not a security wrapper, it is a property set by the service.
@@ -805,7 +812,6 @@ var getNoScript = function()
     };
     return noscript;
 };
-
 
 // ********************************************************************************************* //
 // Registration

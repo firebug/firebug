@@ -1095,6 +1095,9 @@ window.Firebug =
 
         // Dispatch to all modules so that additional settings can be reset.
         Events.dispatch(modules, "resetAllOptions", []);
+
+        // Dispatch to all modules so 'after' actions can be executed.
+        Events.dispatch(modules, "afterResetAllOptions", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

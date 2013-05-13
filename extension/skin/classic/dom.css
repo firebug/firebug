@@ -90,7 +90,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover {
+.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover,
+.memberRow.cropped > .memberLabelCell > .memberLabel:hover {
     cursor: pointer;
     color: blue;
     text-decoration: underline;

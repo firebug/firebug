@@ -514,12 +514,6 @@
 /************************************************************************************************/
 /* Summary */
 
-.netSummaryRow .netTimeBar {
-    background: #BBBBBB;
-    border: none;
-    display: inline-block;
-}
-
 .netSummaryLabel {
     color: #222222;
     padding-top: 2px;
