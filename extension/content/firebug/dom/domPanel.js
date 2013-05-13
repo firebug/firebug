@@ -84,7 +84,7 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         if (this.currentSearch && text === this.currentSearch.text)
         {
             row = this.currentSearch.findNext(true, undefined, reverse,
-                Search.isCaseSensitive(text));
+                Firebug.Search.isCaseSensitive(text));
         }
         else
         {
@@ -94,7 +94,7 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             };
 
             this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
-            row = this.currentSearch.find(text, reverse, Search.isCaseSensitive(text));
+            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
         if (row)
