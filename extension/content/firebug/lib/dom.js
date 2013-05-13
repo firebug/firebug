@@ -149,6 +149,15 @@ Dom.getBody = function(doc)
     return doc.documentElement;  // For non-HTML docs
 };
 
+Dom.getNonFrameBody = function(elt)
+{
+    if (Dom.isRange(elt))
+        elt = elt.commonAncestorContainer;
+
+    var body = Dom.getBody(elt.ownerDocument);
+    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
+}
+
 // ********************************************************************************************* //
 // DOM Modification
 

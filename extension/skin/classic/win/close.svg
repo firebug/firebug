@@ -67,7 +67,36 @@
        color-interpolation-filters="sRGB"
        id="filter3841">
       <feGaussianBlur
-         id="feGaussianBlur3843"
+         stdDeviation="0.7125"
+         id="feGaussianBlur3843" />
+    </filter>
+    <linearGradient
+       x1="8.7688313"
+       y1="1049.931"
+       x2="8.7688313"
+       y2="1038.6682"
+       id="linearGradient3001"
+       xlink:href="#linearGradient3786"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,-1036.3622)" />
+    <linearGradient
+       x1="7.2311687"
+       y1="1051.3232"
+       x2="7.2311687"
+       y2="1037.4011"
+       id="linearGradient3003"
+       xlink:href="#linearGradient3770"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,-1036.3622)" />
+    <filter
+       x="-0.23999999"
+       y="-0.23999999"
+       width="1.48"
+       height="1.48"
+       color-interpolation-filters="sRGB"
+       id="filter3773">
+      <feGaussianBlur
+         id="feGaussianBlur3775"
          stdDeviation="0.7125" />
     </filter>
   </defs>
@@ -83,26 +112,21 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <g
-     transform="translate(0,-1036.3622)"
-     id="layer1">
-    <rect
-       width="13"
-       height="13"
-       rx="2"
-       ry="2"
-       x="1.5"
-       y="1037.8622"
-       id="rect3768"
-       style="fill:url(#linearGradient3792);fill-opacity:1;stroke:url(#linearGradient3776);stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-    <path
-       d="m 6,1041.7992 -1.5625,1.5625 2,2 -2,2 1.5625,1.5625 2.0000001,-2 1.9999999,2 1.5625,-1.5625 -1.9999999,-2 1.9999999,-2 -1.5625,-1.5625 -1.9999999,2 -2.0000001,-2 z"
-       id="rect3798-2"
-       style="opacity:0.4;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3841)" />
-    <path
-       d="M 6,4.4375 4.4375,6 l 2,2 -2,2 1.5625,1.5625 2,-2 2,2 1.5625,-1.5625 -2,-2 2,-2 L 10,4.4375 l -2,2 -2,-2 z"
-       transform="translate(0,1036.3622)"
-       id="rect3798"
-       style="fill:#ffffff;fill-opacity:1;stroke:none" />
-  </g>
+  <rect
+     width="13"
+     height="13"
+     rx="2"
+     ry="2"
+     x="1.5"
+     y="1.4999826"
+     id="rect3768"
+     style="fill:url(#linearGradient3001);fill-opacity:1;stroke:url(#linearGradient3003);stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+  <path
+     d="m 6.5005,5.437 -1.5625,1.5625 2,2 -2,2 1.5625,1.5625 2.0000001,-2 1.9999999,2 1.5625,-1.5625 -2,-2 2,-2 -1.5625,-1.5625 -1.9999999,2 -2.0000001,-2 z"
+     id="rect3798-2"
+     style="opacity:0.4;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3773)" />
+  <path
+     d="M 6,4.4375 4.4375,6 l 2,2 -2,2 1.5625,1.5625 2,-2 2,2 1.5625,-1.5625 -2,-2 2,-2 L 10,4.4375 l -2,2 -2,-2 z"
+     id="rect3798"
+     style="fill:#ffffff;fill-opacity:1;stroke:none" />
 </svg>

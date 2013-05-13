@@ -370,7 +370,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
      * a new annotation for the current URL.
      * The annotation will ensure Firebug to be visible after refresh.
      */
-    allOptionsReseted: function()
+    afterResetAllOptions: function()
     {
         // Only reset the annotation if Firebug is active for the current URL.
         if (!Firebug.currentContext)
