@@ -176,13 +176,10 @@
 /* Breakpoint condition */
 
 .conditionEditor {
-    /* A bug in Firefox requires to set a background image instead of a color,
-       otherwise the border will also be painted in the background color */
-    background-image: linear-gradient(to bottom, rgba(37, 37, 37, 0.863), rgba(37, 37, 37, 0.863));
-    background-repeat: no-repeat;
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.svg) 19 25 33 33 stretch;
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.svg) 19 25 33 33 fill
+        stretch;
 }
 
 .conditionCaption {
@@ -206,7 +203,8 @@
 
 .upsideDown {
     border-width: 28px 25px 19px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.svg) 28 25 19 33 stretch;
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.svg) 28 25 19 33 fill
+        stretch;
 }
 
 /************************************************************************************************/

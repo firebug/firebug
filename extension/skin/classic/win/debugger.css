@@ -4,11 +4,10 @@
 /* Breakpoint condition */
 
 .conditionEditor {
-    background-image: linear-gradient(to bottom, #2DD0FC, #00BBF8);
-    background-repeat: no-repeat;
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    border-image: url(chrome://firebug/skin/win/breakpointConditionEditor.svg) 19 25 33 33 stretch;
+    border-image: url(chrome://firebug/skin/win/breakpointConditionEditor.svg) 19 25 33 33 fill
+        stretch;
 }
 
 .conditionCaption {
@@ -27,7 +26,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .upsideDown {
-    background-image: linear-gradient(to bottom, #13D1FC, #00B0E6);
     border-width: 28px 25px 19px 33px;
-    border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.svg) 28 25 19 33 stretch;
+    border-image: url(chrome://firebug/skin/win/breakpointConditionEditorDown.svg) 28 25 19 33 fill
+        stretch;
 }
