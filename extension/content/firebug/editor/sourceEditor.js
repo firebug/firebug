@@ -457,7 +457,13 @@ SourceEditor.prototype =
         Trace.sysout("sourceEditor.addBreakpoint; line: " + lineNo);
 
         var info = this.editorObject.lineInfo(lineNo);
-        if (!info || !info.gutterMarkers)
+        if (!info)
+        {
+            Trace.sysout("sourceEditor.addBreakpoint; ERROR line doesn't exist: " + lineNo);
+            return;
+        }
+
+        if (!info.gutterMarkers)
         {
             var breakpoint = this.getGutterElement().ownerDocument.createElement("div");
             breakpoint.className = "breakpoint";
