@@ -398,6 +398,12 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var bpMarker = this.editor.getGutterMarker(SourceEditor.Gutters.breakpoints,
             bp.lineNo);
 
+        if (!bpMarker)
+        {
+            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!");
+            return;
+        }
+
         bpMarker.className = "breakpoint";
 
         if (bp.disabled)
