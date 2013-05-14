@@ -594,11 +594,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             {
                 var object = objects[objIndex];
                 if (part.type == "%c")
+                {
                     lastStyle = object.toString();
+                }
                 else if (objIndex < objects.length)
+                {
+                    if (part.type == "%f" && part.precision != -1)
+                        object = parseFloat(object).toFixed(part.precision);
                     node = this.appendObject(object, row, part.rep);
+                }
                 else
+                {
                     node = this.appendObject(part.type, row, FirebugReps.Text);
+                }
                 objIndex++;
             }
             else
@@ -800,7 +808,7 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /(%{1,2})((\d+)?\.)?([a-zA-Z])/;
+    var reg = /(%{1,2})(\.\d+)?([a-zA-Z])/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
         // If the percentage sign is escaped, then just output it
@@ -811,8 +819,8 @@ function parseFormat(format)
         // A pattern was found, so it needs to be interpreted
         else
         {
-            var type = m[4];
-            var precision = m[3] ? parseInt(m[3]) : (m[2] && m[2].substr(-1) == "." ? -1 : 0);
+            var type = m[3];
+            var precision = m[2] ? parseInt(m[2].substr(1)) : -1;
 
             var rep = null;
             switch (type)
