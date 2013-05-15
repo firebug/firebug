@@ -48,6 +48,7 @@ var redirectionLimit = Options.getPref("network.http", "redirection-limit");
 var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var fx20 = versionChecker.compare(appInfo.version, "20") >= 0;
+var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -293,7 +294,9 @@ var SpyHttpObserver =
 
             // There is no http-on-opening-request in case of redirect so, we need
             // to use http-on-modify-request.
-            if ((topic == "http-on-modify-request" && redirect) ||
+            // Also, http-on-opening-request has been introduced in Firefox 18 so,
+            // we still need to use http-on-modify-request in previous versions (issue 6436)
+            if ((topic == "http-on-modify-request" && (redirect || !fx18)) ||
                 topic == "http-on-opening-request" ||
                 topic == "http-on-examine-response" ||
                 topic == "http-on-examine-cached-response")
@@ -329,7 +332,7 @@ var SpyHttpObserver =
                 var requestName = request.URI.asciiSpec;
                 var requestMethod = request.requestMethod;
 
-                if (topic == "http-on-modify-request" && redirect)
+                if (topic == "http-on-modify-request" && (redirect || !fx18))
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-opening-request")
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
