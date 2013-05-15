@@ -3335,7 +3335,7 @@ FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, 
     this.category = category;
     this.context = context;
     this.trace = trace;
-    this.msgId = msgId || this.createMsgID();
+    this.msgId = msgId || this.getId();
     this.colNumber = colNumber;
 };
 
@@ -3383,7 +3383,7 @@ FirebugReps.ErrorMessageObj.prototype =
         this.lineNo = lineNumber;
     },
 
-    createMsgID: function()
+    getId: function()
     {
         return this.href + ":" + this.message + ":" + this.lineNo;
     }
