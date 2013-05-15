@@ -26,8 +26,8 @@ function openPopup(callback, win)
 
         setTimeout(function()
         {
-            var popup = win.document.getUserData("popup-window");
-            win.document.setUserData("popup-window", null, null);
+            var popup = win.wrappedJSObject.popup;
+            delete win.wrappedJSObject.popup;
             popup.close();
             FBTest.progress("The popup should be closed now");
             callback();
