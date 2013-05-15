@@ -592,9 +592,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         function logText(text, row)
         {
-            Css.setClass(row, "logRowHint");
+            var nodeSpan = row.ownerDocument.createElement("span");
+            Css.setClass(nodeSpan, "logRowHint");
             var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(node);
+            row.appendChild(nodeSpan);
+            nodeSpan.appendChild(node);
         }
 
         function logTextNode(text, row)
@@ -658,24 +660,45 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
+        // Last CSS style defined using "%c" that should be applied on
+        // created log-row parts (elements). See issue 6064.
+        // Example: console.log('%cred-text %cgreen-text', 'color:red', 'color:green');
+        var lastStyle;
+
         for (var i = 0; i < parts.length; ++i)
         {
+            var node;
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
             	var object = objects[objIndex];
                 if (part.type == "%c")
-                    row.setAttribute("style", object.toString());
+                {
+                    lastStyle = object.toString();
+                }
                 else if (objIndex < objects.length)
-                    this.appendObject(object, row, part.rep);
+                {
+                    if (part.type == "%f" && part.precision != -1)
+                        object = parseFloat(object).toFixed(part.precision);
+                    node = this.appendObject(object, row, part.rep);
+                }
                 else
-                    this.appendObject(part.type, row, FirebugReps.Text);
+                {
+                    node = this.appendObject(part.type, row, FirebugReps.Text);
+                }
                 objIndex++;
             }
             else
             {
-                FirebugReps.Text.tag.append({object: part}, row);
+                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
+                node = tag.append({object: part}, row);
             }
+
+            // Apply custom style if available.
+            if (lastStyle && node)
+                node.setAttribute("style", lastStyle);
+
+            node = null;
         }
 
         for (var i = objIndex; i < objects.length; ++i)
@@ -845,6 +868,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
     },
+
+    showInfoTip: function(infoTip, target, x, y)
+    {
+        var object = Firebug.getRepObject(target);
+        var rep = Firebug.getRep(object, this.context);
+        if (!rep)
+            return false;
+
+        return rep.showInfoTip(infoTip, target, x, y);
+    }
 });
 
 // ********************************************************************************************* //
@@ -855,7 +888,7 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /(%{1,2})((\d+)?\.)?([a-zA-Z])/;
+    var reg = /(%{1,2})(\.\d+)?([a-zA-Z])/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
         // If the percentage sign is escaped, then just output it
@@ -866,8 +899,8 @@ function parseFormat(format)
         // A pattern was found, so it needs to be interpreted
         else
         {
-            var type = m[4];
-            var precision = m[3] ? parseInt(m[3]) : (m[2] && m[2].substr(-1) == "." ? -1 : 0);
+            var type = m[3];
+            var precision = m[2] ? parseInt(m[2].substr(1)) : -1;
 
             var rep = null;
             switch (type)
