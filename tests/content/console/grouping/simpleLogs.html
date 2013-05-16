@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Group console messages: simple logs</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4979">Group console messages</a>:
+        simple logs</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Console panel and enable it</li>
+            <li>Press the test button
+                <button id="testButton1" onclick="groupedLogs()">Grouped logs</button></li>
+            <li>Every log in the Console should have group counter set to "2"</li>
+            <li>Press the test button
+                <button id="testButton2" onclick="notGroupedLogs()">Not grouped logs</button></li>
+            <li>Every log in the Console should not have the group counter</li>
+        </ol>
+
+        <br/><br/>
+
+        <div id="output"></div>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+
+<script>
+function groupedLogs()
+{
+    console.info("info"); console.info("info");
+    console.log(null); console.log(null);
+    console.log(undefined); console.log(undefined);
+    console.log(true); console.log(true);
+    console.log(1); console.log(1);
+    console.log("test"); console.log("test");
+
+    var obj = {1:1,x:2};
+    console.log(obj); console.log(obj);
+
+    console.log([{a:1},2,3]); console.log([{a:1},2,3]);
+    console.log(Math.sqrt(-1)); console.log(Math.sqrt(-1));
+
+    var obj = Object.create(null);
+    console.log(obj); console.log(obj);
+
+    console.log(document); console.log(document);
+
+    console.debug("debug"); console.debug("debug");
+    console.info("info"); console.info("info");
+    console.warn("warning"); console.warn("warning");
+    console.error("error"); console.error("error");
+
+    console.log(document.head.firstChild); console.log(document.head.firstChild);
+
+    cleanUp();
+}
+
+function notGroupedLogs()
+{
+    console.log(1); console.log(2);
+    console.log(true); console.log(false);
+    console.log(1); console.log("1");
+    console.log([1,2,3]); console.log([1,2,4]);
+    console.log([{a:1},2,4]); console.log([{a:1},2,5]);
+    console.log({a:1,b:2}); console.log({a:1,b:3});
+    console.log(1,1); console.log(1,2);
+    console.log("1"); console.log(1);
+    console.log("null"); console.log(null); console.log(undefined);
+
+    var arr = [1];
+    console.log(arr); arr[0] = 2; console.log(arr);
+
+    logTable(); logTable();
+    logTime(); logTime();
+
+    var th = function() { throw 0; };
+    var throwy1 = Proxy.create({getOwnPropertyDescriptor: th, getPropertyDescriptor: th, getOwnPropertyNames: th, getPropertyNames: th}, null);
+    var throwy2 = Proxy.create({getOwnPropertyDescriptor: th, getPropertyDescriptor: th, getOwnPropertyNames: th, getPropertyNames: th}, null);
+    console.log(throwy1); console.log(throwy2);
+
+    appendChildAndLog(document.createTextNode("a")); appendChildAndLog(document.createTextNode("a"));
+
+    appendChildInArrayAndLog(document.createTextNode("a")); appendChildInArrayAndLog(document.createTextNode("a"));
+
+    cleanUp();
+}
+
+function cleanUp()
+{
+    var output = document.getElementById("output");
+    while (output.lastChild)
+        output.removeChild(output.lastChild);
+}
+
+function logTable()
+{
+    var objects =
+    [
+        {firstName: "Steven", lastName: "Mayers"},
+        {firstName: "John", lastName: "Travers"}
+    ];
+    console.table(objects);
+}
+
+function logTime()
+{
+    console.time("Timer");
+    console.timeEnd("Timer");
+}
+
+function appendChildAndLog(ch)
+{
+    var output = document.getElementById("output");
+    output.appendChild(ch);
+    console.log(ch);
+}
+
+function appendChildInArrayAndLog(ch)
+{
+    var output = document.getElementById("output");
+    output.appendChild(ch);
+    console.log([ch]);
+}
+</script>
+
+</body>
+</html>
