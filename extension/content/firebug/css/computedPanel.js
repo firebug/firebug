@@ -34,14 +34,18 @@ const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBe
 
 try
 {
-    // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
     // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
-    Cu.import("resource:///modules/devtools/CssLogic.jsm");
+    var scope = {}
+    Cu.import("resource:///modules/devtools/gDevTools.jsm", scope);
+    var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
+
+    // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
+    //Cu.import("resource:///modules/devtools/CssLogic.jsm");
 }
 catch (err)
 {
     if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available!");
+        FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available! " + err, err);
 }
 
 // ********************************************************************************************* //
