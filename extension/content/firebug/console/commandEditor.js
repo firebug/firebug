@@ -9,26 +9,20 @@ define([
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/editor/sourceEditor",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
+function (Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
 
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
-
-var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
 var TEXT_CHANGED = "";
 
 try
 {
-    // Introduced in Firefox 8
-    Cu["import"]("resource:///modules/source-editor.jsm");
-
-    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
-    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
-    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
+    CONTEXT_MENU = SourceEditor.Events.contextMenu;
+    TEXT_CHANGED = SourceEditor.Events.textChange;
 }
 catch (err)
 {
@@ -51,36 +45,33 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         if (this.editor)
             return;
-
+        
+        
         // The current implementation of the SourceEditor (based on Orion) doesn't
         // support zooming. So, the TextEditor (based on textarea) can be used
         // by setting extensions.firebug.enableOrion pref to false.
         // See issue 5678
-        if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
+        // xxxFashid:This(Support zooming) should be tested with Codemirror.
+        /*if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
             this.editor = new SourceEditor();
         else
-            this.editor = new TextEditor();
+            this.editor = new TextEditor();*/
+
+        this.editor = new SourceEditor();
 
         var config =
         {
-            mode: MODE_JAVASCRIPT,
-            showLineNumbers: false,
-            theme: "chrome://firebug/skin/orion-firebug.css"
+            mode: "javascript",
+            lineNumbers: false
         };
 
-        // Custom shortcuts for Orion editor
-        config.keys = [{
-            action: "firebug-cmdEditor-execute",
-            code: KeyEvent.DOM_VK_RETURN,
-            accel: true,
-            callback: this.onExecute.bind(this),
-        },{
-            action: "firebug-cmdEditor-escape",
-            code: KeyEvent.DOM_VK_ESCAPE,
-            callback: this.onEscape.bind(this),
-        }];
+        // Custom shortcuts for Codemirror editor
+        config.extraKeys = {
+            "Enter": this.onExecute.bind(this),
+            "Esc": this.onEscape.bind(this)
+        };
 
-        // Initialize Orion editor.
+        // Initialize Codemirror editor.
         this.parent = document.getElementById("fbCommandEditor");
         this.editor.init(this.parent, config, this.onEditorLoad.bind(this));
 
@@ -110,7 +101,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
         this.editor.addEventListener(TEXT_CHANGED, this.onTextChanged);
 
-        this.editor.setCaretOffset(this.editor.getCharCount());
+        var lastLineNo = this.editor.lastLineNo();
+        this.editor.setCursor(lastLineNo, this.editor.getCharCount(lastLineNo));
 
         Firebug.chrome.applyTextSize(Firebug.textSize);
 

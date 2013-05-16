@@ -78,8 +78,8 @@ SourceEditor.DefaultConfig =
 
 SourceEditor.Events =
 {
-    change: "change",
-    beforeChange: "beforeChange",
+    textChange: "change",
+    beforeTextChange: "beforeChange",
     cursorActivity: "cursorActivity",
     beforeSelectionChange: "beforeSelectionChange",
     viewportChange: "viewportChange",
@@ -314,14 +314,70 @@ SourceEditor.prototype =
         return this.editorObject.getValue();
     },
 
-    getCharCount: function()
+    getCharCount: function(line)
     {
-        this.editorObject.getValue().length;
+        return line ? this.editorObject.getDoc().getLine(line).length:
+            this.editorObject.getValue().length;
     },
 
     getSelectedText: function()
     {
         return this.editorObject.getSelection();
+    },
+
+    setSelection: function(start, end)
+    {
+        var lineCount = this.editor.getDoc().lineCount();
+        var startLine = -1;
+        var endLine = lineCount - 1;
+        var startChar = 0;
+        var endChar = 0;
+
+        if (end < start || start > this.getCharCount(endLine))
+            return;
+
+        var charCount = 0;
+        for (var i = 0; i < lineCount; i++)
+        {
+            charCount += this.getCharCount(i);
+            if (startLine == -1 && charCount >= start)
+            {
+                startLine = i;
+                startChar = start - (charCount - this.getCharCount(i));
+            }
+
+            if (charCount >= end)
+            {
+                endLine = i;
+                endChar = end - (charCount - this.getCharCount(i));
+                break;
+            }
+        }
+
+        this.editorObject.setSelection({line: startLine, ch: startChar},
+            {line:endLine, ch: endChar});
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Cursor Methods
+
+    setCursor: function(line, ch)
+    {
+        this.editorObject.setCursor(line, ch);
+        this.editorObject.focus();
+    },
+
+    getCursor: function()
+    {
+        this.editorObject.getCursor()
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Line API
+
+    lastLineNo: function()
+    {
+        this.editorObject.lastLine();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -604,8 +660,8 @@ SourceEditor.prototype =
 function getBuiltInEvents()
 {
     return {
-        change: "change",
-        beforeChange: "beforeChange",
+        textChange: "change",
+        beforeTextChange: "beforeChange",
         cursorActivity: "cursorActivity",
         beforeSelectionChange: "beforeSelectionChange",
         viewportChange: "viewportChange",
