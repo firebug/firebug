@@ -1948,7 +1948,7 @@ this.expandElements = function(panelNode, className) // className, className, ..
  * 
  * @param {String} panelName Name of the panel that shows the result.
  * @param {Object} config Requirements, which must be fulfilled to trigger the callback function
- *     (can include "tagName", "id", "classes", "counter" and "onlyMutations")
+ *     (can include "tagName", "id", "classes", "attributes", "counter" and "onlyMutations")
  * @param {Function} callback A callback function with one parameter.
  */
 this.waitForDisplayedElement = function(panelName, config, callback)
@@ -2024,6 +2024,13 @@ this.waitForDisplayedElement = function(panelName, config, callback)
         mutationAttributes.id = config.id;
     else
         mutationAttributes.class = config.classes;
+
+    if (config.attributes)
+    {
+        for (var prop in config.attributes)
+            mutationAttributes[prop] = config.attributes[prop];
+    }
+
     var recognizer = new MutationRecognizer(doc.defaultView, config.tagName, mutationAttributes);
 
     var tempCallback = callback;
