@@ -9,8 +9,8 @@ function runTest()
         FBTest.enableConsolePanel(function(win)
         {
             var tasks = new FBTest.TaskList();
-            tasks.push(verifyLogs, win, 18, 2, "testButton1", "Verify grouped logs");
-            tasks.push(verifyLogs, win, 26, "", "testButton2", "Verify not grouped logs");
+            tasks.push(verifyLogs, win, 15, 2, "testButton1", "Verify grouped logs");
+            tasks.push(verifyLogs, win, 33, "", "testButton2", "Verify not grouped logs");
 
             tasks.run(function() {
                 FBTest.testDone("simpleLogs.DONE");
@@ -49,8 +49,8 @@ function onVerify(callback, numberOfLogs, expectedCounterValue)
     var panelNode = FBTest.getPanel("console").panelNode;
 
     // Iterate over all counters and check that they are equal to 2
-    var rows = panelNode.querySelectorAll(".panelNode > .logRow > DIV > .logCounter");
-    FBTest.compare(numberOfLogs, rows.length, "There must be expected number of logs");
+    var rows = panelNode.getElementsByClassName("logCounter");
+    FBTest.compare(numberOfLogs, rows.length, "There must be an expected number of logs");
 
     for (var i=0; i<rows.length; i++)
     {
