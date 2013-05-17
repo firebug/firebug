@@ -1669,7 +1669,10 @@ domMemberMap.Window =
     "Infinity",
     "NaN",
     "undefined",
-    "eval"
+    "eval",
+
+    "speechSynthesis",
+    "requestAnimationFrame",
 ];
 
 domMemberMap.Location =
