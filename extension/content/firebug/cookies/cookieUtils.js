@@ -53,7 +53,8 @@ var CookieUtils =
             isSecure    : cookie.isSecure,
             expires     : cookie.expires,
             isHttpOnly  : cookie.isHttpOnly,
-            rawValue    : rawValue
+            rawValue    : rawValue,
+            rawCookie   : cookie,
         };
 
         return c;
