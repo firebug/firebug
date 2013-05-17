@@ -377,7 +377,7 @@ SourceEditor.prototype =
 
     lastLineNo: function()
     {
-        this.editorObject.lastLine();
+        return this.editorObject.lastLine();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
