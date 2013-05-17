@@ -45,8 +45,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         if (this.editor)
             return;
-        
-        
+
         // The current implementation of the SourceEditor (based on Orion) doesn't
         // support zooming. So, the TextEditor (based on textarea) can be used
         // by setting extensions.firebug.enableOrion pref to false.
@@ -65,18 +64,26 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             lineNumbers: false
         };
 
-        // Custom shortcuts for Codemirror editor
+        // Custom shortcuts for source editor
         config.extraKeys = {
             "Enter": this.onExecute.bind(this),
             "Esc": this.onEscape.bind(this)
         };
 
-        // Initialize Codemirror editor.
-        this.parent = document.getElementById("fbCommandEditor");
-        this.editor.init(this.parent, config, this.onEditorLoad.bind(this));
+        function browserLoaded(event)
+        {
+            var doc = event.target;
+            this.parent = doc.querySelector(".panelNode");
 
-        if (FBTrace.DBG_COMMANDEDITOR)
-            FBTrace.sysout("commandEditor: SourceEditor initialized");
+            // Initialize source editor.
+            this.editor.init(this.parent, config, this.onEditorLoad.bind(this));
+
+            if (FBTrace.DBG_COMMANDEDITOR)
+                FBTrace.sysout("commandEditor: SourceEditor initialized");
+        }
+
+        var browser = document.getElementById("fbCommandEditorBrowser");
+        Events.addEventListener(browser, "load", browserLoaded.bind(this), true);
     },
 
     shutdown: function()
