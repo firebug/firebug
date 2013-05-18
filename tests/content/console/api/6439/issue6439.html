@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6439: Consider precision for Console API %f log pattern</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6439">Issue 6439</a>: Consider precision for Console API %f log pattern</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Type <code>console.log("amount: %f", 4.3152)</code> into the Command Line and hit <code class="key">Enter</code></li>
+                    <li>Repeat step 3 for <code>%.2f</code>, <code>%.1f</code>, <code>%.0f</code> and <code>%.5f</code></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The console output should look like this:
+                        <code>
+amount: 4.3152
+amount: 4.32
+amount: 4.3
+amount: 4
+amount: 4.31520
+</code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

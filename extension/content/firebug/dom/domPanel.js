@@ -83,6 +83,10 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         var row;
         if (this.currentSearch && text === this.currentSearch.text)
         {
+            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
+            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
+            // TODO: Rework 'searchBox.js', so it doesn't inject itself into the global 'Firebug'
+            // scope anymore
             row = this.currentSearch.findNext(true, undefined, reverse,
                 Firebug.Search.isCaseSensitive(text));
         }
@@ -94,6 +98,9 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             };
 
             this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
+
+            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
+            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
             row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
