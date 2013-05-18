@@ -450,7 +450,13 @@
 
                         <!-- Command Editor -->
                         <vbox id="fbCommandEditorBox">
-                            <hbox id="fbCommandEditor" flex="1" />
+                            <hbox id="fbCommandEditor" flex="1">
+                                <browser id="fbCommandEditorBrowser" flex="1"
+                                     tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                     disablehistory="true"
+                                     type="content"
+                                     src="chrome://firebug/content/console/commandEditor.html"/>
+                            </hbox>
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button fbInternational"
