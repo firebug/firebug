@@ -264,7 +264,20 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.isSecure ? Locale.$STR("cookies.secure.label") : "";
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Highlighter
+
+    highlightObject: function(object, context)
+    {
+    },
+
+    unhighlightObject: function(object, context)
+    {
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug rep support
+
     supportsObject: function(cookie)
     {
         return cookie instanceof Cookie;
@@ -277,8 +290,20 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     getRealObject: function(cookie, context)
     {
-        return cookie.cookie;
+        var realObject = cookie.cookie.rawCookie;
+        if (!realObject)
+        {
+            if (FBTrace.DBG_COOKIES || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cookies.getRealObject; ERROR no real cookie object!");
+
+            realObject = cookie.cookie;
+        }
+
+        return realObject;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     getContextMenuItems: function(cookie, target, context)
     {

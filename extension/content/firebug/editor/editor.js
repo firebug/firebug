@@ -670,10 +670,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         panel.panelNode.appendChild(this.box);
         this.input.select();
         if (selectionData) // transfer selection to input element
-        {
-            FBTrace.sysout("selectionData", selectionData);
             this.setSelection(selectionData);
-        }
 
         // Insert the "expander" to cover the target element with white space
         if (!this.fixedWidth)
