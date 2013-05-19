@@ -136,7 +136,7 @@ SourceEditor.prototype =
             Trace.sysout("sourceEditor.onEditorCreate;");
             parentNode.appendChild(view);
             self.view = view;
-        }, config);
+        }, this.config);
 
         // Mark lines so, we can search for them (see e.g. getLineIndex method).
         this.editorObject.on("renderLine", function(cm, lineHandle, element)
@@ -327,13 +327,13 @@ SourceEditor.prototype =
 
     setSelection: function(start, end)
     {
-        var lineCount = this.editor.getDoc().lineCount();
+        var lineCount = this.editorObject.getDoc().lineCount();
         var startLine = -1;
         var endLine = lineCount - 1;
         var startChar = 0;
         var endChar = 0;
 
-        if (end < start || start > this.getCharCount(endLine))
+        if (end < start || start > this.getCharCount())
             return;
 
         var charCount = 0;
