@@ -68,7 +68,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         // Custom shortcuts for source editor
         config.extraKeys = {
-            "Enter": this.onExecute.bind(this),
+            "Ctrl-Enter": this.onExecute.bind(this),
             "Esc": this.onEscape.bind(this)
         };
 
@@ -263,15 +263,12 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     fontSizeAdjust: function(adjust)
     {
-        if (!this.editor || !this.editor._view)
+        if (!this.editor)
             return;
 
-        if (typeof(SourceEditor) != "undefined")
+        if (this.editor instanceof SourceEditor)
         {
-            // See issue 5488
-            // var doc = this.editor._view._frame.contentDocument;
-
-            //doc.body.style.fontSizeAdjust = adjust;
+            this.editor.getViewElement().style.fontSizeAdjust = adjust;
         }
         else
         {

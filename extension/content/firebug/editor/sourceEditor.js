@@ -565,6 +565,11 @@ SourceEditor.prototype =
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
 
+    hasFocus: function()
+    {
+        return this.editorObject.hasFocus();
+    },
+
     focus: function()
     {
         this.editorObject.focus();
