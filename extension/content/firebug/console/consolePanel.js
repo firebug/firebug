@@ -386,11 +386,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(object, sourceLink)
+    getMessageId: function(object, rep, sourceLink)
     {
-    	// Firebug internal message objects could provide their own custom ID
+        // Firebug internal message objects could provide their own custom ID
         if (object instanceof Object && typeof(object.getId) == "function")
             return object.getId();
+
+        // The rep for the object could provide its own custom ID
+        if (rep instanceof Object && typeof(rep.getId) == "function")
+            return rep.getId();
 
         // object may not be an object
         if (typeof object != "object")
@@ -440,7 +444,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(objects, sourceLink);
+            var msgId = this.getMessageId(objects, rep, sourceLink);
 
             if (msgId && msgId == this.lastMsgId)
             {
