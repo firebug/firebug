@@ -217,7 +217,7 @@
     font-size: 12px;
     color: #000000;
     width: 100%;
-    box-shadow: gray 2px 2px 3px;
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
     border-radius: 0 0 3px 3px;
     padding: 2px 0;
     pointer-events: auto;

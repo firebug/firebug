@@ -218,7 +218,7 @@ code {
     white-space: nowrap;
     pointer-events: none;
     border-radius: 3px;
-    box-shadow: gray 2px 2px 3px;
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
 }
 
 .infoTip[active="true"] {
