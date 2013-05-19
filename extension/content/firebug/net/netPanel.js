@@ -23,6 +23,7 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netProgress",
     "firebug/css/cssReps",
+    "firebug/net/timeInfoTip",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -37,7 +38,7 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip) {
 
 with (Domplate) {
 
@@ -55,7 +56,7 @@ var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 // ********************************************************************************************* //
 
 /**
- * @panel Represents a Firebug panel that displayes info about HTTP activity associated with
+ * @panel Represents a Firebug panel that displays info about HTTP activity associated with
  * the current page. This class is derived from <code>Firebug.ActivablePanel</code> in order
  * to support activation (enable/disable). This allows to avoid (performance) expensive
  * features if the functionality is not necessary for the user.
@@ -70,6 +71,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     breakable: true,
     enableA11y: true,
     order: 60,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function(context, doc)
     {
@@ -212,7 +216,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
-        delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
+        // clear the state that is tracking the infotip so it is reset after next show()
+        delete this.infoTipURL;
         this.wasScrolledToBottom = Dom.isScrolledToBottom(this.panelNode);
 
         clearInterval(this.layoutInterval);
@@ -316,6 +321,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         };
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     getContextMenuItems: function(nada, target)
     {
@@ -473,7 +481,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Context menu commands
+    // Context Menu Commands
 
     copyURLParams: function(file)
     {
@@ -696,8 +704,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     populateTimeInfoTip: function(infoTip, file)
     {
-        Firebug.NetMonitor.TimeInfoTip.render(this.context, file, infoTip);
-        return true;
+        return TimeInfoTip.render(this.context, file, infoTip);
     },
 
     populateSizeInfoTip: function(infoTip, file)
