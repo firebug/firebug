@@ -317,7 +317,7 @@ SourceEditor.prototype =
     getCharCount: function(line)
     {
         if (line != null)
-            return this.editorObject.getDoc().getLine(line).length;
+            return this.getDocument().getLine(line).length;
 
         // The newline characters shouldn't be counted.
         return this.editorObject.getValue().replace(/\n/g, "").length;
@@ -337,7 +337,7 @@ SourceEditor.prototype =
         if (start > allCharCount || (end > 0 && end < start))
             return;
 
-        var lineCount = this.editorObject.getDoc().lineCount();
+        var lineCount = this.getDocument().lineCount();
         var startLine = -1;
         var endLine = lineCount - 1;
         var startChar = 0;
@@ -387,6 +387,42 @@ SourceEditor.prototype =
             {line:endLine, ch: endChar});
     },
 
+    getSelection: function()
+    {
+        var start = this.getCursor("start");
+        var end = this.getCursor("end");
+        var startOffset = 0;
+        var endOffset = 0;
+
+        // Count the chars of the lines before the
+        // end/start lines.
+        for (var i = 0; i < end.line; i++)
+        {
+            var lineCharCount = this.getCharCount(i);
+            if (start.line > i)
+                startOffset += lineCharCount;
+            endOffset += lineCharCount;
+        }
+
+        // Add the number of chars between the first char
+        // of the lines and cursor position.
+        startOffset +=  start.ch;
+        endOffset +=  end.ch;
+
+        return {
+            start: startOffset,
+            end: endOffset
+        };
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Document Management
+
+    getDocument: function()
+    {
+        return this.editorObject.getDoc();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Cursor Methods
 
@@ -396,9 +432,9 @@ SourceEditor.prototype =
         this.editorObject.focus();
     },
 
-    getCursor: function()
+    getCursor: function(start)
     {
-        this.editorObject.getCursor()
+        return this.getDocument().getCursor(start || "head");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
