@@ -316,8 +316,11 @@ SourceEditor.prototype =
 
     getCharCount: function(line)
     {
-        return line ? this.editorObject.getDoc().getLine(line).length:
-            this.editorObject.getValue().length;
+        if (line != null)
+            return this.editorObject.getDoc().getLine(line).length;
+
+        // The newline characters shouldn't be counted.
+        return this.editorObject.getValue().replace(/\n/g, "").length;
     },
 
     getSelectedText: function()
@@ -327,16 +330,43 @@ SourceEditor.prototype =
 
     setSelection: function(start, end)
     {
+        var allCharCount = this.getCharCount();
+
+        // It would be wrong If start is out of the body
+        // or end(in positive case) is less than start.
+        if (start > allCharCount || (end > 0 && end < start))
+            return;
+
         var lineCount = this.editorObject.getDoc().lineCount();
         var startLine = -1;
         var endLine = lineCount - 1;
         var startChar = 0;
         var endChar = 0;
 
-        if (end < start || start > this.getCharCount())
+        // In cases that both/one of the inputs is negative,
+        // indicate an offset from the end of the text.
+        start  = start < 0 ? allCharCount + start + 1 : start;
+        end = end < 0 ? allCharCount + end + 1 : end;
+
+        // If the one of the inputs, in negative case,
+        // is out of the body.
+        if (end < 0 || start < 0)
             return;
 
+        // It's also possible that the end parameter, in negative case,
+        // would be less than the start (e.g. setSelection(-1, -5)), so
+        // just need to be swapped.
+        if (end < start)
+        {
+            var temp = start;
+            start = end;
+            end = temp;
+        }
         var charCount = 0;
+
+        // Since Codemirror only accepts the start/end lines and chars in the lines
+        // to set selection, It needs to go through the editor lines to find the
+        // location of the inputs.
         for (var i = 0; i < lineCount; i++)
         {
             charCount += this.getCharCount(i);
@@ -353,7 +383,6 @@ SourceEditor.prototype =
                 break;
             }
         }
-
         this.editorObject.setSelection({line: startLine, ch: startChar},
             {line:endLine, ch: endChar});
     },

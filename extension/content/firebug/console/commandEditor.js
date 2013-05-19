@@ -61,7 +61,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         var config =
         {
             mode: "javascript",
-            lineNumbers: false
+            lineNumbers: false,
+            readOnly: false,
+            gutters: []
         };
 
         // Custom shortcuts for source editor
@@ -189,7 +191,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             this.ignoreChanges = true;
 
             if (this.editor)
-                this.editor.setText(text);
+                this.editor.setText(text, "js");
         }
         catch (err)
         {
