@@ -223,6 +223,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     // All calls to this method must call cleanupSheets first
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
+        function filterMozPseudoElements(pseudoElement)
+        {
+            return !Str.hasPrefix(pseudoElement, "::-moz");
+        }
+
         var pseudoElements = [""];
         var inspectedRules, displayedRules = {};
 
@@ -230,15 +235,15 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         if (!inheritMode)
             pseudoElements = Arr.extendArray(pseudoElements, Css.pseudoElements);
 
+        // xxxsz: Do not show Mozilla-specific pseudo-elements for now (see issue 6451)
+        // Pseudo-element rules just apply to specific elements, so we need a way to find out
+        // which elements that are
+        pseudoElements = pseudoElements.filter(filterMozPseudoElements);
+        
         // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon 
         pseudoElements.forEach(function(pseudoElement, i)
         {
-            // xxxsz: Do not show Mozilla-specific pseudo-elements for now (see issue 6451)
-            // Pseudo-element rules just apply to specific elements, so we need a way to find out
-            // which elements that are
-            if (Str.hasPrefix(pseudoElement, "::-moz"))
-                pseudoElements.splice(i, 1);
-            else if (Str.hasPrefix(pseudoElement, "::"))
+            if (Str.hasPrefix(pseudoElement, "::"))
                 pseudoElements[i] = pseudoElement.substr(1);
         });
 
