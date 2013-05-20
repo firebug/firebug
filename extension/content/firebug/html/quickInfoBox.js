@@ -71,6 +71,16 @@ var QuickInfoBox =
         var vbox = document.createElement("vbox");
         qiBox.appendChild(vbox);
 
+        var box = document.createElement("box");
+        vbox.appendChild(box);
+
+        img = document.createElement("image");
+        img.setAttribute("src", "chrome://firebug/skin/pin.svg");
+        img.setAttribute("class", "fbQuickInfoPin");
+        //img.setAttribute("width", "1px");
+        //img.setAttribute("height", "1px");
+        box.appendChild(img);
+
         var needsTitle = this.addRows(element, vbox, domAttribs);
         var needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
 
@@ -93,6 +103,7 @@ var QuickInfoBox =
 
     hide: function()
     {
+        return;
         if (FBTrace.DBG_QUICKINFOBOX)
             FBTrace.sysout("quickInfoBox.hide;");
 
