@@ -395,13 +395,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (context && context.panelName !== "console")
             return;
 
-        Dom.collapse(chrome.$("fbCommandBox"), multiLine);
-        Dom.collapse(chrome.$("fbPanelSplitter"), !multiLine);
-        Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
-
-        if (multiLine)
-            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
-
         var commandLine = this.getSingleRowCommandLine();
         var commandEditor = this.getCommandEditor();
 
@@ -422,6 +415,14 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
                 commandLine.value = Str.stripNewLines(text);
         }
+
+        Dom.collapse(chrome.$("fbCommandBox"), multiLine);
+        Dom.collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+
+        if (multiLine)
+            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
+
         // else we may be hiding a panel while turning Firebug off
     },
 
