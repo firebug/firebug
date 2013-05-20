@@ -367,7 +367,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return false;
         }
 
-        for (; logRow; logRow = search.findNext())
+        for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
+            Firebug.Search.isCaseSensitive(text)))
         {
             Css.setClass(logRow, "matched");
             this.matchSet.push(logRow);
