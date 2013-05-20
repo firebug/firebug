@@ -218,7 +218,9 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         function filterMozPseudoElements(pseudoElement)
         {
-            return !Str.hasPrefix(pseudoElement, "::-moz");
+            return !Str.hasPrefix(pseudoElement, "::-moz") ||
+                pseudoElement == "::-moz-placeholder" ||
+                pseudoElement == "::-moz-selection";;
         }
 
         var pseudoElements = [""];
