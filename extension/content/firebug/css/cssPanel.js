@@ -1791,7 +1791,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.navigateToNextDocument(scanDoc, reverse))
         {
             // firefox findService can't find nodes immediatly after insertion
-            setTimeout(Obj.bind(this.searchCurrentDoc, this), 0, true, text, reverse);
+            // xxxHonza: the timeout has been increased to 100 since search across
+            // multiple documents didn't work sometimes.
+            // Of course, it would be great to get rid of the timeout. 
+            setTimeout(Obj.bind(this.searchCurrentDoc, this), 100, true, text, reverse);
             return "wraparound";
         }
     },
