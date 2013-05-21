@@ -179,7 +179,7 @@
 
 .cssProp.disabledStyle {
     background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
-    filter: url(chrome://firebug/skin/filters.svg#grayscale);
+    filter: url(resource://firebugui/filters.svg#grayscale);
     color: #CCCCCC;
 }
 

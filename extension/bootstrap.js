@@ -44,8 +44,10 @@ function startup(params, reason)
 {
     // Register the resource:// mappings
     var res = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+    var uiURI = Services.io.newURI(__SCRIPT_URI_SPEC__ + "/../content/firebug/firebugui/", null, null);
     var resourceURI = Services.io.newURI(__SCRIPT_URI_SPEC__ + "/../modules/", null, null);
     res.setSubstitution("firebug", resourceURI);
+    res.setSubstitution("firebugui", uiURI);
     res.setSubstitution("moduleloader", resourceURI);
 
     // Add our chrome registration. not needed for 10+
@@ -117,6 +119,7 @@ function shutdown(params, reason)
     // Clear our resource registration
     var res = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
     res.setSubstitution("firebug", null);
+    res.setSubstitution("firebugui", null);
     res.setSubstitution("moduleloader", null);
 }
 

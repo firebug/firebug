@@ -149,11 +149,11 @@ body {
 }
 
 .closeButton:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 .closeButton:hover:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /************************************************************************************************/

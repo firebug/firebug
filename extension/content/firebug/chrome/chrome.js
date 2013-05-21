@@ -37,8 +37,6 @@ const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const panelURL = "chrome://firebug/content/panel.html";
-
 // URLs used in the Firebug Menu and several other places
 const firebugURLs =
 {

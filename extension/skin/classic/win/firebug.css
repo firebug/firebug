@@ -116,7 +116,7 @@
 #fbCommandLineHistoryButton:hover,
 #fbToggleCommandLine:hover,
 #fbToggleCommandEditor:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #fbMinimizeButton:active,
@@ -126,11 +126,11 @@
 #fbCommandLineHistoryButton[checked="true"],
 #fbToggleCommandLine:active,
 #fbToggleCommandEditor:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbCommandLineHistoryButton[disabled] {
-    filter: url(chrome://firebug/skin/filters.svg#brighten);
+    filter: url(resource://firebugui/filters.svg#brighten);
 }
 
 /************************************************************************************************/
