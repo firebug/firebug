@@ -2095,17 +2095,57 @@ this.clearConsole = function(chrome)
 // ********************************************************************************************* //
 // Search
 
-this.clearSearchField = function()
+this.clearSearchField = function(callback)
 {
     // FIX ME: characters should be sent into the search box individually
     // (using key events) to simulate incremental search.
     var searchBox = FW.Firebug.chrome.$("fbSearchBox");
     searchBox.value = "";
+
+    var doc = searchBox.ownerDocument;
+    doc.defaultView.focus();
+    FBTest.focus(searchBox);
+
+    FBTest.sendKey("RETURN", "fbSearchBox");
+
+    if (callback)
+    {
+        // Firebug uses search delay so, we need to wait till the panel is updated
+        // (see firebug/chrome/searchBox module, searchDelay constant).
+        setTimeout(function() {
+            callback()
+        }, 250);
+    }
 }
 
 this.getSearchFieldText = function()
 {
     return FW.Firebug.chrome.$("fbSearchBox").value;
+}
+
+this.setSearchFieldText = function(searchText, callback)
+{
+    FBTest.clearSearchField(function()
+    {
+        // Focus the search box.
+        var searchBox = FW.Firebug.chrome.$("fbSearchBox");
+        var doc = searchBox.ownerDocument;
+        doc.defaultView.focus();
+        FBTest.focus(searchBox);
+
+        // Send text into the input box.
+        FBTest.synthesizeText(searchText, doc.defaultView);
+        FBTest.sendKey("RETURN", "fbSearchBox");
+
+        if (callback)
+        {
+            // Firebug uses search delay so, we need to wait till the panel is updated
+            // (see firebug/chrome/searchBox module, searchDelay constant).
+            setTimeout(function() {
+                callback()
+            }, 250);
+        }
+    });
 }
 
 /**
