@@ -352,12 +352,22 @@ const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
-// CSS Module
+// CSS Panel
 
 Firebug.CSSStyleSheetPanel = function() {};
 
 Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 {
+    name: "stylesheet",
+    parentPanel: null,
+    searchable: true,
+    dependents: ["css", "stylesheet", "dom", "domSide", "layout"],
+    enableA11y: true,
+    deriveA11yFrom: "css",
+    order: 30,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     template: domplate(
     {
         tag:
@@ -369,6 +379,76 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 )
             )
     }),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initialize: function()
+    {
+        this.onMouseDown = Obj.bind(this.onMouseDown, this);
+        this.onMouseUp = Obj.bind(this.onMouseUp, this);
+        this.onClick = Obj.bind(this.onClick, this);
+
+        Firebug.Panel.initialize.apply(this, arguments);
+    },
+
+    destroy: function(state)
+    {
+        state.scrollTop = this.panelNode.scrollTop ? this.panelNode.scrollTop : this.lastScrollTop;
+
+        Persist.persistObjects(this, state);
+
+        this.stopEditing();
+
+        Firebug.Panel.destroy.apply(this, arguments);
+    },
+
+    initializeNode: function(oldPanelNode)
+    {
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.addEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
+
+        Firebug.Panel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode: function()
+    {
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.removeEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
+
+        Firebug.Panel.destroyNode.apply(this, arguments);
+    },
+
+    show: function(state)
+    {
+        Firebug.Inspector.stopInspecting(true);
+
+        this.showToolbarButtons("fbCSSButtons", true);
+        this.showToolbarButtons("fbLocationSeparator", true);
+        this.showToolbarButtons("fbLocationButtons", true);
+        this.showToolbarButtons("fbLocationList", true);
+
+        CSSModule.updateEditButton();
+
+        // wait for loadedContext to restore the panel
+        if (this.context.loaded && !this.location)
+        {
+            Persist.restoreObjects(this, state);
+
+            if (!this.location)
+                this.location = this.getDefaultLocation();
+
+            if (state && state.scrollTop)
+                this.panelNode.scrollTop = state.scrollTop;
+        }
+    },
+
+    hide: function()
+    {
+        this.lastScrollTop = this.panelNode.scrollTop;
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -836,7 +916,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var styleRuleBox = rulesBox && Firebug.getElementByRepObject(rulesBox, this.selection);
         if (!styleRuleBox)
         {
-            var rule = {rule: this.selection, inherited: false, selector: "element.style", props: []};
+            var rule = {
+                rule: this.selection,
+                inherited: false,
+                selector: "element.style",
+                props: []
+            };
+
             if (!rulesBox)
             {
                 // The element did not have any displayed styles. We need to create the
@@ -848,7 +934,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 styleRuleBox = styleRuleBox.getElementsByClassName("cssElementRuleContainer")[0];
             }
             else
+            {
                 styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox);
+            }
 
             styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
         }
@@ -911,11 +999,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 autofill += " " + base;
             }
         }
+
         if (!autofill ||
             doc.querySelectorAll(autofill).length === doc.querySelectorAll(base).length)
         {
             autofill = base;
         }
+
         this.ruleEditor.setValue(autofill);
         this.ruleEditor.input.select();
         Firebug.Editor.update(true);
@@ -973,6 +1063,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (this.name == "stylesheet")
             Events.dispatch(this.fbListeners, "onInlineEditorClose", [this, row.firstChild, true]);
+
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -1095,84 +1186,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
-
-    name: "stylesheet",
-    parentPanel: null,
-    searchable: true,
-    dependents: ["css", "stylesheet", "dom", "domSide", "layout"],
-    enableA11y: true,
-    deriveA11yFrom: "css",
-    order: 30,
-
-    initialize: function()
-    {
-        this.onMouseDown = Obj.bind(this.onMouseDown, this);
-        this.onMouseUp = Obj.bind(this.onMouseUp, this);
-        this.onClick = Obj.bind(this.onClick, this);
-
-        Firebug.Panel.initialize.apply(this, arguments);
-    },
-
-    destroy: function(state)
-    {
-        state.scrollTop = this.panelNode.scrollTop ? this.panelNode.scrollTop : this.lastScrollTop;
-
-        Persist.persistObjects(this, state);
-
-        this.stopEditing();
-
-        Firebug.Panel.destroy.apply(this, arguments);
-    },
-
-    initializeNode: function(oldPanelNode)
-    {
-        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
-        Events.addEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
-        Events.addEventListener(this.panelNode, "click", this.onClick, false);
-
-        Firebug.Panel.initializeNode.apply(this, arguments);
-    },
-
-    destroyNode: function()
-    {
-        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
-        Events.removeEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
-        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
-
-        Firebug.Panel.destroyNode.apply(this, arguments);
-    },
-
-    show: function(state)
-    {
-        Firebug.Inspector.stopInspecting(true);
-
-        this.showToolbarButtons("fbCSSButtons", true);
-        this.showToolbarButtons("fbLocationSeparator", true);
-        this.showToolbarButtons("fbLocationButtons", true);
-        this.showToolbarButtons("fbLocationList", true);
-
-        CSSModule.updateEditButton();
-
-        // wait for loadedContext to restore the panel
-        if (this.context.loaded && !this.location)
-        {
-            Persist.restoreObjects(this, state);
-
-            if (!this.location)
-                this.location = this.getDefaultLocation();
-
-            if (state && state.scrollTop)
-                this.panelNode.scrollTop = state.scrollTop;
-        }
-    },
-
-    hide: function()
-    {
-        this.lastScrollTop = this.panelNode.scrollTop;
-    },
-
     supportsObject: function(object, type)
     {
         if (object instanceof window.CSSStyleSheet)
@@ -1281,7 +1294,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var sourceLink = object;
 
-                var sourceFile = Firebug.SourceFile.getSourceFileByHref(sourceLink.href, this.context);
+                var sourceFile = Firebug.SourceFile.getSourceFileByHref(
+                    sourceLink.href, this.context);
+
                 if (sourceFile)
                 {
                     Dom.clearNode(this.panelNode);  // replace rendered stylesheets
@@ -1776,7 +1791,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.navigateToNextDocument(scanDoc, reverse))
         {
             // firefox findService can't find nodes immediatly after insertion
-            setTimeout(Obj.bind(this.searchCurrentDoc, this), 0, true, text, reverse);
+            // xxxHonza: the timeout has been increased to 100 since search across
+            // multiple documents didn't work sometimes.
+            // Of course, it would be great to get rid of the timeout. 
+            setTimeout(Obj.bind(this.searchCurrentDoc, this), 100, true, text, reverse);
             return "wraparound";
         }
     },
@@ -2014,7 +2032,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
                     if (FBTrace.DBG_CSS)
                     {
-                        FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" + value + "\"");
+                        FBTrace.sysout("CSSEditor.saveEdit \"" + propName + "\" = \"" +
+                            value + "\"");
                        // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
                     }
 
@@ -2083,15 +2102,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             Css.hasClass(target, "cssKeyText"))
         {
             target.textContent = value;
-            
+
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @-moz-keyframe rule key: " +
                     previousValue + "->" + value);
             }
-            
+
             rule.keyText = value;
-            
+
             var saveSuccess = (rule.keyText == value || rule.keyText == Css.keyframeKeys[value]);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
@@ -2099,13 +2118,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 Css.hasClass(target, "cssDocumentRuleCondition"))
         {
             target.textContent = value;
-            
+
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @-moz-document rule condition: " +
                         previousValue + "->" + value);
             }
-            
+
             try
             {
                 rule.conditionText = value;
@@ -2113,7 +2132,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             catch (e)
             {
             }
-            
+
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
@@ -2150,9 +2169,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
                     previousValue + "->" + value);
             }
-            
+
             rule.conditionText = value;
-            
+
             var saveSuccess = (rule.conditionText == value);
             this.box.setAttribute("saveSuccess", saveSuccess);
         }
@@ -2190,7 +2209,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var previous = this.initialValue;
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.endEditing: renaming property " + previous + " -> " + value);
+                FBTrace.sysout("CSSEditor.endEditing: renaming property " + previous + " -> " +
+                    value);
             }
 
             var cssRule = Dom.getAncestorByClass(target, "cssRule");
@@ -2241,7 +2261,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleteRange: function(value, offset)
     {

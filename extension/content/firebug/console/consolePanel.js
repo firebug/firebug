@@ -360,14 +360,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         function findRow(node) { return Dom.getAncestorByClass(node, "logRow"); }
         var search = new Search.TextSearch(this.panelNode, findRow);
 
-        var logRow = search.find(text);
+        var logRow = search.find(text, false, Firebug.Search.isCaseSensitive(text));
         if (!logRow)
         {
             Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound", [this, text, []]);
             return false;
         }
 
-        for (; logRow; logRow = search.findNext())
+        for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
+            Firebug.Search.isCaseSensitive(text)))
         {
             Css.setClass(logRow, "matched");
             this.matchSet.push(logRow);

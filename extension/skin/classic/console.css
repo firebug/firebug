@@ -633,7 +633,7 @@
 }
 
 .logRow.matched {
-    display: block !important;
+    display: table !important;
 }
 
 .logRow.matching {
