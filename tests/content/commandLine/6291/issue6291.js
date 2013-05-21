@@ -100,7 +100,7 @@ function testError(callback, panelNode, errorSourceCode, lineNumber)
     var reTestLine = new RegExp("\\(line "+lineNumber+"\\)");
     FBTest.compare(errorSourceCode, row.querySelector(".errorSourceCode").textContent,
         "the source of the error should be \""+errorSourceCode+"\"");
-    FBTest.compare(reTestLine, row.querySelector(".objectLink-sourceLink").textContent,
+    FBTest.compare(reTestLine, row.querySelector(".errorSourceCode").textContent,
         "the error should be located at line "+lineNumber);
     callback();
 }
