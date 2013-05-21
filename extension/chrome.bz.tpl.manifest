@@ -1,10 +1,8 @@
-content firebug content/firebug/
 content firebug content/firebug/ contentaccessible=yes
 
-# Maps resource://firebug/* to files in modules/*
+# Moved to bootstrap.js:
 # resource firebug modules/
-
-# Maps resource://moduleloader/* to files in modules/*
+# resource firebugui content/firebug/firebugui/
 # resource moduleloader modules/
 
 skin firebug classic/1.0 skin/classic/
@@ -70,3 +68,6 @@ override chrome://firebug/skin/debugger.css    chrome://firebug/skin/mac/debugge
 override chrome://firebug-os/skin/firebug.css  chrome://firebug/skin/mac/firebug.css os=Darwin
 override chrome://firebug-os/skin/panel.css    chrome://firebug/skin/mac/panel.css os=Darwin
 override chrome://firebug-os/skin/window.css   chrome://firebug/skin/mac/window.css os=Darwin
+
+# Support for Linux
+override chrome://firebug-os/skin/firebug.css  chrome://firebug/skin/linux/firebug.css os=Linux

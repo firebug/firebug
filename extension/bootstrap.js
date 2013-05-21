@@ -50,9 +50,6 @@ function startup(params, reason)
     res.setSubstitution("firebugui", uiURI);
     res.setSubstitution("moduleloader", resourceURI);
 
-    // Add our chrome registration. not needed for 10+
-    Components.manager.addBootstrappedManifestLocation(params.installPath);
-
     Cu.import("resource://firebug/prefLoader.js");
 
     // Register default preferences
@@ -112,9 +109,6 @@ function shutdown(params, reason)
 
     // Unload all Firebug modules added with Cu.import
     FIREBUG_MODULES.forEach(Cu.unload, Cu);
-
-    // Remove our chrome registration. not needed for 10+
-    Components.manager.removeBootstrappedManifestLocation(params.installPath);
 
     // Clear our resource registration
     var res = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
