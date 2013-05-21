@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6453: Create FBTest that covers Console panel search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6453">Issue 6453</a>:
+    Create FBTest that covers Console panel search</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Console panel</li>
+            <li>Use the search box to search in the panel</li>
+            <li>There should be 6 logs when you search for 'testing' (case insensitive)</li>
+            <li>There should be 2 logs when you search for 'Testing' (case sensitive)</li>
+            <li>There should be 1 logs when you search for 'TESTING' (case sensitive)</li>
+            <li>There should be 1 logs when you search for 'xxx' (case insensitive)</li>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, &lt;odvarko@gmail.com&gt;</footer>
+</div>
+
+<div id="testing">Testing</div>
+
+<script>
+var obj = {prop: "testing"};
+console.log("testing");
+console.warn("Testing");
+console.table("Testing");
+console.log(document.getElementById("testing"));
+console.log(obj);
+console.time("TESTING");
+console.timeEnd("TESTING");
+console.info("xxx");
+</script>
+</body>
+</html>
