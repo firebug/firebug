@@ -10,14 +10,15 @@
             [],
             [1],
             ["foo"],
-            new Array("foo"),
             [1, "foo", window],
+            new Array("foo"),
             [, , ,],
             document.getElementsByTagName("div"), // issue 489 and issue 588
             document.documentElement.childNodes, // issue 588
             (function() { return arguments; })(1, "foo", window),
             (function() { var arr = []; arr["key1"] = "value1"; return arr; })() // 766
         ];
+
         var nonArrays =
         [
             undefined,
@@ -29,20 +30,21 @@
             window.sessionStorage // issue 1695
         ];
 
-        function log()
+        function logArrays()
         {
         	arrays.forEach(function(item)
             {
         		console.log(item);
             });
-
-        	nonArrays.forEach(function(item)
-            {
-        		console.log(item);
-            });
         }
 
-        window.addEventListener("DOMContentLoaded", log, false);
+        function logNonArrays()
+        {
+            nonArrays.forEach(function(item)
+            {
+                console.log(item);
+            });
+        }
         </script>
     </head>
     <body>
@@ -50,6 +52,10 @@
             <h1>Display of arrays and array-like objects</h1>
         </header>
         <div>
+            <section id="content">
+                <button id="logArrays" onclick="logArrays()">Log arrays and array-like objects</button>
+                <button id="logNonArrays" onclick="logNonArrays()">Log non-arrays</button>
+            </section>
             <section id="description">
                 <p class="note">
                     Note: This test covers <a href="http://code.google.com/p/fbug/issues/detail?id=212">issue 212</a>,
@@ -64,11 +70,18 @@
                 <ol>
                     <li>Open Firebug</li>
                     <li>Enable and switch to the <em>Console</em> panel</li>
-                    <li>Reload the page</li>
+                    <li>
+                        Click the <em>Log arrays and array-like objects</em> button<br/>
+                        <span class="ok">&rArr; All logged items must be displayed as arrays.</span>
+                    </li>
+                    <li>
+                        Click the <em>Log non-arrays</em> button<br/>
+                        <span class="ok">&rArr; All logged items must not be displayed as arrays.</span>
+                    </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>Point 1</li>
+                    <li>Arrays and array-like objects must be displayed as arrays but non-arrays not.</li>
                 </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
