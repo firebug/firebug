@@ -14,8 +14,8 @@ function runTest()
         {
             executeSearchTest("testing", false, false, function(counter)
             {
-                FBTest.compare(7, counter, "There must be precise number " +
-                     "of occurences (7) actual: " + counter);
+                FBTest.compare(10, counter, "There must be precise number " +
+                     "of occurences (10) actual: " + counter);
                 callback();
             });
         });
@@ -25,8 +25,8 @@ function runTest()
         {
             executeSearchTest("testing", false, true, function(counter)
             {
-                FBTest.compare(2, counter, "There must be precise number " +
-                    "of occurences (2) actual: " + counter);
+                FBTest.compare(4, counter, "There must be precise number " +
+                    "of occurences (4) actual: " + counter);
                 callback();
             });
         });
@@ -36,8 +36,8 @@ function runTest()
         {
             executeSearchTest("Testing", false, false, function(counter)
             {
-                FBTest.compare(4, counter, "There must be precise number " +
-                    "of occurences (4) actual: " + counter);
+                FBTest.compare(5, counter, "There must be precise number " +
+                    "of occurences (5) actual: " + counter);
                 callback();
             });
         });
