@@ -25,6 +25,7 @@ function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Opti
 var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
+var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -536,6 +537,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             nodeSpan.appendChild(node);
         }
 
+        function addStyle(node, css)
+        {
+            var dummyEl = node.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            dummyEl.setAttribute("style", css);
+            node.setAttribute("style", "");
+            for (var i = 0; i < dummyEl.style.length; i++)
+            {
+                var prop = dummyEl.style[i];
+                if (reAllowedCss.test(prop))
+                    node.style.setProperty(prop, dummyEl.style.getPropertyValue(prop));
+            }
+        }
+
         if (!objects || !objects.length)
         {
             // Make sure the log-row has proper height (even if empty).
@@ -611,7 +625,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Apply custom style if available.
             if (lastStyle && node)
-                node.setAttribute("style", lastStyle);
+                addStyle(node, lastStyle);
 
             node = null;
         }
