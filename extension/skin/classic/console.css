@@ -326,7 +326,7 @@
 }
 
 .hasBreakSwitch .errorBreak {
-    display: inline;
+    display: inline-block;
 }
 
 .breakForError .errorBreak {
@@ -804,6 +804,7 @@
 }
 
 .spyIcon {
+    display: inline-block;
     margin-right: 4px;
     margin-left: 4px;
     width: 16px;

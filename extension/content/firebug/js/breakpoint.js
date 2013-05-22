@@ -311,7 +311,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                     _checked: "$bp.checked", tabindex : '-1'}),
                 SPAN({"class": "breakpointName"}, "$bp.name"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
-                IMG({"class": "closeButton", src: "blank.gif"})
+                SPAN({"class": "closeButton"})
             ),
             DIV({"class": "breakpointCode"}, "$bp.sourceLine")
         ),

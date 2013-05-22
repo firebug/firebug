@@ -40,7 +40,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
             DIV({"class": "infoTipImageBox infoTipLoading"},
                 IMG({"class": "infoTipImage", src: "$urlValue", repeat: "$repeat",
                     onload: "$onLoadImage", onerror: "$onErrorImage"}),
-                IMG({"class": "infoTipBgImage", collapsed: true, src: "blank.gif"}),
+                DIV({"class": "infoTipBgImage", collapsed: true}),
                 DIV({"class": "infoTipCaption"})
             ),
 

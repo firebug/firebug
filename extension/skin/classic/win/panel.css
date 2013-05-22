@@ -54,6 +54,7 @@
 /* DOM panel */
 
 .closeButton {
+    display: inline-block;
     width: 16px;
     height: 16px;
     background: url(chrome://firebug/skin/win/close.svg) no-repeat;
