@@ -35,9 +35,11 @@ const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBe
 //xxxHonza: shell we move this mess to lib?
 try
 {
-    // Firefox 22
+    // Firefox <= 22
     // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
-    Cu.import("resource:///modules/devtools/CssLogic.jsm");
+    var scope = {};
+    Cu.import("resource:///modules/devtools/CssLogic.jsm", scope);
+    var CssLogic = scope.CssLogic;
 }
 catch (err)
 {
