@@ -296,34 +296,6 @@ StackFrame.cleanStackTraceOfFirebug = function(trace)
     return trace;
 };
 
-StackFrame.getStackDump = function()
-{
-    var lines = [];
-    for (var frame = Components.stack; frame; frame = frame.caller)
-        lines.push(frame.filename + " (" + frame.lineNumber + ")");
-
-    return lines.join("\n");
-};
-
-StackFrame.getStackSourceLink = function()
-{
-    for (var frame = Components.stack; frame; frame = frame.caller)
-    {
-        if (frame.filename && frame.filename.indexOf("://firebug/") > 0)
-        {
-            for (; frame; frame = frame.caller)
-            {
-                var firebugComponent = "/modules/firebug-";
-                if (frame.filename && frame.filename.indexOf("://firebug/") < 0 &&
-                    frame.filename.indexOf(firebugComponent) == -1)
-                    break;
-            }
-            break;
-        }
-    }
-    return StackFrame.getFrameSourceLink(frame);
-};
-
 StackFrame.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
