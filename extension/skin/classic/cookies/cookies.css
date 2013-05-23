@@ -17,6 +17,9 @@
 }
 
 .cookieEvent .cookieDomainLabel {
+    position: absolute;
+    top: 0;
+    right: 0;
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
     color: #0000FF;
@@ -308,9 +311,6 @@
 }
 
 .cookieDomainLabel {
-	position: absolute;
-	top: 0;
-	right: 0;
     color: rgb(0, 0, 255);
 }
 
