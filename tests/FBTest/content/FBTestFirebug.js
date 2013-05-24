@@ -2411,7 +2411,7 @@ this.getStyleRulesBySelector = function(selector)
     for (var i = 0, len = selectors.length; i < len; ++i)
     {
         if (selectors[i].textContent.indexOf(selector) != -1)
-            rules.push(FW.FBL.getAncestorByClass(selector, "cssRule"));
+            rules.push(FW.FBL.getAncestorByClass(selectors[i], "cssRule"));
     }
 
     return rules;
