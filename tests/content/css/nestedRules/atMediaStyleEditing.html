@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Nested rules: @media rules style editing</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+
+        @media all {
+            #element {
+                background-image: -moz-linear-gradient(135deg, #78FF8C, #B4FFC8);
+            }
+        }
+
+        @media print {
+            #element {
+                background-image: -moz-linear-gradient(135deg, #FFFF78, #FFFFB4);
+            }
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Nested rules: @media rules style editing</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <p class="note">
+                    This test case covers one part of issue
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=1717">Issue 1717</a> (CSS Panel does not have @media UI).
+                </p>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>
+                        Select <em>atMediaStyleEditing.html</em> from the Location Menu<br/>
+                        <span class="ok">
+                            &rArr; There must be one unnested <code>#element</code> rule, one nested inside an <code>@media all</code>
+                            and one inside an <code>@media print</code> rule.
+                        </span>
+                    </li>
+                    <li>
+                        Click the value of the <code>background-image</code> property inside the
+                        <code>#element</code> rule nested inside the <code>@media all</code> rule<br/>
+                        <span class="ok">&rArr; The inline editor should open.</span>
+                    </li>
+                    <li>
+                        Enter <code>-moz-linear-gradient(135deg, #FF8C78, #FFC8B4)</code><br/>
+                        <span class="ok">&rArr; The <code>&lt;div&gt;</code> (<code>#element</code>) above should be red now.</span>
+                    </li>
+                    <li>
+                        Click the disable icon besides the <code>background-image</code> property inside the
+                        <code>#element</code> rule nested inside the <code>@media all</code> rule<br/>
+                        <span class="ok">&rArr; The property should be displayed disabled inside the panel.</span><br/>
+                        <span class="ok">&rArr; The <code>&lt;div&gt;</code> (<code>#element</code>) above should be blue now.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Style editing inside @media rules should work as expected.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
