@@ -461,6 +461,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 var logContent = row.getElementsByClassName("logContent").item(0);
                 appender.apply(this, [objects, logContent, rep]);
 
+                // If sourceLink is not provided and the object is an instance of Error
+                // convert it into ErrorMessageObj instance, which implements getSourceLink
+                // method.
+                // xxxHonza: is there a better place where to make this kind of conversion?
+                if (!sourceLink && (objects instanceof Error))
+                    objects = FirebugReps.Except.getErrorMessage(objects);
+
                 if (!sourceLink && objects && objects.getSourceLink)
                     sourceLink = objects.getSourceLink();
 
