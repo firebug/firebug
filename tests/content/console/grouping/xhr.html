@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Group console messages: XHR</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function onExecuteTest()
+        {
+            makeXHR("xhr.txt"); makeXHR("xhr.txt"); // Must not be grouped
+        }
+
+        function makeXHR(url)
+        {
+            var XHR = new XMLHttpRequest();
+            XHR.open("GET", url);
+            XHR.send(null);
+
+            XHR.onreadystatechange = function()
+            {
+                if (XHR.readyState == 4 && XHR.status == 200)
+                {
+                    var output = document.getElementById("output");
+                    output.style.display = "block";
+                    output.innerHTML += XHR.responseText + "<br/>";
+                }
+            }
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4979">Group console messages</a>: XHR</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Make XHR</button>
+                <section id="output"></section>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug, select the Console panel and enable it</li>
+                    <li>Press the <em>Make XHR</em> button above</li>
+                    <li>There should be two XHR entries in the Console. They must not be grouped.</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>There should be two entries in the console. They must not be grouped.</li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
+        </div>
+    </body>
+</html>

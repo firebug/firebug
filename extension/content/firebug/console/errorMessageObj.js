@@ -27,7 +27,7 @@ function ErrorMessageObj(message, href, lineNo, source, category, context,
     this.category = category;
     this.context = context;
     this.trace = trace;
-    this.msgId = msgId;
+    this.msgId = msgId || this.getId();
     this.colNumber = colNumber;
 }
 
@@ -66,6 +66,11 @@ ErrorMessageObj.prototype =
         this.href = sourceName;
         this.lineNo = lineNumber;
     },
+
+    getId: function()
+    {
+        return this.href + ":" + this.message + ":" + this.lineNo;
+    }
 };
 
 // ********************************************************************************************* //

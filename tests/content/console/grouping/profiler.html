@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Group console messages: profiler</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+        function onExecuteTest()
+        {
+            profile(); profile(); // Must not be grouped
+        }
+
+        function profiledFunction()
+        {
+            for (var i = 0; i < 1000; ++i)
+                var test = 1;
+        }
+
+        function profile()
+        {
+            console.profile("Profile");
+            for (var i = 0; i < 100; ++i)
+                profiledFunction();
+            console.profileEnd();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4979">Group console messages</a>: Profiler</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Profile</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Press the <em>Profile</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be two profiler logs (results) in the console.
+                        They must not be grouped.
+                    </li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
+        </div>
+    </body>
+</html>

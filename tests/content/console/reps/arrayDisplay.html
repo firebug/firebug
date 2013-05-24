@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Display of arrays and array-like objects</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        var arrays =
+        [
+            [],
+            [1],
+            ["foo"],
+            [1, "foo", window],
+            new Array("foo"),
+            [, , ,],
+            document.getElementsByTagName("div"), // issue 489 and issue 588
+            document.documentElement.childNodes, // issue 588
+            (function() { return arguments; })(1, "foo", window),
+            (function() { var arr = []; arr["key1"] = "value1"; return arr; })() // 766
+        ];
+
+        var nonArrays =
+        [
+            undefined,
+            1,
+            "foo",
+            new String("foo"), // issue 234
+            {0: "foo", 1: "bar", length: 2}, // issue 212
+            new (function NotAnArray() { this.data = "this is not Array"; }), // issue 874
+            window.sessionStorage // issue 1695
+        ];
+
+        function logArrays()
+        {
+        	arrays.forEach(function(item)
+            {
+        		console.log(item);
+            });
+        }
+
+        function logNonArrays()
+        {
+            nonArrays.forEach(function(item)
+            {
+                console.log(item);
+            });
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Display of arrays and array-like objects</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="logArrays" onclick="logArrays()">Log arrays and array-like objects</button>
+                <button id="logNonArrays" onclick="logNonArrays()">Log non-arrays</button>
+            </section>
+            <section id="description">
+                <p class="note">
+                    Note: This test covers <a href="http://code.google.com/p/fbug/issues/detail?id=212">issue 212</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=234">issue 234</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=489">issue 489</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=588">issue 588</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=766">issue 766</a>,
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=874">issue 874</a> and
+                    <a href="http://code.google.com/p/fbug/issues/detail?id=1695">issue 1695</a>
+                </p>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Click the <em>Log arrays and array-like objects</em> button<br/>
+                        <span class="ok">&rArr; All logged items must be displayed as arrays.</span>
+                    </li>
+                    <li>
+                        Click the <em>Log non-arrays</em> button<br/>
+                        <span class="ok">&rArr; All logged items must not be displayed as arrays.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Arrays and array-like objects must be displayed as arrays but non-arrays not.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

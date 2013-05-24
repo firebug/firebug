@@ -55,7 +55,8 @@ var TraceErrorListener =
         if (object.flags & WARNING_FLAG)
             return;
 
-        FBTrace.sysout("Console Service ERROR " + object, object);
+        var message = (object.message ? object.message : object);
+        FBTrace.sysout("Console Service ERROR " + message, object);
     },
 };
 
@@ -66,4 +67,3 @@ return TraceErrorListener;
 
 // ********************************************************************************************* //
 });
-

@@ -163,7 +163,13 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     logProfileRow: function(context, title)
     {
-        var row = Firebug.Console.openGroup(title, context, "profile",
+        var now = new Date().toISOString();
+        var objects =
+        {
+            getId: function() { return title + now; },
+            title: title
+        };
+        var row = Firebug.Console.openGroup(objects, context, "profile",
             Firebug.Profiler.ProfileCaption, true, null, true);
         Css.setClass(row, "profilerRunning");
 
@@ -235,7 +241,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
             timeBox.textContent = Locale.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
 
-            var groupBody = groupRow.lastChild;
+            var groupBody = groupRow.getElementsByClassName("logGroupBody")[0];
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
             var table = sizer.firstChild;
             var tHeader = table.lastChild;  // no rows inserted.
@@ -243,7 +249,8 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             var tag = Firebug.Profiler.ProfileCall.tag;
             var insert = tag.insertRows;
 
-            for (var i = 0; i < calls.length; ++i) {
+            for (var i = 0; i < calls.length; ++i)
+            {
                 calls[i].index = i;
                 context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
             }
@@ -420,7 +427,7 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 {
     tag:
         SPAN({"class": "profileTitle", "role": "status"},
-            SPAN({"class": "profileCaption"}, "$object"),
+            SPAN({"class": "profileCaption"}, "$object.title"),
             " ",
             SPAN({"class": "profileTime"}, "")
         )

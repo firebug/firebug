@@ -11,7 +11,15 @@
 /************************************************************************************************/
 /* Support for console */
 
+.cookieEvent {
+	position: relative;
+	width: 100%;
+}
+
 .cookieEvent .cookieDomainLabel {
+    position: absolute;
+    top: 0;
+    right: 0;
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
     color: #0000FF;
@@ -21,10 +29,9 @@
 .logRow-cookiesCleared,
 .logRow-cookiesRejected,
 .logRow-cookie:hover {
-    padding: 2px 0px 1px 22px !important;
-    background-image: url(chrome://firebug/skin/cookies/cookie.svg) !important;
-    background-repeat: no-repeat !important;
-    background-position: 4px 2px !important;
+    background-image: url(chrome://firebug/skin/cookies/cookie.svg);
+    background-repeat: no-repeat;
+    background-position: 4px 3px;
 }
 
 .logRow-cookiesRejected .cookieRejectedList {
@@ -60,6 +67,10 @@
 
 .logRow-cookiesCleared > DIV {
     padding: 1px 0 2px 0 !important;
+}
+
+.logRow-cookie > div > .logContent {
+    padding-left: 22px;
 }
 
 /* Container for document.cookie log within the Console panel */

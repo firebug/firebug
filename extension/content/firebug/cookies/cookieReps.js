@@ -726,28 +726,17 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
     // Console
     tag:
         DIV({"class": "cookieEvent", _repObject: "$object"},
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY(
-                    TR(
-                        TD({width: "100%"},
-                            SPAN(Locale.$STR("cookies.console.cookie"), " "),
-                            SPAN({"class": "cookieNameLabel", onclick: "$onClick"}, 
-                                "$object|getName", 
-                                " "),
-                            SPAN({"class": "cookieActionLabel"}, 
-                                "$object|getAction", 
-                                ".&nbsp;&nbsp;"),
-                            SPAN({"class": "cookieValueLabel"}, 
-                                "$object|getValue")
-                        ),
-                        TD(
-                            SPAN({"class": "cookieDomainLabel", onclick: "$onClickDomain",
-                                title: "$object|getOriginalURI"}, "$object|getDomain"),
-                            SPAN("&nbsp;") 
-                        )
-                    )
-                )
-            )
+        	SPAN(Locale.$STR("cookies.console.cookie"), " "),
+            SPAN({"class": "cookieNameLabel", onclick: "$onClick"}, 
+                "$object|getName", 
+                " "),
+            SPAN({"class": "cookieActionLabel"}, 
+                "$object|getAction", 
+                ".&nbsp;&nbsp;"),
+            SPAN({"class": "cookieValueLabel"}, 
+                "$object|getValue"),
+            DIV({"class": "cookieDomainLabel", onclick: "$onClickDomain",
+                title: "$object|getOriginalURI"}, "$object|getDomain")
         ),
 
     // Event handlers

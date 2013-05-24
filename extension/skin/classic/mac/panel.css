@@ -12,7 +12,7 @@ body {
 /* Twisties */
 
 .twisty,
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
@@ -29,7 +29,7 @@ body {
     background-position: 2px calc(0.5em - 3px);
 }
 
-.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,

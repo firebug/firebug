@@ -4,7 +4,7 @@
 /* Twisties */
 
 .twisty,
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
@@ -24,7 +24,7 @@
     min-height: 12px;
 }
 
-.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,

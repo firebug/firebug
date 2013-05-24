@@ -1,0 +1,58 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Time Info tip */
+
+.timeInfoTip {
+    width: 100%;
+    padding: 5px;
+}
+
+.timeInfoTipStartLabel {
+    padding-left: 5px;
+    color: gray;
+}
+
+.timeInfoTipDesc {
+    padding: 5px 10px 0px 5px;
+    color: gray;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: 200px;
+}
+
+.timeInfoTipBox {
+    position: relative;
+    height: 17px;
+    border-right: 6ch solid transparent;
+}
+
+.timeInfoTipBar,
+.timeInfoTipEventBar {
+    position: relative;
+    display: block;
+    margin: 0;
+    opacity: 1;
+    height: 15px;
+    min-width: 2px;
+}
+
+.timeInfoTipEventBar {
+    width: 1px !important;
+}
+
+.timeInfoTipCell.startTime {
+    padding-right: 8px;
+    padding-left: 8px;
+}
+
+.timeInfoTipCell.elapsedTime {
+    text-align: right;
+    padding-right: 8px;
+}
+
+.perfTimingBarLabel {
+    color: black;
+}
+
+/*************************************************************************************************/

@@ -1,32 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Console Source File and Line Number Reporting Bug</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <script language="javascript" type="text/javascript">
-
-   function log() {
-     console.info("log");
-     external();
-   };
-
-    </script>
-    <script language="javascript" type="text/javascript" 
-            src="external.js"></script>
-  </head>
-  <body>
-    <h1>Console Source File and Line Number Reporting Bug</h1>
-    <ol>
-      <li>Click this button: <input type="button" onclick="log()" id="button" value="Click me!"> </li>
-      <li>Observe that console reports that "log" is written from
-      line 11 of this file.  <br/>
-      <b>Issue a:</b> Line 11 is not in the script section.</li>
-      <li>Observe that console reports that "external" is written from
-      line 2 of this file.<br/>
-      <b>Issue b:</b> It should report the file name as "external.js",
-      and it should report that the line number is 2.</li>
-    </ol>
-  </body>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 882: console.log() reports wrong source file and line number</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function log() {
+            console.info("log");
+            external();
+        };
+        </script>
+        <script src="external.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=882">Issue 882</a>: console.log() reports wrong source file and line number</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button onclick="log()" id="createLog">Log</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Click the button <em>Log</em> above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        There should be two logs. One called "log" at line 9 of <em>issue882.html</em>, the other one
+                        named "external" at line 2 of <em>external.js</em>. 
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>

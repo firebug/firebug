@@ -2,15 +2,19 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/xpcom",
     "firebug/lib/array",
-    "firebug/lib/string",
+    "firebug/lib/string"
 ],
-function(FBTrace, Arr, Str) {
+function(FBTrace, Xpcom, Arr, Str) {
 
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+// ********************************************************************************************* //
 
 var Obj = {};
 
@@ -150,6 +154,71 @@ Obj.getPrototype = function(ob)
 Obj.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
+};
+
+Obj.getObjHash = function(obj)
+{
+    function getPropString(obj, level)
+    {
+        level = level || 1;
+        if (level > 3 || typeof obj != "object")
+            return typeof obj;
+
+        try
+        {
+            var props = Object.getOwnPropertyNames(obj);
+        }
+        catch(e)
+        {
+            return typeof obj;
+        }
+
+        var propString = "";
+        props.forEach(function(propName) {
+            propString += propName + ":" + typeof obj[propName] + ":" +
+                (typeof obj[propName] == "object" ?
+                    getPropString(obj[propName], level + 1) : obj[propName]);
+        });
+
+        var parent = Object.getPrototypeOf(obj);
+        if (parent)
+            propString += getPropString(parent);
+
+        return propString;
+    }
+
+    function toHexString(charCode)
+    {
+        return ("0" + charCode.toString(16)).slice(-2);
+    }
+
+    try
+    {
+        var str = typeof obj + getPropString(obj);
+    
+        var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
+            "nsIScriptableUnicodeConverter");
+        converter.charset = "UTF-8";
+        var result = {};
+        var data = converter.convertToByteArray(str, result);
+        var ch = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        ch.init(ch.MD5);
+        ch.update(data, data.length);
+        var hash = ch.finish(false);
+    
+        var hexHash = "";
+        for (var i=0, len = hash.length; i < len; ++i)
+            hexHash += toHexString(hash.charCodeAt(i));
+    }
+    catch(e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.getObjHash; Hash could not be created", e);
+
+        return this.getUniqueId();
+    }
+
+    return hexHash;
 };
 
 Obj.getRandomInt = function(min, max)

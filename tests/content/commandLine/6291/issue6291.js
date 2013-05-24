@@ -11,6 +11,7 @@ function runTest()
         {
             var panelNode = FBTest.getPanel("console").panelNode;
             var tasks = new FBTest.TaskList();
+
             // 3
             tasks.push(logProgress, "Testing the nsIXPCException's with alert()");
             var alertCommand = "alert({toString: function(){ throw 1; }})";
@@ -18,6 +19,7 @@ function runTest()
                 "Error: Could not convert JavaScript argument arg 0 [nsIDOMWindow.alert]", "span",
                 "errorMessage", false);
             tasks.push(testError, panelNode, alertCommand, 2);
+
             // 4.
             tasks.push(logProgress,
                 "Testing the calls of the console API through the Command Line");
@@ -98,10 +100,15 @@ function testError(callback, panelNode, errorSourceCode, lineNumber)
 {
     var row = panelNode.querySelector(".logRow-errorMessage");
     var reTestLine = new RegExp("\\(line "+lineNumber+"\\)");
-    FBTest.compare(errorSourceCode, row.querySelector(".errorSourceCode").textContent,
+    var source = row.querySelector(".errorSourceBox");
+    var sourceLink = row.querySelector(".objectLink-sourceLink");
+
+    FBTest.compare(errorSourceCode, source.textContent,
         "the source of the error should be \""+errorSourceCode+"\"");
-    FBTest.compare(reTestLine, row.querySelector(".objectLink-sourceLink").textContent,
+
+    FBTest.compare(reTestLine, sourceLink.textContent,
         "the error should be located at line "+lineNumber);
+
     callback();
 }
 

@@ -16,7 +16,7 @@ define([
     "firebug/lib/system",
     "firebug/lib/string",
     "firebug/lib/persist",
-    "firebug/js/sourceLink",
+    "firebug/debugger/script/sourceLink",
     "firebug/console/console",
     "firebug/console/commandLineExposed",
     "firebug/console/closureInspector",

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Group console messages: Simple logs</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+        function groupedLogs()
+        {
+            console.info("info"); console.info("info");
+            console.log(null); console.log(null);
+            console.log(undefined); console.log(undefined);
+            console.log(true); console.log(true);
+            console.log(1); console.log(1);
+            console.log("test"); console.log("test");
+
+            var obj = {1:1,x:2};
+            console.log(obj); console.log(obj);
+
+            console.log([{a:1},2,3]); console.log([{a:1},2,3]);
+            console.log(Math.sqrt(-1)); console.log(Math.sqrt(-1));
+
+            var obj = Object.create(null);
+            console.log(obj); console.log(obj);
+
+            console.debug("debug"); console.debug("debug");
+            console.info("info"); console.info("info");
+            console.warn("warning"); console.warn("warning");
+            console.error("error"); console.error("error");
+
+            cleanUp();
+        }
+
+        function notGroupedLogs()
+        {
+            console.log(1); console.log(2);
+            console.log(true); console.log(false);
+            console.log(1); console.log("1");
+            console.log([1,2,3]); console.log([1,2,4]);
+            console.log([{a:1},2,4]); console.log([{a:1},2,5]);
+            console.log({a:1,b:2}); console.log({a:1,b:3});
+            console.log(1,1); console.log(1,2);
+            console.log("1"); console.log(1);
+            console.log("null"); console.log(null); console.log(undefined);
+
+            console.log(document); console.log(document);
+            console.log(document.head.firstChild); console.log(document.head.firstChild);
+
+            var arr = [1];
+            console.log(arr); arr[0] = 2; console.log(arr);
+
+            logTable(); logTable();
+
+            /* This is currently not supported by Firebug
+            var th = function() { throw 0; };
+            var throwy1 = Proxy.create({getOwnPropertyDescriptor: th, getPropertyDescriptor: th, getOwnPropertyNames: th, getPropertyNames: th}, null);
+            var throwy2 = Proxy.create({getOwnPropertyDescriptor: th, getPropertyDescriptor: th, getOwnPropertyNames: th, getPropertyNames: th}, null);
+            console.log(throwy1); console.log(throwy2);
+            */
+
+            appendChildAndLog(document.createTextNode("a")); appendChildAndLog(document.createTextNode("a"));
+
+            appendChildInArrayAndLog(document.createTextNode("a")); appendChildInArrayAndLog(document.createTextNode("a"));
+
+            cleanUp();
+        }
+
+        function cleanUp()
+        {
+            var output = document.getElementById("output");
+            while (output.lastChild)
+                output.removeChild(output.lastChild);
+        }
+
+        function logTable()
+        {
+            var objects =
+            [
+                {firstName: "Steven", lastName: "Mayers"},
+                {firstName: "John", lastName: "Travers"}
+            ];
+            console.table(objects);
+        }
+
+        function appendChildAndLog(ch)
+        {
+            var output = document.getElementById("output");
+            output.appendChild(ch);
+            console.log(ch);
+        }
+
+        function appendChildInArrayAndLog(ch)
+        {
+            var output = document.getElementById("output");
+            output.appendChild(ch);
+            console.log([ch]);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4979">Group console messages</a>: Simple logs</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton1" onclick="groupedLogs()">Grouped logs</button>
+                <button id="testButton2" onclick="notGroupedLogs()">Not grouped logs</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Press the <em>Grouped logs</em> button above<br/>
+                        <span class="ok">&rArr; Every log in the console should have the group counter set to "2".</span>
+                    </li>
+                    <li>
+                        Press the <em>Not grouped logs</em> button above<br/>
+                        <span class="ok">&rArr; None of the logs in the console should have a group counter.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        All logs created by clicking the <em>Grouped logs</em> button should be grouped and
+                        all created by clicking the <em>Not grouped logs</em> button should not be grouped.
+                    </li>
+                </ul>
+
+                <div id="output"></div>
+            </section>
+            <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
+        </div>
+    </body>
+</html>
