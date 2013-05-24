@@ -2387,6 +2387,21 @@ this.getSelectedNodeBox = function()
 
 //********************************************************************************************* //
 // CSS panel
+this.getAtRulesByType = function(type)
+{
+    var panel = FBTest.selectPanel("stylesheet");
+    var ruleTypes = panel.panelNode.getElementsByClassName("cssRuleName");
+
+    var rules = [];
+    for (var i=0, len = ruleTypes.length; i<len; ++i)
+    {
+        if (ruleTypes[i].textContent == type)
+            rules.push(FW.FBL.getAncestorByClass(ruleTypes[i], "cssRule"));
+    }
+
+    return rules;
+};
+
 this.getStyleRulesBySelector = function(selector)
 {
     var panel = FBTest.selectPanel("stylesheet");
