@@ -105,12 +105,12 @@ section#description li.error, section#description li span.error {
     color: #DC0000;
 }
 
-code {
+code, kbd {
     white-space: pre;
     color: #008C00;
 }
 
-code.key {
+code.key, kbd {
     color: #0000DC;
 }
 
