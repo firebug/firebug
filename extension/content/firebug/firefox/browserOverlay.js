@@ -290,6 +290,23 @@ BrowserOverlay.prototype =
         });
     },
 
+    onViewMenuShowing: function()
+    {
+        var suspendMarker = this.win.document.getElementById("firebugStatus");
+
+        // Check whether Firebug is open
+        var open = false;
+        if (this.win.Firebug.chrome)
+        {
+            var fbContentBox = this.win.Firebug.chrome.$("fbContentBox");
+            open = fbContentBox.getAttribute("collapsed") == "true" ? false : true;
+        }
+
+        var firebugViewMenuItem = this.win.document.
+            getElementById("menu_firebug_viewToggleFirebug");
+        firebugViewMenuItem.setAttribute("checked", open);
+    },
+
     onPositionPopupShowing: function(popup)
     {
         while (popup.lastChild)
