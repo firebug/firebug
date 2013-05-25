@@ -32,7 +32,8 @@ var contentTypes =
     "font/ttf",
     "font/woff",
     "application/x-otf",
-    "application/x-font-otf"
+    "application/x-font-otf",
+    "application/font-woff"
 ];
 
 // ********************************************************************************************* //
