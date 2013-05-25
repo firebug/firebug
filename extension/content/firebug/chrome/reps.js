@@ -2701,7 +2701,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     inspectObject: function(error, context)
     {
-        var sourceLink = this.getSourceLink(error);
+        var sourceLink = error.getSourceLink();
         FirebugReps.SourceLink.inspectObject(sourceLink, context);
     },
 
@@ -3362,7 +3362,7 @@ FirebugReps.ErrorMessageObj.prototype =
 
     resetSource: function()
     {
-        if (this.href && this.lineNo)
+        if (this.href && this.lineNo != null)
             this.source = this.getSourceLine();
     },
 
