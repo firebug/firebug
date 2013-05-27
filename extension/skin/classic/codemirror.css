@@ -15,10 +15,10 @@
 /* PADDING */
 
 .CodeMirror-lines {
-  padding: 40px 0; /* Vertical padding around content */
+  padding: 4px 0; /* Vertical padding around content */
 }
 .CodeMirror pre {
-  padding: 0 40px; /* Horizontal padding of content */
+  padding: 0 4px; /* Horizontal padding of content */
 }
 
 .CodeMirror-scrollbar-filler {
@@ -37,6 +37,11 @@
   min-width: 20px;
   text-align: right;
   color: #999;
+  min-width: 20px;
+    text-align: right;
+    color: #999;
+    padding-left: 8px !important;
+    padding-right: 25px !important;
 }
 
 /* CURSOR */

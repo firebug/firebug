@@ -7,10 +7,6 @@
     font-family: monospace;
     font-size: 11px;
     line-height: 1.2;
-    position: relative;
-    overflow: hidden;
-    background: white;
-    color: black;
 }
 
 .cm-s-firebug .linehighlighting {
@@ -20,14 +16,6 @@
 
 .cm-s-firebug .CodeMirror-activeline-background {
     background: #00FFFF;
-}
-
-.cm-s-firebug .CodeMirror-scroll {
-    overflow: hidden;
-}
-
-.cm-s-firebug .CodeMirror-lines {
-    cursor: text;
 }
 
 /* Text indent from the breakpoint column */
@@ -52,23 +40,9 @@
     padding-bottom: 30px;
     z-index: 3;
 }
-
-.cm-s-firebug .CodeMirror-linenumbers {
-}
-
 .cm-s-firebug .CodeMirror-linenumber {
-    min-width: 20px;
-    text-align: right;
-    color: #999;
     padding-left: 8px !important;
     padding-right: 25px !important;
-}
-
-.cm-s-firebug .CodeMirror div.CodeMirror-cursor.CodeMirror-overwrite {
-}
-
-.cm-s-firebug .cm-tab {
-    display: inline-block;
 }
 
 /*************************************************************************************************/
@@ -103,37 +77,11 @@
 
 .cm-s-firebug .CodeMirror-gutter {
     padding-right:4px;
-    padding-bottom: 30px;
-    margin-bottom: -32px;
     width:.5em;
 }
 
 .cm-s-firebug .CodeMirror-gutter-elt {
-    position: absolute;
-    cursor: default;
-    z-index: 4;
     padding-left: 3px;
-}
-
-/*************************************************************************************************/
-/* Print */
-
-@media print {
-  /* Hide the cursor when printing */
-  .CodeMirror div.CodeMirror-cursor {
-    visibility: hidden;
-  }
-}
-
-/*************************************************************************************************/
-/* No vertical padding in Firebug theme */
-
-.CodeMirror-lines {
-    padding: 0 0; /* Vertical padding around content */
-}
-
-.CodeMirror pre {
-    padding: 0 0; /* Horizontal padding of content */
 }
 
 /*************************************************************************************************/
