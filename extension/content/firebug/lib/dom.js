@@ -649,7 +649,10 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
     if (!scrollBox)
         return;
 
-    var offset = Dom.getClientOffset(element);
+    var offset = {
+        x: element.offsetLeft,
+        y: element.offsetTop
+    };
 
     if (!alignmentX)
         alignmentX = "centerOrLeft";
