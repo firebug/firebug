@@ -2149,7 +2149,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         var url = null;
         // Ignores any trailing whitespace in |source|
-        const reURIinComment = /\/\/@\ssourceURL=\s*(\S*?)\s*$/m;
+        const reURIinComment = /\/\/[@#]\ssourceURL=\s*(\S*?)\s*$/m;
         var m = reURIinComment.exec(lines[lines.length - 1]);
 
         if (m)
