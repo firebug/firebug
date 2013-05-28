@@ -24,6 +24,7 @@ var Cu = Components.utils;
 
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
+Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
 
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");

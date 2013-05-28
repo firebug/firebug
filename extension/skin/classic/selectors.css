@@ -1,0 +1,28 @@
+/* See license.txt for terms of usage */
+
+.panelNode-selectors {
+    overflow: hidden;
+}
+
+.selectorTrials {
+    height: 100%;
+}
+
+.editorContainer {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+    line-height: 14px;
+    cursor: text;
+}
+
+.elementsGroups {
+    position: relative;
+    height: calc(100% - 18px);
+    overflow-y: scroll;
+}
+
+.cssElementsHeader {
+    margin: 0;
+}
