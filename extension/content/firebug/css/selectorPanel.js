@@ -103,16 +103,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.groups = [
-            {
-                selector: "div",
-                opened: true
-            },
-            {
-                selector: "p > span",
-                opened: true
-            }
-        ];
+        this.groups = [];
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -145,6 +136,20 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Groups
 
+    addGroup: function(selector)
+    {
+        var group = {
+            selector: selector,
+            opened: true
+        }
+        this.groups.push(group);
+
+        // Append element group to display
+        var elementsGroups = this.panelNode.getElementsByClassName("elementsGroups")[0];
+        var elementsGroup = this.template.elementsGroupTag.replace(
+            {group: group, windows: this.context.windows}, elementsGroups);
+    },
+
     refresh: function()
     {
         var parentNode = this.template.selectorsTag.replace(
@@ -170,7 +175,28 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
             title: Locale.$STR("Selector"),
             oninput: "$onInput",
             onkeypress: "$onKeyPress"}
-        )
+        ),
+
+    endEditing: function(target, value, cancel)
+    {
+        if (cancel || value == "")
+            return;
+
+        if (this.isValidSelector(value))
+            this.panel.addGroup(value);
+    },
+
+    isValidSelector: function(value)
+    {
+        try {
+            this.panel.panelNode.querySelector(value);
+            return true;
+        }
+        catch (e)
+        {
+            return false;
+        }
+    }
 });
 
 //********************************************************************************************* //
