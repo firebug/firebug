@@ -32,3 +32,10 @@
 .cssElementsHeader {
     margin: 0;
 }
+
+.selectorGroupRemoveButton
+{
+    position: absolute;
+    right: 3px;
+    top: 2px;
+}
