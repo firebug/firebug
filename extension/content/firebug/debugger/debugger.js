@@ -40,7 +40,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         // Listen to the debugger-client, which represents the connection to the server.
         // The debugger-client object represents the source of all RDP events.
-        DebuggerClientModule.addListener(this);
+
+        if (Firebug.Debugger.isAlwaysEnabled())
+            DebuggerClientModule.addListener(this);
 
         // Hook XUL stepping buttons.
         var chrome = Firebug.chrome;
@@ -149,11 +151,15 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     activateDebugger: function()
     {
+        DebuggerClientModule.addListener(this);
+
         Trace.sysout("Debugger.activateDebugger;");
     },
 
     deactivateDebugger: function()
     {
+        DebuggerClientModule.removeListener(this);
+
         Trace.sysout("Debugger.deactivateDebugger;");
     },
 

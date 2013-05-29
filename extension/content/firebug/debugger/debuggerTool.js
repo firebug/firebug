@@ -162,6 +162,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         var self = this;
         this.context.activeThread.getSources(function(response)
         {
+            // The tool is already destroyed so, bail out.
+            if (!self._onPause)
+                return;
+
             var sources = response.sources;
             for (var i=0; i<sources.length; i++)
                 self.addScript(sources[i]);

@@ -17,7 +17,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-var Trace = FBTrace.to("DBG_CONNECTION");
+var Trace = FBTrace.to("DBG_DEBUGGERCLIENTMODULE");
+var TraceConn = FBTrace.to("DBG_CONNECTION");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 Cu["import"]("resource://gre/modules/devtools/dbg-client.jsm");
@@ -91,6 +92,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     connect: function()
     {
+        Trace.sysout("debuggerClientModule.connect;");
+
         // Initialize the server to allow connections through pipe transport.
         if (!this.isRemoteDebugger)
         {
@@ -107,6 +110,10 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             }
         }
 
+        this.transport = (this.isRemoteDebugger) ?
+            debuggerSocketConnect(Options.get("remoteHost"), Options.get("remotePort")) :
+            DebuggerServer.connectPipe();
+
         // Load Firebug actors. If Firebug is running server side these actors
         // should also be loaded.
         this.loadActors(this.onActorsLoaded.bind(this));
@@ -114,6 +121,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     loadActors: function(callback)
     {
+        Trace.sysout("debuggerClientModule.loadActors;", arguments);
+
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
         // actor types.
@@ -125,17 +134,13 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         ],
         function()
         {
-            Trace.sysout("debuggerClientModule.loadActors; ", arguments);
-
             callback();
         });
     },
 
     onActorsLoaded: function()
     {
-        this.transport = (this.isRemoteDebugger) ?
-            debuggerSocketConnect(Options.get("remoteHost"), Options.get("remotePort")) :
-            DebuggerServer.connectPipe();
+        Trace.sysout("debuggerClientModule.onActorsLoaded;");
 
         // Debugger client represents the connection to the server side
         // and so it's global.
@@ -154,15 +159,40 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     disconnect: function()
     {
+        if (!this.client)
+            return;
+
         this.client.removeListener("tabNavigated", this.onTabNavigated);
         this.client.removeListener("tabDetached", this.onTabDetached);
 
         // Disconnect from the server.
         this.client.close(this.onDisconnect);
+        this.client = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Hooks
+    // Firebug Activation
+
+    onResumeFirebug: function()
+    {
+        Trace.sysout("debuggerClientModule.onResumeFirebug;");
+
+        /*if (this.transport)
+            this.onActorsLoaded();
+        else
+            this.connect();*/
+    },
+
+    onSuspendFirebug: function()
+    {
+        Trace.sysout("debuggerClientModule.onSuspendFirebug;");
+
+        // TODO: unhook packet tracing
+        //this.disconnect();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // JSD2 Hooks
 
     onConnect: function(type, traits)
     {
@@ -178,20 +208,24 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     onTabNavigated: function(type, packet)
     {
-        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url, packet);
+        var context = TabWatcher.getContextByTabActor(packet.from);
+        Trace.sysout("debuggerClientModule.onTabNavigated; to: " + packet.url +
+            ", context: " + context, packet);
     },
 
     onTabDetached: function(type, packet)
     {
         var context = TabWatcher.getContextByTabActor(packet.from);
+        if (!context)
+            return;
 
         Trace.sysout("debuggerClientModule.onTabDetached; " +
             (context ? context.getId() : "no context"));
 
-        // xxxHonza: what if the context is null?
-        // should we dispatch to the contex/debuggerTool?
         this.dispatch("onThreadDetached", [context]);
         this.dispatch("onTabDetached", [context]);
+
+        context.tabDetached = true;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -200,14 +234,18 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     initContext: function(context, persistedState)
     {
         Trace.sysout("debuggerClientModule.initContext; " + context.getName() +
-            " ID: " + context.getId());
+            " ID: " + context.getId(), persistedState);
 
         // If page reloads happens the tab-client and thread-client remains the same
-        // so, reuse them from the persiste state object (if they are available).
+        // so, reuse them from the persisted state object (if they are available).
         if (persistedState)
         {
             context.tabClient = persistedState.tabClient;
             context.activeThread = persistedState.activeThread;
+            context.threadActor = persistedState.threadActor;
+
+            Trace.sysout("debuggerClientModule.initContext; from persisted state " +
+                context.getName() + " ID: " + context.getId());
         }
 
         // Attach remote tab.
@@ -223,6 +261,24 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
         persistedState.tabClient = context.tabClient;
         persistedState.activeThread = context.activeThread;
+        persistedState.threadActor = context.threadActor;
+
+        Trace.sysout("debuggerClientModule.destroyContext; persisted state: " +
+            "tabClient: " + persistedState.tabClient +
+            ", activeThread: " + persistedState.activeThread +
+            ", threadActor: " + persistedState.threadActor);
+
+        // If onTabDetached wasn't received from the server so far
+        // onThreadDetached and onTabDetached events should be fired. These
+        // events expect the current |context| as an argument and this is the
+        // last chance to have the |context|.
+        if (!context.tabDetached)
+        {
+            this.dispatch("onThreadDetached", [context]);
+            this.dispatch("onTabDetached", [context]);
+
+            context.tabDetached = true;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -230,11 +286,19 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
 
     attachCurrentTab: function(context)
     {
+        if (!Firebug.Debugger.isAlwaysEnabled())
+        {
+            Trace.sysout("debuggerClientModule.attachCurrentTab; The Script panel not enabled");
+            return;
+        }
+
         Trace.sysout("debuggerClientModule.attachCurrentTab; " + context.getName() +
             " ID: " + context.getId());
+        Trace.sysout("debuggerClientModule.attachCurrentTab; tabClient: " + context.tabClient +
+            ", activeThread: " + context.activeThread);
 
-        // Context already attached (page just reloaded).
-        if (context.tabClient && context.activeThread)
+        // I. Context already attached to the page and thread actors (page just reloaded).
+        if (context.tabClient && context.threadActor && context.activeThread)
         {
             Trace.sysout("debuggerClientModule.attachCurrentTab; " +
                 "Page already attached (just reloaded)");
@@ -247,13 +311,28 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
             return;
         }
 
+        // II. tab actor attached, but thread actor not yet.
+        if (context.tabClient && context.threadActor && !context.activeThread)
+        {
+            Trace.sysout("debuggerClientModule.attachCurrentTab; " +
+                "Page already attached (just reloaded), but thread not attached.");
+
+            this.dispatch("onTabDetached", [context, true]);
+            this.dispatch("onTabAttached", [context, true]);
+
+            this.attachThread(context, context.threadActor);
+            return;
+        }
+
         var self = this;
         this.client.listTabs(function(response)
         {
-            // Use the current context. The previous one could have been already destroyed
-            // (happens e.g. for about:blank).
-            // xxxHonza: FIX ME, this is rather a hack.
-            context = Firebug.currentContext;
+            if (!context.window)
+            {
+                TraceError.sysout("Couldn't get list of tabs, context destroyed");
+                return;
+            }
+
             if (!context)
             {
                 FBTrace.sysout("ERROR? no context");
@@ -276,7 +355,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         Trace.sysout("debuggerClientModule.attachTab; " + context.getName() +
             " ID: " + context.getId(), tabActor);
 
-        if (context.tabClient)
+        if (context.tabClient && context.threadActor)
         {
             Trace.sysout("debuggerClientModule.attachTab; context.tabClient exists. " +
                 "thread actor: " + context.threadActor, context.tabClient);
@@ -288,9 +367,18 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var self = this;
         this.client.attachTab(tabActor, function(response, tabClient)
         {
+            Trace.sysout("debuggerClientModule.onAttachTab; " + context.getName() +
+                " ID: " + context.getId());
+
             if (!tabClient)
             {
                 TraceError.sysout("ERROR: No tab client found!");
+                return;
+            }
+
+            if (!context.window)
+            {
+                TraceError.sysout("Couldn't attach to tab, context destroyed");
                 return;
             }
 
@@ -308,12 +396,30 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         Trace.sysout("debuggerClientModule.attachThread; " + context.getName() +
             " ID: " + context.getId(), threadActor);
 
+        if (context.activeThread)
+        {
+            Trace.sysout("debuggerClientModule.attachThread; context.activeThread exists. " +
+                activeThread);
+            return;
+        }
+
         var self = this;
         this.client.attachThread(threadActor, function(response, threadClient)
         {
+            Trace.sysout("debuggerClientModule.onAttachThread; " + context.getName() +
+                " ID: " + context.getId(), threadClient);
+
             if (!threadClient)
             {
-                TraceError.sysout("Couldn't attach to thread: " + response.error);
+                TraceError.sysout("debuggerClientModule.onAttachThread; ERROR " +
+                    "Couldn't attach to thread: " + response.error, response);
+                return;
+            }
+
+            if (!context.window)
+            {
+                TraceError.sysout("debuggerClientModule.onAttachThread; ERROR " +
+                    " Couldn't attach to thread, context destroyed", response);
                 return;
             }
 
@@ -372,7 +478,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                 if (packet.type == "newGlobal")
                     return;
 
-                Trace.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
+                TraceConn.sysout("PACKET RECEIVED; " + JSON.stringify(packet), packet);
                 self.client.onPacket.apply(self.client, arguments);
             },
 
@@ -385,7 +491,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var send = this.transport.send;
         this.transport.send = function(packet)
         {
-            Trace.sysout("PACKET SEND " + JSON.stringify(packet), packet);
+            TraceConn.sysout("PACKET SEND " + JSON.stringify(packet), packet);
 
             send.apply(self.transport, arguments);
         }
