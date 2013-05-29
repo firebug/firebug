@@ -8,10 +8,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/lib/persist",
     "firebug/css/selectorModule",
     "firebug/css/selectorEditor"
 ],
-function(FBTrace, Obj, Domplate, Locale, Dom, Css, Events, CSSSelectorsModule, SelectorEditor) {
+function(FBTrace, Obj, Domplate, Locale, Dom, Css, Events, Persist, CSSSelectorsModule,
+    SelectorEditor) {
 
 with (Domplate) {
 
@@ -124,6 +126,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     destroy: function(state)
     {
+        state.groups = this.groups;
+        Persist.persistObjects(this, state);
+
         Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
@@ -148,6 +153,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     show: function(state)
     {
+        Persist.restoreObjects(this, state);
+
+        if (state)
+        {
+            if (state.groups)
+                this.groups = state.groups;
+        }
+
         this.refresh();
     },
 
