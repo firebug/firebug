@@ -23,6 +23,12 @@
     overflow-y: scroll;
 }
 
+.selectorWarning {
+    font-size: 11px;
+    color: gray;
+    padding: 2px 0 0 1ex;
+}
+
 .cssElementsHeader {
     margin: 0;
 }

@@ -146,7 +146,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
         // Append element group to display
         var elementsGroups = this.panelNode.getElementsByClassName("elementsGroups")[0];
-        var elementsGroup = this.template.elementsGroupTag.replace(
+        var action = elementsGroups.getElementsByClassName("noSelection")[0] ?
+            "replace" : "append";
+        var elementsGroup = this.template.elementsGroupTag[action](
             {group: group, windows: this.context.windows}, elementsGroups);
     },
 
@@ -154,6 +156,12 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         var parentNode = this.template.selectorsTag.replace(
                 {groups: this.groups, windows: this.context.windows}, this.panelNode);
+
+        if (this.groups.length == 0)
+        {
+            var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
+            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+        }
     }
 });
 
@@ -197,6 +205,16 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
             return false;
         }
     }
+});
+
+//********************************************************************************************* //
+
+var WarningTemplate = domplate(Firebug.Rep,
+{
+    noSelectionTag:
+        DIV({"class": "selectorWarning noSelection"},
+            SPAN(Locale.$STR("css.selector.noSelection"))
+        )
 });
 
 //********************************************************************************************* //
