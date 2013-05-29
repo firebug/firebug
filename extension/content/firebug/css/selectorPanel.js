@@ -272,6 +272,12 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
             onkeypress: "$onKeyPress"}
         ),
 
+    saveEdit: function(target, value, previousValue)
+    {
+        var saveSuccess = this.isValidSelector(value);
+        this.box.setAttribute("saveSuccess", saveSuccess);
+    },
+
     endEditing: function(target, value, cancel)
     {
         if (cancel || value == "")
