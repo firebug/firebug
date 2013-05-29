@@ -49,7 +49,8 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
                 role: "list", _repObject: "$group"},
                 H1({"class": "cssElementsHeader groupHeader focusRow", role: "listitem"},
                     DIV({"class": "twisty", role: "presentation"}),
-                    SPAN({"class": "cssElementsLabel groupLabel"}, "$group.selector")
+                    SPAN({"class": "cssElementsLabel groupLabel"}, "$group.selector"),
+                    DIV({"class": "closeButton selectorGroupRemoveButton"})
                 ),
                 TAG("$elementsTag", {elements: "$windows,$group.selector|getElements"})
             ),
@@ -106,7 +107,18 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
         var header = Dom.getAncestorByClass(event.target, "groupHeader");
         if (header)
-            this.toggleGroup(event.target);
+        {
+            var removeButton = Dom.getAncestorByClass(event.target, "selectorGroupRemoveButton");
+            if (removeButton)
+            {
+                var group = Firebug.getRepObject(event.target);
+                this.removeGroup(group.selector);
+            }
+            else
+            {
+                this.toggleGroup(event.target);
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -208,6 +220,22 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
             Dom.scrollTo(groupNode, groupsNode, null,
                 groupNode.offsetHeight > groupsNode.clientHeight || titleAtTop ? "top" : "bottom");
+        }
+    },
+
+    removeGroup: function(selector)
+    {
+        for (var i=0, len=this.groups.length; i<len; ++i)
+        {
+            if (this.groups[i].selector == selector)
+            {
+                this.groups.splice(i, 1);
+
+                // Remove elements group from display
+                var elementsGroup = this.panelNode.getElementsByClassName("elementsGroup")[i];
+                elementsGroup.parentNode.removeChild(elementsGroup);
+                break;
+            }
         }
     },
 
