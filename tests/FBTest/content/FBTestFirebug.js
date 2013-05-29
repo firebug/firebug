@@ -764,6 +764,8 @@ function waitForWindowLoad(browser, callback)
         {
             var win = browser.contentWindow;
 
+            FBTest.sysout("waitForWindowLoad; window loaded " + win.location.href);
+
             // This is a workaround for missing wrappedJSObject property,
             // if the test case comes from http (and not from chrome)
             // xxxHonza: this is rather a hack, it should be removed if possible.
@@ -798,6 +800,9 @@ function waitForWindowLoad(browser, callback)
     // (bug549539) could be utilized.
     function waitForEvents(event)
     {
+        FBTest.sysout("waitForWindowLoad; event: " + event.type + " (" +
+            event.target.location.href + ")");
+
         if (event.type == "load" && event.target === browser.contentDocument)
         {
             browser.removeEventListener("load", waitForEvents, true);
@@ -819,6 +824,8 @@ function waitForWindowLoad(browser, callback)
 
     browser.addEventListener("load", waitForEvents, true);
     browser.addEventListener("MozAfterPaint", waitForEvents, true);
+
+    FBTest.sysout("waitForWindowLoad; waiting...");
 }
 
 /**
@@ -980,7 +987,41 @@ this.disableScriptPanel = function(callback)
  */
 this.enableScriptPanel = function(callback)
 {
-    this.setPanelState(FW.Firebug.Debugger, "script", callback, true);
+    // xxxHonza: we need to wait till the client is connected to the debugger, which
+    // happens asynchronously after the Script panel is enabled.
+    // This needs to be yet refactored.
+    function onCallback(win)
+    {
+        var context = FW.Firebug.currentContext;
+        if (!context)
+        {
+            FBTest.ok(context, "There is no current context!" + context);
+            return;
+        }
+
+        FBTest.sysout("enableScriptPanel.window loaded: " + win.location.href);
+
+        // Wait till the context is attached to the remote debugger i.e. 'resumed'
+        // packet received.
+        var tool = context.getTool("debugger");
+        var listener =
+        {
+            onStopDebugging: function()
+            {
+                FBTest.sysout("enableScriptPanel.onStopDebugging;");
+                tool.removeListener(listener);
+
+                if (callback)
+                    callback(win);
+            }
+        };
+
+        FBTest.sysout("enableScriptPanel.add tool listener;");
+        tool.addListener(listener);
+    }
+
+    var cb = callback ? onCallback : null;
+    this.setPanelState(FW.Firebug.Debugger, "script", cb, true);
 };
 
 /**
@@ -1504,7 +1545,7 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
     var doc = panel.panelNode.ownerDocument;
 
     // Complete attributes that must be set on sourceRow element.
-    var attributes = {"class": "sourceRow", exe_line: "true"};
+    var attributes = {"class": "CodeMirror-debugLocation"};
     if (breakpoint)
         attributes.breakpoint = breakpoint ? "true" : "false";
 
@@ -1545,10 +1586,7 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
             var panel = chrome.getSelectedPanel();
             FBTest.compare("script", panel.name, "The script panel should be selected");
 
-            var row = FBTestFirebug.getSourceLineNode(lineNo, chrome);
-            FBTest.ok(row, "Row " + lineNo + " must be found");
-
-            var currentLineNo = parseInt(sourceRow.firstChild.textContent, 10);
+            var currentLineNo = parseInt(sourceRow.lineNumber.textContent, 10);
             FBTest.compare(lineNo, currentLineNo, "The break must be on line " + lineNo + ".");
 
             callback(sourceRow);
