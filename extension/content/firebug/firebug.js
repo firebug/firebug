@@ -365,14 +365,14 @@ window.Firebug =
     // dispatch onSuspendFirebug to all modules
     suspendFirebug: function()
     {
-        var cancelSuspend = Events.dispatch2(activableModules, "onSuspendingFirebug", []);
+        var cancelSuspend = Events.dispatch2(modules, "onSuspendingFirebug", []);
         if (cancelSuspend)
             return;
 
         this.setSuspended("suspending");
 
         // TODO no context arg
-        var cancelSuspend = Events.dispatch2(activableModules, "onSuspendFirebug",
+        var cancelSuspend = Events.dispatch2(modules, "onSuspendFirebug",
             [Firebug.currentContext]);
 
         if (cancelSuspend)
@@ -391,7 +391,7 @@ window.Firebug =
         this.setSuspended("resuming");
 
         // TODO no context arg
-        Events.dispatch(activableModules, 'onResumeFirebug', [Firebug.currentContext]);
+        Events.dispatch(modules, "onResumeFirebug", [Firebug.currentContext]);
         this.setSuspended(null);
     },
 
@@ -1569,8 +1569,9 @@ Firebug.Listener.prototype =
 
     removeListener: function(listener)
     {
-        // if this.fbListeners is null, remove is being called with no add
-        Arr.remove(this.fbListeners, listener);
+        // if this.fbListeners is null, remove is being called with no arr
+        if (this.fbListeners)
+            Arr.remove(this.fbListeners, listener);
     },
 
     dispatch: function(eventName, args)
@@ -1689,12 +1690,32 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // intermodule dependency
+    // Intermodule Dependency
 
     // caller needs module. win maybe context.window or iframe in context.window.
     // true means module is ready now, else getting ready
     isReadyElsePreparing: function(context, win)
     {
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug Activation
+
+    onSuspendingFirebug: function()
+    {
+        // Called before any suspend actions. First caller to return true aborts suspend.
+    },
+
+    onSuspendFirebug: function()
+    {
+        // When the number of activeContexts decreases to zero. Modules should remove
+        // listeners, disable function that takes resources
+    },
+
+    onResumeFirebug: function()
+    {
+        // When the number of activeContexts increases from zero. Modules should undo the
+        // work done in onSuspendFirebug
     },
 });
 
@@ -2446,26 +2467,6 @@ Firebug.ActivableModule = Obj.extend(Firebug.Module,
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("firebug.ActivableModule.onObserverChange;");
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Firebug Activation
-
-    onSuspendingFirebug: function()
-    {
-        // Called before any suspend actions. First caller to return true aborts suspend.
-    },
-
-    onSuspendFirebug: function()
-    {
-        // When the number of activeContexts decreases to zero. Modules should remove
-        // listeners, disable function that takes resources
-    },
-
-    onResumeFirebug: function()
-    {
-        // When the number of activeContexts increases from zero. Modules should undo the
-        // work done in onSuspendFirebug
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
