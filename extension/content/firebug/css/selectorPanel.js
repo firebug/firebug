@@ -95,6 +95,19 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClick: function(event)
+    {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var header = Dom.getAncestorByClass(event.target, "groupHeader");
+        if (header)
+            this.toggleGroup(event.target);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Extends Panel
 
     name: "selectors",
@@ -104,6 +117,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     initialize: function()
     {
         this.groups = [];
+        this.onClick = Obj.bind(this.onClick, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -116,11 +130,15 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     initializeNode: function(oldPanelNode)
     {
         Firebug.Panel.initializeNode.apply(this, arguments);
+
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     destroyNode: function()
     {
         Firebug.Panel.destroyNode.apply(this, arguments);
+
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     supportsObject: function(object)
@@ -156,6 +174,27 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var elementsTable = elementsGroup.getElementsByClassName("cssElementsTable")[0]; 
             WarningTemplate.noSelectionResultsTag.replace({}, elementsTable);
+        }
+    },
+
+    toggleGroup: function(node)
+    {
+        var groupsNode = Dom.getAncestorByClass(node, "elementsGroups");
+        var groupNode = Dom.getAncestorByClass(node, "elementsGroup");
+        var group = Firebug.getRepObject(groupNode);
+
+        Css.toggleClass(groupNode, "opened");
+        var opened = Css.hasClass(groupNode, "opened");
+        group.opened = opened;
+
+        if (opened)
+        {
+            var offset = Dom.getClientOffset(node);
+            FBTrace.sysout("offset", offset);
+            var titleAtTop = offset.y < groupsNode.scrollTop;
+
+            Dom.scrollTo(groupNode, groupsNode, null,
+                groupNode.offsetHeight > groupsNode.clientHeight || titleAtTop ? "top" : "bottom");
         }
     },
 
