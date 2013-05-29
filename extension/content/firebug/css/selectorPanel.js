@@ -150,6 +150,13 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             "replace" : "append";
         var elementsGroup = this.template.elementsGroupTag[action](
             {group: group, windows: this.context.windows}, elementsGroups);
+
+        // If there are no elements matching the selector, display an info message
+        if (elementsGroup.getElementsByClassName("cssElements").length == 0)
+        {
+            var elementsTable = elementsGroup.getElementsByClassName("cssElementsTable")[0]; 
+            WarningTemplate.noSelectionResultsTag.replace({}, elementsTable);
+        }
     },
 
     refresh: function()
@@ -214,6 +221,11 @@ var WarningTemplate = domplate(Firebug.Rep,
     noSelectionTag:
         DIV({"class": "selectorWarning noSelection"},
             SPAN(Locale.$STR("css.selector.noSelection"))
+        ),
+
+    noSelectionResultsTag:
+        DIV({"class": "selectorWarning"},
+            SPAN(Locale.$STR("css.selector.noSelectionResults"))
         )
 });
 
