@@ -645,6 +645,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     resume: function(callback, limit)
     {
+        Trace.sysout("debuggerTool.resume; limit: " + limit);
+
         // xxxHonza: do not use _doResume. Use stepping methods instead.
         return this.context.activeThread._doResume(limit, callback);
     },

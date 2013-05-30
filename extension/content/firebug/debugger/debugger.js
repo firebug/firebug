@@ -104,13 +104,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context, persistedState, browser)
     {
-        // xxxHonza: duplicated in onThreadDetached, do we need it?
-        var tool = context.getTool("debugger");
-        tool.detach();
+        Trace.sysout("debugger.destroyContext; context ID: " + context.getId());
 
         persistedState.breakpointClients = context.breakpointClients;
-
-        Trace.sysout("debugger.destroyContext; context ID: " + context.getId());
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -133,7 +129,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
 
-        // xxxHonza: duplicated in destroyContext, do we need it?
         var tool = context.getTool("debugger");
         tool.detach();
     },
