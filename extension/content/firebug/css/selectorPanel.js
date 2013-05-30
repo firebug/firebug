@@ -30,11 +30,8 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             DIV({"class": "selectorTrials a11yCSSView", role: "list", "aria-label":
                 Locale.$STR("aria.labels.Elements")},
                 TAG("$selectorEditorRow"),
-                DIV({"class": "elementsGroups"},
-                    FOR("group", "$groups",
-                        TAG("$elementsGroupTag", {group: "$group", windows: "$windows"})
-                    )
-                )),
+                DIV({"class": "elementsGroups"})
+            ),
 
         selectorEditorRow:
             DIV({"class": "selectorEditorContainer editorContainer a11yFocusNoTab",
@@ -207,7 +204,11 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         }
         this.groups.push(group);
 
-        // Append element group to display
+        this.displayGroup(group);
+    },
+
+    displayGroup: function(group)
+    {
         var elementsGroups = this.panelNode.getElementsByClassName("elementsGroups")[0];
         var action = elementsGroups.getElementsByClassName("noSelection")[0] ?
             "replace" : "append";
@@ -268,6 +269,11 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
             WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+        }
+        else
+        {
+            for (var i=0, len=this.groups.length; i<len; ++i)
+                this.displayGroup(this.groups[i]);
         }
     }
 });
