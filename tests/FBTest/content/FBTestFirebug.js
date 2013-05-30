@@ -987,9 +987,7 @@ this.disableScriptPanel = function(callback)
  */
 this.enableScriptPanel = function(callback)
 {
-    // xxxHonza: we need to wait till the client is connected to the debugger, which
-    // happens asynchronously after the Script panel is enabled.
-    // This needs to be yet refactored.
+    // Wait till the debugger is attached to the current thread (async)
     function onCallback(win)
     {
         var context = FW.Firebug.currentContext;
@@ -1001,23 +999,31 @@ this.enableScriptPanel = function(callback)
 
         FBTest.sysout("enableScriptPanel.window loaded: " + win.location.href);
 
-        // Wait till the context is attached to the remote debugger i.e. 'resumed'
-        // packet received.
-        var tool = context.getTool("debugger");
+        // If the thread is already attached just execute the callback.
+        if (context.activeThread)
+        {
+            if (callback)
+                callback(win);
+            return;
+        }
+
+        // Listener for 'onThreadAttached' event
         var listener =
         {
-            onStopDebugging: function()
+            onThreadAttached: function()
             {
-                FBTest.sysout("enableScriptPanel.onStopDebugging;");
-                tool.removeListener(listener);
+                FBTest.sysout("enableScriptPanel.onThreadAttached;");
+                DebuggerController.removeListener(listener);
 
                 if (callback)
                     callback(win);
             }
         };
 
-        FBTest.sysout("enableScriptPanel.add tool listener;");
-        tool.addListener(listener);
+        // Wait till the context is attached to the thread.
+        DebuggerController.addListener(listener);
+
+        FBTest.sysout("enableScriptPanel.add debugger listener;");
     }
 
     var cb = callback ? onCallback : null;
