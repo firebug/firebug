@@ -28,7 +28,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         selectorsTag:
             DIV({"class": "selectorTrials a11yCSSView", role: "list", "aria-label":
-                Locale.$STR("aria.labels.Elements")},
+                Locale.$STR("aria.labels.Selectors")},
                 TAG("$selectorEditorRow"),
                 DIV({"class": "elementsGroups"})
             ),
@@ -36,7 +36,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         selectorEditorRow:
             DIV({"class": "selectorEditorContainer editorContainer a11yFocusNoTab",
                 role: "button", "tabindex" : "0",
-                "aria-label": Locale.$STR("a11y.labels.press enter to add new selector"),
+                "aria-label": Locale.$STR("a11y.labels.press_enter_to_add_new_selector"),
                 onclick: "$onClickEditor"},
                 Locale.$STR("css.selector.TryASelector")
             ),
