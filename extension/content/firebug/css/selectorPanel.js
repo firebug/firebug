@@ -240,7 +240,6 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         if (opened)
         {
             var offset = Dom.getClientOffset(node);
-            FBTrace.sysout("offset", offset);
             var titleAtTop = offset.y < groupsNode.scrollTop;
 
             Dom.scrollTo(groupNode, groupsNode, null,
