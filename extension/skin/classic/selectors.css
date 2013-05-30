@@ -17,6 +17,10 @@
     cursor: text;
 }
 
+.selectorsPanelEditor {
+    font-family: monospace !important;
+}
+
 .elementsGroups {
     position: relative;
     height: calc(100% - 18px);
