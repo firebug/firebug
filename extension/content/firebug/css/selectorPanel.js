@@ -48,10 +48,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
                     DIV({"class": "twisty", role: "presentation"}),
                     SPAN({"class": "cssElementsLabel groupLabel"}, "$group.selector"),
                     DIV({"class": "closeButton selectorGroupRemoveButton"})
-                ),
-                TAG("$elementsTag", {elements: "$windows,$group.selector|getElements"})
+                )
             ),
-            
+
         elementsTag:
             TABLE({"class": "cssElementsTable groupContent", role: "list"},
                 TBODY({role: "presentation"},
@@ -72,11 +71,6 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             var tag = rep.shortTag ? rep.shortTag : rep.tag;
             return tag;
         },
-    
-        getElements: function(windows, selector)
-        {
-            return CSSSelectorsModule.matchElements(windows, selector);
-        },
 
         onClickEditor: function(event)
         {
@@ -85,14 +79,6 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             Firebug.Editor.startEditing(target, "");
         }
     }),
-
-    getEditor: function(target, value)
-    {
-        if (!this.editor)
-            this.editor = new CSSSelectorsPanelEditor(this.document);
-
-        return this.editor;
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
@@ -182,7 +168,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         this.mutationObserver.observe(this.context.window.document, {
             attributes: true,
             childList: true,
-            characterData: true, 
+            characterData: true,
             subtree: true
         });
     },
@@ -191,6 +177,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.mutationObserver.disconnect();
         this.mutationObserver = null;
+    },
+
+    getEditor: function(target, value)
+    {
+        if (!this.editor)
+            this.editor = new CSSSelectorsPanelEditor(this.document);
+
+        return this.editor;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -215,11 +209,21 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         var elementsGroup = this.template.elementsGroupTag[action](
             {group: group, windows: this.context.windows}, elementsGroups);
 
-        // If there are no elements matching the selector, display an info message
-        if (elementsGroup.getElementsByClassName("cssElements").length == 0)
+        try
         {
-            var elementsTable = elementsGroup.getElementsByClassName("cssElementsTable")[0]; 
-            WarningTemplate.noSelectionResultsTag.replace({}, elementsTable);
+            var elements = CSSSelectorsModule.matchElements(this.context.windows, group.selector);
+            if (elements.length != 0)
+            {
+                this.template.elementsTag.append({elements: elements}, elementsGroup);
+            }
+            else
+            {
+                WarningTemplate.noSelectionResultsTag.append({}, elementsGroup);
+            }
+        }
+        catch(e)
+        {
+            WarningTemplate.invalidSelectorTag.append({}, elementsGroup);
         }
     },
 
@@ -309,8 +313,7 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
         if (cancel || value == "")
             return;
 
-        if (this.isValidSelector(value))
-            this.panel.addGroup(value);
+        this.panel.addGroup(value);
     },
 
     isValidSelector: function(value)
@@ -336,8 +339,13 @@ var WarningTemplate = domplate(Firebug.Rep,
         ),
 
     noSelectionResultsTag:
-        DIV({"class": "selectorWarning"},
+        DIV({"class": "selectorWarning noSelectionResults"},
             SPAN(Locale.$STR("css.selector.noSelectionResults"))
+        ),
+
+    invalidSelectorTag:
+        DIV({"class": "selectorWarning invalidSelector"},
+            SPAN(Locale.$STR("css.selector.invalidSelector"))
         )
 });
 
