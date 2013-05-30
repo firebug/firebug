@@ -80,7 +80,10 @@ var CSSSelectorsModule = Obj.extend(Firebug.Module,
             if (selections)
             {
                 for (var j=0; j<selections.length; j++)
-                    elements.push(selections[j]);
+                {
+                    if (!Firebug.shouldIgnore(selections[j]))
+                        elements.push(selections[j]);
+                }
             }
             else
             {

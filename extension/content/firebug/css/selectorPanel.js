@@ -121,6 +121,11 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
+    onMutationObserve: function(records)
+    {
+        this.refresh();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Extends Panel
 
@@ -132,6 +137,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.groups = [];
         this.onClick = Obj.bind(this.onClick, this);
+        this.onMutationObserve = this.onMutationObserve.bind(this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -174,6 +180,20 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         this.refresh();
+
+        this.mutationObserver = new MutationObserver(this.onMutationObserve);
+        this.mutationObserver.observe(this.context.window.document, {
+            attributes: true,
+            childList: true,
+            characterData: true, 
+            subtree: true
+        });
+    },
+
+    hide: function()
+    {
+        this.mutationObserver.disconnect();
+        this.mutationObserver = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
