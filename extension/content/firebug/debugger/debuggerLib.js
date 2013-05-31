@@ -1,8 +1,6 @@
 /* See license.txt for terms of usage */
-
 /*jshint esnext:true, es5:true, curly:false*/
 /*global FBTrace:true, Components:true, define:true */
-
 
 define([
     "firebug/lib/wrapper",
@@ -134,7 +132,7 @@ DebuggerLib.getObject = function(context, actorId)
         // good architecure, refactor.
         // First option: implement a provider used by UI widgets (e.g. DomTree)
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
-        var threadActor = this.getThreadActor(context);
+        var threadActor = this.getThreadActor(context.browser);
         var actor = threadActor.threadLifetimePool.get(actorId);
 
         if (!actor && threadActor._pausePool)
@@ -151,12 +149,15 @@ DebuggerLib.getObject = function(context, actorId)
     }
 }
 
-DebuggerLib.getThreadActor = function(context)
+DebuggerLib.getThreadActor = function(browser)
 {
     try
     {
         var conn = DebuggerServer._connections["conn0."];
-        var tabActor = conn.rootActor._tabActors.get(context.browser);
+        var tabActor = conn.rootActor._tabActors.get(browser);
+        if (!tabActor)
+            return null;
+
         return tabActor.threadActor;
     }
     catch (e)
@@ -170,7 +171,7 @@ DebuggerLib.getThreadActor = function(context)
 
 DebuggerLib.getCurrentFrames = function(context)
 {
-    var threadActor = this.getThreadActor(context);
+    var threadActor = this.getThreadActor(context.browser);
     return onFrames.call(threadActor, {});
 }
 
@@ -217,7 +218,7 @@ function onFrames(aRequest)
 
 DebuggerLib.getNextExecutableLine = function(context, aLocation)
 {
-    var threadClient = this.getThreadActor(context);
+    var threadClient = this.getThreadActor(context.browser);
 
     var scripts = threadClient.dbg.findScripts(aLocation);
     if (scripts.length == 0)
@@ -312,6 +313,9 @@ var getInactiveDebuggerForContext = function(context)
 
 // ********************************************************************************************* //
 // Registration
+
+// Expose for FBTest
+Firebug.DebuggerLib = DebuggerLib;
 
 return DebuggerLib;
 

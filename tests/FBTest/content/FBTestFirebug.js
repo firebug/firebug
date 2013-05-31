@@ -134,6 +134,10 @@ this.testDone = function(message)
 {
     FBTest.sysout("FBTestFirebug.testDone; start test done timeout");
 
+    // Clean up now so, annotations are cleared and Firebug is not activated for the
+    // next activated tab that would coincidentally come from the same domain. 
+    this.setToKnownState();
+
     var self = this;
     var test = FBTestApp.TestRunner.currentTest;
     setTimeout(function cleanUpLater()
@@ -999,31 +1003,61 @@ this.enableScriptPanel = function(callback)
 
         FBTest.sysout("enableScriptPanel.window loaded: " + win.location.href);
 
+        var listener;
+
         // If the thread is already attached just execute the callback.
         if (context.activeThread)
         {
-            if (callback)
-                callback(win);
-            return;
-        }
+            FBTest.sysout("enableScriptPanel.thread-actor already attached " +
+                context.activeThread.paused, context.activeThread);
 
-        // Listener for 'onThreadAttached' event
-        var listener =
-        {
-            onThreadAttached: function()
+            // xxxHonza: hack, why the ThreadClient isn't paused too?
+            var actor = FW.Firebug.DebuggerLib.getThreadActor(context.browser);
+            var state = actor ? actor._state : "no tab actor";
+            FBTest.sysout("enableScriptPanel; actor: " + state);
+
+            if (state == "paused")
             {
-                FBTest.sysout("enableScriptPanel.onThreadAttached;");
-                DebuggerController.removeListener(listener);
+                listener =
+                {
+                    onResumed: function()
+                    {
+                        FBTest.sysout("enableScriptPanel.onResumed;");
+                        DebuggerController.removeListener(listener);
 
+                        if (callback)
+                            callback(win);
+                    }
+                };
+            }
+            else
+            {
                 if (callback)
                     callback(win);
+                return;
             }
-        };
+        }
+        else
+        {
+            // Listener for 'onThreadAttached' event
+            listener =
+            {
+                onThreadAttached: function()
+                {
+                    FBTest.sysout("enableScriptPanel.onThreadAttached;");
+                    DebuggerController.removeListener(listener);
+
+                    if (callback)
+                        callback(win);
+                }
+            };
+        }
 
         // Wait till the context is attached to the thread.
-        DebuggerController.addListener(listener);
+        if (listener)
+            DebuggerController.addListener(listener);
 
-        FBTest.sysout("enableScriptPanel.add debugger listener;");
+        FBTest.sysout("enableScriptPanel.add debugger listener; " + listener);
     }
 
     var cb = callback ? onCallback : null;
@@ -1547,6 +1581,9 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
         FBTest.ok(panel, "Firebug needs a selected panel!");
         return;
     }
+
+    var actor = FW.Firebug.DebuggerLib.getThreadActor(panel.context.browser);
+    FBTest.sysout("waitForBreakInDebugger; actor: " + (actor ? actor._state : "no tab actor"));
 
     var doc = panel.panelNode.ownerDocument;
 

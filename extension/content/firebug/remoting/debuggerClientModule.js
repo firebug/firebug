@@ -8,9 +8,10 @@ define([
     "firebug/lib/events",
     "firebug/chrome/tabWatcher",
     "firebug/chrome/firefox",
+    "firebug/chrome/window",
     "firebug/remoting/debuggerClientTab",
 ],
-function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, DebuggerClientTab) {
+function(Firebug, FBTrace, Obj, Options, Events, TabWatcher, Firefox, Win, DebuggerClientTab) {
 
 // ********************************************************************************************* //
 // Constants
@@ -182,7 +183,7 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var browser = Firefox.getCurrentBrowser();
 
         Trace.sysout("debuggerClientModule.onResumeFirebug; connected: " +
-            this.connected, browser);
+            this.connected + ", " + Win.safeGetWindowLocation(browser.contentWindow));
 
         // Firebug has been opened for the current tab so, attach to the back-end
         // tab and thread actor.
@@ -194,7 +195,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     {
         var browser = Firefox.getCurrentBrowser();
 
-        Trace.sysout("debuggerClientModule.onSuspendFirebug;", browser);
+        Trace.sysout("debuggerClientModule.onSuspendFirebug; " +
+            Win.safeGetWindowLocation(browser.contentWindow));
 
         // Firebug has been closed for the current tab, so explicitly detach
         // the tab and thread actor and destroy the tab instance.
@@ -213,7 +215,14 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         var tab = new DebuggerClientTab(browser, this.client, this);
         this.tabMap.set(browser, tab);
 
-        tab.attach();
+        var self = this;
+        tab.attach(function(threadClient)
+        {
+            Trace.sysout("debuggerClientModule.attachClientTab; Callback: thread attached");
+
+            self._onResumed = self.onResumed.bind(self, threadClient);
+            threadClient.addListener("resumed", self._onResumed);
+        });
 
         return tab;
     },
@@ -224,13 +233,21 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         if (!tab)
             return;
 
-        tab.detach();
+        // xxxHonza: what if the attach process is not finished yet?
+        if (tab.threadClient)
+            tab.threadClient.removeListener("resumed", this._onResumed);
+
+        var self = this;
+        tab.detach(function()
+        {
+            Trace.sysout("debuggerClientModule.detachClientTab; Callback: thread detached ");
+        });
 
         this.tabMap.delete(browser);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // JSD2 Hooks
+    // DebuggerClient Handlers
 
     onConnect: function(type, traits)
     {
@@ -262,10 +279,20 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
     onTabDetached: function(type, packet)
     {
         var context = TabWatcher.getContextByTabActor(packet.from);
-        Trace.sysout("debuggerClientModule.onTabDetached; from: " + packet.url +
+        Trace.sysout("debuggerClientModule.onTabDetached; from: " + packet.from +
             ", context: " + context, packet);
 
         // xxxHonza: should we manually detach the tab now?
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // ThreadClient Handlers
+
+    onResumed: function(threadClient)
+    {
+        Trace.sysout("debuggerClientModule.onResumed; ", arguments);
+
+        this.dispatch("onResumed", [threadClient]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -281,6 +308,8 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // If tab object for this tab-browser exists, the 'attach to the thread actor'
         // (async) sequence already started. If the 'tab.activeThread' is set the process
         // is successfully finished.
+        // If the tab object doesn't exist, let's attach the tab, but only if the connection
+        // is ready. Otherwise, all contexts will be attached when 'onConnected' is fired. 
         if (tab)
         {
             context.tabClient = tab.tabClient;
@@ -297,6 +326,11 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
                 Trace.sysout("debuggerClientModule.initContext; tab not connected to " +
                     "the thread yet");
             }
+        }
+        else if (this.connected)
+        {
+            // Attach to the tab if not attached yet, but back-end is already connected.
+            this.attachClientTab(context.browser);
         }
     },
 

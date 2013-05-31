@@ -340,7 +340,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!currentFrame)
             return;
 
-        var threadActor = DebuggerLib.getThreadActor(context);
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
         var frameActor = currentFrame.getActor();
         var frame = threadActor._requestFrame(frameActor);
 

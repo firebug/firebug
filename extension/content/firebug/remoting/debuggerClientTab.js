@@ -5,11 +5,15 @@ define([
     "firebug/lib/trace",
     "firebug/chrome/window",
     "firebug/chrome/tabWatcher",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Win, TabWatcher) {
+function(Firebug, FBTrace, Win, TabWatcher, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Trace = FBTrace.to("DBG_DEBUGGERCLIENTTAB");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 var getWinLocation = Win.safeGetWindowLocation;
 
@@ -49,7 +53,7 @@ DebuggerClientTab.prototype =
     threadActor: null,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Initialization
+    // Public API
 
     /**
      * Attach to the current thread happens in three steps (round-trips with the server)
@@ -59,18 +63,22 @@ DebuggerClientTab.prototype =
      * 
      * Note that attach is initiated when 'onResumeFirebug' event is fired (Firebug UI opened).
      */
-    attach: function()
+    attach: function(callback)
     {
         Trace.sysout("debuggerClientTab.attach; " + getWinLocation(this.window));
+
+        this.attachCallback = callback;
 
         // Step I. get list of all available tabs.
         // Other steps happens asynchronously.
         this.client.listTabs(this.onListTabs.bind(this));
     },
 
-    detach: function()
+    detach: function(callback)
     {
-        // Does the tab and thread actors detach automatically?
+        this.detachCallback = callback;
+
+        this.detachThread();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,6 +86,13 @@ DebuggerClientTab.prototype =
 
     onListTabs: function(response)
     {
+        // If the tab object has been detached in just after 'listTabs' has been send
+        // Just ignore rest of the attach sequence.
+        // xxxHonza: similar thing should be probably done in onTabAttached + detach the
+        // tab immediately.
+        if (this.detached)
+            return;
+
         // The response contains list of all tab and global actors registered
         // on the server side. We need to cache it since these IDs will be
         // needed later (for communication to these actors).
@@ -92,6 +107,13 @@ DebuggerClientTab.prototype =
     {
         Trace.sysout("debuggerClientTab.attachTab; " + getWinLocation(this.window));
 
+        if (this.threadActor || this.tabClient)
+        {
+            TraceError.sysout("debuggerClientTab.attachTab; ERROR already attached?" +
+                getWinLocation(this.window));
+            return;
+        }
+
         // Step II. attach to the current tab actor.
         this.client.attachTab(tabActor, this.onTabAttached.bind(this));
     },
@@ -99,6 +121,12 @@ DebuggerClientTab.prototype =
     onTabAttached: function(response, tabClient)
     {
         Trace.sysout("debuggerClientTab.onTabAttached; " + getWinLocation(this.window));
+
+        if (this.detached)
+        {
+            // xxxHonza: we should detach the tab now.
+            TraceError.sysout("ERROR: tab already detached!");
+        }
 
         if (!tabClient)
         {
@@ -116,17 +144,30 @@ DebuggerClientTab.prototype =
     {
         Trace.sysout("debuggerClientTab.attachThread; " + getWinLocation(this.window));
 
+        // State diagnostics and tracing
+        var actor = DebuggerLib.getThreadActor(this.browser);
+        Trace.sysout("debuggerClientTab.attachThread; state: " +
+            (actor ? actor._state : "no tab actor"));
+
         // Step III. attach to the current thread actor.
         this.client.attachThread(threadActor, this.onThreadAttached.bind(this));
     },
 
     onThreadAttached: function(response, threadClient)
     {
-        Trace.sysout("debuggerClientTab.onThreadAttached; " + getWinLocation(self.window));
+        Trace.sysout("debuggerClientTab.onThreadAttached; " + getWinLocation(this.window));
+
+        if (this.detached)
+        {
+            // xxxHonza: we should detach the thread now.
+            TraceError.sysout("ERROR: tab already detached!");
+        }
 
         if (!threadClient)
         {
-            TraceError.sysout("ERROR No tab thread! " + response.error, response);
+            var threadActor = DebuggerLib.getThreadActor(this.browser);
+            TraceError.sysout("ERROR " + response.error + " (" + threadActor._state +
+                ")", response);
             return;
         }
 
@@ -138,12 +179,56 @@ DebuggerClientTab.prototype =
         if (context)
             context.activeThread = this.activeThread;
 
+        // Execute attach callback if any is provided.
+        this.executeCallback(this.attachCallback, [threadClient]);
+        this.attachCallback = null
+
+        // Dispatch event to all listeners.
         this.dispatch("onThreadAttached");
 
         threadClient.resume();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Detach Helpers
+
+    detachThread: function()
+    {
+        Trace.sysout("debuggerClientTab.detachThread;" + this.activeThread);
+
+        if (this.activeThread)
+            this.activeThread.detach(this.onThreadDetached.bind(this));
+
+        this.detached = true;
+    },
+
+    onThreadDetached: function(response)
+    {
+        Trace.sysout("debuggerClientTab.onThreadDetached;", response);
+
+        this.activeThread = null;
+
+        this.detachTab();
+    },
+
+    detachTab: function()
+    {
+        Trace.sysout("debuggerClientTab.detachTab;");
+
+        this.tabClient.detach(this.onTabDetached.bind(this));
+    },
+
+    onTabDetached: function(response)
+    {
+        Trace.sysout("debuggerClientTab.onTabDetached;", response);
+
+        // Execute detach callback if provided.
+        this.executeCallback(this.detachCallback, []);
+        this.detachCallback = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
 
     dispatch: function(eventName)
     {
@@ -153,6 +238,23 @@ DebuggerClientTab.prototype =
 
         this.listener.dispatch(eventName, [context]);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    executeCallback: function(callback, args)
+    {
+        if (!callback)
+            return;
+
+        try
+        {
+            callback.apply(this, args);
+        }
+        catch (e)
+        {
+            TraceError.sysout("debuggerClientTab.executeCallback; EXCEPTION" + e, e);
+        }
+    }
 };
 
 // ********************************************************************************************* //
