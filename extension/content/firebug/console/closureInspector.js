@@ -286,7 +286,7 @@ var ClosureInspector =
             return;
         }
 
-        var dwin = DebuggerLib.getDebuggerGlobal(context, win);
+        var dwin = DebuggerLib.getDebuggeeGlobal(context, win);
 
         var scopeDataHolder = Object.create(ScopeProxy.prototype);
         scopeDataHolder.scope = scope;

@@ -400,7 +400,7 @@ DOMMemberProvider.prototype =
     // Add the magic "(closure)" property.
     maybeAddClosureMember: function(object, type, props, level, isScope)
     {
-        var win = context.getCurrentGlobal();
+        var win = this.context.getCurrentGlobal();
         var wrapper = ClosureInspector.getScopeWrapper(object, win, this.context, isScope);
         if (!wrapper)
             return;
