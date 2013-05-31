@@ -405,6 +405,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             return;
         }
 
+        Dom.collapse(chrome.$("fbCommandBox"), multiLine);
+        Dom.collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+
+        if (multiLine)
+            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
+
         if (context)
         {
             var text = context.commandLineText || "";
@@ -415,13 +422,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
                 commandLine.value = Str.stripNewLines(text);
         }
-
-        Dom.collapse(chrome.$("fbCommandBox"), multiLine);
-        Dom.collapse(chrome.$("fbPanelSplitter"), !multiLine);
-        Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
-
-        if (multiLine)
-            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
 
         // else we may be hiding a panel while turning Firebug off
     },

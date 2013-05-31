@@ -188,7 +188,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
         {
             if (visible)
                 commandLine.value = Str.stripNewLines(commandEditor.value);
-            else
+            else if(!Dom.isCollapsed(cmdbox))
                 commandEditor.value = Str.cleanIndentation(commandLine.value);
         }
     },
