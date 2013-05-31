@@ -21,17 +21,16 @@ function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, Fir
 // ********************************************************************************************* //
 // DOM Member Provider
 
-function DOMMemberProvier(context)
+function DOMMemberProvider(context)
 {
     this.context = context;
 }
 
-DOMMemberProvier.prototype =
+DOMMemberProvider.prototype =
 {
     /**
      * @param object a user-level object wrapped in security blanket
      * @param level for a.b.c, level is 2
-     * @param optional context
      */
     getMembers: function(object, level)
     {
@@ -541,7 +540,7 @@ function getPropertyDescriptor(object, propName)
 // ********************************************************************************************* //
 // Registration
 
-return DOMMemberProvier;
+return DOMMemberProvider;
 
 // ********************************************************************************************* //
 });
