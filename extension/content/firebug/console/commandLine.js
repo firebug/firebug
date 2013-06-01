@@ -147,8 +147,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             exceptionFunction(result, context, "errorMessage");
         };
 
-        Firebug.Console.injector.attachIfNeeded(context, win);
-
         origExpr = origExpr || expr;
         CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError);
     },

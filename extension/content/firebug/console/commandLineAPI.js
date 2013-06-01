@@ -128,17 +128,13 @@ CommandLineAPI.getCommandLineAPI = function(context)
         if (!(object instanceof window.Window))
             throw new Error("Object must be a window.");
 
-        // Make sure the command line is attached into the target iframe.
-        var consoleReady = Firebug.Console.isReadyElsePreparing(context, object);
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.cd; console ready: " + consoleReady);
 
-        // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper
-        // So, look within all registered consoleHandlers for
-        // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
-        var entry = Firebug.Console.injector.getConsoleHandler(context, object);
-        if (entry)
-            context.baseWindow = entry.win;
+        // The window object parameter uses XPCSafeJSObjectWrapper, but we need XrayWrapper.
+        // So use Wrapper.wrapObject() to get the XrayWrapper instance of that object.
+        // Note: Wrapper.wrapObject always returns the same instance for a given object.
+        context.baseWindow = Wrapper.wrapObject(object);
 
         var format = Locale.$STR("commandline.CurrentWindow") + " %o";
         Firebug.Console.logFormatted([format, context.baseWindow], context, "info");
