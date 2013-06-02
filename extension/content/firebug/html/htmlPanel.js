@@ -608,12 +608,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
-                var attrValueBox = nodeAttr.querySelector("*> .nodeValue");
+                var attrValueBox = nodeAttr.getElementsByClassName("nodeValue")[0];
                 var attrValueText = attrValueBox.firstChild;
                 if (attrValueText)
                     attrValueText.nodeValue = attrValue;
                 else
-                    attrValueBox.innerHTML = Str.escapeForTextNode(attrValue);
+                    attrValueBox.textContent = Str.escapeForTextNode(attrValue);
 
                 this.highlightMutation(attrValueBox, objectNodeBox, "mutated");
             }
@@ -2360,14 +2360,14 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         value = Str.unescapeForTextNode(value || "");
-        target.innerHTML = Str.escapeForTextNode(value);
+        target.textContent = Str.escapeForTextNode(value);
 
         if (node instanceof window.Element)
         {
             if (Xml.isElementMathML(node) || Xml.isElementSVG(node))
                 node.textContent = value;
             else
-                node.innerHTML = value;
+                node.textContent = value;
         }
         else
         {
@@ -2406,7 +2406,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         // XXXstr unescape value
-        target.innerHTML = Str.escapeForElementAttribute(value);
+        target.textContent = Str.escapeForElementAttribute(value);
 
         if (Css.hasClass(target, "nodeName"))
         {

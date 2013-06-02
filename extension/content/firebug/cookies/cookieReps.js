@@ -476,7 +476,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     {
         if (Events.isLeftClick(event))
         {
-            var domain = event.target.innerHTML;
+            var domain = event.target.textContent;
             if (domain)
             {
                 Events.cancelEvent(event);
@@ -1375,18 +1375,17 @@ function checkList(panel)
     if (!panel || !this.panelNode)
         return; 
 
-    var row = Dom.getElementByClass(this.panelNode, "cookieRow");
+    var row = this.panelNode.getElementsByClassName("cookieRow")[0];
     while (row)
     {
         var rep = row.repObject;
-        if ((rep.cookie.name != row.firstChild.firstChild.innerHTML) ||
-            (rep.cookie.path != row.childNodes[3].firstChild.innerHTML))
+        var displayedCookieName = row.getElementsByClassName("cookieNameLabel")[0].textContent;
+        var displayedCookiePath = row.getElementsByClassName("cookiePathLabel")[0].textContent;
+        if (rep.cookie.name != displayedCookieName || rep.cookie.path != displayedCookiePath)
         {
-            FBTrace("---> Check failed!");
-            FBTrace("--->" + rep.rawHost + ", " + rep.cookie.name + ", " +
-                rep.cookie.path);
-            FBTrace("    " + row.firstChild.firstChild.innerHTML + ", " +
-                row.childNodes[3].firstChild.innerHTML);
+            FBTrace.sysout("---> Check failed!");
+            FBTrace.sysout("--->" + rep.rawHost + ", " + rep.cookie.name + ", " + rep.cookie.path);
+            FBTrace.sysout("    " + displayedCookieName + ", " + displayedCookiePath);
         }
 
         row = row.nextSibling;

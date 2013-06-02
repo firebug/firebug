@@ -1661,7 +1661,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var tbody = netInfoBox.getElementsByClassName("netInfo" + rowName + "Body").item(0);
         var node = this.sourceTag.replace({}, tbody);
         var sourceNode = node.getElementsByClassName("source").item(0);
-        sourceNode.innerHTML = source;
+        sourceNode.textContent = source;
     },
 
     insertHeaderRows: function(netInfoBox, headers, rowName)
