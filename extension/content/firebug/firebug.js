@@ -2427,13 +2427,14 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.textContent = value ? Str.escapeForSourceLine(value) : "m";
+        this.measureBox.textContent = value || "m";
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
     measureInputText: function(value)
     {
-        value = value ? Str.escapeForTextNode(value) : "m";
+        if (!value)
+            value = "m";
         if (!Firebug.showTextNodesWithWhitespace)
             value = value.replace(/\t/g, "mmmmmm").replace(/\ /g, "m");
 

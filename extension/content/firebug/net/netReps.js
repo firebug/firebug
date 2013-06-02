@@ -1643,7 +1643,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         else
         {
             var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
-            this.insertSource(netInfoBox, Str.escapeForTextNode(source), target.rowName);
+            this.insertSource(netInfoBox, source, target.rowName);
             target.textContent = Locale.$STR("net.headers.pretty print");
         }
 
@@ -1654,10 +1654,6 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
     insertSource: function(netInfoBox, source, rowName)
     {
-        // This breaks copy to clipboard.
-        //if (source)
-        //    source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
-
         var tbody = netInfoBox.getElementsByClassName("netInfo" + rowName + "Body").item(0);
         var node = this.sourceTag.replace({}, tbody);
         var sourceNode = node.getElementsByClassName("source").item(0);

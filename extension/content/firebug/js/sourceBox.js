@@ -666,7 +666,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
                 if (FBTrace.DBG_COMPILATION_UNITS)
                 {
                     FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+
-                        lineNode.getElementsById("sourceRowText")[0].textContent);
+                        lineNode.getElementsByClassName("sourceRowText")[0].textContent);
                 }
             }
             else
