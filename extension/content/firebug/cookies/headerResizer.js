@@ -121,7 +121,6 @@ var HeaderResizer =
     {
         var target = event.target;
         var x = event.clientX;
-        var y = event.clientY;
 
         var column = Dom.getAncestorByClass(target, "cookieHeaderCell");
         var offset = Dom.getClientOffset(column);

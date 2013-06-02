@@ -243,7 +243,7 @@ var NetHttpActivityObserver =
 
         throw Cr.NS_ERROR_NO_INTERFACE;
     }
-}
+};
 
 // ********************************************************************************************* //
 // Activity Observer Tracing Support

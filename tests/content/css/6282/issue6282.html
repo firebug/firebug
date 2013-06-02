@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6282: CSS panel fails on interpreting @page</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #teststyle1 {
+            background-color: green;
+        }
+
+        #teststyle2 {
+            background-color: red;
+        }
+
+        @page {
+            margin: 0.5cm;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6282">Issue 6282</a>: CSS panel fails on interpreting @page</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>In the Location Menu switch to <em>issue6282.html</em></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>CSS</em> panel should show the contents of <em>issue6282.html</em>.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

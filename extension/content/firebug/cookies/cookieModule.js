@@ -30,12 +30,14 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/chrome/firefox",
+    "firebug/chrome/window",
+    "firebug/lib/url",
     "firebug/cookies/legacy",
 ],
 function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
     BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
     CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
-    TraceListener, TraceModule, Firefox) {
+    TraceListener, TraceModule, Firefox, Win, Url) {
 
 with (Domplate) {
 
@@ -146,7 +148,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             var image = document.createElement("image");
             image.setAttribute("id", "fbBreakOnImageCookies");
             image.setAttribute("class", "fbBreakOnImage");
-            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookieSingle.png");
+            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.svg");
             bonStack.appendChild(image);
         }
 
@@ -380,7 +382,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         }
 
         if (panel)
-            privateAppend(panel.document)
+            privateAppend(panel.document);
 
         // Firebug 1.6 introduces another panel for console preview on other panels
         // The allows to use command line in other panels too.
@@ -688,16 +690,34 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (!panel)
             return;
 
-        for (var host in context.cookies.activeHosts)
+        var hosts = context.cookies.activeHosts;
+
+        // If Firebug has been opened after page load, the activeHosts map
+        // is empty since it's being initialized during the page load time
+        // (in HttpObserver.onModifiedRequest).
+        // Use the current window and iframes in such case (see issue 6469).
+        if (!Obj.hasProperties(hosts))
+        {
+            hosts = {};
+
+            Win.iterateWindows(context.window, function(win)
+            {
+                var host = Url.getURIHost(win.location);
+                hosts[host] = true;
+            });
+        }
+
+        for (var host in hosts)
         {
             var cookieEnumerator = cookieManager.getCookiesFromHost(host);
-
             while (cookieEnumerator.hasMoreElements())
             {
                 var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
-
-                if (!filter || ((!filter.session || cookie.isSession) && (!filter.host || filter.host == cookie.host)))
+                if (!filter || ((!filter.session || cookie.isSession) &&
+                    (!filter.host || filter.host == cookie.host)))
+                {
                     cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
+                }
             }
         }
     },
@@ -724,14 +744,14 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         Firebug.CookieModule.removeCookies(context);
     },
-    
+
     onRemoveAllSession: function(context)
     {
         if (Options.get(removeSessionConfirmation))
         {
             var check = {value: false};
-            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
+                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeallsession"), flags, "", "", "",
@@ -742,7 +762,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             // Update 'Remove Session Cookies' confirmation option according to the value
             // of the dialog's "do not show again" checkbox.
-            Options.set(removeSessionConfirmation, !check.value)
+            Options.set(removeSessionConfirmation, !check.value);
         }
 
         Firebug.CookieModule.removeCookies(context, {session: true});
@@ -753,8 +773,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeConfirmation))
         {
             var check = {value: false};
-            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
+                prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STRF("cookies.confirm.Remove_All_From_Host", [host]), flags, "", "", "",
@@ -786,7 +806,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // There is an excepion if the window is closed or not initialized (empty tab)
         var host;
         try {
-            host = context.window.location.host
+            host = context.window.location.host;
         }
         catch (err) {
             alert(Locale.$STR("cookies.message.There_is_no_active_page"));

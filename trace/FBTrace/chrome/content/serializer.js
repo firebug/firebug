@@ -1,6 +1,13 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "fbtrace/trace",
+    "fbtrace/lib/http",
+    "fbtrace/lib/options",
+    "fbtrace/importedMessage",
+    "fbtrace/messageTemplate",
+],
+function(FBTrace, Http, Options, ImportedMessage, MessageTemplate) {
 
 // ********************************************************************************************* //
 // Constants 
@@ -13,7 +20,7 @@ const reEndings = /\r\n|\r|\n/;
 // ********************************************************************************************* //
 // Serializer Implementation
 
-TraceConsole.Serializer =
+var Serializer =
 {
     onSaveToFile: function(console)
     {
@@ -35,13 +42,16 @@ TraceConsole.Serializer =
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-                var currLocale = Firebug.Options.getPref("general.useragent", "locale");
+                var currLocale = Options.getPref("general.useragent", "locale");
                 var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag);
 
                 var log = { version: "1.0" };
 
                 // Firebug info version
-                log.firebug = Firebug.version;
+                var version = this.getFirebugVersion();
+                if (version)
+                    log.firebug = version;
+
                 log.app = {
                     name: appInfo.name,
                     version: appInfo.version,
@@ -72,6 +82,21 @@ TraceConsole.Serializer =
         }
     },
 
+    getFirebugVersion: function()
+    {
+        try
+        {
+            var jsonString = Options.getPref("extensions", "bootstrappedAddons");
+            var value = JSON.parse(jsonString);
+            var firebugInfo = value["firebug@software.joehewitt.com"];
+            return firebugInfo ? firebugInfo.version : null;
+        }
+        catch (err)
+        {
+            FBTrace.sysout("FBTrace; getFirebugVersion EXCEPTION " + err, err);
+        }
+    },
+
     onLoadFromFile: function(console)
     {
         try
@@ -92,7 +117,7 @@ TraceConsole.Serializer =
             inputStream.init(fp.file, -1, -1, 0); // read-only
 
             // Read and parset the content
-            var jsonString = FBL.readFromStream(inputStream)
+            var jsonString = Http.readFromStream(inputStream)
             var log = JSON.parse(jsonString);
             if (!log)
             {
@@ -101,9 +126,6 @@ TraceConsole.Serializer =
             }
 
             log.filePath = fp.file.path;
-
-            var MessageTemplate = Firebug.TraceModule.MessageTemplate;
-            var TraceModule = Firebug.TraceModule;
 
             // Create header, dump all logs and create footer.
             MessageTemplate.dumpSeparator(console, MessageTemplate.importHeaderTag, log);
@@ -115,7 +137,7 @@ TraceConsole.Serializer =
                 else if (logMsg.type == "separator")
                     MessageTemplate.dumpSeparator(console);
                 else
-                    MessageTemplate.dump(new TraceModule.ImportedMessage(logMsg), console);
+                    MessageTemplate.dump(new ImportedMessage(logMsg), console);
             }
             MessageTemplate.dumpSeparator(console, MessageTemplate.importFooterTag);
         }
@@ -159,7 +181,7 @@ TraceConsole.Serializer =
 
 // ********************************************************************************************* //
 
-return TraceConsole.Serializer;
+return Serializer;
 
 // ********************************************************************************************* //
 });

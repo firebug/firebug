@@ -22,7 +22,7 @@ the opened window. Repeat and watch memory consumption</li>
 <br/><br/><br/>
 <i>Use this button to automate popup opening and closing. You need to allow popups for this site.</i>
 <br/><br/>
-<button onclick="autoPopup()">Auto Open & Close</button>
+<button onclick="autoPopup()">Auto Open &amp; Close</button>
 Number of popups: <input id="counterInput" type="text" size="2" value="50"/>
 <span id="counter"></span>
 
@@ -59,9 +59,9 @@ function onOpenPopup()
     // Catch load event and notify possible listener (test driver).
     popup.addEventListener("load", function()
     {
+        window.popup = popup;
         var event = document.createEvent("Events");
         event.initEvent("popup-loaded", true, false);
-        document.setUserData("popup-window", popup, null);
         document.dispatchEvent(event);
     }, false);
 }

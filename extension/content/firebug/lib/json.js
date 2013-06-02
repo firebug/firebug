@@ -8,10 +8,6 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
-
 var Json = {};
 
 // ********************************************************************************************* //
@@ -93,7 +89,7 @@ Json.parseJSONString = function(jsonString, originURL)
 
 Json.parseJSONPString = function(jsonString, originURL)
 {
-}
+};
 
 // ********************************************************************************************* //
 

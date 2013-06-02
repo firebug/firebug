@@ -83,7 +83,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.10",
+    version: "1.12",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -154,7 +154,8 @@ window.Firebug =
 
         this.isInitialized = true;
 
-        Events.dispatch(modules, "initialize", []);
+        // Distribute Firebug's preference domain as an argument (see issue 6210).
+        Events.dispatch(modules, "initialize", [Options.prefDomain]);
 
         // This is the final of Firebug initialization.
         FBTrace.timeEnd("INITIALIZATION_TIME");
@@ -1048,6 +1049,9 @@ window.Firebug =
 
         // Dispatch to all modules so that additional settings can be reset.
         Events.dispatch(modules, "resetAllOptions", []);
+
+        // Dispatch to all modules so 'after' actions can be executed.
+        Events.dispatch(modules, "afterResetAllOptions", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1314,8 +1318,6 @@ window.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // nsISupports
 
     QueryInterface : function(iid)
@@ -1386,7 +1388,7 @@ window.Firebug =
         if (!Firebug.previousPlacement)
             Firebug.previousPlacement = Options.get("previousPlacement");
 
-        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
+        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) );
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1440,39 +1442,17 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 {
     try
     {
-        var context = Firebug.connection.getContextByWindow(global);
-        if (context)
-        {
-            var handler = Firebug.Console.injector.getConsoleHandler(context, global);
-
-            if (!handler)
-                handler = Firebug.Console.isReadyElsePreparing(context, global);;
-
-            if (handler)
-            {
-                FBTrace.sysout("Firebug.getConsoleByGlobal " + handler.console + " for " +
-                    context.getName(), handler);
-
-                return handler.console;
-            }
-
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global " +
-                    global + " " + Win.safeGetWindowLocation(global), global);
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
-                    global, global);
-        }
+        if (!(global instanceof Window))
+            throw new Error("global is not a Window object");
+        var win = Wrapper.wrapObject(global);
+        return Firebug.Console.getExposedConsole(win);
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -1489,7 +1469,8 @@ Firebug.Listener = function()
     // It can't be created here since derived objects would share
     // the same array.
     this.fbListeners = null;
-}
+};
+
 Firebug.Listener.prototype =
 {
     addListener: function(listener)
@@ -2462,17 +2443,18 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.innerHTML = value ? Str.escapeForSourceLine(value) : "m";
+        this.measureBox.textContent = value || "m";
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
     measureInputText: function(value)
     {
-        value = value ? Str.escapeForTextNode(value) : "m";
+        if (!value)
+            value = "m";
         if (!Firebug.showTextNodesWithWhitespace)
-            value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
+            value = value.replace(/\t/g, "mmmmmm").replace(/\ /g, "m");
 
-        this.measureBox.innerHTML = value;
+        this.measureBox.textContent = value;
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
@@ -2534,14 +2516,31 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
-        if (object.constructor && typeof(object.constructor) == 'function')
+        if (!object)
         {
-            var ctorName = object.constructor.name;
-            if (ctorName && ctorName != "Object")
-                return ctorName;
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Rep.getTitle; ERROR No object provided");
+            return "null object";
         }
 
-        var label = FBL.safeToString(object); // eg [object XPCWrappedNative [object foo]]
+        try
+        {
+            if (object.constructor && typeof(object.constructor) == 'function')
+            {
+                var ctorName = object.constructor.name;
+                // xxxsz: Objects with 'Object' as constructor name should also be shown.
+                // See issue 6148.
+                if (ctorName)
+                    return ctorName;
+            }
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Rep.getTitle; EXCEPTION " + e, e);
+        }
+
+        var label = Str.safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
         const re =/\[object ([^\]]*)/;
         var m = re.exec(label);
@@ -2607,7 +2606,8 @@ Firebug.Rep = domplate(
     {
         return n == 1 ? "" : "s";
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
@@ -2748,9 +2748,8 @@ Firebug.Migrator =
     {
         var id = elt.getAttribute('id');
         Options.set( "migrated_"+id, true, typeof(true));
-    },
-
-}
+    }
+};
 
 // ********************************************************************************************* //
 

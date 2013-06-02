@@ -669,7 +669,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         panel.panelNode.appendChild(this.box);
         this.input.select();
-        if (selectionData) //transfer selection to input element
+        if (selectionData) // transfer selection to input element
             this.setSelection(selectionData);
 
         // Insert the "expander" to cover the target element with white space
@@ -1032,8 +1032,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             if(this.wrapped)
             {
-                var fixupL = clR[1].left - this.targetOffset.x,
-                    fixupT = clR[1].top - this.targetOffset.y;
+                var fixupL = clR[1].left - clR[0].left;
+                    fixupT = clR[1].top - clR[0].top;
             }
             else
             {
@@ -1070,7 +1070,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (forceAll)
             Dom.scrollIntoCenterView(this.box, null, true);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Autocompletion

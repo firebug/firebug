@@ -6,10 +6,11 @@ define([
     "firebug/chrome/firefox",
     "firebug/lib/locale",
     "firebug/lib/domplate",
+    "firebug/lib/xpcom",
     "firebug/lib/url",
-    "firebug/lib/dom",
+    "firebug/lib/dom"
 ],
-function(Obj, Firebug, Firefox, Locale, Domplate, Url, Dom) {
+function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -18,7 +19,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-
+const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 /**
  * @module Implements Panel activation logic. A Firebug panel can support activation in order
@@ -220,8 +221,21 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI commands
 
-    clearAnnotations: function()
+    clearAnnotations: function(force)
     {
+        if (!force)
+        {
+            var check = {value: false};
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+    
+            if (!prompts.confirmEx(Firebug.chrome.window, Locale.$STR("Firebug"),
+                Locale.$STR("annotations.confirm.clear"), flags, "", "", "", null, check) == 0)
+            {
+                return;
+            }
+        }
+
         Firebug.connection.clearAnnotations();
     },
 
@@ -356,7 +370,8 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var doc = browser.contentDocument;
         return doc.documentElement.querySelector(".disabledPanelNode");
     },
-})};
+});
+};
 
 // ************************************************************************************************
 // Registration

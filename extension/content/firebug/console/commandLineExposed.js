@@ -1,16 +1,31 @@
 /* See license.txt for terms of usage */
+/*jshint esnext:true, es5:true, curly:false, evil:true, forin: false*/
+/*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
     "firebug/lib/wrapper",
-    "firebug/lib/events",
+    "firebug/debugger/debuggerLib",
+    "firebug/lib/object",
+    "firebug/console/commandLineAPI",
+    "firebug/lib/locale",
 ],
-function(Wrapper, Events) {
+function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+const Cu = Components.utils;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+var commandLineCache = new WeakMap();
 
 // ********************************************************************************************* //
 // Command Line APIs
 
 // List of command line APIs
-var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
+var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
     "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
 
@@ -18,10 +33,17 @@ var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1"];
+var props = ["$0", "$1", "$p"];
 
 // Registered commands, name -> config object.
-var userCommands = {};
+var userCommands = Object.create(null);
+
+// List of command line APIs to auto-complete, kept equal to the concatenation
+// of the above minus trace*.
+var completionList = [
+        "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
+        "values", "debug", "undebug", "monitor", "unmonitor", "copy"
+    ].concat(consoleShortcuts, props);
 
 // ********************************************************************************************* //
 // Command Line Implementation
@@ -45,235 +67,119 @@ function createFirebugCommandLine(context, win)
         return null;
     }
 
-    // The commandLine object
-    var commandLine = {
-        __exposedProps__: {}
-    };
+    // The debuggee global.
+    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Exposed Properties
+    var commandLine = commandLineCache.get(win.document);
+    if (commandLine)
+        return copyCommandLine(commandLine, dglobal);
 
-    function createCommandHandler(cmd) {
-        return function() {
-            return notifyFirebug(arguments, cmd, "firebugExecuteCommand");
-        }
-    }
-
-    function createShortcutHandler(cmd) {
-        return function() {
-            return console[cmd].apply(console, arguments);
-        }
-    }
-
-    function createVariableHandler(prop) {
-        return function() {
-            return notifyFirebug(arguments, prop, "firebugExecuteCommand");
-        }
-    }
-
-    // Define command line methods
-    for (var i=0; i<commands.length; i++)
-    {
-        var command = commands[i];
-
-        // If the method is already defined, don't override it.
-        if (command in contentView)
-            continue;
-
-        commandLine[command] = createCommandHandler(command);
-        commandLine.__exposedProps__[command] = "rw";
-    }
+    // The commandLine object.
+    commandLine = dglobal.makeDebuggeeValue(Object.create(null));
 
     var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
+    // The command line API instance.
+    var commands = CommandLineAPI.getCommandLineAPI(context);
 
-    // Define shortcuts for some console methods
-    for (var i=0; i<consoleShortcuts.length; i++)
+    // Helpers for command creation.
+    function createCommandHandler(command)
     {
-        var command = consoleShortcuts[i];
-
-        // If the method is already defined, don't override it.
-        if (command in contentView)
-            continue;
-
-        commandLine[command] = createShortcutHandler(command);
-        commandLine.__exposedProps__[command] = "r";
+        var wrappedCommand = function()
+        {
+            try
+            {
+                return command.apply(null, arguments);
+            }
+            catch(ex)
+            {
+                throw new Error(ex.message, ex.fileName, ex.lineNumber);
+            }
+        };
+        return dglobal.makeDebuggeeValue(wrappedCommand);
     }
 
-    // Define console variables.
-    for (var i=0; i<props.length; i++)
+    function createVariableHandler(handler)
     {
-        var prop = props[i];
-        if (prop in contentView)
-            continue;
-
-        commandLine.__defineGetter__(prop, createVariableHandler(prop));
-        commandLine.__exposedProps__[prop] = "r";
+        var object = dglobal.makeDebuggeeValue({});
+        object.handle = function()
+        {
+            try
+            {
+                return handler(context);
+            }
+            catch(ex)
+            {
+                throw new Error(ex.message, ex.fileName, ex.lineNumber);
+            }
+        };
+        return object;
     }
 
-    // Define user registered commands.
+    function createUserCommandHandler(config, name)
+    {
+        return function()
+        {
+            try
+            {
+                return config.handler.call(null, context, arguments);
+            }
+            catch (exc)
+            {
+                Firebug.Console.log(exc, context, "errorMessage");
+
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("commandLine.api; EXCEPTION when executing " +
+                        "a command: " + name + ", " + exc, exc);
+                }
+            }
+        };
+    }
+
+    // Define command line methods.
+    for (var commandName in commands)
+    {
+        var command = commands[commandName];
+        commandLine[commandName] = createCommandHandler(command);
+    }
+
+    // Register shortcut.
+    consoleShortcuts.forEach(function(name)
+    {
+        var command = console[name].bind(console);
+        commandLine[name] = createCommandHandler(command);
+    });
+
+    // Register user commands.
     for (var name in userCommands)
     {
-        // If the method is already defined, don't override it.
-        if (name in contentView)
-            continue;
-
         var config = userCommands[name];
-
-        if (config.getter)
-        {
-            commandLine.__defineGetter__(name, createVariableHandler(name));
-            commandLine.__exposedProps__[name] = "r";
-        }
+        var command = createUserCommandHandler(config, name);
+        if (userCommands[name].getter)
+            commandLine[name] = createVariableHandler(command);
         else
-        {
-            commandLine[name] = createCommandHandler(name);
-            commandLine.__exposedProps__[name] = "r";
-        }
+            commandLine[name] = createCommandHandler(command);
     }
 
-    attachCommandLine();
+    commandLineCache.set(win.document, commandLine);
 
-    // xxxHonza: TODO make this private.
-    commandLine["detachCommandLine"] = detachCommandLine;
-    commandLine.__exposedProps__["detachCommandLine"] = "r";
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Helpers (not accessible from web content)
-
-    function attachCommandLine()
-    {
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.attachCommandLine; " + window.location);
-
-        if (!contentView.console)
-        {
-            var console = createFirebugConsole(context, win);
-            contentView.console = console;
-        }
-
-        Events.addEventListener(contentView.document, "firebugCommandLine",
-            firebugEvalEvent, true);
-    }
-
-    function detachCommandLine()
-    {
-        Events.removeEventListener(contentView.document, "firebugCommandLine",
-            firebugEvalEvent, true);
-
-        // suicide!
-        delete contentView._FirebugCommandLine;
-
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.detachCommandLine; " + window.location);
-    }
-
-    function firebugEvalEvent(event)
-    {
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed.firebugEvalEvent " + window.location);
-
-        // see commandLine.js
-        var expr = contentView.document.getUserData("firebug-expr");
-        evaluate(expr);
-
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Exposed; did evaluate on " + expr);
-    }
-
-    function evaluate(expr)
-    {
-        try
-        {
-            var line = Components.stack.lineNumber;
-            var result = contentView.eval(expr);
-
-            // See Issue 5221
-            //var result = FirebugEvaluate(expr, contentView);
-            notifyFirebug([result], "evaluated", "firebugAppendConsole");
-        }
-        catch (exc)
-        {
-            // change source and line number of exeptions from commandline code
-            // create new error since properties of nsIXPCException are not modifiable
-            var shouldModify, isXPCException;
-            if (exc.filename == Components.stack.filename)
-                shouldModify = isXPCException = true;
-            else if (exc.fileName == Components.stack.filename)
-                shouldModify = true;
-
-            if (shouldModify)
-            {
-                var result = new Error;
-                result.stack = null;
-                result.source = expr;
-                result.message = exc.message;
-                result.lineNumber = exc.lineNumber - line;
-                result.fileName = "data:," + encodeURIComponent(expr);
-
-                if (!isXPCException)
-                    result.name = exc.name;
-            }
-            else
-            {
-                result = exc;
-            }
-
-            notifyFirebug([result], "evaluateError", "firebugAppendConsole");
-        }
-    }
-
-    function notifyFirebug(objs, methodName, eventID)
-    {
-        var event = contentView.document.createEvent("Events");
-        event.initEvent(eventID, true, false);
-
-        commandLine.userObjects = [];
-        for (var i=0; i<objs.length; i++)
-            commandLine.userObjects.push(objs[i]);
-
-        var length = commandLine.userObjects.length;
-        contentView.document.setUserData("firebug-methodName", methodName, null);
-
-        contentView.document.dispatchEvent(event);
-
-        if (FBTrace.DBG_COMMANDLINE)
-        {
-            FBTrace.sysout("commandLine.Exposed; dispatched event " + methodName + " via " +
-                eventID + " with " + objs.length + " user objects, [0]:" +
-                commandLine.userObjects[0]);
-        }
-
-        var result;
-        if (contentView.document.getUserData("firebug-retValueType") == "array")
-            result = [];
-
-        if (!result && commandLine.userObjects.length == length + 1)
-            return commandLine.userObjects[length];
-
-        for (var i=length; i<commandLine.userObjects.length && result; i++)
-            result.push(commandLine.userObjects[i]);
-
-        return result;
-    }
-
-    return commandLine;
-};
-
-/* see Issue 5221
-// chrome: urls are filtered out by debugger, so we create script with a data url
-// to get eval sequences in location list and 0 error ofsets
-const evalFileSrc = "data:text/javascript,FirebugEvaluate=function(t,w)w.eval(t)";
-var script = document.createElementNS("http://www.w3.org/1999/xhtml", "script")
-script.src = evalFileSrc;
-document.documentElement.appendChild(script);
-*/
+    // Return a copy so the original one is preserved from changes.
+    return copyCommandLine(commandLine, dglobal);
+}
 
 // ********************************************************************************************* //
 // User Commands
 
+/**
+ * Registers a command.
+ *
+ * @param {string} name The name of the command
+ * @param {object} config The configuration. See some examples in commandLineHelp.js 
+ *      and commandLineInclude.js
+ */
 function registerCommand(name, config)
 {
-    if (commands[name] || consoleShortcuts[name] || props[name] || userCommands[name])
+    if (commandNames[name] || consoleShortcuts[name] || props[name] || userCommands[name])
     {
         if (FBTrace.DBG_ERRORS)
         {
@@ -285,9 +191,15 @@ function registerCommand(name, config)
     }
 
     userCommands[name] = config;
+    completionList.push(name);
     return true;
 }
 
+/**
+ * Unregisters a command.
+ *
+ * @param {string} name The name of the command to unregister
+ */
 function unregisterCommand(name)
 {
     if (!userCommands[name])
@@ -302,7 +214,274 @@ function unregisterCommand(name)
     }
 
     delete userCommands[name];
+    var ind = completionList.indexOf(name);
+    if (ind !== -1)
+        completionList.splice(ind, 1);
     return true;
+}
+
+/**
+ * Returns true if the scope is specific of the commands bindings.
+ *
+ * @param {Scope} scope
+ * @param {Window} win The (wrapped) window
+ *
+ * @return {boolean}
+ */
+function isCommandLineScope(scope, win)
+{
+    var commandLine = commandLineCache.get(win.document);
+
+    // This should never occur.
+    if (!commandLine && (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS))
+        FBTrace.sysout("CommandLineExposed.isCommandLineScope; could not get commandLine");
+    // Test whether the scope is an object and if its object contains commandLine functions
+    return scope.type === "object" && commandLine && commandLine.cd === scope.getVariable("cd");
+}
+
+/**
+ * Evaluates an expression in the thread of the webpage, so the Firebug UI is not frozen
+ * when the expression calls a function which will be paused.
+ *
+ *
+ * @param {object} context
+ * @param {Window} win
+ * @param {string} expr The expression (transformed if needed)
+ * @param {string} origExpr The expression as typed by the user
+ * @param {function} onSuccess The function to trigger in case of success
+ * @param {function} onError The function to trigger in case of exception
+ *
+ * @see CommandLine.evaluate
+ */
+function evaluateInPageContext(context, win)
+{
+    executeInWindowContext(win, evaluate, arguments);
+}
+
+/**
+ * Evaluates an expression.
+ *
+ * @param {object} context
+ * @param {Window} win
+ * @param {string} expr The expression (transformed if needed)
+ * @param {string} origExpr The expression as typed by the user
+ * @param {function} onSuccess The function to trigger in case of success
+ * @param {function} onError The function to trigger in case of exception
+ */
+function evaluate(context, win, expr, origExpr, onSuccess, onError)
+{
+    var result;
+    var contentView = Wrapper.getContentView(win);
+    var commandLine = createFirebugCommandLine(context, win);
+    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var resObj;
+
+    updateVars(commandLine, dglobal, context);
+    removeConflictingNames(commandLine, context, contentView);
+
+    resObj = dglobal.evalInGlobalWithBindings(expr, commandLine);
+
+    var unwrap = function(obj)
+    {
+        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dglobal);
+    };
+
+    // In case of abnormal termination, as if by the "slow script" dialog box,
+    // do not print anything in the console.
+    if (!resObj)
+    {
+        if (FBTrace.DBG_ERROR)
+            FBTrace.sysout("CommandLineExposed.evaluate; something went wrong when evaluating this"+
+                " expression: "+expr);
+        return;
+    }
+
+    if (resObj.hasOwnProperty("return"))
+    {
+        result = unwrap(resObj.return);
+        if (resObj.return && resObj.return.handle)
+        {
+            resObj.return.handle();
+            // Do not print anything in the console in case of getter commands.
+            return;
+        }
+    }
+    else if (resObj.hasOwnProperty("yield"))
+    {
+        result = unwrap(resObj.yield);
+    }
+    else if (resObj.hasOwnProperty("throw"))
+    {
+        // Change source and line number of exceptions from commandline code
+        // create new error since properties of nsIXPCException are not modifiable.
+        // Example of code raising nsIXPCException: `alert({toString: function(){ throw "blah"; }})`
+
+        // xxxFlorent: FIXME: we can't get the right stack trace with this example:
+        //     function a(){
+        //          throw new Error("error");
+        //     }
+        //     <ENTER>
+        //     a();
+        //     <ENTER>
+        var exc = unwrap(resObj.throw);
+
+        if (exc === null || exc === undefined)
+            return;
+
+        if (typeof exc !== "object")
+        {
+            exc = new Error(exc, null, null);
+            exc.fileName = exc.lineNumber = exc.stack = null;
+        }
+
+        var shouldModify = false, isXPCException = false;
+        var fileName = exc.filename || exc.fileName || "";
+        var isInternalError = fileName.lastIndexOf("chrome://", 0) === 0;
+        var lineNumber = null;
+        var stack = null;
+        var splitStack;
+        var isFileNameMasked = DebuggerLib.isFrameLocationEval(fileName);
+        if (isInternalError || isFileNameMasked)
+        {
+            shouldModify = true;
+            isXPCException = (exc.filename !== undefined);
+
+            // Lie and show the pre-transformed expression instead.
+            fileName = "data:,/* " + Locale.$STR("commandline.errorSourceHeader") + " */"+
+                encodeURIComponent("\n"+origExpr);
+
+            if (isInternalError && typeof exc.stack === "string")
+            {
+                splitStack = exc.stack.split("\n");
+                var correctionSucceeded = correctStackTrace(splitStack);
+                if (correctionSucceeded)
+                {
+                    // correct the line number so we take into account the comment prepended above
+                    lineNumber = findLineNumberInExceptionStack(splitStack) + 1;
+
+                    // correct the first trace
+                    splitStack.splice(0, 1, "@" + fileName + ":" + lineNumber);
+                    stack = splitStack.join("\n");
+                }
+                else
+                    shouldModify = false;
+            }
+            else
+            {
+                // correct the line number so we take into account the comment prepended above
+                lineNumber = exc.lineNumber + 1;
+            }
+        }
+
+        result = new Error();
+
+        if (shouldModify)
+        {
+            result.stack = stack;
+            result.source = origExpr;
+            result.message = exc.message;
+            result.lineNumber = lineNumber;
+            result.fileName = fileName;
+
+            // The error message can also contain post-transform details about the
+            // source, but it's harder to lie about. Make it prettier, at least.
+            if (typeof result.message === "string")
+                result.message = result.message.replace(/__fb_scopedVars\(/g, "<get closure>(");
+
+            if (!isXPCException)
+                result.name = exc.name;
+        }
+        else
+        {
+            Obj.getPropertyNames(exc).forEach(function(prop)
+            {
+                result[prop] = exc[prop];
+            });
+            result.stack = exc.stack;
+            result.source = exc.source;
+        }
+
+        executeInWindowContext(window, onError, [result, context]);
+        return;
+    }
+
+    executeInWindowContext(window, onSuccess, [result, context]);
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Helpers (not accessible from web content)
+
+function copyCommandLine(commandLine, dglobal)
+{
+    var copy = dglobal.makeDebuggeeValue(Object.create(null));
+    for (var name in commandLine)
+        copy[name] = commandLine[name];
+    return copy;
+}
+
+function findLineNumberInExceptionStack(splitStack)
+{
+    var m = splitStack[0].match(/:(\d+)$/);
+    return m !== null ? +m[1] : null;
+}
+
+function correctStackTrace(splitStack)
+{
+    var filename = Components.stack.filename;
+    // remove the frames over the evaluated expression
+    for (var i = 0; i < splitStack.length-1 &&
+        splitStack[i+1].indexOf(evaluate.name + "@" + filename, 0) === -1 ; i++);
+
+    if (i >= splitStack.length)
+        return false;
+    splitStack.splice(0, i);
+    return true;
+}
+
+function updateVars(commandLine, dglobal, context)
+{
+    var htmlPanel = context.getPanel("html", true);
+    var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
+
+    for (var prop in vars)
+        commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
+
+    vars = Firebug.CommandLine.getAccessorVars(context);
+    for (var prop in vars)
+        commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
+}
+
+function removeConflictingNames(commandLine, context, contentView)
+{
+    for (var name in commandLine)
+    {
+        // Note: we cannot trust contentView.hasOwnProperty, so we use the "in" operator.
+        if (name in contentView)
+            delete commandLine[name];
+    }
+}
+
+/**
+ * Executes a function in another window execution context.
+ *
+ * Useful when we have to pause some debuggee functions without freezing
+ * the Firebug UI.
+ *
+ * @param {Window} win The window having the thread in which we want to execute the function
+ * @param {function} func The function to execute
+ * @param {Array or Array-Like object} args The arguments to pass to the function
+ */
+function executeInWindowContext(win, func, args)
+{
+    var listener = function()
+    {
+        win.document.removeEventListener("firebugCommandLine", listener);
+        func.apply(null, args);
+    };
+    win.document.addEventListener("firebugCommandLine", listener);
+    var event = document.createEvent("Events");
+    event.initEvent("firebugCommandLine", true, false);
+    win.document.dispatchEvent(event);
 }
 
 // ********************************************************************************************* //
@@ -311,12 +490,15 @@ function unregisterCommand(name)
 Firebug.CommandLineExposed =
 {
     createFirebugCommandLine: createFirebugCommandLine,
-    commands: commands,
+    commands: commandNames,
     consoleShortcuts: consoleShortcuts,
     properties: props,
     userCommands: userCommands,
     registerCommand: registerCommand,
     unregisterCommand: unregisterCommand,
+    isCommandLineScope: isCommandLineScope,
+    evaluate: evaluateInPageContext,
+    completionList: completionList,
 };
 
 return Firebug.CommandLineExposed;

@@ -20,6 +20,10 @@ function CookieChangedEvent(context, cookie, action)
     this.cookie = cookie;
     this.action = action;
     this.rawHost = CookieUtils.makeStrippedHost(cookie.host);
+    this.getId = function()
+    {
+        return this.action + this.rawHost + this.cookie.name + ":" + this.cookie.value;
+    };
 }
 
 /**

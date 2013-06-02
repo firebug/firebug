@@ -122,6 +122,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
     },
 
+    _temporaryTransformSyntax: function(expr, win, context)
+    {
+        return Firebug.ClosureInspector.extendLanguageSyntax(expr, win, context);
+    },
+
     /**
      * Used by autocomplete in commandLine
      * @return array of locally visible property names for each scope we are in
@@ -129,7 +134,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     getCurrentFrameKeys: function(context)  // TODO remote, on bti
     {
         // return is safe
-        var globals = Arr.keys(Wrapper.getContentView(context.getGlobalScope()));
+        var globals = Arr.keys(Wrapper.getContentView(context.getCurrentGlobal()));
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
 
@@ -295,12 +300,23 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
         context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
+        try
+        {
+            context.stoppedGlobal = Wrapper.wrapObject(
+                Wrapper.unwrapIValue(frame.executionContext.globalObject));
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.stop failed to get global scope");
+        }
 
-        var hookReturn = Firebug.connection.dispatch("onStop",[context,frame, type,rv]);
+        var hookReturn = Firebug.connection.dispatch("onStop", [context, frame, type, rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
             delete context.stoppedFrame;
+            delete context.stoppedGlobal;
             delete context.currentFrame;
 
             if (FBTrace.DBG_UI_LOOP)
@@ -441,10 +457,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 var str = "if (!window._firebug)window._firebug={};\n";
                 str += "window._firebug.rerunThis = this;\n";
-                str += "window._firebug.rerunArgs = [];\n"
-                str += "if (arguments && arguments.length) for (var i = 0; i < arguments.length; i++) window._firebug.rerunArgs.push(arguments[i]);\n"
-                str += "window._firebug.rerunFunctionName = "+fnName+";\n"
-                str +="window._firebug.rerunFunction = function _firebugRerun() { "+fnName+".apply(window._firebug.rerunThis, window._firebug.rerunArgs); }"
+                str += "window._firebug.rerunArgs = [];\n";
+                str += "if (arguments && arguments.length) for (var i = 0; i < arguments.length; i++) window._firebug.rerunArgs.push(arguments[i]);\n";
+                str += "window._firebug.rerunFunctionName = "+fnName+";\n";
+                str +="window._firebug.rerunFunction = function _firebugRerun() { "+fnName+".apply(window._firebug.rerunThis, window._firebug.rerunArgs); }";
                 return str;
             }
 
@@ -538,7 +554,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     unSuspend: function(context)
     {
         FBS.stopStepping(null, context);  // TODO per context
-        FBS.cancelBreakOnNextCall(this, context)
+        FBS.cancelBreakOnNextCall(this, context);
     },
 
     runUntil: function(context, compilationUnit, lineNo)
@@ -1012,6 +1028,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 delete context.stopped;
                 delete context.stoppedFrame;
+                delete context.stoppedGlobal;
                 delete context.currentFrame;
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
@@ -1073,52 +1090,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // otherwise we cannot be called.
         context.jsDebuggerCalledUs = true;
 
-        if (!Firebug.Console.injector.isAttached(context, frameWin))
-        {
-            this.injectConsole(context, frameWin);
-        }
-        else
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal console isAttached to "+
-                    Win.safeGetWindowLocation(frameWin)+" in  "+context.getName());
-        }
-
         this.breakContext = context;
         //FBTrace.sysout("debugger.js this.breakContext "+this.breakContext.getName());
         return true;
-    },
-
-    injectConsole: function(context, frameWin)
-    {
-        if (Firebug.Console.isAlwaysEnabled())
-        {
-            // This is how the console is injected ahead of JS running on the page
-            FBS.filterConsoleInjections = true;
-            try
-            {
-                var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("debugger.supportsGlobal injectConsole FAILS: "+exc, exc);
-            }
-            finally
-            {
-                FBS.filterConsoleInjections = false;
-            }
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady+
-                    " jsDebuggerCalledUs: "+context.jsDebuggerCalledUs, frameWin);
-        }
-        else
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole console NOT enabled ",
-                    frameWin);
-        }
     },
 
     onLock: function(state)
@@ -1157,6 +1131,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     return this.debuggerTracer(context, frame);
                 else
                     this.setDebuggerKeywordCause(context, frame);
+                if (!context.breakingCause)
+                    return RETURN_CONTINUE;
             }
 
             return this.stop(context, frame, type);
@@ -1890,14 +1866,19 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
                 for (var row = panel.panelNode.firstChild; row; row = row.nextSibling)
                 {
-                    var error = row.firstChild.repObject;
+                    var errorMessage = row.getElementsByClassName("objectBox-errorMessage");
+                    if (!errorMessage.length)
+                        continue;
+
+                    errorMessage = errorMessage[0];
+                    var error = errorMessage.repObject;
                     if (error instanceof FirebugReps.ErrorMessageObj && error.href == url &&
                         error.lineNo == lineNo)
                     {
                         if (isSet)
-                            Css.setClass(row.firstChild, "breakForError");
+                            Css.setClass(errorMessage, "breakForError");
                         else
-                            Css.removeClass(row.firstChild, "breakForError");
+                            Css.removeClass(errorMessage, "breakForError");
 
                         Firebug.connection.dispatch( "onToggleErrorBreakpoint",
                             [context, url, lineNo, isSet]);
@@ -2125,7 +2106,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         var url = null;
         // Ignores any trailing whitespace in |source|
-        const reURIinComment = /\/\/@\ssourceURL=\s*(\S*?)\s*$/m;
+        const reURIinComment = /\/\/[@#]\ssourceURL=\s*(\S*?)\s*$/m;
         var m = reURIinComment.exec(lines[lines.length - 1]);
 
         if (m)
@@ -2365,7 +2346,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
         this.debuggerName =  window.location.href +"-@-"+Obj.getUniqueId();
-        this.toString = function() { return this.debuggerName; }
+        this.toString = function() { return this.debuggerName; };
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+
@@ -2537,24 +2518,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("loadedContext needs to trigger watchpanel updates");
-
-        /*
-        var watchPanel = this.ableWatchSidePanel(context);
-        var needNow = watchPanel && watchPanel.watches;
-        var watchPanelState = Firebug.getPanelState({name: "watches", context: context});
-        var needPersistent = watchPanelState && watchPanelState.watches;
-        if (needNow || needPersistent)
-        {
-            Firebug.CommandLine.isReadyElsePreparing(context);
-            if (watchPanel)
-            {
-                context.setTimeout(function refreshWatchesAfterCommandLineReady()
-                {
-                    watchPanel.refresh();
-                });
-            }
-        }
-        */
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger("+this.debuggerName+").loadedContext enabled on load: "+
@@ -2854,7 +2817,7 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
     this.checked = checked;
     this.sourceLine = sourceLine;
     this.isFuture = isFuture;
-}
+};
 
 // ********************************************************************************************* //
 
@@ -2891,7 +2854,7 @@ Firebug.DebuggerListener =
 
     onFunctionConstructor: function(context, frame, ctor_script, url, sourceFile)
     {
-    },
+    }
 };
 
 // ********************************************************************************************* //
@@ -2936,8 +2899,8 @@ Firebug.JSDebugClient =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejection: " +
                 rejection.length + ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
-    },
-}
+    }
+};
 
 // Recursively look for obj in container using array of visited objects
 function findObjectPropertyPath(containerName, container, obj, visited)
@@ -3018,11 +2981,11 @@ function ArrayEnumerator(array)
     this.hasMoreElements = function()
     {
         return (this.index < array.length);
-    }
+    };
     this.getNext = function()
     {
         return this.array[++this.index];
-    }
+    };
 }
 
 // ********************************************************************************************* //

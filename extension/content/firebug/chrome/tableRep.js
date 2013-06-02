@@ -6,9 +6,10 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/object",
     "firebug/lib/array",
 ],
-function(Domplate, Locale, FirebugReps, Dom, Css, Arr) {
+function(Domplate, Locale, FirebugReps, Dom, Css, Obj, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -71,6 +72,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             return [row];
 
         var cols = [];
+        var value = null;
         for (var i=0; i<this.columns.length; i++)
         {
             var prop = this.columns[i].property;
@@ -88,7 +90,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             {
                 var props = (typeof(prop) == "string") ? prop.split(".") : [prop];
 
-                var value = row;
+                value = row;
                 for (var p in props)
                     value = (value && value[props[p]]) || undefined;
             }
@@ -182,7 +184,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         {
             Css.removeClass(header, "sortedAscending");
             Css.setClass(header, "sortedDescending");
-            header.setAttribute("aria-sort", "descending")
+            header.setAttribute("aria-sort", "descending");
 
             header.sorted = 1;
 
@@ -212,11 +214,11 @@ FirebugReps.Table = domplate(Firebug.Rep,
         {
             this.columns = columns;
 
-            var object = object || {};
-            object.data = data;
-            object.columns = columns;
+            var obj = object || {};
+            obj.data = data;
+            obj.columns = columns;
 
-            var row = Firebug.Console.log(object, context, "table", this, true);
+            var row = Firebug.Console.log(obj, context, "table", this, true);
 
             // Set vertical height for scroll bar.
             var tBody = row.querySelector(".dataTableTbody");
@@ -270,7 +272,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
     getHeaderColumns: function(data)
     {
         // Get the first row in the object.
-        var firstRow;
+        var firstRow = null;
         for (var p in data)
         {
             firstRow = data[p];
@@ -306,8 +308,6 @@ FirebugReps.Table = domplate(Firebug.Rep,
      */
     domFilter: function(object, name)
     {
-        var domMembers = Dom.getDOMMembers(object, name);
-
         if (typeof(object) == "function")
         {
             if (Dom.isDOMMember(object, name) && !Firebug.showDOMFuncs)
@@ -326,8 +326,16 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
 
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getId: function()
+    {
+        return Obj.getUniqueId();
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

@@ -11,7 +11,7 @@ function webAppFactory() {
 var WebApp = function(win)
 {
     this.topMostWindow = win;
-}
+};
 
 /**
  * The Window of the top-level browsing context, aka 'top'
@@ -23,7 +23,7 @@ WebApp.prototype =
     {
         return this.topMostWindow;
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

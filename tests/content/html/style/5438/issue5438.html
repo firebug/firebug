@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5438: Allow jumping from web font usage in Style side panel to its definition</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @font-face {
+            font-family: TestFont;
+            src: url(testFont.woff) format("woff");
+        }
+
+        #element {
+            font-family: TestFont;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5438">Issue 5438</a>: Allow jumping from web font usage in Style side panel to its definition</h1>
+        </header>
+        <div>
+            <section id="content">
+                <p id="element">Hello Firebug user!</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the text <em>Hello Firebug user!</em> above</li>
+                    <li>
+                        Inside the <em>Style</em> side panel right-click on the value (<code>TestFont</code>)
+                        of the <code>font-family</code> property inside the <code>#element</code> rule<br/>
+                        <span class="ok">&rArr; There should be an option <em>Inspect Declaration</em></span>
+                    </li>
+                    <li>Click that menu item</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        Firebug should switch to the <em>CSS</em> panel and highlight the <code>@font-face</code> rule,
+                        in which the <code>TestFont</code> is defined
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

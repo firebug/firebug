@@ -25,7 +25,7 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
 // ********************************************************************************************* //
 // Constants
 
-/* const animationDuration = 0.8; see issue 5618 */
+const animationDuration = 0.8;
 
 // ********************************************************************************************* //
 // Breakpoints
@@ -111,7 +111,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         Menu.createMenuItems(menuPopup, menuItems);
     },
 
-    /* see issue 5618
     toggleTabHighlighting: function(event)
     {
         // Don't continue if it's the wrong animation phase
@@ -131,7 +130,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         panel.context.delayedArmedTab.setAttribute("breakOnNextArmed", "true");
         delete panel.context.delayedArmedTab;
     },
-    */
 
     updateBreakOnNextTooltips: function(panel)
     {
@@ -171,9 +169,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(panel.name);
         if (tab)
-            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
-
-        /* see issue 5618
         {
             if (armed)
             {
@@ -202,7 +197,6 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
                 tab.setAttribute("breakOnNextArmed", "false");
             }
         }
-        */
     },
 
     updatePanelTabs: function(context)
@@ -448,11 +442,12 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
         panel.refresh();
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
-Firebug.Breakpoint.BreakpointsPanel = function() {}
+Firebug.Breakpoint.BreakpointsPanel = function() {};
 
 Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
 {
@@ -483,7 +478,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (this.context.loaded)
         {
-            var state;
+            var state = null;
             Persist.restoreObjects(this, state);
 
             if (state)
@@ -575,7 +570,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         var monitors = [];
 
         var renamer = new SourceFileRenamer(context);
-        var self = this;
         var Breakpoint = Firebug.Debugger.Breakpoint;
 
         for (var url in context.sourceFileMap)
@@ -590,6 +584,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props))
                     return;
 
+                var isFuture = false;
+                var name = "";
                 if (scripts)  // then this is a current (not future) breakpoint
                 {
                     var script = scripts[0];
@@ -599,12 +595,9 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                             script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+
                             context.getName());
 
-                    if (analyzer)
-                        var name = analyzer.getFunctionDescription(script, context).name;
-                    else
-                        var name = StackFrame.guessFunctionName(url, 1, context);
-
-                    var isFuture = false;
+                    name = analyzer ?
+                        analyzer.getFunctionDescription(script, context).name :
+                        StackFrame.guessFunctionName(url, 1, context);
                 }
                 else
                 {
@@ -612,7 +605,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                         FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+
                             url+"@"+line+"\n");
 
-                    var isFuture = true;
+                    isFuture = true;
                 }
 
                 var source = context.sourceCache.getLine(url, line);
@@ -787,7 +780,7 @@ function countBreakpoints(context)
 Firebug.Breakpoint.BreakpointGroup = function()
 {
     this.breakpoints = [];
-}
+};
 
 Firebug.Breakpoint.BreakpointGroup.prototype =
 {
@@ -883,7 +876,7 @@ SourceFileRenamer.prototype.needToRename = function(context)
             context.sourceFileMap);
 
     return this.renamedSourceFiles.length;
-}
+};
 
 SourceFileRenamer.prototype.renameSourceFiles = function(context)
 {
@@ -903,7 +896,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         if (!sourceFile.source)
         {
             FBTrace.sysout("breakpoint.renameSourceFiles no source for " + oldURL +
-                " callerURL " + callerURL, sourceFile)
+                " callerURL " + callerURL, sourceFile);
             continue;
         }
 
@@ -939,14 +932,14 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
     }
 
     return this.renamedSourceFiles.length;
-}
+};
 
 // ********************************************************************************************* //
 
 Firebug.Breakpoint.ConditionEditor = function(doc)
 {
     this.initialize(doc);
-}
+};
 
 with (Domplate) {
 Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
@@ -1034,7 +1027,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.JSEditor.prototy
             var sourceFile = compilationUnit.sourceFile;
             FBS.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -1051,7 +1044,7 @@ Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
     this.document = doc;
     this.cause = cause;
-}
+};
 
 Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 /** @lends Firebug.ScriptPanel.Notification */
@@ -1064,7 +1057,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
                     TR(
                         TD({"class": "imageCol"},
                             IMG({"class": "notificationImage",
-                                src: "chrome://firebug/skin/breakpoint.png"})
+                                src: "chrome://firebug/skin/breakpoint.svg"})
                         ),
                         TD({"class": "descCol"},
                             SPAN({"class": "notificationDesc"}, "$cause|getDescription"),
@@ -1366,7 +1359,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
             }
         }, 15);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

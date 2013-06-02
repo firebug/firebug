@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Group console messages: console.group()</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+        function onExecuteTest()
+        {
+            logGroup(); logGroup();
+        }
+
+        function logGroup()
+        {
+            console.group("Group");
+            console.log("test");
+            console.groupEnd();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4979">Group console messages</a>: console.group()</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Create console.group()s</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug, select the Console panel and enable it</li>
+                    <li>Press the <em>Create console.group()s</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>There should be two groups in the console. They must not be grouped.</li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
+        </div>
+    </body>
+</html>

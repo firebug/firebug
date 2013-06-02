@@ -8,10 +8,6 @@ function(Str) {
 // ********************************************************************************************* //
 // Constants
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
-
 var Xpath = {};
 
 // ********************************************************************************************* //
@@ -46,7 +42,7 @@ Xpath.getElementTreeXPath = function(element)
                 ++index;
         }
 
-        var tagName = element.nodeName.toLowerCase();
+        var tagName = (element.prefix ? element.prefix + ":" : "") + element.localName;
         var pathIndex = (index ? "[" + (index+1) + "]" : "");
         paths.splice(0, 0, tagName + pathIndex);
     }

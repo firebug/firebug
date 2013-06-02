@@ -5,7 +5,7 @@ function runTest() {
     FBTest.progress("Testing StorageService");
 
     var url = "test.json";
-    var store = StorageService.getStorage(url);
+    var store = StorageService.getStorage(url, FW.Firebug.chrome.window);
     FBTest.ok(store, "StorageService.getStorage(url);");
 
     var bar = {first:"time", last:"best"};
@@ -18,7 +18,7 @@ function runTest() {
 
     setTimeout(function restoreFromDisk()
     {
-        var restore = StorageService.getStorage(url);
+        var restore = StorageService.getStorage(url, FW.Firebug.chrome.window);
 
         FBTest.compare(1, restore.length, "one item should be restored from "+url);
 

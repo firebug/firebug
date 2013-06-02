@@ -14,7 +14,7 @@ function runTest()
             // parameters.
 
             taskList.push(executeAndVerify, "state = true;", "true",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
 
             taskList.push(executeAndVerify, "window", "Window dom.html",
                 "a", " objectLink objectLink-object");
@@ -23,25 +23,31 @@ function runTest()
                 "a", " objectLink objectLink-object");
 
             taskList.push(executeAndVerify, "aa", "\"three\"",
-                "pre", "objectBox objectBox-string");
+                "span", "objectBox objectBox-string");
 
             taskList.push(executeAndVerify, "cc", "null",
-                "pre", "objectBox objectBox-null");
+                "span", "objectBox objectBox-null");
 
             taskList.push(executeAndVerify, "dd", "2",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
 
             taskList.push(executeAndVerify, "dd = 999", "999",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
 
             taskList.push(executeAndVerify, "dd", "999",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
 
             taskList.push(executeAndVerify, "set_d_val", "set_d_val(td)",
                 "a", "objectLink objectLink-function");
 
             taskList.push(executeAndVerify, "set_d_val(998);", "998",
-                "pre", "objectBox objectBox-number");
+                "span", "objectBox objectBox-number");
+
+            // Strings with copyable white-space
+            taskList.push(executeAndVerify, "multiline", "\"multi\nline\"",
+                "pre", "objectBox objectBox-string");
+            taskList.push(executeAndVerify, "multispace", "\"multi  space\"",
+                "pre", "objectBox objectBox-string");
 
             // Errors
             FBTest.setPref("ObjectShortIteratorMax", 1);   // Related to R6588
@@ -52,10 +58,10 @@ function runTest()
             // Assignment
             taskList.push(executeAndVerify, "var blah = 'oink';",
                 ">>> var blah = 'oink';",
-                "pre", "objectBox objectBox-text");
+                "span", "objectBox objectBox-text");
 
             taskList.push(executeAndVerify, "blah", "\"oink\"",
-                "pre", "objectBox objectBox-string");
+                "span", "objectBox objectBox-string");
 
             // DOM Elements
             taskList.push(executeAndVerify,

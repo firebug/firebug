@@ -11,8 +11,10 @@ define([
     "firebug/trace/debug",
     "firebug/console/console",
     "firebug/lib/options",
+    "firebug/debugger/debuggerLib",
 ],
-function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options) {
+function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
+    DebuggerLib) {
 
 // ********************************************************************************************* //
 
@@ -68,13 +70,13 @@ function createFirebugConsole(context, win)
             return logAssert("assert", rest);
         }
 
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.dir = function dir(o)
     {
         Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.dirxml = function dirxml(o)
@@ -85,7 +87,7 @@ function createFirebugConsole(context, win)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.trace = function firebugDebuggerTracer()
@@ -95,20 +97,20 @@ function createFirebugConsole(context, win)
         debugger;
         delete unwrapped.top._firebugStackTrace;
 
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.group = function group()
     {
         var sourceLink = getStackLink();
         Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.groupEnd = function()
     {
         Firebug.Console.closeGroup(context);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.groupCollapsed = function()
@@ -121,19 +123,19 @@ function createFirebugConsole(context, win)
         // Use rather a different method that causes auto collapsing of the group
         // when it's created.
         Firebug.Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.count = function(key)
@@ -156,27 +158,30 @@ function createFirebugConsole(context, win)
                 context.frameCounters[frameId] = frameCounter;
             }
             else
+            {
                 ++frameCounter.count;
+            }
 
             var label = key == undefined
                 ? frameCounter.count
                 : key + " " + frameCounter.count;
 
-            frameCounter.logRow.firstChild.firstChild.nodeValue = label;
+            var node = frameCounter.logRow.getElementsByClassName("objectBox-text")[0];
+            node.firstChild.nodeValue = label;
         }
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.clear = function()
     {
         Firebug.Console.clear(context);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.time = function(name, reset)
     {
         if (!name)
-            return Console.getDefaultReturnValue(win);
+            return Console.getDefaultReturnValue();
 
         var time = new Date().getTime();
 
@@ -186,25 +191,26 @@ function createFirebugConsole(context, win)
         var key = "KEY"+name.toString();
 
         if (!reset && this.timeCounters[key])
-            return Console.getDefaultReturnValue(win);
+            return Console.getDefaultReturnValue();
 
         this.timeCounters[key] = time;
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.timeEnd = function(name)
     {
         var time = new Date().getTime();
+        var diff = undefined;
 
         if (!this.timeCounters)
-            return Console.getDefaultReturnValue(win);
+            return Console.getDefaultReturnValue();
 
         var key = "KEY"+name.toString();
 
         var timeCounter = this.timeCounters[key];
         if (timeCounter)
         {
-            var diff = time - timeCounter;
+            diff = time - timeCounter;
             var label = name + ": " + diff + "ms";
 
             this.info(label);
@@ -232,7 +238,7 @@ function createFirebugConsole(context, win)
     console.table = function(data, columns)
     {
         FirebugReps.Table.log(data, columns, context);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.error = function error()
@@ -253,13 +259,13 @@ function createFirebugConsole(context, win)
     /*console.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     console.memoryProfileEnd = function()
     {
         Firebug.MemoryProfiler.stop(context);
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };*/
 
     // Expose only these properties to the content scope (read only).
@@ -294,7 +300,7 @@ function createFirebugConsole(context, win)
 
     function logFormatted(args, className, linkToSource, noThrottle)
     {
-        var sourceLink;
+        var sourceLink = null;
 
         // Using JSD to get user stack is time consuming.
         if (Options.get("preferJSDSourceLinks"))
@@ -307,7 +313,7 @@ function createFirebugConsole(context, win)
         if (!sourceLink)
             sourceLink = linkToSource ? getStackLink() : null;
 
-        var ignoreReturnValue = Firebug.Console.getDefaultReturnValue(win);
+        var ignoreReturnValue = Firebug.Console.getDefaultReturnValue();
         var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : ignoreReturnValue;
     };
@@ -316,33 +322,25 @@ function createFirebugConsole(context, win)
     {
         Errors.increaseCount(context);
 
-        if (!args || !args.length || args.length == 0)
-            var msg = [Locale.$STR("Assertion")];
-        else
-            var msg = args[0];
+        var msg = (!args || !args.length || args.length == 0) ?
+            [Locale.$STR("Assertion")] : args[0];
 
         // If there's no error message, there's also no stack trace. See Issue 4700.
-        if (!msg)
+        var trace = null;
+        if (msg)
         {
-            var trace = null;
-        }
-        else if (msg.stack)
-        {
-            var trace = StackFrame.parseToStackTrace(msg.stack, context);
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from msg.stack", trace);
-        }
-        else if (context.stackTrace)
-        {
-            var trace = context.stackTrace;
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
-        }
-        else
-        {
-            var trace = getJSDUserStack();
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+            if (msg.stack)
+            {
+                trace = StackFrame.parseToStackTrace(msg.stack, context);
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("logAssert trace from msg.stack", trace);
+            }
+            else
+            {
+                trace = getJSDUserStack();
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+            }
         }
 
         trace = StackFrame.cleanStackTraceOfFirebug(trace);
@@ -361,7 +359,7 @@ function createFirebugConsole(context, win)
 
         if (args.length > 1)
         {
-            errorObject.objects = []
+            errorObject.objects = [];
             for (var i = 1; i < args.length; i++)
                 errorObject.objects.push(args[i]);
         }
@@ -370,7 +368,7 @@ function createFirebugConsole(context, win)
         if (row)
             row.scrollIntoView();
 
-        return Console.getDefaultReturnValue(win);
+        return Console.getDefaultReturnValue();
     };
 
     function getComponentsStackDump()
@@ -402,7 +400,12 @@ function createFirebugConsole(context, win)
 
     function getStackLink()
     {
-        return StackFrame.getFrameSourceLink(getComponentsStackDump());
+        var sourceLink = StackFrame.getFrameSourceLink(getComponentsStackDump());
+        // xxxFlorent: should be reverted if we integrate 
+        // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+        if (DebuggerLib.isFrameLocationEval(sourceLink.href))
+            return null;
+        return sourceLink;
     };
 
     function getJSDUserStack()
@@ -424,6 +427,11 @@ function createFirebugConsole(context, win)
 
                 // firebug-service scope reached, in some cases the url starts with file://
                 if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+                    continue;
+
+                // xxxFlorent: should be reverted if we integrate
+                // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+                if (DebuggerLib.isFrameLocationEval(frames[i].href))
                     continue;
 
                 // command line

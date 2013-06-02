@@ -8,18 +8,54 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
+const Ci = Components.interfaces;
+const Cu = Components.utils;
 var Arr = {};
 
 // ********************************************************************************************* //
 // Arrays
 
-Arr.isArray = function(obj)
+Arr.isArray = Array.isArray || function(obj)
 {
-    if (Array.isArray)
-        return Array.isArray(obj);
-
     return Object.prototype.toString.call(obj) === "[object Array]";
-}
+};
+
+Arr.isArrayLike = function(obj)
+{
+    try
+    {
+        if (typeof obj !== "object")
+            return false;
+        if (!isFinite(obj.length))
+            return false;
+        if (Arr.isArray(obj))
+            return true;
+        if (typeof obj.callee === "function") // arguments
+            return true;
+        if (typeof obj.splice === "function") // jQuery etc.
+            return true;
+        if (Arr._isDOMTokenList(obj))
+            return true;
+        var str = Object.prototype.toString.call(obj);
+        if (str === "[object HTMLCollection]" || str === "[object NodeList]")
+            return true;
+    }
+    catch (exc) {}
+    return false;
+};
+
+Arr._isDOMTokenList = function(obj)
+{
+    // When minVersion is 19 or so, we can replace this whole function with
+    // (Object.prototype.toString.call(obj) === "[object DOMTokenList]").
+    try
+    {
+        var uwGlobal = XPCNativeWrapper.unwrap(Cu.getGlobalForObject(obj));
+        return obj instanceof uwGlobal.DOMTokenList;
+    }
+    catch (exc) {}
+    return false;
+};
 
 // At least sometimes the keys will be on user-level window objects
 Arr.keys = function(map)
@@ -101,7 +137,7 @@ Arr.cloneArray = function(array, fn)
            newArray.push(array[i]);
 
    return newArray;
-}
+};
 
 Arr.extendArray = function(array, array2)
 {
@@ -109,16 +145,24 @@ Arr.extendArray = function(array, array2)
    newArray.push.apply(newArray, array);
    newArray.push.apply(newArray, array2);
    return newArray;
-}
+};
 
 Arr.arrayInsert = function(array, index, other)
 {
-   for (var i = 0; i < other.length; ++i)
-       array.splice(i+index, 0, other[i]);
+    // Prepare arguments for Array.splice()
+    // 1) index: at which to start inserting the 'other' array.
+    // 2) howMany: elements to remove (none in this case)
+    // 3-N) elements: to insert
+    var args = [index, 0];
+    args.push.apply(args, other);
 
-   return array;
-}
+    // Insert 'other' array into 'array'
+    array.splice.apply(array, args);
 
+    return array;
+};
+
+// xxxFlorent: [ES6-SET] [ES6-SPREAD]
 /**
  * Filter out unique values of an array, saving only the first occurrence of
  * every value. In case the array is sorted, a faster path is taken.

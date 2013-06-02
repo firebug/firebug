@@ -9,7 +9,6 @@ function(Obj, Xpcom) {
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var clipboard = Xpcom.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");

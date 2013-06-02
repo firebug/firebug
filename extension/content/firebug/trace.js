@@ -16,15 +16,7 @@ try
     var scope = {};
     Components.utils["import"]("resource://firebug/fbtrace.js", scope);
     FBTrace = scope.FBTrace;
-    FBTrace.setScope(window);
 
-    function clearFBTraceScope()
-    {
-        window.removeEventListener("unload", clearFBTraceScope, true);
-        FBTrace.setScope(null);
-    }
-
-    window.addEventListener("unload", clearFBTraceScope, true);
     FBTrace.time("SCRIPTTAG_TIME");
 }
 catch (err)

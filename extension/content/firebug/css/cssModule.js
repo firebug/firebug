@@ -32,6 +32,50 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
 {
     dispatchName: "cssModule",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        this.editors = {};
+        this.registerEditor("Live",
+        {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startLiveEditing(stylesheet, context);
+            },
+            stopEditing: function()
+            {
+                Firebug.Editor.stopEditing();
+            }
+        });
+
+        this.registerEditor("Source",
+        {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startSourceEditing(stylesheet, context);
+            },
+            stopEditing: function()
+            {
+                Firebug.Editor.stopEditing();
+            }
+        });
+    },
+
+    initContext: function(context)
+    {
+        context.dirtyListener = new Firebug.CSSDirtyListener(context);
+        this.addListener(context.dirtyListener);
+    },
+
+    destroyContext: function(context)
+    {
+        this.removeListener(context.dirtyListener);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     freeEdit: function(styleSheet, value)
     {
         if (FBTrace.DBG_CSS)
@@ -67,7 +111,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             styleSheet.editStyleSheet = editStyleSheet;
         }
 
-        styleSheet.editStyleSheet.innerHTML = value;
+        styleSheet.editStyleSheet.textContent = value;
 
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.saveEdit styleSheet.href:" + styleSheet.href +
@@ -207,79 +251,6 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             doc.fbDefaultSheet = sheet;
         }
         return sheet;
-    },
-
-    cleanupSheets: function(doc, context)
-    {
-        if (!context)
-            return false;
-
-        // Due to the manner in which the layout engine handles multiple
-        // references to the same sheet we need to kick it a little bit.
-        // The injecting a simple stylesheet then removing it will force
-        // Firefox to regenerate it's CSS hierarchy.
-        //
-        // WARN: This behavior was determined anecdotally.
-        // See http://code.google.com/p/fbug/issues/detail?id=2440
-
-        // This causes additional HTTP request for a font (see 4649).
-        /*if (!Xml.isXMLPrettyPrint(context))
-        {
-            var style = Css.createStyleSheet(doc);
-            style.textContent = "#fbIgnoreStyleDO_NOT_USE {}";
-            Css.addStyleSheet(doc, style);
-
-            if (style.parentNode)
-            {
-                style.parentNode.removeChild(style);
-            }
-            else
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.cleanupSheets; ERROR no parent style:", style);
-            }
-        }*/
-
-        var result = true;
-
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
-        // This voodoo touches each style sheet to force some Firefox internal change
-        // to allow edits.
-        var styleSheets = Css.getAllStyleSheets(context);
-        for(var i = 0; i < styleSheets.length; i++)
-        {
-            try
-            {
-                var rules = styleSheets[i].cssRules;
-                if (rules.length > 0)
-                    var touch = rules[0];
-
-                //if (FBTrace.DBG_CSS && touch)
-                //    FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+
-                //        (styleSheets[i].href?styleSheets[i].href:context.getName()));
-            }
-            catch(e)
-            {
-                result = false;
-
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.show: sheet.cssRules FAILS for " +
-                        (styleSheets[i] ? styleSheets[i].href : "null sheet") + e, e);
-            }
-        }
-
-        // Return true only if all stylesheets are fully loaded and there is no
-        // excpetion when accessing them.
-        return result;
-    },
-
-    cleanupSheetHandler: function(event, context)
-    {
-        var target = event.target;
-        var tagName = (target.tagName || "").toLowerCase();
-
-        if (tagName == "link")
-            this.cleanupSheets(target.ownerDocument, context);
     },
 
     parseCSSValue: function(value, offset)
@@ -452,75 +423,6 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             }
         ];
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Module functions
-
-    initialize: function()
-    {
-        this.editors = {};
-        this.registerEditor("Live",
-        {
-            startEditing: function(stylesheet, context, panel)
-            {
-                panel.startLiveEditing(stylesheet, context);
-            },
-            stopEditing: function()
-            {
-                Firebug.Editor.stopEditing();
-            }
-        });
-
-        this.registerEditor("Source",
-        {
-            startEditing: function(stylesheet, context, panel)
-            {
-                panel.startSourceEditing(stylesheet, context);
-            },
-            stopEditing: function()
-            {
-                Firebug.Editor.stopEditing();
-            }
-        });
-    },
-
-    watchWindow: function(context, win)
-    {
-        if (!context.cleanupSheetListener)
-            context.cleanupSheetListener = Obj.bind(this.cleanupSheetHandler, this, context);
-
-        context.addEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
-        context.addEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
-    },
-
-    unwatchWindow: function(context, win)
-    {
-        if (context.cleanupSheetListener)
-        {
-            context.removeEventListener(win, "DOMAttrModified", context.cleanupSheetListener, false);
-            context.removeEventListener(win, "DOMNodeInserted", context.cleanupSheetListener, false);
-        }
-    },
-
-    loadedContext: function(context)
-    {
-        var self = this;
-        Win.iterateWindows(context.browser.contentWindow, function(subwin)
-        {
-            self.cleanupSheets(subwin.document, context);
-        });
-    },
-
-    initContext: function(context)
-    {
-        context.dirtyListener = new Firebug.CSSDirtyListener(context);
-        this.addListener(context.dirtyListener);
-    },
-
-    destroyContext: function(context)
-    {
-        this.removeListener(context.dirtyListener);
-    }
 });
 
 // ********************************************************************************************* //

@@ -1,0 +1,195 @@
+/* See license.txt for terms of usage */
+
+.domTable {
+    width: 100%;
+}
+
+.memberLabelCell {
+    padding: 2px 0 2px 0px;
+    vertical-align: top;
+}
+
+.memberValueCell {
+    padding: 2px 0 2px 5px;
+    display: block;
+    overflow: hidden;
+}
+
+.memberValueCell.readOnly > SPAN {
+    opacity: 0.5;
+}
+
+.memberLabel {
+    cursor: default;
+    overflow: hidden;
+    padding-left: 18px;
+    white-space: nowrap;
+}
+
+.memberLabelPrefix {
+    color: gray;
+    margin-right: 3px;
+    font-weight: normal;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Breakpoints */
+
+/* In order to set memberRowHeader's height to 100%, memberRow and
+ * memberHeaderCell (parents) has to also be set to height: 100%,
+ * otherwise it wouldn't work */
+.memberHeaderCell {
+    height: 100%;
+}
+
+.memberRow {
+    height: 100%;
+    border: 1px solid transparent; /* see issue 5769 */
+}
+
+.memberRowHeader {
+    cursor: pointer;
+    display: none;
+    height: 100%;
+}
+
+/* Show breakpoints bar only in the DOM panel (and DOM side panel) so far */
+.panelNode-dom .memberRowHeader,
+.panelNode-domSide .memberRowHeader {
+    display: block;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+.panelNode-dom .memberRow:hover {
+    background-color: #EFEFEF;
+}
+
+.panelNode-dom .memberRow td {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.userLabel,
+.userClassLabel,
+.userFunctionLabel {
+    font-weight: bold;
+}
+
+.userLabel {
+    color: #000000;
+}
+
+.userClassLabel {
+    color: #E90000;
+}
+
+.userFunctionLabel {
+    color: #025E2A;
+}
+
+.domLabel {
+    color: #000000;
+}
+
+.domClassLabel {
+    color: #E90000;
+}
+
+.domFunctionLabel {
+    color: #025E2A;
+}
+
+.ordinalLabel {
+    color: SlateBlue;
+    font-weight: bold;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.scopesRow {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    color: #666666;
+}
+
+.scopesRow td {
+    border-top: 1px solid #BEBEBE;
+}
+
+.scopesLabel {
+    background-color:  LightYellow;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchEditCell {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+    line-height: 14px;
+    cursor: text;
+}
+
+.editor-watchNewRow,
+.editor-memberRow {
+    font-family: monospace !important;
+}
+
+.editor-memberRow {
+    padding: 1px 0 !important;
+}
+
+.editor-watchRow {
+    padding-bottom: 0 !important;
+}
+
+.watchRow > .memberLabelCell {
+    font-family: monospace;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.watchRow > .memberLabelCell > .memberLabel {
+    background-color: transparent;
+}
+
+.watchRow > .memberValueCell {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.watchRow > .memberLabelCell,
+.watchRow > .memberValueCell {
+    background-color: #F5F5F5;
+    border-bottom: 1px solid #BEBEBE;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchToolbox {
+    z-index: 2147483647;
+    position: absolute;
+    right: 0;
+    padding: 1px 2px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.domTable .objectBox-errorMessage {
+    padding: 0 0 0 18px;
+    background: url(chrome://firebug/skin/errorSmall.svg) no-repeat 0 0;
+    color: red;
+}
+
+.domTable .objectBox-errorMessage .errorTitle {
+    display: inline;
+}

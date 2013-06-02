@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 5416: Auto-completion for Command Line API</title>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+            var copy; // shadow the command line method
+            var copx;
+        </script>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5416">Issue 5416</a>: Auto-completion for Command Line API</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ul>
+                    <li>Open Firebug and enable the Console panel.</li>
+                    <li>Verify the following completions by typing the prefix and pressing <span class="key">TAB</span>:</li>
+                    <ul>
+                        <li>"dirx" <span class="ok">&rArr; "dirxml"</span></li>
+                        <li>"if (false)dirx" <span class="ok">&rArr; "if (false)dirxml"</span></li>
+                        <li>"dirxml.to" <span class="ok">&rArr; "dirxml.toString"</span></li>
+                        <li>"copy" <span class="ok">&rArr; "copy"</span></li>
+                        <li>"window.copy" <span class="ok">&rArr; "window.copy"</span></li>
+                        <li>"window.dirx" <span class="ok">&rArr; (no completion)</span></li>
+                        <li>"traceA" <span class="ok">&rArr; (no completion)</span></li>
+                    </ul>
+                    <li>Verify that "cop" has a completion box consistent of "copx" and "copy",
+                    both regular properties, and that "und" has one consistent of "undebug" and
+                    "undefined" (the former an API completion, with italic style).</li>
+                </ul>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>Members of the Command Line API should show up in completions,
+                    in italic font style</li>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
+

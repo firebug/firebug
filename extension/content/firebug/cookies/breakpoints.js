@@ -140,7 +140,7 @@ var Breakpoints =
     updateBreakpoint: function(context, cookie)
     {
         // Make sure a breakpoint is displayed.
-        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie)
+        var bp = context.cookies.breakpoints.findBreakpoint(cookie.cookie);
         if (!bp)
             return;
 
@@ -178,8 +178,8 @@ var Breakpoints =
         var panel = context.getPanel(panelName);
         panel.selectedSourceBox = cookie.row;
         Firebug.Editor.startEditing(cookie.row, condition);
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Cookie Breakpoints
@@ -293,7 +293,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
 Breakpoints.ConditionEditor = function(doc)
 {
     Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
-}
+};
 
 Breakpoints.ConditionEditor.prototype = Domplate.domplate(Firebug.Breakpoint.ConditionEditor.prototype,
 {
@@ -346,14 +346,16 @@ Breakpoints.Breakpoint.prototype =
             // Firefox 3.5 and breakpoints since Firebug 1.5, which supports min Fx 3.5
             // So, all is good.
             var expr = "(function (){var scope = " + JSON.stringify(scope) +
-                "; with (scope) { return " + this.condition + ";}})();"
+                "; with (scope) { return " + this.condition + ";}})();";
 
             // Evaluate condition using Firebug's command line.
-            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+            Firebug.CommandLine.evaluate(expr, context, null, context.window,
                 this.onEvaluateSucceeds, this.onEvaluateFails);
 
             if (FBTrace.DBG_COOKIES)
-                FBTrace.sysout("cookies.evaluateCondition; rc " + rc, {expr: expr, scope: scope});
+            {
+                FBTrace.sysout("cookies.evaluateCondition", {expr: expr, scope: scope});
+            }
 
             return !!context.breakingCause;
         }
@@ -392,7 +394,7 @@ Breakpoints.Breakpoint.prototype =
             prevValue: this.condition, newValue:result
         };
     }
-}
+};
 
 // ********************************************************************************************* //
 // Registration

@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -16,8 +17,10 @@ define([
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
     Wrapper, Xpcom) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -25,6 +28,7 @@ function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Opti
 var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
+var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -54,6 +58,19 @@ Firebug.ConsolePanel = function () {};
 
 Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
+    template: domplate(
+    {
+        logRowTag:
+            DIV({"class": "$className", role: "listitem"},
+                DIV(
+                    DIV({"class": "logContent"}),
+                    DIV({"class": "logCounter"},
+                        SPAN({"class": "logCounterValue"})
+                    )
+                )
+            )
+    }),
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
@@ -78,12 +95,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
-        {
             this.insertLogLimit(this.context);
-
-            if (this.context.consoleReloadWarning)  // we have not yet injected the console
-                this.insertReloadWarning();
-        }
     },
 
     destroy: function(state)
@@ -258,8 +270,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 "console.option.tip.Show_System_Errors"),
             Menu.optionMenu("ShowChromeMessages", "showChromeMessages",
                 "console.option.tip.Show_System_Messages"),
-            Menu.optionMenu("ShowExternalErrors", "showExternalErrors",
-                "console.option.tip.Show_External_Errors"),
             Menu.optionMenu("ShowNetworkErrors", "showNetworkErrors",
                 "console.option.tip.Show_Network_Errors"),
             this.getShowStackTraceMenuItem(),
@@ -346,14 +356,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         function findRow(node) { return Dom.getAncestorByClass(node, "logRow"); }
         var search = new Search.TextSearch(this.panelNode, findRow);
 
-        var logRow = search.find(text);
+        var logRow = search.find(text, false, Firebug.Search.isCaseSensitive(text));
         if (!logRow)
         {
             Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound", [this, text, []]);
             return false;
         }
 
-        for (; logRow; logRow = search.findNext())
+        for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
+            Firebug.Search.isCaseSensitive(text)))
         {
             Css.setClass(logRow, "matched");
             this.matchSet.push(logRow);
@@ -372,24 +383,96 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getMessageId: function(object, rep, sourceLink)
+    {
+        // Firebug internal message objects could provide their own custom ID
+        if (object instanceof Object && typeof(object.getId) == "function")
+            return object.getId();
+
+        // The rep for the object could provide its own custom ID
+        if (rep instanceof Object && typeof(rep.getId) == "function")
+            return rep.getId();
+
+        // object may not be an object
+        if (typeof object != "object")
+            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+
+        // object may be NaN
+        if (object !== object)
+            return "NotANumber";
+
+        // Use all direct properties of the object
+        if (object && (typeof object === "object" || typeof object === "function"))
+        {
+            var id = Obj.getObjHash(object);
+            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+        }
+
+        return Obj.getUniqueId().toString();
+    },
+
+    increaseRowCount: function(row)
+    {
+        var counter = row.getElementsByClassName("logCounter").item(0);
+        if (!counter)
+            return;
+        var value = counter.getElementsByClassName("logCounterValue");
+        if (!value)
+            return;
+
+        value = value.item(0);
+
+        var count = parseInt(value.textContent);
+        if (isNaN(count))
+            count = 1;
+
+        count++;
+        counter.setAttribute("count", count);
+        value.textContent = count;
+    },
+
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
+        var row;
         var container = this.getTopContainer();
-
         if (noRow)
         {
             appender.apply(this, [objects]);
         }
         else
         {
-            var row = this.createRow("logRow", className);
+            var msgId = this.getMessageId(objects, rep, sourceLink);
 
-            appender.apply(this, [objects, row, rep]);
+            if (msgId && msgId == this.lastMsgId)
+            {
+                this.increaseRowCount(container.lastChild);
 
-            if (sourceLink)
-                FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
+                row = container.lastChild;
+            }
+            else
+            {
+                row = this.createRow("logRow", className);
+                row.msgId = msgId;
+                var logContent = row.getElementsByClassName("logContent").item(0);
+                appender.apply(this, [objects, logContent, rep]);
 
-            container.appendChild(row);
+                // If sourceLink is not provided and the object is an instance of Error
+                // convert it into ErrorMessageObj instance, which implements getSourceLink
+                // method.
+                // xxxHonza: is there a better place where to make this kind of conversion?
+                if (!sourceLink && (objects instanceof Error))
+                    objects = FirebugReps.Except.getErrorMessage(objects);
+
+                if (!sourceLink && objects && objects.getSourceLink)
+                    sourceLink = objects.getSourceLink();
+
+                if (sourceLink)
+                    FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
+
+                container.appendChild(row);
+            }
+
+            this.lastMsgId = msgId;
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -418,6 +501,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Don't forget to clear opened groups, if any.
             this.groups = null;
+
+            this.lastMsgId = null;
         }
     },
 
@@ -441,22 +526,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var container = this.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
-    },
-
-    insertReloadWarning: function()
-    {
-        // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(this.appendObject, Locale.$STR(
-            "message.Reload to activate window console"), "info");
-    },
-
-    clearReloadWarning: function()
-    {
-        if (this.warningRow && this.warningRow.parentNode)
-        {
-            this.warningRow.parentNode.removeChild(this.warningRow);
-            delete this.warningRow;
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -493,7 +562,22 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // are dynamically consumed during the rendering process.
         // This allows to derive new templates from an existing ones, without breaking
         // the default subject set within domplate() function.
-        return rep.tag.append({object: object}, row, rep);
+        try
+        {
+            // XXX Hack until we get IF support in domplate (or bug 116083 gets fixed).
+            var tag = rep.tag;
+            if (rep === FirebugReps.Text)
+                tag = rep.getWhitespaceCorrectedTag(object);
+            return tag.append({object: object}, row, rep);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
+                FBTrace.sysout("consolePanel.appendObject; rep " + rep.className, rep);
+            }
+        }
     },
 
     appendFormatted: function(objects, row, rep)
@@ -519,6 +603,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var node = row.ownerDocument.createTextNode(text);
             row.appendChild(nodeSpan);
             nodeSpan.appendChild(node);
+        }
+
+        function addStyle(node, css)
+        {
+            var dummyEl = node.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            dummyEl.setAttribute("style", css);
+            node.setAttribute("style", "");
+            for (var i = 0; i < dummyEl.style.length; i++)
+            {
+                var prop = dummyEl.style[i];
+                if (reAllowedCss.test(prop))
+                    node.style.setProperty(prop, dummyEl.style.getPropertyValue(prop));
+            }
         }
 
         if (!objects || !objects.length)
@@ -579,22 +676,32 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex++];
+            	var object = objects[objIndex];
                 if (part.type == "%c")
+                {
                     lastStyle = object.toString();
-                else if (typeof(object) != "undefined")
+                }
+                else if (objIndex < objects.length)
+                {
+                    if (part.type == "%f" && part.precision != -1)
+                        object = parseFloat(object).toFixed(part.precision);
                     node = this.appendObject(object, row, part.rep);
+                }
                 else
+                {
                     node = this.appendObject(part.type, row, FirebugReps.Text);
+                }
+                objIndex++;
             }
             else
             {
-                node = FirebugReps.Text.tag.append({object: part}, row);
+                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
+                node = tag.append({object: part}, row);
             }
 
             // Apply custom style if available.
             if (lastStyle && node)
-                node.setAttribute("style", lastStyle);
+                addStyle(node, lastStyle);
 
             node = null;
         }
@@ -606,7 +713,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
-            else 
+            else
                 this.appendObject(object, row);
         }
     },
@@ -635,12 +742,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        Events.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        Events.dispatch(this.fbListeners, "onLogRowCreated", [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-        groupBody.setAttribute('role', 'group');
+        groupBody.setAttribute("role", "group");
         this.groups.push(groupBody);
 
         // Expand/collapse logic.
@@ -652,12 +759,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 if (Css.hasClass(groupRow, "opened"))
                 {
                     Css.removeClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'false');
+                    event.target.setAttribute("aria-expanded", "false");
                 }
                 else
                 {
                     Css.setClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'true');
+                    event.target.setAttribute("aria-expanded", "true");
                 }
             }
         }, false);
@@ -675,8 +782,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     createRow: function(rowName, className)
     {
         var elt = this.document.createElement("div");
-        elt.className = rowName + (className ? " " + rowName + "-" + className : "");
-        return elt;
+        var row = this.template.logRowTag.append({className: rowName +
+            (className ? " " + rowName + "-" + className : "")}, elt);
+        return row;
     },
 
     getTopContainer: function()
@@ -785,18 +893,19 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /((^%|(?=.)%)(\d+)?(\.)([a-zA-Z]))|((^%|(?=.)%)([a-zA-Z]))/;
+    var reg = /(%{1,2})(\.\d+)?([a-zA-Z])/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
-        if (m[0].substr(0, 2) == "%%")
+        // If the percentage sign is escaped, then just output it
+        if (m[1] == "%%")
         {
-            parts.push(format.substr(0, m.index));
-            parts.push(m[0].substr(1));
+            parts.push(format.substr(0, m.index) + m[0].substr(1));
         }
+        // A pattern was found, so it needs to be interpreted
         else
         {
-            var type = m[8] ? m[8] : m[5];
-            var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
+            var type = m[3];
+            var precision = m[2] ? parseInt(m[2].substr(1)) : -1;
 
             var rep = null;
             switch (type)
@@ -817,11 +926,11 @@ function parseFormat(format)
                     break;
             }
 
-            parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
-            parts.push({rep: rep, precision: precision, type: ("%" + type)});
+            parts.push(format.substr(0, m.index));
+            parts.push({rep: rep, precision: precision, type: "%" + type});
         }
 
-        format = format.substr(m.index+m[0].length);
+        format = format.substr(m.index + m[0].length);
     }
 
     parts.push(format);
@@ -836,4 +945,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-});
+}});

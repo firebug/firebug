@@ -26,13 +26,19 @@ Menu.createMenu = function(popup, item)
     }
 
     var menu = popup.ownerDocument.createElement("menu");
+    popup.appendChild(menu);
 
     Menu.setItemIntoElement(menu, item);
 
-    var menuPopup = popup.ownerDocument.createElement("menupopup");
+    this.createMenuPopup(menu, item);
 
-    popup.appendChild(menu);
-    menu.appendChild(menuPopup);
+    return menu;
+};
+
+Menu.createMenuPopup = function(parent, item)
+{
+    var menuPopup = parent.ownerDocument.createElement("menupopup");
+    parent.appendChild(menuPopup);
 
     if (item.items)
     {
@@ -41,7 +47,7 @@ Menu.createMenu = function(popup, item)
     }
 
     return menuPopup;
-};
+}
 
 // Menu.createMenuItems(popup, items[, before])
 Menu.createMenuItems = function(popup, items, before)
@@ -55,10 +61,12 @@ Menu.createMenuItem = function(popup, item, before)
     if ((typeof(item) == "string" && item == "-") || item.label == "-")
         return Menu.createMenuSeparator(popup, item, before);
 
-    if (item.items)
-        return Menu.createMenu(popup, item);
+    var menuitem;
 
-    var menuitem = popup.ownerDocument.createElement("menuitem");
+    if (item.items)
+        menuitem = Menu.createMenu(popup, item);
+    else
+        menuitem = popup.ownerDocument.createElement("menuitem");
 
     Menu.setItemIntoElement(menuitem, item);
 
@@ -86,9 +94,6 @@ Menu.setItemIntoElement = function(element, item)
     // This allows to quickly change more options.
     if (item.type == "checkbox" && !item.closemenu)
         element.setAttribute("closemenu", "none");
-
-    if (item.checked)
-        element.setAttribute("checked", "true");
 
     if (item.disabled)
         element.setAttribute("disabled", "true");
@@ -126,10 +131,18 @@ Menu.setItemIntoElement = function(element, item)
         element.setAttribute("name", item.name);
 
     if (item.items && (item.command || item.commandID))
+    {
         element.setAttribute("type", "splitmenu");
+        element.setAttribute("iconic", "true");
+    }
+
+    // xxxHonza: must be done after 'type' == 'splitmenu' otherwise the menu-item
+    // is not checked (the check icon is not displayed from some reason).
+    if (item.checked)
+        element.setAttribute("checked", "true");
 
     return element;
-}
+};
 
 Menu.createMenuHeader = function(popup, item)
 {
@@ -167,6 +180,7 @@ Menu.createMenuSeparator = function(popup, item, before)
         popup.insertBefore(menuItem, before);
     else
         popup.appendChild(menuItem);
+
     return menuItem;
 };
 
@@ -184,7 +198,7 @@ Menu.optionMenu = function(label, option, tooltiptext)
     return {
         label: label,
         type: "checkbox",
-        checked: Firebug[option],
+        checked: Options.get(option),
         option: option,
         tooltiptext: tooltiptext,
         command: function() {

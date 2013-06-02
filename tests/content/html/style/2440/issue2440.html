@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2440: Disappearing Styles When Edited</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link rel="stylesheet" type="text/css" href="issue2440.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="issue2440.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="issue2440.css" media="print" />
+        <link rel="alternative stylesheet" type="text/css" href="issue2440.css" media="screen" />
+        <link rel="alternative stylesheet" type="text/css" href="issue2440.css" media="print" />
+        <style type="text/css">
+            #element1 {
+                margin: 6px;
+                margin-right: 10px;
+                width: 100px;
+                height: 100px;
+                float: left;
+            }
+
+            iframe {
+                display: block;
+                width: 110px;
+                height: 110px;
+                border: 1px solid #000000;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2440">Issue 2440</a>: Disappearing Styles When Edited</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+                <iframe id="testFrame" src="issue2440-iframe.html"></iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the HTML panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#element</code>)</li>
+                    <li>
+                        Switch to the <em>Style</em> side panel<br/>
+                        <span class="ok">&rArr; There should be three entries with the selector <code>#element</code> containing a <code>background-image</code> property</span>
+                    </li>
+                    <li>
+                        Inspect the green <code>&lt;div&gt;</code> (<code>#frameElement</code>)<br/>
+                        <span class="ok">&rArr; There should be three entries with the selector <code>#frameElement</code> containing a <code>background-image</code> property</span>
+                    </li>
+                 </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        If a CSS file is included several times, the style definition must be shown
+                        several times inside the <em>Style</em> side panel and there must be a way
+                        to distinguish them.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

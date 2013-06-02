@@ -7,7 +7,6 @@ resource fbtest modules/
 
 overlay    chrome://browser/content/browser.xul        chrome://fbtest/content/overlayFirebug.xul
 overlay    chrome://firebug/content/firebugOverlay.xul        chrome://fbtest/content/overlayFirebug.xul
-overlay    chrome://fbtest/content/testConsole.xul     chrome://fbtest/content/haltOnFailedTest.xul
 
 component {F483275E-ECC6-4028-B375-92498C0AD76F} components/commandLine.js
 contract @mozilla.org/commandlinehandler/general-startup;1?type=FBTest {F483275E-ECC6-4028-B375-92498C0AD76F}

@@ -53,7 +53,8 @@ var CookieUtils =
             isSecure    : cookie.isSecure,
             expires     : cookie.expires,
             isHttpOnly  : cookie.isHttpOnly,
-            rawValue    : rawValue
+            rawValue    : rawValue,
+            rawCookie   : cookie,
         };
 
         return c;
@@ -76,32 +77,37 @@ var CookieUtils =
             {
                 var name = option[0].toLowerCase();
                 name = (name == "domain") ? "host" : name;
-                if (name == "httponly")
+                switch(name)
                 {
-                    cookie.isHttpOnly = true;
-                }
-                else if (name == "expires")
-                {
-                    var value = option[1];
-                    value = value.replace(/-/g, " ");
-                    cookie[name] = Date.parse(value) / 1000;
+                    case "httponly":
+                        cookie.isHttpOnly = true;
+                        break;
 
-                    // Log error if the date isn't correctly parsed.
-                    if (FBTrace.DBG_COOKIES)
-                    {
-                        var tempDate = new Date(cookie[name] * 1000);
-                        if (value != tempDate.toGMTString())
+                    case "secure":
+                        cookie.isSecure = true;
+                        break;
+
+                    case "expires":
+                        var value = option[1];
+                        value = value.replace(/-/g, " ");
+                        cookie[name] = Date.parse(value) / 1000;
+
+                        // Log error if the date isn't correctly parsed.
+                        if (FBTrace.DBG_COOKIES)
                         {
-                            FBTrace.sysout("cookies.parseFromString: ERROR, " + 
-                                "from: " + value + 
-                                ", to: " + tempDate.toGMTString() + 
-                                ", cookie: " + string);
+                            var tempDate = new Date(cookie[name] * 1000);
+                            if (value != tempDate.toGMTString())
+                            {
+                                FBTrace.sysout("cookies.parseFromString: ERROR, " + 
+                                    "from: " + value + 
+                                    ", to: " + tempDate.toGMTString() + 
+                                    ", cookie: " + string);
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    cookie[name] = option[1];
+                        break;
+
+                    default:
+                        cookie[name] = option[1];
                 }
             }
         }

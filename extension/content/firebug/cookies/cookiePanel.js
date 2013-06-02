@@ -349,11 +349,12 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         function findRow(node) { return Dom.getAncestorByClass(node, "cookieRow"); }
         var search = new Search.TextSearch(this.panelNode, findRow);
 
-        var cookieRow = search.find(text);
+        var caseSensitive = Firebug.Search.isCaseSensitive(text);
+        var cookieRow = search.find(text, false, caseSensitive);
         if (!cookieRow)
             return false;
 
-        for (; cookieRow; cookieRow = search.findNext())
+        for (; cookieRow; cookieRow = search.findNext(false, false, false, caseSensitive))
         {
             Css.setClass(cookieRow, "matched");
             this.matchSet.push(cookieRow);
@@ -488,7 +489,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var row = Dom.getAncestorByClass(target, "cookieRow");
         if (row && row.repObject)
         {
-            if (Dom.getAncestorByClass(target, "cookieSizeCol"))
+            if (Dom.getAncestorByClass(target, "cookieSizeCol") || 
+                Dom.getAncestorByClass(target, "cookieRawSizeCol"))
             {
                 var infoTipCookieId = "cookiesize-"+row.repObject.name;
                 if (infoTipCookieId == this.infoTipCookieId && row.repObject == this.infoTipCookie)

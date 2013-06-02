@@ -28,7 +28,7 @@ const Ci = Components.interfaces;
 
 const DirService = Xpcom.CCSV("@mozilla.org/file/directory_service;1",
     "nsIDirectoryServiceProvider");
-const NS_OS_TEMP_DIR = "TmpD"
+const NS_OS_TEMP_DIR = "TmpD";
 const nsIFile = Ci.nsIFile;
 const nsISafeOutputStream = Ci.nsISafeOutputStream;
 const nsIURI = Ci.nsIURI;
@@ -51,7 +51,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        Firebug.registerUIListener(this)
+        Firebug.registerUIListener(this);
         this.loadExternalEditors();
     },
 
@@ -210,8 +210,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
         if (object instanceof SourceLink.SourceLink)
         {
-            var sourceLink = object;
-            this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
+            this.appendContextMenuItem(popup, object.href, object.line);
         }
         else if (target.id == "fbLocationList")
         {
@@ -223,11 +222,6 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             var sourceLink = panel.getSourceLink(target, object);
             if (sourceLink)
                 this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
-        }
-        else if (Css.hasClass(target, "stackFrameLink"))
-        {
-            this.appendContextMenuItem(popup, target.innerHTML,
-                target.getAttribute("lineNumber"));
         }
     },
 
@@ -245,7 +239,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         var menupopup = doc.createElement("menupopup");
         menupopup.addEventListener("popupshowing", function(event)
         {
-            return Firebug.ExternalEditors.onEditorsShowing(this)
+            return Firebug.ExternalEditors.onEditorsShowing(this);
         });
 
         item.appendChild(menupopup);
@@ -254,6 +248,12 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     appendContextMenuItem: function(popup, url, line)
     {
+        if (FBTrace.DBG_EXTERNALEDITORS)
+        {
+            FBTrace.sysout("externalEditors.appendContextMenuItem; href: " + url +
+                ", line: " + line);
+        }
+
         var editor = this.getDefaultEditor();
         var doc = popup.ownerDocument;
         var item = doc.getElementById("menu_firebug_firebugOpenWithEditor");
@@ -331,7 +331,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 line: line,
                 editor: editor,
                 cmdline: editor.cmdline
-            }
+            };
 
             var self = this;
             this.getLocalFile(options, function(file)
@@ -350,13 +350,16 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 var args = self.parseCmdLine(options.cmdline, options);
 
                 if (FBTrace.DBG_EXTERNALEDITORS)
-                    FBTrace.sysout("externalEditors.open; launcProgram with args:", args);
+                    FBTrace.sysout("externalEditors.open; launch program with args:", args);
 
                 System.launchProgram(editor.executable, args);
             });
         }
         catch (exc)
         {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("externalEditors.open; EXCEPTION " + exc, exc);
+
             Debug.ERROR(exc);
         }
     },
@@ -387,8 +390,11 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 if (file)
                     callback(file);
 
-                // TODO: do we need to notifiy user if path was wrong?
-            }
+                // TODO: do we need to notify the user if path was wrong?
+                // xxxHonza: note that there can be already a notification
+                // coming from external editor (e.g. Notepad has its own
+                // error dialog informing about an invalid path).
+            };
 
             req.send(null);
             return;
@@ -479,7 +485,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                     return "";
                 return options[b];
             });
-        })
+        });
 
         return args;
     },
@@ -639,7 +645,7 @@ function lazyLoadUrlMappings(propName)
         if (!line[1] || !line[0])
             continue;
 
-        var start = line[0].trim()
+        var start = line[0].trim();
         var end = line[1].trim();
 
         if (start[0] == "/" && start[1] == "/")
@@ -653,9 +659,9 @@ function lazyLoadUrlMappings(propName)
         var t = {
             regexp: safeRegexp(start, i),
             filePath: end
-        }
+        };
         if (t.regexp && t.filePath)
-            this.pathTransformations.push(t)
+            this.pathTransformations.push(t);
     }
 
     if (!this.checkHeaderRe)
@@ -679,7 +685,7 @@ Firebug.ExternalEditors.saveUrlMappings = function()
 
     var file = userFile("urlMappings.txt");
     writeToFile(file, text.join(""));
-}
+};
 
 // file helpers
 function userFile(name)
@@ -687,7 +693,7 @@ function userFile(name)
     var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
     file.append("firebug");
     file.append(name);
-    return file
+    return file;
 }
 
 function readEntireFile(file)

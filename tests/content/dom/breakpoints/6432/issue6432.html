@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6432: Long string properties don't allow to set a breakpoint for them</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        var testString = "This is a very long string. This is a very long string. " +
+                         "This is a very long string. This is a very long string. " +
+                         "This is a very long string. This is a very long string. " +
+                         "This is a very long string. This is a very long string. " +
+                         "This is a very long string. This is a very long string. ";
+
+        function changePropertyValue()
+        {
+            testString = "Now it's not a long string anymore.";
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6432">Issue 6432</a>: Long string properties don't allow to set a breakpoint for them</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="changePropertyValue" onclick="changePropertyValue()">Change property value</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> panel</li>
+                    <li>Switch to the <em>DOM</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; <em>DOM</em> panel should list a <code>longString</code> property with a cropped string value.</span>
+                    </li>
+                    <li>
+                        Click the breakpoint column besides that property<br/>
+                        <span class="ok">&rArr; A breakpoint should be set for the property.</span>
+                    </li>
+                    <li>
+                        Click the <em>Change property value</em> button above<br/>
+                        <span class="ok">Firebug should automatically switch to the <em>Script</em> panel and the debugger should stop at line 16
+                        (<code>testString = &quot;Now it's not a long string anymore.&quot;;</code>)</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Setting breakpoints at long string properties should work.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

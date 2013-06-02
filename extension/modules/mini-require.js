@@ -13,8 +13,6 @@ var require, define;
 // Constants
 
 var Cu = Components.utils;
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://firebug/fbtrace.js");
@@ -47,7 +45,12 @@ var Loader =
 
     define: function(moduleId, deps, payload)
     {
-        payload.deps = deps;
+        if (!payload && FBTrace.DBG_ERRORS)
+            FBTrace.sysout("loader.define; No payload? " + moduleId, moduleId);
+
+        if (payload)
+            payload.deps = deps;
+
         this.payloads[moduleId] = payload;
     },
 
@@ -83,6 +86,9 @@ var Loader =
         catch (err)
         {
             Cu.reportError(err);
+
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("mini-require; lookup " + err, err);
         }
     },
 
@@ -95,7 +101,7 @@ var Loader =
         module = this.modules[moduleId] = {};
         module.scope = {
             define: this.lookup.bind(this)
-        }
+        };
 
         this.currentModule.push(module);
 
@@ -208,8 +214,8 @@ var Loader =
         for (var p in deps)
             desc += p + "\n";
         return desc;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 // Public API

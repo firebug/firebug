@@ -22,12 +22,14 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
+    "firebug/lib/options",
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper) {
+    TraceListener, TraceModule, Wrapper, Xpcom, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,6 +42,12 @@ var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
 
 // List of contexts with XHR spy attached.
 var contexts = [];
+
+var redirectionLimit = Options.getPref("network.http", "redirection-limit");
+
+var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var fx20 = versionChecker.compare(appInfo.version, "20") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -281,16 +289,17 @@ var SpyHttpObserver =
     {
         try
         {
-            if (topic != "http-on-modify-request" &&
-                topic != "http-on-examine-response" &&
-                topic != "http-on-examine-cached-response")
-            {
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.SpyHttpObserver.observe; ERROR Unknown topic: " + topic);
-                return;
-            }
+            var redirect = (request.redirectionLimit < redirectionLimit);
 
-            this.observeRequest(request, topic);
+            // There is no http-on-opening-request in case of redirect so, we need
+            // to use http-on-modify-request.
+            if ((topic == "http-on-modify-request" && redirect) ||
+                topic == "http-on-opening-request" ||
+                topic == "http-on-examine-response" ||
+                topic == "http-on-examine-cached-response")
+            {
+                this.observeRequest(request, topic);
+            }
         }
         catch (exc)
         {
@@ -309,6 +318,8 @@ var SpyHttpObserver =
         if (!win || !xhr)
             return;
 
+        var redirect = (request.redirectionLimit < redirectionLimit);
+
         for (var i=0; i<contexts.length; ++i)
         {
             var context = contexts[i];
@@ -318,7 +329,9 @@ var SpyHttpObserver =
                 var requestName = request.URI.asciiSpec;
                 var requestMethod = request.requestMethod;
 
-                if (topic == "http-on-modify-request")
+                if (topic == "http-on-modify-request" && redirect)
+                    this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
+                else if (topic == "http-on-opening-request")
                     this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
                 else if (topic == "http-on-examine-response")
                     this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
@@ -361,9 +374,7 @@ var SpyHttpObserver =
 
         // Notify registered listeners. The onStart event is fired once for entire XHR
         // (even if there is more redirects within the process).
-        var name = request.URI.asciiSpec;
-        var origName = request.originalURI.asciiSpec;
-        if (name == origName)
+        if (!isRedirect(request))
             Events.dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
 
         // Remember the start time et the end, so it's most accurate.
@@ -498,6 +509,8 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
             spy.endTime = time;
             spy.transactionClosed = true;
 
+            updateTime(spy);
+
             // This should be the proper time to detach the Spy object, but only
             // in the case when the XHR is already loaded. If the XHR is made as part of the
             // page load, it may happen that the event (readyState == 4) comes later
@@ -548,7 +561,15 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     {
         spy = context.spies[i];
         if (spy.request == request)
+        {
+            if (FBTrace.DBG_SPY)
+            {
+                var name = Url.getFileName(spy.request.URI.asciiSpec);
+                var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
+                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " + name + ", " + origName);
+            }
             return spy;
+        }
     }
 
     if (noCreate)
@@ -560,16 +581,21 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
 
-    // Attach spy only to the original request. Notice that there can be more network requests
-    // made by the same XHR if redirects are involved.
-    if (name == origName)
-        spy.attach();
-
     if (FBTrace.DBG_SPY)
     {
-        FBTrace.sysout("spy.getSpyForXHR; New spy object created (" +
-            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
+        var redirect = isRedirect(request);
+        FBTrace.sysout("spy.getSpyForXHR; NEW spy object (" +
+            (redirect ? "redirected XHR" : "new XHR") + ") for: " +
+            Url.getFileName(name) + ", " + Url.getFileName(origName));
     }
+
+    // Attach spy only to the original request. Notice that there can be more network requests
+    // made by the same XHR if redirects are involved.
+
+    // The Console panel should display XHR entry for evere redirect so we need to
+    // attach spy for each request (even redirects). See issue 4009
+    //if (name == origName)
+        spy.attach();
 
     return spy;
 }
@@ -603,6 +629,11 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     {
         var spy = this;
 
+        this.onReadyStateChange = function(event) { onHTTPSpyReadyStateChange(spy, event); };
+        this.onLoad = function() { onHTTPSpyLoad(spy); };
+        this.onError = function() { onHTTPSpyError(spy); };
+        this.onAbort = function() { onHTTPSpyAbort(spy); };
+
         this.onEventListener = function(event)
         {
             switch (event.type)
@@ -622,8 +653,20 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             }
         };
 
-        eventListenerService.addListenerForAllEvents(this.xhrRequest,
-            this.onEventListener, true, false, false);
+        if (typeof(eventListenerService.addListenerForAllEvents) == "function")
+        {
+            eventListenerService.addListenerForAllEvents(this.xhrRequest,
+                this.onEventListener, true, false, false);
+        }
+        else
+        {
+            this.onreadystatechange = this.xhrRequest.onreadystatechange;
+            this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+
+            this.xhrRequest.addEventListener("load", this.onLoad, false);
+            this.xhrRequest.addEventListener("error", this.onError, false);
+            this.xhrRequest.addEventListener("abort", this.onAbort, false);
+        }
 
         if (FBTrace.DBG_SPY)
             FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
@@ -649,13 +692,33 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             return;
 
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.detach; " + this.href);
+        {
+            FBTrace.sysout("spy.detach; " + Http.safeGetRequestName(this.request) + ", " +
+                Url.getFileName(this.href));
+        }
 
         // Remove itself from the list of active spies.
         Arr.remove(this.context.spies, this);
 
-        eventListenerService.removeListenerForAllEvents(this.xhrRequest,
-            this.onEventListener, true, false);
+        if (typeof(eventListenerService.addListenerForAllEvents) == "function")
+        {
+            eventListenerService.removeListenerForAllEvents(this.xhrRequest,
+                this.onEventListener, true, false);
+        }
+        else
+        {
+            if (this.onreadystatechange)
+                this.xhrRequest.onreadystatechange = this.onreadystatechange;
+
+            try { this.xhrRequest.removeEventListener("load", this.onLoad, false); } catch (e) {}
+            try { this.xhrRequest.removeEventListener("error", this.onError, false); } catch (e) {}
+            try { this.xhrRequest.removeEventListener("abort", this.onAbort, false); } catch (e) {}
+        }
+
+        this.onreadystatechange = null;
+        this.onLoad = null;
+        this.onError = null;
+        this.onAbort = null;
 
         this.onEventListener = null;
     },
@@ -687,15 +750,42 @@ function onHTTPSpyReadyStateChange(spy, event)
 {
     if (FBTrace.DBG_SPY)
     {
+        var name = Url.getFileName(spy.request.URI.asciiSpec);
+        var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
+
         FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
-            " (multipart: " + spy.xhrRequest.multipart + ")");
+            " (multipart: " + spy.xhrRequest.multipart + ") " + name + ", " + origName);
+    }
+
+    // Remember just in case spy is detached (readyState == 4).
+    var originalHandler = spy.onreadystatechange;
+
+    // ReadyStateChange event with readyState == 1 is fired when the page calls  the |open| method.
+    // This event is usually not cought since spy object is attached when HTTP-ON-OPENING-REQUEST
+    // http even is fired - which happens after |readyState == 1|
+    // This scenario happens if the xhr object is reused synchronously in page callback handler
+    // (onreadystatechange) for another request. In such case we need to quickly detach our
+    // Spy object. New one will be immediatelly created when HTTP-ON-OPENING-REQUEST is fired.
+    // See issue 5049
+    // This approach doesn't work in Firefox 19 (see issue 6304) so, let's enable it for 20+ only.
+    if (spy.xhrRequest.readyState == 1 && fx20)
+    {
+        if (FBTrace.DBG_SPY)
+        {
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
+                "reused, detach" + Http.safeGetRequestName(spy.request) + ", " +
+                Url.getFileName(spy.href));
+        }
+
+        spy.detach(false);
+        return;
     }
 
     // Force response text to be updated in the UI (in case the console entry
     // has been already expanded and the response tab selected).
     if (spy.logRow && spy.xhrRequest.readyState >= 3)
     {
-        var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+        var netInfoBox = getInfoBox(spy);
         if (netInfoBox)
         {
             netInfoBox.htmlPresented = false;
@@ -726,24 +816,73 @@ function onHTTPSpyReadyStateChange(spy, event)
 
         // Notify the Net panel about a request being loaded.
         // xxxHonza: I don't think this is necessary.
+        // stopFile this breaks layout of the net panel in case of redirects.
         var netProgress = spy.context.netProgress;
-        if (netProgress)
+        if (netProgress && !isRedirect(spy.request))
             netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText,
                 spy.responseText]);
 
         // Notify registered listeners about finish of the XHR.
         Events.dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
     }
+
+    // Pass the event to the original page handler.
+    if (typeof(eventListenerService.addListenerForAllEvents) == "undefined")
+        callPageHandler(spy, event, originalHandler);
+}
+
+function callPageHandler(spy, event, originalHandler)
+{
+    try
+    {
+        // Calling the page handler throwed an exception (see #502959)
+        // This should be fixed in Firefox 3.5
+        if (originalHandler && event)
+        {
+            if (originalHandler.handleEvent)
+                originalHandler.handleEvent(event);
+            else
+                originalHandler.call(spy.xhrRequest, event);
+        }
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
+
+        var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
+        if (xpcError)
+        {
+            // TODO attach trace
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
+
+            // Make sure the exception is displayed in both Firefox & Firebug console.
+            throw new Error(xpcError.message, xpcError.href, xpcError.lineNo);
+        }
+        else
+        {
+            throw exc;
+        }
+    }
 }
 
 function onHTTPSpyLoad(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href);
+    {
+        FBTrace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
+            Url.getFileName(spy.href) + ", state: " + spy.xhrRequest.readyState);
+    }
 
-    // Detach must be done in onLoad (not in onreadystatechange) otherwise
-    // onAbort would not be handled.
-    spy.detach(false);
+    // Detach must be done in onLoad (not in onreadystatechange) otherwise onAbort would
+    // not be handled. Note that onAbort, onError and onLoad events are fired after
+    // onreadystatechange and must also be handled.
+    // Issue 5049: only detach if XHR state == 4. It can happen that XHR object is being
+    // reused for another request and onLoad fires too soon. See also onHTTPSpyReadyStateChange
+    // for more details.
+    if (spy.xhrRequest.readyState == 4)
+        spy.detach(false);
 
     // If the spy is not loaded yet (and so, the response was not cached), do it now.
     // This can happen since synchronous XHRs don't fire onReadyStateChange event (issue 2868).
@@ -871,7 +1010,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             Css.toggleClass(logRow, "opened");
 
-            var spy = Dom.getChildByClass(logRow, "spyHead").repObject;
+            var spy = logRow.getElementsByClassName("spyHead")[0].repObject;
             var spyHeadTable = Dom.getAncestorByClass(target, "spyHeadTable");
 
             if (Css.hasClass(logRow, "opened"))
@@ -883,7 +1022,9 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             }
             else
             {
-                var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                // Notify all listeners about closing XHR entry and destroying the body.
+                // Any custom tabs should be removed now.
+                var netInfoBox = getInfoBox(spy);
                 Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody",
                     [netInfoBox, spy]);
 
@@ -928,6 +1069,13 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     {
         try
         {
+            if (!context.window)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("spy.resend; ERROR no context");
+                return;
+            }
+
             // xxxHonza: must be done through Console RDP
             var win = Wrapper.unwrapObject(context.window);
             var request = new win.XMLHttpRequest();
@@ -1020,7 +1168,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         return items;
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 
@@ -1039,11 +1188,11 @@ Firebug.XHRSpyListener =
 
 function updateTime(spy)
 {
-    if(spy.logRow)
+    if (spy.logRow)
     {
         var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
-        if (spy.responseTime)
-            timeBox.textContent = " " + Str.formatTime(spy.responseTime);
+        if (spy.sendTime && spy.endTime)
+            timeBox.textContent = " " + Str.formatTime(spy.endTime - spy.sendTime);
     }
 }
 
@@ -1094,7 +1243,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
         spy.responseHeaders = getResponseHeaders(spy);
 
     var template = Firebug.NetMonitor.NetInfoBody;
-    var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+    var netInfoBox = getInfoBox(spy);
 
     var defaultTab;
 
@@ -1113,7 +1262,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
 
     if (!netInfoBox)
     {
-        var head = Dom.getChildByClass(spy.logRow, "spyHead");
+        var head = spy.logRow.getElementsByClassName("spyHead")[0];
         netInfoBox = template.tag.append({"file": spy}, head);
 
         // Notify listeners so, custom info tabs can be appended
@@ -1128,6 +1277,16 @@ function updateHttpSpyInfo(spy, updateInfoBody)
     {
         template.updateInfo(netInfoBox, spy, spy.context);
     }
+}
+
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
+}
+
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
 }
 
 // ********************************************************************************************* //
@@ -1179,6 +1338,21 @@ function getResponseHeaders(spy)
     }
 
     return headers;
+}
+
+function isRedirect(request)
+{
+    try
+    {
+        var name = request.URI.asciiSpec;
+        var origName = request.originalURI.asciiSpec;
+        return (name != origName);
+    }
+    catch (e)
+    {
+    }
+
+    return false;
 }
 
 // ********************************************************************************************* //

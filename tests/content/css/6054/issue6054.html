@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6054: Colors are always copied in rgb() format</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6054">Issue 6054</a>: Colors are always copied in rgb() format</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Change the color display to <em>Colors As Hex</em></li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#element</code>) above</li>
+                    <li>Right-click the <code>#element</code> rule and choose <em>Copy Declaration</em></li>
+                    <li>Paste the copied string to a text editor</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><code>#element {
+    width: 100px;
+    height: 100px;
+    background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+}</code></li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

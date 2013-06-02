@@ -15,8 +15,6 @@ function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 var MODE_JAVASCRIPT = "js";
@@ -269,9 +267,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         if (typeof(SourceEditor) != "undefined")
         {
-            var doc = this.editor._view._frame.contentDocument;
-
             // See issue 5488
+            // var doc = this.editor._view._frame.contentDocument;
+
             //doc.body.style.fontSizeAdjust = adjust;
         }
         else
@@ -390,7 +388,7 @@ TextEditor.prototype =
 
         return this.textBox.value.substring(start, end);
     } 
-}
+};
 
 // ********************************************************************************************* //
 // Registration

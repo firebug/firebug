@@ -9,8 +9,9 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xpcom",
     "firebug/lib/events",
+    "firebug/lib/object",
 ],
-function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events) {
+function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events, Obj) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -25,8 +26,10 @@ var CMD_TYPE_PROPERTY = 3;
 
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
+var CLOSURE_INSPECTOR_HELP_URL = "https://getfirebug.com/wiki/index.php/Closure_Inspector";
+
 // ********************************************************************************************* //
-// Domplates
+// Command Line Help
 
 var HelpCaption = domplate(
 {
@@ -128,11 +131,66 @@ var HelpEntry = domplate(
 });
 
 // ********************************************************************************************* //
+// Command Line Tips
+
+var TipsCaption = domplate(
+{
+    tag:
+        SPAN({"class": "helpTitle"},
+            SPAN({"class": "helpCaption"},
+                Locale.$STR("console.cmd.tip_title")
+            ),
+            SPAN({"class": "helpCaptionDesc"},
+                Locale.$STR("console.cmd.tip_title_desc")
+            )
+        )
+});
+
+var TipsList = domplate(
+{
+    tag:
+        DIV({"class": "tipsContent"},
+            UL({"class": "tipsList"})
+        )
+});
+
+var Tip = domplate(
+{
+    loop:
+        FOR("tip", "$tips",
+            TAG("$tag", "$tip")
+        ),
+
+    tag:
+        LI({"class": "tip"},
+            SPAN({"class": "text"}, "$tip|getText"),
+            SPAN("&nbsp"),
+            SPAN({"class": "example"},"$tip|getExample")
+        ),
+
+    getText: function(object)
+    {
+        return object.nol10n ? object.text : Locale.$STR(object.text);
+    },
+
+    getExample: function(object)
+    {
+        return object.example;
+    }
+});
+
+// ********************************************************************************************* //
 // Help Object
 
 var CommandLineHelp = domplate(
 {
     render: function(context)
+    {
+        this.renderHelp(context);
+        this.renderTips(context);
+    },
+
+    renderHelp: function(context)
     {
         var row = Firebug.Console.openGroup("help", context, "help",
             HelpCaption, true, null, true);
@@ -144,13 +202,20 @@ var CommandLineHelp = domplate(
 
         var commands = [];
 
+        var ignore = ["traceCalls", "untraceCalls", "traceAll", "untraceAll"];
         for (var i=0; i<CommandLineExposed.commands.length; i++)
         {
+            var cmd = CommandLineExposed.commands[i];
+
+            // See Issue 5221
+            if (ignore.indexOf(cmd) >= 0)
+                continue;
+
             commands.push({
-                name: CommandLineExposed.commands[i],
-                desc: "console.cmd.help." + CommandLineExposed.commands[i],
+                name: cmd,
+                desc: "console.cmd.help." + cmd,
                 type: CMD_TYPE_COMMAND,
-            })
+            });
         }
 
         for (var i=0; i<CommandLineExposed.consoleShortcuts.length; i++)
@@ -159,7 +224,7 @@ var CommandLineHelp = domplate(
                 name: CommandLineExposed.consoleShortcuts[i],
                 desc: "console.cmd.help." + CommandLineExposed.consoleShortcuts[i],
                 type: CMD_TYPE_SHORTCUT,
-            })
+            });
         }
 
         for (var i=0; i<CommandLineExposed.properties.length; i++)
@@ -168,7 +233,7 @@ var CommandLineHelp = domplate(
                 name: CommandLineExposed.properties[i],
                 desc: "console.cmd.help." + CommandLineExposed.properties[i],
                 type: CMD_TYPE_PROPERTY,
-            })
+            });
         }
 
         for (var name in CommandLineExposed.userCommands)
@@ -181,7 +246,7 @@ var CommandLineHelp = domplate(
                 noUserHelpUrl: !config.helpUrl,
                 helpUrl: config.helpUrl ? config.helpUrl: null,
                 type: config.getter ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
-            })
+            });
         }
 
         // Sort commands
@@ -189,8 +254,39 @@ var CommandLineHelp = domplate(
 
         // Generate table
         HelpEntry.tag.insertRows({commands: commands}, tBody);
+    },
 
-        return row;
+    renderTips: function(context)
+    {
+        var row = Firebug.Console.openGroup("help", context, "help",
+            TipsCaption, true, null, true);
+        Firebug.Console.closeGroup(context, true);
+
+        var logGroupBody = row.lastChild;
+        var table = TipsList.tag.replace({}, logGroupBody);
+        var list = table.lastChild;
+
+        // #1) Render basic command line syntaxt tip
+        var tip = {
+            example: "1 + 1",
+            text: "console.cmd.tip.javascript"
+        };
+        Tip.tag.append({tip: tip}, list);
+
+        // #2) Render closure syntax tip
+        tip = {
+            example: "myObject.%closureVarName",
+            text: "console.cmd.tip.closures"
+        };
+
+        function onClickLink()
+        {
+            Win.openNewTab(CLOSURE_INSPECTOR_HELP_URL);
+        }
+
+        var node = Tip.tag.append({tip: tip}, list);
+        var textNode = node.getElementsByClassName("text").item(0);
+        FirebugReps.Description.render(Locale.$STR(tip.text), textNode, onClickLink);
     }
 });
 
@@ -200,14 +296,13 @@ var CommandLineHelp = domplate(
 function onExecuteCommand(context)
 {
     CommandLineHelp.render(context);
-    return Firebug.Console.getDefaultReturnValue(context.window);
+    return Firebug.Console.getDefaultReturnValue();
 }
 
 // ********************************************************************************************* //
 // Registration
 
 Firebug.registerCommand("help", {
-    getter: true,
     helpUrl: "http://getfirebug.com/wiki/index.php/help",
     handler: onExecuteCommand.bind(this),
     description: Locale.$STR("console.cmd.help.help")

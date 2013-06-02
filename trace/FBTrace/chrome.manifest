@@ -1,22 +1,16 @@
 content fbtrace  chrome/content/
-content fbtrace-firebug  chrome/firebug/content/
 
-overlay chrome://browser/content/browser.xul        chrome://fbtrace/content/traceFirebugOverlay.xul
-overlay chrome://firebug/content/firebugOverlay.xul         chrome://fbtrace/content/traceFirebugOverlay.xul
+overlay chrome://browser/content/browser.xul            chrome://fbtrace/content/traceFirebugOverlay.xul
+overlay chrome://firebug/content/firebugOverlay.xul     chrome://fbtrace/content/traceFirebugOverlay.xul
 
 resource fbtrace modules/
-resource fbtrace-firebug chrome/firebug/modules/
-resource fbtrace_rjs chrome/
-
-resource moduleLoader chrome/firebug/modules/
 
 skin    fbtrace classic/1.0 chrome/skin/classic/
 skin    fbtrace-os classic/1.0 chrome/skin/classic/win/
 skin    fbtrace-os classic/1.0 chrome/skin/classic/mac/ os=Darwin
-skin    fbtrace-firebug classic/1.0 chrome/firebug/skin/classic/
 
-locale  fbtrace en-US       chrome/locale/en-US/
-locale  fbtrace-firebug en-US       chrome/firebug/locale/en-US/
+locale  fbtrace en-US    chrome/locale/en-US/
+locale  fbtrace de       chrome/locale/de/
 
 component {FBDD01C3-6D09-494c-B086-C5D56F346658} components/commandLine.js
 contract @mozilla.org/commandlinehandler/general-startup;1?type=FBTrace {FBDD01C3-6D09-494c-B086-C5D56F346658}

@@ -40,7 +40,7 @@ var FirebugLoader =
                 return;
 
             e.firebugFrameLoad(win.Firebug);
-        })
+        });
     },
 
     unregisterBootstrapScope: function(e)
@@ -54,7 +54,7 @@ var FirebugLoader =
             this.forEachWindow(function(win)
             {
                 e.topWindowUnload(win);
-            })
+            });
         }
 
         if (e.firebugFrameUnload)
@@ -62,7 +62,7 @@ var FirebugLoader =
             this.forEachWindow(function(win)
             {
                 e.firebugFrameUnload(win.Firebug);
-            })
+            });
         }
     },
 
@@ -74,8 +74,9 @@ var FirebugLoader =
         var XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});
         var bootstrapScopes = XPIProviderBP.XPIProvider.bootstrapScopes;
 
-        for each(var scope in bootstrapScopes)
+        for (var id in bootstrapScopes)
         {
+            var scope = bootstrapScopes[id];
             try
             {
                 if (scope.firebugStartup)
@@ -93,14 +94,14 @@ var FirebugLoader =
         this.forEachWindow(function(win)
         {
             FirebugLoader.unloadFromWindow(win);
-        })
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     unloadFromWindow: function(win)
     {
-        var fbug = win.Firebug
+        var fbug = win.Firebug;
         this.dispatchToScopes("topWindowUnload", [win]);
 
         if (fbug.shutdown)
@@ -117,9 +118,12 @@ var FirebugLoader =
         [getRoots(win.document), getRoots(win.gNavToolbox.palette),
             fbug.browserOverlay.nodesToRemove].forEach(function(list)
         {
-            for each(var el in list)
+            for (var i=0; i<list.length; i++)
+            {
+                var el = list[i];
                 if (el && el.parentNode)
                     el.parentNode.removeChild(el);
+            }
         });
 
         win.Firebug.browserOverlay.unloadContextMenuOverlay(win);
@@ -166,8 +170,9 @@ var FirebugLoader =
 
     dispatchToScopes: function(name, arguments)
     {
-        for each (var e in this.bootstrapScopes)
+        for (var id in this.bootstrapScopes)
         {
+            var e = this.bootstrapScopes[id];
             try
             {
                 if (name in e)
@@ -197,6 +202,6 @@ var FirebugLoader =
             }
         }
     }
-}
+};
 
 // ********************************************************************************************* //

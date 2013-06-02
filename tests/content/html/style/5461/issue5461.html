@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5461: When copying selected parts from Style side panel don't copy source link or inherited styles header</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5461">Issue 5461</a>: When copying selected parts from Style side panel don't copy source link or inherited styles header</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> (<code>#element</code>) above</li>
+                    <li>Mark everything inside the <em>Style</em> side panel via <code class="key">Ctrl/&#8984;+A</code></li>
+                    <li>Copy the selection to the clipboard via Ctrl/&#8984;+C</li>
+                    <li>Paste the content of the clipboard to a text editor</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The copied contents shouldn't contain source links or inherited styles headers</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

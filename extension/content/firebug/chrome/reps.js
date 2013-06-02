@@ -23,13 +23,13 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/dom/toggleBranch",
-    "firebug/console/eventMonitor",
+    "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, Menu, CompilationUnit) {
+    ClosureInspector, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -56,12 +56,14 @@ catch (err)
 // ********************************************************************************************* //
 // Common Tags
 
-// use pre here to keep line breaks while copying multiline strings 
 var OBJECTBOX = FirebugReps.OBJECTBOX =
-    PRE({"class": "objectBox inline objectBox-$className", role : "presentation"});
+    SPAN({"class": "objectBox objectBox-$className", role: "presentation"});
+
+var PREOBJECTBOX =
+    PRE({"class": "objectBox inline objectBox-$className", role: "presentation"});
 
 var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
-    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
+    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role: "listitem"});
 
 var OBJECTLINK = FirebugReps.OBJECTLINK =
     A({
@@ -127,7 +129,8 @@ FirebugReps.Nada = domplate(Firebug.Rep,
 
 FirebugReps.Number = domplate(Firebug.Rep,
 {
-    tag: OBJECTBOX("$object"),
+    tag: OBJECTBOX({"_repObject": "$object"}, "$object"),
+    tinyTag: OBJECTBOX("$object"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,11 +144,35 @@ FirebugReps.Number = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
+// To support copying strings with multiple spaces, tabs, newlines etc. correctly
+// we are unfortunately required by Firefox to use a <pre> tag (bug 116083).
+// Don't do that with all OBJECTBOX's though - it inserts newlines *everywhere*.
+// (See issues 3816, 6130.)
+// XXX: This would look much nicer with support for IF in domplate.
+var reSpecialWhitespace = /  |[\t\n]/;
+FirebugReps.SpecialWhitespaceString = domplate(Firebug.Rep,
+{
+    tag: PREOBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
+
+    shortTag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object|cropMultipleLines&quot;"),
+    tinyTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "string",
+
+    supportsObject: function(object, type)
+    {
+        return (type == "string" && reSpecialWhitespace.test(object));
+    }
+});
+
 FirebugReps.String = domplate(Firebug.Rep,
 {
-    tag: OBJECTBOX("&quot;$object&quot;"),
+    tag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
 
-    shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
+    shortTag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object|cropMultipleLines&quot;"),
+    tinyTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -191,7 +218,15 @@ FirebugReps.Text = domplate(Firebug.Rep,
 {
     tag: OBJECTBOX("$object"),
 
+    // Refer to SpecialWhitespaceString above.
+    specialWhitespaceTag: PREOBJECTBOX("$object"),
+
     shortTag: OBJECTBOX("$object|cropMultipleLines"),
+
+    getWhitespaceCorrectedTag: function(str)
+    {
+        return reSpecialWhitespace.test(str) ? this.specialWhitespaceTag : this.tag;
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -209,7 +244,7 @@ FirebugReps.Caption = domplate(Firebug.Rep,
 
 FirebugReps.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({"class": "warning focusRow", role : 'listitem'}, "$object|STR")
+    tag: DIV({"class": "warning focusRow", role: "listitem"}, "$object|STR")
 });
 
 // ********************************************************************************************* //
@@ -444,7 +479,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                 if (filter(t, value))
                 {
                     var rep = Firebug.getRep(value);
-                    var tag = rep.shortTag || rep.tag;
+                    var tag = rep.tinyTag || rep.shortTag || rep.tag;
                     if ((t == "object" || t == "function") && value)
                     {
                         value = rep.getTitle(value);
@@ -490,7 +525,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 FirebugReps.ReferenceObj = function(target)
 {
     this.target = target;
-}
+};
 
 /**
  * Rep for cycle reference in an array.
@@ -524,48 +559,6 @@ FirebugReps.Reference = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
-// Array Helpers
-
-function mightBeArray(obj, win)
-{
-    try
-    {
-        if (!obj)
-            return false;
-        // do this first to avoid security 1000 errors
-        else if (obj instanceof Ci.nsIDOMHistory)
-            return false;
-
-        var view = Wrapper.getContentView(win || window);
-
-        // do this first to avoid security 1000 errors
-        if ("StorageList" in view && obj instanceof view.StorageList)
-            return false;
-        // do this first to avoid exceptions
-        else if (obj.toString() === "[xpconnect wrapped native prototype]")
-            return false;
-    }
-    catch (exc)
-    {
-        try
-        {
-            if (FBTrace.DBG_ERRORS)
-            {
-                // Something weird: without the try/catch, OOM, with no exception??
-                FBTrace.sysout("mightBeArray FAILS: " + exc, exc);
-                FBTrace.sysout("mightBeArray Fails on obj " + obj);
-            }
-        }
-        catch (exexc)
-        {
-            FBTrace.sysout("mightBeArray double ERROR " + exexc, exexc);
-        }
-    }
-
-    return true;
-}
-
-// ********************************************************************************************* //
 
 FirebugReps.ArrBase = domplate(FirebugReps.Obj,
 {
@@ -580,9 +573,9 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         return "[" + object.length + "]";
     },
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        return this.isArray(object, context ? context.window : null);
+        return this.isArray(object);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -719,7 +712,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         var limit = Options.get("multiHighlightLimit");
         if (!arr || (limit > 0 && arr.length > limit))
         {
-            if (Css.hasClass(target, "arrayLeftBracket ") ||
+            if (Css.hasClass(target, "arrayLeftBracket") ||
                 Css.hasClass(target, "arrayRightBracket"))
             {
                 var tooltip = Locale.$STRF("console.multiHighlightLimitExceeded", [limit]);
@@ -736,27 +729,10 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         Firebug.Inspector.highlightObject(arr, context);
     },
 
-    // http://code.google.com/p/fbug/issues/detail?id=874
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
-        {
-            if (!obj)
-                return false;
-            // do this first to avoid security 1000 errors
-            else if (obj instanceof Ci.nsIDOMHistory)
-                return false;
-            // do this first to avoid exceptions
-            else if (obj.toString && obj.toString() === "[xpconnect wrapped native prototype]")
-                return false;
-            else if (isFinite(obj.length) && typeof obj.splice === "function")
-                return true;
-            else if (Arr.isArray(obj))
-                return true;
-        }
-
         return false;
-    },
+    }
 });
 
 // ********************************************************************************************* //
@@ -790,15 +766,16 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
         ),
 
     // http://code.google.com/p/fbug/issues/detail?id=874
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
+        try
         {
-            if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
+            if (Arr.isArray(obj))
                 return true;
-            else if (Arr.isArray(obj))
+            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
                 return true;
         }
+        catch (exc) {}
         return false;
     }
 });
@@ -850,30 +827,19 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     getTitle: function(obj, context)
     {
-        var arr = Wrapper.unwrapObject(obj);
-        const re =/\[object ([^\]]*)/;
-        var label = Str.safeToString(arr);
+        if (Arr._isDOMTokenList(obj))
+            return "DOMTokenList";
+
+        const re = /\[object ([^\]]*)/;
+        var label = Object.prototype.toString.call(obj);
         var m = re.exec(label);
-        return m[1] || label;
+        return (m ? m[1] : label);
     },
 
-    isArray: function(obj, win)
+    isArray: function(obj)
     {
-        if (mightBeArray(obj, win))
-        {
-            var view = Wrapper.getContentView(win || window);
-            var arr = Wrapper.unwrapObject(obj);
-
-            if (isFinite(obj.length) && typeof obj.splice === "function" && obj.length)
-                return true;
-            else if (arr instanceof view.HTMLCollection)
-                return true;
-            else if (arr instanceof view.NodeList)
-                return true;
-        }
-
-        return false;
-    },
+        return Arr.isArrayLike(obj);
+    }
 });
 
 // ********************************************************************************************* //
@@ -929,7 +895,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     getRealObject: function(file, context)
     {
-        return null;
+        return file.request;
     }
 });
 
@@ -950,12 +916,12 @@ function instanceOf(object, Klass)
     return false;
 }
 
-
-
 // ********************************************************************************************* //
 
 FirebugReps.Element = domplate(Firebug.Rep,
 {
+    className: "element",
+
     tag:
         OBJECTLINK(
             "&lt;",
@@ -974,9 +940,98 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 SPAN({"class": "selectorTag"}, "$object|getSelectorTag"),
                 SPAN({"class": "selectorId"}, "$object|getSelectorId"),
                 SPAN({"class": "selectorClass"}, "$object|getSelectorClass"),
-                SPAN({"class": "selectorValue"}, "$object|getValue")
+                TAG("$object|getValueTag", {object: "$object"})
             )
          ),
+
+    // Generic template for various element values
+    valueTag:
+        SPAN({"class": "selectorValue"}, "$object|getValue"),
+
+    // Template for <input> element with a single value coming from attribute.
+    singleInputTag:
+        SPAN(
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.attribute_value") + " = "
+            ),
+            SPAN({"class": "attributeValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"})
+            )
+        ),
+
+    // Template for <input> element with two different values (attribute and property)
+    multipleInputTag:
+        SPAN(
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.property_value") + " = "
+            ),
+            SPAN({"class": "propertyValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromProperty"})
+            ),
+            SPAN("&nbsp;"),
+            SPAN({"class": "selectorValue"},
+                Locale.$STR("firebug.reps.element.attribute_value") + " = "
+            ),
+            SPAN({"class": "attributeValue inputValue"},
+                TAG(FirebugReps.String.tag, {object: "$object|getValueFromAttribute"})
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getValueTag: function(elt)
+    {
+        // Use proprietary template for <input> elements that can have two
+        // different values. One coming from attribute 'value' and one coming
+        // from property 'value'.
+        if (elt instanceof window.HTMLInputElement)
+        {
+            var attrValue = elt.getAttribute("value");
+            var propValue = elt.value;
+
+            if (attrValue != propValue)
+                return this.multipleInputTag;
+            else
+                return this.singleInputTag;
+        }
+
+        return this.valueTag;
+    },
+
+    getValueFromAttribute: function(elt)
+    {
+        var limit = Options.get("stringCropLength");
+        var value = elt.getAttribute("value");
+        return Str.cropString(value, limit);
+    },
+
+    getValueFromProperty: function(elt)
+    {
+        var limit = Options.get("stringCropLength");
+        return Str.cropString(elt.value, limit);
+    },
+
+    getValue: function(elt)
+    {
+        var value;
+
+        if (elt instanceof window.HTMLImageElement)
+            value = Url.getFileName(elt.getAttribute("src"));
+        else if (elt instanceof window.HTMLAnchorElement)
+            value = Url.getFileName(elt.getAttribute("href"));
+        else if (elt instanceof window.HTMLInputElement)
+            value = elt.getAttribute("value");
+        else if (elt instanceof window.HTMLFormElement)
+            value = Url.getFileName(elt.getAttribute("action"));
+        else if (elt instanceof window.HTMLScriptElement)
+            value = Url.getFileName(elt.getAttribute("src"));
+
+        return value ? " " + Str.cropMultipleLines(value, 20) : "";
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocalName: function(object)
     {
@@ -1040,24 +1095,6 @@ FirebugReps.Element = domplate(Firebug.Rep,
         {
             return "";
         }
-    },
-
-    getValue: function(elt)
-    {
-        var value;
-
-        if (elt instanceof window.HTMLImageElement)
-            value = Url.getFileName(elt.getAttribute("src"));
-        else if (elt instanceof window.HTMLAnchorElement)
-            value = Url.getFileName(elt.getAttribute("href"));
-        else if (elt instanceof window.HTMLInputElement)
-            value = elt.getAttribute("value");
-        else if (elt instanceof window.HTMLFormElement)
-            value = Url.getFileName(elt.getAttribute("action"));
-        else if (elt instanceof window.HTMLScriptElement)
-            value = Url.getFileName(elt.getAttribute("src"));
-
-        return value ? " " + Str.cropMultipleLines(value, 20) : "";
     },
 
     attrIterator: function(elt)
@@ -1236,9 +1273,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return elts && elts.length ? elts[0] : null;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    reloadFrame: function(frame)
+    {
+        frame.contentDocument.location.reload();
+    },
 
-    className: "element",
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsObject: function(object, type)
     {
@@ -1248,16 +1288,26 @@ FirebugReps.Element = domplate(Firebug.Rep,
     browseObject: function(elt, context)
     {
         var tag = elt.localName.toLowerCase();
-        if (tag == "script")
+        if (tag == "script" || tag == "img" || tag == "iframe" || tag == "frame")
             Win.openNewTab(elt.src);
-        else if (tag == "link")
+        else if (tag == "link" || tag == "a")
             Win.openNewTab(elt.href);
-        else if (tag == "a")
-            Win.openNewTab(elt.href);
-        else if (tag == "img")
-            Win.openNewTab(elt.src);
 
         return true;
+    },
+
+    ignoreTarget: function(target)
+    {
+        // XXX: Temporary fix for issue 5577.
+        var repNode = target && Firebug.getRepNode(target);
+        return (repNode && repNode.classList.contains("cssRule"));
+    },
+
+    highlightObject: function(object, context, target)
+    {
+        if (this.ignoreTarget(target))
+            return;
+        Firebug.Inspector.highlightObject(object, context);
     },
 
     persistObject: function(elt, context)
@@ -1272,10 +1322,29 @@ FirebugReps.Element = domplate(Firebug.Rep,
         return Css.getElementCSSSelector(element);
     },
 
-    getTooltip: function(elt)
+    getTooltip: function(elt, context, target)
     {
-        var tooltip = this.getXPath(elt);
+        // If the mouse cursor hovers over cropped value of an input element
+        // display the full value in the tooltip.
+        if (Css.hasClass(target, "objectBox-string"))
+        {
+            var inputValue = Dom.getAncestorByClass(target, "inputValue");
+            if (inputValue)
+            {
+                var limit = Options.get("stringCropLength");
+                var value;
+                if (Css.hasClass(inputValue, "attributeValue"))
+                    value = elt.getAttribute("value");
+                else if (Css.hasClass(inputValue, "propertyValue"))
+                    value = elt.value;
 
+                if (value && value.length > limit)
+                    return value;
+            }
+        }
+
+        // Display xpath of the element.
+        var tooltip = this.getXPath(elt);
         if (elt.namespaceURI)
             tooltip += " (" + elt.namespaceURI + ")";
 
@@ -1284,8 +1353,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
-        // XXX: Temporary fix for issue 5577.
-        if (Dom.getAncestorByClass(target, "cssElementRuleContainer"))
+        if (this.ignoreTarget(target))
             return;
 
         var type;
@@ -1388,7 +1456,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
         ]);
 
         var tag = elt.localName.toLowerCase();
-        if (tag == "script" || tag == "link" || tag == "a" || tag == "img")
+        if (tag == "script" || tag == "link" || tag == "a" || tag == "img" || tag == "iframe" ||
+            tag == "frame")
         {
             items = items.concat([
                 "-",
@@ -1400,20 +1469,18 @@ FirebugReps.Element = domplate(Firebug.Rep,
             ]);
         }
 
-        items = items.concat([
-            "-",
-            {
-                label: "ShowEventsInConsole",
-                tooltiptext: "html.tip.Show_Events_In_Console",
-                id: "fbShowEventsInConsole",
-                type: "checkbox",
-                checked: EventMonitor.areEventsMonitored(elt, null, context),
-                command: function()
+        if (tag == "iframe" || tag == "frame")
+        {
+            items = items.concat([
                 {
-                    var checked = this.hasAttribute("checked");
-                    EventMonitor.toggleMonitorEvents(elt, null, !checked, context);
+                    label: "html.menu.Reload_Frame",
+                    tooltiptext: "html.menu.tip.Reload_Frame",
+                    command: Obj.bindFixed(this.reloadFrame, this, elt)
                 }
-            },
+            ]);
+        }
+
+        items = items.concat([
             "-",
             {
                 label: "ScrollIntoView",
@@ -1471,7 +1538,6 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-var regexpConstructorRE = /RegExp/;
 FirebugReps.RegExp = domplate(Firebug.Rep,
 {
     tag:
@@ -1487,13 +1553,12 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
     {
         try
         {
-            return type == "object" && object && object.constructor && object.constructor.toString &&
-                regexpConstructorRE.test(object.constructor.toString());
+            return type == "object" && Object.prototype.toString.call(object) === "[object RegExp]";
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err)
+                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err);
         }
     },
 
@@ -1650,6 +1715,15 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSStyleRule";
         }
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
+        {
+            return "CSSSupportsRule";
+        }
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            (window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule))
+        {
+            return "CSSDocumentRule";
+        }
         else if (rule instanceof window.CSSFontFaceRule)
         {
             return "CSSFontFaceRule";
@@ -1676,6 +1750,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         {
             return "CSSKeyframeRule";
         }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return "CSSPageRule";
+        }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
             return "CSSNameSpaceRule";
@@ -1689,6 +1767,15 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         if (rule instanceof window.CSSStyleRule)
         {
             return rule.selectorText;
+        }
+        else if (window.CSSSupportsRule && rule instanceof window.CSSSupportsRule)
+        {
+            return rule.conditionText;
+        }
+        else if ((window.CSSDocumentRule && rule instanceof window.CSSDocumentRule) ||
+            (window.CSSMozDocumentRule && rule instanceof window.CSSMozDocumentRule))
+        {
+            return rule.conditionText;
         }
         else if (rule instanceof window.CSSFontFaceRule)
         {
@@ -1715,6 +1802,10 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
             rule instanceof window.MozCSSKeyframeRule)
         {
             return rule.keyText;
+        }
+        else if (window.CSSPageRule && rule instanceof window.CSSPageRule)
+        {
+        	return rule.selectorText || "";
         }
         else if (rule instanceof window.CSSNameSpaceRule)
         {
@@ -1870,52 +1961,6 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.EventLog = domplate(FirebugReps.Event,
-{
-    className: "eventLog",
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    tag:
-        TAG("$copyEventTag", {object: "$object|copyEvent"}),
-
-    copyEventTag:
-        SPAN(
-            OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
-            SPAN("&#187;"),
-            SPAN("&nbsp"),
-            TAG("$object|getTargetTag", {object: "$object|getTarget"})
-        ),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    copyEvent: function(log)
-    {
-        return new Dom.EventCopy(log.event);
-    },
-
-    getTarget: function(event)
-    {
-        return event.target;
-    },
-
-    getTargetTag: function(event)
-    {
-        var rep = Firebug.getRep(event.target);
-        return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    supportsObject: function(object, type)
-    {
-        return object instanceof EventMonitor.EventLog;
-    },
-});
-
-// ********************************************************************************************* //
-
 FirebugReps.SourceLink = domplate(Firebug.Rep,
 {
     tag:
@@ -1955,7 +2000,10 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         try
         {
-            var fileName = Url.getFileName(sourceLink.href);
+            // XXX This is wrong for at least data: URLs. E.g. evaluating
+            // "%2f" in the command line shows as "/".
+            var fileName = sourceLink.href;
+            fileName = Url.getFileName(fileName);
             fileName = decodeURIComponent(fileName);
         }
         catch(exc)
@@ -1963,8 +2011,6 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'" +
                     sourceLink.href + "\': " + exc, exc);
-
-            fileName = sourceLink.href;
         }
 
         var maxWidth = Firebug.sourceLinkLabelWidth;
@@ -2120,6 +2166,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "CompilationUnit",
+    inspectable: false,
 
     supportsObject: function(object, type)
     {
@@ -2359,15 +2406,16 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
     frameIterator: function(frames)
     {
         // Skip Firebug internal frames.
-        // xxxHonza: this is anoter place where stack frame is peeling off.
+        // xxxHonza: this is another place where we peel off stack frames.
         var result = [];
         for (var i=0; frames && i<frames.length; i++)
         {
             var frame = frames[i];
             var sf = frame.sourceFile;
             if ((sf && sf.href && Str.hasPrefix(sf.href, "chrome")) ||
-                (frame.fn == "_firebugRerun") ||
-                (frame.fn == "jsdbug_NoScriptFunctionName"))
+                (frame.fn === "_firebugRerun") ||
+                (frame.fn === "jsdbug_NoScriptFunctionName") ||
+                (frame.fn === "(debugger)"))
             {
                 continue;
             }
@@ -2394,7 +2442,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
             DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
-                SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
@@ -2416,8 +2463,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                                 A({"class": "errorSource a11yFocus"},
                                     PRE({"class": "errorSourceCode",
                                         title: "$object|getSourceTitle"}, "$object|getSource")
-                                ),
-                                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                                )
                             )
                         ),
                         TR({$collapsed: "$object|hideErrorCaret"},
@@ -2462,11 +2508,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     hasErrorBreak: function(error)
     {
         return FBS.fbs.hasErrorBreakpoint(Url.normalizeURL(error.href), error.lineNo);
-    },
-
-    getDuplication: function(msgId)
-    {
-        return ""; // filled in later
     },
 
     getSource: function(error, noCrop)
@@ -2559,13 +2600,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     {
         var source = this.getSource(error, true);
         return source ? Str.trim(source) : "";
-    },
-
-    getSourceLink: function(error)
-    {
-        var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext,
-            null, null, error.colNumber) : null;
     },
 
     getSourceType: function(error)
@@ -2667,7 +2701,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     inspectObject: function(error, context)
     {
-        var sourceLink = this.getSourceLink(error);
+        var sourceLink = error.getSourceLink();
         FirebugReps.SourceLink.inspectObject(sourceLink, context);
     },
 
@@ -2859,9 +2893,9 @@ FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
         try
         {
             var items = history.length;
-            return items + " history entries";
+            return Locale.$STRP("firebug.reps.historyEntries", [items]);
         }
-        catch(exc)
+        catch (exc)
         {
             return "object does not support history (nsIDOMHistory)";
         }
@@ -2872,7 +2906,7 @@ FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
         try
         {
             var history = event.currentTarget.repObject;
-            var items = history.length;  // if this throws, then unsupported
+            history.length;  // if this throws, then unsupported
             Firebug.chrome.select(history);
         }
         catch (exc)
@@ -3096,8 +3130,9 @@ FirebugReps.Description = domplate(Firebug.Rep,
 {
     className: "Description",
 
+    // Use SPAN to make sure the description is nicely inserted into existing text inline.
     tag:
-        DIV({onclick: "$onClickLink"}),
+        SPAN({onclick: "$onClickLink"}),
 
     render: function(text, parentNode, listener)
     {
@@ -3231,7 +3266,9 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof window.NamedNodeMap);
+        // NamedNodeMap is no more since Fx 22 - see https://bugzilla.mozilla.org/show_bug.cgi?id=847195.
+        // The temporary Attr-only replacement is MozNamedAttrMap.
+        return (object instanceof (window.NamedNodeMap || window.MozNamedAttrMap));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -3298,7 +3335,7 @@ FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, 
     this.category = category;
     this.context = context;
     this.trace = trace;
-    this.msgId = msgId;
+    this.msgId = msgId || this.getId();
     this.colNumber = colNumber;
 };
 
@@ -3309,16 +3346,23 @@ FirebugReps.ErrorMessageObj.prototype =
         if (!this.context.sourceCache)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!")
+                FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!");
             return;
         }
 
         return this.context.sourceCache.getLine(this.href, this.lineNo);
     },
 
+    getSourceLink: function()
+    {
+        var ext = this.category == "css" ? "css" : "js";
+        return this.lineNo ? new SourceLink.SourceLink(this.href, this.lineNo, ext,
+            null, null, this.colNumber) : null;
+    },
+
     resetSource: function()
     {
-        if (this.href && this.lineNo)
+        if (this.href && this.lineNo != null)
             this.source = this.getSourceLine();
     },
 
@@ -3338,6 +3382,11 @@ FirebugReps.ErrorMessageObj.prototype =
         this.href = sourceName;
         this.lineNo = lineNumber;
     },
+
+    getId: function()
+    {
+        return this.href + ":" + this.message + ":" + this.lineNo;
+    }
 };
 
 // ********************************************************************************************* //
@@ -3347,18 +3396,71 @@ FirebugReps.ErrorCopy = function(message)
     this.message = message;
 };
 
+//********************************************************************************************** //
+
+FirebugReps.ClosureScope = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "scope",
+
+    getTitle: function(object)
+    {
+        var scope = ClosureInspector.getScopeFromWrapper(object);
+        var type = scope.type, title;
+        if (type === "declarative")
+            title = Locale.$STR("firebug.reps.declarativeScope");
+        else if (type === "object")
+            title = Locale.$STR("firebug.reps.objectScope");
+        else if (type === "with")
+            title = Locale.$STR("firebug.reps.withScope");
+        else
+            title = "<unknown scope \"" + type + "\">"; // shouldn't happen
+        return title;
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isScopeWrapper(object);
+    }
+});
+
+// ********************************************************************************************* //
+
+FirebugReps.OptimizedAway = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "optimizedAway",
+
+    getTitle: function(object)
+    {
+        return Locale.$STR("firebug.reps.optimizedAway");
+    },
+
+    supportsObject: function(object, type)
+    {
+        return ClosureInspector.isOptimizedAway(object);
+    }
+});
+
 // ********************************************************************************************* //
 // Registration
 
 Firebug.registerRep(
-    FirebugReps.nsIDOMHistory, // make this early to avoid exceptions
     FirebugReps.Undefined,
     FirebugReps.Null,
     FirebugReps.Number,
-    FirebugReps.RegExp,
+    FirebugReps.SpecialWhitespaceString,
     FirebugReps.String,
+    FirebugReps.nsIDOMHistory, // make this early to avoid exceptions
+    FirebugReps.ApplicationCache, // this also
+    FirebugReps.RegExp,
     FirebugReps.Window,
-    FirebugReps.ApplicationCache, // must come before Arr (array) else exceptions.
     FirebugReps.ErrorMessage,
     FirebugReps.Element,
     FirebugReps.TextNode,
@@ -3382,7 +3484,8 @@ Firebug.registerRep(
     FirebugReps.Date,
     FirebugReps.NamedNodeMap,
     FirebugReps.Reference,
-    FirebugReps.EventLog
+    FirebugReps.ClosureScope,
+    FirebugReps.OptimizedAway
 );
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
@@ -3391,43 +3494,3 @@ return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
 }});
-
-// ********************************************************************************************* //
-
-/*
- * The following is http://developer.yahoo.com/yui/license.txt and applies to only code labeled
- * "Yahoo BSD Source" in only this file reps.js.  John J. Barton June 2007.
- *
-Software License Agreement (BSD License)
-
-Copyright (c) 2006, Yahoo! Inc.
-All rights reserved.
-
-Redistribution and use of this software in source and binary forms, with or without modification, are
-permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
-
-* Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
-
-* Neither the name of Yahoo! Inc. nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of Yahoo! Inc.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// ********************************************************************************************* //

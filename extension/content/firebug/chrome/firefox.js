@@ -7,7 +7,6 @@ define([], function() {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var Cu = Components.utils;
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 // ********************************************************************************************* //
@@ -149,7 +148,7 @@ try
             {
                 prev.apply(self, args);
             });
-        }
+        };
     }
 }
 catch (err)

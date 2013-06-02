@@ -207,6 +207,8 @@ var Annotations = Obj.extend(Firebug.Module,
 
     resetAllOptions: function()
     {
+        // "Reset all options" removes all annotations even if the browser window
+        // is currently in private mode.
         this.clear();
         this.flush(true);
     }

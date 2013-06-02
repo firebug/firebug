@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Issue 537: Pseudo-elements are not displayed in Style side panel</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+      <style type="text/css">
+          #element1 {
+              width: 300px;
+          }
+
+          #element1:first-letter {
+              color: #FF8C78;
+          }
+
+          #element1:first-line {
+              color: #8C8C8C;
+          }
+
+          #element1:before {
+              content: "before ";
+              color: #788CFF;
+          }
+
+          #element1:after {
+              content: " after";
+              color: #78FF8C;
+          }
+      </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=537">Issue 537</a>: Pseudo-elements are not displayed in Style side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+              <p id="element1">Text<br/>with line break</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML panel</em></li>
+                    <li>Inspect the <code>&lt;p&gt;</code> above (<code>#element1</code>)</li>
+                    <li>Switch to the <em>Style</em> side panel</li>
+                </ol>
+                <h3>Expected Result</h3>
+                <ul>
+                    <li>
+                        Four pseudo-element rules are displayed:
+                        <code>#element1:first-letter</code>,
+                        <code>#element1:first-line</code>,
+                        <code>#element1:before</code> and
+                        <code>#element1:after</code>
+                    </li>
+                    <li>The pseudo-element rules <code>#element1:before</code> and <code>#element1:after</code> contain a <code>content</code> property</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

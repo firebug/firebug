@@ -132,7 +132,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
             originals[i] = templates[i].getHidden;
             templates[i].getHidden = function() {
                 return "";
-            }
+            };
         }
 
         // Generate XML preview.
@@ -177,7 +177,8 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

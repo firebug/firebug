@@ -23,10 +23,10 @@ function runTest()
                 FBTest.selectPanel("html");
 
                 // Wait till the executed expression causes HTML panel update.
-                FBTest.waitForHtmlMutation(null, "span", function(node)
+                FBTest.waitForHtmlMutation(null, "div", function(node)
                 {
                     // Verify HTML panel content after mutation.
-                    var expected = /a &aring;&auml;&ouml; b/;
+                    var expected = /section.*a &aring;&auml;&ouml; b.*section/;
                     FBTest.compare(expected, node.textContent, "The text content must match");
 
                     FBTest.testDone("issue5448.DONE");

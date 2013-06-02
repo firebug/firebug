@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 5873: Integrate FireClosure</title>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+function doBreak() {
+    debugger;
+    var count = (function() {
+        var counter = 0;
+        return function() {
+            ++counter;
+        };
+    })();
+
+    for (var i = 0; i < 10; ++i) {
+        count();
+    }
+}
+function breakSoon()
+{
+    setTimeout(doBreak, 0);
+}
+
+// run in the command line:
+/*
+// with(_FirebugCommandLine) {
+window.global = 1;
+with({withVar: 2})
+{
+    window.A = function(param)
+    {
+        function helper(x)
+        {
+            return x + 4;
+        }
+        var local = 5;
+        try
+        {
+            throw 6;
+        }
+        catch (catched)
+        {
+            this.someFunction = function(someFuncParam)
+            {
+                return helper(global + withVar + param + local + catched + someFuncParam);
+            };
+        }
+    };
+}
+window.a = new A(3);
+// }
+*/
+
+window.emptyObject = {};
+
+(function()
+{
+    var priv = 2;
+    window.funcWithProto = function()
+    {
+        return priv;
+    };
+    (function()
+    {
+        var priv = 10;
+        window.funcWithProto.prototype.func = function()
+        {
+            return priv;
+        };
+    })();
+})();
+
+(function()
+{
+    var unrelated = 3;
+    window.otherFunc = function()
+    {
+        return unrelated;
+    };
+    window.otherFunc.regularProp = 4;
+})();
+
+(function()
+{
+    var priv = 1;
+    window.func = function()
+    {
+        return priv % oth;
+    };
+    var oth = window.otherFunc;
+})();
+
+(function(a)
+{
+    (function()
+    {
+        var b = 2;
+        window.innerA = function() { return a; };
+        window.innerB = function() { return b; };
+    })();
+})(1);
+
+window.scopelessFunc = function() {};
+window.scopelessFunc.prop = window.func;
+        </script>
+        <style>
+            #content::after {
+                content: ".";
+                display: block;
+                visibility: hidden;
+                clear: both;
+                line-height: 0;
+                height: 0;
+            }
+            .ifr-cont {
+                float: left;
+                padding: 10px;
+            }
+            .ifr-cont iframe {
+                height: 50px;
+                width: 70px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5873">Issue 5873</a>: Integrate FireClosure</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div class="ifr-cont"> Same-origin:<br><iframe src="frame.html"></iframe> </div>
+                <div class="ifr-cont"> Sandboxed:<br><iframe src="frame.html" sandbox="allow-scripts"></iframe> </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ul>
+                    <li>See issue5873.js.</li>
+                </ul>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li><code>someFunction.%someClosureVar</code> should access a variable bound to
+                    someFunction through a closure.</li>
+                    <li>Operator precedence of <code>.%</code> should be like that of <code>.</code>.</li>
+                    <li><code>someObject.%someClosureVar</code> should to a first approximation do
+                    the same thing; making some intelligent guesses about relevant functions to
+                    steal closures off.</li>
+                    <li>Auto-completion should work for <code>.%</code>.</li>
+                    <li>It should only be possible to access closures of same-origin functions.</li>
+                    <li>The operator should work even when stopped in the debugger, and in
+                    breakpoint conditions.</li>
+                </ul>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

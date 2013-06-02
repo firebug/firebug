@@ -2,10 +2,17 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/xpcom",
     "firebug/lib/array",
-    "firebug/lib/string",
+    "firebug/lib/string"
 ],
-function(FBTrace, Arr, Str) {
+function(FBTrace, Xpcom, Arr, Str) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // ********************************************************************************************* //
 
@@ -16,13 +23,13 @@ var Obj = {};
 Obj.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
    var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
-   return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); }
+   return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); };
 };
 
 Obj.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
-    return function() { return fn.apply(object, args); }
+    return function() { return fn.apply(object, args); };
 };
 
 Obj.extend = function()
@@ -55,6 +62,13 @@ Obj.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
+Obj.isFunction = function(ob)
+{
+    return typeof(ob) == "function";
+}
+
+// ************************************************************************************************
+
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
  *
@@ -69,33 +83,29 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         if (!ob)
             return false;
 
-        var obString = Str.safeToString(ob);
-        if (obString === "[xpconnect wrapped native prototype]")
-        {
+        var type = typeof(ob);
+        if (type == "string" && ob.length)
             return true;
+
+        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
+            return false;
+
+        try
+        {
+            // This is probably unnecessary in Firefox 19 or so.
+            if ("toString" in ob && ob.toString() === "[xpconnect wrapped native prototype]")
+                return true;
         }
+        catch (exc) {}
 
         // The default case (both options false) is relatively simple.
         // Just use for..in loop.
         if (!nonEnumProps && !ownPropsOnly)
         {
             for (var name in ob)
-            {
-                // Try to access the property before declaring existing properties.
-                // It's because some properties can't be read see:
-                // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
-                var value = ob[name];
                 return true;
-            }
             return false;
         }
-
-        var type = typeof(ob);
-        if (type == "string" && ob.length)
-            return true;
-         
-        if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
-            return false;
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);
@@ -103,20 +113,13 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
             props = Object.keys(ob);
 
         if (props.length)
-        {
-            // Try to access the property before declaring existing properties.
-            // It's because some properties can't be read see:
-            // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
-            var value = ob[props[0]];
             return true;
-        }
 
         // Not interested in inherited properties, bail out.
         if (ownPropsOnly)
             return false;
 
         // Climb prototype chain.
-        var inheritedProps = [];
         var parent = Object.getPrototypeOf(ob);
         if (parent)
             return this.hasProperties(parent, nonEnumProps, ownPropsOnly);
@@ -151,12 +154,77 @@ Obj.getPrototype = function(ob)
 Obj.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
-}
+};
+
+Obj.getObjHash = function(obj)
+{
+    function getPropString(obj, level)
+    {
+        level = level || 1;
+        if (level > 3 || typeof obj != "object")
+            return typeof obj;
+
+        try
+        {
+            var props = Object.getOwnPropertyNames(obj);
+        }
+        catch(e)
+        {
+            return typeof obj;
+        }
+
+        var propString = "";
+        props.forEach(function(propName) {
+            propString += propName + ":" + typeof obj[propName] + ":" +
+                (typeof obj[propName] == "object" ?
+                    getPropString(obj[propName], level + 1) : obj[propName]);
+        });
+
+        var parent = Object.getPrototypeOf(obj);
+        if (parent)
+            propString += getPropString(parent);
+
+        return propString;
+    }
+
+    function toHexString(charCode)
+    {
+        return ("0" + charCode.toString(16)).slice(-2);
+    }
+
+    try
+    {
+        var str = typeof obj + getPropString(obj);
+    
+        var converter = Xpcom.CCSV("@mozilla.org/intl/scriptableunicodeconverter",
+            "nsIScriptableUnicodeConverter");
+        converter.charset = "UTF-8";
+        var result = {};
+        var data = converter.convertToByteArray(str, result);
+        var ch = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        ch.init(ch.MD5);
+        ch.update(data, data.length);
+        var hash = ch.finish(false);
+    
+        var hexHash = "";
+        for (var i=0, len = hash.length; i < len; ++i)
+            hexHash += toHexString(hash.charCodeAt(i));
+    }
+    catch(e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.getObjHash; Hash could not be created", e);
+
+        return this.getUniqueId();
+    }
+
+    return hexHash;
+};
 
 Obj.getRandomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);
-}
+};
 
 // Cross Window instanceof; type is local to this window
 Obj.XW_instanceof = function(obj, type)
@@ -185,12 +253,13 @@ Obj.XW_instanceof = function(obj, type)
 
     // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited
     // /Determining_Instance_Relationships
-}
+};
 
 /**
  * Tells if the given property of the provided object is a non-native getter or not.
  * This method depends on PropertyPanel.jsm module available in Firefox 5+
  * isNonNativeGetter has been introduced in Firefox 7
+ * The method has been moved to WebConsoleUtils.jsm in Fx 18
  *
  * @param object aObject The object that contains the property.
  * @param string aProp The property you want to check if it is a getter or not.
@@ -201,20 +270,58 @@ Obj.isNonNativeGetter = function(obj, propName)
     try
     {
         var scope = {};
-        Components.utils.import("resource:///modules/PropertyPanel.jsm", scope);
+        Cu.import("resource://gre/modules/devtools/WebConsoleUtils.jsm", scope);
 
-        if (scope.isNonNativeGetter)
+        if (scope.WebConsoleUtils.isNonNativeGetter)
         {
-            Obj.isNonNativeGetter = scope.isNonNativeGetter;
+            Obj.isNonNativeGetter = function(obj, propName)
+            {
+                return scope.WebConsoleUtils.isNonNativeGetter(obj, propName);
+            };
+
             return Obj.isNonNativeGetter(obj, propName);
         }
     }
     catch (err)
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.isNonNativeGetter; EXCEPTION " + err, err);
     }
 
+    // OK, the method isn't available let's use an empty implementation
+    Obj.isNonNativeGetter = function()
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Obj.isNonNativeGetter; ERROR built-in method not found!");
+        return true;
+    };
+
     return true;
-}
+};
+
+// xxxFlorent: [ES6-getPropertyNames]
+// http://wiki.ecmascript.org/doku.php?id=harmony:extended_object_api&s=getownpropertynames
+/**
+ * Gets property names from an object.
+ *
+ * @param {*} subject The object
+ * @return {Array} The property names
+ *
+ */
+Obj.getPropertyNames = Object.getPropertyNames || function(subject)
+{
+    var props = Object.getOwnPropertyNames(subject);
+    var proto = Object.getPrototypeOf(subject);
+    while (proto !== null)
+    {
+        props = props.concat(Object.getOwnPropertyNames(proto));
+        proto = Object.getPrototypeOf(proto);
+    }
+    // only keep unique elements from props (not optimised):
+    //    props = [...new Set(props)];
+    return Arr.unique(props);
+};
+
 
 // ********************************************************************************************* //
 

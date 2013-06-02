@@ -14,12 +14,12 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
+Cu["import"]("resource://gre/modules/XPCOMUtils.jsm");
+Cu["import"]("resource://gre/modules/Services.jsm");
+Cu["import"]("resource://gre/modules/AddonManager.jsm");
 
 // xxxHonza: could we remove some of them?
-var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
+var TraceAPI = ["dump", "sysout", "matchesNode", "time", "timeEnd"];
 
 // ********************************************************************************************* //
 // Service Implementation
@@ -41,7 +41,8 @@ catch (err)
             if (tracer)
                 return tracer;
 
-            if (getBoolPref(prefDomain, "alwaysOpenTraceConsole"))
+            var enabledAddons = decodeURIComponent(getCharPref("extensions", "enabledAddons"));
+            if (enabledAddons.indexOf("fbtrace@getfirebug.com:") >= 0)
             {
                 // Solution with built-in buffer for logs created before console is ready.
                 var wrapper = new TracerWrapper(prefDomain);
@@ -58,8 +59,8 @@ catch (err)
 
             this.tracers[prefDomain] = tracer;
             return tracer;
-        },
-    }
+        }
+    };
 }
 
 // ********************************************************************************************* //
@@ -106,7 +107,7 @@ TracerWrapper.prototype =
         {
             return function() {
                 self.push(method, arguments);
-            }
+            };
         };
 
         // Fake FBTrace object
@@ -141,9 +142,6 @@ TracerWrapper.prototype =
         {
             get: function(target, name)
             {
-                if (self.FBTrace)
-                    return self.FBTrace[name];
-
                 return self.FBTrace ? self.FBTrace[name] : self.tracer[name];
             },
 
@@ -151,6 +149,8 @@ TracerWrapper.prototype =
             {
                 if (self.FBTrace)
                     self.FBTrace[name] = value;
+                else
+                    self.tracer[name] = value;
 
                 return true;
             },
@@ -244,7 +244,7 @@ TracerWrapper.prototype =
         {
         }
     }
-}
+};
 
 // ********************************************************************************************* //
 // Helpers
@@ -264,6 +264,20 @@ function getBoolPref(prefDomain, name)
     {
         var prefName = prefDomain + "." + name;
         return prefs.getBoolPref(prefName);
+    }
+    catch (err)
+    {
+    }
+
+    return false;
+}
+
+function getCharPref(prefDomain, name)
+{
+    try
+    {
+        var prefName = prefDomain + "." + name;
+        return prefs.getCharPref(prefName);
     }
     catch (err)
     {

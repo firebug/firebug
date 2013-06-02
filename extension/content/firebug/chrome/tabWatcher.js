@@ -655,7 +655,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             }
 
             Events.dispatch(this.fbListeners, "destroyContext",
-                [null, (browser?browser.persistedState:null), browser]);
+                [null, (browser ? browser.persistedState : null), browser]);
             return;
         }
 
@@ -670,9 +670,11 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         Events.dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
+        {
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context " + context.uid +
                 " for: " + (context.window && !context.window.closed?context.window.location :
                 "no window or closed ") + " aborted: " + context.aborted);
+        }
 
         context.destroy(persistedState);
 
@@ -687,7 +689,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (!currentBrowser.showFirebug)
         {
             // context is null if we don't want to debug this browser
-            Events.dispatch(this.fbListeners, "showContext", [browser, null]);
+            Events.dispatch(this.fbListeners, "showContext", [currentBrowser, null]);
         }
     },
 
@@ -774,7 +776,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             context = Firebug.currentContext;
 
         if (context.browser)
-            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
+            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE);
         else
             context.window.location.reload();
     },

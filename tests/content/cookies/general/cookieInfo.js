@@ -7,11 +7,14 @@ function runTest()
     {
         FBTest.sysout("cookieInfo; Check cookie entry in the Cookies panel");
 
+        var target = FW.Firebug.chrome.window.top.document.documentElement;
+        FBTest.pressToggleFirebug(true, target);
+        //FBTest.openFirebug(true);
+
         // Open Firebug UI and enable Net panel.
         FBTestFireCookie.enableCookiePanel(function(win)
         {
             // Make sure the Cookie panel's UI is there.
-            FBTest.openFirebug(true);
             var panelNode = FBTest.selectPanel("cookies").panelNode;
 
             var cookieRow = FBTestFireCookie.getCookieRowByName(panelNode, "TestCookieInfo");

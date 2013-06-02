@@ -1,12 +1,20 @@
 /* See license.txt for terms of usage */
 
-// Must be global within the browser window.
-var gFindBar;
+define([
+    "firebug/lib/trace",
+    "firebug/lib/array",
+    "firebug/lib/locale",
+    "firebug/chrome/window",
+    "firebug/lib/dom",
+    "firebug/lib/string",
+    "firebug/lib/css",
+    "fbtest/testLogger",
+    "fbtest/testListLoader",
+],
+function(FBTrace, Arr, Locale, Win, Dom, Str, Css, TestLogger, TestListLoader) {
 
-FBTestApp.ns(function() { with (FBL) {
-
-// ************************************************************************************************
-// Test Console Implementation
+// ********************************************************************************************* //
+// Constants
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -14,7 +22,8 @@ var Ci = Components.interfaces;
 // Services
 var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader);
 var filePicker = Cc["@mozilla.org/filepicker;1"].getService(Ci.nsIFilePicker);
-var cmdLineHandler = Cc["@mozilla.org/commandlinehandler/general-startup;1?type=FBTest"].getService(Ci.nsICommandLineHandler);
+var cmdLineHandler = Cc["@mozilla.org/commandlinehandler/general-startup;1?type=FBTest"].
+    getService(Ci.nsICommandLineHandler);
 var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 var ios = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
 var chromeRegistry = Cc['@mozilla.org/chrome/chrome-registry;1'].getService(Ci.nsIChromeRegistry);
@@ -24,9 +33,8 @@ var nsIFilePicker = Ci.nsIFilePicker;
 
 var versionURL = "chrome://fbtest/content/fbtest.properties";
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
-/** @namespace */
 FBTestApp.TestWindowLoader =
 {
     initialize: function()
@@ -43,7 +51,8 @@ FBTestApp.TestWindowLoader =
     internationalizeUI: function()
     {
         var elements = document.getElementsByClassName("fbInternational");
-        elements = FBL.cloneArray(elements);
+        elements = Arr.cloneArray(elements);
+
         var attributes = ["label", "tooltiptext", "pickerTooltiptext", "barTooltiptext",
             "aria-label"];
         for (var i=0; i<elements.length; i++)
@@ -53,7 +62,7 @@ FBTestApp.TestWindowLoader =
             for (var j=0; j<attributes.length; j++)
             {
                 if (element.hasAttribute(attributes[j]))
-                    FBL.internationalize(element, attributes[j]);
+                    Locale.internationalize(element, attributes[j]);
             }
         }
     },
@@ -65,7 +74,7 @@ FBTestApp.TestWindowLoader =
             Firebug.TraceModule.addListener(FBTestApp.TestConsole.TraceListener);
 
         // The tracing console can be already opened so, simulate onLoadConsole event.
-        iterateBrowserWindows("FBTraceConsole", function(win)
+        Win.iterateBrowserWindows("FBTraceConsole", function(win)
         {
             if (win.TraceConsole.prefDomain == "extensions.firebug")
             {
@@ -82,7 +91,7 @@ FBTestApp.TestWindowLoader =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * This object represents main Test Console implementation.
@@ -120,13 +129,13 @@ FBTestApp.TestConsole =
             //          test list file is used.
             this.loadTestList(this.getDefaultTestList(), this.getDefaultTestCasePath());
 
-            $("testCaseUrlBar").testURL = this.testCasePath;
+            Firebug.chrome.$("testCaseUrlBar").testURL = this.testCasePath;
 
             if (FBTrace.DBG_FBTEST)
                 FBTrace.sysout("fbtest.TestConsole.initialize; " + this.getVersion() + ", " +
                     this.testCasePath);
 
-            gFindBar = $("FindToolbar");
+            window.gFindBar = Firebug.chrome.$("FindToolbar");
         }
         catch (e)
         {
@@ -219,9 +228,9 @@ FBTestApp.TestConsole =
 
     updatePaths: function()
     {
-        this.testListPath = $("testListUrlBar").testURL;
-        this.testCasePath = $("testCaseUrlBar").testURL;
-        this.driverBaseURI = $("testDriverUrlBar").testURL;
+        this.testListPath = Firebug.chrome.$("testListUrlBar").testURL;
+        this.testCasePath = Firebug.chrome.$("testCaseUrlBar").testURL;
+        this.driverBaseURI = Firebug.chrome.$("testDriverUrlBar").testURL;
 
         if (FBTrace.DBG_FBTEST)
             FBTrace.sysout("fbtest.updatePaths; " + this.testListPath + ", " +
@@ -235,15 +244,15 @@ FBTestApp.TestConsole =
                 this.testCasePath + ", " + this.driverBaseURI);
 
         // Update test list URL box.
-        var urlBar = $("testListUrlBar");
+        var urlBar = Firebug.chrome.$("testListUrlBar");
         urlBar.testURL = this.testListPath;
 
         // Update test source URL box.
-        urlBar = $("testCaseUrlBar");
+        urlBar = Firebug.chrome.$("testCaseUrlBar");
         urlBar.testURL = this.testCasePath;
 
         // Update test driver URL box.
-        urlBar = $("testDriverUrlBar");
+        urlBar = Firebug.chrome.$("testDriverUrlBar");
         urlBar.testURL = this.driverBaseURI;
     },
 
@@ -253,7 +262,7 @@ FBTestApp.TestConsole =
         for (var i=0; groups && i<groups.length; i++)
             count += groups[i].tests.length;
 
-        $("testCount").value = count;
+        Firebug.chrome.$("testCount").value = count;
     },
 
     setAndLoadTestList: function()
@@ -328,12 +337,12 @@ FBTestApp.TestConsole =
             self.autoRun();
         };
 
-        var taskBrowser = $("taskBrowser");
+        var taskBrowser = Firebug.chrome.$("taskBrowser");
 
         if (testListPath == "fbtest:all")
-            FBTestApp.TestListLoader.loadAllRegisteredTests(taskBrowser, finishCallback);
+            TestListLoader.loadAllRegisteredTests(taskBrowser, finishCallback);
         else
-            FBTestApp.TestListLoader.loadTestList(taskBrowser, testListPath, finishCallback);
+            TestListLoader.loadTestList(taskBrowser, testListPath, finishCallback);
 
         this.updateURLBars();
     },
@@ -353,7 +362,8 @@ FBTestApp.TestConsole =
         for (var i = 0; i < Application.extensions; i++)
         {
             var extension = Application.extensions[i];
-            extensionsText = "Extension: " + extension.name + " (" + extension.id +") version: "+extension.version+"\n";
+            extensionsText = "Extension: " + extension.name + " (" + extension.id +") version: " +
+                extension.version+"\n";
         }
 
         // Store head info.
@@ -396,7 +406,8 @@ FBTestApp.TestConsole =
 
         var iframe = doc.getElementById("FBTest");
         if (iframe)
-            return (iframe.contentWindow.wrappedJSObject ? iframe.contentWindow.wrappedJSObject : iframe.contentWindow);
+            return (iframe.contentWindow.wrappedJSObject ? iframe.contentWindow.wrappedJSObject :
+                iframe.contentWindow);
     },
 
     notifyObservers: function(subject, topic, data)
@@ -415,22 +426,23 @@ FBTestApp.TestConsole =
             return;
         }
 
-        var browser = $("taskBrowser");
+        var browser = Firebug.chrome.$("taskBrowser");
         var doc = browser.contentDocument;
-        var testListNode = $("testList", doc);
+        var testListNode = Firebug.chrome.$("testList", doc);
         if (!testListNode)
         {
-            var iframed = $("FBTest", doc);
+            var iframed = Firebug.chrome.$("FBTest", doc);
             if (iframed)
             {
                 doc = iframed.contentDocument;
-                testListNode = $("testList", doc);
+                testListNode = Firebug.chrome.$("testList", doc);
             }
+
             if (!testListNode)
             {
                 testListNode = doc.createElement("div");
                 testListNode.setAttribute("id", "testList");
-                var body = getBody(doc);
+                var body = Dom.getBody(doc);
                 if (!body)
                 {
                     FBTrace.sysout("fbtest.refreshTestList; ERROR There is no <body> element.");
@@ -440,7 +452,7 @@ FBTestApp.TestConsole =
             }
         }
 
-        eraseNode(testListNode);
+        Dom.eraseNode(testListNode);
 
         // Generate UI (domplate).
         var GroupList = FBTestApp.GroupList;
@@ -478,7 +490,7 @@ FBTestApp.TestConsole =
             var enableTestLogger = Firebug.getPref(FBTestApp.prefDomain, "enableTestLogger");
             if (enableTestLogger)
             {
-                var listener = new FBTestApp.TestLogger.ProgressListener(new Date());
+                var listener = new TestLogger.ProgressListener(new Date());
                 FBTestApp.TestRunner.addListener(listener);
             }
 
@@ -522,7 +534,7 @@ FBTestApp.TestConsole =
             {
                 // Register a listener that continuously logs test results so,
                 // in case of a crash there is at least part of the log.
-                var listener = new FBTestApp.TestLogger.ProgressListener(new Date());
+                var listener = new TestLogger.ProgressListener(new Date());
                 FBTestApp.TestRunner.addListener(listener);
 
                 FBTestApp.TestConsole.onRunAll(function(canceled)
@@ -556,19 +568,19 @@ FBTestApp.TestConsole =
     {
         if (testListPath)
         {
-            testListPath = trim(testListPath);
+            testListPath = Str.trim(testListPath);
             this.appendNVPairToHistory("history", testListPath);
         }
 
         if (testCaseServer)
         {
-            testCaseServer = trim(testCaseServer);
+            testCaseServer = Str.trim(testCaseServer);
             this.appendNVPairToHistory("testCaseHistory", testCaseServer);
         }
 
         if (driverBaseURI)
         {
-            driverBaseURI = trim(driverBaseURI);
+            driverBaseURI = Str.trim(driverBaseURI);
             this.appendNVPairToHistory("testDriverHistory", driverBaseURI);
         }
 
@@ -619,15 +631,15 @@ FBTestApp.TestConsole =
         var scrollCurrentTestIntoView = Firebug.getPref(FBTestApp.prefDomain,
             "scrollCurrentTestIntoView");
         if (scrollCurrentTestIntoView && testQueue.length > 0)
-            scrollIntoCenterView(testQueue[0].row, null, true);
+            Dom.scrollIntoCenterView(testQueue[0].row, null, true);
 
         var finalQueue = testQueue;
 
         //xxxHonza: there should be UI for running the entire test-suit more times.
         /*for (var i=0; i<10; i++)
         {
-            var arr = FBL.cloneArray(testQueue);
-            finalQueue = FBL.extendArray(finalQueue, arr);
+            var arr = Arr.cloneArray(testQueue);
+            finalQueue = Arr.extendArray(finalQueue, arr);
         }*/
 
         // ... and execute them as one test suite.
@@ -670,7 +682,7 @@ FBTestApp.TestConsole =
 
     onRefreshTestList: function()
     {
-        $("taskBrowser").setAttribute("src", "about:blank");
+        Firebug.chrome.$("taskBrowser").setAttribute("src", "about:blank");
         this.updatePaths();
         this.loadTestList(this.testListPath, this.testCasePath);
     },
@@ -694,14 +706,18 @@ FBTestApp.TestConsole =
     onToggleNoTestTimeout: function()
     {
         this.noTestTimeout = !this.noTestTimeout;
-        $("noTestTimeout").setAttribute("checked", this.noTestTimeout ? "true" : "false");
+        Firebug.chrome.$("noTestTimeout").setAttribute("checked",
+            this.noTestTimeout ? "true" : "false");
+
         Firebug.setPref(FBTestApp.prefDomain, "noTestTimeout", this.noTestTimeout);
     },
 
     onToggleRandomTestSelection: function()
     {
         this.randomTestSelection = !this.randomTestSelection;
-        $("randomTestSelection").setAttribute("checked", this.randomTestSelection ? "true" : "false");
+        Firebug.chrome.$("randomTestSelection").setAttribute("checked",
+            this.randomTestSelection ? "true" : "false");
+
         Firebug.setPref(FBTestApp.prefDomain, "randomTestSelection", this.randomTestSelection);
     },
 
@@ -714,7 +730,7 @@ FBTestApp.TestConsole =
         for (var i=0; i<popup.childNodes.length; i++)
         {
             var menuItem = popup.childNodes[i];
-            var toolbar = $(menuItem.getAttribute("toolbar"));
+            var toolbar = Firebug.chrome.$(menuItem.getAttribute("toolbar"));
             menuItem.setAttribute("checked", toolbar.collapsed ? "false" : "true");
         }
     },
@@ -722,7 +738,7 @@ FBTestApp.TestConsole =
     showURLBar: function(event)
     {
         var menuItem = event.originalTarget;
-        var toolbar = $(menuItem.getAttribute("toolbar"));
+        var toolbar = Firebug.chrome.$(menuItem.getAttribute("toolbar"));
         toolbar.collapsed = menuItem.getAttribute("checked") != "true";
         document.persist(toolbar.id, "collapsed");
     },
@@ -771,12 +787,12 @@ FBTestApp.TestConsole =
                 return;
 
             return Cc["@mozilla.org/network/protocol;1?name=file"]
-                      .createInstance(Ci.nsIFileProtocolHandler)
-                      .getFileFromURLSpec(aPath);
+                .createInstance(Ci.nsIFileProtocolHandler)
+                .getFileFromURLSpec(aPath);
         }
         catch (e)
         {
-            throw new Error("urlToPath fails for "+aPath+ " because of "+e);
+            throw new Error("urlToPath fails for " + aPath + " because of " + e);
         }
     },
 
@@ -792,7 +808,8 @@ FBTestApp.TestConsole =
             if (aDir)
                 rv = rv.substr(0, rv.lastIndexOf("/") + 1);
 
-            if (/content\/$/.test(aPath)) // fix bug  in convertToChromeURL
+            // fix bug  in convertToChromeURL
+            if (/content\/$/.test(aPath))
             {
                 var m = /(.*\/content\/)/.exec(rv);
                 if (m)
@@ -827,7 +844,7 @@ FBTestApp.TestConsole =
         }
         catch (e)
         {
-            throw new Error("urlToPath fails for "+aPath+ " because of "+e);
+            throw new Error("urlToPath fails for " + aPath + " because of " + e);
         }
     },
 
@@ -836,8 +853,8 @@ FBTestApp.TestConsole =
         if (!this.table)
             return false;
 
-        var hidePassingTests = hasClass(this.table, "hidePassingTests");
-        var menuItem = $("menu_hidePassingTests");
+        var hidePassingTests = Css.hasClass(this.table, "hidePassingTests");
+        var menuItem = Firebug.chrome.$("menu_hidePassingTests");
         menuItem.setAttribute("checked", hidePassingTests ? "true" : "false");
 
         // This could deserve more generic aproach like dispatching an event
@@ -852,13 +869,13 @@ FBTestApp.TestConsole =
         if (!this.table)
             return;
 
-        if (hasClass(this.table, "hidePassingTests"))
-            removeClass(this.table, "hidePassingTests");
+        if (Css.hasClass(this.table, "hidePassingTests"))
+            Css.removeClass(this.table, "hidePassingTests");
         else
-            setClass(this.table, "hidePassingTests");
+            Css.setClass(this.table, "hidePassingTests");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     iterateTests: function(callback)
     {
@@ -877,7 +894,7 @@ FBTestApp.TestConsole =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /** @namespace */
 FBTestApp.TestConsole.TraceListener =
@@ -885,7 +902,7 @@ FBTestApp.TestConsole.TraceListener =
     // Called when console window is loaded.
     onLoadConsole: function(win, rootNode)
     {
-        var consoleFrame = $("consoleFrame", win.document);
+        var consoleFrame = win.document.getElementById("consoleFrame");
         this.addStyleSheet(consoleFrame.contentDocument,
             "chrome://fbtest/skin/traceConsole.css",
             "fbTestStyles");
@@ -893,12 +910,12 @@ FBTestApp.TestConsole.TraceListener =
 
     addStyleSheet: function(doc, uri, id)
     {
-        if ($(id, doc))
+        if (doc.getElementById(id))
             return;
 
-        var styleSheet = createStyleSheet(doc, uri);
+        var styleSheet = Css.createStyleSheet(doc, uri);
         styleSheet.setAttribute("id", id);
-        addStyleSheet(doc, styleSheet);
+        Css.addStyleSheet(doc, styleSheet);
     },
 
     // Called when a new message is logged in to the trace-console window.
@@ -908,12 +925,12 @@ FBTestApp.TestConsole.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr("fbtest.".length);
-            message.text = trim(message.text);
+            message.text = Str.trim(message.text);
         }
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // FBTest
 
 /**
@@ -922,11 +939,10 @@ FBTestApp.TestConsole.TraceListener =
  */
 var FBTest = FBTestApp.FBTest = {};
 
-// Compatibility with Firebug 1.4
-function trim(text)
-{
-    return text.replace(/^\s*|\s*$/g,"");
-}
+// ********************************************************************************************* //
+// Registration
 
-// ************************************************************************************************
-}});
+return FBTestApp.TestConsole;
+
+// ********************************************************************************************* //
+});

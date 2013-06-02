@@ -1,0 +1,7 @@
+body {
+    background: not-existing-function();
+}
+
+div {
+    color: notacolor;
+}

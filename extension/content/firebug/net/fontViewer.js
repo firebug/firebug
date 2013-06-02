@@ -30,8 +30,10 @@ var contentTypes =
     "application/x-ttf",
     "application/x-font-ttf",
     "font/ttf",
+    "font/woff",
     "application/x-otf",
-    "application/x-font-otf"
+    "application/x-font-otf",
+    "application/font-woff"
 ];
 
 // ********************************************************************************************* //
@@ -543,7 +545,7 @@ Firebug.FontViewerModel.Preview = domplate(
             copyright: Firebug.FontViewerModel.Preview.translatedInfoTag,
             trademark: Firebug.FontViewerModel.Preview.translatedInfoTag,
             license: Firebug.FontViewerModel.Preview.licenseTag
-        }
+        };
 
         for (var i=0; i<root.children.length; i++)
         {
@@ -683,14 +685,15 @@ Firebug.FontViewerModel.Preview = domplate(
             charTypes: charTypes}, body, this);
 
         var styleNode = node.getElementsByClassName("fontInfoPreviewStyle").item(0);
-        styleNode.innerHTML = this.getFontFaceCss(fontObject);
+        styleNode.textContent = this.getFontFaceCss(fontObject);
 
         this.insertGeneralInfo(body, file.fontObject);
 
         if (fontObject.metadata != "")
             this.insertMetaDataFormatted(body, fontObject.metadata);
     }
-})};
+});
+};
 
 // ********************************************************************************************* //
 // Registration

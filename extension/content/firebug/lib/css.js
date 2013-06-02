@@ -7,9 +7,15 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/http",
-    "firebug/lib/xpath",
+    "firebug/lib/xpath"
 ],
 function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Ci = Components.interfaces;
+var Cc = Components.classes;
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -23,6 +29,7 @@ var cssKeywordMap = {};
 var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
+var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
@@ -212,7 +219,7 @@ Css.isImageRule = function(nodeType,rule)
 
 Css.copyTextStyles = function(fromNode, toNode, style)
 {
-    var view = fromNode.ownerDocument.defaultView;
+    var view = fromNode ? fromNode.ownerDocument.defaultView : null;
     if (view)
     {
         if (!style)
@@ -239,14 +246,15 @@ Css.copyBoxStyles = function(fromNode, toNode, style)
         if (!style)
             style = view.getComputedStyle(fromNode, "");
 
-        toNode.style.marginTop = style.getPropertyCSSValue("margin-top").cssText;
-        toNode.style.marginRight = style.getPropertyCSSValue("margin-right").cssText;
-        toNode.style.marginBottom = style.getPropertyCSSValue("margin-bottom").cssText;
-        toNode.style.marginLeft = style.getPropertyCSSValue("margin-left").cssText;
-        toNode.style.borderTopWidth = style.getPropertyCSSValue("border-top-width").cssText;
-        toNode.style.borderRightWidth = style.getPropertyCSSValue("border-right-width").cssText;
-        toNode.style.borderBottomWidth = style.getPropertyCSSValue("border-bottom-width").cssText;
-        toNode.style.borderLeftWidth = style.getPropertyCSSValue("border-left-width").cssText;
+        toNode.style.marginTop = style.marginTop;
+        toNode.style.marginRight = style.marginRight;
+        toNode.style.marginBottom = style.marginBottom;
+        toNode.style.marginLeft = style.marginLeft;
+        toNode.style.borderTopWidth = style.borderTopWidth;
+        toNode.style.borderRightWidth = style.borderRightWidth;
+        toNode.style.borderBottomWidth = style.borderBottomWidth;
+        toNode.style.borderLeftWidth = style.borderLeftWidth;
+        toNode.style.unicodeBidi = style.unicodeBidi;
 
         return style;
     }
@@ -261,7 +269,7 @@ Css.readBoxStyles = function(style)
         "border-left-width": "borderLeft", "border-bottom-width": "borderBottom",
         "padding-top": "paddingTop", "padding-right": "paddingRight",
         "padding-left": "paddingLeft", "padding-bottom": "paddingBottom",
-        "z-index": "zIndex",
+        "z-index": "zIndex"
     };
 
     var styles = {};
@@ -319,7 +327,7 @@ var classNameReCache={};
 
 Css.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || name == '')
+    if (!node || node.nodeType != Node.ELEMENT_NODE || !node.className || !name)
         return false;
 
     if (name.indexOf(" ") != -1)
@@ -342,7 +350,7 @@ Css.hasClass = function(node, name)
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     return node.className.search(re) != -1;
 };
 
@@ -399,7 +407,7 @@ Css.removeClass = function(node, name)
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
 
     node.className = node.className.replace(re, " ");
 
@@ -487,7 +495,7 @@ Css.safeGetCSSRules = function(styleSheet)
     }
 
     return null;
-}
+};
 
 Css.isValidStylesheet = function(styleSheet)
 {
@@ -503,7 +511,7 @@ Css.isValidStylesheet = function(styleSheet)
     }
 
     return false;
-}
+};
 
 // ********************************************************************************************* //
 // Stylesheet API
@@ -540,7 +548,7 @@ Css.createStyleSheet = function(doc, url)
 
     Firebug.setIgnored(style);
     return style;
-}
+};
 
 Css.addStyleSheet = function(doc, style)
 {
@@ -759,7 +767,7 @@ Css.stripUnits = function(value)
             return skip || ('0' + whitespace);
         }
     );
-}
+};
 
 Css.extractURLs = function(value)
 {
@@ -770,70 +778,105 @@ Css.extractURLs = function(value)
         urls.push(urlValues[i].replace(/url\((["'])(.*?)\1\)/, "$2"));
 
     return urls;
-}
+};
+
+Css.colorNameToRGB = function(value)
+{
+    try
+    {
+        var rgbValue = domUtils.colorNameToRGB(value);
+        return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+    }
+    catch(e) {
+        return value;
+    }
+};
 
 Css.rgbToHex = function(value)
 {
+    function convertRGBToHex(r, g, b)
+    {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
+            toString(16).substr(-6).toUpperCase();
+    }
+    try
+    {
+        var rgbValue = domUtils.colorNameToRGB(value);
+        return convertRGBToHex(rgbValue.r, rgbValue.g, rgbValue.b);
+    }
+    catch(e) {}
+
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
-            return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
-                toString(16).substr(-6).toUpperCase();
+            return convertRGBToHex(r, g, b);
         });
-}
+};
 
 Css.rgbToHSL = function(value)
 {
+    function convertRGBToHSL(r, g, b, a)
+    {
+        r = parseInt(r);
+        g = parseInt(g);
+        b = parseInt(b);
+
+        var gray = (r == g && g == b);
+
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        var max = Math.max(r, g, b);
+        var min = Math.min(r, g, b);
+
+        var h = 0;
+        var s = 0;
+        var l = (max+min)/2;
+
+        if (!gray)
+        {
+            var delta = max - min;
+            s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);
+
+            switch (max)
+            {
+                case r:
+                    h = (g-b)/delta + (g < b ? 6 : 0);
+                    break;
+
+                case g:
+                    h = (b-r)/delta + 2;
+                    break;
+
+                case b:
+                    h = (r-g)/delta + 4;
+                    break;
+            }
+        }
+
+        h = Math.round(h * 60);
+        s = Math.round(s * 100);
+        l = Math.round(l * 100);
+
+        if (a)
+            return "hsla("+h+", "+s+"%, "+l+"%, "+a+")";
+        else
+            return "hsl("+h+", "+s+"%, "+l+"%)";
+    }
+
+    try
+    {
+        var rgbValue = domUtils.colorNameToRGB(value);
+        return convertRGBToHSL(rgbValue.r, rgbValue.g, rgbValue.b);
+    }
+    catch(e) {}
+
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a)
         {
-            r = parseInt(r);
-            g = parseInt(g);
-            b = parseInt(b);
-
-            var gray = (r == g && g == b);
-
-            r /= 255;
-            g /= 255;
-            b /= 255;
-
-            var max = Math.max(r, g, b);
-            var min = Math.min(r, g, b);
-
-            var h = 0;
-            var s = 0;
-            var l = (max+min)/2;
-
-            if (!gray)
-            {
-                var delta = max - min;
-                s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);
-
-                switch (max)
-                {
-                    case r:
-                        h = (g-b)/delta + (g < b ? 6 : 0);
-                        break;
-
-                    case g:
-                        h = (b-r)/delta + 2;
-                        break;
-
-                    case b:
-                        h = (r-g)/delta + 4;
-                        break;
-                }
-            }
-
-            h = Math.round(h * 60);
-            s = Math.round(s * 100);
-            l = Math.round(l * 100);
-
-            if (a)
-                return "hsla("+h+", "+s+"%, "+l+"%, "+a+")";
-            else
-                return "hsl("+h+", "+s+"%, "+l+"%)";
+            return convertRGBToHSL(r, g, b, a);
         });
-}
+};
 
 // ********************************************************************************************* //
 // CSS Info
@@ -841,6 +884,16 @@ Css.rgbToHSL = function(value)
 Css.cssInfo = {};
 Css.cssInfo.html =
 {
+    "animation": [],
+    "animation-delay": [],
+    "animation-direction": ["normal", "alternate", "reverse", "alternate-reverse"],
+    "animation-duration": [],
+    "animation-iteration-count": ["infinite"],
+    "animation-name" : ["none"],
+    "animation-play-state": ["running", "paused"],
+    "animation-timing-function": [],
+    "animation-fill-mode": ["none", "forwards", "backwards", "both"],
+
     "background": ["bgRepeat", "bgAttachment", "position", "color", "image", "none", "boxModels"],
     "background-attachment": ["bgAttachment"],
     "background-color": ["color"],
@@ -878,10 +931,9 @@ Css.cssInfo.html =
     "border-top-right-radius": ["length"], // FF 4.0
     "border-bottom-right-radius": ["length"], // FF 4.0
     "border-bottom-left-radius": ["length"], // FF 4.0
-    "-moz-border-image": ["mozBorderImageRepeat", "thickness", "url()", "none"],
-    "border-image": ["mozBorderImageRepeat", "thickness", "url()", "none"], // FF 15.0
+    "border-image": ["borderImageRepeat", "thickness", "url()", "none"], // FF 15.0
     "border-image-outset": ["length"], // FF 15.0
-    "border-image-repeat": ["mozBorderImageRepeat"], // FF 15.0
+    "border-image-repeat": ["borderImageRepeat"], // FF 15.0
     "border-image-slice": ["fill"],
     "border-image-source": ["image", "none"],
     "border-image-width": ["auto", "length"], // FF 15.0
@@ -954,6 +1006,8 @@ Css.cssInfo.html =
     "padding-bottom": ["length"],
     "padding-left": ["length"],
 
+    "page-break-after": ["pageBreak"],
+    "page-break-before": ["pageBreak"],
     "pointer-events": ["auto", "none"],
     "position": ["elPosition"],
     "quotes": ["none"],
@@ -967,6 +1021,14 @@ Css.cssInfo.html =
     "text-rendering": ["textRendering"],
     "text-shadow": ["color", "length"],
     "text-transform": ["textTransform"],
+    "transition": ["transitionProperty", "timingFunction"],
+    "transition-property": ["transitionProperty"],
+    "transition-duration": [],
+    "transition-timing-function": ["timingFunction"],
+    "transition-delay": [],
+    "transform": ["transformFunction", "none", "length"],
+    "transform-origin": ["position", "length"],
+    "transform-style": ["transformStyle"],
     "unicode-bidi": ["unicodeBidi"],
     "vertical-align": ["verticalAlign", "length"],
     "visibility": ["visibility"],
@@ -975,8 +1037,6 @@ Css.cssInfo.html =
     "word-spacing": ["normal", "length"],
     "word-wrap": ["wordWrap"], // FF 3.5
     "z-index": ["auto"],
-    "page-break-after": ["pageBreak"],
-    "page-break-before": ["pageBreak"],
 
     "-moz-appearance": ["mozAppearance"],
     "-moz-backface-visibility": ["mozBackfaceVisibility"], // FF 10.0
@@ -1014,26 +1074,9 @@ Css.cssInfo.html =
     "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto", "length"],
     "-moz-image-region": [],
-    "-moz-transform": ["mozTransformFunction", "none", "length"],
-    "-moz-transform-origin": ["position", "length"],
-    "-moz-transform-style": ["mozTransformStyle"], // FF 10.0
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
-    "-moz-transition": ["mozTransitionProperty", "mozTimingFunction"], // FF 4.0
-    "-moz-transition-property": ["mozTransitionProperty"], // FF 4.0
-    "-moz-transition-duration": [], // FF 4.0
-    "-moz-transition-timing-function": ["mozTimingFunction"], // FF 4.0
-    "-moz-transition-delay": [], // FF 4.0
-    "-moz-animation": [], // FF 5.0
-    "-moz-animation-delay": [], // FF 5.0
-    "-moz-animation-direction": ["normal", "alternate"], // FF 5.0
-    "-moz-animation-duration": [], // FF 5.0
-    "-moz-animation-iteration-count": ["infinite"], // FF 5.0
-    "-moz-animation-name" : ["none"], // FF 5.0
-    "-moz-animation-play-state": ["running", "paused"], // FF 5.0
-    "-moz-animation-timing-function": [], // FF 5.0
-    "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF 5.0
     "orient": ["horizontal", "vertical"], // FF 6.0
     "-moz-text-blink": ["none", "blink"], // FF 6.0
     "-moz-text-decoration-color": ["color"], // FF 6.0
@@ -1112,6 +1155,7 @@ Css.cssInfo.svg =
 
 Css.multiValuedProperties =
 {
+    "animation": 1,
     "background": 1,
     "background-position": 1,
     "border": 1,
@@ -1123,8 +1167,7 @@ Css.multiValuedProperties =
     "font": 1,
     "font-family": 1,
     "margin": 1,
-    "padding": 1,
-    "-moz-animation": 1
+    "padding": 1
 };
 
 Css.unitlessProperties =
@@ -1175,6 +1218,8 @@ Css.cssKeywords =
         "menupopup",
         "menuradio",
         "menuseparator",
+        "meterbar",
+        "meterchunk",
         "progressbar",
         "progressbar-vertical",
         "progresschunk",
@@ -2050,7 +2095,7 @@ Css.cssKeywords =
         "inset"
     ],
 
-    "mozBorderImageRepeat":
+    "borderImageRepeat":
     [
         "stretch",
         "round",
@@ -2061,20 +2106,24 @@ Css.cssKeywords =
     "image":
     [
         "url()",
-        "-moz-linear-gradient()", // FF 3.6
-        "-moz-radial-gradient()", // FF 3.6
-        "-moz-repeating-linear-gradient()", // FF 3.6
-        "-moz-repeating-radial-gradient()", // FF 3.6
-        "-moz-image-rect()", // FF 4.0
-        "-moz-element()", // FF 4.0
+        "linear-gradient()",
+        "radial-gradient()",
+        "repeating-linear-gradient()",
+        "repeating-radial-gradient()",
+        "-moz-linear-gradient()",
+        "-moz-radial-gradient()",
+        "-moz-repeating-linear-gradient()",
+        "-moz-repeating-radial-gradient()",
+        "-moz-image-rect()",
+        "-moz-element()",
     ],
 
     "length":
     [
-        "-moz-calc()"
+        "calc()"
     ],
 
-    "mozTransformFunction":
+    "transformFunction":
     [
         "matrix()",
         "matrix3d()",
@@ -2240,14 +2289,14 @@ Css.cssKeywords =
     ],
 
     // FF 10.0
-    "mozTransformStyle":
+    "transformStyle":
     [
         "preserve-3d",
         "flat"
     ],
 
     // FF 4.0
-    "mozTransitionProperty":
+    "transitionProperty":
     [
         "none",
         "all",
@@ -2298,6 +2347,8 @@ Css.cssKeywords =
         "text-indent",
         "text-shadow",
         "top",
+        "transform-origin",
+        "transform",
         "vertical-align",
         "visibility",
         "width",
@@ -2310,12 +2361,10 @@ Css.cssKeywords =
         "-moz-column-rule-width",
         "-moz-column-width",
         "-moz-image-region",
-        "-moz-outline-radius",
-        "-moz-transform-origin",
-        "-moz-transform"
+        "-moz-outline-radius"
     ],
 
-    "mozTimingFunction": // FF 4.0
+    "timingFunction": // FF 4.0
     [
         "cubic-bezier()",
         "ease",
@@ -2599,6 +2648,37 @@ Css.charsets =
     "Windows-1258"
 ];
 
+// http://www.w3.org/TR/CSS21/media.html#media-types
+Css.mediaTypes =
+[
+    "all",
+    "aural",
+    "braille",
+    "embossed",
+    "handheld",
+    "print",
+    "projection",
+    "screen",
+    "tty",
+    "tv"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@document
+Css.documentConditions =
+[
+    "url()",
+    "url-prefix()",
+    "domain()",
+    "regexp()"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@keyframes#Values
+Css.keyframeKeys =
+{
+    "from": "0%",
+    "to": "100%"
+};
+
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h
 // but that's not relevant for our purposes.
@@ -2659,6 +2739,9 @@ Css.pseudoClasses =
     ":-moz-lwtheme-brighttext",
     ":-moz-lwtheme-darktext",
     ":-moz-math-increment-script-level",
+    ":-moz-meter-optimum",
+    ":-moz-meter-sub-optimum",
+    ":-moz-meter-sub-sub-optimum",
     ":-moz-only-whitespace",
     ":-moz-placeholder",
     ":-moz-read-only",
@@ -2682,6 +2765,7 @@ Css.pseudoClasses =
     ":-moz-window-inactive"
 ];
 
+// https://developer.mozilla.org/en-US/docs/CSS/CSS_Reference/Mozilla_Extensions#Pseudo-elements_and_pseudo-classes
 // http://mxr.mozilla.org/mozilla-central/source/browser/devtools/styleinspector/CssLogic.jsm
 Css.pseudoElements =
 [
@@ -2689,29 +2773,33 @@ Css.pseudoElements =
     "::before",
     "::first-letter",
     "::first-line",
-    "::selection",
     "::-moz-focus-inner",
     "::-moz-focus-outer",
     "::-moz-list-bullet",
     "::-moz-list-number",
     "::-moz-math-anonymous",
     "::-moz-math-stretchy",
+    "::-moz-placeholder",
     "::-moz-progress-bar",
     "::-moz-selection"
 ];
 
 Css.nonEditableTags =
 {
-    "HTML": 1,
-    "HEAD": 1,
-    "html": 1,
-    "head": 1
+    "HTML": 1, "html": 1,
+    "HEAD": 1, "head": 1
 };
 
 Css.innerEditableTags =
 {
-    "BODY": 1,
-    "body": 1
+    "BODY": 1, "body": 1
+};
+
+Css.nonDeletableTags =
+{
+    "HTML": 1, "html": 1,
+    "HEAD": 1, "head": 1,
+    "BODY": 1, "body": 1
 };
 
 // ********************************************************************************************* //

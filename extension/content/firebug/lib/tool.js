@@ -10,7 +10,7 @@ var FirebugTool = function(name)
 {
     this.toolName = name;
     this.active = false;
-}
+};
 
 FirebugTool.prototype =
 {
@@ -26,7 +26,7 @@ FirebugTool.prototype =
     {
         this.active = !!active;
     }
-}
+};
 // ********************************************************************************************* //
 
 return FirebugTool;

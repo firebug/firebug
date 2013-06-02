@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4583: Overwritten percental styles are not striked out</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            #elementWithOverwrittenStyles {
+                width: 200px;
+                height: 100px;
+                background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            }
+
+            #elementWithOverwrittenStyles {
+                width: 15%;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4583">Issue 4583</a>: Overwritten percental styles are not striked out</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="elementWithOverwrittenStyles"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above (<code>#elementWithOverwrittenStyles</code>)</li>
+                    <li>Observe the <code>width</code> property of the second <code>#elementWithOverwrittenStyles</code> rule</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <code>width</code> property must be striked out</li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/options",
-    "firebug/lib/css"
+    "firebug/lib/css",
+    "firebug/chrome/menu"
 ],
-function(FBTrace, Locale, Options, Css) {
+function(FBTrace, Locale, Options, Css, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -80,8 +81,11 @@ Toolbar.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
+    if (item.items)
+        Menu.createMenuPopup(element, item);
+
     return element;
-}
+};
 
 Toolbar.createToolbarSeparator = function(toolbar, before)
 {

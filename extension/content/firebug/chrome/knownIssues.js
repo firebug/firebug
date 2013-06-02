@@ -15,9 +15,6 @@ function(Obj, Options, Firebug, Dom, Firefox) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-
 // ********************************************************************************************* //
 
 /**
@@ -30,46 +27,8 @@ Firebug.KnownIssues = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        var popupPrefName = "commandLineShowCompleterPopup";
-        if (/Linux/.test(window.navigator.platform))
-            Options.register(popupPrefName, false);
-        else
-            Options.register(popupPrefName, true);
-
-        Firebug.commandLineShowCompleterPopup = Firebug.Options.get(popupPrefName);
-
-        // In Firefox 4.0b7+ the addon-toolbar is not showing up. We'll show it once just
-        // in case the user overlooks the new Firebug start-button in the toolbar. As soon
-        // as users will get used to the toolbar button this could be removed completely.
-        if (!Firebug.addonBarOpened)
-        {
-            var addonBar = Firefox.getElementById("addon-bar");
-
-            // Open the addon bar
-            Dom.collapse(addonBar, false);
-            document.persist("addon-bar", "collapsed");
-
-            // This is just one time operation.
-            Firebug.Options.set("addonBarOpened", true);
-        }
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("Set commandLineShowCompleterPopup " +
-                Firebug.commandLineShowCompleterPopup);
+        // TODO: put any workarounds here
     },
-
-    internationalizeUI: function(doc)
-    {
-        // See also issue 4529. Since the memory profiler is still a lab thing,
-        // hide the "Memory Profiler" button begin a pref.
-        // xxxHonza: removed from 1.10 (issue 5599)
-        /*if (!Options.get("memoryProfilerEnable"))
-        {
-            var button = doc.getElementById("fbToggleMemoryProfiling");
-            if (button)
-                Dom.collapse(button, true);
-        }*/
-    }
 });
 
 // ********************************************************************************************* //

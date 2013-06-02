@@ -1,0 +1,90 @@
+/* See license.txt for terms of usage */
+
+html {
+    background-color: #f3f3f3;
+}
+
+body {
+    border-top: 1px solid #BBB9BA;
+}
+
+/************************************************************************************************/
+/* Twisties */
+
+.twisty,
+.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-log .objectBox-array.hasTwisty,
+.logRow-spy .spyHead .spyTitle,
+.logGroup > .logRow,
+.memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.hasHeaders .netHrefLabel,
+.objectBox-stackFrame.hasTwisty,
+.objectBox-functionCall.hasTwisty,
+.netPageRow > .netCol > .netPageTitle,
+.computedStyle.hasSelectors > .stylePropName,
+.cookieRow > .cookieNameCol > .cookieNameLabel {
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
+    background-repeat: no-repeat;
+    background-position: 2px 3px;
+}
+
+.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-log .objectBox-array.hasTwisty.opened,
+.logRow-spy.opened .spyHead .spyTitle,
+.logGroup.opened > .logRow,
+.memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
+.nodeBox.highlightOpen > .nodeLabel > .twisty,
+.nodeBox.open > .nodeLabel > .twisty,
+.netRow.opened > .netCol > .netHrefLabel,
+.objectBox-stackFrame.hasTwisty.opened,
+.objectBox-functionCall.hasTwisty.opened,
+.computedStylesGroup.opened > .cssComputedHeader > .twisty,
+.netPageRow.opened > .netCol > .netPageTitle,
+.computedStyle.hasSelectors.opened > .stylePropName,
+.cookieRow.opened > .cookieNameCol > .cookieNameLabel {
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
+}
+
+.memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.hasHeaders .netHrefLabel {
+    background-position: 2px 2px;
+}
+
+.twisty {
+    background-position: 2px 1px;
+}
+
+/************************************************************************************************/
+/* Panel base */
+
+.infoTip,
+.fullPanelEditor {
+    font-family: Monaco, monospace;
+}
+
+/************************************************************************************************/
+/* Console panel */
+
+.logRow-command > .objectBox-text,
+.objectBox-string,
+.objectBox-text,
+.objectBox-number,
+.objectLink-element,
+.objectLink-textNode,
+.objectLink-function,
+.objectBox-stackTrace,
+.objectLink-profile,
+.objectBox-table,
+.errorSource,
+.selectorTag,
+.selectorId,
+.selectorClass,
+.objectLeftBrace,
+.objectRightBrace,
+.objectEqual,
+.objectComma,
+.arrayLeftBracket,
+.arrayRightBracket,
+.arrayComma {
+      font-family: Monaco, monospace;
+}

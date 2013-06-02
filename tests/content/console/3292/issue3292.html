@@ -1,39 +1,50 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Test Case for Issue #3292</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-</head>
-<body>
-
-<h1>Issue #3292 and Issue #3327</h1>
-
-<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3292">Issue #3292</a>
-- <span class="h3">console not defined in iframe</span> and
-<a href="http://code.google.com/p/fbug/issues/detail?id=3327">Issue #3327</a>
-- <span class="h3"> Issue 3327:  Firebug Console token changed! never stops outputting</span>.
-<br/>
-<i>johnjbarton@johnjbarton.com</i>
-</p>
-
-<ol>
-<li>Open Firebug and enable the Console panel.</li>
-<li>Reload this page</li>
-<li>You should see two logs in the Console panel.<br/>
-<code>parent log</code><br/>
-<code>included in iframe</code><br/>
-<code>included in iframe</code><br/>
-<code style="color:red">iframe log</code>
-</li>
-</ol>
-
-<script type="text/javascript">
-window.console.log("parent log");
-</script>
-<script type="text/javascript" src="js/issue3292-included.js"></script>
-
-<iframe src="./issue3292-innerFrame.html" height="300"></iframe>
-</script>
-
-</body>
+    <head>
+        <title>Issue 3292: console is not defined in iframes</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #iframe {
+            width: 100px;
+            height: 50px;
+            border: none;
+        }
+        </style>
+        <script type="text/javascript">
+        console.log("parent log");
+        </script>
+        <script type="text/javascript" src="issue3292-log.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3292">Issue 3292</a>: console is not defined in iframes</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe id="iframe" src="issue3292-iframe.html"></iframe>
+            </section>
+            <section id="description">
+                <p class="note">This test also covers <a href="http://code.google.com/p/fbug/issues/detail?id=3327">issue 3327</a> (Firebug Console token changed! never stops outputting)</p>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        Three logs should be listed inside the console:<br/>
+                        <code>
+parent log
+include log (2 grouped logs)
+iframe log
+</code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>

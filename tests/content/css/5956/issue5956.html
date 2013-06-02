@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5956: Allow copying single CSS properties</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5956">Issue 5956</a>: Allow copying single CSS properties</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5956.html</em> from the Location Menu</li>
+                    <li>Right-click the <code>background</code> property of the <code>#element</code> rule and choose <em>Copy Property Declaration</em></li>
+                    <li>Paste the copied string to a text editor</li>
+                    <li>Repeat steps 4 and 5 two times but choose <em>Copy Property Name</em> and <em>Copy Property Value</em></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><code>background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);</code> for <em>Copy Property Declaration</em></li>
+                    <li><code>background-image</code> for <em>Copy Property Name</em></li>
+                    <li><code>-moz-linear-gradient(135deg, #788CFF, #B4C8FF)</code> for <em>Copy Property Value</em></li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

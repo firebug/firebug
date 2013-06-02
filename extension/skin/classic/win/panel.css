@@ -4,11 +4,13 @@
 /* Twisties */
 
 .twisty,
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.foldableGroup > .groupHeader > .twisty,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.memberRow.cropped > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
 .objectBox-functionCall.hasTwisty,
@@ -17,17 +19,19 @@
 .breakpointHeader > .twisty,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(chrome://firebug/skin/win/twistyClosed.svg);
     background-repeat: no-repeat;
-    background-position: 2px 2px;
+    background-position: 2px calc(0.5em - 3px);
     min-height: 12px;
 }
 
-.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.foldableGroup.opened > .groupHeader > .twisty,
+.logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
+.memberRow.cropped.opened > .memberLabelCell > .memberLabel,
 .nodeBox.highlightOpen > .nodeLabel > .twisty,
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
@@ -38,11 +42,7 @@
 .breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
-}
-
-.twisty {
-    background-position: 4px 4px;
+    background-image: url(chrome://firebug/skin/win/twistyOpen.svg);
 }
 
 .hasHeaders .netHrefLabel,
@@ -56,13 +56,13 @@
 .closeButton {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/win/close.svg) no-repeat;
 }
 
 .closeButton:hover {
-    background-position: 0 -16px;
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
-.closeButton:hover:active {
-    background-position: 0 -32px;
+.closeButton:active {
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }

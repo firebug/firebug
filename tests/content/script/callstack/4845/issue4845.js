@@ -29,16 +29,9 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 panel = FBTest.selectPanel("console");
-                logRows = panel.panelNode.getElementsByClassName("objectBox-text");
+                var counterValue = row.getElementsByClassName("logCounterValue")[0].textContent;
 
-                logMessages = 0;
-                for (var i = 0; i < logRows.length; ++i)
-                {
-                    if (logRows.item(i).textContent == "Hello Firebug user!")
-                        logMessages++;
-                }
-
-                FBTest.compare(2, logMessages,
+                FBTest.compare(2, counterValue,
                     "There must be two 'Hello Firebug user!' messages logged to the console.");
 
                 FBTest.clickContinueButton();

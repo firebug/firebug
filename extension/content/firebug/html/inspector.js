@@ -8,21 +8,23 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/chrome/window",
     "firebug/lib/system",
-    "firebug/html/highlighterCache"
+    "firebug/html/highlighterCache",
+    "firebug/html/quickInfoBox",
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
-    Win, System, HighlighterCache) {
+function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
+    Win, System, HighlighterCache, QuickInfoBox) {
 
 // ********************************************************************************************* //
 // Constants
 
 const inspectDelay = 200;
-const highlightCSS = "chrome://firebug/content/html/highlighter.css";
+const highlightCssUrl = "chrome://firebug/content/html/highlighter.css";
 const ident = HighlighterCache.ident;
 const Cu = Components.utils;
 
@@ -71,12 +73,14 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         var i, elt, elementLen, oldContext, usingColorArray;
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
-        if (!elementArr || !FirebugReps.Arr.isArray(elementArr, context.window))
+        if (!elementArr || !Arr.isArrayLike(elementArr))
         {
+            // Not everything that comes through here is wrapped - fix that.
+            elementArr = Wrapper.wrapObject(elementArr);
+
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
-                (Wrapper.getContentView(elementArr) &&
-                    !Xml.isVisible(Wrapper.getContentView(elementArr))))
+                (typeof elementArr === "object" && !Xml.isVisible(elementArr)))
             {
                 if (elementArr && Dom.isRange(elementArr))
                     elementArr = elementArr;
@@ -139,13 +143,14 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = FirebugReps.Arr.isArray(colorObj, context.window);
+            usingColorArray = Arr.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {
                 for (i=0, elementLen=elementArr.length; i<elementLen; i++)
                 {
-                    elt = elementArr[i];
+                    // Like above, wrap things.
+                    elt = Wrapper.wrapObject(elementArr[i]);
 
                     if (elt && elt instanceof HTMLElement)
                     {
@@ -728,7 +733,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     {
         try
         {
-            this.hideQuickInfoBox();
+            QuickInfoBox.hideQuickInfoBox();
+            this.inspectNode(null);
         }
         catch (ex)
         {
@@ -787,12 +793,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             this.highlightObject(null);
             this.defaultHighlighter = value ? getHighlighter("boxModel") : getHighlighter("frame");
         }
-        else if (name == "showQuickInfoBox")
+        else if(name == "showQuickInfoBox")
         {
-            if (quickInfoBox.boxEnabled && !value)
-                quickInfoBox.hide();
-
-            quickInfoBox.boxEnabled = value;
+            QuickInfoBox.boxEnabled = value;
         }
     },
 
@@ -807,31 +810,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (styleSheet)
             return styleSheet;
     },
-
-    /**
-     * Toggle the quick info box.
-     */
-    toggleQuickInfoBox: function()
-    {
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state == "open")
-            quickInfoBox.hide();
-
-        quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
-
-        Firebug.Options.set("showQuickInfoBox", quickInfoBox.boxEnabled);
-    },
-
-    /**
-     * Hide the quick info box.
-     */
-    hideQuickInfoBox: function()
-    {
-        quickInfoBox.hide();
-
-        this.inspectNode(null);
-    }
 });
 
 // ********************************************************************************************* //
@@ -1044,134 +1022,11 @@ function getImageMapHighlighter(context)
                 canvas = null;
                 ctx = null;
             }
-        }
+        };
     }
 
     return context.imageMapHighlighter;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-var quickInfoBox =
-{
-    boxEnabled: undefined,
-    dragging: false,
-    storedX: null,
-    storedY: null,
-
-    show: function(element)
-    {
-        if (!this.boxEnabled || !element)
-            return;
-
-        this.needsToHide = false;
-
-        var domAttribs = ["nodeName", "id", "name", "offsetWidth", "offsetHeight"];
-        var cssAttribs = ["position"];
-        var compAttribs = [
-            "width", "height", "zIndex", "position", "top", "right", "bottom", "left",
-            "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
-            "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"];
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state==="closed")
-        {
-            this.storedX = this.storedX || Firefox.getElementById("content").tabContainer.boxObject.screenX + 5;
-            this.storedY = this.storedY || Firefox.getElementById("content").tabContainer.boxObject.screenY + 35;
-
-            // Dynamically set noautohide to avoid mozilla bug 545265.
-            if (!this.noautohideAdded)
-            {
-                this.noautohideAdded = true;
-                qiBox.addEventListener("popupshowing", function runOnce()
-                {
-                    qiBox.removeEventListener("popupshowing", runOnce, false);
-                    qiBox.setAttribute("noautohide", true);
-                }, false);
-            }
-            qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
-        }
-
-        qiBox.removeChild(qiBox.firstChild);
-        var vbox = document.createElement("vbox");
-        qiBox.appendChild(vbox);
-
-        var needsTitle = this.addRows(element, vbox, domAttribs);
-        var needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
-
-        var lab;
-        if (needsTitle || needsTitle2)
-        {
-            lab = document.createElement("label");
-            lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", Locale.$STR("quickInfo"));
-            vbox.insertBefore(lab, vbox.firstChild);
-        }
-
-        lab = document.createElement("label");
-        lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", Locale.$STR("computedStyle"));
-        vbox.appendChild(lab);
-
-        this.addRows(element, vbox, compAttribs, true);
-    },
-
-    hide: function()
-    {
-        // if mouse is over panel defer hiding to mouseout to not cause flickering
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-        if (qiBox.state==="closed")
-            return;
-
-        if (qiBox.mozMatchesSelector(":hover"))
-            return;
-
-        this.storedX = qiBox.boxObject.screenX;
-        this.storedY = qiBox.boxObject.screenY;
-        qiBox.hidePopup();
-    },
-
-    addRows: function(domBase, vbox, attribs, computedStyle)
-    {
-        if (!domBase)
-            return;
-
-        var needsTitle = false;
-        for (var i = 0; i < attribs.length; i++)
-        {
-            var value;
-            if (computedStyle)
-            {
-                var cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
-                value = cs.getPropertyValue(attribs[i]);
-
-                if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
-                    value = rgbToHex(value);
-            }
-            else
-            {
-                value = domBase[attribs[i]];
-            }
-
-            if (value)
-            {
-                needsTitle = true;
-                var hbox = document.createElement("hbox");
-                var lab = document.createElement("label");
-                lab.setAttribute("class", "fbQuickInfoName");
-                lab.setAttribute("value", attribs[i]);
-                hbox.appendChild(lab);
-                var desc = document.createElement("label");
-                desc.setAttribute("class", "fbQuickInfoValue");
-                desc.appendChild(document.createTextNode(": " + value));
-                hbox.appendChild(desc);
-                vbox.appendChild(hbox);
-            }
-        }
-
-        return needsTitle;
-    }
-};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1224,13 +1079,15 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter " + element.tagName);
-            var body = getNonFrameBody(element);
+
+            var body = Dom.getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
 
             this.ihl && this.ihl.show(false);
 
-            quickInfoBox.show(element);
+            QuickInfoBox.show(element);
+
             var highlighter = this.getHighlighter(context, isMulti);
             var bgDiv = highlighter.firstChild;
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
@@ -1239,19 +1096,19 @@ Firebug.Inspector.FrameHighlighter.prototype =
             {
                 cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-                if (cs.MozTransform && cs.MozTransform != "none")
-                    css += "-moz-transform: "+cs.MozTransform+"!important;" +
-                           "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
+                if (cs.transform && cs.transform != "none")
+                    css += "transform: " + cs.transform + " !important;" +
+                           "transform-origin: " + cs.transformOrigin + " !important;";
                 if (cs.borderRadius)
-                    css += "border-radius: "+cs.borderRadius+"!important;";
+                    css += "border-radius: " + cs.borderRadius + " !important;";
                 if (cs.borderTopLeftRadius)
-                    css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
+                    css += "border-top-left-radius: " + cs.borderTopLeftRadius + " !important;";
                 if (cs.borderTopRightRadius)
-                    css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
+                    css += "border-top-right-radius: " + cs.borderTopRightRadius + " !important;";
                 if (cs.borderBottomRightRadius)
-                    css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
+                    css += "border-bottom-right-radius: " + cs.borderBottomRightRadius + " !important;";
                 if (cs.borderBottomLeftRadius)
-                    css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
+                    css += "border-bottom-left-radius: " + cs.borderBottomLeftRadius + " !important;";
             }
             css += "box-shadow: 0 0 2px 2px "+
                 (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
@@ -1275,7 +1132,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                     FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI +
                         " !?= " + body.ownerDocument.documentURI, highlighter);
 
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
 
                 try
                 {
@@ -1310,7 +1167,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (body)
         {
             body.removeChild(highlighter);
-            quickInfoBox.hide();
+            QuickInfoBox.hide();
         }
 
         this.ihl && this.ihl.destroy();
@@ -1376,7 +1233,7 @@ BoxModelHighlighter.prototype =
         {
             this.ihl && this.ihl.show(false);
 
-            quickInfoBox.show(element);
+            QuickInfoBox.show(element);
             context.highlightFrame = highlightFrame;
 
             if (highlightFrame)
@@ -1462,10 +1319,10 @@ BoxModelHighlighter.prototype =
                 moveImp(nodes.lines.top, 0, top);
                 moveImp(nodes.lines.right, left + width, 0);
                 moveImp(nodes.lines.bottom, 0, top + height);
-                moveImp(nodes.lines.left, left, 0)
+                moveImp(nodes.lines.left, left, 0);
             }
 
-            var body = getNonFrameBody(element);
+            var body = Dom.getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
 
@@ -1494,7 +1351,7 @@ BoxModelHighlighter.prototype =
 
             if (needsAppend)
             {
-                attachStyles(context, body);
+                attachStyles(context, body.ownerDocument);
                 body.appendChild(nodes.offset);
             }
 
@@ -1528,7 +1385,7 @@ BoxModelHighlighter.prototype =
     unhighlight: function(context)
     {
         HighlighterCache.clear();
-        quickInfoBox.hide();
+        QuickInfoBox.hide();
     },
 
     getNodes: function(context, isMulti)
@@ -1623,37 +1480,26 @@ BoxModelHighlighter.prototype =
 
 // ********************************************************************************************* //
 
-function getNonFrameBody(elt)
+function attachStyles(context, doc)
 {
-    if (Dom.isRange(elt))
+    if (!context.highlightStyleCache)
+        context.highlightStyleCache = new WeakMap();
+    var highlightStyleCache = context.highlightStyleCache;
+
+    var style;
+    if (highlightStyleCache.has(doc))
     {
-        elt = elt.commonAncestorContainer;
+        style = highlightStyleCache.get(doc);
     }
-    var body = Dom.getBody(elt.ownerDocument);
-    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
-}
-
-function attachStyles(context, body)
-{
-    if (FBTrace.DBG_ERRORS && context.highlightStyle && Cu.isDeadWrapper(context.highlightStyle))
-        FBTrace.sysout("inspector.attachStyles; ERROR can't access dead object");
-
-    var doc = body.ownerDocument;
-
-    if (!context.highlightStyle)
-        context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
-
-    var parentNode = context.highlightStyle.parentNode;
-    if (!parentNode || context.highlightStyle.ownerDocument != doc)
+    else
     {
-        // Clone the <style> element so, it doesn't adopt the new document as parent.
-        // The other doc (except of the original one that is always the top doc) comes
-        // from an iframe, which can be reloaded (within the context life-time) and
-        // consequent access to context.highlightStyle would fire "can't access dead object"
-        // exception (see issue 6013).
-        var style = parentNode ? context.highlightStyle.cloneNode(true) : context.highlightStyle;
-        Css.addStyleSheet(body.ownerDocument, style);
+        style = Css.createStyleSheet(doc, highlightCssUrl);
+        highlightStyleCache.set(doc, style);
     }
+
+    // Cater for the possiblity that someone might have removed our stylesheet.
+    if (!style.parentNode)
+        Css.addStyleSheet(doc, style);
 }
 
 function createProxiesForDisabledElements(body)
@@ -1677,9 +1523,9 @@ function createProxiesForDisabledElements(body)
         div.className = "firebugResetStyles fbProxyElement";
 
         css = moveImp(null, rect.left, rect.top + body.scrollTop) + resizeImp(null, rect.width, rect.height);
-        if (cs.MozTransform && cs.MozTransform != "none")
-          css += "-moz-transform:" + cs.MozTransform + "!important;" +
-                 "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
+        if (cs.transform && cs.transform != "none")
+            css += "transform:" + cs.transform + " !important;" +
+                   "transform-origin:" + cs.transformOrigin + " !important;";
         if (cs.borderRadius)
             css += "border-radius:" + cs.borderRadius + " !important;";
         if (cs.borderTopLeftRadius)
@@ -1698,14 +1544,6 @@ function createProxiesForDisabledElements(body)
         div.ident = ident.proxyElt;
         HighlighterCache.add(div);
     }
-}
-
-function rgbToHex(value)
-{
-    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b)
-    {
-        return "#"+((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
-    });
 }
 
 function isVisibleElement(elt)

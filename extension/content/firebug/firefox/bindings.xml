@@ -859,6 +859,10 @@
         ]]></handler>
 
         <handler event="popupshowing"><![CDATA[
+            // If the event comes from a sub-menu ignore it (just the root has "menuPopup" class)
+            if (!FBL.hasClass(event.originalTarget, "menuPopup"))
+                return;
+
             var tab = this.parentNode;
             if (!tab)
                 return false;
@@ -893,6 +897,10 @@
         ]]></handler>
 
         <handler event="popuphidden"><![CDATA[
+            // If the event comes from a sub-menu ignore it (just the root has "menuPopup" class)
+            if (!FBL.hasClass(event.originalTarget, "menuPopup"))
+                return;
+
             this.setAttribute("role", "presentation");
             FBL.eraseNode(this.popup);
         ]]></handler>
@@ -1897,7 +1905,7 @@
     <content align="stretch">
         <xul:menuitem anonid="item" flex="1"
             class="menuitem-tooltip split-menuitem-item"
-            xbl:inherits="label,key,image,value" allowevents="true"/>
+            xbl:inherits="label,key,image,value,checked" allowevents="true"/>
         <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
             <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
                 <xul:image/>

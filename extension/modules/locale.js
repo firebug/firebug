@@ -98,7 +98,7 @@ Locale.$STR = function(name, bundle)
         name = name.substr(index + 1);
     name = name.replace("_", " ", "g");
     return name;
-}
+};
 
 Locale.$STRF = function(name, args, bundle)
 {
@@ -139,7 +139,7 @@ Locale.$STRF = function(name, args, bundle)
         name = name.substr(index + 1);
 
     return name;
-}
+};
 
 Locale.$STRP = function(name, args, index, bundle)
 {
@@ -167,7 +167,7 @@ Locale.$STRP = function(name, args, index, bundle)
 
     // translatedString contains no ";", either rule 0 or getString fails
     return translatedString;
-}
+};
 
 /*
  * Use the current value of the attribute as a key to look up the localized value.
@@ -190,7 +190,7 @@ Locale.internationalize = function(element, attr, args)
         if (FBTrace.DBG_LOCALE)
             FBTrace.sysout("Failed to internationalize element with attr "+attr+" args:"+args);
     }
-}
+};
 
 Locale.internationalizeElements = function(doc, elements, attributes)
 {
@@ -213,7 +213,7 @@ Locale.internationalizeElements = function(doc, elements, attributes)
                 Locale.internationalize(element, attributes[j]);
         }
     }
-}
+};
 
 Locale.registerStringBundle = function(bundleURI)
 {
@@ -224,21 +224,21 @@ Locale.registerStringBundle = function(bundleURI)
     bundleURI = getDefaultStringBundleURI(bundleURI);
     categoryManager.addCategoryEntry("default_strings_firebug", bundleURI, "", false, true);
     this.defaultStringBundle = null;
-}
+};
 
 Locale.getStringBundle = function()
 {
     if (!this.stringBundle)
         this.stringBundle = stringBundleService.createExtensibleBundle("strings_firebug");
     return this.stringBundle;
-}
+};
 
 Locale.getDefaultStringBundle = function()
 {
     if (!this.defaultStringBundle)
         this.defaultStringBundle = stringBundleService.createExtensibleBundle("default_strings_firebug");
     return this.defaultStringBundle;
-}
+};
 
 Locale.getPluralRule = function()
 {
@@ -249,7 +249,7 @@ Locale.getPluralRule = function()
     catch (err)
     {
     }
-}
+};
 
 // ********************************************************************************************* //
 // Helpers

@@ -27,6 +27,7 @@ locale  firebug es-AR       locale/es-AR/
 locale  firebug es-CL       locale/es-CL/
 locale  firebug es-ES       locale/es-ES/
 locale  firebug et-EE       locale/et-EE/
+locale  firebug eu          locale/eu/
 locale  firebug fa          locale/fa/
 locale  firebug fa-IR       locale/fa-IR/
 locale  firebug fi-FI       locale/fi-FI/

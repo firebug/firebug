@@ -12,46 +12,42 @@ body {
 /* Twisties */
 
 .twisty,
-.logRow-errorMessage > .hasTwisty > .errorTitle,
+.foldableGroup > .groupHeader > .twisty,
+.logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.memberRow.cropped > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
 .objectBox-functionCall.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
     background-repeat: no-repeat;
-    background-position: 2px 3px;
+    background-position: 2px calc(0.5em - 3px);
 }
 
-.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.foldableGroup.opened > .groupHeader > .twisty,
+.logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
+.memberRow.cropped.opened > .memberLabelCell > .memberLabel,
 .nodeBox.highlightOpen > .nodeLabel > .twisty,
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
+.netPageRow.opened > .netCol > .netPageTitle,
 .objectBox-stackFrame.hasTwisty.opened,
 .objectBox-functionCall.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
-.netPageRow.opened > .netCol > .netPageTitle,
+.breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
-}
-
-.memberRow.hasChildren > .memberLabelCell > .memberLabel,
-.hasHeaders .netHrefLabel {
-    background-position: 2px 2px;
-}
-
-.twisty {
-    background-position: 2px 1px;
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
 }
 
 /************************************************************************************************/
@@ -149,15 +145,15 @@ body {
 .closeButton {
     width: 13px;
     height: 13px;
-    background: url(chrome://firebug/skin/mac/close.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/mac/close.svg) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    background-position: 0 -13px;
+    filter: url(chrome://firebug/skin/filters.svg#darken);
 }
 
 .closeButton:hover:active {
-    background-position: 0 -26px;
+    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
 }
 
 /************************************************************************************************/

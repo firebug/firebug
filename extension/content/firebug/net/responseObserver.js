@@ -375,8 +375,8 @@ ChannelListener.prototype =
         }
 
         throw Components.results.NS_NOINTERFACE;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 
@@ -389,7 +389,7 @@ var HttpResponseObserver =
 
         return null;
     }
-}
+};
 
 return HttpResponseObserver;
 

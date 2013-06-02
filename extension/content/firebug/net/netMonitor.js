@@ -32,6 +32,7 @@ const Cr = Components.results;
 var panelName = "net";
 
 var startFile = NetProgress.prototype.startFile;
+var openingFile = NetProgress.prototype.openingFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
@@ -115,7 +116,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             {
                 if (context.netProgress)
                     context.netProgress.post(windowPaint, [win, NetUtils.now()]);
-            }
+            };
 
             if (Options.get("netShowPaintEvents"))
             {
@@ -136,7 +137,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
                         context.removeEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
                     }
                 }, 2000); //xxxHonza: this should be customizable using preferences.
-            }
+            };
             context.addEventListener(win, "load", onWindowLoadHandler, true);
 
             // Register "DOMContentLoaded" listener to track timing.
@@ -145,7 +146,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
                 if (context.netProgress)
                     context.netProgress.post(contentLoad, [win, NetUtils.now()]);
                 context.removeEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
-            }
+            };
 
             context.addEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
         }
@@ -399,6 +400,8 @@ var NetHttpObserver =
                 this.onExamineResponse(subject, win, tabId, context);
             else if (topic == "http-on-examine-cached-response")
                 this.onExamineCachedResponse(subject, win, tabId, context);
+            else if (topic == "http-on-opening-request")
+                this.openingFile(subject, win, tabId, context);
         }
         catch (err)
         {
@@ -517,6 +520,18 @@ var NetHttpObserver =
         networkContext.post(respondedCacheFile, [request, NetUtils.now(), info]);
     },
 
+    openingFile: function(request, win, tabId, context)
+    {
+        var networkContext = Firebug.NetMonitor.contexts[tabId];
+        if (!networkContext)
+            networkContext = context ? context.netProgress : null;
+
+        if (!networkContext)
+            return;
+
+        networkContext.post(openingFile, [request, win]);
+    },
+
     /* nsISupports */
     QueryInterface: function(iid)
     {
@@ -527,7 +542,7 @@ var NetHttpObserver =
 
         throw Cr.NS_ERROR_NO_INTERFACE;
     }
-}
+};
 
 // ********************************************************************************************* //
 // Monitoring start/stop
@@ -562,8 +577,10 @@ function monitorContext(context)
     else
     {
         if (FBTrace.DBG_NET)
+        {
             FBTrace.sysout("net.monitorContext; create network monitor context object for: " +
                 tabId);
+        }
 
         networkContext = createNetProgress(context);
     }
@@ -700,12 +717,12 @@ NetCacheListener.prototype =
     {
         // Remember the response for this request.
         var file = this.netProgress.getRequestFile(request, null, true);
-        if (file)
+        if (file && responseText)
             file.responseText = responseText;
 
         Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
     }
-}
+};
 
 // ********************************************************************************************* //
 // Debugger Listener

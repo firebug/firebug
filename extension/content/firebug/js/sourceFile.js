@@ -34,7 +34,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 Firebug.SourceFile = function (compilation_unit_type)
 {
     this.compilation_unit_type = compilation_unit_type;
-}
+};
 
 Firebug.SourceFile.prototype =
 {
@@ -184,7 +184,7 @@ Firebug.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE)
         {
             var endTime = new Date().getTime();
-            var delta = endTime - startTime ;
+            var delta = endTime - startTime;
             if (delta > 0)
             {
                 FBTrace.sysout("SourceFile.addToLineTable processed "+lineCount+" lines in "+
@@ -224,7 +224,7 @@ Firebug.SourceFile.prototype =
         {
             FBTrace.sysout("SourceFile.addToLineTableByPCLoop: "+this.toString()+"\n");
             var endTime = new Date().getTime();
-            var delta = endTime - startTime ;
+            var delta = endTime - startTime;
 
             if (delta > 0)
             {
@@ -439,8 +439,8 @@ Firebug.SourceFile.prototype =
     getOuterScriptAnalyzer: function()
     {
         FBTrace.sysout("getOuterScriptAnalyzer not overridden for "+sourceFile, this);
-    },
-}
+    }
+};
 
 Firebug.SourceFile.summarizeSourceLineArray = function(sourceLines, size)
 {
@@ -459,7 +459,7 @@ Firebug.SourceFile.summarizeSourceLineArray = function(sourceLines, size)
 Firebug.SourceFile.NestedScriptAnalyzer = function(sourceFile)
 {
     this.sourceFile = sourceFile;
-}
+};
 
 Firebug.SourceFile.NestedScriptAnalyzer.prototype =
 {
@@ -508,7 +508,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
     {
         return script.baseLineNumber - (this.sourceFile.getBaseLineOffset() - 1);
     }
-}
+};
 
 Firebug.SourceFile.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
@@ -535,9 +535,11 @@ Firebug.SourceFile.addScriptsToSourceFile = function(sourceFile, outerScript, in
     }
 
     if (FBTrace.DBG_SOURCEFILES)
+    {
         FBTrace.sysout("addScriptsToSourceFile "+ total +" scripts, sourcefile="+
             sourceFile.toString(), sourceFile);
-}
+    }
+};
 
 // ********************************************************************************************* //
 
@@ -611,7 +613,7 @@ Firebug.EvalLevelSourceFile.prototype =
 Firebug.EvalLevelSourceFile.OuterScriptAnalyzer = function(sourceFile)
 {
     this.sourceFile = sourceFile;
-}
+};
 
 Firebug.EvalLevelSourceFile.OuterScriptAnalyzer.prototype =
 {
@@ -631,7 +633,7 @@ Firebug.EvalLevelSourceFile.OuterScriptAnalyzer.prototype =
     {
         return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -682,7 +684,7 @@ Firebug.EventSourceFile.prototype = Obj.descend(new Firebug.SourceFile("event"),
 Firebug.EventSourceFile.OuterScriptAnalyzer = function(sourceFile)
 {
     this.sourceFile = sourceFile;
-}
+};
 
 Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
 {
@@ -707,7 +709,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
         }
         else
         {
-            var args = []
+            var args = [];
         }
         return {name: name, args: args};
     },
@@ -716,7 +718,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     {
         return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -732,8 +734,8 @@ Firebug.SourceFile.CommonBase =
     getOuterScriptAnalyzer: function()
     {
         return Firebug.TopLevelSourceFile.OuterScriptAnalyzer;
-    },
-}
+    }
+};
 
 // ********************************************************************************************* //
 
@@ -745,7 +747,7 @@ Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScrip
     this.pcmap_type = PCMAP_SOURCETEXT;
 
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
-}
+};
 
 Firebug.TopLevelSourceFile.prototype = Obj.descend(new Firebug.SourceFile("top-level"),
     Firebug.SourceFile.CommonBase);
@@ -757,6 +759,7 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
     {
         return frame.line;
     },
+
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
@@ -765,12 +768,13 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
         file_name = file_name ? file_name: "__top_level__";
         return {name: file_name, args: []};
     },
+
     getSourceLinkForScript: function (script)
     {
         return SourceLink.SourceLink(Url.normalizeURL(script.fileName),
-            script.baseLineNumber, "js")
+            script.baseLineNumber, "js");
     }
-}
+};
 
 // ********************************************************************************************* //
 
@@ -781,7 +785,7 @@ Firebug.EnumeratedSourceFile = function(url)
     this.href = new String(url);
     this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
-}
+};
 
 Firebug.EnumeratedSourceFile.prototype = Obj.descend(
     new Firebug.SourceFile("enumerated"),
@@ -793,7 +797,7 @@ Firebug.NoScriptSourceFile = function(context, url) // Somehow we got the Url, b
 {
     this.href = url;  // we know this much
     this.innerScripts = {};
-}
+};
 
 Firebug.NoScriptSourceFile.prototype = Obj.descend(
     new Firebug.SourceFile("URLOnly"),
@@ -809,7 +813,7 @@ Firebug.XULSourceFile = function(url, outerScript, innerScriptEnumerator)
     this.outerScript = outerScript;  // Beware may not be valid after we return!!
 
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
-}
+};
 
 Firebug.XULSourceFile.prototype = Obj.descend(
     new Firebug.SourceFile("xul"),
@@ -826,7 +830,7 @@ Firebug.ScriptTagAppendSourceFile = function(url, outerScript, sourceLength, inn
     this.pcmap_type = PCMAP_SOURCETEXT;
 
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
-}
+};
 
 Firebug.ScriptTagAppendSourceFile.prototype = Obj.descend(
     new Firebug.SourceFile("scriptTagAppend"),
@@ -842,7 +846,7 @@ Firebug.ScriptTagSourceFile = function(context, url, scriptTagNumber)
     this.scriptTagNumber = scriptTagNumber;
     this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
-}
+};
 
 Firebug.ScriptTagSourceFile.prototype = Obj.descend(
     new Firebug.SourceFile("scriptTag"),
@@ -983,7 +987,7 @@ Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
         FBTrace.sysout("findScriptForFunctionInContext found " + (found ? found.tag : "none"));
 
     return found;
-}
+};
 
 Firebug.SourceFile.findSourceForFunction = function(fn, context)
 {

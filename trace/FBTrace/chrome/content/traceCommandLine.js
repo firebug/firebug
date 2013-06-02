@@ -1,22 +1,26 @@
 /* See license.txt for terms of usage */
 
+define([
+    "fbtrace/trace",
+    "fbtrace/lib/dom",
+    "fbtrace/lib/object",
+    "fbtrace/lib/window",
+    "fbtrace/lib/menu",
+],
+function(FBTrace, Dom, Obj, Win, Menu) {
+
+// ********************************************************************************************* //
+// Constants
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu["import"]("resource:///modules/source-editor.jsm");
+Cu["import"]("resource://fbtrace/storageService.js");
+
 // ********************************************************************************************* //
 // Command Line Implementation
-
-try
-{
-    Components.utils["import"]("resource:///modules/source-editor.jsm");
-}
-catch (err)
-{
-    // Inroduced in Firefox 8
-}
-
-// ********************************************************************************************* //
-
-Components.utils.import("resource://fbtrace-firebug/storageService.js");
-
-// ********************************************************************************************* //
 
 var TraceCommandLine =
 {
@@ -27,16 +31,12 @@ var TraceCommandLine =
         if (this.editor)
             return;
 
-        if (typeof(SourceEditor) == "undefined")
-            return;
-
         this.editor = new SourceEditor();
 
         // Load previous command line content.
         var commandLineIntro = this.loadContent();
 
-        var config =
-        {
+        var config = {
             mode: SourceEditor.MODES.JAVASCRIPT,
             showLineNumbers: true,
             initialText: commandLineIntro,
@@ -76,9 +76,9 @@ var TraceCommandLine =
         var commandLine = document.getElementById("fbTraceCommandLine");
 
         // Toggle visibility of the command line.
-        var shouldShow = FBL.isCollapsed(splitter);
-        FBL.collapse(splitter, !shouldShow);
-        FBL.collapse(commandLine, !shouldShow);
+        var shouldShow = Dom.isCollapsed(splitter);
+        Dom.collapse(splitter, !shouldShow);
+        Dom.collapse(commandLine, !shouldShow);
 
         if (shouldShow && this.editor)
             this.editor.focus();
@@ -91,7 +91,7 @@ var TraceCommandLine =
         if (!this.currentWindow)
         {
             var self = this;
-            FBL.iterateBrowserWindows("navigator:browser", function(win)
+            Win.iterateBrowserWindows("navigator:browser", function(win)
             {
                 return self.currentWindow = win;
             });
@@ -102,9 +102,9 @@ var TraceCommandLine =
 
     onContextMenuShowing: function(popup)
     {
-        // Collect all browser windows with Firebug.
+        // Collect available browser windows.
         var windows = [];
-        FBL.iterateBrowserWindows("", function(win)
+        Win.iterateBrowserWindows("", function(win)
         {
             windows.push(win);
         });
@@ -118,9 +118,9 @@ var TraceCommandLine =
                 label: win.document.title,
                 type: "radio",
                 checked: this.currentWindow == win,
-                command: FBL.bindFixed(this.selectContext, this, win)
+                command: Obj.bindFixed(this.selectContext, this, win)
             };
-            FBL.createMenuItem(popup, item);
+            Menu.createMenuItem(popup, item);
         }
     },
 
@@ -222,8 +222,12 @@ var commandLineIntro =
 "\n";
 
 // ********************************************************************************************* //
+// Registration
 
 addEventListener("load", TraceCommandLine.onLoad.bind(TraceCommandLine), false);
 addEventListener("unload", TraceCommandLine.onUnload.bind(TraceCommandLine), false);
 
+return TraceCommandLine;
+
 // ********************************************************************************************* //
+});

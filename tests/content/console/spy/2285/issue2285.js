@@ -1,3 +1,7 @@
+var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+var FF22OrHigher = versionChecker.compare(appInfo.version, "21.*") >= 0;
+
 function runTest()
 {
     FBTest.sysout("issue2285.START");
@@ -43,7 +47,11 @@ function runTest()
             };
 
             win.document.addEventListener("test-done", testDone, false);
-            FBTest.click(win.document.getElementById("testButton"));
+
+            if (FF22OrHigher)
+                FBTest.click(win.document.getElementById("testButton2"));
+            else
+                FBTest.click(win.document.getElementById("testButton1"));
         });
     });
 }

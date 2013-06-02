@@ -160,4 +160,3 @@ function diff( o, n ) {
   
   return { o: o, n: n };
 }
-
