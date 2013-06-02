@@ -200,11 +200,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         isInvisible: function(value)
         {
             return value == 0;
-        },
-
-        getVerticalText: function(n)
-        {
-            return getVerticalText(n);
         }
     }),
 
@@ -520,10 +515,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             Firebug.Inspector.highlightObject(this.panel.selection, this.panel.context, "boxModel", boxFrame);
         }
 
-        if (Css.hasClass(target, "layoutVerticalText"))
-            target.innerHTML = getVerticalText(intValue);
-        else
-            target.textContent = intValue;
+        target.textContent = intValue;
     },
 
     endEditing: function(target, value, cancel)
@@ -559,15 +551,6 @@ function getBoxEdge(element)
     var re = /layoutLabel([^\s]+)/;
     var m = re.exec(element.className);
     return m ? m[1] : "";
-}
-
-function getVerticalText(n)
-{
-    n = n+"";
-    var text = [];
-    for (var i = 0; i < n.length; ++i)
-        text.push(n[i]);
-    return text.join("<br>");
 }
 
 // ************************************************************************************************
