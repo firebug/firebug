@@ -122,6 +122,7 @@ pref("extensions.firebug.netPhaseInterval", 1000);
 pref("extensions.firebug.sizePrecision", 1);
 pref("extensions.firebug.netParamNameLimit", 25);
 pref("extensions.firebug.netShowPaintEvents", false);
+pref("extensions.firebug.netShowReflowEvents", false);
 pref("extensions.firebug.netShowBFCacheResponses", false);
 pref("extensions.firebug.netHtmlPreviewHeight", 100);
 

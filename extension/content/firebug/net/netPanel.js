@@ -34,7 +34,8 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
-    "firebug/net/netReps"
+    "firebug/net/netReps",
+    "firebug/net/reflowObserver",
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
@@ -301,6 +302,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             "-",
             Menu.optionMenu("net.option.Show_Paint_Events", "netShowPaintEvents",
                 "net.option.tip.Show_Paint_Events"),
+            Menu.optionMenu("net.option.Show_Reflow_Events", "netShowReflowEvents",
+                "net.option.tip.Show_Reflow_Events"),
             Menu.optionMenu("net.option.Show_BFCache_Responses", "netShowBFCacheResponses",
                 "net.option.tip.Show_BFCache_Responses")
         ];
