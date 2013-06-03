@@ -301,6 +301,9 @@ SourceEditor.prototype =
             case "js":
                 mode = "javascript";
             break;
+            case "css":
+                mode = "css";
+            break;
         }
 
         this.editorObject.setOption("mode", mode);

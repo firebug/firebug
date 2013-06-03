@@ -26,13 +26,14 @@ define([
     "firebug/css/selectorEditor",
     "firebug/lib/trace",
     "firebug/css/loadHandler",
+    "firebug/editor/sourceEditor",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, LoadHandler) {
+    SelectorEditor, FBTrace, LoadHandler, SourceEditor) {
 
 with (Domplate) {
 
@@ -2838,27 +2839,38 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
 function StyleSheetEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
-    this.input = this.box.firstChild;
+    var config = {
+        mode: "css",
+        readOnly: false
+    };
+
+    this.onEditorTextChangeListener = this.onEditorTextChange.bind(this);
+
+    // Initialize source editor, then append to the box.
+    this.editor = new SourceEditor();
+    this.editor.init(this.box, config, this.onEditorInitialize.bind(this));
 }
 
 StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 {
     multiLine: true,
 
-    tag: DIV(
-        TEXTAREA({"class": "styleSheetEditor fullPanelEditor", oninput: "$onInput"})
-    ),
+    tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+    onEditorInitialize: function()
+    {
+        this.editor.addEventListener(SourceEditor.Events.textChange,
+            this.onEditorTextChangeListener);
+    },
     getValue: function()
     {
-        return this.input.value;
+        return this.editor.getText();
     },
 
     setValue: function(value)
     {
-        return this.input.value = value;
+        return this.editor.setText(value, "css");
     },
 
     show: function(target, panel, value, textSize)
@@ -2866,10 +2878,9 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.target = target;
         this.panel = panel;
 
+        // Show the box that editor already is appended to.
         this.panel.panelNode.appendChild(this.box);
-
-        this.input.value = value;
-        this.input.focus();
+        this.editor.setText(value, "css");
 
         // match CSSModule.getEditorOptionKey
         var command = Firebug.chrome.$("cmd_firebug_togglecssEditMode");
@@ -2917,7 +2928,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    onInput: function()
+    onEditorTextChange: function()
     {
         Firebug.Editor.update();
     },
