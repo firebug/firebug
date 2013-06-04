@@ -130,16 +130,18 @@ var DebuggerClientModule = Obj.extend(Firebug.Module,
         // Actors must be loaded at the time when basic browser actors are already available.
         // (i.e. addBrowserActors executed). Firebug actors can derive (or modify) existing
         // actor types.
-        var config = Firebug.getModuleLoaderConfig();
+        /*var config = Firebug.getModuleLoaderConfig();
         Firebug.require(config, [
             //"firebug/debugger/actors/threadActor",
             //"firebug/debugger/actors/objectActor"
-            "firebug/debugger/actors/browserRootActor"
+            //"firebug/debugger/actors/browserRootActor"
         ],
         function()
         {
             callback();
-        });
+        });*/
+
+        callback();
     },
 
     onActorsLoaded: function()

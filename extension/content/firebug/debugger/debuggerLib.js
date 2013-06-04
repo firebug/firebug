@@ -154,7 +154,9 @@ DebuggerLib.getThreadActor = function(browser)
     try
     {
         var conn = DebuggerServer._connections["conn0."];
-        var tabActor = conn.rootActor._tabActors.get(browser);
+
+        var tabList = conn.rootActor._parameters.tabList;
+        var tabActor = tabList._actorByBrowser.get(browser);
         if (!tabActor)
             return null;
 
