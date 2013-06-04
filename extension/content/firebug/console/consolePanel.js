@@ -353,7 +353,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return Dom.getAncestorByClass(node, "logRow"); }
+        function findRow(node)
+        {
+            return Dom.getAncestorByClass(node, "logRow");
+        }
+
         var search = new Search.TextSearch(this.panelNode, findRow);
 
         var logRow = search.find(text, false, Firebug.Search.isCaseSensitive(text));
@@ -367,6 +371,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             Firebug.Search.isCaseSensitive(text)))
         {
             Css.setClass(logRow, "matched");
+
+            // Mark the groups, in which the low row is located, also as matched
+            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            {
+                Css.setClass(group, "matched");
+            }
             this.matchSet.push(logRow);
         }
 
