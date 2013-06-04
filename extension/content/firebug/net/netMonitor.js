@@ -273,7 +273,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (!context.netProgress)
             return;
 
-        Options.set("netFilterCategory", filterCategory);
+        this.setFilter(filterCategory);
 
         // The content filter has been changed. Make sure that the content
         // of the panel is updated (CSS is used to hide or show individual files).
@@ -283,6 +283,11 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             panel.setFilter(filterCategory);
             panel.updateSummaries(NetUtils.now(), true);
         }
+    },
+
+    setFilter: function(filterCategory)
+    {
+        Options.set("netFilterCategory", filterCategory);
     },
 
     syncFilterButtons: function(chrome)
