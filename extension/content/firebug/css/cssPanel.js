@@ -2839,13 +2839,13 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
 function StyleSheetEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
-    var config = {
-        mode: "css",
-        readOnly: false
-    };
 
     this.onEditorTextChangeListener = this.onEditorTextChange.bind(this);
-
+    var config = {
+        mode: "css",
+        readOnly: false,
+        gutters: []
+    };
     // Initialize source editor, then append to the box.
     this.editor = new SourceEditor();
     this.editor.init(this.box, config, this.onEditorInitialize.bind(this));
@@ -2935,11 +2935,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     scrollToLine: function(line, offset)
     {
-        this.startMeasuring(this.input);
-        var lineHeight = this.measureText().height;
-        this.stopMeasuring();
-
-        this.input.scrollTop = (line * lineHeight) + offset;
+        this.editor.scrollToLine(line);
     }
 });
 
