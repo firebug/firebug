@@ -229,10 +229,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (name == "netFilterCategory")
         {
             Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
-            Firebug.connection.eachContext(function syncFilters(context)
-            {
-                Firebug.NetMonitor.onToggleFilter(context, value);
-            });
+            Firebug.NetMonitor.setFilter(value);
         }
         else if (name == "netShowBFCacheResponses")
         {
