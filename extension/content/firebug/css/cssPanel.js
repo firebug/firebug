@@ -479,8 +479,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.stylesheetEditor.styleSheet = this.location;
         Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
-        //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
-        this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
+        this.stylesheetEditor.editor.scrollTo(this.panelNode.scrollLeft, this.panelNode.scrollTop);
     },
 
     startLiveEditing: function(styleSheet, context)
