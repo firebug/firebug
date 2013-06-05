@@ -94,13 +94,45 @@ ProfilerEngine.prototype =
 
     onEnterFrame: function(frame)
     {
+        try
+        {
+            this.doEnterFrame(frame);
+        }
+        catch (e)
+        {
+            TraceError.sysout("profilerEngine.onEnterFrame; EXCEPTION", e);
+        }
+    },
+
+    onPopFrame: function(frame, startTime, scriptInfo, completionValue)
+    {
+        try
+        {
+            this.doPopFrame(frame, startTime, scriptInfo, completionValue);
+        }
+        catch (e)
+        {
+            TraceError.sysout("profilerEngine.onPopFrame; EXCEPTION", e);
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    doEnterFrame: function(frame)
+    {
         var now = this.now();
 
         // Remember the first start time to compute the total profiling time later.
         if (!this.startTime)
             this.startTime = now;
 
-        // Collected data are sorted per script within a structure, see the scriptInfo below.
+        if (!frame.live)
+        {
+            TraceError.sysout("profilerEngine.onEnterFrame; ERROR frame not live!");
+            return;
+        }
+
+        // Collected data are sorted per script, see the scriptInfo below.
         // There is one info structure per script object.
         var script = frame.script;
         if (!script)
@@ -112,12 +144,12 @@ ProfilerEngine.prototype =
         var scriptInfo = this.scripts.get(script);
         if (!scriptInfo)
         {
-            var url = script ? script.url : null;
-            var name = frame.callee ? frame.callee.name : "<unknown>";
+            var url = script.url;
+            var name = frame.callee ? frame.callee.name : "anonymous";
 
             scriptInfo = {
                 callCount: 0,
-                startLine: script ? script.startLine : -1,
+                startLine: script.startLine,
                 url: url,
                 fileName: Url.getFileName(url),
                 funcName: name,
@@ -136,13 +168,19 @@ ProfilerEngine.prototype =
         frame.onPop = this.onPopFrame.bind(this, frame, now, scriptInfo);
     },
 
-    onPopFrame: function(frame, startTime, scriptInfo, completionValue)
+    doPopFrame: function(frame, startTime, scriptInfo, completionValue)
     {
         this.endTime = this.now();
 
         // Compute total execution time for the script (frame).
         var elapsedTime = this.endTime - startTime;
         scriptInfo.totalExecutionTime += elapsedTime;
+
+        if (!frame.live)
+        {
+            TraceError.sysout("profilerEngine.onPopFrame; ERROR frame not live!");
+            return;
+        }
 
         var si = scriptInfo;
 
@@ -162,7 +200,7 @@ ProfilerEngine.prototype =
         // own-execution-time == total-execution-time
         // 3) The own-execution-time computation is done in the end of the profiling session
         // when the consumer enumerates result scripts. See {@ProfilerEngine.enumerateScripts}.
-        var olderScript = frame.older.script;
+        var olderScript = frame.older ? frame.older.script : null;
         if (!olderScript)
             return;
 
@@ -176,6 +214,8 @@ ProfilerEngine.prototype =
         // Sum up nested (child) execution time.
         olderScriptInfo.totalNestedExecutionTime += elapsedTime;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     now: function()
     {
