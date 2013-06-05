@@ -40,8 +40,8 @@ ProfilerEngine.prototype =
 {
     startProfiling: function()
     {
-        // Collected profiling results are stored per 'script' in this structure.
-        this.scripts = new Results();
+        // Collected profiling results are stored per 'script'.
+        this.scripts = new Map();
 
         // Total profiling time (total executing time of the first executed frame).
         this.startTime = null;
@@ -76,14 +76,16 @@ ProfilerEngine.prototype =
         var global = Cu.getGlobalForObject({});
         jsDebugger.addDebuggerToGlobal(global);
 
+        // xxxHonza: all iframes should be supported.
         return new global.Debugger(context.window);
     },
 
     enumerateScripts: function(callback)
     {
-        for (var i=0; i<this.scripts.arr.length; i++)
+        var keys = this.scripts.keys();
+        for (var key of keys)
         {
-            var script = this.scripts.arr[i];
+            var script = this.scripts.get(key);
 
             // Compute own execution time (total nested execution time from nested frames
             // has been collected during the profiling session).
@@ -97,6 +99,7 @@ ProfilerEngine.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Handlers
 
+    // xxxHonza: try-catch could slow down the profiling, it should be removed eventually.
     onEnterFrame: function(frame)
     {
         try
@@ -159,8 +162,8 @@ ProfilerEngine.prototype =
                 fileName: Url.getFileName(url),
                 funcName: name,
                 totalExecutionTime: 0,
-                minExecutionTime: undefined,
-                maxExecutionTime: undefined,
+                minExecutionTime: Infinity,
+                maxExecutionTime: -Infinity,
                 totalNestedExecutionTime: 0,
             };
 
@@ -187,15 +190,13 @@ ProfilerEngine.prototype =
             return;
         }
 
-        var si = scriptInfo;
-
         // Update min execution time
-        if (elapsedTime < si.minExecutionTime || typeof(si.minExecutionTime) == "undefined")
-            si.minExecutionTime = elapsedTime;
+        if (elapsedTime < scriptInfo.minExecutionTime)
+            scriptInfo.minExecutionTime = elapsedTime;
 
         // Update max execution time
-        if (elapsedTime > si.maxExecutionTime || typeof(si.maxExecutionTime) == "undefined")
-            si.maxExecutionTime = elapsedTime;
+        if (elapsedTime > scriptInfo.maxExecutionTime)
+            scriptInfo.maxExecutionTime = elapsedTime;
 
         // Computing own-execution-time is a little more trickier.
         // 1) Younger frames are putting theirs total execution time to parent frames, where the
@@ -228,40 +229,11 @@ ProfilerEngine.prototype =
         // Use performance.now() it's slower, but more precise
         // Don't forget that performance.now() is relative to navigationStart.
         var win = this.context.window;
-        var now = win.performance.now();
 
+        // Does using chrome's performance.now() make any difference?
+        var now = win.performance.now();
         return win.performance.timing.navigationStart + now;
     },
-};
-
-// ********************************************************************************************* //
-// Helper object for collecting results
-
-function Results()
-{
-    this.arr = [];
-    this.map = new Map();
-}
-
-Results.prototype =
-{
-    get: function(key)
-    {
-        return this.map.get(key);
-    },
-
-    set: function(key, value)
-    {
-        if (!this.map.has(key))
-            this.arr.push(value);
-
-        return this.map.set(key, value);
-    },
-
-    has: function(key)
-    {
-        return this.map.has(key);
-    }
 };
 
 // ********************************************************************************************* //
