@@ -111,7 +111,7 @@ Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
             styleSheet.editStyleSheet = editStyleSheet;
         }
 
-        styleSheet.editStyleSheet.innerHTML = value;
+        styleSheet.editStyleSheet.textContent = value;
 
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.saveEdit styleSheet.href:" + styleSheet.href +

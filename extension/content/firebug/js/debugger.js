@@ -1090,52 +1090,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // otherwise we cannot be called.
         context.jsDebuggerCalledUs = true;
 
-        if (!Firebug.Console.injector.isAttached(context, frameWin))
-        {
-            this.injectConsole(context, frameWin);
-        }
-        else
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal console isAttached to "+
-                    Win.safeGetWindowLocation(frameWin)+" in  "+context.getName());
-        }
-
         this.breakContext = context;
         //FBTrace.sysout("debugger.js this.breakContext "+this.breakContext.getName());
         return true;
-    },
-
-    injectConsole: function(context, frameWin)
-    {
-        if (Firebug.Console.isAlwaysEnabled())
-        {
-            // This is how the console is injected ahead of JS running on the page
-            FBS.filterConsoleInjections = true;
-            try
-            {
-                var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("debugger.supportsGlobal injectConsole FAILS: "+exc, exc);
-            }
-            finally
-            {
-                FBS.filterConsoleInjections = false;
-            }
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady+
-                    " jsDebuggerCalledUs: "+context.jsDebuggerCalledUs, frameWin);
-        }
-        else
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole console NOT enabled ",
-                    frameWin);
-        }
     },
 
     onLock: function(state)

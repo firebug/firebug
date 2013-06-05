@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6402: Don't abuse the debugger service for injecting "console"</title>
+        <script>
+            window._console = window.console;
+            function checkEquals()
+            {
+                document.getElementById("equals").textContent =
+                    (window._console === window.console);
+            }
+        </script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6402">Issue 6402</a>: Don't abuse the debugger service for injecting "console"</h1>
+        </header>
+        <div>
+            <section id="content">
+                <p>Note: window._console refers to the window.console instance when running the first JS instruction</p>
+                <p><button onclick="checkEquals()" id="check">Check</button> window._console === window.console? 
+                    ==&gt; <span id="equals"></span></p>
+                <iframe src="iframe.html" style="display:none" id="iframe"></iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Load that page without having Firebug opened</li>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the Console Panel</li>
+                    <li>Click on the button named "check" (#equals should display <code>false</code>)</li>
+                    <li>Reload the page</li>
+                    <li>Click again on the "check" button (#equals should display <code>true</code> this time)</li>
+                    <li>Go to <a href="issue6402.xml">issue6402.xml</a></li>
+                    <li>Open Firebug and switch to the Console Panel</li>
+                    <li>Run <code>console.log("ok")</code></li>
+                </ol>
+            </section>
+            <footer>
+                Florent FAYOLLE, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

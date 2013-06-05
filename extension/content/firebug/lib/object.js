@@ -212,8 +212,12 @@ Obj.getObjHash = function(obj)
     }
     catch(e)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Obj.getObjHash; Hash could not be created", e);
+        // xxxsz: There is a bunch of objects, which throw exceptions when accessing their
+        // properties. These exceptions don't really need to be displayed in the FBTrace
+        // console due to this being handled by creating a unique ID for them.
+        // So remove the tracing for now.
+        // if (FBTrace.DBG_ERRORS)
+        //     FBTrace.sysout("Obj.getObjHash; Hash could not be created", e);
 
         return this.getUniqueId();
     }

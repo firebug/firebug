@@ -169,38 +169,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
     },
 
-    // this is the only code that should call injector.attachIfNeeded
-    isReadyElsePreparing: function(context, win)
+    getExposedConsole: function(win)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isReadyElsePreparing, win is " +
-                (win?"an argument: ":"null, context.window: ") +
-                (win?win.location:context.window.location));
-
-        if (Xml.isXMLPrettyPrint(context, win))
-            return false;
-
-        if (win)
-        {
-            return this.injector.attachIfNeeded(context, win);
-        }
-        else
-        {
-            var attached = true;
-            for (var i = 0; i < context.windows.length; i++)
-                attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
-
-            // already in the list above:
-            // attached = attached && this.injector.attachIfNeeded(context, context.window);
-            if (context.windows.indexOf(context.window) == -1)
-                FBTrace.sysout("isReadyElsePreparing: context.window not in context.windows");
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.isReadyElsePreparing attached to " +
-                    context.windows.length + " and returns "+attached);
-
-            return attached;
-        }
+        return this.injector.getExposedConsole(win);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -227,35 +198,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
     initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
-        context.consoleReloadWarning = true;  // mark as need to warn.
-    },
-
-    loadedContext: function(context)
-    {
-        for (var url in context.sourceFileMap)
-            return;  // if there are any sourceFiles, then do nothing
-
-        // Inject console handler if not injected yet. It's injected only in the case that
-        // the page has JS (and thus may call console) and Firebug has been activated after
-        // the first JS call (and thus we have not already injected).
-        if (!this.injector.isAttached(context, context.window) && !context.jsDebuggerCalledUs)
-            this.isReadyElsePreparing(context);
-
-        // else we saw no JS, so the reload warning is not needed.
-        this.clearReloadWarning(context);
-    },
-
-    clearReloadWarning: function(context) // remove the warning about reloading.
-    {
-        if (context.consoleReloadWarning)
-        {
-            var panel = context.getPanel("console");
-            if (panel)
-            {
-                panel.clearReloadWarning();
-                delete context.consoleReloadWarning;
-            }
-        }
     },
 
     togglePersist: function(context)
@@ -274,17 +216,12 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
-    destroyContext: function(context, persistedState)
+    watchWindow: function(context, win)
     {
-        Win.iterateWindows(context.window, function detachOneConsole(win)
-        {
-            Firebug.Console.injector.detachConsole(context, win);
-        });
-    },
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.watchWindow; " + Win.safeGetWindowLocation(win));
 
-    unwatchWindow: function(context, win)
-    {
-        Firebug.Console.injector.detachConsole(context, win);
+        Firebug.Console.injector.attachConsoleInjector(context, win);
     },
 
     updateOption: function(name, value)

@@ -746,7 +746,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("dom.scrollTo", element.innerHTML);
+        FBTrace.sysout("dom.scrollTo", element);
 };
 
 /**

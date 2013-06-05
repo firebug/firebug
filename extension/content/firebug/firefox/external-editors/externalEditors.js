@@ -210,8 +210,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
         if (object instanceof SourceLink.SourceLink)
         {
-            var sourceLink = object;
-            this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
+            this.appendContextMenuItem(popup, object.href, object.line);
         }
         else if (target.id == "fbLocationList")
         {
@@ -223,11 +222,6 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             var sourceLink = panel.getSourceLink(target, object);
             if (sourceLink)
                 this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
-        }
-        else if (Css.hasClass(target, "stackFrameLink"))
-        {
-            this.appendContextMenuItem(popup, target.innerHTML,
-                target.getAttribute("lineNumber"));
         }
     },
 
