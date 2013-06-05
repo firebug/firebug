@@ -20,6 +20,9 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Profiler engine based on JSD2 API
 
+/**
+ * Instance of {@ProfilerEngine} is always associated with a context (content window)
+ */
 function ProfilerEngine(context)
 {
     this.context = context
@@ -55,6 +58,8 @@ ProfilerEngine.prototype =
     {
         // Remove debugger hook.
         this.dbg.onEnterFrame = undefined;
+
+        Trace.sysout("profilerEngine.stopProfiling;", this.scripts);
 
         // Return total execution time.
         return this.endTime - this.startTime;
@@ -212,6 +217,7 @@ ProfilerEngine.prototype =
         }
 
         // Sum up nested (child) execution time.
+        // xxxHonza: the results can be a bit confusing in case of recursion.
         olderScriptInfo.totalNestedExecutionTime += elapsedTime;
     },
 
