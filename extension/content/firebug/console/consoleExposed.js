@@ -14,9 +14,10 @@ define([
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
     "firebug/console/errorMessageObj",
+    "firebug/console/profiler",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
-    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj) {
+    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler) {
 
 // ********************************************************************************************* //
 
@@ -127,13 +128,13 @@ function createFirebugConsole(context, win)
 
     console.profile = function(title)
     {
-        Firebug.Profiler.startProfiling(context, title);
+        Profiler.startProfiling(context, title);
         return Console.getDefaultReturnValue();
     };
 
     console.profileEnd = function()
     {
-        Firebug.Profiler.stopProfiling(context);
+        Profiler.stopProfiling(context);
         return Console.getDefaultReturnValue();
     };
 

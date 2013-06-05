@@ -86,7 +86,7 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 
         // xxxFlorent: For a reason I ignore, there are some conflicts with the ShareMeNot addon.
         //   As a workaround, we unwrap the global object.
-        //   TODO see what cause that behaviour, why, and if there are no other addons in that case.
+        //   TODO see what cause that behavior, why, and if there are no other addons in that case.
         var contentView = Wrapper.getContentView(global);
         dglobal = dbg.addDebuggee(contentView);
         dbg.removeDebuggee(contentView);
