@@ -551,6 +551,11 @@ SourceEditor.prototype =
         }
     },
 
+    scrollTo: function(left, top)
+    {
+        this.editorObject.scrollTo(left, top);
+    },
+
     getScrollInfo: function()
     {
         return this.editorObject.getScrollInfo();
