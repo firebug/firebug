@@ -92,6 +92,10 @@ ProfilerEngine.prototype =
                 script.totalNestedExecutionTime;
 
             callback.enumerateScript(script);
+
+            // Just in case we'd like to reuse the same instance
+            // of the Debugger object in another profiling session.
+            script.initialized = false;
         }
     },
 
