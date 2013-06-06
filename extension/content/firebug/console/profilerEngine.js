@@ -100,18 +100,6 @@ ProfilerEngine.prototype =
 
     onEnterFrame: function(frame)
     {
-        this.doEnterFrame(frame);
-    },
-
-    onPopFrame: function(frame, startTime, scriptInfo, completionValue)
-    {
-        this.doPopFrame(frame, startTime, scriptInfo, completionValue);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    doEnterFrame: function(frame)
-    {
         var now = this.now();
 
         // Remember the first start time to compute the total profiling time later.
@@ -157,7 +145,7 @@ ProfilerEngine.prototype =
         frame.onPop = this.onPopFrame.bind(this, frame, now, script);
     },
 
-    doPopFrame: function(frame, startTime, script, completionValue)
+    onPopFrame: function(frame, startTime, script, completionValue)
     {
         this.endTime = this.now();
 
