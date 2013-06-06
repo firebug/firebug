@@ -112,7 +112,7 @@ pref("extensions.firebug.showOwnProperties", false);
 pref("extensions.firebug.showRulers", true);
 
 // Net
-pref("extensions.firebug.netFilterCategory", "all");
+pref("extensions.firebug.netFilterCategories", "all");
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400);

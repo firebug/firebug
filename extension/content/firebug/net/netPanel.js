@@ -200,7 +200,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return;
 
         if (!this.filterCategory)
-            this.setFilter(Firebug.netFilterCategory);
+            this.setFilter(Options.get("netFilterCategories"));
 
         this.layout();
 
@@ -226,10 +226,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     updateOption: function(name, value)
     {
-        if (name == "netFilterCategory")
+        if (name == "netFilterCategories")
         {
             Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
-            Firebug.NetMonitor.setFilter(value);
+            Firebug.NetMonitor.setFilter([value]);
         }
         else if (name == "netShowBFCacheResponses")
         {
@@ -1200,7 +1200,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var cachedSize = 0, totalSize = 0;
 
-        var category = Firebug.netFilterCategory;
+        var category = Options.get("netFilterCategories");
         if (category == "all")
             category = null;
 
