@@ -41,7 +41,7 @@ ProfilerEngine.prototype =
     startProfiling: function()
     {
         // Collected profiling results are stored per 'script'.
-        this.scripts = new Map();
+        this.scripts = new Array();
 
         // Total profiling time (total executing time of the first executed frame).
         this.startTime = null;
@@ -82,10 +82,9 @@ ProfilerEngine.prototype =
 
     enumerateScripts: function(callback)
     {
-        var keys = this.scripts.keys();
-        for (var key of keys)
+        for (var i=0; i<this.scripts.length; i++)
         {
-            var script = this.scripts.get(key);
+            var script = this.scripts[i];
 
             // Compute own execution time (total nested execution time from nested frames
             // has been collected during the profiling session).
@@ -99,29 +98,14 @@ ProfilerEngine.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Handlers
 
-    // xxxHonza: try-catch could slow down the profiling, it should be removed eventually.
     onEnterFrame: function(frame)
     {
-        try
-        {
-            this.doEnterFrame(frame);
-        }
-        catch (e)
-        {
-            TraceError.sysout("profilerEngine.onEnterFrame; EXCEPTION", e);
-        }
+        this.doEnterFrame(frame);
     },
 
     onPopFrame: function(frame, startTime, scriptInfo, completionValue)
     {
-        try
-        {
-            this.doPopFrame(frame, startTime, scriptInfo, completionValue);
-        }
-        catch (e)
-        {
-            TraceError.sysout("profilerEngine.onPopFrame; EXCEPTION", e);
-        }
+        this.doPopFrame(frame, startTime, scriptInfo, completionValue);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -149,40 +133,37 @@ ProfilerEngine.prototype =
             return;
         }
 
-        var scriptInfo = this.scripts.get(script);
-        if (!scriptInfo)
+        if (!script.initialized)
         {
-            var url = script.url;
-            var name = frame.callee ? frame.callee.name : "anonymous";
+            script.initialized = true;
 
-            scriptInfo = {
-                callCount: 0,
-                startLine: script.startLine,
-                url: url,
-                fileName: Url.getFileName(url),
-                funcName: name,
-                totalExecutionTime: 0,
-                minExecutionTime: Infinity,
-                maxExecutionTime: -Infinity,
-                totalNestedExecutionTime: 0,
-            };
+            if (!script.funcName)
+                script.funcName = frame.callee ? frame.callee.name : "anonymous";
 
-            this.scripts.set(script, scriptInfo);
+            if (typeof(script.callCount) == "undefined")
+                script.callCount = 0;
+
+            script.minExecutionTime = Infinity;
+            script.maxExecutionTime = -Infinity;
+            script.totalNestedExecutionTime = 0;
+            script.totalExecutionTime = 0;
+
+            this.scripts.push(script);
         }
 
-        scriptInfo.callCount++;
+        script.callCount++;
 
         // Hook 'onPop' so we can also get the end execution time.
-        frame.onPop = this.onPopFrame.bind(this, frame, now, scriptInfo);
+        frame.onPop = this.onPopFrame.bind(this, frame, now, script);
     },
 
-    doPopFrame: function(frame, startTime, scriptInfo, completionValue)
+    doPopFrame: function(frame, startTime, script, completionValue)
     {
         this.endTime = this.now();
 
         // Compute total execution time for the script (frame).
         var elapsedTime = this.endTime - startTime;
-        scriptInfo.totalExecutionTime += elapsedTime;
+        script.totalExecutionTime += elapsedTime;
 
         if (!frame.live)
         {
@@ -191,12 +172,12 @@ ProfilerEngine.prototype =
         }
 
         // Update min execution time
-        if (elapsedTime < scriptInfo.minExecutionTime)
-            scriptInfo.minExecutionTime = elapsedTime;
+        if (elapsedTime < script.minExecutionTime)
+            script.minExecutionTime = elapsedTime;
 
         // Update max execution time
-        if (elapsedTime > scriptInfo.maxExecutionTime)
-            scriptInfo.maxExecutionTime = elapsedTime;
+        if (elapsedTime > script.maxExecutionTime)
+            script.maxExecutionTime = elapsedTime;
 
         // Computing own-execution-time is a little more trickier.
         // 1) Younger frames are putting theirs total execution time to parent frames, where the
@@ -210,16 +191,9 @@ ProfilerEngine.prototype =
         if (!olderScript)
             return;
 
-        var olderScriptInfo = this.scripts.get(olderScript);
-        if (!olderScriptInfo)
-        {
-            TraceError.sysout("profilerEngine.onPopFrame; ERROR unknown older script!");
-            return;
-        }
-
         // Sum up nested (child) execution time.
         // xxxHonza: the results can be a bit confusing in case of recursion.
-        olderScriptInfo.totalNestedExecutionTime += elapsedTime;
+        olderScript.totalNestedExecutionTime += elapsedTime;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
