@@ -231,6 +231,12 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.context.clientCache.clear();
 
+        if (!packet.frame)
+        {
+            FBTrace.sysout("debuggerTool.paused; ERROR no frame!");
+            return;
+        }
+
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
         // Avoid double-break at the same line (e.g. breakpoint + step-over)
 
@@ -270,7 +276,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         }
 
         // Send event asking whether the debugger should really break. If at least
-        // one listeners returns true, the debugger just conntinues with pause.
+        // one listeners returns true, the debugger just continues with pause.
         if (!this.dispatch2("shouldBreakDebugger", [this.context, event, packet]))
         {
             Trace.sysout("debuggerTool.paused; Listeners don't want to break the debugger.");
