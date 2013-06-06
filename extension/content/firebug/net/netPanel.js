@@ -199,8 +199,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!enabled)
             return;
 
-        if (!this.filterCategory)
-            this.setFilter(Options.get("netFilterCategories"));
+        if (!this.filterCategories)
+            this.setFilter(Options.get("netFilterCategories").split(" "));
 
         this.layout();
 
@@ -1200,9 +1200,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var cachedSize = 0, totalSize = 0;
 
-        var category = Options.get("netFilterCategories");
-        if (category == "all")
-            category = null;
+        var categories = this.filterCategories;
+        if (categories == "all")
+            categories = null;
 
         var fileCount = 0;
         var minTime = 0, maxTime = 0;
@@ -1215,7 +1215,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (!Firebug.netShowBFCacheResponses && file.fromBFCache)
                 continue;
 
-            if (!category || file.category == category)
+            if (!categories || categories.indexOf(file.category) != -1)
             {
                 if (file.loaded)
                 {
@@ -1393,17 +1393,17 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
     },
 
-    setFilter: function(filterCategory)
+    setFilter: function(filterCategories)
     {
-        this.filterCategory = filterCategory;
+        this.filterCategories = filterCategories;
 
         var panelNode = this.panelNode;
         for (var category in NetUtils.fileCategories)
         {
-            if (filterCategory != "all" && category != filterCategory)
-                Css.setClass(panelNode, "hideCategory-"+category);
+            if (filterCategories.join(" ") != "all" && filterCategories.indexOf(category) == -1)
+                Css.setClass(panelNode, "hideCategory-" + category);
             else
-                Css.removeClass(panelNode, "hideCategory-"+category);
+                Css.removeClass(panelNode, "hideCategory-" + category);
         }
     },
 

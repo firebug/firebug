@@ -303,7 +303,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         var panel = context.getPanel(panelName, true);
         if (panel)
         {
-            panel.setFilter(filterCategory);
+            panel.setFilter(filterCategories);
             panel.updateSummaries(NetUtils.now(), true);
         }
     },
