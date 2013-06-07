@@ -296,21 +296,15 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
                 filterCategories.splice(allIndex, 1);
         }
 
-        this.setFilter(filterCategories);
-
-        // The content filter has been changed. Make sure that the content
-        // of the panel is updated (CSS is used to hide or show individual files).
-        var panel = context.getPanel(panelName, true);
-        if (panel)
-        {
-            panel.setFilter(filterCategories);
-            panel.updateSummaries(NetUtils.now(), true);
-        }
-    },
-
-    setFilter: function(filterCategories)
-    {
+        // If no filter categories are selected, use the default
+        if (filterCategories.length == 0)
+            filterCategories = Options.getDefault("netFilterCategories").split(" ");
+        
         Options.set("netFilterCategories", filterCategories.join(" "));
+
+        this.syncFilterButtons(Firebug.chrome);
+
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onFiltersSet", [filterCategories]);
     },
 
     syncFilterButtons: function(chrome)
