@@ -24,9 +24,22 @@ function runTest()
 
                         FBTest.waitForDOMProperty("_name", function(row)
                         {
-                             // Great, a variable from the closure is there, done.
-                             FBTest.progress("Property _name is visible");
-                             FBTest.testDone("issue6481.DONE");
+                            FBTest.progress("Property _name is visible");
+
+                            var value = row.querySelector(".memberValueCell .objectBox-string");
+                            FBTest.compare("\"Arthur\"", value.textContent, "The value must match");
+
+                            FBTest.waitForDOMProperty("_unused", function(row)
+                            {
+                                FBTest.progress("Property _unused is visible");
+
+                                var value = row.querySelector(".memberValueCell .objectBox-optimizedAway");
+                                FBTest.compare("(optimized away)", value.textContent,
+                                    "The value must match").
+
+                                FBTest.testDone("issue6481.DONE");
+                            }, true);
+
                         }, true);
 
                         // Click to expand the '(closure)' item
