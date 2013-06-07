@@ -17,7 +17,19 @@ var Trace = FBTrace.to("DBG_BREAKPOINTS");
 // ********************************************************************************************* //
 // Debugger Keyword
 
+/**
+ * @module Javascript debugger; keyword can be prevented by a disabled breakpoint
+ * created at the same line/url. This module implements related logic by handling
+ * {@DebuggerTool} object events.
+ *
+ * 1) onDebuggerPaused: if debugger halts at a debugger; keyword, the 'breaking cause'
+ *    is created and initialized.
+ *
+ * 2) shouldResumeDebugger: disabled breakpoint has high priority and so it can
+ *    be used to prevent the debugger keyword from halting the debugger.
+ */
 var DebuggerKeyword = Obj.extend(Firebug.Module,
+/** @lends DebuggerKeyword */
 {
     dispatchName: "debuggerKeyword",
 
