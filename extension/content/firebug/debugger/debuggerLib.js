@@ -264,7 +264,15 @@ DebuggerLib.isExecutableLine = function(context, location)
 {
     var threadClient = this.getThreadActor(context.browser);
 
-    var scripts = threadClient.dbg.findScripts(location);
+    // Use 'innermost' property so, the result is (almost) always just one script object
+    // and we can save time in the loop below. See: https://wiki.mozilla.org/Debugger
+    var query = {
+        url: location.url,
+        line: location.line,
+        innermost: true,
+    };
+
+    var scripts = threadClient.dbg.findScripts(query);
     if (scripts.length == 0)
         return false;
 
