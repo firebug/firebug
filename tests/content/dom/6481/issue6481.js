@@ -35,7 +35,7 @@ function runTest()
 
                                 var value = row.querySelector(".memberValueCell .objectBox-optimizedAway");
                                 FBTest.compare("(optimized away)", value.textContent,
-                                    "The value must match").
+                                    "The value must match");
 
                                 FBTest.testDone("issue6481.DONE");
                             }, true);
