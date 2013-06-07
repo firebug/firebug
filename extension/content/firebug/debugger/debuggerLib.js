@@ -3,9 +3,10 @@
 /*global FBTrace:true, Components:true, define:true */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/wrapper",
 ],
-function(Wrapper) {
+function(FBTrace, Wrapper) {
 
 "use strict";
 
@@ -21,6 +22,8 @@ var dglobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
+
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Implementation
@@ -257,6 +260,25 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
     }
 }
 
+DebuggerLib.isExecutableLine = function(context, location)
+{
+    var threadClient = this.getThreadActor(context.browser);
+
+    var scripts = threadClient.dbg.findScripts(location);
+    if (scripts.length == 0)
+        return false;
+
+    for (var i=0; i<scripts.length; i++)
+    {
+        var script = scripts[i];
+        var offsets = script.getLineOffsets(location.line);
+        if (offsets.length > 0)
+            return true;
+    }
+
+    return false;
+}
+
 // ********************************************************************************************* //
 // Debugger
 
@@ -298,8 +320,7 @@ var getInactiveDebuggerForContext = function(context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERROR)
-            FBTrace.sysout("DebuggerLib.getInactiveDebuggerForContext; Debugger not found", exc);
+        TraceError.sysout("DebuggerLib.getInactiveDebuggerForContext; Debugger not found", exc);
     }
 
     // If the Debugger Class was not found, make this function no-op.

@@ -26,8 +26,6 @@ var Cu = Components.utils;
 var Trace = FBTrace.to("DBG_SCRIPTVIEW");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-var annonTypeHighlightedLine = "firefox.annotation.highlightedLine";
-
 // ********************************************************************************************* //
 // Source View
 
@@ -73,6 +71,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
         this.onMouseUpListener = this.onEditorMouseUp.bind(this);
+        this.onViewportChangeListener = this.onViewportChange.bind(this);
 
         // Initialize source editor.
         this.editor = new SourceEditor();
@@ -103,6 +102,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.addEventListener(SourceEditor.Events.mouseUp,
             this.onMouseUpListener);
 
+        // Hook scrolling (viewport change).
+        this.editor.addEventListener(SourceEditor.Events.viewportChange,
+            this.onViewportChangeListener);
+
         // Focus so, keyboard works as expected.
         this.editor.focus();
 
@@ -130,9 +133,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             this.onMouseMoveListener);
         this.editor.removeEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
-
         this.editor.removeEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
+        this.editor.removeEventListener(SourceEditor.Events.mouseOut,
+            this.onViewportChangeListener);
 
         try
         {
@@ -509,6 +513,13 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         Trace.sysout("scripView.onEditorMouseUp;", event);
 
         this.dispatch("onEditorMouseUp", [event]);
+    },
+
+    onViewportChange: function(event)
+    {
+        Trace.sysout("scripView.onViewportChange; " + event.from + " -> " + event.to);
+
+        this.dispatch("onViewportChange", [event.from, event.to]);
     },
 
     getLineIndex: function(target)

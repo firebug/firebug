@@ -25,11 +25,12 @@ define([
     "firebug/debugger/script/scriptPanelWarning",
     "firebug/debugger/script/breakNotification",
     "firebug/console/commandLine",
+    "firebug/debugger/debuggerLib",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine) {
+    BreakNotification, CommandLine, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -74,11 +75,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
         // Create source view for JS source code. Initialization is made when the Script
-        // panel is actualy displayed (in 'show' method).
+        // panel is actually displayed (in 'show' method).
         this.scriptView = new ScriptView();
         this.scriptView.addListener(this);
 
-        // The tool/controller (serves as a proxy to the backend service) is registered dynamicaly.
+        // The tool/controller (serves as a proxy to the back-end service) is registered dynamically.
         // Depending on the current tool the communication can be local or remote.
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
         this.tool = this.context.getTool("debugger");
@@ -122,9 +123,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         });
 
         // Initialize the source view. Orion initialization here, when the
-        // parentNode is actualy visible, solves the following problem:
+        // parentNode is actually visible, solves the following problem:
         // Error: TypeError: this._iframe.contentWindow is undefined
-        // Save for muliple calls.
+        // Save for multiple calls.
         this.scriptView.initialize(this.panelNode);
 
         if (active && state && state.location)
@@ -1265,6 +1266,48 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.infoTipExpr = expr;
 
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Executable Lines
+
+    onViewportChange: function(from, to)
+    {
+        // Run executable-line decorating on 150ms timeout, which is bigger than
+        // the period in which scroll events are fired. So, if the user is moving
+        // scroll-bar thumb (or quickly clicking on scroll-arrows), the line numbers
+        // are not decorated and the scrolling is fast.
+        // All this optimalization due to peformance penalities when computing exe lines.
+        if (this.context.markExeLinesTimeout)
+            this.context.clearTimeout(this.context.markExeLinesTimeout);
+
+        this.context.markExeLinesTimeout = this.context.setTimeout(
+            this.markExecutableLines.bind(this, from, to), 150);
+    },
+
+    markExecutableLines: function(from, to)
+    {
+        var self = this;
+        var currentLine = from;
+        var editor = this.scriptView.editor.editorObject;
+
+        // Iterate over all visible lines.
+        editor.eachLine(from, to, function(handle)
+        {
+            // Bail out if the exe-flag for this line has been already computed.
+            if (typeof(handle.executableLine) != "undefined")
+                return;
+
+            // Check if the line is executable (performance expensive operation).
+            handle.executableLine = DebuggerLib.isExecutableLine(self.context, {
+                url: self.getCurrentURL(),
+                line: ++currentLine,
+            });
+
+            // Mark the line as executable.
+            if (handle.executableLine)
+                editor.addLineClass(handle, "executable", "CodeMirror-executableLine");
+        });
     },
 });
 
