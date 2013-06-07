@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6481: Show closures don´t work</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+
+    <script>
+    function Person(_name)
+    {
+        // This variable is not used and will be optimized out.
+        // It's part of the test
+        var _unused = "a value";
+
+        this.introduce = function()
+        {
+            console.log("Hello, my name is %s", _name);
+        }
+    }
+
+    // create an instance of Person:
+    var someone = new Person("Arthur");
+
+    // we call a closure!
+    someone.introduce(); // prints "Hello, my name is Arthur"
+    </script>
+</head>
+<body>
+    <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6481">Issue 6481</a>:
+            Show closures don´t work</h1>
+    </header>
+    <div>
+        <section id="description">
+            <h3>Steps to reproduce</h3>
+            <ol>
+                <li>Open firebug</li>
+                <li>Switch to the DOM panel</li>
+                <li>Select "Show Closures"</li>
+                <li>Expand variable "someone" > "introduce" > "(closure)"</li>
+                <li>You should see: <code>_name "Arthur"</code></li>
+                <li>You should also see: <code>_unused (optimized away)</code></li>
+            </ol>
+        </section>
+        <footer>
+            Jan Odvarko, &lt;odvarko@gmail.com&gt;
+        </footer>
+    </div>
+</body>
+</html>

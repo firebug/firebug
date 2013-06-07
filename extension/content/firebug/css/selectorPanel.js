@@ -1,279 +1,150 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/lib/locale",
-    "firebug/lib/events",
-    "firebug/lib/dom",
     "firebug/lib/domplate",
-    "firebug/chrome/menu",
-    "firebug/css/selectorEditor",
+    "firebug/lib/locale",
+    "firebug/lib/dom",
+    "firebug/lib/css",
+    "firebug/lib/events",
+    "firebug/lib/persist",
     "firebug/css/selectorModule",
+    "firebug/css/selectorEditor"
 ],
-function(Firebug, Obj, Locale, Events, Dom, Domplate, Menu, SelectorEditor) {
+function(FBTrace, Obj, Domplate, Locale, Dom, Css, Events, Persist, CSSSelectorsModule,
+    SelectorEditor) {
+
 with (Domplate) {
 
 // ********************************************************************************************* //
-// Constants
+// CSS Computed panel (HTML side panel)
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+function CSSSelectorsPanel() {}
 
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-
-// ********************************************************************************************* //
-// CSS Selector Panel
-
-/**
- * @panel Selector side panel displaying HTML elements for the current selector,
- * either from the CSS main panel or user entry
- */
-function SelectorPanel() {}
-SelectorPanel.prototype = Obj.extend(Firebug.Panel,
-/** @lends SelectorPanel */
+CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 {
-    name: "selector",
-    parentPanel: "stylesheet",
-    title: Locale.$STR("css.selector.Selection"),
-    editable: true,
+    template: domplate(
+    {
+        selectorsTag:
+            DIV({"class": "selectorTrials a11yCSSView", role: "list", "aria-label":
+                Locale.$STR("aria.labels.Selectors")},
+                TAG("$selectorEditorRow"),
+                DIV({"class": "elementsGroups"})
+            ),
+
+        selectorEditorRow:
+            DIV({"class": "selectorEditorContainer editorContainer a11yFocusNoTab",
+                role: "button", "tabindex" : "0",
+                "aria-label": Locale.$STR("a11y.labels.press_enter_to_add_new_selector"),
+                onclick: "$onClickEditor"},
+                Locale.$STR("css.selector.TryASelector")
+            ),
+
+        elementsGroupTag:
+            DIV({"class": "elementsGroup foldableGroup", $opened: "$group.opened",
+                role: "list", _repObject: "$group"},
+                H1({"class": "cssElementsHeader groupHeader focusRow", role: "listitem"},
+                    DIV({"class": "twisty", role: "presentation"}),
+                    SPAN({"class": "cssElementsLabel groupLabel"}, "$group.selector"),
+                    DIV({"class": "closeButton selectorGroupRemoveButton"})
+                )
+            ),
+
+        elementsTag:
+            TABLE({"class": "cssElementsTable groupContent", role: "list"},
+                TBODY({role: "presentation"},
+                    FOR("element", "$elements",
+                        TR({"class": "focusRow cssElementsRow cssElements",
+                                role: "listitem", _repObject: "$element"},
+                            TD({"class": "cssElement", role: "presentation"},
+                                TAG("$element|getElementTag", {object: "$element"})
+                            )
+                        )
+                    )
+                )
+            ),
+
+        getElementTag: function(value)
+        {
+            var rep = Firebug.getRep(value);
+            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+            return tag;
+        },
+
+        onClickEditor: function(event)
+        {
+            var target = event.currentTarget;
+            var panel = Firebug.getElementPanel(target);
+            Firebug.Editor.startEditing(target, "");
+        }
+    }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Initialization
+    // Events
 
-    initialize: function(context, doc)
+    onClick: function(event)
     {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var header = Dom.getAncestorByClass(event.target, "groupHeader");
+        if (header)
+        {
+            var removeButton = Dom.getAncestorByClass(event.target, "selectorGroupRemoveButton");
+            if (removeButton)
+            {
+                var group = Firebug.getRepObject(event.target);
+                this.removeGroup(group.selector);
+            }
+            else
+            {
+                this.toggleGroup(event.target);
+            }
+        }
+    },
+
+    onMutationObserve: function(records)
+    {
+        this.refresh();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Extends Panel
+
+    name: "selectors",
+    parentPanel: "stylesheet",
+    order: 0,
+
+    initialize: function()
+    {
+        this.groups = [];
+        this.onClick = Obj.bind(this.onClick, this);
+        this.onMutationObserve = this.onMutationObserve.bind(this);
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
-    shutdown: function(context, doc)
+    destroy: function(state)
     {
-        Firebug.Panel.shutdown.apply(this, arguments);
+        state.groups = this.groups;
+        Persist.persistObjects(this, state);
+
+        Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
     {
         Firebug.Panel.initializeNode.apply(this, arguments);
 
-        this.setSelection = Obj.bind(this.setSelection, this);
-        this.clearSelection = Obj.bind(this.clearSelection, this);
-        this.lockSelection = Obj.bind(this.lockSelection, this);
-
-        var panelNode = this.mainPanel.panelNode;
-        // See: http://code.google.com/p/fbug/issues/detail?id=5931
-        //Events.addEventListener(panelNode, "mouseover", this.setSelection, false);
-        //Events.addEventListener(panelNode, "mouseout", this.clearSelection, false);
-        //Events.addEventListener(panelNode, "mousedown", this.lockSelection, false);
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     destroyNode: function()
     {
-        var panelNode = this.mainPanel.panelNode;
-        //Events.removeEventListener(panelNode, "mouseover", this.setSelection, false);
-        //Events.removeEventListener(panelNode, "mouseout", this.clearSelection, false);
-        //Events.removeEventListener(panelNode, "mousedown", this.lockSelection, false);
-
         Firebug.Panel.destroyNode.apply(this, arguments);
-    },
 
-    show: function(state)
-    {
-        Firebug.Panel.show.apply(this, arguments);
-
-        this.refresh();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getCSSStyleRule: function(event)
-    {
-        var object = Firebug.getRepObject(event.target);
-
-        if (object && (object instanceof window.CSSStyleRule))
-            return object;
-    },
-
-    getCSSRuleElement: function(element)
-    {
-        while (element && !element.classList.contains("cssRule"))
-            element = element.parentNode;
-
-        return element;
-    },
-
-    getMatchingElements: function(rule)
-    {
-        this.trialSelector = rule.selectorText;
-        this.selection = rule;
-        this.rebuild();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Selection
-
-    setSelection: function(event)
-    {
-        var rule = this.getCSSStyleRule(event);
-
-        if (rule)
-        {
-            // then we have entered a rule element
-            var ruleElement = this.getCSSRuleElement(event.target);
-            if (ruleElement && ruleElement !== this.lockedElement)
-                ruleElement.classList.add("selectedSelectorRule");
-
-            this.selection = rule;
-            this.rebuild();
-        }
-    },
-
-    clearSelection: function(event)
-    {
-        if (this.selection !== this.lockedSelection)
-        {
-            this.selection = this.lockedSelection;
-            this.rebuild();
-        }
-
-        var rule = this.getCSSStyleRule(event);
-        if (rule)
-        {
-            // then we are leaving a rule element that we may have highlighted.
-            var ruleElement = this.getCSSRuleElement(event.target);
-            if (ruleElement)
-                ruleElement.classList.remove("selectedSelectorRule");
-        }
-    },
-
-    lockSelection: function(event)
-    {
-        var rule = this.getCSSStyleRule(event);
-        if (rule)
-        {
-            if (this.lockedElement)
-                this.lockedElement.classList.remove("lockedSelectorRule");
-
-            this.lockedElement = this.getCSSRuleElement(event.target);
-
-            if (this.lockedElement)
-            {
-                this.lockedElement.classList.add("lockedSelectorRule");
-                this.lockedElement.classList.remove("selectedSelectorRule");
-            }
-
-            this.lockedSelection = rule;
-        }
-    },
-
-    hide: function()
-    {
-        Firebug.Panel.hide.apply(this, arguments);
-    },
-
-    refresh: function()
-    {
-        var root = this.context.window.document.documentElement;
-        this.selection = this.mainPanel.selection;
-
-        // Use trial selector if there is no selection in the CSS panel.
-        if (!this.selection)
-            this.selection = this.trialSelector;
-
-        this.rebuild(true);
-    },
-
-    /**
-     * returns an array of Elements matched from selector
-     */
-    getSelectedElements: function(selectorText)
-    {
-        var elements = [];
-
-        // Execute the query also in all iframes (see issue 5962)
-        var windows = this.context.windows;
-        for (var i=0; i<windows.length; i++)
-        {
-            var win = windows[i];
-            var selections = win.document.querySelectorAll(selectorText);
-
-            // For some reason the return value of querySelectorAll()
-            // is not recognized as a NodeList anymore since Firefox 10.0.
-            // See issue 5442.
-            // But since there can be more iframes we need to collect all matching
-            // elements in an extra array anyway.
-            if (selections)
-            {
-                for (var j=0; j<selections.length; j++)
-                    elements.push(selections[j]);
-            }
-            else
-            {
-                throw new Error("Selection Failed: " + selections);
-            }
-        }
-
-        return elements;
-    },
-
-    /**
-     * Build content of the panel. The basic layout of the panel is generated by
-     * {@link SelectorTemplate} template.
-     */
-    rebuild: function()
-    {
-        if (this.selection)
-        {
-            try
-            {
-                var selectorText;
-
-                if (this.selection instanceof window.CSSStyleRule)
-                    selectorText = this.selection.selectorText;
-                else
-                    selectorText = this.selection;
-
-                var elements = this.getSelectedElements(selectorText);
-                if (elements && elements.length != 0)
-                {
-                    SelectorTemplate.tag.replace({object: elements}, this.panelNode);
-                    this.showTrialSelector(this.trialSelector);
-                    return;
-                }
-            }
-            catch (e)
-            {
-                var table = SelectorTemplate.tag.replace({object: []}, this.panelNode);
-                var tbody = table.lastChild;
-
-                WarningTemplate.selectErrorTag.insertRows({object: e}, tbody.lastChild);
-                WarningTemplate.selectErrorTextTag.insertRows({object: e}, tbody.lastChild);
-
-                this.showTrialSelector(this.trialSelector);
-                return;
-            }
-        }
-
-        var table = SelectorTemplate.tag.replace({object: []}, this.panelNode);
-        var tbody = table.lastChild;
-
-        if (this.trialSelector)
-        {
-            WarningTemplate.noSelectionResultsTag.insertRows(
-                {object: this.selection}, tbody.lastChild);
-        }
-        else
-        {
-            WarningTemplate.noSelectionTag.insertRows(
-                {object: this.selection}, tbody.lastChild);
-        }
-
-        this.showTrialSelector(this.trialSelector);
-    },
-
-    getObjectPath: function(object)
-    {
-        if (FBTrace.DBG_ELEMENTS)
-            FBTrace.sysout("css.selector.getObjectPath NOOP", object);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     supportsObject: function(object)
@@ -281,53 +152,136 @@ SelectorPanel.prototype = Obj.extend(Firebug.Panel,
         return 0;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    tryASelector: function(element)
+    show: function(state)
     {
-        if (!this.trialSelector)
-            this.trialSelector = this.selection ? this.selection.selectorText : "";
+        Persist.restoreObjects(this, state);
 
-        this.editProperty(element, this.trialSelector);
+        if (state)
+        {
+            if (state.groups)
+                this.groups = state.groups;
+        }
+
+        this.refresh();
+
+        this.mutationObserver = new MutationObserver(this.onMutationObserve);
+        this.mutationObserver.observe(this.context.window.document, {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
     },
 
-    editProperty: function(row, editValue)
+    hide: function()
     {
-        Firebug.Editor.startEditing(row, editValue);
+        this.mutationObserver.disconnect();
+        this.mutationObserver = null;
     },
 
     getEditor: function(target, value)
     {
         if (!this.editor)
-            this.editor = new SelectorPanelEditor(this.document);
+            this.editor = new CSSSelectorsPanelEditor(this.document);
 
         return this.editor;
     },
 
-    setTrialSelector: function(target, value)
-    {
-        if (this.lockedElement)
-            this.lockedElement.classList.remove("lockedSelectorRule");
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Groups
 
-        this.trialSelector = value;
-        this.selection = this.trialSelector;
-        this.lockedElement = target;
-        this.lockedSelection = this.selection;
-        this.rebuild();
+    addGroup: function(selector)
+    {
+        var group = {
+            selector: selector,
+            opened: true
+        }
+        this.groups.push(group);
+
+        this.displayGroup(group);
     },
 
-    showTrialSelector: function(trialSelector)
+    displayGroup: function(group)
     {
-        var show = trialSelector ? true : false;
-        Dom.collapse(this.document.getElementById("trialHint"), show);
+        var elementsGroups = this.panelNode.getElementsByClassName("elementsGroups")[0];
+        var action = elementsGroups.getElementsByClassName("noSelection")[0] ?
+            "replace" : "append";
+        var elementsGroup = this.template.elementsGroupTag[action](
+            {group: group, windows: this.context.windows}, elementsGroups);
 
-        var trialSelectorDiv = this.document.getElementById("trialSelector");
-        trialSelectorDiv.textContent = trialSelector;
-        Dom.collapse(trialSelectorDiv, !show);
+        try
+        {
+            var elements = CSSSelectorsModule.matchElements(this.context.windows, group.selector);
+            if (elements.length != 0)
+            {
+                this.template.elementsTag.append({elements: elements}, elementsGroup);
+            }
+            else
+            {
+                WarningTemplate.noSelectionResultsTag.append({}, elementsGroup);
+            }
+        }
+        catch(e)
+        {
+            WarningTemplate.invalidSelectorTag.append({}, elementsGroup);
+        }
     },
+
+    toggleGroup: function(node)
+    {
+        var groupsNode = Dom.getAncestorByClass(node, "elementsGroups");
+        var groupNode = Dom.getAncestorByClass(node, "elementsGroup");
+        var group = Firebug.getRepObject(groupNode);
+
+        Css.toggleClass(groupNode, "opened");
+        var opened = Css.hasClass(groupNode, "opened");
+        group.opened = opened;
+
+        if (opened)
+        {
+            var offset = Dom.getClientOffset(node);
+            var titleAtTop = offset.y < groupsNode.scrollTop;
+
+            Dom.scrollTo(groupNode, groupsNode, null,
+                groupNode.offsetHeight > groupsNode.clientHeight || titleAtTop ? "top" : "bottom");
+        }
+    },
+
+    removeGroup: function(selector)
+    {
+        for (var i=0, len=this.groups.length; i<len; ++i)
+        {
+            if (this.groups[i].selector == selector)
+            {
+                this.groups.splice(i, 1);
+
+                // Remove elements group from display
+                var elementsGroup = this.panelNode.getElementsByClassName("elementsGroup")[i];
+                elementsGroup.parentNode.removeChild(elementsGroup);
+                break;
+            }
+        }
+    },
+
+    refresh: function()
+    {
+        var parentNode = this.template.selectorsTag.replace(
+                {groups: this.groups, windows: this.context.windows}, this.panelNode);
+
+        if (this.groups.length == 0)
+        {
+            var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
+            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+        }
+        else
+        {
+            for (var i=0, len=this.groups.length; i<len; ++i)
+                this.displayGroup(this.groups[i]);
+        }
+    }
 });
 
-function SelectorPanelEditor(doc)
+function CSSSelectorsPanelEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
     this.input = this.box;
@@ -337,124 +291,69 @@ function SelectorPanelEditor(doc)
     this.fixedWidth = true;
 }
 
-SelectorPanelEditor.prototype = domplate(SelectorEditor.prototype,
+CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
 {
     tag:
-        INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
+        INPUT({"class": "fixedWidthEditor selectorsPanelEditor a11yFocusNoTab",
             type: "text",
             title: Locale.$STR("Selector"),
             oninput: "$onInput",
             onkeypress: "$onKeyPress"}
         ),
 
+    saveEdit: function(target, value, previousValue)
+    {
+        var saveSuccess = this.isValidSelector(value);
+        this.box.setAttribute("saveSuccess", saveSuccess);
+    },
+
     endEditing: function(target, value, cancel)
     {
-        if (cancel)
+        if (cancel || value == "")
             return;
 
-        this.panel.setTrialSelector(target, value);
-    }
-});
-
-// ********************************************************************************************* //
-
-var BaseRep = domplate(Firebug.Rep,
-{
-    // xxxHonza: shouldn't this be in Firebug.Rep?
-    getNaturalTag: function(value)
-    {
-        var rep = Firebug.getRep(value);
-        var tag = rep.shortTag ? rep.shortTag : rep.tag;
-        return tag;
-    }
-});
-
-// ********************************************************************************************* //
-
-var TrialRow =
-    TR({"class": "watchNewRow", level: 0, onclick: "$onClickEditor"},
-        TD({"class": "watchEditCell", colspan: 3},
-            DIV({"class": "watchEditBox a11yFocusNoTab", "id": "trialHint",
-                role: "button", "tabindex" : "0",
-                "aria-label": Locale.$STR("a11y.labels.press enter to add new selector")},
-                Locale.$STR("css.selector.TryASelector")
-            ),
-            DIV({"class": "trialSelector", "id": "trialSelector"}, "")
-        )
-    );
-
-// ********************************************************************************************* //
-
-/**
- * @domplate: Template for basic layout of the {@link SelectorPanel} panel.
- */
-var SelectorTemplate = domplate(BaseRep,
-{
-    // object will be array of elements CSSStyleRule
-    tag:
-        TABLE({"class": "cssSelectionTable", cellpadding: 0, cellspacing: 0},
-            TBODY({"class": "cssSelectionTBody"},
-                TrialRow,
-                FOR("element", "$object",
-                    TR({"class": "selectionElementRow", _repObject: "$element"},
-                        TD({"class": "selectionElement"},
-                            TAG( "$element|getNaturalTag", {object: "$element"})
-                        )
-                    )
-                )
-            )
-        ),
-
-    onClickEditor: function(event)
-    {
-        var tr = event.currentTarget;
-        var panel = Firebug.getElementPanel(tr);
-        panel.tryASelector(tr);
+        this.panel.addGroup(value);
     },
+
+    isValidSelector: function(value)
+    {
+        try {
+            this.panel.panelNode.querySelector(value);
+            return true;
+        }
+        catch (e)
+        {
+            return false;
+        }
+    }
 });
 
-// ********************************************************************************************* //
+//********************************************************************************************* //
 
 var WarningTemplate = domplate(Firebug.Rep,
 {
     noSelectionTag:
-        TR({"class": "selectorWarning"},
-            TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelection"))
+        DIV({"class": "selectorWarning noSelection"},
+            SPAN(Locale.$STR("css.selector.noSelection"))
         ),
 
     noSelectionResultsTag:
-        TR({"class": "selectorWarning"},
-            TD({"class": "selectionElement"}, Locale.$STR("css.selector.noSelectionResults"))
+        DIV({"class": "selectorWarning noSelectionResults"},
+            SPAN(Locale.$STR("css.selector.noSelectionResults"))
         ),
 
-    selectErrorTag:
-        TR({"class": "selectorWarning"},
-            TD({"class": "selectionElement"}, Locale.$STR("css.selector.selectorError"))
-        ),
-
-    selectErrorTextTag:
-        TR({"class": "selectorWarning"},
-            TD({"class": "selectionErrorText selectionElement"},
-                SPAN("$object|getErrorMessage")
-            )
-        ),
-
-    getErrorMessage: function(object)
-    {
-        if (object.message)
-            return object.message;
-
-        return Locale.$STR("css.selector.unknownErrorMessage");
-    }
+    invalidSelectorTag:
+        DIV({"class": "selectorWarning invalidSelector"},
+            SPAN(Locale.$STR("css.selector.invalidSelector"))
+        )
 });
 
-// ********************************************************************************************* //
-// Registration
+//********************************************************************************************* //
+//Registration
 
-Firebug.registerStylesheet("chrome://firebug/skin/selector.css");
-Firebug.registerPanel(SelectorPanel);
+Firebug.registerPanel(CSSSelectorsPanel);
 
-return SelectorPanel;
+return CSSSelectorsPanel;
 
-// ********************************************************************************************* //
+//********************************************************************************************* //
 }});

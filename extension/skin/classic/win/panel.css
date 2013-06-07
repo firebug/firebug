@@ -4,6 +4,7 @@
 /* Twisties */
 
 .twisty,
+.foldableGroup > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
@@ -24,6 +25,7 @@
     min-height: 12px;
 }
 
+.foldableGroup.opened > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,

@@ -238,8 +238,8 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             this.panelNode = parentNode;
             this.context = context;
 
-            var members = this.getMembers(jsonObject, 0, context);
-            this.expandMembers(members, this.toggles, 0, 0, context);
+            var members = this.getMembers(jsonObject, 0);
+            this.expandMembers(members, this.toggles, 0, 0);
             this.showMembers(members, false, false);
         }
         catch (err)
@@ -249,7 +249,7 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }
     },
 
-    getMembers: function(object, level, context)
+    getMembers: function(object, level)
     {
         if (!level)
             level = 0;
@@ -265,7 +265,7 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
 
         // Sort only if it isn't an array (issue 4382).
-        if (Firebug.sortJsonPreview && !Arr.isArray(object, context.window))
+        if (Firebug.sortJsonPreview && !Arr.isArray(object, this.context.window))
             members.sort(sortName);
 
         return members;

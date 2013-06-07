@@ -424,30 +424,40 @@ var BrowserMenu =
         ]);
 
         // Firefox view menu
-        $menupopupOverlay(doc, $(doc, "menu_viewPopup"), [
-            $menuitem(doc, {
-                id: "menu_firebug_viewToggleFirebug",
-                insertbefore: "toggle_taskbar",
-                label: "firebug.Firebug",
-                type: "checkbox",
-                key: "key_firebug_toggleFirebug",
-                command: "cmd_firebug_toggleFirebug",
-                "class": "fbInternational"
-            })
-        ]);
+        $menupopupOverlay(doc, $(doc, "menu_viewPopup"),
+            [
+                $menuitem(doc, {
+                    id: "menu_firebug_viewToggleFirebug",
+                    insertbefore: "toggle_taskbar",
+                    label: "firebug.Firebug",
+                    type: "checkbox",
+                    key: "key_firebug_toggleFirebug",
+                    command: "cmd_firebug_toggleFirebug",
+                    "class": "fbInternational"
+                })
+            ],
+            {
+                onpopupshowing: "return Firebug.browserOverlay.onViewMenuShowing();"
+            }
+        );
         
         // SeaMonkey view menu
-        $menupopupOverlay(doc, $(doc, "menu_View_Popup"), [
-            $menuitem(doc, {
-                id: "menu_firebug_viewToggleFirebug",
-                insertafter: "menuitem_fullScreen",
-                label: "firebug.Firebug",
-                type: "checkbox",
-                key: "key_firebug_toggleFirebug",
-                command: "cmd_firebug_toggleFirebug",
-                "class": "menuitem-iconic fbInternational"
-            })
-        ]);
+        $menupopupOverlay(doc, $(doc, "menu_View_Popup"),
+            [
+                $menuitem(doc, {
+                    id: "menu_firebug_viewToggleFirebug",
+                    insertafter: "menuitem_fullScreen",
+                    label: "firebug.Firebug",
+                    type: "checkbox",
+                    key: "key_firebug_toggleFirebug",
+                    command: "cmd_firebug_toggleFirebug",
+                    "class": "menuitem-iconic fbInternational"
+                })
+            ],
+            {
+                onpopupshowing: "return Firebug.browserOverlay.onViewMenuShowing();"
+            }
+        );
 
         // Firefox Tools -> Web Developer Menu
         $menupopupOverlay(doc, $(doc, "menuWebDeveloperPopup"), [

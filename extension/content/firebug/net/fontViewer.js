@@ -32,7 +32,8 @@ var contentTypes =
     "font/ttf",
     "font/woff",
     "application/x-otf",
-    "application/x-font-otf"
+    "application/x-font-otf",
+    "application/font-woff"
 ];
 
 // ********************************************************************************************* //
@@ -684,7 +685,7 @@ Firebug.FontViewerModel.Preview = domplate(
             charTypes: charTypes}, body, this);
 
         var styleNode = node.getElementsByClassName("fontInfoPreviewStyle").item(0);
-        styleNode.innerHTML = this.getFontFaceCss(fontObject);
+        styleNode.textContent = this.getFontFaceCss(fontObject);
 
         this.insertGeneralInfo(body, file.fontObject);
 
