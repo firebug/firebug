@@ -100,6 +100,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
+        {
             this.insertLogLimit(this.context);
 
             if (this.context.consoleReloadWarning)  // we have not yet injected the console
