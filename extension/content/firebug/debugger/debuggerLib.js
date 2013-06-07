@@ -16,8 +16,6 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
-
 // Debugees
 var dglobalWeakMap = new WeakMap();
 
@@ -153,8 +151,9 @@ DebuggerLib.getThreadActor = function(browser)
 {
     try
     {
-        var conn = DebuggerServer._connections["conn0."];
-
+        // The current connection is now accessible through the transport.
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=878472
+        var conn = Firebug.debuggerClient._transport._serverConnection;
         var tabList = conn.rootActor._parameters.tabList;
         var tabActor = tabList._actorByBrowser.get(browser);
         if (!tabActor)
