@@ -186,7 +186,8 @@ var Profiler = Obj.extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                if (!Firebug.filterSystemURLs || !Url.isSystemURL(script.fileName))
+                var fileName = Url.getFileName(script.url);
+                if (!Firebug.filterSystemURLs || !Url.isSystemURL(fileName))
                 {
                     var sourceLink = Firebug.SourceFile.toSourceLink(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)

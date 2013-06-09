@@ -530,8 +530,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     {
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
-        var members = this.getMembers(this.selection, 0, this.context);
-        this.expandMembers(members, this.toggles, 0, 0, this.context);
+        var members = this.getMembers(this.selection, 0);
+        this.expandMembers(members, this.toggles, 0, 0);
         this.showMembers(members, update, scrollTop);
     },
 
@@ -541,9 +541,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     /**
      * @param object a user-level object wrapped in security blanket
      * @param level for a.b.c, level is 2
-     * @param optional context
      */
-    getMembers: function(object, level, context)
+    getMembers: function(object, level)
     {
         if (!this.memberProvider)
             this.memberProvider = new DOMMemberProvider(this.context);
@@ -561,7 +560,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // recursion starts with offset=0, level=0
-    expandMembers: function (members, toggles, offset, level, context)
+    expandMembers: function(members, toggles, offset, level)
     {
         var expanded = 0;
         for (var i = offset; i < members.length; ++i)
@@ -580,7 +579,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     continue;
 
                 // sets newMembers.level to level+1
-                var newMembers = this.getMembers(member.value, level+1, context);
+                var newMembers = this.getMembers(member.value, level+1);
 
                 // Insert 'newMembers' into 'members'
                 Arr.arrayInsert(members, i+1, newMembers);
@@ -596,7 +595,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 }
 
                 var moreExpanded = newMembers.length +
-                    this.expandMembers(members, toggles.get(member.name), i+1, level+1, context);
+                    this.expandMembers(members, toggles.get(member.name), i+1, level+1);
                 i += moreExpanded;
                 expanded += moreExpanded;
             }

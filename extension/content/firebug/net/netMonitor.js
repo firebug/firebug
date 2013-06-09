@@ -268,27 +268,66 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             panel.clear();
     },
 
-    onToggleFilter: function(context, filterCategory)
+    onToggleFilter: function(event, context, filterCategory)
     {
         if (!context.netProgress)
             return;
 
-        Options.set("netFilterCategory", filterCategory);
+        var filterCategories = [];
+        if (Events.isControl(event) && filterCategory != "all")
+        {
+            filterCategories = Options.get("netFilterCategories").split(" ");
+            var filterCategoryIndex = filterCategories.indexOf(filterCategory);
+            if (filterCategoryIndex == -1)
+                filterCategories.push(filterCategory);
+            else
+                filterCategories.splice(filterCategoryIndex, 1);
+        }
+        else
+        {
+            filterCategories.push(filterCategory);
+        }
+
+        // Remove "all" filter in case several filters are selected
+        if (filterCategories.length > 1)
+        {
+            var allIndex = filterCategories.indexOf("all");
+            if (allIndex != -1)
+                filterCategories.splice(allIndex, 1);
+        }
+
+        this.setFilter(filterCategories);
 
         // The content filter has been changed. Make sure that the content
         // of the panel is updated (CSS is used to hide or show individual files).
         var panel = context.getPanel(panelName, true);
         if (panel)
         {
-            panel.setFilter(filterCategory);
+            panel.setFilter(filterCategories);
             panel.updateSummaries(NetUtils.now(), true);
         }
     },
 
+    setFilter: function(filterCategories)
+    {
+        Options.set("netFilterCategories", filterCategories.join(" "));
+    },
+
     syncFilterButtons: function(chrome)
     {
-        var button = chrome.$("fbNetFilter-" + Firebug.netFilterCategory);
-        button.checked = true;
+        var filterCategories = new Set();
+        Options.get("netFilterCategories").split(" ").forEach(function(element)
+        {
+            filterCategories.add(element);
+        });
+        var doc = chrome.window.document;
+        var buttons = doc.getElementsByClassName("fbNetFilter");
+
+        for (var i=0, len=buttons.length; i<len; ++i)
+        {
+            var filterCategory = buttons[i].id.substr(buttons[i].id.search("-") + 1);
+            buttons[i].checked = filterCategories.has(filterCategory); 
+        }
     },
 
     togglePersist: function(context)

@@ -372,7 +372,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return Dom.getAncestorByClass(node, "logRow"); }
+        function findRow(node)
+        {
+            return Dom.getAncestorByClass(node, "logRow");
+        }
+
         var search = new Search.TextSearch(this.panelNode, findRow);
 
         var logRow = search.find(text, false, Firebug.Search.isCaseSensitive(text));
@@ -386,6 +390,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             Firebug.Search.isCaseSensitive(text)))
         {
             Css.setClass(logRow, "matched");
+
+            // Mark the groups, in which the low row is located, also as matched
+            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            {
+                Css.setClass(group, "matched");
+            }
             this.matchSet.push(logRow);
         }
 
@@ -540,22 +551,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var container = this.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
-    },
-
-    insertReloadWarning: function()
-    {
-        // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(this.appendObject, Locale.$STR(
-            "message.Reload to activate window console"), "info");
-    },
-
-    clearReloadWarning: function()
-    {
-        if (this.warningRow && this.warningRow.parentNode)
-        {
-            this.warningRow.parentNode.removeChild(this.warningRow);
-            delete this.warningRow;
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

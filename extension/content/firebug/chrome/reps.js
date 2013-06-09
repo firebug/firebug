@@ -257,10 +257,8 @@ FirebugReps.Func = domplate(Firebug.Rep,
     summarizeFunction: function(fn)
     {
         var fnText = Str.safeToString(fn);
-
-        // Get function name.
         var namedFn = /^function ([^(]+\([^)]*\))/.exec(fnText);
-        var anonFn  = /^function \(/.test(fnText);
+        var anonFn = /^function \(/.test(fnText);
         var displayName = fn.displayName;
 
         var result = namedFn ? namedFn[1] : (displayName ? displayName + "()" :

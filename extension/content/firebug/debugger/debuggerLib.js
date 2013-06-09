@@ -3,9 +3,10 @@
 /*global FBTrace:true, Components:true, define:true */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/wrapper",
 ],
-function(Wrapper) {
+function(FBTrace, Wrapper) {
 
 "use strict";
 
@@ -16,13 +17,13 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource://gre/modules/devtools/dbg-server.jsm");
-
 // Debugees
 var dglobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
+
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Implementation
@@ -153,8 +154,9 @@ DebuggerLib.getThreadActor = function(browser)
 {
     try
     {
-        var conn = DebuggerServer._connections["conn0."];
-
+        // The current connection is now accessible through the transport.
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=878472
+        var conn = Firebug.debuggerClient._transport._serverConnection;
         var tabList = conn.rootActor._parameters.tabList;
         var tabActor = tabList._actorByBrowser.get(browser);
         if (!tabActor)
@@ -258,6 +260,33 @@ DebuggerLib.getNextExecutableLine = function(context, aLocation)
     }
 }
 
+DebuggerLib.isExecutableLine = function(context, location)
+{
+    var threadClient = this.getThreadActor(context.browser);
+
+    // Use 'innermost' property so, the result is (almost) always just one script object
+    // and we can save time in the loop below. See: https://wiki.mozilla.org/Debugger
+    var query = {
+        url: location.url,
+        line: location.line,
+        innermost: true,
+    };
+
+    var scripts = threadClient.dbg.findScripts(query);
+    if (scripts.length == 0)
+        return false;
+
+    for (var i=0; i<scripts.length; i++)
+    {
+        var script = scripts[i];
+        var offsets = script.getLineOffsets(location.line);
+        if (offsets.length > 0)
+            return true;
+    }
+
+    return false;
+}
+
 // ********************************************************************************************* //
 // Debugger
 
@@ -299,8 +328,7 @@ var getInactiveDebuggerForContext = function(context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERROR)
-            FBTrace.sysout("DebuggerLib.getInactiveDebuggerForContext; Debugger not found", exc);
+        TraceError.sysout("DebuggerLib.getInactiveDebuggerForContext; Debugger not found", exc);
     }
 
     // If the Debugger Class was not found, make this function no-op.

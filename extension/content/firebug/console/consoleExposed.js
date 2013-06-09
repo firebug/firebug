@@ -335,14 +335,6 @@ function createFirebugConsole(context, win)
                 if (FBTrace.DBG_CONSOLE)
                     FBTrace.sysout("logAssert trace from msg.stack", trace);
             }
-            else if (context.stackTrace)
-            {
-                // xxxHonza: I don't see context.stackTrace being set anywhere.
-                // Can we remove this?
-                trace = context.stackTrace;
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
-            }
             else
             {
                 trace = getJSDUserStack();

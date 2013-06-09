@@ -1,0 +1,51 @@
+/* See license.txt for terms of usage */
+
+.panelNode-selectors {
+    overflow: hidden;
+}
+
+.selectorTrials {
+    height: 100%;
+}
+
+.editorContainer {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+    line-height: 14px;
+    cursor: text;
+}
+
+.selectorsPanelEditor {
+    font-family: monospace !important;
+}
+
+.elementsGroups {
+    position: relative;
+    height: calc(100% - 18px);
+    overflow-y: scroll;
+}
+
+.selectorWarning {
+    font-size: 11px;
+    color: gray;
+    padding: 2px 1ex;
+}
+
+.selectorWarning.invalidSelector {
+    color: red;
+    background-color: #FFEBEB;
+}
+
+.cssElementsHeader {
+    margin: 0;
+}
+
+.selectorGroupRemoveButton
+{
+    position: absolute;
+    right: 3px;
+    top: 2px;
+    cursor: auto;
+}

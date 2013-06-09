@@ -14,9 +14,10 @@ define([
     "firebug/lib/string",
     "firebug/dom/toggleBranch",
     "firebug/dom/domModule",
+    "firebug/dom/domMemberProvider",
 ],
 function(Firebug, D, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
-    DOMModule) {
+    DOMModule, DOMMemberProvider) {
 
 "use strict";
 
@@ -111,8 +112,8 @@ var DirTablePlate = D.domplate(Firebug.Rep,
 
     memberIterator: function(object)
     {
-        // xxxHonza: kind of hackish to access DOMBasePanel here, fix me
-        var members = Firebug.DOMBasePanel.prototype.getMembers(object, 0, null);
+        var memberProvider = new DOMMemberProvider(null);
+        var members = memberProvider.getMembers(object, 0);
         if (members.length)
             return members;
 
@@ -270,7 +271,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
                         FBTrace.sysout("toggleRow mark path "+toggles);
                 }
 
-                var members = domPanel.getMembers(target.repObject, level+1, context);
+                var members = domPanel.getMembers(target.repObject, level+1);
 
                 var rowTag = this.rowTag;
                 var lastRow = row;

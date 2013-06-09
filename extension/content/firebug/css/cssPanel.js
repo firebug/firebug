@@ -2661,7 +2661,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
             FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue +
                 "'", target);
 
-        target.innerHTML = Str.escapeForCss(value);
+        target.textContent = value;
         if (value === previousValue)
             return;
 
@@ -2772,7 +2772,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS)
                     FBTrace.sysout("CSS Insert Error: "+err, err);
 
-                target.innerHTML = Str.escapeForCss(previousValue);
+                target.textContent = previousValue;
                 // create dummy rule to be able to recover from error
                 var insertLoc = CSSModule.insertRule(styleSheet,
                     'selectorSavingError{}', ruleIndex);
@@ -3041,7 +3041,7 @@ function getOriginalStyleSheetCSS(sheet, context)
 {
     if (sheet.ownerNode instanceof window.HTMLStyleElement)
     {
-        return sheet.ownerNode.innerHTML;
+        return sheet.ownerNode.textContent;
     }
     else
     {

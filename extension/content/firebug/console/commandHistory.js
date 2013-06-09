@@ -130,7 +130,7 @@ Firebug.CommandHistory = function()
 
             hbox.classList.add("commandHistoryItem");
             var shortExpr = Str.cropString(Str.stripNewLines(commands[i]), 50);
-            hbox.innerHTML = Str.escapeForTextNode(shortExpr);
+            hbox.textContent = shortExpr;
             hbox.value = i;
             commandsPopup.appendChild(hbox);
 

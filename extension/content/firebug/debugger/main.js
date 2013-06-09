@@ -21,6 +21,7 @@ define([
     "firebug/debugger/commands",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/clients/remoteNodeListRep",
+    "firebug/debugger/breakpoints/debuggerKeyword",
 ],
 function(FBTrace, ObjectClient) {
 

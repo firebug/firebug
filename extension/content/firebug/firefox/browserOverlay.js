@@ -24,6 +24,7 @@ var Cu = Components.utils;
 
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
+Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
 
 // JSD2 related new strings are in a separate bundle
 // They should be integrated/remoted at the end of JSD2 refactoring
@@ -292,6 +293,23 @@ BrowserOverlay.prototype =
             while (popup.lastChild)
                 popup.removeChild(popup.lastChild);
         });
+    },
+
+    onViewMenuShowing: function()
+    {
+        var suspendMarker = this.win.document.getElementById("firebugStatus");
+
+        // Check whether Firebug is open
+        var open = false;
+        if (this.win.Firebug.chrome)
+        {
+            var fbContentBox = this.win.Firebug.chrome.$("fbContentBox");
+            open = fbContentBox.getAttribute("collapsed") == "true" ? false : true;
+        }
+
+        var firebugViewMenuItem = this.win.document.
+            getElementById("menu_firebug_viewToggleFirebug");
+        firebugViewMenuItem.setAttribute("checked", open);
     },
 
     onPositionPopupShowing: function(popup)

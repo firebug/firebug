@@ -141,3 +141,11 @@
 .cm-s-firebug .CodeMirror-highlightedLine {
     background-color: rgb(196, 244, 255);
 }
+
+/*************************************************************************************************/
+/* Executable Line */
+
+.cm-s-firebug .CodeMirror-executableLine .CodeMirror-linenumber {
+    color: green;
+    font-weight: bold;
+}

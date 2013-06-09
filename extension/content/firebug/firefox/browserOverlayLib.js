@@ -129,10 +129,14 @@ var BrowserOverlayLib =
         return this.$el(doc, "splitmenu", attrs, children);
     },
 
-    $menupopupOverlay: function(doc, parent, children)
+    $menupopupOverlay: function(doc, parent, children, attributes)
     {
         if (!parent)
             return;
+
+        attributes = attributes || {};
+        for (var a in attributes)
+            parent.setAttribute(a, attributes[a]);
 
         for (var i=0; i<children.length; ++i)
         {
