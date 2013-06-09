@@ -268,7 +268,11 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
         if (this.editor instanceof SourceEditor)
         {
-            this.editor.getViewElement().style.fontSizeAdjust = adjust;
+            var editorViewElement = this.editor.getViewElement();
+            editorViewElement.style.fontSizeAdjust = adjust;
+            // line-height also needs to be changed along with font adjusting
+            // to avoid overlapping lines.
+            editorViewElement.style.lineHeight = adjust * 2;
         }
         else
         {
