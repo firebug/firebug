@@ -84,10 +84,14 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.onContextMenu = Obj.bind(this.onContextMenu, this);
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
+
+        // Listen for set filters, so the panel is properly updated when needed
+        Firebug.NetMonitor.addListener(this);
     },
 
     destroy: function(state)
     {
+        Firebug.NetMonitor.removeListener(this);
         Firebug.ActivablePanel.destroy.apply(this, arguments);
     },
 
@@ -226,15 +230,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     updateOption: function(name, value)
     {
-        if (name == "netFilterCategories")
-        {
-            Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
-            Firebug.NetMonitor.setFilter([value]);
-        }
-        else if (name == "netShowBFCacheResponses")
-        {
+        if (name == "netShowBFCacheResponses")
             this.updateBFCacheResponses();
-        }
     },
 
     updateBFCacheResponses: function()
@@ -777,6 +774,14 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             Events.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, null]);
             return false;
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onFiltersSet: function(filterCategories)
+    {
+        this.setFilter(filterCategories);
+        this.updateSummaries(NetUtils.now(), true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
