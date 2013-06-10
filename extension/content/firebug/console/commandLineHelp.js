@@ -41,7 +41,12 @@ var HelpCaption = domplate(
             SPAN({"class": "helpCaptionDesc"},
                 Locale.$STR("console.cmd.help_title_desc")
             )
-        )
+        ),
+
+    getId: function()
+    {
+        return Obj.getUniqueId();
+    }
 });
 
 // The table UI should be based on tableRep
@@ -143,15 +148,18 @@ var TipsCaption = domplate(
             SPAN({"class": "helpCaptionDesc"},
                 Locale.$STR("console.cmd.tip_title_desc")
             )
-        )
+        ),
+
+    getId: function()
+    {
+        return Obj.getUniqueId();
+    }
 });
 
 var TipsList = domplate(
 {
     tag:
-        DIV({"class": "tipsContent"},
-            UL({"class": "tipsList"})
-        )
+        UL({"class": "tipsList"})
 });
 
 var Tip = domplate(
@@ -196,9 +204,10 @@ var CommandLineHelp = domplate(
             HelpCaption, true, null, true);
         Firebug.Console.closeGroup(context, true);
 
-        var logGroupBody = row.lastChild;
-        var table = HelpTable.tag.replace({}, logGroupBody);
-        var tBody = table.lastChild;
+        var logGroupBody = row.getElementsByClassName("logGroupBody")[0];
+        var logContent = logGroupBody.getElementsByClassName("logContent")[0];
+        var table = HelpTable.tag.append({}, logContent);
+        var tBody = table.getElementsByClassName("helpTbody")[0];
 
         var commands = [];
 
@@ -262,9 +271,9 @@ var CommandLineHelp = domplate(
             TipsCaption, true, null, true);
         Firebug.Console.closeGroup(context, true);
 
-        var logGroupBody = row.lastChild;
-        var table = TipsList.tag.replace({}, logGroupBody);
-        var list = table.lastChild;
+        var logGroupBody = row.getElementsByClassName("logGroupBody")[0];
+        var logContent = logGroupBody.getElementsByClassName("logContent")[0];
+        var list = TipsList.tag.append({}, logContent);
 
         // #1) Render basic command line syntaxt tip
         var tip = {
