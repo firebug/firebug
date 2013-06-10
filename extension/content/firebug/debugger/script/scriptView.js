@@ -496,7 +496,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onGutterClick: function(event)
     {
-        Trace.sysout("scriptView.gutterClick; " + event);
+        Trace.sysout("scriptView.gutterClick; ", event);
 
         if (event.lineNo != null)
         {
@@ -580,7 +580,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     getSelectedText: function()
     {
         return this.editor.getSelectedText();
-    }
+    },
 });
 
 // ********************************************************************************************* //

@@ -233,7 +233,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (!packet.frame)
         {
-            FBTrace.sysout("debuggerTool.paused; ERROR no frame!");
+            FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
             return;
         }
 

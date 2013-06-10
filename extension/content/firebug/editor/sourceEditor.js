@@ -169,6 +169,8 @@ SourceEditor.prototype =
 
     addEventListener: function(type, handler)
     {
+        Trace.sysout("sourceEditor.addEventListener;" + type);
+
         if (isBuiltInEvent(type))
         {
             var func = function()

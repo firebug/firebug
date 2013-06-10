@@ -542,6 +542,13 @@ this.pressKey = function(keyCode, target)
 };
 
 // ********************************************************************************************* //
+
+this.clickContentButton = function(win, buttonId)
+{
+    FBTest.click(win.document.getElementById(buttonId));
+};
+
+// ********************************************************************************************* //
 // Firebug UI
 
 /**
@@ -1515,48 +1522,35 @@ this.getSourceLineNode = function(lineNo, chrome)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
-    var panel = chrome.getSelectedPanel();
-    var sourceBox = panel.selectedSourceBox;
-    if (!FBTest.ok(sourceBox, "getSourceLineNode needs selectedSourceBox in panel " + panel.name))
-        return false;
+    var sourceLineNode;
 
-    var sourceViewport =  FW.FBL.getChildByClass(sourceBox, "sourceViewport");
-    if (!sourceViewport)
+    var panelNode = FBTest.getPanel("script").panelNode;
+    var scroller = panelNode.getElementsByClassName("CodeMirror-scroll")[0];
+
+    var lines = scroller.getElementsByClassName("firebug-line");
+    for (var i=0; i<lines.length; i++)
     {
-        FBTest.ok(sourceViewport, "There is a sourceViewport after scrolling");
-        return false;
-    }
+        var line = lines[i].parentNode;
+        var lineHeight = line.clientHeight;
 
-    var rows = sourceViewport.childNodes;
-    FBTest.sysout("getSourceLineNode has sourceViewport with "+rows.length+" childNodes");
-
-    // Look for line
-    var row = null;
-    for (var i=0; i < rows.length; i++)
-    {
-        var line = rows[i].getElementsByClassName("sourceLine").item(0);
-        if (parseInt(line.textContent, 10) == lineNo)
+        // Skip lines outside the viewport,
+        if (line.offsetTop + lineHeight < scroller.scrollTop ||
+            line.offsetTop > scroller.scrollTop + scroller.clientHeight)
         {
-            row = rows[i];
+            continue;
+        }
+
+        var lineNumberNode = line.getElementsByClassName("CodeMirror-linenumber")[0];
+        var lineNumber = parseInt(lineNumberNode.textContent, 10);
+
+        if (lineNumber == lineNo)
+        {
+            sourceLineNode = line;
             break;
         }
-        else
-        {
-            FBTest.sysout("Tried row "+i+" "+line.textContent+"=?="+lineNo);
-        }
     }
 
-    if (!row)
-    {
-        FBTest.sysout("getSourceLineNode did not find "+lineNo);
-    }
-    else
-    {
-        FBTest.sysout("getSourceLineNode found "+lineNo+" "+rows[i].innerHTML);
-        FBTest.sysout("getSourceLineNode found "+lineNo+" "+row.innerHTML);
-    }
-
-    return row;
+    return sourceLineNode;
 };
 
 /**
@@ -1685,44 +1679,30 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
     if (!chrome)
         chrome = FW.Firebug.chrome;
 
-    var panel = FBTestFirebug.selectPanel("script");
+    var panel = FBTest.selectPanel("script");
     if (!url)
         url = panel.getObjectLocation(panel.location);
 
     // FIXME: xxxpedro this function seems to be hacky, and could be the source
     // of the problem with the test case for Issue 4553
-    FBTestFirebug.selectSourceLine(url, lineNo, "js", chrome, function(row)
+    FBTest.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
-        if (row.getAttribute("breakpoint") != "true")
+        if (!FBTest.hasBreakpoint(row))
         {
             if (attributes && attributes.condition)
             {
-                // Righ-click to open the condition editor
-                var eventDetails = {type : "contextmenu", button : 2};
-                var sourceLine = row.querySelector(".sourceLine");
-                FBTest.synthesizeMouse(sourceLine, 2, 2, eventDetails);
-                var editor = panel.panelNode.querySelector(".conditionInput.completionInput");
-                FBTest.sendString(attributes.condition, editor);
-                FBTest.sendKey("RETURN", editor);
-
-                FBTest.mouseOver(sourceLine);
-
-                // FIXME xxxpedro variable never used. Is the following
-                // "FBTest.waitForDisplayedText" waiting for the correct condition?
-                var config = {tagName: "div", classes: "infoTip"};
-                FBTest.waitForDisplayedText("script", attributes.condition, function (infoTip)
-                {
-                    FBTest.compare(attributes.condition, infoTip.textContent,
-                        "Breakpoint condition must be set correctly");
-                    callback(row);
-                });
+                // xxxHonza: TODO
             }
             else
             {
-                // Click to create a breakpoint.
-                FBTest.mouseDown(row.querySelector(".sourceLine"));
-                FBTest.compare(row.getAttribute("breakpoint"), "true", "Breakpoint must be set");
-                callback(row);
+                var config = {tagName: "div", classes: "breakpoint"};
+                FBTest.waitForDisplayedElement("script", config, function(element)
+                {
+                    callback(row);
+                });
+
+                var target = row.querySelector(".CodeMirror-linenumber");
+                FBTest.synthesizeMouse(target, 2, 2, {type: "mousedown"});
             }
         }
         else
@@ -1743,15 +1723,25 @@ this.removeBreakpoint = function(chrome, url, lineNo, callback)
 
     FBTestFirebug.selectSourceLine(url, lineNo, "js", chrome, function(row)
     {
-        if (row.getAttribute("breakpoint") == "true")
+        if (FBTest.hasBreakpoint(row))
         {
             // Click to remove a breakpoint.
-            FBTest.mouseDown(row.querySelector(".sourceLine"));
-            FBTest.ok(row.getAttribute("breakpoint") != "true", "Breakpoint must be set");
+            FBTest.mouseDown(row.querySelector(".breakpoint"));
+            FBTest.ok(!FBTest.hasBreakpoint(row), "Breakpoint must be removed");
         }
         callback(row);
     });
 };
+
+this.hasBreakpoint = function(line, chrome)
+{
+    var line = line;
+    if (typeof(line) == "number")
+        line = FBTest.getSourceLineNode(lineNo, chrome);
+
+    var bpNode = line.getElementsByClassName("breakpoint");
+    return (bpNode.length > 0);
+}
 
 // ********************************************************************************************* //
 // Watch Panel
@@ -1982,6 +1972,12 @@ this.getCurrentLocation = function()
 // TODO: xxxpedro this function seems to be hacky
 this.selectSourceLine = function(url, lineNo, category, chrome, callback)
 {
+    if (!url)
+    {
+        var panel = FBTest.getSelectedPanel();
+        url = panel.getObjectLocation(panel.location);
+    }
+
     var sourceLink = new FBTest.FirebugWindow.FBL.SourceLink(url, lineNo, category);
     if (chrome)
         chrome.select(sourceLink);
@@ -1994,7 +1990,7 @@ this.selectSourceLine = function(url, lineNo, category, chrome, callback)
     var tries = 5;
     var checking = setInterval(function checkScrolling()
     {
-        var row = FBTestFirebug.getSourceLineNode(lineNo, chrome);
+        var row = FBTest.getSourceLineNode(lineNo, chrome);
         if (!row && --tries)
             return;
 
