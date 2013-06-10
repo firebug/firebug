@@ -1294,6 +1294,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Iterate over all visible lines.
         editor.eachLine(from, to, function(handle)
         {
+            currentLine++;
+
             // Bail out if the exe-flag for this line has been already computed.
             if (typeof(handle.executableLine) != "undefined")
                 return;
@@ -1301,7 +1303,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Check if the line is executable (performance expensive operation).
             handle.executableLine = DebuggerLib.isExecutableLine(self.context, {
                 url: self.getCurrentURL(),
-                line: ++currentLine,
+                line: currentLine,
             });
 
             // Mark the line as executable.
