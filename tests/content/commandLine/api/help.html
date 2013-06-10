@@ -1,23 +1,32 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Test Case for command line</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-</head>
-<body>
-
-<h1>Command line API: help</h1>
-
-<p>This test-case is intended for command line <b>help</b> method.
-<br/>
-<i>Jan Odvarko, odvarko@gmail.com</i>
-</p>
-
-<ol>
-<li>Open Firebug and enable the Console panel.</li>
-<li>Execute <span style="color:green">help</span> on the command line.</li>
-<li>A table with available command line API should be displayed.</li>
-</ol>
-
-</body>
+    <head>
+        <title>Command Line API: help</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1>Command Line API: help</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Focus the Command Line</li>
+                    <li>Type <code>help</code> and hit <kbd>Enter</kbd></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The console should show a table listing all registered commands and some
+                        Command Line tips.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>
