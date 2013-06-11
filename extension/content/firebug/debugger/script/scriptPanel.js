@@ -122,10 +122,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             selection: this.selection
         });
 
-        // Initialize the source view. Orion initialization here, when the
-        // parentNode is actually visible, solves the following problem:
-        // Error: TypeError: this._iframe.contentWindow is undefined
-        // Save for multiple calls.
+        // Initialize the source view.
+        // xxxHonza: from some reason the script is not visible the first time
+        // Firebug is opened if this is done in scriptPanel.initialize.
         this.scriptView.initialize(this.panelNode);
 
         if (active && state && state.location)

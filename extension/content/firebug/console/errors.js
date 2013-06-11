@@ -706,7 +706,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     {
         Trace.sysout("errors.setErrorBreakpoint; " + url + " (" + line + ")");
 
-        BreakpointStore.addBreakpoint(url, line, BreakpointStore.BP_ERROR);
+        BreakpointStore.addBreakpoint(url, line, null, BreakpointStore.BP_ERROR);
     },
 
     clearErrorBreakpoint: function(url, line)
