@@ -2031,11 +2031,11 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             ++step;
         }
 
-        var func = (funcCommand !== null), command = (func ? funcCommand : tempExpr.command);
+        var isFunc = (funcCommand !== null), command = (isFunc ? funcCommand : tempExpr.command);
         Firebug.CommandLine.evaluate(command, context, context.thisValue, null,
             function found(result, context)
             {
-                if (func)
+                if (isFunc)
                 {
                     if (type === LinkType.CALL)
                     {
@@ -2108,10 +2108,14 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                         {
                             var rest = result.substr(newPos + 11),
                                 epos = rest.search(/[^a-zA-Z0-9_$.]/);
-                            if (epos !== -1)
+                            if (epos !== -1 && /[; \t\n(}]/.test(rest.charAt(epos)))
                             {
                                 rest = rest.substring(0, epos);
-                                tempExpr.command = rest + ".prototype";
+                                var func = tempExpr.command, expr = rest + ".prototype";
+                                tempExpr.command = "(function() { " +
+                                    "try { return " + func + ".%" + expr + "; } " +
+                                    "catch(e) { return " + expr + "; } " +
+                                "})()";
                                 evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                                 return;
                             }
