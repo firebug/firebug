@@ -109,11 +109,6 @@
     opacity: 0.5;
 }
 
-.cm-s-firebug .breakpoint.disabled {
-    background-color: silver;
-    border: 1px solid grey;
-}
-
 /*************************************************************************************************/
 /* Debug Location */
 
