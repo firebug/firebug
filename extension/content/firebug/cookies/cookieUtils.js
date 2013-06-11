@@ -52,6 +52,7 @@ var CookieUtils =
             path        : cookie.path,
             isSecure    : cookie.isSecure,
             expires     : cookie.expires,
+            maxAge      : cookie.maxAge,
             isHttpOnly  : cookie.isHttpOnly,
             rawValue    : rawValue,
             rawCookie   : cookie,
@@ -85,6 +86,11 @@ var CookieUtils =
 
                     case "secure":
                         cookie.isSecure = true;
+                        break;
+
+                    case "max-age":
+                        //Remove dash from variable name
+                        cookie.maxAge = option[1];
                         break;
 
                     case "expires":

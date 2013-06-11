@@ -114,6 +114,9 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 TD({"class": "cookieExpiresCol cookieCol"},
                     DIV({"class": "cookieExpiresLabel cookieLabel"}, "$cookie|getExpires")
                 ),
+                TD({"class": "cookieMaxAgeCol cookieCol"},
+                    DIV({"class": "cookieMaxAgeLabel cookieLabel"}, "$cookie|getMaxAge")
+                ),
                 TD({"class": "cookieHttpOnlyCol cookieCol"},
                     DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
                 ),
@@ -196,6 +199,14 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.host;
     },
 
+	getMaxAge: function(cookie)
+    {
+        if (!cookie.cookie.maxAge)
+            return "";
+
+        return Str.formatTime(cookie.cookie.maxAge * 1000);
+    },
+	
     getExpires: function(cookie)
     {
         if (cookie.cookie.expires == undefined)
@@ -1061,6 +1072,12 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                         DIV({"class": "cookieHeaderCellBox",
                             title: Locale.$STR("cookies.header.expires.tooltip")}, 
                         Locale.$STR("cookies.header.expires"))
+                    ),
+                    TD({id: "colMaxAge", role: "columnheader",
+                        "class": "cookieHeaderCell a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("cookies.header.maxAge.tooltip")}, 
+                        Locale.$STR("cookies.header.maxAge"))
                     ),
                     TD({id: "colHttpOnly", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
