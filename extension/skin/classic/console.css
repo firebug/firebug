@@ -506,11 +506,19 @@
     color: gray;
 }
 
-.logRow-help .tipsContent .tip {
+.logRow-help .logGroupBody > DIV > .logContent {
+    padding: 0;
+}
+
+.logRow-help .tipsList {
+    padding-left: 2em;
+}
+
+.logRow-help .tipsList > .tip {
     margin-bottom: 5px;
 }
 
-.logRow-help .tipsContent .tip .example {
+.logRow-help .tipsList > .tip > .example {
     color: green;
     font-family: monospace;
 }
