@@ -25,7 +25,11 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
+/**
+ * @module
+ */
 Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
+/** @lends Firebug.Debugger */
 {
     dispatchName: "Debugger",
 
@@ -146,6 +150,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     activateDebugger: function()
     {
+        if (this.activated)
+            return;
+
+        this.activated = true;
+
         DebuggerClientModule.addListener(this);
 
         Trace.sysout("Debugger.activateDebugger;");
@@ -153,6 +162,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     deactivateDebugger: function()
     {
+        if (!this.activated)
+            return;
+
+        this.activated = false;
+
         DebuggerClientModule.removeListener(this);
 
         Trace.sysout("Debugger.deactivateDebugger;");
