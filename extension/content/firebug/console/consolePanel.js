@@ -112,8 +112,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.updateOption(name, Options.get(name));
 
         // The Console panel displays error breakpoints and so, its UI must be updated
-        // when a new error-breakpoint is created or removed.
+        // when a new error-breakpoint is created or removed. It also listens to
+        // debugger tool to update BON error UI.
         this.context.getTool("debugger").addListener(this);
+        this.context.getTool("breakpoint").addListener(this);
     },
 
     destroy: function(state)
@@ -137,6 +139,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
         this.context.getTool("debugger").removeListener(this);
+        this.context.getTool("breakpoint").removeListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },

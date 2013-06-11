@@ -9,10 +9,9 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClientModule",
-    "firebug/debugger/debuggerTool",
 ],
 function(FBTrace, Obj, Locale, Firebug, DebuggerHalter, DebuggerLib, ClientCache,
-    DebuggerClientModule, DebuggerTool) {
+    DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -124,17 +123,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Create grip cache
         context.clientCache = new ClientCache(DebuggerClientModule.client, context);
 
-        // Attach debugger tool
-        var tool = context.getTool("debugger");
-        tool.attach();
+        // Attach tools
+        context.getTool("debugger").attach();
+        context.getTool("breakpoint").attach();
     },
 
     onThreadDetached: function(context)
     {
         Trace.sysout("debuggerTool.onThreadDetached; context ID: " + context.getId());
 
-        var tool = context.getTool("debugger");
-        tool.detach();
+        context.getTool("debugger").detach();
+        context.getTool("breakpoint").detach();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

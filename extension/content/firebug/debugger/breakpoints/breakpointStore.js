@@ -131,7 +131,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         // store since the Script panel doesn't have to exist at this point. Also, other
         // panels can also deal with breakpoints (BON) and so, a panel doesn't seem to be
         // the right center place, where the perform the initialization.
-        var tool = context.getTool("debugger");
+        var tool = context.getTool("breakpoint");
         tool.setBreakpoints(bps, function()
         {
             // Some breakpoint could have been auto-corrected so, save all now.

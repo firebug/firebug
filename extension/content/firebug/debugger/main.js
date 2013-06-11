@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/debugger/clients/objectClient",
     "firebug/debugger/debuggerTool", //xxxHonza: So, it's the DebuggerClientModule first listener
+    "firebug/debugger/breakpoints/breakpointTool",
     "firebug/debugger/debugger",
     "firebug/debugger/script/scriptPanel",
     "firebug/debugger/breakpoints/breakpointStore",

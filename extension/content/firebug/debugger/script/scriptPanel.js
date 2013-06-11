@@ -84,6 +84,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Access to the back-end debugger service (JSD2) must always be done through the tool.
         this.tool = this.context.getTool("debugger");
         this.tool.addListener(this);
+
+        this.context.getTool("breakpoint").addListener(this);
     },
 
     destroy: function(state)
@@ -101,6 +103,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.destroy();
 
         this.tool.removeListener(this);
+
+        this.context.getTool("breakpoint").removeListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -665,7 +669,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BreakpointStore Listener
+    // BreakpointTool Listener
 
     onBreakpointAdded: function(context, bp)
     {
@@ -1071,7 +1075,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Tool Listener
+    // DebuggerTool Listener
 
     onStartDebugging: function(context, event, packet)
     {
