@@ -281,7 +281,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         this.context.activeThread.fillFrames(50);
 
         // Panels are created when first used by the user, but in this case we need to break
-        // JS execution and show it in the Script panel immediatelly so, it needs to exist before
+        // JS execution and show it in the Script panel immediately so, it needs to exist before
         // firing 'onStartDebugging' event.
         this.context.getPanel("script");
 

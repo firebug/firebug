@@ -16,7 +16,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_BREAKPOINTTOOL");
 
 // ********************************************************************************************* //
-// Debugger Tool
+// Breakpoint Tool
 
 function BreakpointTool(context)
 {
@@ -25,8 +25,13 @@ function BreakpointTool(context)
 
 /**
  * @object BreakpointTool object is automatically instantiated by the framework for each
- * context. Reference to the current context is passed to the constructor. Life cycle
- * of a tool object is the same as for a panel, but tool doesn't have any UI.
+ * context. The object represents a proxy to the backend and all communication related
+ * to breakpoints should be done through it.
+ *
+ * {@BreakpointTool} (one instance per context) is also handling events coming from
+ * {@BreakpointStore} (one instance per Firebug), performs async operation with the
+ * server side (using RDP) and forwards results to all registered listeners, which are
+ * usually panel objects.
  *
  * xxxHonza: It should be derived from Tool base class.
  */
@@ -35,6 +40,9 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
 {
     dispatchName: "breakpointTool",
 
+    queue: new Array(),
+    setBreakpointInProgress: false,
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
@@ -42,6 +50,8 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
+        // Listen for {@BreakpointStore} events to create/remove breakpoints
+        // in the related backend (thread actor).
         BreakpointStore.addListener(this);
     },
 
@@ -54,11 +64,6 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // BreakpointStore Event Listener
-
-    // BreakpointTool (one instance per context) object is handling events coming from
-    // BreakpointStore (one instance per Firebug). It consequently performs async operation
-    // with the server side (using RDP) and forwarding results to all registered listeners
-    // (usually panel objects)
 
     onAddBreakpoint: function(bp)
     {
@@ -122,11 +127,26 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoints
+    // Breakpoint Backend API
 
+    /**
+     * Setting a breakpoint is an asynchronous process that requires communication with
+     * the backend. There can be three round-trips with the server:
+     * 1) SEND 'interrupt' -> RECEIVED 'paused'
+     * 2) SEND 'setBreakpoint' -> RECEIVED 'actor'
+     * 3) SEND 'resume' -> RECEIVED 'resumed'
+     *
+     * If the method is called again in the middle of an existing set-breakpoint-sequence,
+     * arguments are pushed in a |queue| and handled after the first process finishes.
+     *
+     * xxxHonza: the thread doesn't have to be interrupted/resumed if there are
+     * other breakpoints waiting in the queue.
+     */
     setBreakpoint: function(url, lineNumber, callback)
     {
-        if (!this.context.activeThread)
+        // The context needs to be attached to the thread in order to set a breakpoint.
+        var thread = this.context.activeThread;
+        if (!thread)
         {
             TraceError.sysout("BreakpointTool.setBreakpoint; ERROR Can't set BP, no thread.");
             return;
@@ -146,46 +166,104 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        // Prepare a callback to handle response from the server side.
         var self = this;
-        var doSetBreakpoint = function _doSetBreakpoint(response, bpClient)
+
+        function doSetBreakpoint(callback)
         {
-            var actualLocation = response.actualLocation;
+            var location = {
+                url: url,
+                line: lineNumber + 1
+            };
 
-            Trace.sysout("breakpointTool.onSetBreakpoint; " + bpClient.location.url + " (" +
-                bpClient.location.line + ")", bpClient);
+            // Send RDP packet to set a breakpoint on the server side. The callback will be
+            // executed as soon as we receive a response.
+            self.context.activeThread.setBreakpoint(location,
+                self.onSetBreakpoint.bind(self, callback));
+        }
 
-            // Note that both actualLocation and bpClient.location deal with 1-based
-            // line numbers.
-            if (actualLocation && actualLocation.line != bpClient.location.line)
+        // If the debuggee is paused, just set the breakpoint.
+        if (thread.paused)
+        {
+            doSetBreakpoint(callback);
+            return;
+        }
+
+        // If the previous async-process hasn't finished yet, put arguments in a queue.
+        if (this.setBreakpointInProgress)
+        {
+            Trace.sysout("breakpointTool.setBreakpoint; Setting BP in progress, wait " +
+                 url + " (" + lineNumber + ")");
+
+            this.queue.push(arguments);
+            return;
+        }
+
+        this.setBreakpointInProgress = true;
+
+        // Otherwise, force a pause in order to set the breakpoint.
+        thread.interrupt(function(response)
+        {
+            if (response.error)
             {
-                // To be found when it needs removing.
-                bpClient.location.line = actualLocation.line;
+                // Can't set the breakpoint if pausing failed.
+                callback(response);
+                return;
             }
 
-            // Store breakpoint clients so, we can use the actors to remove breakpoints.
-            // xxxFarshid: Shouldn't we save bpClient object only if there is no error?
-            // xxxHonza: yes, we probably should.
-            // xxxHonza: we also need an error logging
-            if (!self.context.breakpointClients)
-                self.context.breakpointClients = [];
+            // Set the breakpoint
+            doSetBreakpoint(function(response, bpClient)
+            {
+                // Wait for resume
+                thread.resume(function(response)
+                {
+                    self.setBreakpointInProgress = false;
 
-            // FF 19+: uses same breakpoint client object for a executable line and
-            // all non-executable lines above that, so doesn't store breakpoint client
-            // objects if there is already one with same actor.
-            if (!self.breakpointActorExists(bpClient))
-                self.context.breakpointClients.push(bpClient);
+                    callback(response, bpClient);
 
-            if (callback)
-                callback(response, bpClient);
-        };
+                    // Set breakpoints waiting in the queue.
+                    if (self.queue.length > 0)
+                        self.setBreakpoint.apply(self, self.queue.shift());
+                });
+            });
+        });
+    },
 
-        // Send RDP packet to set a breakpoint on the server side. The callback will be
-        // executed as soon as we receive a response.
-        return this.context.activeThread.setBreakpoint({
-            url: url,
-            line: lineNumber + 1
-        }, doSetBreakpoint);
+    /**
+     * Executed when a breakpoint is set on the backend and confirmation packet
+     * has been received.
+     */
+    onSetBreakpoint: function(callback, response, bpClient)
+    {
+        var actualLocation = response.actualLocation;
+
+        Trace.sysout("breakpointTool.onSetBreakpoint; " + bpClient.location.url + " (" +
+            bpClient.location.line + ")", bpClient);
+
+        // Note that both actualLocation and bpClient.location deal with 1-based
+        // line numbers.
+        if (actualLocation && actualLocation.line != bpClient.location.line)
+        {
+            // To be found when it needs removing.
+            bpClient.location.line = actualLocation.line;
+        }
+
+        // Store breakpoint clients so, we can use the actors to remove breakpoints.
+        // xxxFarshid: Shouldn't we save bpClient object only if there is no error?
+        // xxxHonza: yes, we probably should.
+        // xxxHonza: we also need an error logging
+        if (!this.context.breakpointClients)
+            this.context.breakpointClients = [];
+
+        // FF 19+: uses same breakpoint client object for a executable line and
+        // all non-executable lines above that, so doesn't store breakpoint client
+        // objects if there is already one with same actor.
+        if (!this.breakpointActorExists(bpClient))
+            this.context.breakpointClients.push(bpClient);
+
+        if (callback)
+            callback(response, bpClient);
+
+        this.setBreakpointInProgress = false;
     },
 
     // xxxHonza: execute the callback as soon as all breakpoints are set on the server side.
@@ -217,7 +295,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        // ... otherwise we need to interupt the thread first.
+        // ... otherwise we need to interrupt the thread first.
         thread.interrupt(function(response)
         {
             if (response.error)
@@ -228,7 +306,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             }
 
             // When the thread is interrupted, we can set all the breakpoints.
-            doSetBreakpoints(self.resume.bind(self));
+            doSetBreakpoints(thread.resume.bind(self));
         });
     },
 
