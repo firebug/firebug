@@ -92,7 +92,7 @@ function verifyNetPanelDisplay(enabledFilters, displayedRequests)
                     }
             }
 
-            var cs = panelNode.ownerGlobal.getComputedStyle(requests[i]);
+            var cs = requests[i].ownerDocument.defaultView.getComputedStyle(requests[i]);
             FBTest.ok((requestMustBeShown && cs.display != "none") ||
                 (!requestMustBeShown && cs.display == "none"), "Request to '" +
                     repObject.href.substr(repObject.href.lastIndexOf("/") + 1)
