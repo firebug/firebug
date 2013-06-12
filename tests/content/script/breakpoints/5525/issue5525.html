@@ -7,7 +7,10 @@
 </head>
 <body>
 <script type="text/javascript">
-var test = undefinedVariable;
+function onExecuteTest()
+{
+    var test = undefinedVariable;
+}
 </script>
 <header>
     <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5525">Issue 5525</a>:
@@ -20,6 +23,7 @@ var test = undefinedVariable;
         <li>Open Firebug</li>
         <li>Enable the <em>Script</em> and the <em>Console</em> panel, reload the page
             and switch to the <em>Console</em> panel</li>
+        <li>Click this button <button id="testButton" onclick="onExecuteTest()">Click Me</button></li>
         <li><span>The console should display a syntax error:
             <code>undefinedVariable is not defined</code></span>
         </li>
