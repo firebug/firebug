@@ -302,7 +302,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
             filterTypes.push(filterType);
         }
 
-        FBTrace.sysout("filterTypes " + filterTypes);
         // Remove "all" filter in case several filters are selected
         if (filterTypes.length > 1)
         {
