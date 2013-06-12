@@ -213,18 +213,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
     },
 
-    updateOption: function(name, value)
-    {
-        if (name == "consoleFilterTypes")
-        {
-            Firebug.Console.syncFilterButtons(Firebug.chrome);
-            Firebug.connection.eachContext(function syncFilters(context)
-            {
-                Firebug.Console.onToggleFilter(context, value);
-            });
-        }
-    },
-
     shouldBreakOnNext: function()
     {
         // xxxHonza: shouldn't the breakOnErrors be context related?
@@ -393,6 +381,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Console Listeners
+
+    onFiltersSet: function(filterTypes)
+    {
+        this.setFilter(filterTypes);
+        Firebug.Search.update(this.context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getMessageId: function(object, rep, sourceLink)
     {
@@ -553,7 +550,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 {
                     // xxxHonza: could we log directly the unwrapped object?
                     var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest") 
+                    if (unwrapped.constructor.name == "XMLHttpRequest")
                         object = object + "";
                 }
                 catch (e)
