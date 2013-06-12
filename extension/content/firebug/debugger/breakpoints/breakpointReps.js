@@ -107,7 +107,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                 TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
                 IMG({"class": "closeButton", src: "blank.gif"})
             ),
-            DIV({"class": "breakpointCode"}, "$bp|getSourceLink")
+            DIV({"class": "breakpointCode"}, "$bp|getSource")
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -122,6 +122,11 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         // Convert line index(zero-based) to line number(one-based)
         var lineNo = bp.lineNo + 1;
         return new SourceLink(bp.href, lineNo, "js");
+    },
+
+    getSource: function(bp)
+    {
+        return bp.getSourceLine();
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)
