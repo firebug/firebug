@@ -443,7 +443,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var self = this;
         function callback(unit, firstLineNumber, lastLineNumber, lines)
         {
-            // There could have been more asynchronouse requests done at the same time
+            // There could have been more asynchronous requests done at the same time
             // (e.g. show default script and restore the last visible script).
             // Use only the callback that corresponds to the current location URL.
             if (!self.location || self.location.getURL() != unit.getURL())
@@ -1220,8 +1220,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             {
                 var rep = Firebug.getRep(result, context);
                 var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-                Trace.sysout("scriptPanel.populateInfoTip result is " + result, result);
 
                 tag.replace({object: result}, infoTip);
 
