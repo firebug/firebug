@@ -11,6 +11,12 @@ function(Cookie, Str) {
 
 var CookieUtils = 
 {
+    isSessionCookie: function(cookie)
+    {
+        //maxAge 0 is string on actual cookie
+        return (!cookie.expires && !cookie.maxAge)
+    },
+
     getCookieId: function(cookie)
     {
         return cookie.host + cookie.path + cookie.name;

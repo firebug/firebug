@@ -159,6 +159,8 @@
 .cookieTable[hiddenCols~=colPath] .cookiePathCol,
 .cookieTable[hiddenCols~=colExpires] #colExpires,
 .cookieTable[hiddenCols~=colExpires] .cookieExpiresCol,
+.cookieTable[hiddenCols~=colMaxAge] #colMaxAge,
+.cookieTable[hiddenCols~=colMaxAge] .cookieMaxAgeCol,
 .cookieTable[hiddenCols~=colHttpOnly] #colHttpOnly,
 .cookieTable[hiddenCols~=colHttpOnly] .cookieHttpOnlyCol,
 .cookieTable[hiddenCols~=colSecurity] #colSecurity,
@@ -248,7 +250,8 @@
 }
 
 /* Session cookies */
-.sessionCookie > .cookieExpiresCol {
+.sessionCookie > .cookieExpiresCol,
+.sessionCookie > .cookieMaxAgeCol {
     color: green;
 }
 
@@ -305,6 +308,7 @@
 .cookieSizeLabel,
 .cookiePathLabel,
 .cookieExpiresLabel,
+.cookieMaxAgeLabel,
 .cookieValueLabel {
     padding: 1px 0 2px 0 !important;
     /*width: 100%; See issue 63*/
@@ -351,6 +355,7 @@
 .cookieSizeCol,
 .cookiePathCol,
 .cookieExpiresCol,
+.cookieMaxAgeCol,
 .cookieValueCol,
 .cookieSecurityCol,
 .cookieStatusCol,

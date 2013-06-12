@@ -199,22 +199,22 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.host;
     },
 
-	getMaxAge: function(cookie)
+    getMaxAge: function(cookie)
     {
         if (!cookie.cookie.maxAge)
             return "";
 
         return Str.formatTime(cookie.cookie.maxAge * 1000);
     },
-	
+    
     getExpires: function(cookie)
     {
         if (cookie.cookie.expires == undefined)
             return "";
-
+        
         // The first character is space so, if the table is sorted according
         // to this column, all "Session" cookies are displayed at the begining.
-        if (cookie.cookie.expires == 0)
+        if (CookieUtils.isSessionCookie(cookie.cookie))
             return " " + Locale.$STR("cookies.Session");
 
         try
@@ -239,7 +239,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     isSessionCookie: function(cookie)
     {
-        return !cookie.cookie.expires;
+        return CookieUtils.isSessionCookie(cookie.cookie);
     },
 
     isRejected: function(cookie)
