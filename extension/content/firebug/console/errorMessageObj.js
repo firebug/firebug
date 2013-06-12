@@ -3,8 +3,9 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/debugger/script/sourceFile",
 ],
-function(Firebug, FBTrace) {
+function(Firebug, FBTrace, SourceFile) {
 
 // ********************************************************************************************* //
 // Constants
@@ -13,6 +14,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //
 // ErrorMessageObj Implementation
@@ -33,15 +35,16 @@ function ErrorMessageObj(message, href, lineNo, source, category, context,
 
 ErrorMessageObj.prototype =
 {
-    getSourceLine: function()
+    getSourceLine: function(callback)
     {
-        if (!this.context.sourceCache)
+        var sourceFile = SourceFile.getSourceFileByUrl(this.context, this.href);
+        if (!sourceFile)
         {
-            TraceError.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!");
+            TraceError.sysout("errorMessageObj.getSourceLine; ERROR no source file!");
             return;
         }
 
-        return this.context.sourceCache.getLine(this.href, this.lineNo);
+        return sourceFile.getLine(this.lineNo - 1, callback);
     },
 
     resetSource: function()
