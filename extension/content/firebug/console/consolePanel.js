@@ -115,7 +115,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // when a new error-breakpoint is created or removed. It also listens to
         // debugger tool to update BON error UI.
         this.context.getTool("debugger").addListener(this);
-        this.context.getTool("breakpoint").addListener(this);
     },
 
     destroy: function(state)
@@ -139,7 +138,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
         this.context.getTool("debugger").removeListener(this);
-        this.context.getTool("breakpoint").removeListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
@@ -911,69 +909,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         return rep.showInfoTip(infoTip, target, x, y);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // DebuggerTool Listener
-
-    onBreakpointAdded: function(context, bp)
-    {
-        // The Console panel is only interested in error breakpoints.
-        if (!bp.isError())
-            return;
-
-        Trace.sysout("consolePanel.onBreakpointAdded", bp);
-
-        this.updateErrorBreakpoints(bp, true);
-    },
-
-    onBreakpointRemoved: function(context, bp)
-    {
-        Trace.sysout("consolePanel.onBreakpointRemoved", bp);
-
-        // It isn't possible to check the |bp.type| since the possible error flag has
-        // been already removed at this point. See {@BreakpointStore.removeBreakpoint}.
-        // So, let's try to remove the breakpoint from the Script panel view in any case.
-        this.updateErrorBreakpoints(bp, false);
-    },
-
-    /**
-     * Update Error Breakpoints. Error messages displayed in the Console panel allow
-     * creating/removing a breakpoint. Existence of an error-breakpoint is indicated
-     * by displaying a red circle before the error description.
-     * This method updates the UI if a breakpoint is created/removed.
-     *
-     * @param {Object} bp Breakpoint instance.
-     * @param {Object} isSet If true, an error breakpoint has been added, otherwise false.
-     */
-    updateErrorBreakpoints: function(bp, isSet)
-    {
-        // Iterate all error messages (see firebug/console/errorMessageRep template)
-        // in the Console panel and update associated breakpoint UI.
-        var messages = this.panelNode.getElementsByClassName("objectBox-errorMessage");
-        for (var i=0; i<messages.length; i++)
-        {
-            var message = messages[i];
-
-            // The repObject associated with an error message template should be always
-            // an instance of ErrorMessageObj.
-            var error = Firebug.getRepObject(message);
-            if (!(error instanceof ErrorMessageObj))
-            {
-                TraceError.sysout("consolePanel.updateErrorBreakpoints; ERROR Wrong rep object!");
-                continue;
-            }
-
-            // Errors use real line numbers (1 based) while breakpoints
-            // use zero based numbers.
-            if (error.href == bp.href && error.lineNo - 1 == bp.lineNo)
-            {
-                if (isSet)
-                    Css.setClass(message, "breakForError");
-                else
-                    Css.removeClass(message, "breakForError");
-            }
-        }
-    }, 
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerTool Listener

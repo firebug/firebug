@@ -31,22 +31,16 @@ var Trace = FBTrace.to("DBG_FUNCTIONMONITOR");
 // ********************************************************************************************* //
 // Function Monitor
 
+/**
+ * @module The modules implements 'debug', 'undebug', 'monitor' and 'unmonitor' commands.
+ */
 var FunctionMonitor = Obj.extend(Firebug.Module,
+/** @lends FunctionMonitor */
 {
     dispatchName: "functionMonitor",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
-
-    initialize: function()
-    {
-        Firebug.Module.initialize.apply(this, arguments);
-    },
-
-    shutdown: function()
-    {
-        Firebug.Module.shutdown.apply(this, arguments);
-    },
 
     initContext: function(context)
     {

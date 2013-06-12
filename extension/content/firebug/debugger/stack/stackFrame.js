@@ -214,6 +214,7 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceFile)
     var line = "";
     for (var i = 0; i < 4; ++i)
     {
+        // xxxHonza: the source can be fetched asynchronously, we should use callback.
         line = sourceFile.getLine(lineNo - i) + line;
         if (line != undefined)
         {

@@ -170,6 +170,8 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         var self = this;
 
+        // xxxHonza: usage of soureceFile.getLine() should be asynchronous
+
         for (var url in context.compilationUnits)
         {
             var unit = context.compilationUnits[url];
@@ -178,7 +180,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var line = bp.lineNo;
                 var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = context.sourceCache.getLine(url, line);
+                var sourceLine = unit.sourceFile.getLine(line);
 
                 bp.setName(name);
                 bp.setSourceLine(sourceLine);
@@ -190,7 +192,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var line = bp.lineNo;
                 var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = context.sourceCache.getLine(url, line);
+                var sourceLine = unit.sourceFile.getLine(line);
 
                 bp.setName(name);
                 bp.setSourceLine(sourceLine);
@@ -202,7 +204,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var line = bp.lineNo;
                 var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = context.sourceCache.getLine(url, line);
+                var sourceLine = unit.sourceFile.getLine(line);
 
                 bp.setName(name);
                 bp.setSourceLine(sourceLine);

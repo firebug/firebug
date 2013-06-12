@@ -82,8 +82,10 @@ function runTest()
                 ["id.get+(i", true],
 
                 ["date().g", true],
-                ["mk4().c", true],
-                ["mk4().chain().c", true],
+                ["make1().c", true],
+                ["make1().chain().c", true],
+                ["make2().c", true],
+                ["make2().chain().c", true],
                 ["getterSeemingEval('window').i", true],
                 ["getterSeemingEval('[window]')[0].i", true],
                 ["id(eval('window')).i", false],

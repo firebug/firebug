@@ -23,12 +23,14 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 /**
  * SourceFile one for every compilation unit.
  */
-function SourceFile(actor, href)
+function SourceFile(context, actor, href)
 {
-    this.compilation_unit_type = "remote-script";
-
+    this.context = context;
     this.actor = actor;
     this.href = href;
+
+    // xxxHonza: remove
+    this.compilation_unit_type = "remote-script";
 }
 
 SourceFile.prototype =
@@ -49,13 +51,32 @@ SourceFile.prototype =
         return 0;
     },
 
-    getLine: function(lineNo)
+    getLine: function(lineNo, callback)
     {
-        if (this.loaded && lineNo >=0 && lineNo < this.lines.length)
-            return this.lines[lineNo];
+        if (this.loaded)
+        {
+            if (lineNo >=0 && lineNo < this.lines.length)
+            {
+                var source = this.lines[lineNo];
+                if (callback)
+                    callback(source);
 
-        // xxxHonza: TODO
-        return "";
+                return source;
+            }
+
+            Trace.sysout("sourceFile.getLine; Line number is out of scope!");
+            return;
+        }
+
+        this.loadScriptLines(function(lines)
+        {
+            var line;
+            if (lineNo >=0 && lineNo < lines.length)
+                line = lines[lineNo];
+
+            if (callback)
+                callback(line);
+        });
     },
 
     isExecutableLine: function(lineNo)
@@ -64,18 +85,17 @@ SourceFile.prototype =
         return false;
     },
 
-    loadScriptLines: function(context, callback)
+    loadScriptLines: function(callback)
     {
-        Trace.sysout("sourceFile.loadScriptLines;");
-
-        // Alway remember the last passed callback that should be executed when the source
+        // Always remember the last passed callback that should be executed when the source
         // is loaded. Note that the request-for-source can be already in progress.
+        // xxxHonza: this doesn't sound right.
         this.callback = callback;
 
         if (this.loaded)
         {
             this.callback(this.lines);
-            return;
+            return this.lines;
         }
 
         // Ignore if the request-for-source is currently in progress.
@@ -85,43 +105,49 @@ SourceFile.prototype =
             return;
         }
 
+        Trace.sysout("sourceFile.loadScriptLines;");
+
         this.inProgress = true;
 
-        var self = this;
-        var sourceClient = context.activeThread.source(this);
-        sourceClient.source(function(response)
-        {
-            Trace.sysout("sourceFile.loadScriptLines; response:", response);
-
-            if (response.error)
-            {
-                TraceError.sysout("sourceFile.loadScriptLines; ERROR " +
-                    response.error, response);
-                return;
-            }
-
-            // Convert all line delimiters to the unix style. The source editor
-            // (in the Script panel) also uses unix style and so we can compare
-            // if specific text is already set in the editor.
-            // See {@ScriptView.showSource}
-            var source = response.source.replace(/\r\n/gm, "\n");
-
-            self.loaded = true;
-            self.inProgress = false;
-            self.lines = Str.splitLines(source);
-
-            self.callback(self.lines);
-        });
+        var sourceClient = this.context.activeThread.source(this);
+        sourceClient.source(this.onSourceLoaded.bind(this));
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Private Helpers
+
+    onSourceLoaded: function(response)
+    {
+        Trace.sysout("sourceFile.onSourceLoaded; response:", response);
+
+        if (response.error)
+        {
+            TraceError.sysout("sourceFile.onSourceLoaded; ERROR " +
+                response.error, response);
+            return;
+        }
+
+        // Convert all line delimiters to the unix style. The source editor
+        // (in the Script panel) also uses unix style and so we can compare
+        // if specific text is already set in the editor.
+        // See {@ScriptView.showSource}
+        var source = response.source.replace(/\r\n/gm, "\n");
+
+        this.loaded = true;
+        this.inProgress = false;
+        this.lines = Str.splitLines(source);
+
+        this.callback(this.lines);
+    }
 }
 
 // ********************************************************************************************* //
 // Static Methods (aka class methods)
 
-SourceFile.getSourceFileByScript = function(context, script)
+SourceFile.getSourceFileByUrl = function(context, url)
 {
     if (context.sourceFileMap)
-        return context.sourceFileMap[script.url];
+        return context.sourceFileMap[url];
 };
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)

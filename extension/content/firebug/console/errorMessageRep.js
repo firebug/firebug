@@ -16,9 +16,10 @@ define([
     "firebug/lib/object",
     "firebug/chrome/menu",
     "firebug/lib/system",
+    "firebug/lib/events",
 ],
 function(Firebug, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
-    SourceLink, Dom, Css, Obj, Menu, System) {
+    SourceLink, Dom, Css, Obj, Menu, System, Events) {
 
 with (Domplate) {
 
@@ -29,6 +30,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //
 // ErrorMessage Template Implementation
@@ -148,7 +150,18 @@ var ErrorMessage = domplate(Firebug.Rep,
             return "";
         }
 
-        var source = error.getSourceLine();
+        var async = false;
+
+        // The source needs to be fetched asynchronously the first time, but if it's
+        // already available its being returned synchronously.
+        var source = error.getSourceLine(function(source)
+        {
+            if (async)
+                Events.dispatch(Firebug.modules, "onUpdateErrorObject", [error]);
+        });
+
+        async = true;
+
         if (source && noCrop)
         {
             return source;
@@ -363,8 +376,139 @@ var ErrorMessage = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// ErrorMessageUpdater Module
+
+/**
+ * @module Responsible for asynchronous UI update.
+ *
+ * 1) Error logs usually display one line script where the error happened and the source
+ *    needs to be fetched asynchronously sometimes.
+ *
+ * 2) Error logs can also display a breakpoint that can be created or removed, which is
+ *    also asynchronous.
+ */
+var ErrorMessageUpdater = Obj.extend(Firebug.Module,
+/** @lends ErrorMessageUpdater */
+{
+    dispatchName: "ErrorMessageUpdater",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initContext: function(context)
+    {
+        context.getTool("breakpoint").addListener(this);
+    },
+
+    destroyContext: function(context)
+    {
+        context.getTool("breakpoint").removeListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DebuggerTool Listener
+
+    onBreakpointAdded: function(context, bp)
+    {
+        // The Console panel is only interested in error breakpoints.
+        if (!bp.isError())
+            return;
+
+        Trace.sysout("errorMessageRep.onBreakpointAdded", bp);
+
+        this.updateErrorBreakpoints(context, bp, true);
+    },
+
+    onBreakpointRemoved: function(context, bp)
+    {
+        Trace.sysout("errorMessageRep.onBreakpointRemoved", bp);
+
+        // It isn't possible to check the |bp.type| since the possible error flag has
+        // been already removed at this point. See {@BreakpointStore.removeBreakpoint}.
+        // So, let's try to remove the breakpoint from the Script panel view in any case.
+        this.updateErrorBreakpoints(context, bp, false);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Error Breakpoint Update
+
+    /**
+     * Update Error Breakpoints. Error messages displayed in the Console panel allow
+     * creating/removing a breakpoint. Existence of an error-breakpoint is indicated
+     * by displaying a red circle before the error description.
+     * This method updates the UI if a breakpoint is created/removed.
+     *
+     * @param {Object} bp Breakpoint instance.
+     * @param {Object} isSet If true, an error breakpoint has been added, otherwise false.
+     */
+    updateErrorBreakpoints: function(context, bp, isSet)
+    {
+        var panel = context.getPanel("console");
+
+        // Iterate all error messages (see firebug/console/errorMessageRep template)
+        // in the Console panel and update associated breakpoint UI.
+        var messages = panel.panelNode.getElementsByClassName("objectBox-errorMessage");
+        for (var i=0; i<messages.length; i++)
+        {
+            var message = messages[i];
+
+            // The repObject associated with an error message template should be always
+            // an instance of ErrorMessageObj.
+            var error = Firebug.getRepObject(message);
+            if (!(error instanceof ErrorMessageObj))
+            {
+                TraceError.sysout("consolePanel.updateErrorBreakpoints; ERROR Wrong rep object!");
+                continue;
+            }
+
+            // Errors use real line numbers (1 based) while breakpoints
+            // use zero based numbers.
+            if (error.href == bp.href && error.lineNo - 1 == bp.lineNo)
+            {
+                if (isSet)
+                    Css.setClass(message, "breakForError");
+                else
+                    Css.removeClass(message, "breakForError");
+            }
+        }
+    }, 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Error Source Update
+
+    onUpdateErrorObject: function(errorObject)
+    {
+        Trace.sysout("errorMessageRep.onUpdateErrorObject;", errorObject);
+
+        // Get all error-logs in the Console and update the one related to
+        // the error-object passed into this method.
+        var context = errorObject.context;
+        var panel = context.getPanel("console");
+        var rows = panel.panelNode.querySelectorAll(".logRow-errorMessage");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            var log = row.getElementsByClassName("objectBox-errorMessage")[0];
+            if (Firebug.getRepObject(log) == errorObject)
+            {
+                Dom.clearNode(log);
+
+                var rep = Firebug.getRep(errorObject, context);
+                var content = row.getElementsByClassName("logContent")[0];
+
+                // Render content again. The group counter is preserved since it's
+                // located outside of the content.
+                ErrorMessage.tag.append({object: errorObject}, content, ErrorMessage);
+                break;
+            }
+        }
+    },
+});
+
+// ********************************************************************************************* //
 // Registration
 
+Firebug.registerModule(ErrorMessageUpdater);
 Firebug.registerRep(ErrorMessage);
 
 return ErrorMessage;
