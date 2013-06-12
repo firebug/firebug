@@ -196,7 +196,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
 
         // Create a source file and append it into the context.
-        var sourceFile = new SourceFile(script.actor, script.url);
+        var sourceFile = new SourceFile(this.context, script.actor, script.url);
         this.context.addSourceFile(sourceFile);
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen
@@ -219,7 +219,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         };
 
         if (ignoreTypes[type])
+        {
+            FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
             return;
+        }
 
         this.context.clientCache.clear();
 
@@ -227,6 +230,27 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         {
             FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
             return;
+        }
+
+        // Helper resume function
+        function doResume(tool)
+        {
+            // Get resume limit type from the context (doesn't have to be set).
+            var resumeLimit = tool.context.resumeLimit;
+            delete tool.context.resumeLimit;
+
+            // Resume debugger
+            return tool.resume(null, resumeLimit);
+        }
+
+        // xxxHonza: this check should go somewhere else.
+        // xxxHonza: this might be also done by removing/adding listeners.
+        // If the Script panel is disabled (not created for the current context,
+        // the debugger should not break.
+        if (this.context.getPanel("script") == null)
+        {
+            Trace.sysout("debuggerTool.paused; Do not pause if the Script panel is disabled");
+            return doResume(this);
         }
 
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=829028
@@ -247,17 +271,6 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Notify listeners, about debugger pause event.
         this.dispatch("onDebuggerPaused", [this.context, event, packet])
-
-        // Helper resume function
-        function doResume(tool)
-        {
-            // Get resume limit type from the context (doesn't have to be set).
-            var resumeLimit = tool.context.resumeLimit;
-            delete tool.context.resumeLimit;
-
-            // Resume debugger
-            return tool.resume(null, resumeLimit);
-        }
 
         // Send event allowing immediate resume. If at least one listener returns
         // true, the debugger will resume.
