@@ -96,6 +96,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
             this.insertLogLimit(this.context);
+
+        // Listen for set filters, so the panel is properly updated when needed
+        Firebug.Console.addListener(this);
     },
 
     destroy: function(state)
@@ -118,6 +121,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
+        Firebug.Console.removeListener(this);
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
@@ -153,7 +157,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.showCommandLine(true);
         this.showToolbarButtons("fbConsoleButtons", true);
 
-        this.setFilter(Firebug.consoleFilterTypes);
+        if (!this.filterTypes)
+            this.setFilter(Options.get("consoleFilterTypes").split(" "));
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             this.persistContent);
@@ -211,18 +216,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.hide; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
-    },
-
-    updateOption: function(name, value)
-    {
-        if (name == "consoleFilterTypes")
-        {
-            Firebug.Console.syncFilterButtons(Firebug.chrome);
-            Firebug.connection.eachContext(function syncFilters(context)
-            {
-                Firebug.Console.onToggleFilter(context, value);
-            });
-        }
     },
 
     shouldBreakOnNext: function()
@@ -319,23 +312,17 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     setFilter: function(filterTypes)
     {
-        var panelNode = this.panelNode;
+        this.filterTypes = filterTypes;
 
-        Events.dispatch(this.fbListeners, "onFilterSet", [logTypes]);
+        var panelNode = this.panelNode;
+        Events.dispatch(this.fbListeners, "onFiltersSet", [logTypes]);
 
         for (var type in logTypes)
         {
-            // Different types of errors and warnings are combined for filtering
-            if (filterTypes == "all" || filterTypes == "" || filterTypes.indexOf(type) != -1 ||
-                (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
-                (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
-            {
-                Css.removeClass(panelNode, "hideType-" + type);
-            }
-            else
-            {
+            if (filterTypes.join(" ") != "all" && filterTypes.indexOf(type) == -1)
                 Css.setClass(panelNode, "hideType-" + type);
-            }
+            else
+                Css.removeClass(panelNode, "hideType-" + type);
         }
     },
 
@@ -390,6 +377,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     breakOnNext: function(breaking)
     {
         Options.set("breakOnErrors", breaking);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Console Listeners
+
+    onFiltersSet: function(filterTypes)
+    {
+        this.setFilter(filterTypes);
+        Firebug.Search.update(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -553,7 +549,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 {
                     // xxxHonza: could we log directly the unwrapped object?
                     var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest") 
+                    if (unwrapped.constructor.name == "XMLHttpRequest")
                         object = object + "";
                 }
                 catch (e)

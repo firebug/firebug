@@ -33,7 +33,7 @@ var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1", "$p"];
+var props = ["$0", "$1", "$p", "$_"];
 
 // Registered commands, name -> config object.
 var userCommands = Object.create(null);
@@ -41,9 +41,10 @@ var userCommands = Object.create(null);
 // List of command line APIs to auto-complete, kept equal to the concatenation
 // of the above minus trace*.
 var completionList = [
-        "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
-        "values", "debug", "undebug", "monitor", "unmonitor", "copy"
-    ].concat(consoleShortcuts, props);
+    "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
+    "values", "debug", "undebug", "monitor", "unmonitor", "copy"
+].concat(consoleShortcuts, props);
+var unsortedCompletionList = true;
 
 // ********************************************************************************************* //
 // Command Line Implementation
@@ -192,6 +193,7 @@ function registerCommand(name, config)
 
     userCommands[name] = config;
     completionList.push(name);
+    unsortedCompletionList = true;
     return true;
 }
 
@@ -484,6 +486,16 @@ function executeInWindowContext(win, func, args)
     win.document.dispatchEvent(event);
 }
 
+function getAutoCompletionList()
+{
+    if (unsortedCompletionList)
+    {
+        unsortedCompletionList = false;
+        completionList.sort();
+    }
+    return completionList;
+}
+
 // ********************************************************************************************* //
 // Registration
 
@@ -498,7 +510,7 @@ Firebug.CommandLineExposed =
     unregisterCommand: unregisterCommand,
     isCommandLineScope: isCommandLineScope,
     evaluate: evaluateInPageContext,
-    completionList: completionList,
+    getAutoCompletionList: getAutoCompletionList,
 };
 
 return Firebug.CommandLineExposed;
