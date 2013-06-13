@@ -218,20 +218,6 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
             "interrupted": 1,
         };
 
-        if (ignoreTypes[type])
-        {
-            FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
-            return;
-        }
-
-        this.context.clientCache.clear();
-
-        if (!packet.frame)
-        {
-            FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
-            return;
-        }
-
         // Helper resume function
         function doResume(tool)
         {
@@ -241,6 +227,20 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
             // Resume debugger
             return tool.resume(null, resumeLimit);
+        }
+
+        if (ignoreTypes[type])
+        {
+            FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
+            return doResume(this);
+        }
+
+        this.context.clientCache.clear();
+
+        if (!packet.frame)
+        {
+            FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
+            return doResume(this);
         }
 
         // xxxHonza: this check should go somewhere else.
