@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/url",
     "firebug/lib/string",
+    "firebug/debugger/stack/stackFrame",
 ],
-function(FBTrace, Url, Str) {
+function(FBTrace, Url, Str, StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -130,7 +131,7 @@ ProfilerEngine.prototype =
             script.initialized = true;
 
             if (!script.funcName)
-                script.funcName = frame.callee ? frame.callee.name : "anonymous";
+                script.funcName = StackFrame.getFunctionName(frame);
 
             if (typeof(script.callCount) == "undefined")
                 script.callCount = 0;

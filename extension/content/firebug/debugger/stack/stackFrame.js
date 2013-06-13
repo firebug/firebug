@@ -188,14 +188,28 @@ StackFrame.buildStackFrame = function(frame, context)
         });
     }
 
-    // Get function name
-    var funcName = frame.callee ? frame.callee.displayName : "";
-    if (!funcName)
-        funcName = frame.callee ? frame.callee.name : "";
-
+    var funcName = StackFrame.getFunctionName(frame);
     return new StackFrame(sourceFile, frame.where.line, funcName,
         args, frame, 0, context);
 };
+
+StackFrame.getFunctionName = function(frame)
+{
+    // Get real function name
+    var funcName = "";
+    if (!frame.callee)
+        return funcName;
+
+    funcName = frame.callee.displayName;
+    if (!funcName)
+        funcName = frame.callee.name;
+
+    // Use custom displayName (coming from the script) if provided.
+    if (frame.callee.userDisplayName)
+        funcName = frame.callee.userDisplayName;
+
+    return funcName;
+}
 
 StackFrame.guessFunctionName = function(url, lineNo, sourceFile)
 {
