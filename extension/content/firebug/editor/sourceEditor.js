@@ -164,6 +164,11 @@ SourceEditor.prototype =
         Trace.sysout("sourceEditor.destroy;");
     },
 
+    isInitialized: function()
+    {
+        return (this.editorObject != null)
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Event Listeners
 
@@ -367,6 +372,7 @@ SourceEditor.prototype =
             start = end;
             end = temp;
         }
+
         var charCount = 0;
 
         // Since Codemirror only accepts the start/end lines and chars in the lines
@@ -388,8 +394,11 @@ SourceEditor.prototype =
                 break;
             }
         }
-        this.editorObject.setSelection({line: startLine, ch: startChar},
-            {line:endLine, ch: endChar});
+
+        this.editorObject.setSelection(
+            {line: startLine, ch: startChar},
+            {line: endLine, ch: endChar}
+        );
     },
 
     getSelection: function()
@@ -406,13 +415,14 @@ SourceEditor.prototype =
             var lineCharCount = this.getCharCount(i);
             if (start.line > i)
                 startOffset += lineCharCount;
+
             endOffset += lineCharCount;
         }
 
         // Add the number of chars between the first char
         // of the lines and cursor position.
-        startOffset +=  start.ch;
-        endOffset +=  end.ch;
+        startOffset += start.ch;
+        endOffset += end.ch;
 
         return {
             start: startOffset,

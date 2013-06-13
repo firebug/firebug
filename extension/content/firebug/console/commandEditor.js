@@ -266,10 +266,19 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor)
             return;
 
+        // The source editor doesn't have to be initialized at this point.
         if (this.editor instanceof SourceEditor)
         {
+            if (!this.editor.isInitialized())
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("commandEditor.fontSizeAdjust; ERROR Not initialized yet");
+                return;
+            }
+
             var editorViewElement = this.editor.getViewElement();
             editorViewElement.style.fontSizeAdjust = adjust;
+
             // line-height also needs to be changed along with font adjusting
             // to avoid overlapping lines.
             editorViewElement.style.lineHeight = adjust * 2;
