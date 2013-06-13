@@ -3,10 +3,11 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/string",
+    "firebug/lib/events",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Str, SourceLink, DebuggerLib) {
+function(FBTrace, Str, Events, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,6 +32,7 @@ function SourceFile(context, actor, href)
 
     // xxxHonza: remove
     this.compilation_unit_type = "remote-script";
+    this.callbacks = [];
 }
 
 SourceFile.prototype =
@@ -87,28 +89,28 @@ SourceFile.prototype =
 
     loadScriptLines: function(callback)
     {
-        // Always remember the last passed callback that should be executed when the source
-        // is loaded. Note that the request-for-source can be already in progress.
-        // xxxHonza: this doesn't sound right.
-        this.callback = callback;
-
         if (this.loaded)
         {
-            this.callback(this.lines);
+            callback(this.lines);
             return this.lines;
         }
+
+        // Remember the callback. There can be more callbacks if the script is
+        // being loaded and more clients want it.
+        this.callbacks.push(callback);
 
         // Ignore if the request-for-source is currently in progress.
         if (this.inProgress)
         {
-            Trace.sysout("sourceFile.loadScriptLines; in-progress");
+            Trace.sysout("sourceFile.loadScriptLines; in-progress " + this.href);
             return;
         }
 
-        Trace.sysout("sourceFile.loadScriptLines;");
+        Trace.sysout("sourceFile.loadScriptLines; Load source for: " + this.href);
 
         this.inProgress = true;
 
+        // This is the only place where source is loaded for specific URL.
         var sourceClient = this.context.activeThread.source(this);
         sourceClient.source(this.onSourceLoaded.bind(this));
     },
@@ -137,7 +139,12 @@ SourceFile.prototype =
         this.inProgress = false;
         this.lines = Str.splitLines(source);
 
-        this.callback(this.lines);
+        // Notify all callbacks.
+        for (var i=0; i<this.callbacks.length; i++)
+            this.callbacks[i](this.lines);
+
+        // Fire also global notification.
+        Events.dispatch(Firebug.modules, "onSourceLoaded", [this]);
     }
 }
 

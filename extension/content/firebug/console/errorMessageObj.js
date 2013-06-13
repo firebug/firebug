@@ -37,6 +37,9 @@ ErrorMessageObj.prototype =
 {
     getSourceLine: function(callback)
     {
+        if (this.source)
+            return this.source;
+
         var sourceFile = SourceFile.getSourceFileByUrl(this.context, this.href);
         if (!sourceFile)
         {
@@ -44,7 +47,16 @@ ErrorMessageObj.prototype =
             return;
         }
 
-        return sourceFile.getLine(this.lineNo - 1, callback);
+        this.sourceLoading = true;
+
+        var self = this;
+        sourceFile.getLine(this.lineNo - 1, function(line)
+        {
+            self.sourceLoading = false;
+            self.source = line;
+
+            callback(line);
+        });
     },
 
     resetSource: function()

@@ -65,7 +65,7 @@ var Exception = domplate(Firebug.Rep,
                 lineNo = 0;
         }
 
-        var errorObject = new ErrorMessageObj(message, url, lineNo, "", "js",
+        var errorObject = new ErrorMessageObj(message, url, lineNo, null, "js",
             context, trace);
 
         if (trace && trace.frames && trace.frames[0])

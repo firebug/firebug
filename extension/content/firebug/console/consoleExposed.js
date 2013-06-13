@@ -349,7 +349,7 @@ function createFirebugConsole(context, win)
 
         // we may have only the line popped above
         var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0;
-        var errorObject = new ErrorMessageObj(msg, url, lineNo, "", category, context, trace);
+        var errorObject = new ErrorMessageObj(msg, url, lineNo, null, category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
             errorObject.correctWithStackTrace(trace);

@@ -414,7 +414,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.observe delayed log to " + context.getName());
 
-        // report later to avoid loading sourceS
+        // report later to avoid loading sources
         context.throttle(this.delayedLogging, this, [msgId, context, error, context, className,
             false, true], true);
     },

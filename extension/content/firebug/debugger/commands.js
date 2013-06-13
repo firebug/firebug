@@ -142,6 +142,7 @@ function getSource(context, args)
         if (!actor)
             return "No actor specified";
 
+        // xxxHonza: SourceFile object should be utilized here
         var sourceClient = context.activeThread.source({actor: actor});
         sourceClient.source(function(response)
         {

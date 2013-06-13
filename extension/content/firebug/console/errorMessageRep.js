@@ -150,6 +150,10 @@ var ErrorMessage = domplate(Firebug.Rep,
             return "";
         }
 
+        // If the source load is currently in-progress, bail out.
+        if (error.sourceLoading)
+            return "";
+
         var async = false;
 
         // The source needs to be fetched asynchronously the first time, but if it's
@@ -491,14 +495,12 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
             var log = row.getElementsByClassName("objectBox-errorMessage")[0];
             if (Firebug.getRepObject(log) == errorObject)
             {
-                Dom.clearNode(log);
-
                 var rep = Firebug.getRep(errorObject, context);
                 var content = row.getElementsByClassName("logContent")[0];
 
                 // Render content again. The group counter is preserved since it's
-                // located outside of the content.
-                ErrorMessage.tag.append({object: errorObject}, content, ErrorMessage);
+                // located outside of the replaced area.
+                ErrorMessage.tag.replace({object: errorObject}, content, ErrorMessage);
                 break;
             }
         }
