@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6422: Add a right click option for accessing objects in the Command Line</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6422">Issue 6422</a>: Add a right click option for accessing objects in the Command Line</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>In the Command Line, run: <code>$p</code><br>
+                    <span style="color:green">&rarr;</span> The result should be <code>undefined</code>.</li>
+                    <li>In the Command Line, run: <code>0</code></li>
+                    <li>Right-click the result and select "Use In Command Line"<br>
+                    <span style="color:green">&rarr;</span> <code>$p</code> should be entered into the Command Line, fully selected.</li>
+                    <li>Press enter<br>
+                    <span style="color:green">&rarr;</span> The result should be <code>0</code>.</li>
+                    <li>In the Command Line, run: <code>console.log("%o", "");</code></li>
+                    <li>Enter <code>a</code> into the Command Line, without pressing enter</li>
+                    <li>Right-click the logged string and select "Use In Command Line"<br>
+                    <span style="color:green">&rarr;</span> <code>$p</code> should be appended to the Command Line, and selected.</li>
+                    <li>Remove the <code>a</code>, and press enter<br>
+                    <span style="color:green">&rarr;</span> The result should be <code>""</code>.</li>
+                </ol>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
