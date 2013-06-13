@@ -475,3 +475,11 @@
 }
 
 /************************************************************************************************/
+
+/* Firefox folds max-age into expires internally, so for the Cookies panel we
+ * hide the corresponding rows & header.
+ * N.B.: This is not, in fact, redundant: there are several elements with the
+ * id "colMaxAge"... */
+.panelNode-cookies #colMaxAge, .panelNode-cookies .cookieMaxAgeCol {
+    display: none;
+}

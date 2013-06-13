@@ -108,13 +108,6 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // Create cookie list table.
         this.table = CookieReps.CookieTable.createTable(this.panelNode);
-        //FF folds max age into expires internally, so when pulled for cookie panel
-        //undisplay the corresponding rows & header
-        this.table.querySelector("#colMaxAge").style.display = "none";
-        var row_entries = this.table.querySelectorAll('.cookieMaxAgeCol');
-        for (var entry of row_entries) {
-            row_entries.style.display = "none";
-        }
 
         // Cookies are displayed only for web pages.
         var location = this.context.window.location;
