@@ -6,30 +6,25 @@
     <script src="testErrorBreakpoints.js" type="text/javascript"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script>
-        function doOnLoad() {
-            setTimeout(causeError, 1000);
-        }
-        function causeError() {
-            // cause an error message to show up in console
-            foo.bar += 'baz';
-        }
+    function causeError() {
+        // cause an error message to show up in console
+        foo.bar += 'baz';
+    }
     </script>
 </head>
-<body onload="doOnLoad()">
+<body>
 <h1>Test for Error Breakpoints</h1>
 
 <ol>
 <li>Enable Firebug and reload this page.</li>
+<li>Use this button to create an error <button id="testButton" onclick="causeError()">Execute Test</button></li>
 <li>You should see one error displayed in Firefox status bar.</li>
-<li>Open Firebug, select the Console panel (or just click on the red message in the status bar).</li>
+<li>Open Firebug, select the Console panel.</li>
 <li>Create error breakpoint by clicking on the gray circle close to the error message.<br/>
 Just before: <code style="color:green">foo.bar += 'baz';</code></li>
 <li>Reload this page again.</li>
 <li>The debugegr should stop at the line causing the error.</li>
 </ol>
-
-<i>Use the button bellow to create an error without page reload.</i><br/>
-<button id="testButton" onclick="causeError()">Execute Test</button>
 
 </body>
 </html>

@@ -2,43 +2,47 @@ function runTest()
 {
     FBTest.openNewTab(basePath + "script/2279/testErrorBreakpoints.html", function(win)
     {
-        // xxxHonza: enable also the Script panel so, response cache is activated.
+        FBTest.selectPanel("console");
+
         FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-errorMessage"};
             FBTest.waitForDisplayedElement("console", config, function(el)
             {
-                FBTest.progress("recognized error row: " + el);
-
                 var objBox = el.querySelector("span.objectBox-errorMessage");
-                var errBP = el.querySelector("img.errorBreak");
+                var errBP = objBox.querySelector("img.errorBreak");
 
-                FBTest.progress("Found Breakpoint button: " + errBP);
-
-                // test unchecked
                 FBTest.ok(!hasClass(objBox, "breakForError"), "Must be unchecked");
+
+                var config = {
+                    tagName: "span",
+                    classes: "objectBox-errorMessage breakForError"
+                };
+
+                FBTest.waitForDisplayedElement("console", config, function(el)
+                {
+                    FBTest.ok(hasClass(objBox, "breakForError"), "Must be checked");
+
+                    var chrome = FW.Firebug.chrome;
+                    FBTest.waitForBreakInDebugger(chrome, 11, false, function(row)
+                    {
+                        FBTest.clickContinueButton();
+                        FBTest.progress("Break on error!");
+                        FBTest.testDone("exampleScript2.DONE");
+                    });
+
+                    FBTest.reload(function(win)
+                    {
+                        FBTest.clickContentButton(win, "testButton");
+                    });
+                });
 
                 // toggle breakpoint
                 FBTest.click(errBP);
-
-                // xxxHonza: the timeout is a hack (but should fix test-bot failure)
-                setTimeout(function()
-                {
-                    // test checked
-                    FBTest.ok(hasClass(objBox, "breakForError"), "Must be checked");
-
-                    FBTest.click(errBP);
-                    setTimeout(function()
-                    {
-                        // test unchecked again
-                        FBTest.ok(!hasClass(objBox, "breakForError"), "Must be unchecked again");
-                        FBTest.testDone();
-                    });
-                });
             });
 
-            FBTest.progress("waiting for an error to appear");
+            FBTest.clickContentButton(win, "testButton");
         });
     });
 }
