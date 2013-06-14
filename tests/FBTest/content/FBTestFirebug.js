@@ -19,8 +19,8 @@ var Cu = Components.utils;
 
 Cu["import"]("resource://fbtest/EventUtils.js");
 
-//************************************************************************************************
-//Constants
+// ********************************************************************************************* //
+// Constants
 
 var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
 
@@ -113,7 +113,7 @@ this.exception = function(msg, err)
 };
 
 /**
- * Prints a message into test resutls (displayed under a test within test console).
+ * Prints a message into test results (displayed under a test within test console).
  *  
  * @param {String} msg A message to be displayed under the current test within the test console.
  */
@@ -1541,8 +1541,10 @@ this.getSourceLineNode = function(lineNo, chrome)
         }
 
         var lineNumberNode = line.getElementsByClassName("CodeMirror-linenumber")[0];
-        var lineNumber = parseInt(lineNumberNode.textContent, 10);
+        if (!lineNumberNode)
+            continue;
 
+        var lineNumber = parseInt(lineNumberNode.textContent, 10);
         if (lineNumber == lineNo)
         {
             sourceLineNode = line;
@@ -1584,7 +1586,7 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
     // Complete attributes that must be set on sourceRow element.
     var attributes = {"class": "CodeMirror-debugLocation"};
     if (breakpoint)
-        attributes.breakpoint = breakpoint ? "true" : "false";
+        attributes["class"] += " CodeMirror-breakpoint";
 
     // Wait for the UI modification that shows the source line where break happened.
     var lookBP = new MutationRecognizer(doc.defaultView, "div", attributes);

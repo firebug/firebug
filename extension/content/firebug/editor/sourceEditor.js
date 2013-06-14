@@ -26,6 +26,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 var WRAP_CLASS = "CodeMirror-debugLocation";
 var BACK_CLASS = "CodeMirror-debugLocation-background";
 var HIGHLIGHTED_LINE_CLASS = "CodeMirror-highlightedLine";
+var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
 // ********************************************************************************************* //
 // Source Editor Constructor
@@ -615,11 +616,15 @@ SourceEditor.prototype =
             breakpoint.className = "breakpoint";
             this.editorObject.setGutterMarker(lineNo, bpGutter, breakpoint);
 
+            // Modify also the line-wrap element (also used by FBTest)
+            var handle = this.editorObject.getLineHandle(lineNo);
+            this.editorObject.addLineClass(handle, "wrap", BP_WRAP_CLASS);
+
             // dispatch event;
             if (this.bpChangingHandlers)
             {
                 var event = {
-                    added: [{ line: lineNo}],
+                    added: [{line: lineNo}],
                     removed: []
                 };
 
@@ -637,12 +642,16 @@ SourceEditor.prototype =
 
         this.removeGutterMarker(bpGutter, lineNo);
 
+        // Modify also the line-wrap element (also used by FBTest)
+        var handle = this.editorObject.getLineHandle(lineNo);
+        this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
+
         // dispatch event;
         if (this.bpChangingHandlers)
         {
             var event = {
                 added: [],
-                removed: [{ line: lineNo}]
+                removed: [{line: lineNo}]
             };
 
             this.bpChangingHandlers.forEach(function(handler)
