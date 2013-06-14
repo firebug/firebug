@@ -8,9 +8,10 @@ define([
     "firebug/debugger/clients/scopeClient",
     "firebug/dom/domMemberProvider",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/watch/watchExpression",
 ],
 function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
-    DebuggerLib) {
+    DebuggerLib, WatchExpression) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -30,9 +31,9 @@ function WatchProvider(panel)
  * The Watch panel provider uses two ways to get data:
  * 1) Asynchronously over the RDP (e.g. frames, user-expr eval results, function scope, etc.),
  * 2) Synchronously through direct access to the server side (JS objects).
- * 
+ *
  * xxxHonza: add #2) This is a hack that allows Firebug to adopt JSD2 faster. It should be
- * removed as soon as remote debuggin is supported.
+ * removed as soon as remote debugging is supported.
  */
 var BaseProvider = ClientProvider.prototype;
 WatchProvider.prototype = Obj.extend(BaseProvider,
@@ -61,6 +62,34 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
             return localObject;
 
         return BaseProvider.getValue.apply(this, arguments);
+    },
+
+    getLabel: function(object)
+    {
+        // If the debugger is resumed the {@WatchPanel} displays list of user expressions
+        // and the current global scope, top level window or an iframe set using cd().
+        // The window is labeled as 'window'. It could be a bit better to use 'this' but,
+        // the expanded state would be remembered and used even for the case when the 
+        // debugger is halted ('this' is one of the scopes).
+        // xxxHonza: there must be a way how to provide better ID - not a label during
+        // the tree restoration process.
+        if (object instanceof Window)
+            return "window";
+
+        return BaseProvider.getLabel.apply(this, arguments);
+    },
+
+    hasChildren: function(object)
+    {
+        // If the base provider says, the object has children, let's go with it.
+        if (BaseProvider.hasChildren.apply(this, arguments))
+            return true;
+
+        // ... otherwise we need to try to get the local object (breaking RDP)
+        // and check if it has any JS members.
+        object = this.getLocalObject(object);
+        if (object)
+            return Obj.hasProperties(object);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -104,8 +133,18 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     getMembers: function(object, level)
     {
-        object = this.getLocalObject(object);
+        // The default watch panel input is used when the debugger is resumed.
+        if (object instanceof WatchProvider.DefaultWatchPanelInput)
+            return null;
 
+        // User watch expression can be expandable if its value is an object
+        // with JS properties.
+        if (object instanceof WatchExpression)
+            return this.memberProvider.getMembers(object.value, level);
+
+        // If the object is a grip, let's try to get the local JS object (breaks RDP)
+        // and return its JS properties.
+        object = this.getLocalObject(object);
         if (object)
             return this.memberProvider.getMembers(object, level);
 
@@ -132,7 +171,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     /**
      * This is the place where we break the RDP feature and access server side objects
-     * localy. It's used for providing data to the Watch panel.
+     * locally. It's used for providing data to the Watch panel.
      *
      * @param {Object} object Client object with an actor.
      */
@@ -161,6 +200,29 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         return DebuggerLib.getObject(this.panel.context, actor);
     },
 });
+
+// ********************************************************************************************* //
+// DefaultWatchPanelInput
+
+/**
+ * Used as an input object for the Watch panel in case the debugger is resumed.
+ * The object has the following children:
+ * 1) User watch expressions
+ * 2) The current global scope (top level window, or the current iframe)
+ */
+WatchProvider.DefaultWatchPanelInput = function(panel)
+/** @lends WatchProvider.DefaultWatchPanelInput */
+{
+    this.panel = panel
+}
+
+WatchProvider.DefaultWatchPanelInput.prototype.getChildren = function()
+{
+    var children = [];
+    children.push.apply(children, this.panel.watches);
+    children.push(this.panel.context.getGlobalScope());
+    return children;
+}
 
 // ********************************************************************************************* //
 // Registration

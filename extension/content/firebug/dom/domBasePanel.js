@@ -756,7 +756,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     getRowPathName: function(row)
     {
-        var member = row.domObject, name = member.name;
+        var member = row.domObject;
+        var name = member.name + "";
 
         // Fake "(closure)" properties.
         if (member.ignoredPath)
@@ -768,14 +769,14 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         // Ordinals.
         if (name.match(/^[\d]+$/))
-            return ["", "["+name+"]"];
+            return ["", "[" + name + "]"];
 
         // Identifiers.
         if (name.match(rxIdentifier))
             return [".", name];
 
         // Other, weird, names.
-        return ["", "[\""+name.replace(/\\/g, "\\\\").replace(/"/g,"\\\"") + "\"]"];
+        return ["", "[\"" + name.replace(/\\/g, "\\\\").replace(/"/g,"\\\"") + "\"]"];
     },
 
     copyName: function(row)

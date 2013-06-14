@@ -177,7 +177,7 @@ DomTree.prototype = domplate(
             // Get children object for the next level.
             var members = this.getMembers(member.value, level + 1);
 
-            // Insert rows if they are immediatelly available. Otherwise set a spinner
+            // Insert rows if they are immediately available. Otherwise set a spinner
             // and wait for the update.
             if (members && members.length)
             {
@@ -222,7 +222,7 @@ DomTree.prototype = domplate(
         // or for properties of given object if data provider is not available.
         if (this.provider)
         {
-            // Children can be provided asychronously.
+            // Children can be provided asynchronously.
             var children = this.fetchChildren(object);
             if (isPromise(children))
                 return children;
@@ -516,6 +516,9 @@ function isPromise(object)
 {
     return object && typeof(object.then) == "function";
 }
+
+// Expose for {@DomBaseTree}
+DomTree.isPromise = isPromise;
 
 // ********************************************************************************************* //
 // Registration

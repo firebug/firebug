@@ -41,7 +41,11 @@ const commandPrefix = ">>>";
 // ********************************************************************************************* //
 // Command Line
 
+/**
+ * @module
+ */
 Firebug.CommandLine = Obj.extend(Firebug.Module,
+/** @lends Firebug.CommandLine */
 {
     dispatchName: "commandLine",
 
@@ -706,7 +710,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var rep = Firebug.getRep(object, context);
         object = rep && rep.getRealObject(object, context);
 
-        if (!rep || !rep.inspectable || object instanceof SourceLink.SourceLink)
+        if (!rep || !rep.inspectable || object instanceof SourceLink)
             return;
 
         var hasConsole = !!context.getPanel("console", true);

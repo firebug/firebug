@@ -68,7 +68,7 @@ function WatchPanel()
 /**
  * @panel Represents the Watch side panel available in the Script panel. This panel
  * allows variable inspection during debugging. It's possible to inspect existing
- * variables in the scope-chaine as well as evaluating user expressions.
+ * variables in the scope-chain as well as evaluating user expressions.
  */
 var BasePanel = DOMBasePanel.prototype;
 WatchPanel.prototype = Obj.extend(BasePanel,
@@ -99,6 +99,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.provider = new WatchProvider(this);
+        this.tree.provider = this.provider;
         this.tree.memberProvider = this.provider;
     },
 
@@ -164,10 +165,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
 
-        // Ignore non-frame objects. When the debugger is resumed, properties of the current
-        // global (usually a window) are displayed in showEmptyMembers() method.
+        // When the debugger is resumed, properties of the current global (top level
+        // window or an iframe) and user watch expressions are displayed.
         if (!(frame instanceof StackFrame))
-            return;
+            return this.showEmptyMembers();
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
@@ -183,7 +184,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             watchNewRow: true,
         };
 
-        this.tree.provider = this.provider;
+        this.evalWatchesLocally();
+
         this.tree.replace(this.panelNode, input);
         this.tree.restoreState(input, this.toggles);
 
@@ -196,8 +198,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // Asynchronously eval all user-expressions, but make sure it isn't
         // already in-progress (to avoid infinite recursion).
-        if (!this.context.evalInProgress)
-            this.evalWatches();
+        // xxxHonza: disable for now. Evaluation is done synchronously through
+        // 'evalWatchesLocally'. It breaks the RDP, but since it's synchronous
+        // The watch panel doesn't flash so much, which improves a lot the UX.
+        //if (!this.context.evalInProgress)
+        //    this.evalWatches();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -215,6 +220,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     rebuild: function()
     {
         Trace.sysout("WatchPanel.rebuild", this.selection);
+
         this.updateSelection(this.selection);
     },
 
@@ -224,14 +230,19 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         var input = {
             domPanel: this,
-            object: this.context.getGlobalScope(),
+            object: new WatchProvider.DefaultWatchPanelInput(this),
             watchNewRow: true,
         };
 
-        // Remove the provider, global scope is currently the local window object.
-        // Also set a member provider that is used for the DOM panel.
-        this.tree.provider = null;
+        // Evaluate watch expressions.
+        this.evalWatchesLocally();
+
+        // Render the watch panel tree.
         this.tree.replace(this.panelNode, input);
+
+        // Pre-expand the global scope item.
+        var scope = this.context.getGlobalScope();
+        this.tree.expandObject(scope);
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
@@ -331,7 +342,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (!this.watches.length)
             return;
 
-        // The debugger must be halted at this moment.
+        // The debugger must be halted at this moment in order to eval on the server side.
         if (!this.context.currentFrame)
             return;
 
@@ -419,6 +430,38 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         });
     },
 
+    evalWatchesLocally: function()
+    {
+        // Executed if evaluation fails
+        // xxxHonza: should we display the error message to the user?
+        function onFailure(result)
+        {
+        }
+
+        // Executed if evaluation succeeds. The result value is set to related
+        // {@WatchExpression} instance.
+        function onSuccess(watch, value)
+        {
+            watch.value = value;
+
+            // The evaluataion is synchronous at the moment and done before
+            // tree rendering so, we don't have to updated now. This will be
+            // necessary as soon as the evaluation is async.
+            //this.tree.updateObject(watch);
+        }
+
+        // Iterate over all user expressions and evaluate them using {@Firebug.CommandLine} API
+        // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
+        // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
+        for (var i=0; i<this.watches.length; i++)
+        {
+            var watch = this.watches[i];
+
+            Firebug.CommandLine.evaluate(watch.expr, this.context, null, null,
+                onSuccess.bind(this, watch), onFailure, true);
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // DebuggerTool Listener
 
@@ -430,6 +473,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         // Save state of the Watch panel for the next pause.
         this.tree.saveState(this.toggles);
+
+        // Debugger is resumed so, don't forget to remove the stopped frame.
+        this.selection = null;
 
         // Update the panel content.
         this.showEmptyMembers();
@@ -555,7 +601,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         // insert DeleteAllWatches after DeleteWatch
         items.splice(deleteAllWatchesIndex, 0, {
-            id: "deleteAllWatches",
+            id: "fbDeleteAllWatches",
             label: "DeleteAllWatches",
             tooltiptext: "watch.tip.Delete_All_Watches",
             command: Obj.bindFixed(this.deleteAllWatches, this)

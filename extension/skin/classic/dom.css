@@ -232,3 +232,10 @@
 .domTable .objectBox-errorMessage .errorTitle {
     display: inline;
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Make sure the last row in the WatchPanel has a bottom border */
+.domTable .memberRow:last-child > TD {
+    border-bottom: 1px solid #BEBEBE;
+}

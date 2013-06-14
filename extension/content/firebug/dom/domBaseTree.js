@@ -21,8 +21,10 @@ with (Domplate) {
 var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-const insertSliceSize = 18;
-const insertInterval = 40;
+// Asynchronous append is good to avoid UI freezing, but bad for UI flickering
+// Bump the slice size, we'll see what the UX will be.
+var insertSliceSize = 100;//18;
+var insertInterval = 40;
 
 // ********************************************************************************************* //
 // DOM Tree Implementation
@@ -206,7 +208,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             {
                 return this.expandRowAsync(row, members);
             }
-            else if (isPromise(members))
+            else if (DomTree.isPromise(members))
             {
                 Css.setClass(row, "spinning");
                 return members;
