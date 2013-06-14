@@ -14,7 +14,7 @@ function runTest()
             var lineNo = 23;
             FBTest.setBreakpoint(chrome, null, lineNo, null, function()
             {
-                FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(row)
+                FBTest.waitForBreakInDebugger(chrome, lineNo, true, function(row)
                 {
                     FBTest.clickContinueButton();
                     FBTest.testDone("exampleScript2.DONE");
