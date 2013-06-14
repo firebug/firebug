@@ -232,7 +232,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         if (ignoreTypes[type])
         {
             FBTrace.sysout("debuggerTool.paused; Type ignored " + type, packet);
-            return doResume(this);
+            return;
         }
 
         this.context.clientCache.clear();
@@ -240,7 +240,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         if (!packet.frame)
         {
             FBTrace.sysout("debuggerTool.paused; ERROR no frame!", packet);
-            return doResume(this);
+            return;
         }
 
         // xxxHonza: this check should go somewhere else.
@@ -442,7 +442,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // This operation causes the server side to:
         // 1) Resume the current thread
-        // 2) Evaluate the expresion in a new frame
+        // 2) Evaluate the expression in a new frame
         // 3) Remove the frame and pause
         this.context.activeThread.eval(frame.getActor(), expr, function(response)
         {
