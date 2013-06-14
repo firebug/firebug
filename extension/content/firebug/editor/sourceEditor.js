@@ -618,7 +618,8 @@ SourceEditor.prototype =
 
             // Modify also the line-wrap element (also used by FBTest)
             var handle = this.editorObject.getLineHandle(lineNo);
-            this.editorObject.addLineClass(handle, "wrap", BP_WRAP_CLASS);
+            if (handle)
+                this.editorObject.addLineClass(handle, "wrap", BP_WRAP_CLASS);
 
             // dispatch event;
             if (this.bpChangingHandlers)
@@ -644,7 +645,8 @@ SourceEditor.prototype =
 
         // Modify also the line-wrap element (also used by FBTest)
         var handle = this.editorObject.getLineHandle(lineNo);
-        this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
+        if (handle)
+            this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
 
         // dispatch event;
         if (this.bpChangingHandlers)
