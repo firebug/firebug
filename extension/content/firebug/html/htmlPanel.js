@@ -1989,7 +1989,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     getInspectorVars: function()
     {
         var vars = {};
-        for (var i=0; i<2; i++)
+        for (var i=0; i<this.inspectorHistory.length; i++)
             vars["$"+i] = this.inspectorHistory[i];
 
         return vars;
