@@ -1225,6 +1225,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         // Iterate over all columns and create a menu item for each.
         var table = context.getPanel(panelName, true).table;
         var hiddenCols = table.getAttribute("hiddenCols");
+        var removeCols = table.getAttribute("removeCols");
 
         var lastVisibleIndex;
         var visibleColCount = 0;
@@ -1238,6 +1239,10 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         for (var i=0; i<columns.length; i++)
         {
             var column = columns[i];
+
+            if (removeCols.indexOf(column.id) != -1)
+                continue;
+            
             var visible = (hiddenCols.indexOf(column.id) == -1);
 
             items.push({
