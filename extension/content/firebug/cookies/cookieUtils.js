@@ -13,7 +13,7 @@ var CookieUtils =
 {
     isSessionCookie: function(cookie)
     {
-        //maxAge 0 is string on actual cookie
+        // maxAge is string value, "0" will not register as session.
         return (!cookie.expires && !cookie.maxAge)
     },
 

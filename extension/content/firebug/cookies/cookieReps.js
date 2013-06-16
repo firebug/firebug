@@ -206,12 +206,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
         return Str.formatTime(cookie.cookie.maxAge * 1000);
     },
-    
+
     getExpires: function(cookie)
     {
         if (cookie.cookie.expires == undefined)
             return "";
-        
+
         // The first character is space so, if the table is sorted according
         // to this column, all "Session" cookies are displayed at the begining.
         if (CookieUtils.isSessionCookie(cookie.cookie))
@@ -1225,7 +1225,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         // Iterate over all columns and create a menu item for each.
         var table = context.getPanel(panelName, true).table;
         var hiddenCols = table.getAttribute("hiddenCols");
-        var removeCols = table.getAttribute("removeCols");
+        var removedCols = table.getAttribute("removedCols");
 
         var lastVisibleIndex;
         var visibleColCount = 0;
@@ -1240,9 +1240,9 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         {
             var column = columns[i];
 
-            if (removeCols.indexOf(column.id) != -1)
+            if (removedCols.indexOf(column.id) != -1)
                 continue;
-            
+
             var visible = (hiddenCols.indexOf(column.id) == -1);
 
             items.push({
