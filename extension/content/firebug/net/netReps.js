@@ -820,6 +820,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 $collapsed: "$file|hidePut"},
                 Locale.$STR("Put")
             ),
+            A({"class": "netInfoPatchTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
+                view: "Patch",
+                $collapsed: "$file|hidePatch"},
+                Locale.$STR("net.label.Patch")
+            ),
             A({"class": "netInfoResponseTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Response",
                 $collapsed: "$file|hideResponse"},
@@ -844,6 +849,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoHeadersText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPostText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
+            DIV({"class": "netInfoPatchText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
                 TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0,
@@ -931,6 +937,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         return file.method.toUpperCase() != "PUT";
     },
 
+    hidePatch: function(file)
+    {
+        return file.method.toUpperCase() != "PATCH";
+    },
+
     hideResponse: function(file)
     {
         var headers = file.responseHeaders;
@@ -1005,7 +1016,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             netInfoBox.selectedText.removeAttribute("selected");
             netInfoBox.selectedTab.setAttribute("aria-selected", "false");
         }
-
         var textBodyName = "netInfo" + view + "Text";
 
         netInfoBox.selectedTab = tab;
@@ -1105,7 +1115,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             if (!netInfoBox.postPresented)
             {
-                netInfoBox.postPresented  = true;
+                netInfoBox.postPresented = true;
                 var postText = netInfoBox.getElementsByClassName("netInfoPostText").item(0);
                 Firebug.NetMonitor.NetInfoPostData.render(context, postText, file);
             }
@@ -1115,9 +1125,19 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             if (!netInfoBox.putPresented)
             {
-                netInfoBox.putPresented  = true;
+                netInfoBox.putPresented = true;
                 var putText = netInfoBox.getElementsByClassName("netInfoPutText").item(0);
                 Firebug.NetMonitor.NetInfoPostData.render(context, putText, file);
+            }
+        }
+
+        if (Css.hasClass(tab, "netInfoPatchTab"))
+        {
+            if (!netInfoBox.patchPresented)
+            {
+                netInfoBox.patchPresented = true;
+                var patchText = netInfoBox.getElementsByClassName("netInfoPatchText").item(0);
+                Firebug.NetMonitor.NetInfoPostData.render(context, patchText, file);
             }
         }
 
