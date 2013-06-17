@@ -131,6 +131,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             this.context.profileRow.parentNode.removeChild(this.context.profileRow);
             state.profileRow = this.context.profileRow;
+            state.profiling = this.context.profiling;
         }
 
         if (FBTrace.DBG_CONSOLE)
@@ -214,7 +215,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             this.context.profileRow = state.profileRow;
             this.panelNode.appendChild(state.profileRow);
+
+            this.context.profiling = state.profiling;
+
             delete state.profileRow;
+            delete state.profiling;
         }
     },
 
