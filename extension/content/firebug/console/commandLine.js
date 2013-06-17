@@ -25,6 +25,7 @@ define([
     "firebug/console/commandHistory",
     "firebug/console/commandLineHelp",
     "firebug/console/commandLineInclude",
+    "firebug/console/getEventListenersCmd",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, Menu, System, Str,
     Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI) {
