@@ -114,6 +114,9 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                 TD({"class": "cookieExpiresCol cookieCol"},
                     DIV({"class": "cookieExpiresLabel cookieLabel"}, "$cookie|getExpires")
                 ),
+                TD({"class": "cookieMaxAgeCol cookieCol"},
+                    DIV({"class": "cookieMaxAgeLabel cookieLabel"}, "$cookie|getMaxAge")
+                ),
                 TD({"class": "cookieHttpOnlyCol cookieCol"},
                     DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
                 ),
@@ -196,6 +199,14 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return cookie.cookie.host;
     },
 
+    getMaxAge: function(cookie)
+    {
+        if (!cookie.cookie.maxAge)
+            return "";
+
+        return Str.formatTime(cookie.cookie.maxAge * 1000);
+    },
+
     getExpires: function(cookie)
     {
         if (cookie.cookie.expires == undefined)
@@ -203,7 +214,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
         // The first character is space so, if the table is sorted according
         // to this column, all "Session" cookies are displayed at the begining.
-        if (cookie.cookie.expires == 0)
+        if (CookieUtils.isSessionCookie(cookie.cookie))
             return " " + Locale.$STR("cookies.Session");
 
         try
@@ -228,7 +239,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     isSessionCookie: function(cookie)
     {
-        return !cookie.cookie.expires;
+        return CookieUtils.isSessionCookie(cookie.cookie);
     },
 
     isRejected: function(cookie)
@@ -1062,6 +1073,12 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                             title: Locale.$STR("cookies.header.expires.tooltip")}, 
                         Locale.$STR("cookies.header.expires"))
                     ),
+                    TD({id: "colMaxAge", role: "columnheader",
+                        "class": "cookieHeaderCell a11yFocus"},
+                        DIV({"class": "cookieHeaderCellBox",
+                            title: Locale.$STR("cookies.header.maxAge.tooltip")}, 
+                        Locale.$STR("cookies.header.maxAge"))
+                    ),
                     TD({id: "colHttpOnly", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
@@ -1208,6 +1225,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         // Iterate over all columns and create a menu item for each.
         var table = context.getPanel(panelName, true).table;
         var hiddenCols = table.getAttribute("hiddenCols");
+        var removedCols = table.getAttribute("removedCols");
 
         var lastVisibleIndex;
         var visibleColCount = 0;
@@ -1221,6 +1239,10 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         for (var i=0; i<columns.length; i++)
         {
             var column = columns[i];
+
+            if (removedCols.indexOf(column.id) != -1)
+                continue;
+
             var visible = (hiddenCols.indexOf(column.id) == -1);
 
             items.push({

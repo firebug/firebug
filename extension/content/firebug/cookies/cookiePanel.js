@@ -196,6 +196,9 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var hiddenCols = Options.get(hiddenColsPref);
         if (hiddenCols)
             this.table.setAttribute("hiddenCols", hiddenCols);
+
+        //Remove certain context menu items on cookiePanel display
+        this.table.setAttribute("removedCols", ["colMaxAge"]);
     },
 
     initializeNode: function(oldPanelNode)
