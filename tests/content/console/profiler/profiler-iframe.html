@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript">
+    function onExecuteTest()
+    {
+        fib(10);
+    }
+
+    function fib(n)
+    {
+        return n<2?n:fib(n-1)+fib(n-2);
+    }
+    </script>
+</head>
+<body>
+    <button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+</body>
+</html>

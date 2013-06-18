@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test case for Profiler & IFrame</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+    <header>
+        <h1>Test case for Profiler & IFrame</h1>
+    </header>
+    <div>
+        <section id="description">
+            <h3>Steps to reproduce</h3>
+            <ol>
+                <li>Open Firebug</li>
+                <li>Select and enable the <em>Console</em> panel.</li>
+                <li>Reload the page</li>
+                <li>Click on <code>Profile</code> button in the Console panel</li>
+                <li>Click on the <em>Execute Test</em> button below</li>
+                <li>Click on <code>Profile</code> button again</li>
+                <li>You should see some profiler results.</li>
+            </ol>
+        </section>
+
+        <iframe id="iframe" src="profiler-iframe.html" width="200px" height="80px"></iframe>
+
+        <footer>Jan Odvarko, odvarko@gmail.com</footer>
+    </div>
+</body>
+</html>
