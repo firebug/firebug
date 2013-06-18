@@ -129,6 +129,9 @@ var Profiler = Obj.extend(Firebug.Module,
             return;
 
         var totalTime = context.profiling.stopProfiling();
+
+        // If totalTime != -1 then it contains total time of the profiling session
+        // (from start to end of the first executed stack frame).
         if (totalTime == -1)
             return;
 
@@ -137,7 +140,7 @@ var Profiler = Obj.extend(Firebug.Module,
         if (cancelReport)
             delete context.profileRow;
         else
-            this.logProfileReport(context, cancelReport, totalTime);
+            this.logProfileReport(context, cancelReport);
 
         Firebug.Console.removeListener(this);
 
@@ -172,10 +175,11 @@ var Profiler = Obj.extend(Firebug.Module,
         return row;
     },
 
-    logProfileReport: function(context, cancelReport, totalTime)
+    logProfileReport: function(context, cancelReport)
     {
         var calls = [];
         var totalCalls = 0;
+        var totalTime = 0;
 
         var sourceFileMap = context.sourceFileMap;
 
@@ -204,6 +208,7 @@ var Profiler = Obj.extend(Firebug.Module,
                         calls.push(call);
 
                         totalCalls += script.callCount;
+                        totalTime += script.totalOwnExecutionTime;
                     }
                 }
             }
