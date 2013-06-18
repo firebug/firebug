@@ -696,9 +696,19 @@ Str.formatSize = function(bytes)
 
 /**
  * Returns a formatted time string
+ *
+ * Examples:
+ * Str.formatTime(12345678) => default formatting options => "3h 25m 45.678s"
+ * Str.formatTime(12345678, "ms") => use milliseconds as min. time unit => "3h 25m 45s 678ms"
+ * Str.formatTime(12345678, null, "m") => use minutes as max. time unit => "205m 45.678s"
+ * Str.formatTime(12345678, "m", "h") => use minutes as min. and hours as max. time unit
+ *     => "3h 25.7613m"
+ *
  * @param {Integer} time Time to format in milliseconds
- * @param {Integer} minTimeUnit Minimal time unit to use in the formatted string
- * @param {Integer} maxTimeUnit Maximal time unit to use in the formatted string
+ * @param {Integer} [minTimeUnit=1] Minimal time unit to use in the formatted string
+ *     (default is seconds)
+ * @param {Integer} [maxTimeUnit=4] Maximal time unit to use in the formatted string
+ *     (default is days)
  * @returns {String} Formatted time string
  */
 Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
