@@ -5,6 +5,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
+    "firebug/chrome/window",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
@@ -12,7 +13,7 @@ define([
     "firebug/css/selectorModule",
     "firebug/css/selectorEditor"
 ],
-function(FBTrace, Obj, Domplate, Locale, Dom, Css, Events, Persist, CSSSelectorsModule,
+function(FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist, CSSSelectorsModule,
     SelectorEditor) {
 
 with (Domplate) {
@@ -164,19 +165,18 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
         this.refresh();
 
-        this.mutationObserver = new MutationObserver(this.onMutationObserve);
-        this.mutationObserver.observe(this.context.window.document, {
-            attributes: true,
-            childList: true,
-            characterData: true,
-            subtree: true
-        });
+        this.observeMutations();
+    },
+
+    watchWindow: function(context, win)
+    {
+        this.observeMutations(win);
     },
 
     hide: function()
     {
-        this.mutationObserver.disconnect();
-        this.mutationObserver = null;
+        this.context.mutationObserver.disconnect();
+        this.context.mutationObserver = null;
     },
 
     getEditor: function(target, value)
@@ -185,6 +185,51 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             this.editor = new CSSSelectorsPanelEditor(this.document);
 
         return this.editor;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // General
+
+    observeMutations: function(win)
+    {
+        var context = this.context;
+        if (!context.mutationObserver)
+            context.mutationObserver = new MutationObserver(this.onMutationObserve);
+
+        function addObserver(win)
+        {
+            var doc = win.document;
+            context.mutationObserver.observe(doc, {
+                attributes: true,
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
+        }
+
+        // If a window is specified, use it, otherwise register observers for all
+        // context windows (including the main window and all embedded iframes).
+        if (win)
+            addObserver(win);
+        else
+            Win.iterateWindows(this.context.window, addObserver);
+    },
+
+    refresh: function()
+    {
+        var parentNode = this.template.selectorsTag.replace(
+                {groups: this.groups, windows: this.context.windows}, this.panelNode);
+
+        if (this.groups.length == 0)
+        {
+            var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
+            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+        }
+        else
+        {
+            for (var i=0, len=this.groups.length; i<len; ++i)
+                this.displayGroup(this.groups[i]);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -260,23 +305,6 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
                 elementsGroup.parentNode.removeChild(elementsGroup);
                 break;
             }
-        }
-    },
-
-    refresh: function()
-    {
-        var parentNode = this.template.selectorsTag.replace(
-                {groups: this.groups, windows: this.context.windows}, this.panelNode);
-
-        if (this.groups.length == 0)
-        {
-            var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
-            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
-        }
-        else
-        {
-            for (var i=0, len=this.groups.length; i<len; ++i)
-                this.displayGroup(this.groups[i]);
         }
     }
 });
