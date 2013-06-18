@@ -77,8 +77,16 @@ ProfilerEngine.prototype =
         var global = Cu.getGlobalForObject({});
         jsDebugger.addDebuggerToGlobal(global);
 
-        // xxxHonza: all iframes should be supported.
-        return new global.Debugger(context.window);
+        var dbg = new global.Debugger();
+
+        // Append the top level window and all iframes as debuggees (to include any JS
+        // script on the page into the profiler results).
+        // xxxHonza: there could be an iframe based (or URL based filter) to reduce
+        // the profiler results.
+        for (var i=0; i<context.windows.length; i++)
+            dbg.addDebuggee(context.windows[i]);
+
+        return dbg;
     },
 
     enumerateScripts: function(callback)

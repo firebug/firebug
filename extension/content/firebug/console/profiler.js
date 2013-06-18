@@ -161,8 +161,10 @@ var Profiler = Obj.extend(Firebug.Module,
             getId: function() { return title + now; },
             title: title
         };
+
         var row = Firebug.Console.openGroup(objects, context, "profile",
             Profiler.ProfileCaption, true, null, true);
+
         Css.setClass(row, "profilerRunning");
 
         Firebug.Console.closeGroup(context, true);
@@ -176,11 +178,13 @@ var Profiler = Obj.extend(Firebug.Module,
         var totalCalls = 0;
 
         var sourceFileMap = context.sourceFileMap;
-        if (FBTrace.DBG_PROFILER)
-        {
-            for (var url in sourceFileMap)
-                FBTrace.sysout("logProfileReport: " + sourceFileMap[url]);
-        }
+
+        // Commenting out, it generates too much output in the tracing console.
+        //if (FBTrace.DBG_PROFILER)
+        //{
+        //    for (var url in sourceFileMap)
+        //        FBTrace.sysout("logProfileReport: " + sourceFileMap[url]);
+        //}
 
         context.profiling.enumerateScripts({enumerateScript: function(script)
         {

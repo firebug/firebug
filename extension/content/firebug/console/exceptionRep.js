@@ -26,7 +26,11 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // Exception Template Implementation
 
+/**
+ * @domplate
+ */
 var Exception = domplate(Firebug.Rep,
+/** @lends Exception */
 {
     tag:
         TAG(ErrorMessage.tag, {object: "$object|getErrorMessage"}),

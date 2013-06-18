@@ -20,10 +20,11 @@ define([
     "firebug/debugger/watch/watchProvider",
     "firebug/debugger/watch/watchExpression",
     "firebug/dom/domBasePanel",
+    "firebug/console/errorCopy",
 ],
 function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, Menu,
     StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
-    DOMBasePanel) {
+    DOMBasePanel, ErrorCopy) {
 
 with (Domplate) {
 
@@ -432,10 +433,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     evalWatchesLocally: function()
     {
-        // Executed if evaluation fails
-        // xxxHonza: should we display the error message to the user?
-        function onFailure(result)
+        // Executed if evaluation fails. The error message is displayed instead
+        // of the result value using {@Exception} template.
+        function onFailure(watch, result)
         {
+            watch.value = new ErrorCopy(result + "");
         }
 
         // Executed if evaluation succeeds. The result value is set to related
@@ -444,8 +446,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         {
             watch.value = value;
 
-            // The evaluataion is synchronous at the moment and done before
-            // tree rendering so, we don't have to updated now. This will be
+            // The evaluation is synchronous at the moment and done before
+            // tree rendering so, we don't have to update now. This will be
             // necessary as soon as the evaluation is async.
             //this.tree.updateObject(watch);
         }
@@ -453,12 +455,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Iterate over all user expressions and evaluate them using {@Firebug.CommandLine} API
         // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
         // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
+        // However, the built-in actor doesn't support .% syntax.
         for (var i=0; i<this.watches.length; i++)
         {
             var watch = this.watches[i];
 
             Firebug.CommandLine.evaluate(watch.expr, this.context, null, null,
-                onSuccess.bind(this, watch), onFailure, true);
+                onSuccess.bind(this, watch), onFailure.bind(this, watch), true);
         }
     },
 
@@ -652,7 +655,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         else if (Css.hasClass(row, "watchRow"))
         {
-            Firebug.Editor.startEditing(row, getRowName(row));
+            Firebug.Editor.startEditing(row, this.tree.getRowName(row));
             return;
         }
 

@@ -360,9 +360,11 @@
 }
 
 /* Remove left border for the log body. It will be applied to the profile table, so there
-   can be a little padding at the bottom when the profile-log is expanded */
+   can be a little padding at the bottom when the profile-log is expanded.
+   Remove also the top border */
 .logRow-profile .logGroupBody {
     border-left: 0;
+    border-top: 0;
 }
 
 .logGroup .profileTable {
@@ -378,6 +380,7 @@
 
 .profileSizer {
     width: 100%;
+    margin-top: 5px;
     padding-bottom: 5px;
 }
 
