@@ -37,6 +37,7 @@ Cookie.prototype =
         var expires = this.cookie.expires ? new Date(this.cookie.expires * 1000) : null;
         return this.cookie.name + "=" + this.cookie.rawValue +
             (expires ? "; expires=" + expires.toGMTString() : "") +
+            (this.cookie.maxAge ? "; Max-Age=" + this.cookie.maxAge : "") +
             ((this.cookie.path) ? "; path=" + this.cookie.path : "; path=/") +
             (noDomain ? "" : ((this.cookie.host) ? "; domain=" + this.cookie.host : "")) +
             ((this.cookie.isSecure) ? "; Secure" : "") + 
@@ -49,6 +50,7 @@ Cookie.prototype =
             name: this.cookie.name,
             value: this.cookie.rawValue,
             expires: (this.cookie.expires ? this.cookie.expires : 0),
+            maxAge: (this.cookie.maxAge ? this.cookie.maxAge : ""),
             path: (this.cookie.path ? this.cookie.path : "/"),
             host: this.cookie.host,
             isHttpOnly: (this.cookie.isHttpOnly),
@@ -63,6 +65,7 @@ Cookie.prototype =
             this.cookie.path + "\t" +
             new String(this.cookie.isSecure).toUpperCase() + "\t" +
             this.cookie.expires + "\t" +
+            this.cookie.maxAge + "\t" +
             this.cookie.name + "\t" +
             this.cookie.rawValue + "\r\n";
     },

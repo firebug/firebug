@@ -130,7 +130,7 @@ var CSSMediaRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule focusRow cssMediaRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+            DIV({"class": "cssHead focusRow", role : "listitem"},
                 SPAN({"class": "cssRuleName"}, "@media"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssMediaRuleCondition", $editable: "$rule|isEditable"},
@@ -152,7 +152,7 @@ var CSSSupportsRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule focusRow cssSupportsRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+            DIV({"class": "cssHead focusRow", role : "listitem"},
                 SPAN({"class": "cssRuleName"}, "@supports"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssSupportsRuleCondition", $editable: "$rule|isEditable"},
@@ -174,7 +174,7 @@ var CSSKeyframesRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule focusRow cssKeyframesRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+            DIV({"class": "cssHead focusRow", role : "listitem"},
                 SPAN({"class": "cssRuleName"}, "@-moz-keyframes"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssKeyframesRuleName", $editable: "$rule|isEditable"},
@@ -264,7 +264,7 @@ var CSSPageRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule focusRow cssPageRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+            DIV({"class": "cssHead focusRow", role : "listitem"},
                 SPAN({"class": "cssRuleName"}, "@page"),
                 SPAN({"class": "separator"}, "$rule.selectorText|getSeparator"),
                 SPAN({"class": "cssPageRuleSelector", $editable: "$rule|isEditable"},
@@ -298,7 +298,7 @@ var CSSDocumentRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule focusRow cssDocumentRule", _repObject: "$rule.rule"},
-            DIV({"class": "cssHead focusRow", role : "listitem"}, 
+            DIV({"class": "cssHead focusRow", role : "listitem"},
                 SPAN({"class": "cssRuleName"}, "@-moz-document"),
                 SPAN({"class": "separator"}, " "),
                 SPAN({"class": "cssDocumentRuleCondition", $editable: "$rule|isEditable"},
@@ -1685,7 +1685,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         // damaging for special pages (see e.g. issues 2440, 3688).
         try
         {
-            var styleSheets = this.context.window.document.styleSheets;
+            var styleSheets = this.getLocationList();
             if (styleSheets.length)
             {
                 var sheet = styleSheets[0];
@@ -1791,7 +1791,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             // firefox findService can't find nodes immediatly after insertion
             // xxxHonza: the timeout has been increased to 100 since search across
             // multiple documents didn't work sometimes.
-            // Of course, it would be great to get rid of the timeout. 
+            // Of course, it would be great to get rid of the timeout.
             setTimeout(Obj.bind(this.searchCurrentDoc, this), 100, true, text, reverse);
             return "wraparound";
         }
@@ -2151,7 +2151,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             rule.parentStyleSheet.disabled = false;
 
             var row = Dom.getAncestorByClass(target, "importRule");
-            row.getElementsByClassName("separator").item(0).textContent = 
+            row.getElementsByClassName("separator").item(0).textContent =
                 value == "" ? "" : String.fromCharCode(160);
 
             var saveSuccess = rule.media.mediaText != "not all" || value == "not all";
@@ -2161,7 +2161,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             Css.hasClass(target, "cssMediaRuleCondition"))
         {
             target.textContent = value;
-            
+
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit: @media rule condition: " +
@@ -2594,11 +2594,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         offset -= offset%2;
         offsetEnd += offsetEnd%2;
 
-        // Remap the increments from [0.1, 1, 10] to [1, 1, 16].
+        // Remap the increments from [0.1, 1, 10, 100] to [1, 1, 16, 64].
         if (-1 < amt && amt < 1)
             amt = (amt < 0 ? -1 : 1);
         if (Math.abs(amt) === 10)
             amt = (amt < 0 ? -16 : 16);
+        if (Math.abs(amt) === 100)
+            amt = (amt < 0 ? -64 : 64);
 
         var isUpper = (expr.toUpperCase() === expr);
 
@@ -2749,7 +2751,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
 
             cssText.push("}");
             cssText = cssText.join("");
-            
+
             try
             {
                 var insertLoc = CSSModule.insertRule(styleSheet, cssText, ruleIndex);
@@ -3016,7 +3018,7 @@ function formatColor(color)
 
         case "hsl":
             return Css.rgbToHSL(color);
-            
+
         case "rgb":
             return Css.colorNameToRGB(color);
 

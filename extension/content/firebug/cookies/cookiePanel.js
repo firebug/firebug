@@ -142,7 +142,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // this must be because FB isn't correctly initialized.
             if (!this.context.cookies)
             {
-                if (FBTrace.DBG_COOKIES) 
+                if (FBTrace.DBG_COOKIES)
                 {
                     FBTrace.sysout(
                         "cookies.Cookie context isn't properly initialized - ERROR: " +
@@ -196,6 +196,9 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var hiddenCols = Options.get(hiddenColsPref);
         if (hiddenCols)
             this.table.setAttribute("hiddenCols", hiddenCols);
+
+        //Remove certain context menu items on cookiePanel display
+        this.table.setAttribute("removedCols", ["colMaxAge"]);
     },
 
     initializeNode: function(oldPanelNode)
@@ -203,7 +206,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.CookiePanel.initializeNode");
 
-        // xxxHonza 
+        // xxxHonza
         // This method isn't called when FB UI is detached. So, the columns
         // are *not* resizable when FB is open in external window.
 
@@ -269,7 +272,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.showToolbarButtons("fbCookieButtons", shouldShow);
             if (!shouldShow)
             {
-                // The activation model has been changed in Firebug 1.4. This is 
+                // The activation model has been changed in Firebug 1.4. This is
                 // just to keep backward compatibility.
                 if (Firebug.DisabledPanelPage.show)
                     Firebug.DisabledPanelPage.show(this, Firebug.CookieModule);
@@ -280,7 +283,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            this.showToolbarButtons("fbCookieButtons", true); 
+            this.showToolbarButtons("fbCookieButtons", true);
         }
 
         if (Firebug.chrome.setGlobalAttribute)
@@ -456,7 +459,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Console Panel Listeners
 
-    onFilterSet: function(logTypes)
+    onFiltersSet: function(logTypes)
     {
         logTypes.cookies = 1;
     },
@@ -489,7 +492,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var row = Dom.getAncestorByClass(target, "cookieRow");
         if (row && row.repObject)
         {
-            if (Dom.getAncestorByClass(target, "cookieSizeCol") || 
+            if (Dom.getAncestorByClass(target, "cookieSizeCol") ||
                 Dom.getAncestorByClass(target, "cookieRawSizeCol"))
             {
                 var infoTipCookieId = "cookiesize-"+row.repObject.name;
@@ -505,13 +508,13 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         delete this.infoTipCookieId;
         return false;
     },
-    
+
     populateSizeInfoTip: function(infoTip, cookie)
     {
         CookieReps.SizeInfoTip.render(cookie, infoTip);
         return true;
     },
-}); 
+});
 
 // ********************************************************************************************* //
 // Cookie Breakpoints

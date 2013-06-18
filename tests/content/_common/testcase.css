@@ -105,13 +105,18 @@ section#description li.error, section#description li span.error {
     color: #DC0000;
 }
 
-code, kbd {
+code {
     white-space: pre;
     color: #008C00;
 }
 
 code.key, kbd {
-    color: #0000DC;
+    background-color: #F9F9F9;
+    border: 1px solid gray;
+    border-radius: 4px 4px 4px 4px;
+    font-family: "Trebuchet MS",helvetica,sans-serif;
+    line-height: 1.8em;
+    padding: 2px 4px;
 }
 
 code.result {

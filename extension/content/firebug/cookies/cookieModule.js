@@ -518,7 +518,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             //var cm = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager);
             //cm.remove(c.host, c.name, c.path, false);
 
-            var isSession = c.expires ? false : true;
+            var isSession = CookieUtil.isSessionCookie(c);
             var cm2 = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager2);
             cm2.add(c.host, c.path, c.name, c.rawValue, c.isSecure, c.isHttpOnly, isSession,
                 c.expires || Math.round((new Date()).getTime() / 1000 + 9999999999));
