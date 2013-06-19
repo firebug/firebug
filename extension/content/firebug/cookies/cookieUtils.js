@@ -7,7 +7,7 @@ define([
 function(Cookie, Str) {
 
 // ********************************************************************************************* //
-// Menu Utils
+// CookieUtils Implementation
 
 var CookieUtils = 
 {
