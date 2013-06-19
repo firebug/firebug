@@ -694,21 +694,89 @@ Str.formatSize = function(bytes)
     return negative ? "-" + result : result;
 };
 
-Str.formatTime = function(elapsed)
+/**
+ * Returns a formatted time string
+ *
+ * Examples:
+ * Str.formatTime(12345678) => default formatting options => "3h 25m 45.678s"
+ * Str.formatTime(12345678, "ms") => use milliseconds as min. time unit => "3h 25m 45s 678ms"
+ * Str.formatTime(12345678, null, "m") => use minutes as max. time unit => "205m 45.678s"
+ * Str.formatTime(12345678, "m", "h") => use minutes as min. and hours as max. time unit
+ *     => "3h 25.7613m"
+ *
+ * @param {Integer} time Time to format in milliseconds
+ * @param {Integer} [minTimeUnit=1] Minimal time unit to use in the formatted string
+ *     (default is seconds)
+ * @param {Integer} [maxTimeUnit=4] Maximal time unit to use in the formatted string
+ *     (default is days)
+ * @returns {String} Formatted time string
+ */
+Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
 {
-    if (elapsed == -1)
+    var timeUnits = [
+        {
+            unit: "ms",
+            interval: 1000
+        },
+        {
+            unit: "s",
+            interval: 60
+        },
+        {
+            unit: "m",
+            interval: 60
+        },
+        {
+            unit: "h",
+            interval: 24
+        },
+        {
+            unit: "d",
+            interval: 1
+        },
+    ];
+
+    if (time == -1)
+    {
         return "";
-    else if (elapsed == 0)
-        return "0";
-    else if (elapsed < 1000)
-        return elapsed + "ms";
-    else if (elapsed < 60000)
-        return (Math.round(elapsed/10) / 100) + "s";
+    }
     else
     {
-        var min = Math.floor(elapsed/60000);
-        var sec = (elapsed % 60000);
-        return min + "m " + (Math.round((elapsed/1000)%60)) + "s";
+        // Get the index of the min. and max. time unit
+        var minTimeUnitIndex = 1;
+        var maxTimeUnitIndex = timeUnits.length - 1;
+        for (var i=0, len=timeUnits.length; i<len; ++i)
+        {
+            if (timeUnits[i].unit == minTimeUnit)
+                minTimeUnitIndex = i;
+            if (timeUnits[i].unit == maxTimeUnit)
+                maxTimeUnitIndex = i;
+        }
+
+        // Calculate the maximal time interval
+        var timeUnitInterval = 1;
+        for (var i=0; i<maxTimeUnitIndex; ++i)
+            timeUnitInterval *= timeUnits[i].interval;
+
+        var formattedString = "";
+        for (var i=maxTimeUnitIndex; i>=minTimeUnitIndex; --i)
+        {
+            var value = time / timeUnitInterval;
+            if (i != minTimeUnitIndex)
+                value = Math.floor(value);
+
+            if (value != 0)
+            {
+                formattedString += value + timeUnits[i].unit;
+                if (i != minTimeUnitIndex)
+                    formattedString += " ";
+            }
+            time %= timeUnitInterval;
+            if (i != 0)
+                timeUnitInterval /= timeUnits[i - 1].interval;
+        }
+
+        return formattedString;
     }
 };
 

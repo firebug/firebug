@@ -115,6 +115,21 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // when a new error-breakpoint is created or removed. It also listens to
         // debugger tool to update BON error UI.
         this.context.getTool("debugger").addListener(this);
+
+        // Initialize filter button tooltips
+        var doc = this.context.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbConsoleFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbConsoleFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
+
+        // Listen for set filters, so the panel is properly updated when needed
+        Firebug.Console.addListener(this);
     },
 
     destroy: function(state)
@@ -139,6 +154,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
         this.context.getTool("debugger").removeListener(this);
+
+        Firebug.Console.removeListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
@@ -175,7 +192,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.showCommandLine(true);
         this.showToolbarButtons("fbConsoleButtons", true);
 
-        this.setFilter(Firebug.consoleFilterTypes);
+        if (!this.filterTypes)
+            this.setFilter(Options.get("consoleFilterTypes").split(" "));
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             this.persistContent);
@@ -256,6 +274,14 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
                 Css.setClass(this.panelNode, "hideArguments");
         }
+    },
+
+    shouldBreakOnNext: function()
+    {
+        // xxxHonza: shouldn't the breakOnErrors be context related?
+        // xxxJJB, yes, but we can't support it because we can't yet tell
+        // which window the error is on.
+        return Options.get("breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -344,23 +370,17 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     setFilter: function(filterTypes)
     {
-        var panelNode = this.panelNode;
+        this.filterTypes = filterTypes;
 
-        Events.dispatch(this.fbListeners, "onFilterSet", [logTypes]);
+        var panelNode = this.panelNode;
+        Events.dispatch(this.fbListeners, "onFiltersSet", [logTypes]);
 
         for (var type in logTypes)
         {
-            // Different types of errors and warnings are combined for filtering
-            if (filterTypes == "all" || filterTypes == "" || filterTypes.indexOf(type) != -1 ||
-                (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
-                (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
-            {
-                Css.removeClass(panelNode, "hideType-" + type);
-            }
-            else
-            {
+            if (filterTypes.join(" ") != "all" && filterTypes.indexOf(type) == -1)
                 Css.setClass(panelNode, "hideType-" + type);
-            }
+            else
+                Css.removeClass(panelNode, "hideType-" + type);
         }
     },
 
@@ -410,6 +430,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             [this, text, this.matchSet]);
 
         return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Console Listeners
+
+    onFiltersSet: function(filterTypes)
+    {
+        this.setFilter(filterTypes);
+        Firebug.Search.update(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -573,7 +602,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 {
                     // xxxHonza: could we log directly the unwrapped object?
                     var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest") 
+                    if (unwrapped.constructor.name == "XMLHttpRequest")
                         object = object + "";
                 }
                 catch (e)

@@ -636,7 +636,8 @@
 
 .netInfoHeadersText,
 .netInfoPostText,
-.netInfoPutText {
+.netInfoPutText,
+.netInfoPatchText {
     padding-top: 0;
 }
 

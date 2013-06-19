@@ -36,7 +36,7 @@ function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, Menu
 
 const Cc = Components.classes;
 
-const commandPrefix = ">>>";
+const commandPrefix = ">>> ";
 
 // ********************************************************************************************* //
 // Command Line
@@ -256,12 +256,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (!Firebug.commandEditor || context.panelName !== "console")
         {
             this.clear(context);
-            Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
+            Firebug.Console.log(commandPrefix + expr, context, "command", FirebugReps.Text);
         }
         else
         {
             var shortExpr = Str.cropString(Str.stripNewLines(expr), 100);
-            Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command",
+            Firebug.Console.log(commandPrefix + shortExpr, context, "command",
                 FirebugReps.Text);
         }
 
@@ -284,8 +284,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (expr === "help")
             expr = "help()";
 
-        var goodOrBad = Obj.bind(Firebug.Console.log, Firebug.Console);
-        this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
+        var logResult = Firebug.Console.log.bind(Firebug.Console);
+        this.evaluate(expr, context, null, null, function(result)
+        {
+            context.lastCommandLineResult = result;
+            logResult.apply(this, arguments);
+        }, logResult);
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);
@@ -760,6 +764,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     getAccessorVars: function(context)
     {
         return {
+            "$_": context.lastCommandLineResult,
             "$p": context.rememberedObject
         };
     },

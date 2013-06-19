@@ -354,7 +354,7 @@ var SpyHttpObserver =
 
         // Get "body" for POST and PUT requests. It will be displayed in
         // appropriate tab of the XHR.
-        if (method == "POST" || method == "PUT")
+        if (method == "POST" || method == "PUT" || method == "PATCH")
             spy.postText = Http.readPostTextFromRequest(request, context);
 
         spy.urlParams = Url.parseURLParams(spy.href);

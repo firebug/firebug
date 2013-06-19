@@ -2360,7 +2360,7 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
         if (!spreExpr && options.includeCommandLineAPI && !context.stopped)
         {
             var global = Wrapper.unwrapObject(out.window);
-            CommandLineExposed.completionList.forEach(function(name)
+            CommandLineExposed.getAutoCompletionList().forEach(function(name)
             {
                 if (!(name in global))
                     out.completions.push({type: CompletionType.API, name: name});
