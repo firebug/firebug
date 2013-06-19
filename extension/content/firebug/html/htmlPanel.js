@@ -1870,6 +1870,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         for (var i=0; i<2; i++)
             vars["$"+i] = this.inspectorHistory[i];
 
+        // XXX: This is quite hacky, but very safe, and we don't really have any good way of doing this on 1.11.
+        vars["$_"] = (this.context ? this.context.lastCommandLineResult : undefined);
         return vars;
     },
 

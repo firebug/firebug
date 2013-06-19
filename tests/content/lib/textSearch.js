@@ -3,6 +3,14 @@ function runTest()
     FBTest.openNewTab(basePath + "lib/textSearch.htm", function(win)
     {
         var root = win.document.getElementById("content");
+        FBTest.progress("Document ready state: " + win.document.readyState);
+
+        if (!FBTest.ok(root, "The 'content' element must exist."))
+        {
+            FBTest.testDone();
+            return;
+        }
+
         var child = win.document.getElementById("child");
 
         function compareFind(node, offset, result)

@@ -444,8 +444,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, true);
 
-        var goodOrBad = Obj.bind(Firebug.Console.log, Firebug.Console);
-        this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
+        var logResult = Firebug.Console.log.bind(Firebug.Console);
+        this.evaluate(expr, context, null, null, function(result)
+        {
+            if (context)
+                context.lastCommandLineResult = result;
+            logResult.apply(this, arguments);
+        }, logResult);
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);

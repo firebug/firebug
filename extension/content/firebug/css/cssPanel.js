@@ -2224,11 +2224,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         offset -= offset%2;
         offsetEnd += offsetEnd%2;
 
-        // Remap the increments from [0.1, 1, 10] to [1, 1, 16].
+        // Remap the increments from [0.1, 1, 10, 100] to [1, 1, 16, 64].
         if (-1 < amt && amt < 1)
             amt = (amt < 0 ? -1 : 1);
         if (Math.abs(amt) === 10)
             amt = (amt < 0 ? -16 : 16);
+        if (Math.abs(amt) === 100)
+            amt = (amt < 0 ? -64 : 64);
 
         var isUpper = (expr.toUpperCase() === expr);
 

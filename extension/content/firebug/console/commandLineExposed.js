@@ -23,7 +23,7 @@ var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1"];
+var props = ["$0", "$1", "$_"];
 
 // Registered commands, name -> config object.
 var userCommands = {};
