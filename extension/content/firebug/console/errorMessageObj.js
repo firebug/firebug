@@ -55,7 +55,8 @@ ErrorMessageObj.prototype =
             self.sourceLoading = false;
             self.source = line;
 
-            callback(line);
+            if (callback)
+                callback(line);
         });
     },
 

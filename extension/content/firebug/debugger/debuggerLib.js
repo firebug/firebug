@@ -302,6 +302,37 @@ DebuggerLib.breakNow = function(context)
     return dGlobal.evalInGlobal("debugger");
 }
 
+// xxxHonza: shell we merge with getInactiveDebuggerForContext?
+DebuggerLib.getDebuggerForContext = function(context)
+{
+    try
+    {
+        var jsDebugger = {};
+        Cu.import("resource://gre/modules/jsdebugger.jsm", jsDebugger);
+
+        var global = Cu.getGlobalForObject({});
+        jsDebugger.addDebuggerToGlobal(global);
+
+        var dbg = new global.Debugger();
+
+        dbg.addDebuggee(context.window);
+
+        // Append the top level window and all iframes as debuggees (to debug any JS
+        // script on the page).
+        // xxxHonza: there could be an iframe based (or URL based) filter
+        // xxxHonza: what if some iframes are appended later?
+        // Shell we use "onNewGlobalObject" hook?
+        for (var i=0; i<context.windows.length; i++)
+            dbg.addDebuggee(context.windows[i]);
+
+        return dbg;
+    }
+    catch (err)
+    {
+        TraceError.sysout("DebuggerLib.getDebuggerForContext; EXCEPTION " + err, err);
+    }
+};
+
 // ********************************************************************************************* //
 // Local helpers
 

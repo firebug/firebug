@@ -58,7 +58,11 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
+/**
+ * @module
+ */
 var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
+/** @lends Errors */
 {
     dispatchName: "errors",
 
