@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6523: Firebug shows wrong (previous) stacktrace</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function onExecuteTest()
+{
+    var frame = document.createElement("iframe");
+    frame.setAttribute("src", "issue6523-frame.html");
+    frame.setAttribute("width", "200px");
+    frame.setAttribute("height", "70px");
+
+    frame.onload = function()
+    {
+        frame.contentWindow.onExecuteTest();
+    }
+
+    var parentNode = document.getElementById("frameContainer");
+    parentNode.appendChild(frame);
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6523">Issue 6523</a>:
+        JSD2: Show Stack Trace With Errors</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Enable the Console panel and reload the page</li>
+            <li>Check <i>Show Stack Trace with Errors</i> option</li>
+            <li>Click the test button
+                <button id="testButton" onclick="onExecuteTest()">Execute</button>
+            </li>
+            <li>There should be one error log in the Console panel: <code>Error: b</code><br/>
+            Expand it and check the stack trace. It should be:<br/>
+<code>
+b()
+d()
+onExecuteTest()
+onclick()
+</code>
+            </li>
+        </ol>
+    </section>
+    <div id="frameContainer"></div>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+</body>
+</html>

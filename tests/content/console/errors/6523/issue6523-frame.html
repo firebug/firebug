@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<script>
+function onExecuteTest()
+{
+    function a(x)
+    {
+        try
+        {
+            x.toLowerCase();
+        }
+        catch(e)
+        {
+        }
+    }
+
+    function b(age, name)
+    {
+        throw new Error("b");
+    }
+
+    function c()
+    {
+        throw new Error("c");
+    }
+
+    function d(age, name)
+    {
+        b(age, name);
+    }
+
+    a();
+    d(12, "test");
+    c();
+}
+</script>
+</body>
+</html>
