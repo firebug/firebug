@@ -164,6 +164,9 @@ StackFrame.getStackSourceLink = function()
     return StackFrame.getFrameSourceLink(frame);
 }
 
+/**
+ * Converts from RDP stack frame packet to {@StackFrame}
+ */
 StackFrame.buildStackFrame = function(frame, context)
 {
     if (!frame)

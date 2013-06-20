@@ -5,8 +5,9 @@ define([
     "firebug/lib/url",
     "firebug/lib/string",
     "firebug/debugger/stack/stackFrame",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, Url, Str, StackFrame) {
+function(FBTrace, Url, Str, StackFrame, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -48,8 +49,8 @@ ProfilerEngine.prototype =
         this.startTime = null;
         this.endTime = null;
 
-        // Get debugger for profiled global (the current content window).
-        this.dbg = this.getDebugger(this.context);
+        // Get debugger for the current context (top level window and all iframes).
+        this.dbg = DebuggerLib.getDebuggerForContext(this.context);
 
         // Hook function calls
         this.dbg.onEnterFrame = this.onEnterFrame.bind(this);
@@ -67,27 +68,6 @@ ProfilerEngine.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    // xxxHonza: firebug/debugger/debuggerLib module should be used somehow
-    getDebugger: function(context)
-    {
-        var jsDebugger = {};
-        Cu.import("resource://gre/modules/jsdebugger.jsm", jsDebugger);
-
-        var global = Cu.getGlobalForObject({});
-        jsDebugger.addDebuggerToGlobal(global);
-
-        var dbg = new global.Debugger();
-
-        // Append the top level window and all iframes as debuggees (to include any JS
-        // script on the page into the profiler results).
-        // xxxHonza: there could be an iframe based (or URL based filter) to reduce
-        // the profiler results.
-        for (var i=0; i<context.windows.length; i++)
-            dbg.addDebuggee(context.windows[i]);
-
-        return dbg;
-    },
 
     enumerateScripts: function(callback)
     {

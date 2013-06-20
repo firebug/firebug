@@ -12,9 +12,10 @@ define([
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/errorMessageObj",
     "firebug/lib/events",
+    "firebug/console/errorStackTraceObserver",
 ],
 function(Obj, Firebug, Xpcom, Console, Css, Win, Arr, Str, BreakpointStore,
-    ErrorMessageObj, Events) {
+    ErrorMessageObj, Eventsm, ErrorStackTraceObserver) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,7 +59,11 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
+/**
+ * @module
+ */
 var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
+/** @lends Errors */
 {
     dispatchName: "errors",
 
@@ -392,6 +397,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             correctLineNumbersOnExceptions(object, error);
         }
 
+        // xxxHonza: ErrorStackTraceObserver should be used to access the error stack trace.
         if (Firebug.errorStackTrace)
         {
             error.correctWithStackTrace(Firebug.errorStackTrace);
