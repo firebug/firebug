@@ -83,6 +83,8 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
 
     startObserving: function(context)
     {
+        Trace.sysout("errorStackTraceObserver.startObserving; " + context.getName());
+
         var dbg = DebuggerLib.getDebuggerForContext(context);
         context.errorStackTraceDbg = dbg;
 
@@ -114,6 +116,8 @@ var ErrorStackTraceObserver = Obj.extend(Firebug.Module,
 
     stopObserving: function(context)
     {
+        Trace.sysout("errorStackTraceObserver.stopObserving; " + context.getName());
+
         if (!context.errorStackTraceDbg)
             return;
 

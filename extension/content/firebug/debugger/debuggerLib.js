@@ -315,15 +315,22 @@ DebuggerLib.getDebuggerForContext = function(context)
 
         var dbg = new global.Debugger();
 
-        dbg.addDebuggee(context.window);
+        var win = Wrapper.unwrapObject(context.window);
+        dbg.addDebuggee(win);
 
         // Append the top level window and all iframes as debuggees (to debug any JS
         // script on the page).
-        // xxxHonza: there could be an iframe based (or URL based) filter
-        // xxxHonza: what if some iframes are appended later?
-        // Shell we use "onNewGlobalObject" hook?
         for (var i=0; i<context.windows.length; i++)
             dbg.addDebuggee(context.windows[i]);
+
+        // Register 'onNewGlobalObject' hook to append dynamically created iframes
+        // into the debugger as debuggees.
+        dbg.onNewGlobalObject = function(global)
+        {
+            // xxxHonza: use timeout to avoid crash, see:
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=885301
+            setTimeout(addNewDebuggee.bind(this, dbg, win, global));
+        }
 
         return dbg;
     }
@@ -332,6 +339,19 @@ DebuggerLib.getDebuggerForContext = function(context)
         TraceError.sysout("DebuggerLib.getDebuggerForContext; EXCEPTION " + err, err);
     }
 };
+
+function addNewDebuggee(dbg, win, global)
+{
+    // We are only interested in iframes...
+    global = DebuggerLib.unwrapDebuggeeValue(global);
+    if (!(global instanceof Window))
+        return;
+
+    // ... and only iframes coming from the same top level window.
+    var root = Wrapper.unwrapObject(global.top);
+    if (root == win)
+        dbg.addDebuggee(global);
+}
 
 // ********************************************************************************************* //
 // Local helpers
