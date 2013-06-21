@@ -50,10 +50,7 @@ var LastCommandLineResult = Obj.extend(Firebug.Module,
 
 function onExecuteCommand(context)
 {
-    // Log the last command line evaluated expression result into the Console panel.
-    Console.log(context.lastCommandLineResult, context);
-
-    return Console.getDefaultReturnValue();
+    return context.lastCommandLineResult;
 }
 
 // ********************************************************************************************* //
@@ -62,7 +59,7 @@ function onExecuteCommand(context)
 Firebug.registerModule(LastCommandLineResult);
 
 Firebug.registerCommand("$_", {
-    getter: true,
+    variable: true,
     helpUrl: "https://getfirebug.com/wiki/index.php/Dollar-underscore",
     handler: onExecuteCommand.bind(this),
     description: Locale.$STR("console.cmd.help.lastCommandLineResult")

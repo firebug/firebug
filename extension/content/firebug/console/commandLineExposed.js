@@ -451,6 +451,16 @@ function updateVars(commandLine, dglobal, context)
     vars = Firebug.CommandLine.getAccessorVars(context);
     for (var prop in vars)
         commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
+
+    for (var prop in userCommands)
+    {
+        var cmd = userCommands[prop];
+        if (cmd.variable)
+        {
+            var value = cmd.handler.call(null, context);
+            commandLine[prop] = dglobal.makeDebuggeeValue(value);
+        }
+    }
 }
 
 function removeConflictingNames(commandLine, context, contentView)
