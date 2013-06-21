@@ -275,7 +275,7 @@ var CommandLineHelp = domplate(
         var logContent = logGroupBody.getElementsByClassName("logContent")[0];
         var list = TipsList.tag.append({}, logContent);
 
-        // #1) Render basic command line syntaxt tip
+        // #1) Render basic command line syntax tip
         var tip = {
             example: "1 + 1",
             text: "console.cmd.tip.javascript"

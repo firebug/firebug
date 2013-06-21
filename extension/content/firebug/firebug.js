@@ -1494,6 +1494,18 @@ Firebug.Listener.prototype =
     {
         // if this.fbListeners is null, remove is being called with no add
         Arr.remove(this.fbListeners, listener);
+    },
+
+    dispatch: function(eventName, args)
+    {
+        if (this.fbListeners && this.fbListeners.length > 0)
+            Events.dispatch(this.fbListeners, eventName, args);
+    },
+
+    dispatch2: function(eventName, args)
+    {
+        if (this.fbListeners && this.fbListeners.length > 0)
+            return Events.dispatch2(this.fbListeners, eventName, args);
     }
 };
 

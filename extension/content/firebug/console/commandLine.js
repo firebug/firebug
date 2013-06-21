@@ -278,20 +278,32 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             noscript.setJSEnabled(noScriptURI, true);
 
         // Allow the use of plain "help"
+        // xxxHonza: this is a hack, FIX ME
         if (expr === "help")
             expr = "help()";
 
+        var self = this;
         var logResult = Firebug.Console.log.bind(Firebug.Console);
-        this.evaluate(expr, context, null, null, function(result)
+
+        function successHandler(result, context)
         {
-            context.lastCommandLineResult = result;
+            self.dispatch("expressionEvaluated", [context, expr, result, true]);
             logResult.apply(this, arguments);
-        }, logResult);
+        }
+
+        function exceptionHandler(err, context)
+        {
+            self.dispatch("expressionEvaluated", [context, expr, err, false]);
+            logResult.apply(this, arguments);
+        }
+
+        // Finally, let's evaluate the use expression!
+        this.evaluate(expr, context, null, null, successHandler, exceptionHandler);
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);
 
-        var consolePanel = Firebug.currentContext.panelMap.console;
+        var consolePanel = context.getPanel("console");
         if (consolePanel)
             Dom.scrollToBottom(consolePanel.panelNode);
     },
@@ -760,7 +772,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     getAccessorVars: function(context)
     {
         return {
-            "$_": context.lastCommandLineResult,
             "$p": context.rememberedObject
         };
     },
