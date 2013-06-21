@@ -365,7 +365,16 @@ var NetUtils =
         if (mimeType)
             mimeType = mimeType.split(";")[0];
 
-        return (file.category = mimeCategoryMap[mimeType]);
+        file.category = mimeCategoryMap[mimeType];
+
+        // Work around application/octet-stream for js files (see issue 6530).
+        // Files with js extensions are JavaScript files and should respect the
+        // Net panel filter.
+        var extension = Url.getFileExtension(file.href);
+        if (extension == "js")
+            file.category = "js";
+
+        return file.category;
     },
 
     getPageTitle: function(context)
