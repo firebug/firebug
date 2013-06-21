@@ -346,16 +346,14 @@ var NetUtils =
             return file.category = "xhr";
         }
 
+        var ext = Url.getFileExtension(file.href) + "";
+        ext = ext.toLowerCase();
+
         if (!file.mimeType)
         {
-            var ext = Url.getFileExtension(file.href);
             if (ext)
-                file.mimeType = mimeExtensionMap[ext.toLowerCase()];
+                file.mimeType = mimeExtensionMap[ext];
         }
-
-        /*if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
-                ", mimeType: " + file.mimeType + " for: " + file.href, file);*/
 
         if (!file.mimeType)
             return "";
@@ -370,9 +368,17 @@ var NetUtils =
         // Work around application/octet-stream for js files (see issue 6530).
         // Files with js extensions are JavaScript files and should respect the
         // Net panel filter.
-        var extension = Url.getFileExtension(file.href);
-        if (extension == "js")
+        if (ext == "js")
             file.category = "js";
+
+        // The last chance to set the category if it isn't set yet.
+        // Let's use the file extension.
+        if (!file.category)
+        {
+            mimeType = mimeExtensionMap[ext];
+            if (mimeType)
+                file.category = mimeCategoryMap[mimeType];
+        }
 
         return file.category;
     },
