@@ -26,8 +26,7 @@
                     </li>
                 </ul>
             </section>
-            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
-            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+            <footer>Awad Mackie, firesock.serwalek@gmail.com</footer>
         </div>
     </body>
 </html>
