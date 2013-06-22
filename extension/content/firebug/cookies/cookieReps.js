@@ -209,7 +209,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         if (maxAge <= 0)
             return maxAge.toString();
 
-        return Str.formatTime(cookie.cookie.maxAge * 1000);
+        return Str.formatTime(maxAge * 1000);
     },
 
     getExpires: function(cookie)
