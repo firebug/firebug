@@ -201,7 +201,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     getMaxAge: function(cookie)
     {
-        var maxAge = parseInt(cookie.cookie.maxAge, 10)
+        var maxAge = parseInt(cookie.cookie.maxAge, 10);
 
         if (isNaN(maxAge))
             return "";
