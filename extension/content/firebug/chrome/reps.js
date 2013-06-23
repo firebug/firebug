@@ -415,7 +415,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
     propIterator: function (object, max)
     {
-        function interesting(t, value)
+        function isInterestingProp(t, value)
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
                 (t == "object" && value && value.toString));
@@ -424,7 +424,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
         // Object members with non-empty values are preferred since it gives the
         // user a better overview of the object.
         var props = [];
-        this.getProps(props, object, max, interesting);
+        this.getProps(props, object, max, isInterestingProp);
 
         if (props.length <= max)
         {
@@ -433,7 +433,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             // Let's display also empty members and functions.
             this.getProps(props, object, max, function(t, value)
             {
-                return !interesting(t, value);
+                return !isInterestingProp(t, value);
             });
         }
 
