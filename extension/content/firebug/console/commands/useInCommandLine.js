@@ -12,6 +12,8 @@ define([
 ],
 function(Firebug, FBTrace, CommandLine, Locale, Obj, Menu, SourceLink, Str) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // UseInCommandLine Implementation
 
