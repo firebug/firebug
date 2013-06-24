@@ -19,6 +19,7 @@ function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -512,12 +513,44 @@ var NetUtils =
      * 'Use in Command Line' features. Firebug is primarily a tool for web developers
      * and so, it shouldn't expose internal chrome objects.
      */
-    getRealObject: function(file)
+    getRealObject: function(file, context)
     {
-        var realObject = {};
+        var global = context.getCurrentGlobal();
+        var realObject = Cu.createObjectIn(global);
+
+        // xxxHonza: it would be great to have some lib/object API for object creation/cloning
+        // with support for content-access.
+
+        // All properties must be read-only so, they can't be modified in the DOM panel.
+        function genPropDesc(value)
+        {
+            return {
+                enumerable: true,
+                configurable: false,
+                writable: false,
+                value: value
+            };
+        }
+
+        // Make sure headers are also cloned and created in the right content scope.
+        function cloneHeaders(headers)
+        {
+            var newHeaders = [];
+            for (var i=0; i<headers.length; i++)
+            {
+                var header = headers[i];
+                var newHeader = Cu.createObjectIn(global);
+                Object.defineProperty(newHeader, "name", genPropDesc(header["name"]));
+                Object.defineProperty(newHeader, "value", genPropDesc(header["value"]));
+                Cu.makeObjectPropsNormal(newHeader);
+                newHeaders.push(newHeader);
+            }
+            return genPropDesc(newHeaders);
+        }
 
         // Iterate over all properties of the request object (nsIHttpChannel)
         // and pick only those that are specified in 'requestProps' list.
+        // Make sure the result |realObject| is content-accessible.
         var request = file.request;
         for (var p in request)
         {
@@ -526,19 +559,22 @@ var NetUtils =
 
             try
             {
-                var prop = request[p];
-                realObject[p] = prop;
+                Object.defineProperty(realObject, p, genPropDesc(request[p]));
             }
             catch (err)
             {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
             }
         }
 
-        // Display additional props from |file|
-        realObject["responseBody"] = file.responseText;
-        realObject["postBody"] = file.postBody;
-        realObject["requestHeaders"] = file.requestHeaders;
-        realObject["responseHeaders"] = file.responseHeaders;
+        // Additional props from |file|
+        Object.defineProperty(realObject, "responseBody", genPropDesc(file.responseText));
+        Object.defineProperty(realObject, "postBody", genPropDesc(file.postBody));
+        Object.defineProperty(realObject, "requestHeaders", cloneHeaders(file.requestHeaders));
+        Object.defineProperty(realObject, "responseHeaders", cloneHeaders(file.responseHeaders));
+
+        Cu.makeObjectPropsNormal(realObject);
 
         return realObject;
     }

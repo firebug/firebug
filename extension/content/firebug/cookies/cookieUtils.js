@@ -7,6 +7,11 @@ define([
 function(Cookie, Str) {
 
 // ********************************************************************************************* //
+// Constants
+
+var Cu = Components.utils;
+
+// ********************************************************************************************* //
 // CookieUtils Implementation
 
 var CookieUtils = 
@@ -150,10 +155,30 @@ var CookieUtils =
         return cookies;
     },
 
-    getRealObject: function(cookie)
+    getRealObject: function(cookie, context)
     {
-        var realObject = this.makeCookieObject(cookie);
-        delete realObject.rawCookie;
+        cookie = this.makeCookieObject(cookie);
+        delete cookie.rawCookie;
+
+        // All properties must be read-only so, they can't be modified in the DOM panel.
+        function genPropDesc(value)
+        {
+            return {
+                enumerable: true,
+                configurable: false,
+                writable: false,
+                value: value
+            };
+        }
+
+        var global = context.getCurrentGlobal();
+        var realObject = Cu.createObjectIn(global);
+
+        for (var p in cookie)
+            Object.defineProperty(realObject, p, genPropDesc(cookie[p]));
+
+        Cu.makeObjectPropsNormal(realObject);
+
         return realObject;
     }
 };
