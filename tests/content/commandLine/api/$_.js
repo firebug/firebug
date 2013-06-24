@@ -1,8 +1,8 @@
 function runTest()
 {
-    FBTest.sysout("$x_.START");
+    FBTest.sysout("$_.START");
 
-    FBTest.openNewTab(basePath + "commandLine/api/$x_.html", function(win)
+    FBTest.openNewTab(basePath + "commandLine/api/$_.html", function(win)
     {
         FBTest.openFirebug();
 
@@ -17,7 +17,7 @@ function runTest()
                 "2", "span", "objectBox objectBox-number");
 
             taskList.run(function() {
-                FBTest.testDone("$x_.DONE");
+                FBTest.testDone("$_.DONE");
             });
         });
     });
