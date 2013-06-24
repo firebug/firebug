@@ -33,7 +33,7 @@ var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
 var consoleShortcuts = ["dir", "dirxml", "table"];
 
 // List of console variables.
-var props = ["$0", "$1", "$2", "$3", "$4", "$p"];
+var props = ["$0", "$1", "$2", "$3", "$4"];
 
 // Registered commands, name -> config object.
 var userCommands = Object.create(null);
@@ -445,10 +445,6 @@ function updateVars(commandLine, dglobal, context)
     var htmlPanel = context.getPanel("html", true);
     var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
 
-    for (var prop in vars)
-        commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
-
-    vars = Firebug.CommandLine.getAccessorVars(context);
     for (var prop in vars)
         commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
 
