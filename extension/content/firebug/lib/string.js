@@ -765,7 +765,7 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
             if (i != minTimeUnitIndex)
                 value = Math.floor(value);
 
-            if (value != 0)
+            if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
             {
                 formattedString += value + timeUnits[i].unit;
                 if (i != minTimeUnitIndex)
