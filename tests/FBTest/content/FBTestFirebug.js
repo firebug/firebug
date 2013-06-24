@@ -1462,7 +1462,6 @@ this.addSelectorTrial = function(chrome, selector, callback)
 
     recognizer.onRecognizeAsync(function(objectLink)
     {
-        FBTrace.sysout("objectLink", objectLink);
         if (callback)
             callback(objectLink);
     });
