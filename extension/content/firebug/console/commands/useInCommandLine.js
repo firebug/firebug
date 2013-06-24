@@ -52,41 +52,20 @@ var UseInCommandLine = Obj.extend(Firebug.Module,
             return;
 
         var rep = Firebug.getRep(object, context);
-        object = rep && rep.getRealObject(object, context);
-
-        if (!rep || !rep.inspectable || object instanceof SourceLink.SourceLink)
+        if (!rep || !rep.inspectable)
             return;
 
-        var hasConsole = !!context.getPanel("console", true);
-
-        function useInCommandLine()
-        {
-            context.rememberedObject = object;
-
-            var panel = Firebug.chrome.getSelectedPanel();
-
-            if (!hasConsole)
-                Firebug.chrome.selectPanel("console");
-            else if (panel && panel.name != "console" && !CommandLine.Popup.isVisible())
-                CommandLine.Popup.toggle(context);
-
-            var commandLine = CommandLine.getCommandLine(context);
-
-            var valueLength = commandLine.value.length, ins = "$p";
-
-            commandLine.value += ins;
-            commandLine.focus();
-            commandLine.setSelectionRange(valueLength, valueLength + ins.length);
-
-            CommandLine.autoCompleter.hide();
-            CommandLine.update(context);
-        }
+        // Get the object that should be associated with '$p' variable.
+        // The same way is used by e.g. 'Inspect In DOM panel' command.
+        object = rep.getRealObject(object, context);
+        if (object instanceof SourceLink.SourceLink)
+            return;
 
         var item = {
             label: "commandline.Use_in_Command_Line",
             tooltiptext: "commandline.tip.Use_in_Command_Line",
             id: "fbUseInCommandLine",
-            command: useInCommandLine.bind(this)
+            command: this.useInCommandLine.bind(this, context, object)
         };
 
         // Add the item before the first "Inspect in * Panel" option (or at the bottom
@@ -101,6 +80,33 @@ var UseInCommandLine = Obj.extend(Firebug.Module,
 
         Menu.createMenuItem(popup, item, before);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu Actions
+
+    useInCommandLine: function(context, object)
+    {
+        context.rememberedObject = object;
+
+        var panel = Firebug.chrome.getSelectedPanel();
+
+        var hasConsole = !!context.getPanel("console", true);
+        if (!hasConsole)
+            Firebug.chrome.selectPanel("console");
+        else if (panel && panel.name != "console" && !CommandLine.Popup.isVisible())
+            CommandLine.Popup.toggle(context);
+
+        var commandLine = CommandLine.getCommandLine(context);
+        var valueLength = commandLine.value.length;
+        var ins = "$p";
+
+        commandLine.value += ins;
+        commandLine.focus();
+        commandLine.setSelectionRange(valueLength, valueLength + ins.length);
+
+        CommandLine.autoCompleter.hide();
+        CommandLine.update(context);
+    }
 });
 
 // ********************************************************************************************* //

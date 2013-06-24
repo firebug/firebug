@@ -26,10 +26,11 @@ define([
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
+    "firebug/net/netUtils",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils) {
 
 with (Domplate) {
 
@@ -897,7 +898,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     getRealObject: function(file, context)
     {
-        return file.request;
+        return NetUtils.getRealObject(file);
     }
 });
 
@@ -910,11 +911,12 @@ function instanceOf(object, Klass)
         if (object == Klass.prototype)
            return true;
 
-        if ( typeof(object) === 'xml')
+        if (typeof(object) === "xml")
             return (Klass.prototype === Xml.prototype);
 
         object = object.__proto__;
     }
+
     return false;
 }
 

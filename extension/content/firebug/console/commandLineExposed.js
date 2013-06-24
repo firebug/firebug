@@ -448,6 +448,8 @@ function updateVars(commandLine, dglobal, context)
     for (var prop in vars)
         commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
 
+    // Iterate all registered commands and pick those which represents a 'variable'.
+    // These needs to be available as variables within the Command Line namespace.
     for (var prop in userCommands)
     {
         var cmd = userCommands[prop];

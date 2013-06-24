@@ -148,6 +148,13 @@ var CookieUtils =
         }
 
         return cookies;
+    },
+
+    getRealObject: function(cookie)
+    {
+        var realObject = this.makeCookieObject(cookie);
+        delete realObject.rawCookie;
+        return realObject;
     }
 };
 

@@ -137,6 +137,32 @@ const binaryCategoryMap =
     "font": 1
 };
 
+const requestProps =
+{
+    "allowPipelining": 1,
+    "allowSpdy": 1,
+    "canceled": 1,
+    "channelIsForDownload": 1,
+    "contentCharset": 1,
+    "contentLength": 1,
+    "contentType": 1,
+    "forceAllowThirdPartyCookie": 1,
+    "loadAsBlocking": 1,
+    "loadUnblocked": 1,
+    "localAddress": 1,
+    "localPort": 1,
+    "name": 1,
+    "redirectionLimit": 1,
+    "redirectionLimit": 1,
+    "remoteAddress": 1,
+    "remotePort": 1,
+    "requestMethod": 1,
+    "requestSucceeded": 1,
+    "responseStatus": 1,
+    "responseStatusText": 1,
+    "status": 1,
+};
+
 // ********************************************************************************************* //
 
 var NetUtils =
@@ -480,6 +506,42 @@ var NetUtils =
         }
 
         FBTrace.sysout(msg + " " + file.href, timeLog);
+    },
+
+    /**
+     * Returns a 'real objct' that is used by 'Inspect in DOM Panel' or
+     * 'Use in Command Line' features. Firebug is primarily a tool for web developers
+     * and so, it shouldn't expose internal chrome objects.
+     */
+    getRealObject: function(file)
+    {
+        var realObject = {};
+
+        // Iterate over all properties of the request object (nsIHttpChannel)
+        // and pick only those that are specified in 'requestProps' list.
+        var request = file.request;
+        for (var p in request)
+        {
+            if (!(p in requestProps))
+                continue;
+
+            try
+            {
+                var prop = request[p];
+                realObject[p] = prop;
+            }
+            catch (err)
+            {
+            }
+        }
+
+        // Display additional props from |file|
+        realObject["responseBody"] = file.responseText;
+        realObject["postBody"] = file.postBody;
+        realObject["requestHeaders"] = file.requestHeaders;
+        realObject["responseHeaders"] = file.responseHeaders;
+
+        return realObject;
     }
 };
 
