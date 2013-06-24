@@ -201,15 +201,10 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
 
     getMaxAge: function(cookie)
     {
-        var maxAge = parseInt(cookie.cookie.maxAge, 10);
-
-        if (isNaN(maxAge))
+        if (!cookie.cookie.maxAge)
             return "";
 
-        if (maxAge <= 0)
-            return maxAge.toString();
-
-        return Str.formatTime(maxAge * 1000);
+        return Str.formatTime(cookie.cookie.maxAge * 1000);
     },
 
     getExpires: function(cookie)
