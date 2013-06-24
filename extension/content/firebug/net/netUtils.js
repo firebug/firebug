@@ -153,7 +153,6 @@ const requestProps =
     "localPort": 1,
     "name": 1,
     "redirectionLimit": 1,
-    "redirectionLimit": 1,
     "remoteAddress": 1,
     "remotePort": 1,
     "requestMethod": 1,
