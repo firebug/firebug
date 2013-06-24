@@ -30,7 +30,7 @@ var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsI
 /**
  * Verification method, prints result of a test. If the first "pass" parameter is "true"
  * the test passes, otherwise fails.
- *  
+ *
  * @param {Boolean} pass Result of a test.
  * @param {String} msg A message to be displayed as a test results under the current test
  *      within the test console.
@@ -55,7 +55,7 @@ this.ok = function(pass, msg)
 /**
  * Verification method. Compares expected and actual string (typically from the Firebug UI).
  * If "actual" and "expected" parameters are equal, the test passes, otherwise it fails.
- *  
+ *
  * @param {String} expected Expected value
  * @param {String} actual Actual value
  * @param {String} msg A message to be displayed as a test result under the current test
@@ -103,7 +103,7 @@ this.compare = function(expected, actual, msg, shouldNotMatch)
 
 /**
  * Logs an exception under the current test within the test console.
- *  
+ *
  * @param {String} msg A message to be displayed under the current test within the test console.
  * @param {Exception} err An exception object.
  */
@@ -114,7 +114,7 @@ this.exception = function(msg, err)
 
 /**
  * Prints a message into test resutls (displayed under a test within test console).
- *  
+ *
  * @param {String} msg A message to be displayed under the current test within the test console.
  */
 this.progress = function(msg)
@@ -127,7 +127,7 @@ this.progress = function(msg)
 
 /**
  * Finishes current test and prints info message (if any) to the status bar.
- *  
+ *
  * All test tabs are removed from the browser.
  */
 this.testDone = function(message)
@@ -174,7 +174,7 @@ this.getLocalURLBase = function()
 /**
  * Basic logging into the Firebug tracing console. All logs made through this function
  * appears only if 'TESTCASE' options is set.
- *  
+ *
  * @param {String} text A message to log.
  * @param {Object} obj An object to log.
  */
@@ -187,10 +187,10 @@ this.sysout = function(text, obj)
 /**
  * In some cases the test can take longer time to execute than it's expected (e.g. due to a slow
  * test server connection).
- *  
+ *
  * Instead of changing the default timeout to another (bigger) - but still fixed value, the test
  * can regularly reset the timeout.
- *  
+ *
  * This way the runner knows that the test is not frozen and is still doing something.
  */
 this.resetTimeout = function()
@@ -204,7 +204,7 @@ this.resetTimeout = function()
 /**
  * Called by the test harness framework in case of a failing test. If *Fail Halt* option
  * is set and *Chromebug* extension installed, the debugger will halt the test execution.
- *  
+ *
  * @param {String} msg A message to be displayed under the current test within the test console.
  */
 this.onFailure = function(msg)
@@ -326,11 +326,11 @@ this.sendMouseEvent = function(event, target, win)
     if (!win)
     {
         win = targetIsString ?
-            // if the target is a string, we cannot know which window that target 
-            // belongs to, so we are assuming it to be the global window 
+            // if the target is a string, we cannot know which window that target
+            // belongs to, so we are assuming it to be the global window
             window :
             // if the target is not a string, thus it is assumed to be an Element,
-            // then we are assuming the window is the one in which that target lives 
+            // then we are assuming the window is the one in which that target lives
             target.ownerDocument.defaultView;
     }
 
@@ -502,7 +502,7 @@ function getFrameOffset(win)
 this.synthesizeKey = function(aKey, aEvent, aWindow)
 {
     aEvent = aEvent || {};
-  
+
     synthesizeKey(aKey, aEvent, aWindow);
 };
 
@@ -529,7 +529,7 @@ this.pressKey = function(keyCode, target)
             if (KeyEvent[name] == keyCode)
                 return name.replace("DOM_VK_", "");
         }
-        
+
         return null;
     }
 
@@ -1245,10 +1245,10 @@ this.clearCommand = function()
 
 
 /**
- * clears and types a command into the Command Line or the Command Editor 
+ * clears and types a command into the Command Line or the Command Editor
  * @param {String} the command to type
  * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
- * 
+ *
  */
 this.clearAndTypeCommand = function(string, useCommandEditor)
 {
@@ -1257,10 +1257,10 @@ this.clearAndTypeCommand = function(string, useCommandEditor)
 };
 
 /**
- * types a command into the Command Line or the Command Editor 
+ * types a command into the Command Line or the Command Editor
  * @param {String} the command to type
  * @param {Boolean} if set to true, type in the CommandEditor, or in the CommandLine otherwise
- * 
+ *
  */
 this.typeCommand = function(string, useCommandEditor)
 {
@@ -1426,6 +1426,52 @@ this.isConsolePreviewVisible = function()
     return FW.Firebug.CommandLine.Popup.isVisible();
 };
 
+
+//********************************************************************************************* //
+//Watch Panel
+
+/**
+* Appends a new selector trial to the Selectors panel (side panel of the CSS panel).
+* @param {Object} chrome Current Firebug's chrome (can be null).
+* @param {String} selector Selector to be added
+* @param {Function} callback Callback function called after the result is displayed
+*/
+this.addSelectorTrial = function(chrome, selector, callback)
+{
+    if (!chrome)
+        chrome = FW.Firebug.chrome;
+
+    var selectorsPanel = FBTest.getPanel("selectors", true);
+    FBTest.ok(selectorsPanel, "Selectors side panel must be there");
+
+    // Create new selector trial
+    var panelNode = selectorsPanel.panelNode;
+    var trySelectorField = panelNode.getElementsByClassName("selectorEditorContainer")[0];
+    FBTest.ok(trySelectorField, "Field to create a new selector group must be there");
+
+    // Click to open a text editor
+    FBTest.click(trySelectorField);
+
+    var editor = panelNode.getElementsByClassName("selectorsPanelEditor")[0];
+    FBTest.ok(editor, "Selector editor must be there");
+
+    // Wait till the result is evaluated and displayed
+    var doc = FBTest.getSidePanelDocument();
+    var recognizer = new MutationRecognizer(doc.defaultView, "a",
+        {"class": "objectLink-element"});
+
+    recognizer.onRecognizeAsync(function(objectLink)
+    {
+        FBTrace.sysout("objectLink", objectLink);
+        if (callback)
+            callback(objectLink);
+    });
+
+    // Type selector and press Enter
+    FBTest.sendString(selector, editor);
+    FBTest.sendKey("RETURN", editor);
+};
+
 // ********************************************************************************************* //
 // Debugger
 
@@ -1565,7 +1611,7 @@ this.waitForBreakInDebugger = function(chrome, lineNo, breakpoint, callback)
 
 /**
  * Wait till the debugger is resumed.
- * 
+ *
  * @param {Object} callback A callback executed when the debugger is resumed.
  */
 this.waitForDebuggerResume = function(callback)
@@ -1721,7 +1767,7 @@ this.addWatchExpression = function(chrome, expression, callback)
 
 /**
  * Sets new value for specified expression in the Watch side panel.
- * 
+ *
  * @param {Object} chrome The current Firebug's chrome (can be null).
  * @param {Object} varName Name of the variable in the Watch panel.
  * @param {Object} expression New expression/value
@@ -1765,7 +1811,7 @@ this.setWatchExpressionValue = function(chrome, varName, expression, callback)
 
 /**
  * Toggles boolean value in the Watch side panel.
- * 
+ *
  * @param {Object} chrome The current Firebug's chrome (can be null).
  * @param {Object} varName Variable name
  * @param {Object} callback Called after the result is displayed.
@@ -1856,7 +1902,7 @@ window.onerror = function(errType, errURL, errLineNum)
 /**
  * Select a location, e.g. a source file inside the Script panel, using the string the user
  * sees.
- *  
+ *
  * Example:
  * ~~
  * var panel = FBTest.selectPanel("script");
@@ -1891,9 +1937,9 @@ this.getCurrentLocation = function()
 
 /**
  * Jump to a file@line.
- *  
+ *
  * Example:
- * 
+ *
  * ~~
  * FBTest.selectSourceLine(sourceFile.href, 1143, "js");
  * ~~
@@ -1942,10 +1988,10 @@ this.expandElements = function(panelNode, className) // className, className, ..
  * Executes passed callback as soon as an expected element is displayed within the
  * specified panel. A DOM node representing the UI is passed into the callback as
  * the only parameter.
- * 
+ *
  * If 'config.onlyMutations' is set to true, the method is always waiting for changes
  * and ignoring the fact that the nodes might be already displayed.
- * 
+ *
  * @param {String} panelName Name of the panel that shows the result.
  * @param {Object} config Requirements, which must be fulfilled to trigger the callback function
  *     (can include "tagName", "id", "classes", "attributes", "counter" and "onlyMutations")
@@ -2216,7 +2262,7 @@ this.searchInCssPanel = function(searchText, callback)
 /**
  * Helper for searchInScriptPanel and searchInCssPanel, waits till the highlighted line
  * (using jumpHighlight class) is unhighlighted (Firebug unhilights this on timeout).
- * 
+ *
  * @param {Object} config Specifies the tagName fo the target element.
  * @param {Object} callback
  */
@@ -2426,7 +2472,7 @@ this.getStyleRulesBySelector = function(selector)
  * Context menu listener is registered through ContextMenuController object, which ensures
  * that the listener is removed at the end of the test even in cases where the context menu
  * is never opened and so, the listener not removed by the test itself.
- * 
+ *
  * @param {Element} target Element, which's context menu should be opened
  * @param {String or Object} menuItemIdentifier ID or object holding the label of the
  *      menu item, that should be executed
@@ -2580,7 +2626,7 @@ this.getClipboardText = function()
 
 /**
  * Wait till the an expected text is available in the clipboard.
- * 
+ *
  * @param {Object} expected The text that should appear in the clipboard. Can be also
  *      a regular expression.
  * @param {Object} callback A callback executed when the text is sucessfully set or
@@ -2621,15 +2667,15 @@ this.waitForClipboard = function(expected, callback)
 
 /**
  * Compare expected Firefox version with the current Firefox installed.
- *  
+ *
  * Example:
  * ~~
  * if (compareFirefoxVersion("3.6") >= 0)
  * {
  *     // execute code for Firebug 3.6+
  * }
- * ~~ 
- *  
+ * ~~
+ *
  * @param {Object} expectedVersion Expected version of Firefox.
  * @returns
  * -1 the current version is smaller
@@ -2649,7 +2695,7 @@ this.compareFirefoxVersion = function(expectedVersion)
 
 /**
  * Support for set of asynchronouse actions within a FBTest.
- *  
+ *
  * Example:
  * ~~
  *  // A suite of asynchronous tests.
@@ -2670,7 +2716,7 @@ this.compareFirefoxVersion = function(expectedVersion)
  *  });
  * ~~
  * @param {Array} tests List of asynchronous functions to be executed in order.
- * @param {Function} callback A callback that is executed as soon 
+ * @param {Function} callback A callback that is executed as soon
  *                   as all fucntions in the list are finished.
  * @param {Number} delay A delay between tasks [ms]
  */
@@ -2940,7 +2986,7 @@ this.showTooltip = function(target, callback)
     }
 
     // Tooltip controller ensures clean up (listners removal) in cases
-    // when the tooltip is never shown and so, the listener not removed. 
+    // when the tooltip is never shown and so, the listener not removed.
     TooltipController.addListener(onTooltipShowing);
 
     var win = target.ownerDocument.defaultView;
