@@ -8,8 +8,9 @@ define([
     "firebug/lib/object",
     "firebug/chrome/menu",
     "firebug/js/sourceLink",
+    "firebug/lib/string",
 ],
-function(Firebug, FBTrace, CommandLine, Locale, Obj, Menu, SourceLink) {
+function(Firebug, FBTrace, CommandLine, Locale, Obj, Menu, SourceLink, Str) {
 
 // ********************************************************************************************* //
 // UseInCommandLine Implementation
