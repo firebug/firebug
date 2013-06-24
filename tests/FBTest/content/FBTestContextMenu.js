@@ -13,8 +13,8 @@ var ContextMenuController =
 
     getContextMenu: function(target)
     {
-        // (Support content://firebug/ for backwards compatibility.)
-        return FW.FBL.hasPrefix(target.ownerDocument.documentURI, "content://firebug/") ||
+        // (Support chrome://firebug/ for backwards compatibility.)
+        return FW.FBL.hasPrefix(target.ownerDocument.documentURI, "chrome://firebug/") ||
                FW.FBL.hasPrefix(target.ownerDocument.documentURI, "resource://firebugui/") ?
             FW.FBL.$("fbContextMenu") :
             FW.Firebug.chrome.window.top.window.document.getElementById("contentAreaContextMenu");
