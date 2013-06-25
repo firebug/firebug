@@ -6,12 +6,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/chrome/firefox",
+    "firebug/lib/wrapper",
     "firebug/lib/xpcom",
     "firebug/lib/http",
     "firebug/lib/string",
     "firebug/lib/xml"
 ],
-function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
+function(Firebug, Locale, Events, Url, Firefox, Wrapper, Xpcom, Http, Str, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -495,57 +496,37 @@ var NetUtils =
     },
 
     /**
-     * Returns a 'real object' that is used by 'Inspect in DOM Panel' or
-     * 'Use in Command Line' features. Firebug is primarily a tool for web developers
-     * and so, it shouldn't expose internal chrome objects.
+     * Returns a content-accessible 'real object' that is used by 'Inspect in DOM Panel'
+     * or 'Use in Command Line' features. Firebug is primarily a tool for web developers
+     * and thus shouldn't expose internal chrome objects.
      */
     getRealObject: function(file, context)
     {
         var global = context.getCurrentGlobal();
-        var realObject = Cu.createObjectIn(global);
+        var clone = {};
 
-        // xxxHonza: it would be great to have some lib/object API for object creation/cloning
-        // with support for content-access.
-
-        // All properties must be read-only so, they can't be modified in the DOM panel.
-        function genPropDesc(value)
-        {
-            return {
-                enumerable: true,
-                configurable: false,
-                writable: false,
-                value: value
-            };
-        }
-
-        // Make sure headers are also cloned and created in the right content scope.
         function cloneHeaders(headers)
         {
             var newHeaders = [];
             for (var i=0; i<headers.length; i++)
             {
-                var header = headers[i];
-                var newHeader = Cu.createObjectIn(global);
-                Object.defineProperty(newHeader, "name", genPropDesc(header["name"]));
-                Object.defineProperty(newHeader, "value", genPropDesc(header["value"]));
-                Cu.makeObjectPropsNormal(newHeader);
-                newHeaders.push(newHeader);
+                var header = {name: headers[i].name, value: headers[i].value};
+                header = Wrapper.cloneIntoContentScope(global, header);
+                newHeaders.push(header);
             }
-            return genPropDesc(newHeaders);
+            return newHeaders;
         }
 
         // Iterate over all properties of the request object (nsIHttpChannel)
         // and pick only those that are specified in 'requestProps' list.
-        // Make sure the result |realObject| is content-accessible.
         var request = file.request;
         for (var p in request)
         {
             if (!(p in requestProps))
                 continue;
-
             try
             {
-                Object.defineProperty(realObject, p, genPropDesc(request[p]));
+                clone[p] = request[p];
             }
             catch (err)
             {
@@ -555,14 +536,12 @@ var NetUtils =
         }
 
         // Additional props from |file|
-        Object.defineProperty(realObject, "responseBody", genPropDesc(file.responseText));
-        Object.defineProperty(realObject, "postBody", genPropDesc(file.postBody));
-        Object.defineProperty(realObject, "requestHeaders", cloneHeaders(file.requestHeaders));
-        Object.defineProperty(realObject, "responseHeaders", cloneHeaders(file.responseHeaders));
+        clone.responseBody = file.responseText;
+        clone.postBody = file.postBody;
+        clone.requestHeaders = cloneHeaders(file.requestHeaders);
+        clone.responseHeaders = cloneHeaders(file.responseHeaders);
 
-        Cu.makeObjectPropsNormal(realObject);
-
-        return realObject;
+        return Wrapper.cloneIntoContentScope(global, clone);
     }
 };
 
