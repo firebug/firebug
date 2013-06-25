@@ -742,9 +742,12 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
     }
     else
     {
-        // Get the index of the min. and max. time unit
+        // Get the index of the min. and max. time unit and the decimal places
         var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
         var maxTimeUnitIndex = timeUnits.length - 1;
+        if (!decimalPlaces)
+            decimalPlaces = (time >= 60000) ? 0 : 2;
+
         for (var i=0, len=timeUnits.length; i<len; ++i)
         {
             if (timeUnits[i].unit == minTimeUnit)
@@ -771,10 +774,6 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
             }
             else
             {
-                // Set default value for decimalPlaces
-                if (!decimalPlaces)
-                    decimalPlaces = 2;
-
                 var decimalFactor = Math.pow(10, decimalPlaces);
                 value = Math.round(value * decimalFactor) / decimalFactor;
             }
