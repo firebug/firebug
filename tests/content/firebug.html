@@ -36,13 +36,13 @@ var serverURI = driverBaseURI;
  *                              Test, which is not targeted for the current OS is marked as "fails".
  */
 var testList = [
-    {group: "lib",                uri: "lib/absoluteURL.js",                      desc: "Verify FBL absoluteURLs" },
-    {group: "lib",                uri: "lib/cssClasses.js",                       desc: "Verify FBL.setClass, FBL.hasClass, FBL.removeClass" },
-    {group: "lib",                uri: "lib/literalRegExp.js",                    desc: "Verify FBL.LiteralRegExp" },
-    {group: "lib",                uri: "lib/parseURLParams.js",                   desc: "Verify FBL.parseURLParams method" },
-    {group: "lib",                uri: "lib/storageService.js",                   desc: "Verify modules/storageService" },
-    {group: "lib",                uri: "lib/textSearch.js",                       desc: "Verify FBL.TextSearch", testPage: "lib/textSearch.htm" },
+    {group: "lib/css",            uri: "lib/css/classes.js",                      desc: "Verify Css.setClass(), Css.hasClass() and Css.removeClass() are working as expected" },
+    {group: "lib/search",         uri: "lib/search/literalRegExp.js",             desc: "Verify Search.LiteralRegExp() is working as expected" },
+    {group: "lib/search",         uri: "lib/search/textSearch.js",                desc: "Verify Search.TextSearch() is working as expected", testPage: "lib/search/textSearch.htm" },
+    {group: "lib/storage",        uri: "lib/storage/storageService.js",           desc: "Verify modules/storageService is working as expected" },
     {group: "lib/string",         uri: "lib/string/formatTime.js",                desc: "Verify Str.formatTime() is working as expected" },
+    {group: "lib/url",            uri: "lib/url/absoluteURL.js",                  desc: "Verify Url.absoluteURLs() is working as expected" },
+    {group: "lib/url",            uri: "lib/url/parseURLParams.js",               desc: "Verify Url.parseURLParams() is working as expected" },
     {group: "chrome",             uri: "chrome/1883/issue1883.js",                desc: "domplate.insertRows properties" },
     {group: "domplate",           uri: "domplate/issue4425.js",                   desc: "Better support for Domplate templates inheritance" },
     {group: "firebug",            uri: "firebug/activeContextAfterReload.js",     desc: "Reloading a FF tab with Firebug open." },

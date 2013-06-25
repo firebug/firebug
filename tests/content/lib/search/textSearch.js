@@ -1,6 +1,6 @@
 function runTest()
 {
-    FBTest.openNewTab(basePath + "lib/textSearch.htm", function(win)
+    FBTest.openNewTab(basePath + "lib/search/textSearch.htm", function(win)
     {
         var root = win.document.getElementById("content");
         FBTest.progress("Document ready state: " + win.document.readyState);
