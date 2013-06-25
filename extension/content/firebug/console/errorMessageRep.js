@@ -488,6 +488,11 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
         // the error-object passed into this method.
         var context = errorObject.context;
         var panel = context.getPanel("console");
+
+        // The Console panel can be disabled.
+        if (!panel)
+            return;
+
         var rows = panel.panelNode.querySelectorAll(".logRow-errorMessage");
         for (var i=0; i<rows.length; i++)
         {

@@ -17,7 +17,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-// Debugees
+// Debuggees
 var dglobalWeakMap = new WeakMap();
 
 // Module object
@@ -28,7 +28,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Implementation
 
-// xxxHonza: for now Firebug is accesing JSD2 API directly in some cases, but as soon
+// xxxHonza: for now Firebug is accessing JSD2 API directly in some cases, but as soon
 // as RDP is supported the entire DebuggerLib module should be used only on the server side.
 
 /**
