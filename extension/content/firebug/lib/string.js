@@ -746,7 +746,7 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
         var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
         var maxTimeUnitIndex = timeUnits.length - 1;
         if (!decimalPlaces)
-            decimalPlaces = (time >= 60000) ? 0 : 2;
+            decimalPlaces = (Math.abs(time) >= 60000) ? 0 : 2;
 
         for (var i=0, len=timeUnits.length; i<len; ++i)
         {
