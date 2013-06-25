@@ -998,73 +998,9 @@ this.disableScriptPanel = function(callback)
  */
 this.enableScriptPanel = function(callback)
 {
-    // Wait till the debugger is attached to the current thread (async)
     function onCallback(win)
     {
-        var context = FW.Firebug.currentContext;
-        if (!context)
-        {
-            FBTest.ok(context, "There is no current context!" + context);
-            return;
-        }
-
-        FBTest.sysout("enableScriptPanel.window loaded: " + win.location.href);
-
-        var listener;
-
-        // If the thread is already attached just execute the callback.
-        if (context.activeThread)
-        {
-            FBTest.sysout("enableScriptPanel.thread-actor already attached " +
-                context.activeThread.paused, context.activeThread);
-
-            // xxxHonza: hack, why the ThreadClient isn't paused too?
-            var actor = FW.Firebug.DebuggerLib.getThreadActor(context.browser);
-            var state = actor ? actor._state : "no tab actor";
-            FBTest.sysout("enableScriptPanel; actor: " + state);
-
-            if (state == "paused")
-            {
-                listener =
-                {
-                    onResumed: function()
-                    {
-                        FBTest.sysout("enableScriptPanel.onResumed;");
-                        DebuggerController.removeListener(listener);
-
-                        if (callback)
-                            callback(win);
-                    }
-                };
-            }
-            else
-            {
-                if (callback)
-                    callback(win);
-                return;
-            }
-        }
-        else
-        {
-            // Listener for 'onThreadAttached' event
-            listener =
-            {
-                onThreadAttached: function()
-                {
-                    FBTest.sysout("enableScriptPanel.onThreadAttached;");
-                    DebuggerController.removeListener(listener);
-
-                    if (callback)
-                        callback(win);
-                }
-            };
-        }
-
-        // Wait till the context is attached to the thread.
-        if (listener)
-            DebuggerController.addListener(listener);
-
-        FBTest.sysout("enableScriptPanel.add debugger listener; " + listener);
+        waitForDebuggerAttach(win, callback);
     }
 
     var cb = callback ? onCallback : null;
@@ -1086,7 +1022,13 @@ this.disableConsolePanel = function(callback)
  */
 this.enableConsolePanel = function(callback)
 {
-    this.setPanelState(FW.Firebug.Console, "console", callback, true);
+    function onCallback(win)
+    {
+        waitForDebuggerAttach(win, callback);
+    }
+
+    var cb = callback ? onCallback : null;
+    this.setPanelState(FW.Firebug.Console, "console", cb, true);
 };
 
 /**
@@ -3080,6 +3022,77 @@ this.isMac = function()
     var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
         .getService(Ci.nsIAppShellService).hiddenDOMWindow;
     return (hiddenWindow.navigator.platform.indexOf("Mac") >= 0);
+}
+
+// ********************************************************************************************* //
+// JSD2
+
+function waitForDebuggerAttach(win, callback)
+{
+    var context = FW.Firebug.currentContext;
+    if (!context)
+    {
+        FBTest.ok(context, "There is no current context!" + context);
+        return;
+    }
+
+    FBTest.sysout("waitForDebuggerAttach.window loaded: " + win.location.href);
+
+    var listener;
+
+    // If the thread is already attached just execute the callback.
+    if (context.activeThread)
+    {
+        FBTest.sysout("waitForDebuggerAttach.thread-actor already attached " +
+            context.activeThread.paused, context.activeThread);
+
+        // xxxHonza: hack, why the ThreadClient isn't paused too?
+        var actor = FW.Firebug.DebuggerLib.getThreadActor(context.browser);
+        var state = actor ? actor._state : "no tab actor";
+        FBTest.sysout("waitForDebuggerAttach; actor: " + state);
+
+        if (state == "paused")
+        {
+            listener =
+            {
+                onResumed: function()
+                {
+                    FBTest.sysout("waitForDebuggerAttach.onResumed;");
+                    DebuggerController.removeListener(listener);
+
+                    if (callback)
+                        callback(win);
+                }
+            };
+        }
+        else
+        {
+            if (callback)
+                callback(win);
+            return;
+        }
+    }
+    else
+    {
+        // Listener for 'onThreadAttached' event
+        listener =
+        {
+            onThreadAttached: function()
+            {
+                FBTest.sysout("waitForDebuggerAttach.onThreadAttached;");
+                DebuggerController.removeListener(listener);
+
+                if (callback)
+                    callback(win);
+            }
+        };
+    }
+
+    // Wait till the context is attached to the thread.
+    if (listener)
+        DebuggerController.addListener(listener);
+
+    FBTest.sysout("waitForDebuggerAttach.add debugger listener; " + listener);
 }
 
 // ********************************************************************************************* //
