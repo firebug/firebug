@@ -17,10 +17,6 @@ function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
 
 const Cu = Components.utils;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-var commandLineCache = new WeakMap();
-
 // ********************************************************************************************* //
 // Command Line APIs
 
@@ -70,6 +66,10 @@ function createFirebugCommandLine(context, win)
 
     // The debuggee global.
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+
+    if (!context.commandLineCache)
+        context.commandLineCache = new WeakMap();
+    var commandLineCache = context.commandLineCache;
 
     var commandLine = commandLineCache.get(win.document);
     if (commandLine)
@@ -220,25 +220,6 @@ function unregisterCommand(name)
     if (ind !== -1)
         completionList.splice(ind, 1);
     return true;
-}
-
-/**
- * Returns true if the scope is specific of the commands bindings.
- *
- * @param {Scope} scope
- * @param {Window} win The (wrapped) window
- *
- * @return {boolean}
- */
-function isCommandLineScope(scope, win)
-{
-    var commandLine = commandLineCache.get(win.document);
-
-    // This should never occur.
-    if (!commandLine && (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS))
-        FBTrace.sysout("CommandLineExposed.isCommandLineScope; could not get commandLine");
-    // Test whether the scope is an object and if its object contains commandLine functions
-    return scope.type === "object" && commandLine && commandLine.cd === scope.getVariable("cd");
 }
 
 /**
@@ -516,7 +497,6 @@ Firebug.CommandLineExposed =
     userCommands: userCommands,
     registerCommand: registerCommand,
     unregisterCommand: unregisterCommand,
-    isCommandLineScope: isCommandLineScope,
     evaluate: evaluateInPageContext,
     getAutoCompletionList: getAutoCompletionList,
 };
