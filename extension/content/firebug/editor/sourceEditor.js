@@ -5,11 +5,14 @@ define([
     "firebug/lib/http",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/wrapper",
 ],
-function(Firebug, Http, Dom, Css) {
+function(Firebug, Http, Dom, Css, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Cu = Components.utils;
 
 // CodeMirror files. These scripts are dynamically included into panel.html.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
@@ -33,7 +36,6 @@ var BP_WRAP_CLASS = "CodeMirror-breakpoint";
 
 function SourceEditor()
 {
-    this.config = {};
     this.editorObject = null;
     this.debugLocation = -1;
     this.highlightedLine = -1;
@@ -103,7 +105,7 @@ SourceEditor.Events =
 
 /**
  * @object This object represents a wrapper for CodeMirror editor. The rest of Firebug
- * should access all CodeMirror features throug this object and so, e.g. make it easy to
+ * should access all CodeMirror features through this object and so, e.g. make it easy to
  * switch to another editor in the future.
  */
 SourceEditor.prototype =
@@ -123,21 +125,40 @@ SourceEditor.prototype =
         Dom.addScript(doc, "cm-css", Http.getResource(cssModeSrc));
         Dom.addScript(doc, "cm-htmlmixed", Http.getResource(htmlMixedModeSrc));
 
+        // All properties must be read-only so, they can't be modified in the DOM panel.
+        function genPropDesc(value)
+        {
+            return {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: value
+            };
+        }
+
+        // Unwrap Firebug content view (panel.html). This view is running in
+        // content mode with no chrome privileges.
+        var view = Wrapper.getContentView(doc.defaultView);
+
+        // The config object passed to the view must be content-accessible.
+        var config = Cu.createObjectIn(view);
+
+        // Compute properties of the final config object.
         for (var prop in SourceEditor.DefaultConfig)
         {
-            this.config[prop] = prop in config ? config[prop] :
-                SourceEditor.DefaultConfig[prop];
+            var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
+            Object.defineProperty(this.config, prop, genPropDesc(value));
         }
 
         var self = this;
 
         // Create editor;
-        this.editorObject = doc.defaultView.CodeMirror(function(view)
+        this.editorObject = view.CodeMirror(function(view)
         {
             Trace.sysout("sourceEditor.onEditorCreate;");
             parentNode.appendChild(view);
             self.view = view;
-        }, this.config);
+        }, config);
 
         // Mark lines so, we can search for them (see e.g. getLineIndex method).
         this.editorObject.on("renderLine", function(cm, lineHandle, element)
