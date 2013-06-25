@@ -243,7 +243,6 @@ function createFirebugConsole(context, win)
 
     console.error = function error()
     {
-        // TODO stack trace
         if (arguments.length == 1)
         {
             return logAssert("error", arguments);  // add more info based on stack trace
@@ -302,7 +301,7 @@ function createFirebugConsole(context, win)
     {
         var sourceLink = null;
 
-        // Using JSD to get user stack is time consuming.
+        // Using JSD to get user stack is time consuming, so there is a pref.
         if (Options.get("preferJSDSourceLinks"))
         {
             var stack = getJSDUserStack();
@@ -316,7 +315,7 @@ function createFirebugConsole(context, win)
         var ignoreReturnValue = Firebug.Console.getDefaultReturnValue();
         var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : ignoreReturnValue;
-    };
+    }
 
     function logAssert(category, args)
     {
@@ -326,20 +325,24 @@ function createFirebugConsole(context, win)
             [Locale.$STR("Assertion")] : args[0];
 
         // If there's no error message, there's also no stack trace. See Issue 4700.
-        var trace = null;
-        if (msg)
+        var trace;
+        if (msg && msg.stack)
         {
-            if (msg.stack)
+            trace = StackFrame.parseToStackTrace(msg.stack, context);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from msg.stack", trace);
+        }
+        else
+        {
+            trace = getJSDUserStack();
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+
+            if (!trace)
             {
-                trace = StackFrame.parseToStackTrace(msg.stack, context);
+                trace = getComponentsUserStack();
                 if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from msg.stack", trace);
-            }
-            else
-            {
-                trace = getJSDUserStack();
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+                    FBTrace.sysout("logAssert trace from getComponentsUserStack", trace);
             }
         }
 
@@ -369,7 +372,7 @@ function createFirebugConsole(context, win)
             row.scrollIntoView();
 
         return Console.getDefaultReturnValue();
-    };
+    }
 
     function getComponentsStackDump()
     {
@@ -396,7 +399,7 @@ function createFirebugConsole(context, win)
                 userURL, frame);
 
         return frame;
-    };
+    }
 
     function getStackLink()
     {
@@ -406,52 +409,58 @@ function createFirebugConsole(context, win)
         if (DebuggerLib.isFrameLocationEval(sourceLink.href))
             return null;
         return sourceLink;
-    };
+    }
+
+    function removeChromeFrames(trace)
+    {
+        var frames = trace ? trace.frames : null;
+        if (!frames || !frames.length)
+            return null;
+
+        var filteredFrames = [];
+        for (var i = 0; i < frames.length; i++)
+        {
+            if (Str.hasPrefix(frames[i].href, "chrome:"))
+                continue;
+
+            if (Str.hasPrefix(frames[i].href, "resource:"))
+                continue;
+
+            // firebug-service scope reached, in some cases the url starts with file://
+            if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+                continue;
+
+            // xxxFlorent: should be reverted if we integrate
+            // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+            if (DebuggerLib.isFrameLocationEval(frames[i].href))
+                continue;
+
+            // command line
+            var fn = frames[i].getFunctionName() + "";
+            if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
+                continue;
+
+            filteredFrames.push(frames[i]);
+        }
+
+        trace.frames = filteredFrames;
+
+        return trace;
+    }
 
     function getJSDUserStack()
     {
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return null;
         var trace = Firebug.Debugger.getCurrentStackTrace(context);
+        return removeChromeFrames(trace);
+    }
 
-        var frames = trace ? trace.frames : null;
-        if (frames && (frames.length > 0) )
-        {
-            var filteredFrames = [];
-
-            for (var i = 0; i < frames.length; i++)
-            {
-                if (Str.hasPrefix(frames[i].href, "chrome:"))
-                    continue;
-
-                if (Str.hasPrefix(frames[i].href, "resource:"))
-                    continue;
-
-                // firebug-service scope reached, in some cases the url starts with file://
-                if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
-                    continue;
-
-                // xxxFlorent: should be reverted if we integrate
-                // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-                if (DebuggerLib.isFrameLocationEval(frames[i].href))
-                    continue;
-
-                // command line
-                var fn = frames[i].getFunctionName() + "";
-                if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
-                    continue;
-
-                filteredFrames.push(frames[i]);
-            }
-
-            // take the oldest frames, leave 2 behind they are injection code
-            trace.frames = filteredFrames; //trace.frames.slice(2 - i);
-
-            return trace;
-        }
-        else
-        {
-            return "Firebug failed to get stack trace with any frames";
-        }
-    };
+    function getComponentsUserStack()
+    {
+        var trace = StackFrame.getFullComponentsStackTrace(context);
+        return removeChromeFrames(trace);
+    }
 
     function getStackFrameId(inputFrame)
     {
@@ -464,7 +473,7 @@ function createFirebugConsole(context, win)
             }
         }
         return null;
-    };
+    }
 
     return console;
 }
