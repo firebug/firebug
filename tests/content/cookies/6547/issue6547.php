@@ -22,7 +22,7 @@
                     <li>Expand the request to <em>issue6547.php</em><br/></li>
                     <li>Switch to the <em>Cookies</em> info tab</li>
                     <li>
-                        There should be a <em>Max. Age</em> column showing the value <code>0</code>
+                        There should be a <em>Max. Age</em> column showing the value <code>0ms</code>
                     </li>
                 </ul>
             </section>
