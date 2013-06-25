@@ -86,9 +86,8 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                 // xxxFlorent: temporarily disabled, see: 
                 //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
                 /*,
-                IMG({
-                    "src":"blank.gif",
-                    "class":"closeButton ",
+                SPAN({
+                    "class":"closeButton",
                     onclick: this.deleteAlias.bind(this, aliasName),
                 })*/
                 )

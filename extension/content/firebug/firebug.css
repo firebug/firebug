@@ -190,7 +190,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 }
 
 panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {

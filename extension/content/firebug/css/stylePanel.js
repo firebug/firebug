@@ -53,7 +53,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
                 DIV({"class": "cssNonInherited", role: "list",
-                        "aria-label": Locale.$STR("aria.labels.style rules") },
+                        "aria-label": Locale.$STR("a11y.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
@@ -86,7 +86,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         CSSFontPropValueTag:
                 FOR("part", "$propValueParts",
-                    SPAN({"class": "$part.type|getClass", _repObject: "$part.font"}, "$part.value"),
+                    SPAN({"class": "$part.type|getClass", _repObject: "$part"}, "$part.value"),
                     SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
                 ),
 
@@ -659,7 +659,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
-        if (style instanceof Ci.nsIDOMFontFace && style.rule)
+        if (style.font && style.font.rule)
         {
             items.push(
                 "-",
@@ -667,7 +667,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     label: "css.label.Inspect_Declaration",
                     tooltiptext: "css.tip.Inspect_Declaration",
                     id: "fbInspectDeclaration",
-                    command: Obj.bindFixed(this.inspectDeclaration, this, style.rule)
+                    command: Obj.bindFixed(this.inspectDeclaration, this, style.font.rule)
                 }
             );
         }

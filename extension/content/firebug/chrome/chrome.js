@@ -37,8 +37,6 @@ const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const panelURL = "chrome://firebug/content/panel.html";
-
 // URLs used in the Firebug Menu and several other places
 const firebugURLs =
 {
@@ -2066,11 +2064,13 @@ function onPanelClick(event)
     }
 }
 
+var lastMouseDownPosition = {x: -1000, y: -1000};
 function onPanelMouseDown(event)
 {
     if (Events.isLeftClick(event))
     {
-        this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
+        lastMouseDownPosition.x = event.screenX;
+        lastMouseDownPosition.y = event.screenY;
     }
     else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
@@ -2105,8 +2105,8 @@ function onPanelMouseUp(event)
 
                 if (selectedRange.collapsed)
                 {
-                    var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
-                        Math.abs(event.screenY - this.lastMouseDownPosition.y);
+                    var distance = Math.abs(event.screenX - lastMouseDownPosition.x) +
+                        Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
                     if (distance > 3)

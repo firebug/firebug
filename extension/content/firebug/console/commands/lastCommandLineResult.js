@@ -62,7 +62,7 @@ Firebug.registerCommand("$_", {
     variable: true,
     helpUrl: "https://getfirebug.com/wiki/index.php/Dollar-underscore",
     handler: onExecuteCommand.bind(this),
-    description: Locale.$STR("console.cmd.help.lastCommandLineResult")
+    description: Locale.$STR("console.cmd.help.$_")
 });
 
 return LastCommandLineResult;

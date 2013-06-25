@@ -335,7 +335,7 @@ var ToolboxPlate = D.domplate(
 {
     tag:
         D.DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
-            D.IMG({"class": "watchDeleteButton closeButton", src: "blank.gif"})
+            D.SPAN({"class": "watchDeleteButton closeButton"})
         ),
 
     onClick: function(event)

@@ -26,10 +26,11 @@ define([
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
+    "firebug/net/netUtils",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils) {
 
 with (Domplate) {
 
@@ -415,23 +416,25 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
     propIterator: function (object, max)
     {
-        var props = [];
-
-        // Object members with non-empty values are preferred since it gives the
-        // user a better overview of the object.
-        this.getProps(props, object, max, function(t, value)
+        function isInterestingProp(t, value)
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
                 (t == "object" && value && value.toString));
-        });
+        };
 
-        if (props.length+1 <= max)
+        // Object members with non-empty values are preferred since it gives the
+        // user a better overview of the object.
+        var props = [];
+        this.getProps(props, object, max, isInterestingProp);
+
+        if (props.length <= max)
         {
-            // There is not enough props yet, let's display also empty members and functions.
+            // There is not enough props yet (or at least, not enough props to
+            // be able to know whether we should print "more..." or not).
+            // Let's display also empty members and functions.
             this.getProps(props, object, max, function(t, value)
             {
-                return ((t == "string" && !value) || (t == "object" && !value) ||
-                    (t == "function"));
+                return !isInterestingProp(t, value);
             });
         }
 
@@ -895,7 +898,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     getRealObject: function(file, context)
     {
-        return file.request;
+        return NetUtils.getRealObject(file, context);
     }
 });
 
@@ -908,11 +911,12 @@ function instanceOf(object, Klass)
         if (object == Klass.prototype)
            return true;
 
-        if ( typeof(object) === 'xml')
+        if (typeof(object) === "xml")
             return (Klass.prototype === Xml.prototype);
 
         object = object.__proto__;
     }
+
     return false;
 }
 
@@ -2454,9 +2458,8 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                     TBODY(
                         TR(
                             TD(
-                                IMG({"class": "$object|isBreakableError a11yFocus",
-                                    src:"blank.gif", role: "checkbox",
-                                    "aria-checked": "$object|hasErrorBreak",
+                                SPAN({"class": "$object|isBreakableError a11yFocus",
+                                    role: "checkbox", "aria-checked": "$object|hasErrorBreak",
                                     title: Locale.$STR("console.Break On This Error")})
                             ),
                             TD(

@@ -1,10 +1,8 @@
-content firebug content/firebug/
 content firebug content/firebug/ contentaccessible=yes
 
-# Maps resource://firebug/* to files in modules/*
+# Moved to bootstrap.js:
 # resource firebug modules/
-
-# Maps resource://moduleloader/* to files in modules/*
+# resource firebugui content/firebug/firebugui/
 # resource moduleloader modules/
 
 skin firebug classic/1.0 skin/classic/

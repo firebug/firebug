@@ -2,9 +2,15 @@
 
 define([
     "firebug/cookies/cookie",
+    "firebug/lib/wrapper",
     "firebug/lib/string"
 ],
-function(Cookie, Str) {
+function(Cookie, Wrapper, Str) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Cu = Components.utils;
 
 // ********************************************************************************************* //
 // CookieUtils Implementation
@@ -50,7 +56,7 @@ var CookieUtils =
         }
         catch (exc) { }
 
-        var c = {
+        return {
             name        : cookie.name,
             value       : value,
             isDomain    : cookie.isDomain,
@@ -63,8 +69,6 @@ var CookieUtils =
             rawValue    : rawValue,
             rawCookie   : cookie,
         };
-
-        return c;
     },
 
     parseFromString: function(string)
@@ -148,6 +152,15 @@ var CookieUtils =
         }
 
         return cookies;
+    },
+
+    getRealObject: function(cookie, context)
+    {
+        cookie = this.makeCookieObject(cookie);
+        delete cookie.rawCookie;
+
+        var global = context.getCurrentGlobal();
+        return Wrapper.cloneIntoContentScope(global, cookie);
     }
 };
 

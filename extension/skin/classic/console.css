@@ -105,10 +105,11 @@
 
 .logRow-info > div > .logContent,
 .logRow-warn > div > .logContent,
-.logRow-warningMessage > div > .logContent,
 .logRow-error > div > .logContent,
-.logRow-errorMessage > div > .logContent,
-.logRow-assert > div > .logContent {
+.logRow-assert > div > .logContent,
+.logRow-warningMessage > div > .logContent,
+.logRow-loading > div > .logContent,
+.logRow-errorMessage > div > .logContent {
     padding-left: 22px;
 }
 
@@ -326,7 +327,7 @@
 }
 
 .hasBreakSwitch .errorBreak {
-    display: inline;
+    display: inline-block;
 }
 
 .breakForError .errorBreak {
@@ -804,6 +805,7 @@
 }
 
 .spyIcon {
+    display: inline-block;
     margin-right: 4px;
     margin-left: 4px;
     width: 16px;

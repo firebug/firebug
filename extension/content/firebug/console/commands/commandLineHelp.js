@@ -248,13 +248,15 @@ var CommandLineHelp = domplate(
         for (var name in CommandLineExposed.userCommands)
         {
             var config = CommandLineExposed.userCommands[name];
+            var prop = config.getter || config.variable;
+
             commands.push({
                 name: name,
                 desc: config.description,
                 nol10n: true,
                 noUserHelpUrl: !config.helpUrl,
                 helpUrl: config.helpUrl ? config.helpUrl: null,
-                type: config.getter ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
+                type: prop ? CMD_TYPE_PROPERTY : CMD_TYPE_COMMAND,
             });
         }
 

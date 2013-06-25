@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6531: Location Menu is not displayed when there are just CSS files in frames</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6531">Issue 6531</a>: Location Menu is not displayed when there are just CSS files in frames</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe src="issue6531-iframe.html" width="100" height="100"></iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Switch to the <em>CSS</em> panel<br/>
+                        <span class="ok">&rArr; The Location Menu button must be shown displaying <em>issue6531-iframe.html</em></span>
+                    </li>
+                    <li>
+                        Click the Location Menu button<br/>
+                        <span class="ok">&rArr; The Location Menu must be opened with an entry for <em>issue6531-iframe.html</em>.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The Location Menu should also work if there are no stylesheets in the main frame.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

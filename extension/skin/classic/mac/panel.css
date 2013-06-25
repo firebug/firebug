@@ -143,17 +143,18 @@ body {
 }
 
 .closeButton {
+    display: inline-block;
     width: 13px;
     height: 13px;
     background: url(chrome://firebug/skin/mac/close.svg) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 .closeButton:hover:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /************************************************************************************************/
