@@ -763,7 +763,12 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
         {
             var value = time / timeUnitInterval;
             if (i != minTimeUnitIndex)
-                value = Math.floor(value);
+            {
+                if (value < 0)
+                    value = Math.ceil(value);
+                else
+                    value = Math.floor(value);
+            }
 
             if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
             {
