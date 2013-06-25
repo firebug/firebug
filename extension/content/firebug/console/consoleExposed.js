@@ -14,7 +14,7 @@ define([
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
     "firebug/console/errorMessageObj",
-    "firebug/console/profiler",
+    "firebug/console/commands/profiler",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
     Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler) {
