@@ -1,6 +1,6 @@
 function runTest()
 {
-    FBTest.sysout("net.breakpoints; START");
+    FBTest.sysout("breakOnXHR.START");
     FBTest.setPref("filterSystemURLs", true);
 
     FBTest.openNewTab(basePath + "net/breakpoints/breakOnXHR.html", function(win)
@@ -29,9 +29,9 @@ function runTest()
         });
 
         // Reload window to activate debugger and run all tests.
-        FBTest.reload(function(win) {
+        FBTest.reload(function() {
             FBTest.runTestSuite(testSuite, function() {
-                FBTest.testDone("dom.breakpoints; DONE");
+                FBTest.testDone("breakOnXHR.DONE");
             });
         })
     });
@@ -58,20 +58,16 @@ function addBreakpoint(win, callback)
     {
         FBTest.sysout("net.breakpoints; XHR visible");
 
-        if (row.repObject)
+        function waitForRepObject()
         {
+            if (!row.repObject)
+            {
+                setTimeout(waitForRepObject, 50);
+                return;
+            }
             createBreakpoint(panel, row.repObject, callback);
         }
-        else
-        {
-            // Wait till the repObject is set.
-            row.watch("repObject", function(prop, oldVal, newVal)
-            {
-                row.unwatch("repObject");
-                createBreakpoint(panel, newVal, callback);
-                return newVal;
-            });
-        }
+        waitForRepObject();
     });
 
     pushButton(win, "executeRequest1");
