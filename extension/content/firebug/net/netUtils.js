@@ -276,19 +276,22 @@ var NetUtils =
 
     getMimeType: function(mimeType, uri)
     {
-        if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
-        {
-            var ext = Url.getFileExtension(uri);
-            if (!ext)
-                return mimeType;
-            else
-            {
-                var extMimeType = mimeExtensionMap[ext.toLowerCase()];
-                return extMimeType ? extMimeType : mimeType;
-            }
-        }
-        else
+        // Get rid of optional charset, e.g. "text/html; charset=UTF-8".
+        // We need pure mime type so, we can use it as a key for look up.
+        if (mimeType)
+            mimeType = mimeType.split(";")[0];
+
+        // If the mime-type exists and is known just return it...
+        if (mimeType && mimeCategoryMap.hasOwnProperty(mimeType))
             return mimeType;
+
+        // ... otherwise we need guess it according to the file extension.
+        var ext = Url.getFileExtension(uri);
+        if (!ext)
+            return mimeType;
+
+        var extMimeType = mimeExtensionMap[ext.toLowerCase()];
+        return extMimeType ? extMimeType : mimeType;
     },
 
     getDateFromSeconds: function(s)
@@ -362,53 +365,26 @@ var NetUtils =
     getFileCategory: function(file)
     {
         if (file.category)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.getFileCategory; current: " + file.category + " for: " +
-                    file.href, file);
             return file.category;
-        }
 
         if (file.isXHR)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
             return file.category = "xhr";
-        }
 
-        var ext = Url.getFileExtension(file.href) + "";
-        ext = ext.toLowerCase();
-
+        // Guess mime-type according to file extension.
         if (!file.mimeType)
-        {
-            if (ext)
-                file.mimeType = mimeExtensionMap[ext];
-        }
+            file.mimeType = this.getMimeType(null, file.href);
 
+        // No mime-type, no category.
         if (!file.mimeType)
             return "";
 
-        // Solve cases when charset is also specified, eg "text/html; charset=UTF-8".
-        var mimeType = file.mimeType;
-        if (mimeType)
-            mimeType = mimeType.split(";")[0];
-
-        file.category = mimeCategoryMap[mimeType];
+        file.category = mimeCategoryMap[file.mimeType];
 
         // Work around application/octet-stream for js files (see issue 6530).
-        // Files with js extensions are JavaScript files and should respect the
-        // Net panel filter.
+        // Files with js extensions are supposed to be JavaScript files.
+        var ext = (Url.getFileExtension(file.href) + "").toLowerCase();
         if (ext == "js")
             file.category = "js";
-
-        // The last chance to set the category if it isn't set yet.
-        // Let's use the file extension.
-        if (!file.category)
-        {
-            mimeType = mimeExtensionMap[ext];
-            if (mimeType)
-                file.category = mimeCategoryMap[mimeType];
-        }
 
         return file.category;
     },
@@ -509,7 +485,7 @@ var NetUtils =
     },
 
     /**
-     * Returns a 'real objct' that is used by 'Inspect in DOM Panel' or
+     * Returns a 'real object' that is used by 'Inspect in DOM Panel' or
      * 'Use in Command Line' features. Firebug is primarily a tool for web developers
      * and so, it shouldn't expose internal chrome objects.
      */
