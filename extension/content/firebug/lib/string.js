@@ -761,7 +761,8 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
         for (var i=0; i<maxTimeUnitIndex; ++i)
             timeUnitInterval *= timeUnits[i].interval;
 
-        var formattedString = "";
+        var formattedString = (time < 0 ? "-" : "");
+        time = Math.abs(time);
         for (var i=maxTimeUnitIndex; i>=minTimeUnitIndex; --i)
         {
             var value = time / timeUnitInterval;
