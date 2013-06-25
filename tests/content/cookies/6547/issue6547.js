@@ -26,7 +26,7 @@ function runTest()
                 var selector = ".netInfoReceivedCookies .cookieRow .cookieMaxAgeLabel";
                 var label = panelNode.querySelector(selector);
 
-                FBTest.compare("0", label.textContent, "Max age must be zero");
+                FBTest.compare("0ms", label.textContent, "Max age must be zero");
 
                 FBTest.testDone("issue6547.DONE");
             });
