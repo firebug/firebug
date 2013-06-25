@@ -124,15 +124,9 @@ function createFirebugCommandLine(context, win)
             {
                 return config.handler.call(null, context, arguments);
             }
-            catch (exc)
+            catch(ex)
             {
-                Firebug.Console.log(exc, context, "errorMessage");
-
-                if (FBTrace.DBG_ERRORS)
-                {
-                    FBTrace.sysout("commandLine.api; EXCEPTION when executing " +
-                        "a command: " + name + ", " + exc, exc);
-                }
+                throw new Error(ex.message, ex.fileName, ex.lineNumber);
             }
         };
     }
