@@ -385,6 +385,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             "toFixed": "toString",
             "watch": "toString",
             "pattern": "parentNode",
+            "getSelection": "getEventListeners",
             "inspect": "include",
             "home": "history"
         };
