@@ -2196,11 +2196,16 @@ function evalPropChain(out, preExpr, origExpr, context)
             else if (ch === "(")
             {
                 // Function call. Save the function name and the arguments if
-                // they are safe to evaluate.
+                // they are safe to evaluate. Currently literals and single
+                // variables not occurring previously on the command line are
+                // treated as safe.
                 var endCont = matchingBracket(preExpr, linkStart);
                 var cont = preExpr.substring(linkStart+1, endCont), origCont = null;
-                if (reLiteralExpr.test(cont))
+                if (reLiteralExpr.test(cont) || (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(cont) &&
+                    preExpr.lastIndexOf(cont, linkStart) === -1))
+                {
                     origCont = origExpr.substring(linkStart+1, endCont);
+                }
                 linkStart = endCont + 1;
                 evalChain.push({
                     "type": LinkType.CALL,
