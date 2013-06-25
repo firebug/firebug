@@ -147,7 +147,7 @@ SourceEditor.prototype =
         for (var prop in SourceEditor.DefaultConfig)
         {
             var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-            Object.defineProperty(this.config, prop, genPropDesc(value));
+            Object.defineProperty(config, prop, genPropDesc(value));
         }
 
         var self = this;
