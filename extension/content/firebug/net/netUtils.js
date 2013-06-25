@@ -367,10 +367,10 @@ var NetUtils =
      * 1) Use file-extension to guess the mime type. This is prefered since
      *    mime-types in HTTP requests are often wrong.
      *    This part is based on mimeExtensionMap map.
-     * 2) If the file extension is misssing or uknown, try to get the mime-type
+     * 2) If the file extension is missing or unknown, try to get the mime-type
      *    from the HTTP request object.
      * 3) If there is still no mime-type, return empty category name.
-     * 4) Use the mime-type and look up the right category 
+     * 4) Use the mime-type and look up the right category.
      *    This part is based on mimeCategoryMap map.
      */
     getFileCategory: function(file)
