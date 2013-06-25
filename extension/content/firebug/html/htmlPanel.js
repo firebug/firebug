@@ -23,6 +23,7 @@ define([
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/debugger/breakpoints/breakpointGroup",
+    "firebug/editor/sourceEditor",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
@@ -31,7 +32,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, BreakpointGroup) {
+    Url, CSSModule, CSSInfoTip, BreakpointGroup, SourceEditor) {
 
 with (Domplate) {
 
@@ -163,7 +164,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
             // If the 'free text' edit mode is active change the current markup
-            // displayed in the editor (textarea) so that it corresponds to the current
+            // displayed in the editor so that it corresponds to the current
             // selection. This typically happens when the user clicks on object-status-path
             // buttons in the toolbar.
             // For the case when the selection is changed from within the editor, don't
@@ -2517,27 +2518,45 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 function HTMLEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
-    this.input = this.box.firstChild;
-    this.multiLine = true;
-    this.tabNavigation = false;
-    this.arrowCompletion = false;
+
+    this.onHTMLEditorTextChangeListener = this.onHTMLEditorTextChange.bind(this);
+
+    var config = {
+        mode: "htmlmixed",
+        readOnly: false,
+        gutters: []
+    };
+    // Initialize the source editor.
+    this.editor = new SourceEditor();
+    this.editor.init(this.box, config, this.onHTMLEditorInitialize.bind(this));
 }
 
 HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 {
-    tag:
-        DIV(
-            TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
-        ),
+    multiLine: true,
+
+    tabNavigation: false,
+
+    arrowCompletion:false,
+
+    tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onHTMLEditorInitialize: function()
+    {
+        this.editor.addEventListener(SourceEditor.Events.textChange,
+            this.onHTMLEditorTextChangeListener);
+    },
 
     getValue: function()
     {
-        return this.input.value;
+        return this.editor.getText();
     },
 
     setValue: function(value)
     {
-        return this.input.value = value;
+        return this.editor.setText(value, "htmlmixed");
     },
 
     show: function(target, panel, value, textSize)
@@ -2556,10 +2575,9 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
             this.originalLocalName = el.localName;
         }
 
+        // Append The editor to the Div(box);
         this.panel.panelNode.appendChild(this.box);
-
-        this.input.value = value;
-        this.input.focus();
+        this.editor.setText(value, "htmlmixed");
 
         var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
         command.setAttribute("checked", true);
@@ -2654,7 +2672,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    onInput: function()
+    onHTMLEditorTextChange: function()
     {
         Firebug.Editor.update();
     }
