@@ -370,9 +370,8 @@ var NetUtils =
         if (file.isXHR)
             return file.category = "xhr";
 
-        // Guess mime-type according to file extension.
-        if (!file.mimeType)
-            file.mimeType = this.getMimeType(null, file.href);
+        // Use an existing mime-type or guess it according to the file extension.
+        file.mimeType = this.getMimeType(file.mimeType, file.href);
 
         // No mime-type, no category.
         if (!file.mimeType)
