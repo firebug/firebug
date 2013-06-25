@@ -713,6 +713,11 @@ Str.formatSize = function(bytes)
  */
 Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
 {
+    var time = parseInt(time);
+
+    if (isNaN(time))
+        return "";
+
     var timeUnits = [
         {
             unit: "ms",
@@ -745,8 +750,6 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
         // Get the index of the min. and max. time unit and the decimal places
         var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
         var maxTimeUnitIndex = timeUnits.length - 1;
-        if (!decimalPlaces)
-            decimalPlaces = (Math.abs(time) >= 60000) ? 0 : 2;
 
         for (var i=0, len=timeUnits.length; i<len; ++i)
         {
@@ -755,6 +758,9 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
             if (timeUnits[i].unit == maxTimeUnit)
                 maxTimeUnitIndex = i;
         }
+
+        if (!decimalPlaces)
+            decimalPlaces = (Math.abs(time) >= 60000 && minTimeUnitIndex == 1 ? 0 : 2);
 
         // Calculate the maximal time interval
         var timeUnitInterval = 1;
@@ -780,17 +786,13 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
             }
 
             if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
-            {
-                formattedString += value.toLocaleString() + timeUnits[i].unit;
-                if (i != minTimeUnitIndex)
-                    formattedString += " ";
-            }
+                formattedString += value.toLocaleString() + timeUnits[i].unit + " ";
             time %= timeUnitInterval;
             if (i != 0)
                 timeUnitInterval /= timeUnits[i - 1].interval;
         }
 
-        return formattedString;
+        return formattedString.trim();
     }
 };
 
