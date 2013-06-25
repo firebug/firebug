@@ -310,7 +310,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
             realObject = cookie.cookie;
         }
 
-        return realObject;
+        return CookieUtils.getRealObject(realObject, context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

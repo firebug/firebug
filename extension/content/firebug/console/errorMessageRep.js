@@ -66,9 +66,8 @@ var ErrorMessage = domplate(Firebug.Rep,
                     TBODY(
                         TR(
                             TD(
-                                IMG({"class": "$object|isBreakableError a11yFocus",
-                                    src:"blank.gif", role: "checkbox",
-                                    "aria-checked": "$object|hasErrorBreak",
+                                SPAN({"class": "$object|isBreakableError a11yFocus",
+                                    role: "checkbox", "aria-checked": "$object|hasErrorBreak",
                                     title: Locale.$STR("console.Break On This Error")})
                             ),
                             TD(
@@ -345,7 +344,7 @@ var ErrorMessage = domplate(Firebug.Rep,
 
     inspectObject: function(error, context)
     {
-        var sourceLink = this.getSourceLink(error);
+        var sourceLink = error.getSourceLink();
         FirebugReps.SourceLink.inspectObject(sourceLink, context);
     },
 

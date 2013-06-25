@@ -175,11 +175,11 @@
 }
 
 .fbsearch-textbox > .fbsearch-icon:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 .fbsearch-textbox > .fbsearch-icon:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbSearchOptionsPanel {
@@ -261,11 +261,11 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbInspectButton:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #fbInspectButton:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/
@@ -277,11 +277,11 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbDebuggerButtons toolbarbutton:hover,
 #fbDebuggerButtons toolbarbutton:active {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #fbDebuggerButtons toolbarbutton[disabled="true"] {
-    filter: url(chrome://firebug/skin/filters.svg#grayscale);
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 #fbRerunButton {
@@ -318,19 +318,19 @@ textbox[type="fbSearchBox"] > panel {
 #fbNavigateForwardButton:hover,
 .navigationHistoryMenuItemBack:hover,
 .navigationHistoryMenuItemForward:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #fbNavigateBackButton:active,
 #fbNavigateForwardButton:active,
 .navigationHistoryMenuItemBack:active,
 .navigationHistoryMenuItemForward:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbNavigateBackButton[disabled="true"],
 #fbNavigateForwardButton[disabled="true"] {
-    filter: url(chrome://firebug/skin/filters.svg#brighten);
+    filter: url(resource://firebugui/filters.svg#brighten);
 }
 
 #fbNavigateBackButton:-moz-locale-dir(ltr),
@@ -358,7 +358,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbCommandPopupButton[disabled="true"] {
-    filter: url(chrome://firebug/skin/filters.svg#brighten);
+    filter: url(resource://firebugui/filters.svg#brighten);
 }
 
 /************************************************************************************************/
@@ -404,11 +404,11 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbBreakOnNextButton[breakable="true"]:hover #fbBreakOnImage {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #fbBreakOnNextButton[breakable="true"]:active #fbBreakOnImage {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 #fbBreakOnNextButton #fbBreakOnImageArmed {
@@ -417,7 +417,7 @@ textbox[type="fbSearchBox"] > panel {
 
 /* disabled */
 #fbBreakOnNextButton[breakable="disabled"] {
-    filter: url(chrome://firebug/skin/filters.svg#grayscale);
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 /* enabled */

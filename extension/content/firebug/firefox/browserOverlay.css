@@ -12,7 +12,7 @@
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
     list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
-    filter: url(chrome://firebug/skin/filters.svg#grayscale);
+    filter: url(resource://firebugui/filters.svg#grayscale);
 }
 
 #firebug-button[firebugActive="true"] {
@@ -102,11 +102,11 @@
 }
 
 #menu_firebug_firebugInspect:hover {
-    filter: url(chrome://firebug/skin/filters.svg#darken);
+    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 #menu_firebug_firebugInspect:active {
-    filter: url(chrome://firebug/skin/filters.svg#deepDarken);
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }
 
 /*************************************************************************************************/

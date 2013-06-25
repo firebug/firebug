@@ -19,6 +19,7 @@ function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,6 +38,9 @@ const mimeExtensionMap =
     "gif": "image/gif",
     "png": "image/png",
     "bmp": "image/bmp",
+    "woff": "application/font-woff",
+    "ttf": "application/x-font-ttf",
+    "otf": "application/x-font-otf",
     "swf": "application/x-shockwave-flash",
     "xap": "application/x-silverlight-app",
     "flv": "video/x-flv",
@@ -86,6 +90,7 @@ const mimeCategoryMap =
     "audio/wav": "media",
     "audio/x-wav": "media",
     "application/x-woff": "font",
+    "application/font-woff": "font",
     "application/x-font-woff": "font",
     "application/x-ttf": "font",
     "application/x-font-ttf": "font",
@@ -131,6 +136,31 @@ const binaryCategoryMap =
     "image": 1,
     "plugin" : 1,
     "font": 1
+};
+
+const requestProps =
+{
+    "allowPipelining": 1,
+    "allowSpdy": 1,
+    "canceled": 1,
+    "channelIsForDownload": 1,
+    "contentCharset": 1,
+    "contentLength": 1,
+    "contentType": 1,
+    "forceAllowThirdPartyCookie": 1,
+    "loadAsBlocking": 1,
+    "loadUnblocked": 1,
+    "localAddress": 1,
+    "localPort": 1,
+    "name": 1,
+    "redirectionLimit": 1,
+    "remoteAddress": 1,
+    "remotePort": 1,
+    "requestMethod": 1,
+    "requestSucceeded": 1,
+    "responseStatus": 1,
+    "responseStatusText": 1,
+    "status": 1,
 };
 
 // ********************************************************************************************* //
@@ -246,19 +276,22 @@ var NetUtils =
 
     getMimeType: function(mimeType, uri)
     {
-        if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
-        {
-            var ext = Url.getFileExtension(uri);
-            if (!ext)
-                return mimeType;
-            else
-            {
-                var extMimeType = mimeExtensionMap[ext.toLowerCase()];
-                return extMimeType ? extMimeType : mimeType;
-            }
-        }
-        else
+        // Get rid of optional charset, e.g. "text/html; charset=UTF-8".
+        // We need pure mime type so, we can use it as a key for look up.
+        if (mimeType)
+            mimeType = mimeType.split(";")[0];
+
+        // If the mime-type exists and is known just return it...
+        if (mimeType && mimeCategoryMap.hasOwnProperty(mimeType))
             return mimeType;
+
+        // ... otherwise we need guess it according to the file extension.
+        var ext = Url.getFileExtension(uri);
+        if (!ext)
+            return mimeType;
+
+        var extMimeType = mimeExtensionMap[ext.toLowerCase()];
+        return extMimeType ? extMimeType : mimeType;
     },
 
     getDateFromSeconds: function(s)
@@ -329,43 +362,41 @@ var NetUtils =
         catch (e) { }
     },
 
+    /**
+     * Returns a category for specific request (file). The logic is as follows:
+     * 1) Use file-extension to guess the mime type. This is prefered since
+     *    mime-types in HTTP requests are often wrong.
+     *    This part is based on mimeExtensionMap map.
+     * 2) If the file extension is missing or unknown, try to get the mime-type
+     *    from the HTTP request object.
+     * 3) If there is still no mime-type, return empty category name.
+     * 4) Use the mime-type and look up the right category.
+     *    This part is based on mimeCategoryMap map.
+     */
     getFileCategory: function(file)
     {
         if (file.category)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.getFileCategory; current: " + file.category + " for: " +
-                    file.href, file);
             return file.category;
-        }
 
+        // All XHRs have its own category.
         if (file.isXHR)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
             return file.category = "xhr";
-        }
 
-        if (!file.mimeType)
-        {
-            var ext = Url.getFileExtension(file.href);
-            if (ext)
-                file.mimeType = mimeExtensionMap[ext.toLowerCase()];
-        }
+        // Guess mime-type according to the file extension. Using file extension
+        // is prefered way since mime-types in HTTP requests are often wrong.
+        var mimeType = this.getMimeType(null, file.href);
 
-        /*if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
-                ", mimeType: " + file.mimeType + " for: " + file.href, file);*/
+        // If no luck with file extension, let's try to get the mime-type from
+        // the request object.
+        if (!mimeType)
+            mimeType = this.getMimeType(file.mimeType, file.href);
 
-        if (!file.mimeType)
+        // No mime-type, no category.
+        if (!mimeType)
             return "";
 
-        // Solve cases when charset is also specified, eg "text/html; charset=UTF-8".
-        var mimeType = file.mimeType;
-        if (mimeType)
-            mimeType = mimeType.split(";")[0];
-
-        return (file.category = mimeCategoryMap[mimeType]);
+        // Finally, get the category according to the mime type.
+        return file.category = mimeCategoryMap[mimeType];
     },
 
     getPageTitle: function(context)
@@ -461,6 +492,77 @@ var NetUtils =
         }
 
         FBTrace.sysout(msg + " " + file.href, timeLog);
+    },
+
+    /**
+     * Returns a 'real object' that is used by 'Inspect in DOM Panel' or
+     * 'Use in Command Line' features. Firebug is primarily a tool for web developers
+     * and so, it shouldn't expose internal chrome objects.
+     */
+    getRealObject: function(file, context)
+    {
+        var global = context.getCurrentGlobal();
+        var realObject = Cu.createObjectIn(global);
+
+        // xxxHonza: it would be great to have some lib/object API for object creation/cloning
+        // with support for content-access.
+
+        // All properties must be read-only so, they can't be modified in the DOM panel.
+        function genPropDesc(value)
+        {
+            return {
+                enumerable: true,
+                configurable: false,
+                writable: false,
+                value: value
+            };
+        }
+
+        // Make sure headers are also cloned and created in the right content scope.
+        function cloneHeaders(headers)
+        {
+            var newHeaders = [];
+            for (var i=0; i<headers.length; i++)
+            {
+                var header = headers[i];
+                var newHeader = Cu.createObjectIn(global);
+                Object.defineProperty(newHeader, "name", genPropDesc(header["name"]));
+                Object.defineProperty(newHeader, "value", genPropDesc(header["value"]));
+                Cu.makeObjectPropsNormal(newHeader);
+                newHeaders.push(newHeader);
+            }
+            return genPropDesc(newHeaders);
+        }
+
+        // Iterate over all properties of the request object (nsIHttpChannel)
+        // and pick only those that are specified in 'requestProps' list.
+        // Make sure the result |realObject| is content-accessible.
+        var request = file.request;
+        for (var p in request)
+        {
+            if (!(p in requestProps))
+                continue;
+
+            try
+            {
+                Object.defineProperty(realObject, p, genPropDesc(request[p]));
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
+            }
+        }
+
+        // Additional props from |file|
+        Object.defineProperty(realObject, "responseBody", genPropDesc(file.responseText));
+        Object.defineProperty(realObject, "postBody", genPropDesc(file.postBody));
+        Object.defineProperty(realObject, "requestHeaders", cloneHeaders(file.requestHeaders));
+        Object.defineProperty(realObject, "responseHeaders", cloneHeaders(file.responseHeaders));
+
+        Cu.makeObjectPropsNormal(realObject);
+
+        return realObject;
     }
 };
 

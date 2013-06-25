@@ -2980,7 +2980,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
                     _checked: "$bp.checked", tabindex : "-1", onclick: "$onEnable"}),
                 TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
                 DIV({"class": "breakpointMutationType"}, "$bp|getChangeLabel"),
-                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+                SPAN({"class": "closeButton", onclick: "$onRemove"})
             ),
             DIV({"class": "breakpointCode"},
                 TAG("$bp.node|getSourceLine", {object: "$bp.node"})

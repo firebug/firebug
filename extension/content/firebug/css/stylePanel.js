@@ -53,7 +53,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
                 DIV({"class": "cssNonInherited", role: "list",
-                        "aria-label": Locale.$STR("aria.labels.style rules") },
+                        "aria-label": Locale.$STR("a11y.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )

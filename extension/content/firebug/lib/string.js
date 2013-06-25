@@ -711,8 +711,13 @@ Str.formatSize = function(bytes)
  *     (default is days)
  * @returns {String} Formatted time string
  */
-Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
+Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
 {
+    var time = parseInt(time);
+
+    if (isNaN(time))
+        return "";
+
     var timeUnits = [
         {
             unit: "ms",
@@ -742,9 +747,10 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
     }
     else
     {
-        // Get the index of the min. and max. time unit
-        var minTimeUnitIndex = 1;
+        // Get the index of the min. and max. time unit and the decimal places
+        var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
         var maxTimeUnitIndex = timeUnits.length - 1;
+
         for (var i=0, len=timeUnits.length; i<len; ++i)
         {
             if (timeUnits[i].unit == minTimeUnit)
@@ -753,30 +759,40 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
                 maxTimeUnitIndex = i;
         }
 
+        if (!decimalPlaces)
+            decimalPlaces = (Math.abs(time) >= 60000 && minTimeUnitIndex == 1 ? 0 : 2);
+
         // Calculate the maximal time interval
         var timeUnitInterval = 1;
         for (var i=0; i<maxTimeUnitIndex; ++i)
             timeUnitInterval *= timeUnits[i].interval;
 
-        var formattedString = "";
+        var formattedString = (time < 0 ? "-" : "");
+        time = Math.abs(time);
         for (var i=maxTimeUnitIndex; i>=minTimeUnitIndex; --i)
         {
             var value = time / timeUnitInterval;
             if (i != minTimeUnitIndex)
-                value = Math.floor(value);
-
-            if (value != 0)
             {
-                formattedString += value + timeUnits[i].unit;
-                if (i != minTimeUnitIndex)
-                    formattedString += " ";
+                if (value < 0)
+                    value = Math.ceil(value);
+                else
+                    value = Math.floor(value);
             }
+            else
+            {
+                var decimalFactor = Math.pow(10, decimalPlaces);
+                value = Math.round(value * decimalFactor) / decimalFactor;
+            }
+
+            if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
+                formattedString += value.toLocaleString() + timeUnits[i].unit + " ";
             time %= timeUnitInterval;
             if (i != 0)
                 timeUnitInterval /= timeUnits[i - 1].interval;
         }
 
-        return formattedString;
+        return formattedString.trim();
     }
 };
 

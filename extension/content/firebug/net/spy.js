@@ -966,7 +966,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                             DIV({"class": "spyStatus"}, "$object|getStatus")
                         ),
                         TD({"class": "spyCol"},
-                            IMG({"class": "spyIcon", src: "blank.gif"})
+                            SPAN({"class": "spyIcon"})
                         ),
                         TD({"class": "spyCol"},
                             SPAN({"class": "spyTime"})

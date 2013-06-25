@@ -414,7 +414,7 @@
                             <browser id="fbPanelBar1-browser"
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
-                                     src="chrome://firebug/content/panel.html"
+                                     src="resource://firebugui/panel.html"
                                      type="content"
                                      role="tabpanel" />
                         </deck>
@@ -440,7 +440,7 @@
                                 <browser id="fbPanelBar2-browser"
                                     tooltip="fbTooltip" contextmenu="fbContextMenu"
                                     disablehistory="true"
-                                    src="chrome://firebug/content/panel.html"
+                                    src="resource://firebugui/panel.html"
                                     type="content"
                                     role="tabpanel" />
                             </deck>
@@ -499,7 +499,8 @@
                 <browser id="fbCommandPopupBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                      disablehistory="true"
-                     src="chrome://firebug/content/panel.html"/>
+                     src="resource://firebugui/panel.html"
+                     type="content"/>
             </deck>
         </vbox>
 

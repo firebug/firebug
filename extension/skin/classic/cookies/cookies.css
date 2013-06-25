@@ -250,8 +250,7 @@
 }
 
 /* Session cookies */
-.sessionCookie > .cookieExpiresCol,
-.sessionCookie > .cookieMaxAgeCol {
+.panelNode-cookies .sessionCookie > .cookieExpiresCol {
     color: green;
 }
 
@@ -480,6 +479,7 @@
  * hide the corresponding rows & header.
  * N.B.: This is not, in fact, redundant: there are several elements with the
  * id "colMaxAge"... */
-.panelNode-cookies #colMaxAge, .panelNode-cookies .cookieMaxAgeCol {
+.panelNode-cookies #colMaxAge,
+.panelNode-cookies .cookieMaxAgeCol {
     display: none;
 }

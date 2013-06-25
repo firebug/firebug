@@ -190,6 +190,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 " " + this.context.getName(), state);
 
         this.showCommandLine(true);
+        Firebug.CommandLine.focus(this.context);
+
         this.showToolbarButtons("fbConsoleButtons", true);
 
         if (!this.filterTypes)

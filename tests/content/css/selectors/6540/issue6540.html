@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6540: Dynamically update selector groups when framed elements change</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            border: none;
+        }
+
+        #addDIV {
+            display: block;
+            margin-top: 5px;
+        }
+        </style>
+        <script type="text/javascript">
+        function addDIV()
+        {
+            var frameDoc = window.frames[0].document;
+            var div = frameDoc.createElement("div");
+            frameDoc.body.appendChild(div);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6540">Issue 6540</a>: Dynamically update selector groups when framed elements change</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe src="issue6540-iframe.html" width="100" height="100"></iframe>
+                <button id="addDIV" onclick="addDIV()">Add &lt;div&gt;</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Inside the <em>Selectors</em> side panel click the <em>Try a selector...</em> field</li>
+                    <li>
+                        Enter <code>div</code> and hit <kbd>Enter</kbd><br/>
+                        <span class="ok">&rArr; A <code>&lt;div&gt;</code> should be listed inside the <em>Selectors</em> side panel.</span>
+                    </li>
+                    <li>
+                        Click the <em>Add &lt;div&gt;</em> button above<br/>
+                        <span class="ok">&rArr; A blue <code>&lt;div&gt;</code> will be added above the button.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Selectors</em> panel should now list two <code>&lt;div&gt;</code>s.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>
