@@ -743,7 +743,7 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
     else
     {
         // Get the index of the min. and max. time unit
-        var minTimeUnitIndex = 1;
+        var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
         var maxTimeUnitIndex = timeUnits.length - 1;
         for (var i=0, len=timeUnits.length; i<len; ++i)
         {
