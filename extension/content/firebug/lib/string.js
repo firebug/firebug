@@ -711,7 +711,7 @@ Str.formatSize = function(bytes)
  *     (default is days)
  * @returns {String} Formatted time string
  */
-Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
+Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
 {
     var timeUnits = [
         {
@@ -768,6 +768,15 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit)
                     value = Math.ceil(value);
                 else
                     value = Math.floor(value);
+            }
+            else
+            {
+                // Set default value for decimalPlaces
+                if (!decimalPlaces)
+                    decimalPlaces = 2;
+
+                var decimalFactor = Math.pow(10, decimalPlaces);
+                value = Math.round(value * decimalFactor) / decimalFactor;
             }
 
             if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
