@@ -141,13 +141,13 @@ SourceEditor.prototype =
         var view = Wrapper.getContentView(doc.defaultView);
 
         // The config object passed to the view must be content-accessible.
-        var config = Cu.createObjectIn(view);
+        var newConfig = Cu.createObjectIn(view);
 
-        // Compute properties of the final config object.
+        // Compute properties of the final newConfig object.
         for (var prop in SourceEditor.DefaultConfig)
         {
             var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-            Object.defineProperty(config, prop, genPropDesc(value));
+            Object.defineProperty(newConfig, prop, genPropDesc(value));
         }
 
         var self = this;
@@ -158,7 +158,7 @@ SourceEditor.prototype =
             Trace.sysout("sourceEditor.onEditorCreate;");
             parentNode.appendChild(view);
             self.view = view;
-        }, config);
+        }, newConfig);
 
         // Mark lines so, we can search for them (see e.g. getLineIndex method).
         this.editorObject.on("renderLine", function(cm, lineHandle, element)
