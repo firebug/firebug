@@ -780,7 +780,7 @@ Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
 
             if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
             {
-                formattedString += value + timeUnits[i].unit;
+                formattedString += value.toLocaleString() + timeUnits[i].unit;
                 if (i != minTimeUnitIndex)
                     formattedString += " ";
             }
