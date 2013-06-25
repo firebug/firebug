@@ -362,30 +362,41 @@ var NetUtils =
         catch (e) { }
     },
 
+    /**
+     * Returns a category for specific request (file). The logic is as follows:
+     * 1) Use file-extension to guess the mime type. This is prefered since
+     *    mime-types in HTTP requests are often wrong.
+     *    This part is based on mimeExtensionMap map.
+     * 2) If the file extension is misssing or uknown, try to get the mime-type
+     *    from the HTTP request object.
+     * 3) If there is still no mime-type, return empty category name.
+     * 4) Use the mime-type and look up the right category 
+     *    This part is based on mimeCategoryMap map.
+     */
     getFileCategory: function(file)
     {
         if (file.category)
             return file.category;
 
+        // All XHRs have its own category.
         if (file.isXHR)
             return file.category = "xhr";
 
-        // Use an existing mime-type or guess it according to the file extension.
-        file.mimeType = this.getMimeType(file.mimeType, file.href);
+        // Guess mime-type according to the file extension. Using file extension
+        // is prefered way since mime-types in HTTP requests are often wrong.
+        var mimeType = this.getMimeType(null, file.href);
+
+        // If no luck with file extension, let's try to get the mime-type from
+        // the request object.
+        if (!mimeType)
+            mimeType = this.getMimeType(file.mimeType, file.href);
 
         // No mime-type, no category.
-        if (!file.mimeType)
+        if (!mimeType)
             return "";
 
-        file.category = mimeCategoryMap[file.mimeType];
-
-        // Work around application/octet-stream for js files (see issue 6530).
-        // Files with js extensions are supposed to be JavaScript files.
-        var ext = (Url.getFileExtension(file.href) + "").toLowerCase();
-        if (ext == "js")
-            file.category = "js";
-
-        return file.category;
+        // Finally, get the category according to the mime type.
+        return file.category = mimeCategoryMap[mimeType];
     },
 
     getPageTitle: function(context)
