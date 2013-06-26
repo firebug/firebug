@@ -13,11 +13,10 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/system",
-    "firebug/net/netUtils",
-    "firebug/lib/xpcom"
+    "firebug/net/netUtils"
 ],
 function(Obj, Firebug, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
-    Arr, System, NetUtils, Xpcom) {
+    Arr, System, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
@@ -27,10 +26,6 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 
 const CacheService = Cc["@mozilla.org/network/cache-service;1"];
-
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var fx18 = versionChecker.compare(appInfo.version, "18") >= 0;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,9 +122,6 @@ NetProgress.prototype =
 
     openingFile: function openingFile(request, win)
     {
-        if (!fx18)
-            return;
-
         var file = this.getRequestFile(request, win);
         if (file)
         {
@@ -141,19 +133,9 @@ NetProgress.prototype =
 
     startFile: function startFile(request, win)
     {
-        // Called asynchronously since Fx17 so, can't be use for Break on XHR
+        // Called asynchronously since Fx17, so can't be used for Break on XHR,
         // since JS stack is not available at the moment.
         // See https://bugzilla.mozilla.org/show_bug.cgi?id=800799
-        if (fx18)
-            return;
-
-        var file = this.getRequestFile(request, win);
-        if (file)
-        {
-            // Parse URL params so, they are available for conditional breakpoints.
-            file.urlParams = Url.parseURLParams(file.href);
-            this.breakOnXHR(file);
-        }
     },
 
     requestedHeaderFile: function requestedHeaderFile(request, time, win, xhr, extraStringData)
@@ -327,7 +309,7 @@ NetProgress.prototype =
             if (info.responseHeaders)
                 file.responseHeaders = info.responseHeaders;
 
-            // Get also request headers (and perhaps also responseHeaders, they won't be 
+            // Get also request headers (and perhaps also responseHeaders, they won't be
             // replaced if already available).
             NetUtils.getHttpHeaders(request, file, this.context);
 
@@ -510,7 +492,7 @@ NetProgress.prototype =
         logTime(file, "connectingFile", time);
 
         // Resolving, connecting and connected can come after the file is loaded
-        // (closedFile received). This happens if the response is coming from the 
+        // (closedFile received). This happens if the response is coming from the
         // cache. Just ignore it.
         if (file && file.loaded)
             return null;
