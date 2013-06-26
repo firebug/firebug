@@ -4,6 +4,7 @@ function runTest()
     {
         var root = win.document.getElementById("content");
         FBTest.progress("Document ready state: " + win.document.readyState);
+        FBTest.progress("Location: " + win.location);
 
         var documentElement = win.document.documentElement;
         var innerHTML = documentElement ? documentElement.innerHTML :
