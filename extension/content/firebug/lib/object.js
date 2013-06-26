@@ -60,14 +60,14 @@ Obj.descend = function(prototypeParent, childProperties)
     return newOb;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Obj.isFunction = function(ob)
 {
     return typeof(ob) == "function";
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
@@ -325,7 +325,6 @@ Obj.getPropertyNames = Object.getPropertyNames || function(subject)
     //    props = [...new Set(props)];
     return Arr.unique(props);
 };
-
 
 // ********************************************************************************************* //
 

@@ -107,7 +107,56 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     onMutationObserve: function(records)
     {
-        this.refresh();
+        var refresh = false;
+
+        // To refresh the panel check whether there's at least one element, that isn't ignored
+        for (var i=0, len=records.length; i<len; ++i)
+        {
+            var record = records[i];
+            switch(record.type)
+            {
+                case "childList":
+                    var nodes = record.addedNodes;
+                    for (var j=0, len=nodes.length; j<len; ++j)
+                    {
+                        if (!Firebug.shouldIgnore(nodes[j]))
+                        {
+                            refresh = true;
+                            break;
+                        }
+                    }
+
+                    if (!refresh)
+                    {
+                        nodes = record.removedNodes;
+                        for (var j=0, len=nodes.length; j<len; ++j)
+                        {
+                            if (!Firebug.shouldIgnore(nodes[j]))
+                            {
+                                refresh = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "attributes":
+                    if (!Firebug.shouldIgnore(record.target))
+                        refresh = true;
+                    break;
+
+                case "characterData":
+                    if (!Firebug.shouldIgnore(record.target.parentElement))
+                        refresh = true;
+                    break;
+            }
+
+            if (refresh)
+                break;
+        }
+
+        if (refresh)
+            this.refresh();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
