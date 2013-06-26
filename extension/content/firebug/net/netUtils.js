@@ -25,7 +25,6 @@ const Cu = Components.utils;
 
 const mimeExtensionMap =
 {
-    "txt": "text/plain",
     "html": "text/html",
     "htm": "text/html",
     "xhtml": "text/html",
@@ -49,7 +48,10 @@ const mimeExtensionMap =
 
 const mimeCategoryMap =
 {
+    // xxxHonza: note that there is no filter for 'txt' category,
+    // shell we use e.g. 'media' instead?
     "text/plain": "txt",
+
     "application/octet-stream": "bin",
     "text/html": "html",
     "text/xml": "html",
