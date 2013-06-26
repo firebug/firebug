@@ -22,14 +22,13 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
-    "firebug/lib/xpcom",
     "firebug/lib/options",
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper, Xpcom, Options) {
+    TraceListener, TraceModule, Wrapper, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -44,10 +43,6 @@ var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
 var contexts = [];
 
 var redirectionLimit = Options.getPref("network.http", "redirection-limit");
-
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var fx20 = versionChecker.compare(appInfo.version, "20") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -767,8 +762,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // (onreadystatechange) for another request. In such case we need to quickly detach our
     // Spy object. New one will be immediatelly created when HTTP-ON-OPENING-REQUEST is fired.
     // See issue 5049
-    // This approach doesn't work in Firefox 19 (see issue 6304) so, let's enable it for 20+ only.
-    if (spy.xhrRequest.readyState == 1 && fx20)
+    if (spy.xhrRequest.readyState == 1)
     {
         if (FBTrace.DBG_SPY)
         {
