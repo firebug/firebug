@@ -6,8 +6,21 @@
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 var prefDomain = "extensions.firebug";
+
+// xxxHonza: I am getting the following exception sometimes:
+// Console Firebug.getModuleLoaderConfig is not a function"
+// This could be be the reason why users can't open Firebug even if clicking on the start button.
+// Looks like 'moduleConfig.js' is not loaded yet?
+if (typeof(Firebug.getModuleLoaderConfig) != "function")
+{
+    FBTrace.sysout("main; ERROR Firebug.getModuleLoaderConfig is not a function!");
+    Cu.reportError("main; ERROR Firebug.getModuleLoaderConfig is not a function!");
+    return;
+}
+
 var config = Firebug.getModuleLoaderConfig();
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
