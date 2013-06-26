@@ -13,6 +13,7 @@ function(FBTrace, Xpcom, Wrapper) {
 // Constants
 
 const Cu = Components.utils;
+const Ci = Components.interfaces;
 var elService = Xpcom.CCSV("@mozilla.org/eventlistenerservice;1", "nsIEventListenerService");
 var Events = {};
 
@@ -533,7 +534,7 @@ Events.getEventListenersForTarget = function(target)
         else
         {
             var debugObject = rawListener.getDebugObject();
-            listener.func = (debugObject && Wrapper.unwrapIValue(debugObject));
+            listener.func = (debugObject instanceof Ci.jsdIValue && Wrapper.unwrapIValue(debugObject));
         }
 
         // Skip chrome event listeners.
