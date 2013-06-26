@@ -12,22 +12,16 @@ define([
     "firebug/lib/search",
     "firebug/chrome/menu",
     "firebug/lib/options",
-    "firebug/lib/wrapper",
-    "firebug/lib/xpcom",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options) {
 
 with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
 
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
 const Cc = Components.classes;
@@ -553,27 +547,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     appendObject: function(object, row, rep)
     {
-        // Issue 5712:  Firefox crashes when trying to log XMLHTTPRequest to console
-        // xxxHonza: should be removed as soon as Firefox 16 is the minimum version.
-        if (!firefox15AndHigher)
-        {
-            if (typeof(object) == "object")
-            {
-                try
-                {
-                    // xxxHonza: could we log directly the unwrapped object?
-                    var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest")
-                        object = object + "";
-                }
-                catch (e)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
-                }
-            }
-        }
-
         if (!rep)
             rep = Firebug.getRep(object, this.context);
 

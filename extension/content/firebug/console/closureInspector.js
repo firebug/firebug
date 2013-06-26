@@ -177,14 +177,17 @@ var ClosureInspector =
             var env = this.getEnvironmentForObject(win, obj, context);
             for (var scope = env; scope; scope = scope.parent)
             {
-                // Scope of the bindings for the command line's commands
-                // which is at the top of the scope chain on objects
-                // defined through the console. Hide it for a nicer display.
-                if (CommandLineExposed.isCommandLineScope(scope, win))
-                    break;
-
                 if (!this.isScopeInteresting(scope))
                     break;
+
+                // Probably the scope of the bindings for our (or Mozilla's) Command
+                // Line API, which is at the top of the scope chain on objects defined
+                // through the console. Hide it for a nicer display.
+                if (scope.type === "object" && !this.isScopeInteresting(scope.parent) &&
+                    scope.getVariable("cd") && scope.getVariable("inspect"))
+                {
+                    break;
+                }
 
                 ret.push.apply(ret, scope.names());
             }

@@ -5,12 +5,13 @@ define([
     "firebug/lib/options",
     "firebug/lib/locale",
     "firebug/lib/array",
+    "firebug/lib/xpcom",
     "firebug/firefox/browserOverlayLib",
     "firebug/firefox/browserCommands",
     "firebug/firefox/browserMenu",
     "firebug/firefox/browserToolbar",
 ],
-function(FBTrace, Options, Locale, Arr, BrowserOverlayLib, BrowserCommands, BrowserMenu,
+function(FBTrace, Options, Locale, Arr, Xpcom, BrowserOverlayLib, BrowserCommands, BrowserMenu,
     BrowserToolbar) {
 
 with (BrowserOverlayLib) {
@@ -526,6 +527,7 @@ BrowserOverlay.prototype =
         }, 400);
     },
 
+    // xxxsz: Can't System.checkFirebugVersion() be used for that?
     checkFirebugVersion: function(currentVersion)
     {
         if (!currentVersion)
@@ -533,9 +535,9 @@ BrowserOverlay.prototype =
 
         var version = this.getVersion();
 
-        // Use Firefox comparator service.
-        var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
-            getService(Ci.nsIVersionComparator);
+        // Use Firefox comparator service
+        var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
+            "nsIVersionComparator");
 
         return versionChecker.compare(version, currentVersion);
     }

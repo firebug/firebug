@@ -12,8 +12,6 @@ function(Obj, Xpcom) {
 var Ci = Components.interfaces;
 
 var clipboard = Xpcom.CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 
 // ********************************************************************************************* //
 // Clipboard helper
@@ -69,22 +67,8 @@ var CookieClipboard = Obj.extend(Object,
             if (!clipboard)
                 return false;
 
-            // nsIClipboard interface has been changed in FF3.
-            if (versionChecker.compare(appInfo.version, "3.0*") >= 0)
-            {
-                // FF3
-                return clipboard.hasDataMatchingFlavors([this.cookieFlavour], 1,
-                    Ci.nsIClipboard.kGlobalClipboard);
-            }
-            else
-            {
-                // FF2
-                var array = Xpcom.CCIN("@mozilla.org/supports-array;1", "nsISupportsArray");
-                var element = Xpcom.CCIN("@mozilla.org/supports-cstring;1", "nsISupportsCString");
-                element.data = this.cookieFlavour;
-                array.AppendElement(element);
-                return clipboard.hasDataMatchingFlavors(array, Ci.nsIClipboard.kGlobalClipboard);
-            }
+            return clipboard.hasDataMatchingFlavors([this.cookieFlavour], 1,
+                Ci.nsIClipboard.kGlobalClipboard);
         }
         catch (err)
         {

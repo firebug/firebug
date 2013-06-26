@@ -1,13 +1,17 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace"
+    "firebug/lib/trace",
+    "firebug/lib/xpcom",
+    "firebug/lib/wrapper" // dependency will go away with jsd2
 ],
-function(FBTrace) {
+function(FBTrace, Xpcom, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
 
+const Cu = Components.utils;
+var elService = Xpcom.CCSV("@mozilla.org/eventlistenerservice;1", "nsIEventListenerService");
 var Events = {};
 
 // ********************************************************************************************* //
@@ -507,6 +511,44 @@ Events.removeEventListener = function(parent, eventId, listener, capturing)
         // xxxHonza: it's not necessary to pollute the tracing console with this message.
         //FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
     }
+};
+
+Events.getEventListenersForTarget = function(target)
+{
+    var listeners = elService.getListenerInfoFor(target, {});
+    var ret = [];
+    for (var i = 0; i < listeners.length; ++i)
+    {
+        var listener = listeners[i];
+        var type = listener.type, capturing = listener.capturing,
+            allowsUntrusted = listener.allowsUntrusted, func = null;
+        if ("listenerObject" in listener)
+        {
+            func = listener.listenerObject;
+        }
+        else
+        {
+            var debugObject = listener.getDebugObject();
+            func = (debugObject && Wrapper.unwrapIValue(debugObject));
+        }
+
+        // Skip chrome event listeners.
+        if (!func || listener.inSystemEventGroup)
+            continue;
+        var funcGlobal = Cu.getGlobalForObject(func);
+        if (!(funcGlobal instanceof Window))
+            continue;
+        if (funcGlobal.document.nodePrincipal.subsumes(document.nodePrincipal))
+            continue;
+
+        ret.push({
+            type: type,
+            capturing: capturing,
+            allowsUntrusted: allowsUntrusted,
+            func: func
+        });
+    }
+    return ret;
 };
 
 if (FBTrace.DBG_EVENTLISTENERS && typeof(Firebug) != "undefined")

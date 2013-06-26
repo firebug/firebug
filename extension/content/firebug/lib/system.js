@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/array",
     "firebug/trace/debug",
+    "firebug/lib/xpcom"
 ],
-function(FBTrace, Arr, Debug) {
+function(FBTrace, Arr, Debug, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -162,8 +163,8 @@ System.checkFirebugVersion = function(expectedVersion)
     var version = Firebug.getVersion();
 
     // Use Firefox comparator service.
-    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
-        getService(Ci.nsIVersionComparator);
+    var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
+        "nsIVersionComparator");
     return versionChecker.compare(version, expectedVersion);
 };
 

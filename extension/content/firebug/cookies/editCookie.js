@@ -18,8 +18,6 @@ const windowMediator = Cc["@mozilla.org/appshell/window-mediator;1"].getService(
 // ********************************************************************************************* //
 
 const ioService = Xpcom.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // ********************************************************************************************* //
@@ -251,21 +249,8 @@ EditCookie.prototype =
         // Get the box element where the dateTime field should be located.
         var expireBox = this.window.document.getElementById("fcExpireBox");
 
-        var dateTimeField = null;
-        if (versionChecker.compare(appInfo.version, "3.0*") >= 0)
-        {
-            // Use new <datepicker> and <timepicker> XUL elements (introduced in Firefox 3)
-            dateTimeField = this.window.document.createElement("dateTimePicker");
-        }
-        else
-        {
-            // Use simple text field with GMT time format.
-            dateTimeField = this.window.document.createElement("textbox");
-            dateTimeField.setAttribute("cols", "12");
-            dateTimeField.setAttribute("flex", "1");
-        }
-
-        // Append it into the UI.
+        // Append a new field into the UI.
+        var dateTimeField = this.window.document.createElement("dateTimePicker");
         dateTimeField.id = "fcExpire";
         expireBox.appendChild(dateTimeField);
     },

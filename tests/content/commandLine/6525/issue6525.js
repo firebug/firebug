@@ -34,7 +34,7 @@ function checkNetPanel(callback)
     {
         FBTest.executeContextMenuCommand(row, "fbUseInCommandLine", function()
         {
-            FBTest.executeCommandAndVerify(callback, "$p.contentType", "\"text/html\"",
+            FBTest.executeCommandAndVerify(callback, "$p.responseHeaders[0].name", /^\".*\"$/,
                 "span", "objectBox-string", true, false)
         });
     });
