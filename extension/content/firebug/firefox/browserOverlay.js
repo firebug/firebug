@@ -110,7 +110,7 @@ BrowserOverlay.prototype =
     // Load Rest of Firebug
 
     /**
-     * This method is called by the Fremework to load entire Firebug. It's executed when
+     * This method is called by the Framework to load entire Firebug. It's executed when
      * the user requires Firebug for the first time.
      *
      * @param {Object} callback Executed when Firebug is fully loaded
@@ -184,7 +184,7 @@ BrowserOverlay.prototype =
                 {
                     var checked = Options.get(option);
 
-                    // xxxHonza: I belive that allPagesActivation could be simple boolean option.
+                    // xxxHonza: I believe that allPagesActivation could be simple boolean option.
                     if (option == "allPagesActivation")
                         checked = (checked == "on") ? true : false;
 

@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Issue 176: net flash tab not recognising flv files</title>
+        <title>Issue 6530: JavaScript filter doesn't work for scripts with incorrect MIME type</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
         <script type="text/javascript">
         function runTest()
         {
-            appendScript("issue176.txt");
-            appendScript("issue176.flv");
+            appendScript("issue6530-test-file.js");
         }
-        
+
         function appendScript(uri)
         {
             var script = document.createElement("script");
             script.setAttribute("type", "text/javascript");
             script.setAttribute("src", uri);
-        
+
             var head = document.getElementsByTagName("head")[0];
             head.appendChild(script);
         }
@@ -24,7 +23,8 @@
     </head>
     <body>
         <header>
-            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=176">Issue 176</a>: net flash tab not recognising flv files</h1>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6530">Issue 6530</a>:
+            JavaScript filter doesn't work for scripts with incorrect MIME type</h1>
         </header>
         <div>
             <section id="content">
@@ -38,16 +38,14 @@
                     <li>Reload the page</li>
                     <li>
                         Click the <em>Execute Test</em> button above<br/>
-                        <span class="ok">&rArr; Two requests must be displayed. One to <em>issue176.txt</em> and one to <em>issue176.flv</em>.</span>
+                        <span class="ok">&rArr; One request must be displayed:
+                        <em>issue6530-test-file.js</em></span>
                     </li>
-                    <li>Change the <em>Net</em> panel filter to <em>Media</em></li>
+                    <li>Change the <em>Net</em> panel filter to <em>JavaScript</em></li>
+                    <li>The request must still be displayed.</li>
                 </ol>
-                <h3>Expected result</h3>
-                <ul>
-                    <li>Both requests must still be displayed.</li>
-                </ul>
             </section>
-            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
         </div>
     </body>
 </html>

@@ -1,26 +1,23 @@
 function runTest()
 {
-    FBTest.sysout("issue176.START");
+    FBTest.sysout("issue6474.START");
 
-    FBTest.openNewTab(basePath + "net/176/issue176.html", function(win)
+    FBTest.openNewTab(basePath + "net/filter/6474/issue6474.html", function(win)
     {
         FBTest.enableNetPanel(function(win)
         {
             FBTest.clearCache();
 
-            // Wait for two requests being displayed in the Net panel.
             var config = {
-                counter: 2,
                 tagName: "tr",
-                classes: "netRow category-media hasHeaders loaded",
+                classes: "netRow category-font hasHeaders loaded",
             };
 
             FBTest.waitForDisplayedElement("net", config, function(row)
             {
                 var panel = FW.Firebug.chrome.selectPanel("net");
 
-                // Set "Media" filter and wait for relayout.
-                FBTest.clickToolbarButton(null, "fbNetFilter-media");
+                FBTest.clickToolbarButton(null, "fbNetFilter-font");
 
                 setTimeout(checkNetPanelUI, 300);
             });
@@ -36,9 +33,8 @@ function checkNetPanelUI()
 {
     var panelNode = FBTest.getPanel("net").panelNode;
 
-    // Check number of requests. Must be exactly two.
-    var netRows = panelNode.getElementsByClassName("netRow category-media hasHeaders loaded");
-    FBTest.compare(2, netRows.length, "There must be exactly two requests displayed!");
+    var netRows = panelNode.getElementsByClassName("netRow category-font hasHeaders loaded");
+    FBTest.compare(1, netRows.length, "There must be exactly one request displayed!");
 
     // Each row can specify just one category.
     for (var i=0; i<netRows.length; i++)
@@ -51,5 +47,5 @@ function checkNetPanelUI()
     }
 
     FW.Firebug.NetMonitor.onToggleFilter(FW.Firebug.currentContext, "all");
-    FBTest.testDone("issue1256.DONE");
+    FBTest.testDone("issue6474.DONE");
 }
