@@ -526,6 +526,7 @@ BrowserOverlay.prototype =
         }, 400);
     },
 
+    // xxxsz: Can't System.checkFirebugVersion() be used for that?
     checkFirebugVersion: function(currentVersion)
     {
         if (!currentVersion)
