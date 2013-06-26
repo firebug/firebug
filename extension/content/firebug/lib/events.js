@@ -1,4 +1,5 @@
 /* See license.txt for terms of usage */
+/*global define:1, Components:1, MouseEvent:1, Window: 1, Firebug:1*/
 
 define([
     "firebug/lib/trace",
@@ -6,6 +7,7 @@ define([
     "firebug/lib/wrapper" // dependency will go away with jsd2
 ],
 function(FBTrace, Xpcom, Wrapper) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -21,15 +23,16 @@ Events.dispatch = function(listeners, name, args)
     if (!listeners)
     {
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Events.dispatch "+name+" without listeners");
+            FBTrace.sysout("Events.dispatch " + name + " without listeners");
 
         return;
     }
 
     try
     {
+        var noMethods;
         if (FBTrace.DBG_DISPATCH)
-            var noMethods = [];
+            noMethods = [];
 
         for (var i = 0; i < listeners.length; ++i)
         {
@@ -37,7 +40,7 @@ Events.dispatch = function(listeners, name, args)
             if (!listener)
             {
                 if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Events.dispatch ERROR "+i+" "+name+" to null listener.");
+                    FBTrace.sysout("Events.dispatch ERROR " + i + " " + name + " to null listener.");
                 continue;
             }
 
@@ -58,9 +61,9 @@ Events.dispatch = function(listeners, name, args)
                         }
 
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.sysout("EXCEPTION in Events.dispatch "+(culprit?culprit+".":"")+
-                            name+": "+exc+" in "+(exc.fileName?exc.fileName:"")+
-                            (exc.lineNumber?":"+exc.lineNumber:""), exc);
+                        var loc = (exc.fileName ? exc.fileName + ":" + exc.lineNumber : "<unknown>");
+                        FBTrace.sysout("EXCEPTION in Events.dispatch " +
+                            (culprit ? culprit + "." : "") + name + ": " + exc + " in " + loc, exc);
                     }
                 }
             }
@@ -72,8 +75,8 @@ Events.dispatch = function(listeners, name, args)
         }
 
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Events.dispatch "+name+" to "+listeners.length+" listeners, "+
-                noMethods.length+" had no such method:", noMethods);
+            FBTrace.sysout("Events.dispatch " + name + " to " + listeners.length + " listeners, " +
+                noMethods.length + " had no such method", noMethods);
     }
     catch (exc)
     {
@@ -86,8 +89,8 @@ Events.dispatch = function(listeners, name, args)
             }
 
             var culprit = listeners[i] ? listeners[i].dispatchName : null;
-            FBTrace.sysout("Exception in Events.dispatch "+(culprit?culprit+".":"")+ name+
-                ": "+exc, exc);
+            FBTrace.sysout("Exception in Events.dispatch " + (culprit ? culprit + "." : "") +
+                name + ": " + exc, exc);
         }
     }
 };
@@ -96,13 +99,14 @@ Events.dispatch2 = function(listeners, name, args)
 {
     try
     {
+        var noMethods;
         if (FBTrace.DBG_DISPATCH)
-            var noMethods = [];
+            noMethods = [];
 
         if (!listeners)
         {
             if (FBTrace.DBG_DISPATCH)
-                FBTrace.sysout("dispatch2, no listeners for "+name);
+                FBTrace.sysout("dispatch2, no listeners for " + name);
             return;
         }
 
@@ -114,8 +118,8 @@ Events.dispatch2 = function(listeners, name, args)
                 var result = listener[name].apply(listener, args);
 
                 if (FBTrace.DBG_DISPATCH)
-                    FBTrace.sysout("dispatch2 "+name+" to #"+i+" of "+listeners.length+
-                        " listeners, result "+result, {result: result, listener: listeners[i],
+                    FBTrace.sysout("dispatch2 " + name + " to #" + i + " of " + listeners.length +
+                        " listeners, result " + result, {result: result, listener: listeners[i],
                         fn: listener[name].toSource()});
 
                 if (result)
@@ -128,18 +132,18 @@ Events.dispatch2 = function(listeners, name, args)
             }
         }
 
-        if (FBTrace.DBG_DISPATCH && noMethods.length == listeners.length)
-            FBTrace.sysout("Events.dispatch2 "+name+" to "+listeners.length+" listeners, "+
-                noMethods.length+" had no such method:", noMethods);
+        if (FBTrace.DBG_DISPATCH && noMethods.length === listeners.length)
+            FBTrace.sysout("Events.dispatch2 " + name + " to " + listeners.length + " listeners, " +
+                noMethods.length + " had no such method:", noMethods);
     }
     catch (exc)
     {
-        if (typeof(FBTrace) != "undefined" && FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack)
                 exc.stack = exc.stack.split('/n');
 
-            FBTrace.sysout(" Exception in lib.dispatch2 "+ name+" exc:"+exc, exc);
+            FBTrace.sysout("Exception in Events.dispatch2 " + name + " exc: " + exc, exc);
         }
     }
 };
@@ -155,27 +159,27 @@ Events.cancelEvent = function(event)
 
 Events.isLeftClick = function(event, allowKeyModifiers)
 {
-    return event.button == 0 && (allowKeyModifiers || this.noKeyModifiers(event));
+    return event.button === 0 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
 Events.isMiddleClick = function(event, allowKeyModifiers)
 {
-    return event.button == 1 && (allowKeyModifiers || this.noKeyModifiers(event));
+    return event.button === 1 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
 Events.isRightClick = function(event, allowKeyModifiers)
 {
-    return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
+    return event.button === 2 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
 Events.isSingleClick = function(event)
 {
-    return event instanceof MouseEvent && event.detail == 1;
+    return event instanceof MouseEvent && event.detail === 1;
 };
 
 Events.isDoubleClick = function(event)
 {
-    return event instanceof MouseEvent && event.detail == 2;
+    return event instanceof MouseEvent && event.detail === 2;
 };
 
 Events.noKeyModifiers = function(event)
@@ -185,12 +189,12 @@ Events.noKeyModifiers = function(event)
 
 Events.isControlClick = function(event)
 {
-    return event.button == 0 && this.isControl(event);
+    return event.button === 0 && this.isControl(event);
 };
 
 Events.isShiftClick = function(event)
 {
-    return event.button == 0 && this.isShift(event);
+    return event.button === 0 && this.isShift(event);
 };
 
 Events.isControl = function(event)
@@ -205,7 +209,7 @@ Events.isAlt = function(event)
 
 Events.isAltClick = function(event)
 {
-    return event.button == 0 && this.isAlt(event);
+    return event.button === 0 && this.isAlt(event);
 };
 
 Events.isControlShift = function(event)
@@ -356,9 +360,9 @@ Events.getEventTypes = function(family)
     var types = [];
     for (var eventFamily in eventTypes)
     {
-        if (!family || family == eventFamily)
+        if (!family || family === eventFamily)
         {
-            for (type in eventTypes[eventFamily])
+            for (var type in eventTypes[eventFamily])
                 types.push(eventTypes[eventFamily][type]);
         }
     }
@@ -368,13 +372,7 @@ Events.getEventTypes = function(family)
 
 Events.isEventFamily = function(eventType)
 {
-    for (var family in eventTypes)
-    {
-        if (eventType == family)
-            return true;
-    }
-
-    return false;
+    return eventTypes.hasOwnProperty(eventType);
 };
 
 Events.getEventFamily = function(eventType)
@@ -398,7 +396,7 @@ Events.attachAllListeners = function(object, listener)
 {
     for (var family in eventTypes)
     {
-        if (family != "mutation" || Firebug.attachMutationEvents)
+        if (family !== "mutation" || Firebug.attachMutationEvents)
             this.attachFamilyListeners(family, object, listener);
     }
 };
@@ -407,7 +405,7 @@ Events.detachAllListeners = function(object, listener)
 {
     for (var family in eventTypes)
     {
-        if (family != "mutation" || Firebug.attachMutationEvents)
+        if (family !== "mutation" || Firebug.attachMutationEvents)
             this.detachFamilyListeners(family, object, listener);
     }
 };
@@ -435,11 +433,11 @@ Events.addEventListener = function(parent, eventId, listener, capturing)
 {
     if (FBTrace.DBG_EVENTLISTENERS)
     {
-        for (var i=0; i<listeners.length; i++)
+        for (var i = 0; i < listeners.length; i++)
         {
             var l = listeners[i];
-            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
-                l.capturing == capturing)
+            if (l.parent === parent && l.eventId === eventId && l.listener === listener &&
+                l.capturing === capturing)
             {
                 FBTrace.sysout("Events.addEventListener; ERROR already registered!", l);
                 return;
@@ -457,7 +455,7 @@ Events.addEventListener = function(parent, eventId, listener, capturing)
 
         frames.shift();
 
-        var pid = (typeof(parent.location) != "undefined" ? (parent.location + "") : typeof(parent));
+        var pid = (parent.location ? parent.location + "" : typeof parent);
 
         listeners.push({
             parentId: pid,
@@ -484,17 +482,19 @@ Events.removeEventListener = function(parent, eventId, listener, capturing)
 
     if (FBTrace.DBG_EVENTLISTENERS)
     {
-        for (var i=0; i<listeners.length; i++)
+        for (var i = 0; i < listeners.length; i++)
         {
             var l = listeners[i];
-            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
-                l.capturing == capturing)
+            if (l.parent === parent && l.eventId === eventId && l.listener === listener &&
+                l.capturing === capturing)
             {
                 listeners.splice(i, 1);
                 return;
             }
         }
 
+        // xxxHonza: it's not necessary to pollute the tracing console with this message.
+        /*
         var frames = [];
         for (var frame = Components.stack; frame; frame = frame.caller)
             frames.push(frame.filename + " (" + frame.lineNumber + ")");
@@ -508,8 +508,8 @@ Events.removeEventListener = function(parent, eventId, listener, capturing)
             stack: frames,
         };
 
-        // xxxHonza: it's not necessary to pollute the tracing console with this message.
-        //FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
+        FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
+        */
     }
 };
 
@@ -519,39 +519,38 @@ Events.getEventListenersForTarget = function(target)
     var ret = [];
     for (var i = 0; i < listeners.length; ++i)
     {
-        var listener = listeners[i];
-        var type = listener.type, capturing = listener.capturing,
-            allowsUntrusted = listener.allowsUntrusted, func = null;
-        if ("listenerObject" in listener)
+        var rawListener = listeners[i];
+        var listener = {
+            type: rawListener.type,
+            capturing: rawListener.capturing,
+            allowsUntrusted: rawListener.allowsUntrusted,
+            func: null
+        };
+        if ("listenerObject" in rawListener)
         {
-            func = listener.listenerObject;
+            listener.func = rawListener.listenerObject;
         }
         else
         {
-            var debugObject = listener.getDebugObject();
-            func = (debugObject && Wrapper.unwrapIValue(debugObject));
+            var debugObject = rawListener.getDebugObject();
+            listener.func = (debugObject && Wrapper.unwrapIValue(debugObject));
         }
 
         // Skip chrome event listeners.
-        if (!func || listener.inSystemEventGroup)
+        if (!listener.func || rawListener.inSystemEventGroup)
             continue;
-        var funcGlobal = Cu.getGlobalForObject(func);
+        var funcGlobal = Cu.getGlobalForObject(listener.func);
         if (!(funcGlobal instanceof Window))
             continue;
         if (funcGlobal.document.nodePrincipal.subsumes(document.nodePrincipal))
             continue;
 
-        ret.push({
-            type: type,
-            capturing: capturing,
-            allowsUntrusted: allowsUntrusted,
-            func: func
-        });
+        ret.push(listener);
     }
     return ret;
 };
 
-if (FBTrace.DBG_EVENTLISTENERS && typeof(Firebug) != "undefined")
+if (FBTrace.DBG_EVENTLISTENERS && typeof Firebug !== "undefined")
 {
     Firebug.Events = {};
     Firebug.Events.getRegisteredListeners = function()
