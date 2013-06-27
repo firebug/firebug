@@ -956,6 +956,16 @@ Css.cssInfo.html =
     "empty-cells": ["emptyCells"],
     "float": ["float"],
 
+    "align-items": ["alignItems"],
+    "align-self": ["alignSelf"],
+    "flex": ["flexBasis"],
+    "flex-basis": ["flexBasis"],
+    "flex-direction": ["flexDirection"],
+    "flex-grow": [],
+    "flex-shrink": [],
+    "justify-content": ["justifyContent"],
+    "order": [],
+
     // specification of font families in "font" is special-cased
     "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
@@ -983,9 +993,9 @@ Css.cssInfo.html =
     "margin-left": ["auto", "length"],
 
     "marker-offset": ["auto", "length"],
-    "min-height": ["auto", "length"],
+    "min-height": ["length"],
     "max-height": ["none", "length"],
-    "min-width": ["width", "auto", "length"],
+    "min-width": ["width", "length"],
     "max-width": ["width", "none", "length"],
 
     "opacity": [],
@@ -1064,7 +1074,7 @@ Css.cssInfo.html =
     "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
     "-moz-background-inline-policy": [],
-    "-moz-binding": [],
+    "-moz-binding": ["url()", "none"],
     "-moz-columns": ["auto", "length"],
     "-moz-column-count": ["auto"],
     "-moz-column-gap": ["normal", "length"],
@@ -1073,7 +1083,7 @@ Css.cssInfo.html =
     "-moz-column-rule-style": ["borderStyle"],
     "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto", "length"],
-    "-moz-image-region": [],
+    "-moz-image-region": ["rect()"],
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
@@ -1572,6 +1582,48 @@ Css.cssKeywords =
         "-moz-show-background"
     ],
 
+    "alignItems":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "alignSelf":
+    [
+        "auto",
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "flexBasis":
+    [
+        "initial",
+        "auto"
+    ],
+
+    "flexDirection":
+    [
+        "row",
+        "row-reverse",
+        "column",
+        "column-reverse"
+    ],
+
+    "justifyContent":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around"
+    ],
+
     "clear":
     [
         "left",
@@ -1842,7 +1894,7 @@ Css.cssKeywords =
         "break-all",
         "keep-all"
     ],
-         
+
     "fontFamily":
     [
         // Common font families
@@ -1887,7 +1939,7 @@ Css.cssKeywords =
         "-moz-pull-down-menu",
         "-moz-field"
     ],
-       
+
     "display":
     [
         "block",
@@ -1895,6 +1947,8 @@ Css.cssKeywords =
         "inline",
         "inline-block",
         "list-item",
+        "flex",
+        "inline-flex",
         "marker",
         "run-in",
         "compact",
@@ -2043,7 +2097,7 @@ Css.cssKeywords =
         "read-write",
         "write-only"
     ],
-       
+
     "userSelect":
     [
         "text",
