@@ -31,6 +31,8 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 
+    profilerEnabled: undefined,
+
     showContext: function(browser, context)
     {
         this.setEnabled(context);
@@ -39,54 +41,45 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Activation
 
-    onPanelEnable: function(panelName)
+    showPanel: function(browser, panel)
     {
         if (FBTrace.DBG_PROFILER)
-            FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
-
-        if (panelName == "console" || panelName == "script")
-            this.setEnabled();
-    },
-
-    onPanelDisable: function(panelName)
-    {
-        if (FBTrace.DBG_PROFILER)
-            FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
-
-        if (panelName == "console" || panelName == "script")
-            this.setEnabled();
+            FBTrace.sysout("Profiler.showPanel");
+        this.setEnabled();
     },
 
     setEnabled: function()
     {
-        if (!Firebug.currentContext)
-            return false;
-
-        // TODO this should be a panel listener operation.
+        var context = Firebug.currentContext;
+        if (!context)
+            return;
 
         // The profiler is available only if the Script panel and Console are enabled
-        var scriptPanel = Firebug.currentContext.getPanel("script", true);
-        var consolePanel = Firebug.currentContext.getPanel("console", true);
-        var disabled = (scriptPanel && !scriptPanel.isEnabled()) ||
-            (consolePanel && !consolePanel.isEnabled());
+        var enabled = context.isPanelEnabled("script") && context.isPanelEnabled("console");
 
-        if (!disabled)
+        if (enabled)
         {
-            // The profiler is available only if the Debugger and Console are activated
+            // The profiler is available only if the Debugger is activated
             var debuggerTool = Firebug.connection.getTool("script");
-            var consoleTool = Firebug.connection.getTool("console");
-            disabled = (debuggerTool && !debuggerTool.getActive()) ||
-                (consoleTool && !consoleTool.getActive());
+            enabled = debuggerTool && debuggerTool.getActive();
         }
+
+        if (enabled === this.profilerEnabled)
+            return;
+        this.profilerEnabled = enabled;
+
+        if (!enabled && this.isProfiling())
+            this.stopProfiling(context);
 
         // Attributes must be modified on the <command> element. All toolbar buttons
         // and menuitems are hooked up to the command.
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "disabled",
-            disabled ? "true" : "false");
+            enabled ? "false" : "true");
 
         // Update button's tooltip.
-        var tooltipText = disabled ? Locale.$STR("ProfileButton.Disabled.Tooltip")
-            : Locale.$STR("ProfileButton.Enabled.Tooltip");
+        var tooltipText = enabled ?
+            Locale.$STR("ProfileButton.Enabled.Tooltip") :
+            Locale.$STR("ProfileButton.Disabled.Tooltip");
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "tooltiptext", tooltipText);
     },
 
@@ -256,6 +249,25 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
         Events.dispatch(this.fbListeners, "stopProfiling", [context,
             groupRow.originalTitle, calls, cancelReport]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    commandLineProfileStart: function(context, title)
+    {
+        if (!this.profilerEnabled)
+        {
+            var msg = Locale.$STR("ProfilerRequiresTheScriptPanel");
+            Firebug.Console.logFormatted([msg], context, "warn");
+            return;
+        }
+        Firebug.Profiler.startProfiling(context, title);
+    },
+
+    commandLineProfileEnd: function(context)
+    {
+        if (this.profilerEnabled)
+            this.stopProfiling(context);
     }
 });
 
@@ -525,13 +537,13 @@ function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTim
 function profile(context, args)
 {
     var title = args[0];
-    Firebug.Profiler.startProfiling(context, title);
+    Firebug.Profiler.commandLineProfileStart(context, title);
     return Firebug.Console.getDefaultReturnValue();
 };
 
 function profileEnd(context)
 {
-    Firebug.Profiler.stopProfiling(context);
+    Firebug.Profiler.commandLineProfileEnd(context);
     return Firebug.Console.getDefaultReturnValue();
 };
 

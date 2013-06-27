@@ -1488,7 +1488,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (Firebug.breakOnErrors)
         {
             // Switch of Break on Next tab lightning.
-            var panel = context.getPanel("console", true);
+            //var panel = context.getPanel("console", true);
             //Firebug.Breakpoint.updatePanelTab(panel, false);
 
             return -1;  // break

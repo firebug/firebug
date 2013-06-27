@@ -128,13 +128,13 @@ function createFirebugConsole(context, win)
 
     console.profile = function(title)
     {
-        Firebug.Profiler.startProfiling(context, title);
+        Firebug.Profiler.commandLineProfileStart(context, title);
         return Console.getDefaultReturnValue();
     };
 
     console.profileEnd = function()
     {
-        Firebug.Profiler.stopProfiling(context);
+        Firebug.Profiler.commandLineProfileEnd(context);
         return Console.getDefaultReturnValue();
     };
 

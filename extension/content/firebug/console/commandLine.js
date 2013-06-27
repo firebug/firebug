@@ -692,26 +692,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         this.update(context);
     },
 
-    onPanelEnable: function(panelName)
-    {
-        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
-
-        this.setMultiLine(Firebug.commandEditor, Firebug.chrome);
-    },
-
-    onPanelDisable: function(panelName)
-    {
-        // We don't care about other panels.
-        if (panelName !== "console")
-            return;
-
-        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
-    },
-
     getCommandLine: function(context)
     {
         return (!this.isInOtherPanel(context) && Firebug.commandEditor) ?
