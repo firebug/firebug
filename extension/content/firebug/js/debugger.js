@@ -2634,18 +2634,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
 
         if (this.hasObservers())
-        {
             this.activateDebugger();
-            if (Firebug.currentContext)
-            {
-                var name = observer.name || observer.dispatchName || observer.toolName;
-                Firebug.Console.log("enabling javascript debugger "+(name?"to support "+name:""));
-            }
-        }
         else
-        {
             this.deactivateDebugger();
-        }
     },
 
     activateDebugger: function()
