@@ -435,7 +435,7 @@ Http.convertToUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/st
 Http.convertFromUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/string' module",
     Str.convertFromUnicode);
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Network Tracing
 
 Http.getStateDescription = function(flag)

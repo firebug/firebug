@@ -687,7 +687,11 @@ Browser.EventListener = {
 
 // ********************************************************************************************* //
 
+/**
+ * @object
+ */
 var TabWatchListener =
+/** @lends TabWatchListener */
 {
     dispatchName: "TabWatchListener",
 
@@ -710,15 +714,29 @@ var TabWatchListener =
         Firebug.connection.toggleResume(context);
     },
 
-    
     // To be called from Firebug.TabWatcher only, see selectContext
     // null as context means we don't debug that browser
     showContext: function(browser, context)
     {
         // the context becomes the default for its view
         Firebug.chrome.setFirebugContext(context);
+
         // resume, after setting Firebug.currentContext
-        Firebug.connection.toggleResume(context);
+        // The condition is appended to solve issue 5916
+        // 1) If a new tab is opened by clicking a link in an existing tab, HTTP request
+        //    is started in the existing tab.
+        // 2) New tab is always set to about:blank at the beginning and there is no
+        //    context for it.
+        // 3) Consequently the tab watcher calls 'showContext' with context == null
+        //    and Firebug.connection.toggleResume suspends Firebug for all existing
+        //    contexts including the one which started the new tab.
+        // 4) The request displayed in the HTTP panel never finishes since even the
+        //    Net panel stops listening and calls unmonitorContext, see
+        //    {@Firebug.NetMonitor.onSuspendFirebug}
+        //
+        // So, do not resume/suspend for "about:blank" pages.
+        if (browser.contentWindow.location.href != "about:blank")
+            Firebug.connection.toggleResume(context);
 
         // tell modules we may show UI
         Events.dispatch(Firebug.modules, "showContext", [browser, context]);

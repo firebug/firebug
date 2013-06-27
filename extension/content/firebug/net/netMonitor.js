@@ -50,6 +50,7 @@ var contentLoad = NetProgress.prototype.contentLoad;
  * for the user.
  */
 Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
+/** @lends Firebug.NetMonitor */
 {
     dispatchName: "netMonitor",
     maxQueueRequests: 500,

@@ -138,7 +138,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
     /**
      * Called when tabBrowser browsers get a new location OR when we get a explicit user op
-     * to open firebug.
+     * to open Firebug.
      * Attaches to a top-level window. Creates context unless we just re-activated on an
      * existing context.
      */
@@ -887,7 +887,14 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
 
-            // See issue 4040
+            // 1) We don't want to skip about:blank since Firebug UI is not update when
+            // switching to about:blank tab, see issue 4040
+            //
+            // 2) But we also want to skip "about:blank" in case a new tab is opened
+            // (new tab is about:blank at the beggining), no context exists and Firebug
+            // is suspended for all contexts, see issue5916
+            // There is a workaround for this case in {@TabWatchListener.showContext]
+            //
             // the onStateChange will deal with this troublesome case
             //if (uri && uri.spec === "about:blank")
             //    return;
