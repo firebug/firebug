@@ -274,7 +274,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getShowStackTraceMenuItem: function()
     {
         var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace",
-            "console.option.tip.Show_Stack_Trace");
+            "console.option.tip.Show_Stack_Trace2");
 
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;

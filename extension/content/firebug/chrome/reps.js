@@ -27,10 +27,11 @@ define([
     "firebug/chrome/menu",
     "arch/compilationunit",
     "firebug/net/netUtils",
+    "firebug/chrome/panelActivation",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
 
 with (Domplate) {
 
@@ -2446,7 +2447,8 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             _repObject: "$object",
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
-            DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
+            DIV({"class": "errorTitle focusRow subLogRow", role: "listitem",
+                title: "$object|getTooltip", $hasTooltip: "$object|getTooltip"},
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
@@ -2454,7 +2456,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role: "presentation"}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow",
-                role : "listitem"},
+                role: "listitem"},
                 TABLE({cellspacing: 0, cellpadding: 0},
                     TBODY(
                         TR(
@@ -2623,6 +2625,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             return "show";
     },
 
+    getTooltip: function(error)
+    {
+        if (error.missingTraceBecauseNoDebugger)
+            return Locale.$STR("console.tip.ErrorWithoutDebugger");
+    },
+
     onToggleError: function(event)
     {
         var target = event.currentTarget;
@@ -2648,12 +2656,28 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
             if (Css.hasClass(target, "opened"))
             {
+                var panel = Firebug.getElementPanel(event.target);
+
                 if (target.stackTrace)
+                {
                     FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                }
+                else if (target.repObject.missingTraceBecauseNoDebugger)
+                {
+                    var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+                    var enableScriptPanel = function()
+                    {
+                        var scriptPanelType = Firebug.getPanelType("script");
+                        PanelActivation.enablePanel(scriptPanelType);
+                    };
+                    var msg = (hasScriptPanel ?
+                        Locale.$STR("console.DebuggerWasDisabledForError") :
+                        Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+                    FirebugReps.Description.render(msg, traceBox, enableScriptPanel);
+                }
 
                 if (Firebug.A11yModel.enabled)
                 {
-                    var panel = Firebug.getElementPanel(event.target);
                     Events.dispatch(panel.fbListeners, "modifyLogRow", [panel, traceBox]);
                 }
             }

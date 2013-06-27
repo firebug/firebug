@@ -383,6 +383,10 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             if (!Firebug.showStackTrace)
                 error.trace = null;
         }
+        else if (Firebug.showStackTrace && !context.isPanelEnabled("script"))
+        {
+            error.missingTraceBecauseNoDebugger = true;
+        }
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
         if (!msgId)
