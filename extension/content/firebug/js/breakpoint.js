@@ -34,6 +34,16 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 {
     dispatchName: "breakpoints",
 
+    initialize: function()
+    {
+        Firebug.connection.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.connection.removeListener(this);
+    },
+
     toggleBreakOnNext: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
@@ -61,6 +71,17 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
     },
 
     showPanel: function(browser, panel)
+    {
+        this.updatePanelState(panel);
+    },
+
+    onDebuggerEnabled: function()
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        this.updatePanelState(panel);
+    },
+
+    updatePanelState: function(panel)
     {
         if (!panel)  // there is no selectedPanel?
             return;
