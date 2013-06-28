@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6566: getEventListeners command provides wrong source link</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6566">Issue 6566</a>:
+        getEventListeners command provides wrong source link</h1>
+</header>
+
+<script type="text/javascript">
+var onExecuteTest = function()
+{
+    asdf.asdf = 45;
+}
+</script>
+
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, enable the <i>Script</i>, <i>Console</i> panels and reload the page.</li>
+            <li>Switch to the <i>Console</i> panel and type the following into the command line:
+                <code>monitor(onExecuteTest)</code>
+            </li>
+            <li>Click on this button: <button id="testButton" onclick="onExecuteTest()">Click Me!</button></li>
+            <li>There should be an error in the <i>Console</i> panel, create a breakpoint for it.</li>
+            <li>Type <code>onExecuteTest</code> in the command line</li>
+            <li>Click on the result, you should be navigated to the <i>Script</i> panel, the line
+            15 must be highlighted.</li>
+            <li>Select the <i>Breakpoints</i> side panel and verify that name of the
+                <code>onExecuteTest</code> function is there for
+                both, the error breakpoint and the logged function breakpoint</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com
+    </footer>
+</div>
+
+</body>
+</html>
