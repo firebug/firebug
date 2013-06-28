@@ -4,6 +4,7 @@ function runTest()
     FBTest.openNewTab(basePath + "commandLine/api/profile.html", function(win)
     {
         FBTest.openFirebug();
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "table", classes: "profileTable"};

@@ -7,6 +7,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("console");
 
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var tests = [];

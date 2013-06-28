@@ -12,9 +12,16 @@ function runTest()
             var doc = FW.Firebug.chrome.window.document;
             var button = doc.getElementById("fbToggleProfiling");
 
-            FBTest.ok(!button.disabled, "Profile button should not be disabled");
+            FBTest.ok(button.disabled, "Profile button should be disabled");
 
-            FBTest.testDone("issue4384.DONE");
+            FBTest.enableScriptPanel();
+
+            FBTest.waitForDebuggerActivation(function()
+            {
+                FBTest.ok(!button.disabled, "Profile button should not be disabled");
+
+                FBTest.testDone("issue4384.DONE");
+            });
         });
     });
 }
