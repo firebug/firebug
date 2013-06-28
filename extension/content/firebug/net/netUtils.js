@@ -510,7 +510,7 @@ var NetUtils =
         function cloneHeaders(headers)
         {
             var newHeaders = [];
-            for (var i=0; i<headers.length; i++)
+            for (var i=0; headers && i<headers.length; i++)
             {
                 var header = {name: headers[i].name, value: headers[i].value};
                 header = Wrapper.cloneIntoContentScope(global, header);
