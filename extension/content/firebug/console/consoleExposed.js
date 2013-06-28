@@ -95,11 +95,17 @@ function createFirebugConsole(context, win)
 
     console.trace = function firebugDebuggerTracer()
     {
-        var unwrapped = Wrapper.unwrapObject(win);
-        unwrapped.top._firebugStackTrace = "console-tracer";
-        debugger;
-        delete unwrapped.top._firebugStackTrace;
+        var trace = null;
+        if (Firebug.Debugger.isAlwaysEnabled())
+            trace = getJSDUserStack();
+        if (!trace)
+            trace = getComponentsUserStack();
 
+        // This should never happen, but inform the user if it does.
+        if (!trace)
+            trace = "(No stack trace available)";
+
+        Firebug.Console.log(trace, context, "stackTrace");
         return Console.getDefaultReturnValue();
     };
 
