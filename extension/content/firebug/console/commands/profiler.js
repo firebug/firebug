@@ -31,7 +31,17 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 
-    profilerEnabled: undefined,
+    profilerEnabled: false,
+
+    initialize: function()
+    {
+        Firebug.connection.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.connection.removeListener(this);
+    },
 
     showContext: function(browser, context)
     {
@@ -64,8 +74,6 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             enabled = debuggerTool && debuggerTool.getActive();
         }
 
-        if (enabled === this.profilerEnabled)
-            return;
         this.profilerEnabled = enabled;
 
         if (!enabled && this.isProfiling())
@@ -76,7 +84,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "disabled",
             enabled ? "false" : "true");
 
-        // Update button's tooltip.
+        // Update the button's tooltip.
         var tooltipText = enabled ?
             Locale.$STR("ProfileButton.Enabled.Tooltip") :
             Locale.$STR("ProfileButton.Disabled.Tooltip");
@@ -89,6 +97,11 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
     {
         if (this.isProfiling())
             this.stopProfiling(context, true);
+    },
+
+    onDebuggerEnabled: function()
+    {
+        this.setEnabled();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
