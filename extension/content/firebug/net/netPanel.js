@@ -34,7 +34,8 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
-    "firebug/net/netReps"
+    "firebug/net/netReps",
+    "firebug/net/netCacheReader",
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,

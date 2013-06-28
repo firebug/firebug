@@ -579,7 +579,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var category = NetUtils.getFileCategory(row.repObject);
             if (category)
                 Css.setClass(netInfoBox, "category-" + category);
-            row.setAttribute('aria-expanded', 'true');
+
+            row.setAttribute("aria-expanded", "true");
         }
         else
         {
@@ -590,7 +591,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 [netInfoBox, file]);
 
             row.parentNode.removeChild(netInfoRow);
-            row.setAttribute('aria-expanded', 'false');
+            row.setAttribute("aria-expanded", "false");
         }
     },
 
@@ -830,11 +831,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 $collapsed: "$file|hideResponse"},
                 Locale.$STR("Response")
             ),
-            A({"class": "netInfoCacheTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
-               view: "Cache",
-               $collapsed: "$file|hideCache"},
-               Locale.$STR("Cache")
-            ),
             A({"class": "netInfoHtmlTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                view: "Html",
                $collapsed: "$file|hideHtml"},
@@ -851,12 +847,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPatchText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
-            DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
-                TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0,
-                    "role": "presentation"},
-                    TBODY({"role": "list", "aria-label": Locale.$STR("Cache")})
-                )
-            ),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
                 IFRAME({"class": "netInfoHtmlPreview", "role": "document"}),
                 DIV({"class": "htmlPreviewResizer"})
@@ -952,12 +942,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         return file.category in NetUtils.binaryFileCategories || file.responseText == "";
-    },
-
-    hideCache: function(file)
-    {
-        //xxxHonza: I don't see any reason why not to display the cache info also for images.
-        return !file.cacheEntry/* || file.category=="image"*/;
     },
 
     hideHtml: function(file)
@@ -1166,15 +1150,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 {
                     this.setResponseText(file, netInfoBox, responseTextBox, context);
                 }
-            }
-        }
-
-        if (Css.hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
-        {
-            var responseTextBox = netInfoBox.getElementsByClassName("netInfoCacheText").item(0);
-            if (file.cacheEntry) {
-                netInfoBox.cachePresented = true;
-                this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
         }
 
