@@ -380,21 +380,6 @@ StackFrame.parseToStackTrace = function(stack, context)
     return trace;
 };
 
-StackFrame.getFullComponentsStackTrace = function(context)
-{
-    var trace = new StackFrame.StackTrace();
-    for (var frame = Components.stack; frame; frame = frame.caller)
-    {
-        var fileName = frame.filename;
-        if (!fileName)
-            continue;
-        var xbFrame = new StackFrame.StackFrame({href: fileName},
-            frame.lineNumber, frame.name, [], null, null, context);
-        trace.frames.push(xbFrame);
-    }
-    return trace;
-};
-
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
     if (trace && trace.frames)
@@ -651,6 +636,27 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     }
 
     return "(?)";
+};
+
+StackFrame.guessFunctionArgNamesFromSource = function(source)
+{
+    // XXXsimon: This fails with ES6 destructuring and parentheses in default parameters.
+    // We'd need a proper JavaScript parser for that.
+    var m = /[^\(]*\(([^\)]*)\)/.exec(source);
+    if (!m)
+        return null;
+    var args = m[1].split(",");
+    for (var i = 0; i < args.length; i++)
+    {
+        var arg = args[i];
+        if (arg.indexOf("=") !== -1)
+            arg = arg.substr(0, arg.indexOf("="));
+        arg = arg.trim();
+        if (!/^[a-zA-Z$_][a-zA-Z$_0-9]*$/.test(arg))
+            return null;
+        args[i] = arg;
+    }
+    return args;
 };
 
 // Mozilla

@@ -16,6 +16,9 @@ define([
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
     DebuggerLib) {
 
+// Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
+//"use strict";
+
 // ********************************************************************************************* //
 
 /**
@@ -458,7 +461,72 @@ function createFirebugConsole(context, win)
 
     function getComponentsUserStack()
     {
-        var trace = StackFrame.getFullComponentsStackTrace(context);
+        // Walk Components.stack and function.caller/arguments simultaneously.
+        var func = arguments.callee;
+        var seenFunctions = new Set();
+        seenFunctions.add(func);
+
+        var trace = new StackFrame.StackTrace();
+        var frame = Components.stack;
+        while (frame)
+        {
+            var fileName = frame.filename;
+            if (fileName)
+            {
+                var frameName = frame.name;
+                var args = [];
+                if (func)
+                {
+                    try
+                    {
+                        if (func.name && func.name !== frameName)
+                        {
+                            // Something is off, abort!
+                            func = null;
+                        }
+                        else
+                        {
+                            var argValues = Array.prototype.slice.call(func.arguments);
+                            var argNames = StackFrame.guessFunctionArgNamesFromSource(func + "");
+                            if (argNames && argNames.length === func.length)
+                            {
+                                for (var i = 0; i < func.length; i++)
+                                    args.push({name: argNames[i], value: argValues[i]});
+                            }
+                        }
+                    }
+                    catch (exc) {} // strict mode etc.
+                }
+
+                var sframe = new StackFrame.StackFrame({href: fileName},
+                    frame.lineNumber, frameName, args, null, null, context);
+                trace.frames.push(sframe);
+            }
+
+            frame = frame.caller;
+            if (func)
+            {
+                try
+                {
+                    func = func.caller;
+                    if (seenFunctions.has(func))
+                    {
+                        // Recursion; we cannot go on unfortunately.
+                        func = null;
+                    }
+                    else
+                    {
+                        seenFunctions.add(func);
+                    }
+                }
+                catch (exc)
+                {
+                    // Strict mode functions etc.
+                    func = null;
+                }
+            }
+        }
+
         return removeChromeFrames(trace);
     }
 
