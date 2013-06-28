@@ -25,7 +25,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 /**
  * SourceFile one for every compilation unit.
  * Unique URL for each. (href)
- * Unique outerScript, the statements outside of any function defintion
+ * Unique outerScript, the statements outside of any function definition
  * sourceCache keyed by href has source for this compilation unit
  * Stored by href in context.
  * Contains array of jsdIScript for functions (scripts) defined in this unit
@@ -506,7 +506,8 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
 
     getBaseLineNumberByScript: function(script)
     {
-        return script.baseLineNumber - (this.sourceFile.getBaseLineOffset() - 1);
+        // Do not subtract 1 (see issue 6566)
+        return script.baseLineNumber - (this.sourceFile.getBaseLineOffset()/* - 1*/);
     }
 };
 
@@ -936,7 +937,8 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
         }
     }
 
-    return StackFrame.guessFunctionName(url, line-1, context);
+    // Do not subtract 1 (see issue 6566)
+    return StackFrame.guessFunctionName(url, line/*-1*/, context);
 };
 
 // ********************************************************************************************* //
@@ -961,7 +963,7 @@ Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
     var found = null;
 
-    if (!fn || typeof(fn) !== 'function')
+    if (!fn || typeof(fn) !== "function")
         return found;
 
     try
@@ -1002,13 +1004,17 @@ Firebug.SourceFile.getSourceLinkForScript = function(script, context)
     {
         var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
         if (scriptAnalyzer)
+        {
             return scriptAnalyzer.getSourceLinkForScript(script);
+        }
         else
         {
             // no-op for detrace
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+
+            {
+                FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile " +
                     sourceFile);
+            }
         }
     }
 };
