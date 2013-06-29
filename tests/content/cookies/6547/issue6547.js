@@ -23,10 +23,26 @@ function runTest()
                 FBTest.click(row);
                 FBTest.expandElements(panelNode, "netInfoCookiesTab");
 
-                var selector = ".netInfoReceivedCookies .cookieRow .cookieMaxAgeLabel";
-                var label = panelNode.querySelector(selector);
+                var selector = ".netInfoReceivedCookies .cookieRow";
+                var rows = panelNode.querySelectorAll(selector);
 
-                FBTest.compare("0ms", label.textContent, "Max age must be zero");
+                var resultMap =
+                {
+                    issue6547_zero: "0ms",
+                    issue6547_pos:  "1d 10h 17m 36s",
+                    issue6547_neg:  "-1d 10h 17m 36s",
+                };
+
+                for (var i = 0; i < rows.length; i++)
+                {
+                    var row = rows[i];
+
+                    var cookieName = row.querySelector(".cookieNameLabel").textContent;
+                    var expResult = resultMap[cookieName];
+                    var result = row.querySelector(".cookieMaxAgeLabel").textContent;
+
+                    FBTest.compare(expResult, result, "Max age must be " + expResult);
+                }
 
                 FBTest.testDone("issue6547.DONE");
             });

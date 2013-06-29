@@ -1,5 +1,7 @@
 <?php
-    header("Set-Cookie: issue6547=Hello Firebug user!; Max-Age=0");
+    header("Set-Cookie: issue6547_zero=Hello Firebug user!; Max-Age=0", false);
+    header("Set-Cookie: issue6547_pos=Hello Firebug user!; Max-Age=123456", false);
+    header("Set-Cookie: issue6547_neg=Hello Firebug user!; Max-Age=-123456", false);
 ?>
 <!DOCTYPE html>
 <html>
@@ -22,7 +24,11 @@
                     <li>Expand the request to <em>issue6547.php</em><br/></li>
                     <li>Switch to the <em>Cookies</em> info tab</li>
                     <li>
-                        There should be a <em>Max. Age</em> column showing the value <code>0ms</code>
+                        <ul>
+                                <li>There should be a <em>Max. Age</em> column showing the value <code>0ms</code> for cookie <em>issue6547_zero</em></li>
+                                <li>There should be a <em>Max. Age</em> column showing the value <code>1d 10h 17m 36s</code> for cookie <em>issue6547_pos</em></li>
+                                <li>There should be a <em>Max. Age</em> column showing the value <code>-1d 10h 17m 36s</code> for cookie <em>issue6547_neg</em></li>
+                        </ul>
                     </li>
                 </ul>
             </section>
