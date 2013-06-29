@@ -3371,11 +3371,14 @@ FirebugReps.ErrorMessageObj.prototype =
 {
     getSourceLine: function()
     {
+        if (this.href === null)
+            return "";
+
         if (!this.context.sourceCache)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!");
-            return;
+            return "";
         }
 
         return this.context.sourceCache.getLine(this.href, this.lineNo);
