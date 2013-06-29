@@ -16,24 +16,99 @@
 <ol>
 <li>Open Firebug and enable the Console panel.</li>
 <li>Click on the <code style="color:green">Execute Test</code> button below.</li>
-<li>The Console panel should display two stack frames:<br/>
-<code style="color:green">function onclick(event) { onExecuteTest(); }(Object { name="event"})</code>
+<li>The Console panel should display six stack frames:
+
+<br><code style="color:green">actualTrace(arg1=1, arg2=2, arg3=undefined)</code>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<code style="color:blue">1 (line 2)</code></li>
-<code style="color:green">onExecuteTest()</code>
+<code style="color:blue">trace.html (line 101)</code>
+<br><code style="color:green">rec(left=0)</code>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<code style="color:blue">trace.html (line 35)</code></li>
+<code style="color:blue">trace.html (line 96)</code>
+<br><code style="color:green">rec()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 94)</code>
+<br><code style="color:green">rec()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 94)</code>
+<br><code style="color:green">onExecuteTest()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 88)</code>
+<br><code style="color:green">onclick()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 1)</code>
+
+</li>
+
+<li>Clear the Console, and click on the <code>Execute Strict Test</code> button below.</li>
+<li>The Console panel should display two stack frames:
+
+<br><code style="color:green">strictTrace()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 107)</code>
+<br><code style="color:green">onclick()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 1)</code>
+
+</li>
+
+<li>Enable the Script panel and reload.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>The Console panel should display six stack frames:
+
+<br><code style="color:green">actualTrace(arg1=1, arg2=2, arg3=undefined)</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 101)</code>
+<br><code style="color:green">rec(left=0)</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 96)</code>
+<br><code style="color:green">rec(left=1)</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 94)</code>
+<br><code style="color:green">rec(left=2)</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 94)</code>
+<br><code style="color:green">onExecuteTest()</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">trace.html (line 88)</code>
+<br><code style="color:green">onclick(event=click, clientX=0, clientY=0)</code>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<code style="color:blue">onclick (line 2)</code>
+
+</li>
 
 </ol>
 
-<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+<button id="testButton" onclick="onExecuteTest('extra arg')">Execute Test</button>
+<button id="strictButton" onclick="strictTrace(1, 2)">Execute Strict Test</button>
 <br/><br/>
 
 <script type="text/javascript">
 function onExecuteTest()
 {
+    rec(2);
+}
+
+function rec(left)
+{
+    if (left)
+        rec(left-1);
+    else
+        actualTrace(1,2);
+}
+
+var actualTrace = function(arg1, arg2, arg3)
+{
     console.trace();
 }
+
+function strictTrace(arg1)
+{
+    "use strict";
+    console.trace();
+}
+strictTrace.displayName = "displayNameWhichShouldNotBeShown";
+// (If it does start showing up at some point, the logic in consoleExposed.js
+// for bailing out if function.name !== frame.name will need to change.)
 </script>
   
 </body>
