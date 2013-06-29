@@ -103,7 +103,14 @@ CommandLineAPI.getCommandLineAPI = function(context)
         }
 
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
-        return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
+        try
+        {
+            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType, true);
+        }
+        catch(ex)
+        {
+            throw new Error(ex.message);
+        }
     };
 
     // values from the extension space
