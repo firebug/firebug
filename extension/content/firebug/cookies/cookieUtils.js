@@ -19,20 +19,14 @@ var CookieUtils =
 {
     isDeletedCookie: function(cookie)
     {
-        if (cookie.maxAge) {
-            if (cookie.maxAge > 0)
-                return false;
-            else
-                return true;
-        }
+        if (cookie.maxAge)
+            return cookie.maxAge <= 0;
 
-        if (cookie.expires) {
+        if (cookie.expires)
+        {
             var expiresDate = new Date(cookie.expires * 1000);
 
-            if (expiresDate.getTime() > Date.now())
-                return false;
-            else
-                return true;
+            return expiresDate.getTime() <= Date.now();
         }
 
         return false;
