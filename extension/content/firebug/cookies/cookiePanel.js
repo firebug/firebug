@@ -33,7 +33,6 @@ with (Domplate) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // Cookies preferences
@@ -63,17 +62,19 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     title: Locale.$STR("cookies.Panel"),
     searchable: true,
     breakable: true,
-    order: 200, // Place just after the Net panel.
+
+    // Place just after the Net panel
+    order: 200,
 
     initialize: function(context, doc)
     {
-        // xxxHonza
+        // xxxHonza:
         // This initialization is made as soon as the Cookies panel
         // is opened the first time.
-        // This means that columns are *not* resizeable within the console
+        // This means that columns are *not* resizable within the console
         // (rejected cookies) till this activation isn't executed.
 
-        // Initialize event listeners before the ancestor is called.
+        // Initialize event listeners before the ancestor is called
         var hcr = HeaderResizer;
         this.onMouseClick = Obj.bind(hcr.onMouseClick, hcr);
         this.onMouseDown = Obj.bind(hcr.onMouseDown, hcr);
@@ -87,7 +88,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         Firebug.ConsolePanel.prototype.addListener(this);
 
-        // Just after the initialization, so the this.document member is set.
+        // Just after the initialization, so the this.document member is set
         Firebug.CookieModule.addStyleSheet(this);
 
         this.refresh();
@@ -99,17 +100,17 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     /**
-     * Renders list of cookies displayed within the Cookies panel.
+     * Renders the list of cookies displayed within the Cookies panel
      */
     refresh: function()
     {
         if (!Firebug.CookieModule.isEnabled(this.context))
             return;
 
-        // Create cookie list table.
+        // Create cookie list table
         this.table = CookieReps.CookieTable.createTable(this.panelNode);
 
-        // Cookies are displayed only for web pages.
+        // Cookies are displayed only for web pages
         var location = this.context.window.location;
         if (!location)
             return;
@@ -118,7 +119,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (protocol.indexOf("http") != 0)
             return;
 
-        // Get list of cookies for the current page.
+        // Get list of cookies for the current page
         var cookies = [];
         var iter = cookieManager.enumerator;
         while (iter.hasMoreElements())
@@ -135,10 +136,10 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             cookies.push(cookieWrapper);
         }
 
-        // If the filter allow it, display all rejected cookies as well.
+        // If the filter allows it, display all rejected cookies as well.
         if (Options.get(showRejectedCookies))
         {
-            // xxxHonza the this.context.cookies is sometimes null, but
+            // xxxHonza: this.context.cookies is sometimes null, but
             // this must be because FB isn't correctly initialized.
             if (!this.context.cookies)
             {
@@ -164,7 +165,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
-        // Generate HTML list of cookies using domplate.
+        // Generate HTML list of cookies using Domplate
         if (cookies.length)
         {
             var header = Dom.getElementByClass(this.table, "cookieHeaderRow");
@@ -183,11 +184,12 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.Cookie list refreshed.", cookies);
 
-        // Sort automaticaly the last sorted column. The preference stores
+        // Automatically sort the last sorted column. The preference stores
         // two things: name of the sorted column and sort direction asc|desc.
         // Example: colExpires asc
         var prefValue = Options.get(lastSortedColumn);
-        if (prefValue) {
+        if (prefValue)
+        {
             var values = prefValue.split(" ");
             CookieReps.CookieTable.sortColumn(this.table, values[0], values[1]);
         }
@@ -197,7 +199,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (hiddenCols)
             this.table.setAttribute("hiddenCols", hiddenCols);
 
-        //Remove certain context menu items on cookiePanel display
+        // Remove certain context menu items on cookiePanel display
         this.table.setAttribute("removedCols", ["colMaxAge"]);
     },
 
@@ -206,11 +208,11 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.CookiePanel.initializeNode");
 
-        // xxxHonza
+        // xxxHonza:
         // This method isn't called when FB UI is detached. So, the columns
-        // are *not* resizable when FB is open in external window.
+        // are *not* resizable when FB is open in an external window.
 
-        // Register event handlers for table column resizing.
+        // Register event handlers for table column resizing
         this.document.addEventListener("click", this.onMouseClick, true);
         this.document.addEventListener("mousedown", this.onMouseDown, true);
         this.document.addEventListener("mousemove", this.onMouseMove, true);
@@ -259,7 +261,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        // Update permission button in the toolbar.
+        // Update permission button in the toolbar
         CookiePermissions.updatePermButton(this.context);
 
         // For backward compatibility with Firebug 1.1
@@ -318,8 +320,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var items = [];
 
-        // If the user clicked at a cookie row, the context menu is already
-        // initialized and so, bail out.
+        // If the user clicked a cookie row, the context menu is already
+        // initialized and so bail out.
         var cookieRow = Dom.getAncestorByClass(target, "cookieRow");
         if (cookieRow)
             return items;
@@ -329,7 +331,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (header)
             return items;
 
-        // Make sure default items (cmd_copy) is removed.
+        // Make sure default items (cmd_copy) are removed
         CookieReps.Rep.getContextMenuItems.apply(this, arguments);
 
         return items;
@@ -349,7 +351,11 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return Dom.getAncestorByClass(node, "cookieRow"); }
+        function findRow(node)
+        {
+            return Dom.getAncestorByClass(node, "cookieRow");
+        }
+
         var search = new Search.TextSearch(this.panelNode, findRow);
 
         var caseSensitive = Firebug.Search.isCaseSensitive(text);
@@ -441,8 +447,10 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.context.breakOnCookie = breaking;
 
         if (FBTrace.DBG_COOKIES)
+        {
             FBTrace.sysout("cookies.breakOnNext; " + context.breakOnCookie + ", " +
                 context.getName());
+        }
     },
 
     shouldBreakOnNext: function()
@@ -520,8 +528,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 // Cookie Breakpoints
 
 /**
- * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
- * providing a list of cookie-breakpoints into the Breakpoints side-panel.
+ * @class Represents an {@link Firebug.Debugger} listener. This listener is reponsible for
+ * providing a list of cookie breakpoints for the Breakpoints side panel.
  */
 Firebug.CookieModule.DebuggerListener =
 {
@@ -533,7 +541,7 @@ Firebug.CookieModule.DebuggerListener =
 };
 
 // ********************************************************************************************* //
-// Custom output in the Console panel for: document.cookie
+// Custom output in the Console panel for document.cookie
 
 Firebug.CookieModule.ConsoleListener =
 {
@@ -544,20 +552,20 @@ Firebug.CookieModule.ConsoleListener =
 
     log: function(context, object, className, sourceLink)
     {
-        //xxxHonza: chromebug says it's null sometimes.
+        //xxxHonza: Chromebug says it's null sometimes.
         if (!context)
             return;
 
         if (object !== context.window.document.cookie)
             return;
 
-        // Parse "document.cookie" string.
+        // Parse "document.cookie" string
         var cookies = CookieUtils.parseSentCookiesFromString(object);
         if (!cookies || !cookies.length)
             return;
 
-        // Create empty log row that serves as a container for list of cookies
-        // crated from the document.cookie property.
+        // Create an empty log row that serves as a container for the list of cookies
+        // created from the document.cookie property
         var appendObject = Firebug.ConsolePanel.prototype.appendObject;
         var row = Firebug.ConsoleBase.logRow(appendObject, object, context,
             "documentCookie", this, null, true);
@@ -580,4 +588,3 @@ return CookiePanel;
 
 // ********************************************************************************************* //
 }});
-
