@@ -17,6 +17,27 @@ var Cu = Components.utils;
 
 var CookieUtils = 
 {
+    isDeletedCookie: function(cookie)
+    {
+        if (cookie.maxAge) {
+            if (cookie.maxAge > 0)
+                return false;
+            else
+                return true;
+        }
+
+        if (cookie.expires) {
+            var expiresDate = new Date(cookie.expires * 1000);
+
+            if (expiresDate.getTime() > Date.now())
+                return false;
+            else
+                return true;
+        }
+
+        return false;
+    },
+
     isSessionCookie: function(cookie)
     {
         // maxAge is string value, "0" will not register as session.

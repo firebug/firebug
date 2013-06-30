@@ -77,7 +77,8 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         FOR("cookie", "$cookies",
             TR({"class": "cookieRow", _repObject: "$cookie", onclick: "$onClickRow",
                 $sessionCookie: "$cookie|isSessionCookie",
-                $rejectedCookie: "$cookie|isRejected"},
+                $rejectedCookie: "$cookie|isRejected",
+                $deletedCookie: "$cookie|isDeletedCookie"},
                 TD({"class": "cookieDebugCol cookieCol"},
                    DIV({"class": "sourceLine cookieRowHeader", onclick: "$onClickRowHeader"},
                         "&nbsp;"
@@ -240,6 +241,11 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     isSessionCookie: function(cookie)
     {
         return CookieUtils.isSessionCookie(cookie.cookie);
+    },
+
+    isDeletedCookie: function(cookie)
+    {
+        return CookieUtils.isDeletedCookie(cookie.cookie);
     },
 
     isRejected: function(cookie)

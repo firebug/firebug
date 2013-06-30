@@ -445,6 +445,11 @@
     border-bottom: 1px solid #EEEEEE;
 }
 
+.netInfoCookies .deletedCookie > .cookieExpiresCol,
+.netInfoCookies .deletedCookie > .cookieMaxAgeCol {
+    color: red;
+}
+
 .cookieInfoRow .cookieRowHeader {
     display: table-cell;
 }
