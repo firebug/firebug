@@ -325,12 +325,37 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var panelNode = this.panelNode;
         Events.dispatch(this.fbListeners, "onFiltersSet", [logTypes]);
 
+        // Make previously visible nodes invisible again
+        if (this.filterMatchSet)
+        {
+            for (var i in this.filterMatchSet)
+                Css.removeClass(this.filterMatchSet[i], "contentMatchesFilter");
+        }
+
+        this.filterMatchSet = [];
+
         for (var type in logTypes)
         {
             if (filterTypes.join(" ") != "all" && filterTypes.indexOf(type) == -1)
+            {
                 Css.setClass(panelNode, "hideType-" + type);
+            }
             else
+            {
                 Css.removeClass(panelNode, "hideType-" + type);
+
+                var logRows = panelNode.getElementsByClassName("logRow-" + type);
+                for (var i=0, len=logRows.length; i<len; ++i)
+                {
+                    // Mark the groups, in which the low row is located, also as matched
+                    for (var group = Dom.getAncestorByClass(logRows[i], "logRow-group"); group;
+                        group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                    {
+                        Css.setClass(group, "contentMatchesFilter");
+                        this.filterMatchSet.push(group);
+                    }
+                }
+            }
         }
     },
 

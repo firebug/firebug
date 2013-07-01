@@ -631,14 +631,14 @@
 .panelNode.hideType-debug .logRow-debug,
 .panelNode.hideType-profile .logRow-profile,
 .panelNode.hideType-table .logRow-table,
-.panelNode.hideType-group .logRow-group,
+.panelNode.hideType-group .logRow-group:not(.contentMatchesFilter),
 .panelNode.hideType-command .logRow-command,
 .panelNode.hideType-stackTrace .logRow-stackTrace,
 .panelNode.hideType-log .logRow-log,
 .panelNode.hideType-dir .logRow-dir,
 .panelNode.hideType-assert .logRow-assert,
 .panelNode.hideType-spy .logRow-spy {
-    display: none !important;
+    display: none;
 }
 
 .logRow.matched {
