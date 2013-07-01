@@ -113,10 +113,10 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                     )
                 ),
                 TD({"class": "cookieExpiresCol cookieCol"},
-                    DIV({"class": "cookieExpiresLabel cookieLabel"}, "$cookie|getExpires")
+                    DIV({"class": "cookieExpiresLabel cookieLabel", "title": "$cookie|getDurationTooltip"}, "$cookie|getExpires")
                 ),
                 TD({"class": "cookieMaxAgeCol cookieCol"},
-                    DIV({"class": "cookieMaxAgeLabel cookieLabel"}, "$cookie|getMaxAge")
+                    DIV({"class": "cookieMaxAgeLabel cookieLabel", "title": "$cookie|getDurationTooltip"}, "$cookie|getMaxAge")
                 ),
                 TD({"class": "cookieHttpOnlyCol cookieCol"},
                     DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
@@ -231,6 +231,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         }
 
         return "";
+    },
+
+    getDurationTooltip: function(cookie)
+    {
+        if (CookieUtils.isDeletedCookie(cookie.cookie))
+            return Locale.$STR("cookies.netinfo.deleted.tooltip");
     },
 
     isHttpOnly: function(cookie)
