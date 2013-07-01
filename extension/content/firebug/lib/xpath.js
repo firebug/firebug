@@ -166,7 +166,18 @@ Xpath.getElementsByXPath = function(doc, xpath)
     return [];
 };
 
-Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
+/**
+ * Evaluates an XPath expression.
+ *
+ * @param Document doc
+ * @param String xpath The XPath expression.
+ * @param Node contextNode The context node.
+ * @param int resultType
+ * @param [bool] throwException If set to true, an invalid XPath expression throws an error.
+ *
+ * @return * the result of the XPath expression
+ */
+Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType, throwException)
 {
     if (contextNode === undefined)
         contextNode = doc;
@@ -180,7 +191,9 @@ Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
     }
     catch (exc)
     {
-        // If an invalid XPath expression was entered, it should be caught without exception
+        if (throwException)
+            throw exc;
+        // If an invalid XPath expression was entered, it should be caught without exception.
         return;
     }
 
@@ -191,7 +204,7 @@ Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
 
         case XPathResult.STRING_TYPE:
             return result.stringValue;
-            
+
         case XPathResult.BOOLEAN_TYPE:
             return result.booleanValue;
 
@@ -201,14 +214,14 @@ Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
             for (var item = result.iterateNext(); item; item = result.iterateNext())
                 nodes.push(item);
             return nodes;
-            
+
         case XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE:
         case XPathResult.ORDERED_NODE_SNAPSHOT_TYPE:
             var nodes = [];
             for (var i = 0; i < result.snapshotLength; ++i)
                 nodes.push(result.snapshotItem(i));
             return nodes;
-            
+
         case XPathResult.ANY_UNORDERED_NODE_TYPE:
         case XPathResult.FIRST_ORDERED_NODE_TYPE:
             return result.singleNodeValue;

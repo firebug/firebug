@@ -219,6 +219,10 @@ this.setToKnownState = function()
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
+    // xxxHonza: TODO
+    // 1) cookies permissions are not reset
+    // 2) Net panel filter is not reset (the preference is, but the UI isn't)
+
     var Firebug = FBTest.FirebugWindow.Firebug;
     Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
     Firebug.PanelActivation.toggleAll("none");
@@ -232,7 +236,7 @@ this.setToKnownState = function()
     Firebug.Debugger.clearAllBreakpoints(null);
     Firebug.resetAllOptions(false);
 
-    // Console preview is hiden by default
+    // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
         this.clickConsolePreviewButton();
 
