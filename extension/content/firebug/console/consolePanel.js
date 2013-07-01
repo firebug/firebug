@@ -397,6 +397,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
             {
                 Css.setClass(group, "matched");
+                this.matchSet.push(group);
             }
             this.matchSet.push(logRow);
         }
