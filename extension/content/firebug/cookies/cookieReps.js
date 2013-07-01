@@ -77,7 +77,8 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         FOR("cookie", "$cookies",
             TR({"class": "cookieRow", _repObject: "$cookie", onclick: "$onClickRow",
                 $sessionCookie: "$cookie|isSessionCookie",
-                $rejectedCookie: "$cookie|isRejected"},
+                $rejectedCookie: "$cookie|isRejected",
+                $deletedCookie: "$cookie|isDeletedCookie"},
                 TD({"class": "cookieDebugCol cookieCol"},
                    DIV({"class": "sourceLine cookieRowHeader", onclick: "$onClickRowHeader"},
                         "&nbsp;"
@@ -112,10 +113,10 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                     )
                 ),
                 TD({"class": "cookieExpiresCol cookieCol"},
-                    DIV({"class": "cookieExpiresLabel cookieLabel"}, "$cookie|getExpires")
+                    DIV({"class": "cookieExpiresLabel cookieLabel", "title": "$cookie|getDurationTooltip"}, "$cookie|getExpires")
                 ),
                 TD({"class": "cookieMaxAgeCol cookieCol"},
-                    DIV({"class": "cookieMaxAgeLabel cookieLabel"}, "$cookie|getMaxAge")
+                    DIV({"class": "cookieMaxAgeLabel cookieLabel", "title": "$cookie|getDurationTooltip"}, "$cookie|getMaxAge")
                 ),
                 TD({"class": "cookieHttpOnlyCol cookieCol"},
                     DIV({"class": "cookieHttpOnlyLabel cookieLabel"}, "$cookie|isHttpOnly")
@@ -232,6 +233,12 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         return "";
     },
 
+    getDurationTooltip: function(cookie)
+    {
+        if (CookieUtils.isDeletedCookie(cookie.cookie))
+            return Locale.$STR("cookies.netinfo.deleted.tooltip");
+    },
+
     isHttpOnly: function(cookie)
     {
         return cookie.cookie.isHttpOnly ? "HttpOnly" : "";
@@ -240,6 +247,11 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
     isSessionCookie: function(cookie)
     {
         return CookieUtils.isSessionCookie(cookie.cookie);
+    },
+
+    isDeletedCookie: function(cookie)
+    {
+        return CookieUtils.isDeletedCookie(cookie.cookie);
     },
 
     isRejected: function(cookie)
