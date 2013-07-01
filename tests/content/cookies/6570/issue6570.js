@@ -18,13 +18,12 @@ function runTest()
 
             FBTest.waitForDisplayedElement("net", options, function(row)
             {
-                var panelNode = FBTest.selectPanel("net").panelNode;
+                var panelNode = FBTest.getSelectedPanel().panelNode;
 
                 FBTest.click(row);
                 FBTest.expandElements(panelNode, "netInfoCookiesTab");
 
-                var selector = ".netInfoReceivedCookies .cookieRow";
-                var rows = panelNode.querySelectorAll(selector);
+                var rows = panelNode.querySelectorAll(".netInfoReceivedCookies .cookieRow");
 
                 var resultMap =
                 {
@@ -36,17 +35,19 @@ function runTest()
                         issue6570_delete: true
                 };
 
-                FBTest.compare(rows.length, Object.keys(resultMap).length, "There should be " + Object.keys(resultMap).length + " cookies.");
+                FBTest.compare(rows.length, Object.keys(resultMap).length, "There should be " +
+                    Object.keys(resultMap).length + " cookies.");
 
-                for (var i = 0; i < rows.length; i++)
+                for (var i=0; i<rows.length; i++)
                 {
                     var row = rows[i];
 
-                    var cookieName = row.querySelector(".cookieNameLabel").textContent;
+                    var cookieName = row.getElementsByClassName("cookieNameLabel")[0].textContent;
                     var expResult = resultMap[cookieName];
-                    var result = row.className.indexOf('deletedCookie') !== -1;
+                    var result = row.className.indexOf("deletedCookie") !== -1;
 
-                    FBTest.compare(expResult, result, "Cookie should be marked as " + (expResult ? "deleted." : "not deleted."));
+                    FBTest.compare(expResult, result, "Cookie should " +
+                        (expResult ? "" : "not ") + "be marked as deleted.");
                 }
 
                 FBTest.testDone("issue6570.DONE");
