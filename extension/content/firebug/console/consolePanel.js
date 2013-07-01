@@ -344,15 +344,25 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             {
                 Css.removeClass(panelNode, "hideType-" + type);
 
-                var logRows = panelNode.getElementsByClassName("logRow-" + type);
-                for (var i=0, len=logRows.length; i<len; ++i)
+                // There can be two kinds of error and warning messages, which have one type
+                var types = [type];
+                if (type == "errorMessage")
+                    types = ["error"];
+                else if (type == "warning")
+                    types = ["warn", "warningMessage"];
+
+                for (var i=0, typesLen=types.length; i<typesLen; ++i)
                 {
-                    // Mark the groups, in which the log row is located, also as matched
-                    for (var group = Dom.getAncestorByClass(logRows[i], "logRow-group"); group;
-                        group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                    var logRows = panelNode.getElementsByClassName("logRow-" + types[i]);
+                    for (var j=0, len=logRows.length; j<len; ++j)
                     {
-                        Css.setClass(group, "contentMatchesFilter");
-                        this.filterMatchSet.push(group);
+                        // Mark the groups, in which the log row is located, also as matched
+                        for (var group = Dom.getAncestorByClass(logRows[j], "logRow-group"); group;
+                            group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                        {
+                            Css.setClass(group, "contentMatchesFilter");
+                            this.filterMatchSet.push(group);
+                        }
                     }
                 }
             }
@@ -820,7 +830,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
         var type = typeMatch ? typeMatch[1] : "";
 
-        FBTrace.sysout("this.filterTypes.indexOf(type)", {ft: this.filterTypes, type: type});
+        // There can be two kinds of error and warning messages, which have one type
+        if (type == "errorMessage")
+            type = "error";
+        else if (type == "warn" || type == "warningMessage")
+            type = "warning";
+
         if (this.filterTypes.indexOf(type) != -1)
         {
             // Mark the groups, in which the log row is located, also as matched
