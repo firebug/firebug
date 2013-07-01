@@ -347,7 +347,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 var logRows = panelNode.getElementsByClassName("logRow-" + type);
                 for (var i=0, len=logRows.length; i<len; ++i)
                 {
-                    // Mark the groups, in which the low row is located, also as matched
+                    // Mark the groups, in which the log row is located, also as matched
                     for (var group = Dom.getAncestorByClass(logRows[i], "logRow-group"); group;
                         group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
                     {
@@ -392,7 +392,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             Css.setClass(logRow, "matched");
 
-            // Mark the groups, in which the low row is located, also as matched
+            // Mark the groups, in which the log row is located, also as matched
             for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
                 group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
             {
@@ -817,6 +817,21 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     filterLogRow: function(logRow, scrolledToBottom)
     {
+        var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
+        var type = typeMatch ? typeMatch[1] : "";
+
+        FBTrace.sysout("this.filterTypes.indexOf(type)", {ft: this.filterTypes, type: type});
+        if (this.filterTypes.indexOf(type) != -1)
+        {
+            // Mark the groups, in which the log row is located, also as matched
+            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            {
+                Css.setClass(group, "contentMatchesFilter");
+                this.filterMatchSet.push(group);
+            }
+        }
+
         if (this.searchText)
         {
             Css.setClass(logRow, "matching");
