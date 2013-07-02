@@ -6,8 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, Url, Locale, Str, SourceLink) {
+function (FBTrace, Url, Locale, Str, SourceLink, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -191,12 +192,12 @@ StackFrame.buildStackFrame = function(frame, context)
         });
     }
 
-    var funcName = StackFrame.getFunctionName(frame);
+    var funcName = StackFrame.getFunctionName(frame, context);
     return new StackFrame(sourceFile, frame.where.line, funcName,
         args, frame, 0, context);
 };
 
-StackFrame.getFunctionName = function(frame)
+StackFrame.getFunctionName = function(frame, context)
 {
     // Get real function name
     var funcName = "";
@@ -210,6 +211,15 @@ StackFrame.getFunctionName = function(frame)
     // Use custom displayName (coming from the script) if provided.
     if (frame.callee.userDisplayName)
         funcName = frame.callee.userDisplayName;
+
+    if (!funcName && frame.callee && context)
+    {
+        var funcObj = DebuggerLib.getObject(context, frame.callee.actor);
+        var dglobal = DebuggerLib.getDebuggeeGlobal(context, context.window);
+        var func = dglobal.makeDebuggeeValue(funcObj);
+
+        FBTrace.sysout("StackFrame.getFunctionName; " + func.displayName, funcObj);
+    }
 
     return funcName;
 }
