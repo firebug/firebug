@@ -42,7 +42,7 @@ function createErrorBreakpoint(callback, win)
     {
         // Verify displayed text.
         var reTextContent = /\s*asdf is not defineda\s*/;
-        FBTest.compare(reTextContent, row.textContent, "Text content must match.");
+        FBTest.compare(reTextContent, row.textContent, "Text content must match. " + row.textContent);
 
         // Create error breakpoint
         var br = row.getElementsByClassName("errorBreak")[0];
@@ -79,8 +79,19 @@ function verifyBreakpointsPanel(callback)
     var bps = panelNode.getElementsByClassName("breakpointName");
     if (FBTest.compare(2, bps.length, "There must be two breakpoints"))
     {
-        FBTest.compare("onExecuteTest", bps[0].textContent, "The breakpoint name must match");
-        FBTest.compare("onExecuteTest", bps[1].textContent, "The breakpoint name must match");
+        if (!FBTest.compare("onExecuteTest", bps[0].textContent,
+            "The breakpoint name must match"))
+        {
+            var links = panelNode.getElementsByClassName("objectLink-sourceLink");
+            FBTest.progress("sourceLink 1: " + links[0].textContent);
+        }
+
+        if (!FBTest.compare("onExecuteTest", bps[1].textContent,
+            "The breakpoint name must match"))
+        {
+            var links = panelNode.getElementsByClassName("objectLink-sourceLink");
+            FBTest.progress("sourceLink 2: " + links[1].textContent);
+        }
     }
 
     callback();
