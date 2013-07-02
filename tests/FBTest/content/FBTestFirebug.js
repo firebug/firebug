@@ -1728,6 +1728,12 @@ this.hasBreakpoint = function(line, chrome)
     if (typeof(line) == "number")
         line = FBTest.getSourceLineNode(lineNo, chrome);
 
+    if (!line)
+    {
+        FBTrace.sysout("hasBreakpoint ERROR undefined line");
+        return false;
+    }
+
     var bpNode = line.getElementsByClassName("breakpoint");
     return (bpNode.length > 0);
 }
