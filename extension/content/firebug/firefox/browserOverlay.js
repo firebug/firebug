@@ -498,7 +498,7 @@ BrowserOverlay.prototype =
 
                 this.win.addEventListener("unload", function()
                 {
-                    clearTimeout(timeout);
+                    this.win.clearTimeout(timeout);
                 }, false);
             }
         }
