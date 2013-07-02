@@ -116,9 +116,12 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     startProfiling: function(context, title)
     {
-        FBS.startProfiling();
-
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
+
+        if (FBS.profiling)
+            return;
+
+        FBS.startProfiling();
 
         var originalTitle = title;
         var isCustomMessage = !!title;
