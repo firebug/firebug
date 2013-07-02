@@ -1115,8 +1115,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
         catch (exc)
         {
-            TraceError.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
-            Firebug.Console.log("Resuming debugger: error during debugging loop: " + exc);
+            TraceError.sysout("Resuming debugger: ERROR during debugging loop: " + exc, exc);
+            Firebug.Console.log("Resuming debugger: ERROR during debugging loop: " + exc);
 
             this.resume(this.context);
         }

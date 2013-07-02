@@ -6,8 +6,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/wrapper",
+    "firebug/lib/array",
 ],
-function(Firebug, Http, Dom, Css, Wrapper) {
+function(Firebug, Http, Dom, Css, Wrapper, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -117,13 +118,14 @@ SourceEditor.prototype =
     init: function (parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
+        var onInit = this.onInit.bind(this, parentNode, config, callback);
 
-        // Append CM scripts into the panel.html
-        Dom.addScript(doc, "cm", Http.getResource(codeMirrorSrc));
-        Dom.addScript(doc, "cm-js", Http.getResource(jsModeSrc));
-        Dom.addScript(doc, "cm-xml", Http.getResource(xmlModeSrc));
-        Dom.addScript(doc, "cm-css", Http.getResource(cssModeSrc));
-        Dom.addScript(doc, "cm-htmlmixed", Http.getResource(htmlMixedModeSrc));
+        this.loadScripts(doc, onInit);
+    },
+
+    onInit: function (parentNode, config, callback)
+    {
+        var doc = parentNode.ownerDocument;
 
         // All properties must be read-only so, they can't be modified in the DOM panel.
         function genPropDesc(value)
@@ -139,6 +141,8 @@ SourceEditor.prototype =
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
         var view = Wrapper.getContentView(doc.defaultView);
+
+        Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
 
         // The config object passed to the view must be content-accessible.
         var newConfig = Cu.createObjectIn(view);
@@ -166,7 +170,7 @@ SourceEditor.prototype =
             Css.setClass(element, "firebug-line");
         });
 
-        // xxxHonza: "contextmenu" event provides wrong target (clicked) element.
+        // xxxHonza: 'contextmenu' event provides wrong target (clicked) element.
         // So, handle 'mousedown' first to remember the clicked element and use
         // it within the getContextMenu item
         var scroller = this.editorObject.display.scroller;
@@ -189,6 +193,57 @@ SourceEditor.prototype =
     isInitialized: function()
     {
         return (this.editorObject != null)
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Load CM Scripts
+
+    loadScripts: function (doc, callback)
+    {
+        Trace.sysout("sourceEditor.loadScripts;");
+
+        var scripts = [];
+
+        var onScriptLoad = function(event)
+        {
+            Arr.remove(scripts, event.target);
+
+            if (!scripts.length)
+                callback();
+        };
+
+        function addScript(doc, id, url)
+        {
+            Dom.addScript(doc, id, Http.getResource(url));
+            return;
+
+            //xxxHonza: The rest is for CM debugging. If <script> tag are inserted with
+            // properly set 'src' attribute, stack traces produced by Firebug tracing
+            // console are correct. But it's asynchronous causing the Script panel UI
+            // to blink so, we don't need it for production.
+            var script = doc.getElementById(id);
+            if (script)
+                return script;
+
+            script = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+            scripts.push(script);
+            script.onload = onScriptLoad;
+
+            script.setAttribute("type", "text/javascript");
+            script.setAttribute("id", id);
+            script.setAttribute("src", url);
+
+            doc.documentElement.appendChild(script);
+        }
+
+        addScript(doc, "cm", codeMirrorSrc);
+        addScript(doc, "cm-js", jsModeSrc);
+        addScript(doc, "cm-xml", xmlModeSrc);
+        addScript(doc, "cm-css", cssModeSrc);
+        addScript(doc, "cm-htmlmixed", htmlMixedModeSrc);
+
+        if (!scripts.length)
+            callback();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -570,7 +625,19 @@ SourceEditor.prototype =
             // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
             // returns the visible area minus scrollbars, it doesn't seem to work).
             var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
-            var coords = this.editorObject.charCoords({line: line, ch: 0}, "local");
+
+            var coords;
+            try
+            {
+                coords = this.editorObject.charCoords({line: line, ch: 0}, "local");
+            }
+            catch (err)
+            {
+                // xxxHonza: why this exception happens?
+                FBTrace.sysout("sourceEditor.scrollToLine; EXCEPTION " + err, err);
+                return;
+            }
+
             var top = coords.top;
             var bottom = coords.bottom;
 
@@ -622,6 +689,9 @@ SourceEditor.prototype =
 
     addBreakpoint: function(lineNo)
     {
+        if (!this.editorObject)
+            return;
+
         Trace.sysout("sourceEditor.addBreakpoint; line: " + lineNo);
 
         var info = this.editorObject.lineInfo(lineNo);
@@ -660,6 +730,9 @@ SourceEditor.prototype =
 
     removeBreakpoint: function(lineNo)
     {
+        if (!this.editorObject)
+            return;
+
         Trace.sysout("sourceEditor.removeBreakpoint; line: " + lineNo);
 
         this.removeGutterMarker(bpGutter, lineNo);
@@ -704,6 +777,9 @@ SourceEditor.prototype =
 
     getGutterMarker: function(gutter, lineNo)
     {
+        if (!this.editorObject)
+            return;
+
         var info = this.editorObject.lineInfo(lineNo);
         return (info && info.gutterMarkers && info.gutterMarkers[gutter] ?
             info.gutterMarkers[gutter] : null);

@@ -354,6 +354,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     addBreakpoint: function(bp)
     {
+        if (!this.editor)
+            return;
+
         var self = this;
         this.safeSkipEditorBreakpointChange(function()
         {

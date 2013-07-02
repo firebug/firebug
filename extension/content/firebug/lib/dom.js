@@ -169,7 +169,11 @@ Dom.insertAfter = function(newNode, referenceNode)
 
 Dom.addScript = function(doc, id, src)
 {
-    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+    var element = doc.getElementById(id);
+    if (element)
+        return element;
+
+    element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
 
@@ -186,10 +190,13 @@ Dom.addScript = function(doc, id, src)
     {
         // See issue 1079, the svg test case gives this error
         if (FBTrace.DBG_ERRORS)
+        {
             FBTrace.sysout("lib.addScript doc has no documentElement (" +
                 doc.readyState + ") " + doc.location, doc);
+        }
         return;
     }
+
     return element;
 };
 
