@@ -1093,6 +1093,13 @@ this.getSelectedPanel = function()
     return panelBar1.selectedPanel; // may be null
 };
 
+/* selected side panel on UI (not via context) */
+this.getSelectedSidePanel = function()
+{
+    var panelBar2 = FW.Firebug.chrome.$("fbPanelBar2");
+    return panelBar2.selectedPanel; // may be null
+};
+
 /**
  * Returns document object of Main Firebug content UI (content of all panels is presented
  * in this document).
@@ -1105,8 +1112,8 @@ this.getPanelDocument = function()
 
 this.getSidePanelDocument = function()
 {
-    var panelBar1 = FW.Firebug.chrome.$("fbPanelBar2");
-    return panelBar1.browser.contentDocument;
+    var panelBar2 = FW.Firebug.chrome.$("fbPanelBar2");
+    return panelBar2.browser.contentDocument;
 };
 
 /* user sees panel tab disabled? */
