@@ -130,7 +130,7 @@ DebuggerLib.getObject = function(context, actorId)
     try
     {
         // xxxHonza: access server side objects, of course even hacks needs
-        // good architecure, refactor.
+        // good architecture, refactor.
         // First option: implement a provider used by UI widgets (e.g. DomTree)
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=837723
         var threadActor = this.getThreadActor(context.browser);

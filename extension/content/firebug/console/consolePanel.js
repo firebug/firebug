@@ -523,7 +523,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 // method.
                 // xxxHonza: is there a better place where to make this kind of conversion?
                 if (!sourceLink && (objects instanceof Error))
-                    objects = FirebugReps.Except.getErrorMessage(objects);
+                    objects = FirebugReps.ExceptionRep.getErrorMessage(objects);
 
                 if (!sourceLink && objects && objects.getSourceLink)
                     sourceLink = objects.getSourceLink();

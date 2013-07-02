@@ -89,6 +89,8 @@ var Exception = domplate(Firebug.Rep,
 // ********************************************************************************************* //
 // Registration
 
+FirebugReps.ExceptionRep = Exception;
+
 Firebug.registerRep(Exception);
 
 return Exception;
