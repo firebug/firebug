@@ -160,6 +160,9 @@ function waitForWindowLoad(browser, callback)
         try
         {
             var win = browser.contentWindow;
+
+            FBTest.progress("executeCallback " + win.location);
+
             if (!win)
                 FBTrace.progress("waitForWindowLoad: ERROR no window!");
 
