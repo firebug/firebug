@@ -369,6 +369,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
     },
 
+    matchesFilter: function(logRow)
+    {
+        if (!this.filterTypes || this.filterTypes.join(" ") == "all")
+            return true;
+
+        var type = this.getLogRowType(logRow);
+        return this.filterTypes.indexOf(type) != -1;
+    },
+
     search: function(text)
     {
         // Make previously visible nodes invisible again
@@ -400,16 +409,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
             Firebug.Search.isCaseSensitive(text)))
         {
-            Css.setClass(logRow, "matched");
-
-            // Mark the groups, in which the log row is located, also as matched
-            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
-                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            if (this.matchesFilter(logRow))
             {
-                Css.setClass(group, "matched");
-                this.matchSet.push(group);
+                Css.setClass(logRow, "matched");
+
+                // Mark the groups, in which the log row is located, also as matched
+                for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                    group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                {
+                    Css.setClass(group, "matched");
+                    this.matchSet.push(group);
+                }
+                this.matchSet.push(logRow);
             }
-            this.matchSet.push(logRow);
         }
 
         Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound",
@@ -825,7 +837,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return this.panelNode;
     },
 
-    filterLogRow: function(logRow, scrolledToBottom)
+    getLogRowType: function(logRow)
     {
         var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
         var type = typeMatch ? typeMatch[1] : "";
@@ -836,7 +848,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         else if (type == "warn" || type == "warningMessage")
             type = "warning";
 
-        if (this.filterTypes.indexOf(type) != -1)
+        return type;
+    },
+
+    filterLogRow: function(logRow, scrolledToBottom)
+    {
+        if (this.matchesFilter(logRow))
         {
             // Mark the groups, in which the log row is located, also as matched
             for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
