@@ -46,7 +46,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
-        exceptionFunction, noStateChange)
+        exceptionFunction, noStateChange, noBindings)
     {
         if (!context)
             return;
@@ -73,7 +73,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr);
+                    successConsoleFunction, exceptionFunction, expr, noBindings);
             }
 
             if (!noStateChange)
@@ -95,7 +95,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     },
 
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction, origExpr)
+        successConsoleFunction, exceptionFunction, origExpr, noBindings)
     {
         var win = targetWindow || context.getCurrentGlobal();
 
@@ -146,7 +146,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         };
 
         origExpr = origExpr || expr;
-        CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError);
+        var options = {"noBindings": noBindings};
+        CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError, options);
     },
 
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,

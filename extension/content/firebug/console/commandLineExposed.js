@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false, evil:true, forin: false*/
+/*jshint esnext:true, curly:false, evil:true, forin: false*/
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
@@ -245,18 +245,27 @@ function evaluateInPageContext(context, win)
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
  */
-function evaluate(context, win, expr, origExpr, onSuccess, onError)
+function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 {
+    if (!options)
+        options = {};
+
     var result;
     var contentView = Wrapper.getContentView(win);
-    var commandLine = createFirebugCommandLine(context, win);
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
 
-    updateVars(commandLine, dglobal, context);
-    removeConflictingNames(commandLine, context, contentView);
+    if (!options.noBindings)
+    {
+        var bindings = getCommandLineBindings(context, win, dglobal, contentView);
 
-    resObj = dglobal.evalInGlobalWithBindings(expr, commandLine);
+        resObj = dglobal.evalInGlobalWithBindings(expr, bindings);
+    }
+    else
+    {
+        resObj = dglobal.evalInGlobal(expr);
+    }
+
 
     var unwrap = function(obj)
     {
@@ -477,6 +486,16 @@ function getAutoCompletionList()
         completionList.sort();
     }
     return completionList;
+}
+
+function getCommandLineBindings(context, win, dglobal, contentView)
+{
+    var commandLine = createFirebugCommandLine(context, win);
+
+    updateVars(commandLine, dglobal, context);
+    removeConflictingNames(commandLine, context, contentView);
+
+    return commandLine;
 }
 
 // ********************************************************************************************* //

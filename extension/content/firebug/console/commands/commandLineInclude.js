@@ -470,7 +470,9 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
                 hasWarnings = true;
             }
 
-            Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
+            Firebug.CommandLine.evaluate(codeToEval, context, undefined, undefined, undefined,
+                undefined, undefined, /*noBindings:*/ true);
+
             if (successFunction)
                 successFunction(xhr, hasWarnings);
         };
