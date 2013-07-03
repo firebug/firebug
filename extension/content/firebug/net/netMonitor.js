@@ -15,11 +15,12 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netDebugger",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule"
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events,
+    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events, Locale,
     TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
@@ -84,6 +85,18 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbNetFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbNetFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetMonitor.initializeUI; enabled: " + this.isAlwaysEnabled());
@@ -300,7 +313,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         // If no filter categories are selected, use the default
         if (filterCategories.length == 0)
             filterCategories = Options.getDefault("netFilterCategories").split(" ");
-        
+
         Options.set("netFilterCategories", filterCategories.join(" "));
 
         this.syncFilterButtons(Firebug.chrome);
@@ -321,7 +334,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         for (var i=0, len=buttons.length; i<len; ++i)
         {
             var filterCategory = buttons[i].id.substr(buttons[i].id.search("-") + 1);
-            buttons[i].checked = filterCategories.has(filterCategory); 
+            buttons[i].checked = filterCategories.has(filterCategory);
         }
     },
 

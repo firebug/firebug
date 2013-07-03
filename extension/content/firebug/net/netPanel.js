@@ -86,18 +86,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
 
-        // Initialize filter button tooltips
-        var doc = this.context.chrome.window.document;
-        var filterButtons = doc.getElementsByClassName("fbNetFilter");
-        for (var i=0, len=filterButtons.length; i<len; ++i)
-        {
-            if (filterButtons[i].id != "fbNetFilter-all")
-            {
-                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
-                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
-            }
-        }
-
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.NetMonitor.addListener(this);
     },

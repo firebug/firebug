@@ -5,6 +5,7 @@ define([
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/xml",
@@ -17,7 +18,7 @@ define([
     "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -185,8 +186,24 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
+    },
 
+    initializeUI: function()
+    {
+        // Synchronize UI buttons with the current filter
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbConsoleFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbConsoleFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
     },
 
     shutdown: function()
