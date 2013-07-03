@@ -156,7 +156,10 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         if (refresh)
+        {
+            this.scrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
             this.refresh();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -177,6 +180,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     destroy: function(state)
     {
+        var scrollContainer = this.panelNode.getElementsByClassName("elementsGroups")[0];
+        state.scrollTop = scrollContainer.scrollTop ?
+            scrollContainer.scrollTop : this.lastScrollTop;
         state.groups = this.groups;
         Persist.persistObjects(this, state);
 
@@ -208,6 +214,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (state)
         {
+            if (state.scrollTop)
+                this.scrollTop = state.scrollTop;
+
             if (state.groups)
                 this.groups = state.groups;
         }
@@ -217,15 +226,16 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         this.observeMutations();
     },
 
-    watchWindow: function(context, win)
-    {
-        this.observeMutations(win);
-    },
-
     hide: function()
     {
         this.context.mutationObserver.disconnect();
         this.context.mutationObserver = null;
+        this.lastScrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
+    },
+
+    watchWindow: function(context, win)
+    {
+        this.observeMutations(win);
     },
 
     getEditor: function(target, value)
@@ -278,6 +288,12 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             for (var i=0, len=this.groups.length; i<len; ++i)
                 this.displayGroup(this.groups[i]);
+        }
+
+        if (this.scrollTop)
+        {
+            this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop = this.scrollTop;
+            delete this.scrollTop;
         }
     },
 
