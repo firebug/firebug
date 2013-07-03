@@ -42,12 +42,33 @@ const STATE_FOCUS   = 0x02;
 const STATE_HOVER   = 0x04;
 
 // ********************************************************************************************* //
-// CSS Elemenet Panel (HTML side panel)
+// CSSStylePanel Panel (HTML side panel)
 
 function CSSStylePanel() {}
 
 CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 {
+    name: "css",
+    parentPanel: "html",
+    order: 0,
+
+    initialize: function()
+    {
+        this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
+        this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
+        this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+
+        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+
+        // Destroy derived updater for now.
+        // xxxHonza: the Style panel could use it too?
+        this.updater.destroy();
+        this.updater = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
     template: domplate(
     {
         cascadedTag:
@@ -478,19 +499,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
-
-    name: "css",
-    parentPanel: "html",
-    order: 0,
-
-    initialize: function()
-    {
-        this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
-        this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
-        this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
-
-        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
-    },
 
     show: function(state)
     {

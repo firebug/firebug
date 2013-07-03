@@ -42,7 +42,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     initializeUI: function()
     {
-        // The "off" option is removed so make sure to convert previsous prev value
+        // The "off" option is removed so make sure to convert previous value
         // into "none" if necessary.
         if (Firebug.allPagesActivation == "off")
             Firebug.allPagesActivation = "none";

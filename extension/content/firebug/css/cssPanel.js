@@ -25,14 +25,14 @@ define([
     "firebug/css/cssReps",
     "firebug/css/selectorEditor",
     "firebug/lib/trace",
-    "firebug/css/loadHandler",
+    "firebug/css/cssPanelUpdater",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, LoadHandler) {
+    SelectorEditor, FBTrace, CSSPanelUpdater) {
 
 with (Domplate) {
 
@@ -352,11 +352,15 @@ const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
-// CSS Panel
+// CSSStyleSheetPanel
 
 Firebug.CSSStyleSheetPanel = function() {};
 
+/**
+ * @panel
+ */
 Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
+/** @lends Firebug.CSSStyleSheetPanel */
 {
     name: "stylesheet",
     parentPanel: null,
@@ -390,6 +394,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.onClick = Obj.bind(this.onClick, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
+
+        // Create an updater for asynchronous update (watching embedded iframe loads).
+        var callback = this.updateDefaultLocation.bind(this);
+        this.updater = new CSSPanelUpdater(this.context, callback);
     },
 
     destroy: function(state)
@@ -399,6 +407,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Persist.persistObjects(this, state);
 
         this.stopEditing();
+
+        if (this.updater)
+            this.updater.destroy();
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
@@ -448,6 +459,46 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     hide: function()
     {
         this.lastScrollTop = this.panelNode.scrollTop;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Default Location Update
+
+    /**
+     * Executed automatically by {@CSSPanelUpdater} object that is watching window/iframe load.
+     */
+    updateDefaultLocation: function()
+    {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("cssPanel.updateDefaultLocation; " + this.location, this.location);
+
+        if (!this.updater)
+            return;
+
+        // Try to update the default location if it doesn't exist yet.
+        if (!this.location)
+        {
+            var defaultLocation = this.getDefaultLocation();
+
+            // Still no default location so, keep the updater running.
+            if (!defaultLocation)
+                return;
+
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("cssPanel.updateDefaultLocation; DONE", defaultLocation);
+
+            // Use navigate so, the location button visibility is properly updated.
+            this.navigate(defaultLocation);
+        }
+        else
+        {
+            // The location is set so just make sure to update the content.
+            this.updateLocation(this.location);
+        }
+
+        // Default location exists so destroy the updater.
+        this.updater.destroy();
+        this.updater = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1213,9 +1264,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 "no stylesheet"));
         }
 
-        // Update as soon as the document is fully loaded (see 4893).
-        var loadHandler = new LoadHandler();
-        loadHandler.handle(this.context, Obj.bindFixed(this.doUpdateLocation, this, styleSheet));
+        this.doUpdateLocation(styleSheet);
     },
 
     doUpdateLocation: function(styleSheet)
@@ -1233,11 +1282,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 if (styleSheet.editStyleSheet)
                     styleSheet = styleSheet.editStyleSheet.sheet;
-                var rules = this.getStyleSheetRules(this.context, styleSheet);
+
+                rules = this.getStyleSheetRules(this.context, styleSheet);
             }
         }
 
-        if (rules.length)
+        if (rules && rules.length)
         {
             this.template.tag.replace({rules: rules}, this.panelNode);
         }
@@ -1336,6 +1386,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (name == "expandShorthandProps" || name == "colorDisplay")
             this.refresh();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocationList: function()
     {
