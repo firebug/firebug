@@ -405,8 +405,8 @@ var Options =
 
     getZoomByTextSize: function(value)
     {
-        var zoom = value >= 0 ? this.positiveZoomFactors[value] :
-            this.negativeZoomFactors[Math.abs(value)];
+        var zoom = value >= 0 ? (this.positiveZoomFactors[value] || 1) :
+            (this.negativeZoomFactors[Math.abs(value)] || 1);
 
         return zoom;
     },
