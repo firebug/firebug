@@ -773,6 +773,17 @@ var TabWatchListener =
         Events.dispatch(Firebug.modules, "unwatchWindow", [context, win]);
     },
 
+    loadWindow: function(context, win)
+    {
+        for (var panelName in context.panelMap)
+        {
+            var panel = context.panelMap[panelName];
+            panel.loadWindow(context, win);
+        }
+
+        Events.dispatch(Firebug.modules, "loadWindow", [context, win]);
+    },
+
     loadedContext: function(context)
     {
         if (!context.browser.currentURI)

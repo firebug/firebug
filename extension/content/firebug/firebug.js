@@ -1778,6 +1778,10 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
+    loadWindow: function(context, win)
+    {
+    },
+
     updateOption: function(name, value)
     {
     },

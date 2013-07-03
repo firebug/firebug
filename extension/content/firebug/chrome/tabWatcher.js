@@ -211,7 +211,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         {
             // xxxHonza: This place can be called multiple times for one window, so
             // make sure event listeners are not registered twice.
-            // There should be a better way to find out whether the listeneres are actually
+            // There should be a better way to find out whether the listeners are actually
             // registered for the window.
             context.removeEventListener(win, "pageshow", onLoadWindowContent,
                 onLoadWindowContent.capturing);
@@ -269,7 +269,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> rushShowContextTimeout: tryAgain: " + tryAgain);
 
-        // still loading, we want to showContext one time but not too agressively
+        // still loading, we want to showContext one time but not too aggressively
         var handler = Obj.bindFixed(function delayShowContext()
         {
             if (FBTrace.DBG_WINDOWS)
@@ -505,6 +505,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
                             context.windows[i].location.href);
                 }
             }
+
+            context.addEventListener(win, "load", onLoadWindow, false);
         }
     },
 
@@ -1254,10 +1256,31 @@ function onUnloadWindow(event)
     var eventType = "unload";
 
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+Win.safeGetWindowLocation(win) +
+    {
+        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: " + Win.safeGetWindowLocation(win) +
             " removeEventListener: "+ eventType);
+    }
 
     Firebug.TabWatcher.unwatchWindow(win);
+}
+
+// ********************************************************************************************* //
+
+function onLoadWindow(event)
+{
+    var win = event.currentTarget;
+
+    Events.removeEventListener(win, "load", onLoadWindow, false);
+
+    var context = Firebug.TabWatcher.getContextByWindow(win);
+    if (!context)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("-> onLoadWindow: ERROR No context for loaded window!");
+        return;
+    }
+
+    Events.dispatch(Firebug.TabWatcher.fbListeners, "loadWindow", [context, win]);
 }
 
 // ********************************************************************************************* //
