@@ -68,5 +68,5 @@ pref("extensions.firebug.DBG_OBSERVERS", false);        // track/untrack support
 pref("extensions.firebug.DBG_EVENTLISTENERS", false);   // track/untrack for registered event listeners, restart needed
 pref("extensions.firebug.DBG_COMMANDEDITOR", false);    // Multiline console based on SourceEditor (Orion)
 pref("extensions.firebug.DBG_MENU", false);             // Menus and context menus in Firebug
-pref("extensions.firebug.DBG_ELEMENTS", false);         // Elements side panel (in the CSS panel)
+pref("extensions.firebug.DBG_SELECTORS", false);        // Selectors side panel (in the CSS panel)
 pref("extensions.firebug.DBG_QUICKINFOBOX", false);     // Quick info box
