@@ -44,13 +44,21 @@ const STATE_HOVER   = 0x04;
 // ********************************************************************************************* //
 // CSSStylePanel Panel (HTML side panel)
 
+/**
+ * @panel Represents the Style side panel available within HTML panel. This panel is responsible
+ * for displaying CSS rules associated with the currently selected element in the HTML panel.
+ * See more: https://getfirebug.com/wiki/index.php/Style_Side_Panel
+ */
 function CSSStylePanel() {}
-
 CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
+/** @lends CSSStylePanel */
 {
     name: "css",
     parentPanel: "html",
     order: 0,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -255,7 +263,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         // Pseudo-element rules just apply to specific elements, so we need a way to find out
         // which elements that are
         pseudoElements = pseudoElements.filter(filterMozPseudoElements);
-        
+
         // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon 
         pseudoElements.forEach(function(pseudoElement, i)
         {

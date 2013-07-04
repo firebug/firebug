@@ -352,13 +352,14 @@ const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
-// CSSStyleSheetPanel
-
-Firebug.CSSStyleSheetPanel = function() {};
+// CSSStyleSheetPanel (CSS Panel)
 
 /**
- * @panel
+ * @panel Represents the CSS panel available in main Firebug UI. This panel is responsible
+ * for displaying CSS rules coming from the current page.
+ * See more: https://getfirebug.com/wiki/index.php/CSS_Panel
  */
+Firebug.CSSStyleSheetPanel = function() {};
 Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 /** @lends Firebug.CSSStyleSheetPanel */
 {
@@ -1651,8 +1652,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     }
                 }
             }
-            var cssValue;
 
+            var cssValue;
             if (propName == "font" || propName == "font-family")
             {
                 if (text.charAt(rangeOffset) == ",")
