@@ -273,8 +273,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace",
-            "console.option.tip.Show_Stack_Trace2");
+        var label = Locale.$STR("ShowStackTrace");
+        var tooltip = Locale.$STR("console.option.tip.Show_Stack_Trace");
+        tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+
+        var menuItem = Menu.optionMenu(label, "showStackTrace", tooltip);
+        menuItem.nol10n = true;
 
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;

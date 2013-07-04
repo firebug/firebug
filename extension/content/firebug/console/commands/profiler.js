@@ -85,9 +85,9 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             enabled ? "false" : "true");
 
         // Update the button's tooltip.
-        var tooltipText = enabled ?
-            Locale.$STR("ProfileButton.Enabled.Tooltip") :
-            Locale.$STR("ProfileButton.Disabled.Tooltip");
+        var tooltipText = Locale.$STR("ProfileButton.Tooltip");
+        if (!enabled)
+            tooltipText = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltipText]);
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "tooltiptext", tooltipText);
     },
 
