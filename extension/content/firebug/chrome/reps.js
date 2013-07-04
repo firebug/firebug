@@ -2447,8 +2447,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             _repObject: "$object",
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
-            DIV({"class": "errorTitle focusRow subLogRow", role: "listitem",
-                title: "$object|getTooltip", $hasTooltip: "$object|getTooltip"},
+            DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
@@ -2671,8 +2670,9 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                         PanelActivation.enablePanel(scriptPanelType);
                     };
                     var msg = (hasScriptPanel ?
-                        Locale.$STR("console.DebuggerWasDisabledForError") :
-                        Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+                            "The debugger was deactivated when this error was thrown." : // XXX temporarily hard-coded, until we decide what to do here
+                            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+
                     FirebugReps.Description.render(msg, traceBox, enableScriptPanel);
                 }
 
