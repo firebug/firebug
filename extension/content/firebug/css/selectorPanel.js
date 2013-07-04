@@ -303,7 +303,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     onReadMore: function()
     {
-        Win.openNewTab("https://getfirebug.com/wiki/index.php/Elements_Side_Panel");
+        Win.openNewTab("https://getfirebug.com/wiki/index.php/Selectors_Side_Panel");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
