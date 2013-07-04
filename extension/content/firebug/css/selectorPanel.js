@@ -282,7 +282,11 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.groups.length == 0)
         {
             var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
-            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+            var box = WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+
+            var readMore = box.getElementsByClassName("readMore")[0];
+            FirebugReps.Description.render(Locale.$STR("css.selector.readMore"),
+                readMore, Obj.bind(this.onReadMore, this));
         }
         else
         {
@@ -295,6 +299,11 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
             this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop = this.scrollTop;
             delete this.scrollTop;
         }
+    },
+
+    onReadMore: function()
+    {
+        Win.openNewTab("https://getfirebug.com/wiki/index.php/Elements_Side_Panel");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -410,7 +419,8 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
 
     isValidSelector: function(value)
     {
-        try {
+        try
+        {
             this.panel.panelNode.querySelector(value);
             return true;
         }
@@ -421,13 +431,15 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 
 var WarningTemplate = domplate(Firebug.Rep,
 {
     noSelectionTag:
         DIV({"class": "selectorWarning noSelection"},
-            SPAN(Locale.$STR("css.selector.noSelection"))
+            DIV(Locale.$STR("css.selector.noSelection")),
+            BR(),
+            DIV({"class": "readMore"})
         ),
 
     noSelectionResultsTag:
@@ -441,12 +453,12 @@ var WarningTemplate = domplate(Firebug.Rep,
         )
 });
 
-//********************************************************************************************* //
-//Registration
+// ********************************************************************************************* //
+// Registration
 
 Firebug.registerPanel(CSSSelectorsPanel);
 
 return CSSSelectorsPanel;
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 }});
