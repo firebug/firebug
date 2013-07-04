@@ -332,16 +332,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             {
                 Css.removeClass(panelNode, "hideType-" + type);
 
-                // There can be two kinds of error and warning messages, which have one type
-                var types = [type];
+                // xxxsz: There can be two kinds of error and warning messages,
+                // which have one type. So map the type to the classes, which match it.
+                // TODO: Merge different CSS class names for log message types
+                var classNames = [type];
                 if (type == "errorMessage")
-                    types = ["error"];
+                    classNames = ["error"];
                 else if (type == "warning")
-                    types = ["warn", "warningMessage"];
+                    classNames = ["warn", "warningMessage"];
 
-                for (var i=0, typesLen=types.length; i<typesLen; ++i)
+                for (var i=0, classNamesLen=classNames.length; i<classNamesLen; ++i)
                 {
-                    var logRows = panelNode.getElementsByClassName("logRow-" + types[i]);
+                    var logRows = panelNode.getElementsByClassName("logRow-" + classNames[i]);
                     for (var j=0, len=logRows.length; j<len; ++j)
                     {
                         // Mark the groups, in which the log row is located, also as matched
@@ -830,7 +832,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
         var type = typeMatch ? typeMatch[1] : "";
 
-        // There can be two kinds of error and warning messages, which have one type
+        // xxxsz: There can be two kinds of error and warning messages,
+        // which have one type. So map the different classes to the type
+        // they represent.
+        // TODO: Merge different CSS class names for log message types
         if (type == "errorMessage")
             type = "error";
         else if (type == "warn" || type == "warningMessage")
