@@ -612,9 +612,9 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     // matches the pattern above, which is the function definition
     var line = "";
     if (FBTrace.DBG_FUNCTION_NAMES)
-        FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");
+        FBTrace.sysout("getFunctionNameFromLines for line@URL=" + lineNo + "@" + url);
 
-    for (var i = 0; i < 4; ++i)
+    for (var i=0; i<4; ++i)
     {
         line = sourceCache.getLine(url, lineNo-i) + line;
         if (line != undefined)
@@ -627,8 +627,10 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
             else
             {
                 if (FBTrace.DBG_FUNCTION_NAMES)
-                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+
-                        "-"+i+" line="+line+"\n");
+                {
+                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i=" + lineNo +
+                        "-" + i + " line=" + line);
+                }
             }
 
             m = reFunctionArgNames.exec(line);
@@ -636,6 +638,7 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
                 return m[1];
         }
     }
+
     return "(?)";
 };
 
