@@ -83,7 +83,6 @@ var FirebugChrome =
      */
     initialize: function()
     {
-
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -932,6 +931,8 @@ var FirebugChrome =
 
         Dom.collapse(sidePanelDeck, !panelBar2.selectedPanel);
         Dom.collapse(panelSplitter, !panelBar2.selectedPanel);
+
+        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [panelBar1.selectedPanel]);
     },
 
     syncTitle: function()

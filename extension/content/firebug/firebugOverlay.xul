@@ -398,6 +398,13 @@
                                     <!-- Toolbar buttons provided by extensions through Firebug API -->
                                     <hbox id="fbPanelToolbar" collapsed="true" class="noTabStop">
                                     </hbox>
+
+                                    <!-- Toggle visibility of the side panels area -->
+                                    <vbox id="fbToggleSidePanelsBox" collapsed="false" align="end" flex="1">
+                                        <toolbarbutton id="fbToggleSidePanels"
+                                            class="toolbar-image-button fbInternational"
+                                            tooltiptext="firebug.tip.Toggle_Side_Panels"/>
+                                    </vbox>
                                 </hbox>
                             </toolbar>
                         </toolbox>

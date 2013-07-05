@@ -478,3 +478,14 @@ textbox[type="fbSearchBox"] > panel {
 #fbNetPersist {
     -moz-image-region: rect(0, 1px, 1px, 0);
 }
+
+/*************************************************************************************************/
+/* Toggle Side Panels */
+
+#fbToggleSidePanels {
+    list-style-image: url(chrome://firebug/skin/collapseSidePanels.svg);
+}
+
+#fbToggleSidePanels.closed {
+    list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
+}
