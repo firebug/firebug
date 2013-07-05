@@ -29,7 +29,8 @@
     <section id="description">
         <h3>Steps to reproduce</h3>
         <ol>
-            <li>Open Firebug, select and enable the Console panel, reload the page.</li>
+            <li>Make sure the pref preferJSDSourceLinks is set.</li>
+            <li>Open Firebug, enable the Script panel, select and enable the Console panel, reload the page.</li>
             <li>Click this button <button id="testButton" onclick="onClickButton()">Click Me</button></li>
             <li>There should be a log in the Console panel, location: FirebugBug.js (line 6)</li>
         </ol>

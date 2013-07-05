@@ -264,7 +264,11 @@
 }
 
 .errorTrace {
+    color: black;
     margin-left: 17px;
+}
+
+.errorTrace .objectBox-stackFrame {
     color: blue;
 }
 

@@ -27,10 +27,11 @@ define([
     "firebug/chrome/menu",
     "arch/compilationunit",
     "firebug/net/netUtils",
+    "firebug/chrome/panelActivation",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
 
 with (Domplate) {
 
@@ -2454,7 +2455,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role: "presentation"}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow",
-                role : "listitem"},
+                role: "listitem"},
                 TABLE({cellspacing: 0, cellpadding: 0},
                     TBODY(
                         TR(
@@ -2623,6 +2624,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             return "show";
     },
 
+    getTooltip: function(error)
+    {
+        if (error.missingTraceBecauseNoDebugger)
+            return Locale.$STR("console.tip.ErrorWithoutDebugger");
+    },
+
     onToggleError: function(event)
     {
         var target = event.currentTarget;
@@ -2648,12 +2655,29 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
             if (Css.hasClass(target, "opened"))
             {
+                var panel = Firebug.getElementPanel(event.target);
+
                 if (target.stackTrace)
+                {
                     FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                }
+                else if (target.repObject.missingTraceBecauseNoDebugger)
+                {
+                    var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+                    var enableScriptPanel = function()
+                    {
+                        var scriptPanelType = Firebug.getPanelType("script");
+                        PanelActivation.enablePanel(scriptPanelType);
+                    };
+                    var msg = (hasScriptPanel ?
+                            "The debugger was deactivated when this error was thrown." : // XXX temporarily hard-coded, until we decide what to do here
+                            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+
+                    FirebugReps.Description.render(msg, traceBox, enableScriptPanel);
+                }
 
                 if (Firebug.A11yModel.enabled)
                 {
-                    var panel = Firebug.getElementPanel(event.target);
                     Events.dispatch(panel.fbListeners, "modifyLogRow", [panel, traceBox]);
                 }
             }
@@ -3347,11 +3371,14 @@ FirebugReps.ErrorMessageObj.prototype =
 {
     getSourceLine: function()
     {
+        if (this.href === null)
+            return "";
+
         if (!this.context.sourceCache)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("reps.ErrorMessageObj.getSourceLine; ERROR no source cache!");
-            return;
+            return "";
         }
 
         return this.context.sourceCache.getLine(this.href, this.lineNo);

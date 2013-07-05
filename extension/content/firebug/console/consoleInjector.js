@@ -38,6 +38,9 @@ Firebug.Console.injector =
             // in a window content sandbox and return a wrapper for the 'console' object.
             // Note that this wrapper appends an additional frame that shouldn't be displayed
             // to the user.
+            //
+            // Since we are using .caller and .arguments for stack walking, the function must
+            // not be in strict mode.
             var expr = "(function(x) { return {\n";
             for (var p in console)
             {

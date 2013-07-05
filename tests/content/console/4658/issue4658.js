@@ -5,6 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "console/4658/issue4658.html", function(win)
     {
         FBTest.openFirebug();
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-debug"};

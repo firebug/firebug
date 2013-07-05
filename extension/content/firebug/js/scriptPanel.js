@@ -162,8 +162,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     onJavaScriptDebugging: function(active)
     {
-        // If this panel is selected, the change in JSD causes a refresh
-        if (Firebug.chrome.getSelectedPanel() === this)
+        // Front side state
+        Firebug.jsDebuggerOn = active;
+
+        // If this panel is selected, the change in JSD causes a refresh.
+        // Note that onJavaScriptDebugging is called on the prototype.
+        var selectedPanel = Firebug.chrome.getSelectedPanel();
+        if (selectedPanel && Object.getPrototypeOf(selectedPanel) === this)
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
@@ -181,9 +186,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Firebug.StartButton.resetTooltip();
         else
             FBTrace.sysout("No Firebug.StartButton in onJavaScriptDebugging?");
-
-        // Front side state
-        Firebug.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
         {
