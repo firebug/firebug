@@ -26,13 +26,14 @@ define([
     "firebug/css/selectorEditor",
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
+    "firebug/lib/wrapper",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, CSSPanelUpdater) {
+    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper) {
 
 with (Domplate) {
 
@@ -463,6 +464,30 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // TabWatcher
+
+    unwatchWindow: function(context, win)
+    {
+        // We need to check whether the current location (a stylesheet) has been
+        // unloaded together with the window. It must be done asynchronously since
+        // the object not marked as dead immediatelly.
+        // xxxHonza: using random timeout is hacky, is there any better approach?
+        context.setTimeout(this.unwatchWindowDelayed.bind(this), 200);
+    },
+
+    unwatchWindowDelayed: function(context, win)
+    {
+        // Check the current location. If the stylesheet comes from unloaded
+        // window it would be dead object by now. If yes, we need to update the
+        // current location.
+        if (Wrapper.isDeadWrapper(this.location))
+        {
+            this.location = null;
+            this.updateDefaultLocation();
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Default Location Update
 
     /**
@@ -472,9 +497,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("cssPanel.updateDefaultLocation; " + this.location, this.location);
-
-        if (!this.updater)
-            return;
 
         // Try to update the default location if it doesn't exist yet.
         if (!this.location)
@@ -497,9 +519,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             this.updateLocation(this.location);
         }
 
-        // Default location exists so destroy the updater.
-        this.updater.destroy();
-        this.updater = null;
+        if (this.updater)
+        {
+            // Default location exists so destroy the updater.
+            this.updater.destroy();
+            this.updater = null;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

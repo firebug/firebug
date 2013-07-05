@@ -63,7 +63,10 @@ CSSPanelUpdater.prototype =
         this.timeout = this.context.setInterval(this.onTimeout.bind(this), updateTimeout);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.watchWindow; " + Win.safeGetWindowLocation(win) + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.watchWindow; " + Win.safeGetWindowLocation(win) +
+                ", " + this.timeout);
+        }
     },
 
     unwatchWindow: function(win)
@@ -105,7 +108,10 @@ CSSPanelUpdater.prototype =
     destroy: function()
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.destroy; " + this.context.getName() + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.destroy; " + this.context.getName() +
+                ", " + this.timeout);
+        }
 
         if (this.timeout)
             this.context.clearInterval(this.timeout);
@@ -122,7 +128,10 @@ CSSPanelUpdater.prototype =
     onTimeout: function()
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.onTimeout; " + this.context.getName() + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.onTimeout; " + this.context.getName() +
+                ", " + this.timeout);
+        }
 
         try
         {
