@@ -713,8 +713,6 @@ Str.formatSize = function(bytes)
     if (sizePrecision == -1)
         result = bytes + " B";
 
-    var a = Math.pow(10, sizePrecision);
-
     if (bytes == -1 || bytes == undefined)
         return "?";
     else if (bytes == 0)
@@ -722,9 +720,9 @@ Str.formatSize = function(bytes)
     else if (bytes < 1024)
         result = bytes.toLocaleString() + " B";
     else if (bytes < (1024 * 1024))
-        result = this.toFixedLocaleString(Math.round(bytes / 1024 * a) / a, sizePrecision) + " KB";
+        result = this.toFixedLocaleString(bytes / 1024, sizePrecision) + " KB";
     else
-        result = this.toFixedLocaleString(Math.round(bytes / (1024 * 1024) * a) / a, sizePrecision) + " MB";
+        result = this.toFixedLocaleString(bytes / (1024 * 1024), sizePrecision) + " MB";
 
     return negative ? "-" + result : result;
 };
