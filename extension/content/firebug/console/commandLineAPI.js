@@ -105,7 +105,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
         try
         {
-            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType, true);
+            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
         }
         catch(ex)
         {
