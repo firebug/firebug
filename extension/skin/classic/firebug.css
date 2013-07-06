@@ -249,6 +249,7 @@ textbox[type="fbSearchBox"] > panel {
     max-width: none;
 }
 
+.fbNoDomain,
 .fbInlineItem {
     font-style: italic;
 }

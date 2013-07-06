@@ -1096,7 +1096,7 @@
                     FBL.removeClass(button, "fbInlineItem");
 
                 this.setAttribute("label", fileName != path ?
-                    FBL.cropString(fileName, 80) : "Inline");
+                    FBL.cropString(fileName, 80) : FBL.$STR("location.inline"));
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
                 {
@@ -1233,7 +1233,9 @@
                 if (!description)
                     FBTrace.sysout("binding.xml popupshowing Fails", object);
 
-                var entry = {object: object, fileName: description.name};
+                var name =  (description.protocol == "file" && description.path == "" &&
+                    description.name == "") ? description.domain : description.name;
+                var entry = {object: object, fileName: name};
 
                 if (currentDescription && currentDescription.name == description.name &&
                     currentDescription.path == description.path)
@@ -1261,12 +1263,18 @@
                 var urls = groups[path];
                 urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
 
-                var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                var menuHeader = FBL.createMenuHeader(this.popup, {
+                    label: path || FBL.$STR("location.no_domain"),
+                    nol10n: true
+                });
                 FBL.setClass(menuHeader, "fbURLMenuItem");
+                if (path == "")
+                    FBL.setClass(menuHeader, "fbNoDomain");
 
                 for (var j = 0; j < urls.length; ++j)
                 {
-                    var label = urls[j].fileName != path ? urls[j].fileName : "Inline";
+                    var label = urls[j].fileName != path ?
+                        urls[j].fileName : FBL.$STR("location.inline");
                     var menuInfo = {
                         label: FBL.cropString(label, Firebug.Options.get("stringCropLength")),
                         tooltiptext: path + urls[j].fileName,
