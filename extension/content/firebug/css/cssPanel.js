@@ -469,21 +469,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     unwatchWindow: function(context, win)
     {
         // We need to check whether the current location (a stylesheet) has been
-        // unloaded together with the window. It must be done asynchronously since
-        // the object not marked as dead immediatelly.
-        // xxxHonza: using random timeout is hacky, is there any better approach?
-        context.setTimeout(this.unwatchWindowDelayed.bind(this), 200);
-    },
-
-    unwatchWindowDelayed: function(context, win)
-    {
-        // Check the current location. If the stylesheet comes from unloaded
-        // window it would be dead object by now. If yes, we need to update the
-        // current location.
-        if (Wrapper.isDeadWrapper(this.location))
+        // unloaded together with the window.
+        if (this.location)
         {
-            this.location = null;
-            this.updateDefaultLocation();
+            var styleSheetDoc = this.location.ownerNode.ownerDocument;
+            if (styleSheetDoc == win.document)
+            {
+                this.location = null;
+                this.updateDefaultLocation();
+            }
         }
     },
 
