@@ -17,7 +17,7 @@
 <binding id="panelBar">
     <!-- The XUL structure for the panel bar is specified in the XUL source
          inside each "panelBar" element.  This allows us to have panel bars
-         with substantially different layous, including the ability to embed
+         with substantially different layout, including the ability to embed
          one panel bar within another - albeit at some cost in maintainability. -->
     <content>
         <children/>
@@ -57,15 +57,15 @@
             <body><![CDATA[
                 var tab = document.createElement("panelTab");
                 tab.panelType = panelType;
-    
+
                 var title = Firebug.getPanelTitle(panelType);
                 var tooltip = Firebug.getPanelTooltip(panelType);
                 tab.setAttribute("label", title);
                 tab.setAttribute("tooltiptext", tooltip);
-    
+
                 this.tabMap[panelType.prototype.name] = tab;
                 this.updateTab(panelType);
-    
+
                 return tab;
             ]]></body>
         </method>
@@ -89,13 +89,13 @@
             <parameter name="panelType"/>
             <body><![CDATA[
                 var tab = this.getTab(panelType.prototype.name);
-    
+
                 if (tab && panelType.prototype.activable)
                 {
                     var enabled = panelType.prototype.isEnabled();
                     tab.setAttribute("aria-disabled", enabled ? "false" : "true");
                 }
-    
+
                 // xxxHonza: Does this belong here?
                 Firebug.StartButton.resetTooltip();
             ]]></body>
@@ -488,19 +488,19 @@
             <body><![CDATA[
                 if (!this.initialized)
                     return;
-    
+
                 // Don't shrink at all, if the pref is set to zero or less
                 if (Firebug.panelTabMinWidth <= 0)
                     return;
-    
+
                 var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
                 if (!totalWidth)
                     return;
-    
+
                 var tabs = FBL.cloneArray(this.panelTabs.children);
                 if (!tabs.length)
                     return;
-    
+
                 var availableSpace = totalWidth;
                 while (tabs.length && availableSpace > 0)
                 {
@@ -530,10 +530,10 @@
             <body><![CDATA[
                 if (this.initialized)
                     return;
-    
+
                 if (!this.panelTabs)
                     return;
-    
+
                 var tab = this.panelTabs.firstChild;
                 while (tab)
                 {
@@ -592,11 +592,11 @@
                     var checked = menuItem.getAttribute("checked") == "true";
                     if (checked)
                         visibleTabs.push(menuItem);
-    
+
                     menuItem.removeAttribute("disabled");
                     menuItem = menuItem.nextSibling;
                 }
-    
+
                 // If there is only one panel visible don't allow to close it.
                 if (visibleTabs.length == 1)
                     visibleTabs[0].setAttribute("disabled", true);
@@ -670,12 +670,12 @@
             <body><![CDATA[
                 if (this.getAttribute("disabled") == "true")
                     return;
-    
+
                 var panelName = this.panelType.prototype.name;
                 var checked = this.getAttribute("checked") == "true";
                 this.setAttribute("checked", checked ? "false" : "true");
                 this.panelBar.togglePanel(panelName, !checked);
-    
+
                 Firebug.chrome.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
@@ -1233,7 +1233,7 @@
                 if (!description)
                     FBTrace.sysout("binding.xml popupshowing Fails", object);
 
-                var name =  (description.protocol == "file" && description.path == "" &&
+                var name = (description.protocol == "file" && description.path == "" &&
                     description.name == "") ? description.domain : description.name;
                 var entry = {object: object, fileName: name};
 
