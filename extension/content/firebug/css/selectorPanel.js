@@ -228,8 +228,8 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     hide: function()
     {
-        this.context.mutationObserver.disconnect();
-        this.context.mutationObserver = null;
+        this.mutationObserver.disconnect();
+        this.mutationObserver = null;
         this.lastScrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
     },
 
@@ -251,14 +251,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     observeMutations: function(win)
     {
-        var context = this.context;
-        if (!context.mutationObserver)
-            context.mutationObserver = new MutationObserver(this.onMutationObserve);
+        var self = this;
+        if (!self.mutationObserver)
+            self.mutationObserver = new MutationObserver(this.onMutationObserve);
 
         function addObserver(win)
         {
             var doc = win.document;
-            context.mutationObserver.observe(doc, {
+            self.mutationObserver.observe(doc, {
                 attributes: true,
                 childList: true,
                 characterData: true,
