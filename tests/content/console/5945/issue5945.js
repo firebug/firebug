@@ -25,13 +25,13 @@ function runTest()
                 {
                     msg: /'background'/,
                     source: "background: not-existing-function();",
-                    link: /cssWithErrors\.css\s*\(line\s*2\,\s*col\s*\d+\)/
+                    link: FW.FBL.$STRF("LineAndCol", ["cssWithErrors.css", 2, 16])
                 },
                 {
                     msg: /'notacolor'.*?'color'/,
                     source: "color: notacolor;",
-                    link: /cssWithErrors\.css\s*\(line\s*6\,\s*col\s*\d+\)/
-                }]
+                    link: FW.FBL.$STRF("LineAndCol", ["cssWithErrors.css", 6, 11])
+                }];
 
                 for (var i=0; i < rows.length; ++i)
                 {
@@ -42,7 +42,7 @@ function runTest()
                     var source = rows[i].getElementsByClassName("errorSourceCode")[0];
                     FBTest.compare(expected[i].source, source.textContent,
                         "The proper source must be displayed. " + source.textContent);
-                    
+
                     var sourceLink = rows[i].getElementsByClassName("objectLink")[0];
                     FBTest.compare(expected[i].link, sourceLink.textContent,
                         "The proper source link must be displayed. " + sourceLink.textContent);

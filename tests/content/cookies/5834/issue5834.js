@@ -23,27 +23,31 @@ function runTest()
     });
 }
 
+var sizeString = FW.FBL.$STR("cookie.sizeinfo.Size");
+var rawSizeString = FW.FBL.$STR("cookie.sizeinfo.Raw_Size");
+
 function short(callback)
 {
-    executeTest("TestCookie5834-1", /Size\s*21 B/, callback);
+    executeTest("TestCookie5834-1", new RegExp(sizeString + "\\s*21 B"), callback);
 }
 
 function shortURLEncoded(callback)
 {
-    executeTest("TestCookie5834-2", /Size\s*23 B\s*Raw Size\s*31 B/, callback);
+    executeTest("TestCookie5834-2", new RegExp(sizeString + "\\s*23 B\\s*" + rawSizeString +
+        "\\s*31 B"), callback);
 }
 
 function long(callback)
 {
-    executeTest("TestCookie5834-3", new RegExp("Size\\s*"+((1.2).toLocaleString())+" KB\\s*\\("+
-        ((1216).toLocaleString())+" B\\)"), callback);
+    executeTest("TestCookie5834-3", new RegExp(sizeString + "\\s*" + ((1.2).toLocaleString()) +
+        " KB\\s*\\(" + ((1216).toLocaleString()) + " B\\)"), callback);
 }
 
 function longURLEncoded(callback)
 {
-    executeTest("TestCookie5834-4", new RegExp("Size\\s*"+(166).toLocaleString()+
-        " B\\s*Raw Size\\s*"+(1.3).toLocaleString()+" KB\\s*\\("+(1366).toLocaleString()+" B\\)"),
-        callback);
+    executeTest("TestCookie5834-4", new RegExp(sizeString + "\\s*"+(166).toLocaleString()+
+        " B\\s*" + rawSizeString + "\\s*" + (1.3).toLocaleString() + " KB\\s*\\(" +
+        (1366).toLocaleString() + " B\\)"), callback);
 }
 
 function executeTest(cookieName, expected, callback)

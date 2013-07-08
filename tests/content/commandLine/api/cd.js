@@ -9,7 +9,7 @@ function runTest()
         {
             var tasks = new FBTest.TaskList();
             tasks.push(FBTest.executeCommandAndVerify, "cd(frames[0])",
-                "Current window: Window cdFrame.html",
+                /Window cdFrame\.html/,
                 "div", "logRow-info");
 
             tasks.push(FBTest.executeCommandAndVerify, "$(\"#test-iframe-1\")",
@@ -17,10 +17,10 @@ function runTest()
                 "a", "objectLink objectLink-element");
 
             tasks.push(FBTest.executeCommandAndVerify, "cd(top)",
-                "Current window: Window cd.html",
+                /Window cd\.html/,
                 "div", "logRow-info");
 
-            tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)", 
+            tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)",
                 "Error: Object must be a window.", "div", "subLogRow", false);
 
             tasks.push(testErrorInfo);
@@ -37,7 +37,7 @@ function testErrorInfo(callback)
     var panelNode = FBTest.getPanel("console").panelNode;
     var row = panelNode.querySelector(".logRow-errorMessage");
     FBTest.click(row.querySelector(".subLogRow"));
-    FBTest.compare(1, row.getElementsByClassName("objectBox-stackFrame").length, 
+    FBTest.compare(1, row.getElementsByClassName("objectBox-stackFrame").length,
         "there should be exactly one element in the stack trace");
     FBTest.compare("cd(undefined)", row.querySelector(".errorSourceCode").textContent,
         "the source of the error should be : \"cd(undefined)\"");
