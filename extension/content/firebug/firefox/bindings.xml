@@ -1083,12 +1083,14 @@
                 else if (val)
                 {
                     var description = locator.getObjectDescription(val);
-                    fileName = description.label ? description.label : description.name;
+                    fileName = (description.protocol == "file" && description.path == "" &&
+                        description.name == "") ? description.domain : description.name;
                 }
 
                 this.repObject = val;
 
                 var button = document.getAnonymousElementByAttribute(this, "anonid", "button");
+                
                 var path = description.path != "/" ? description.path : description.domain;
                 if (fileName == path)
                     FBL.setClass(button, "fbInlineItem");
@@ -1237,8 +1239,11 @@
                     description.name == "") ? description.domain : description.name;
                 var entry = {object: object, fileName: name};
 
-                if (currentDescription && currentDescription.name == description.name &&
-                    currentDescription.path == description.path)
+                if (currentDescription &&
+                    currentDescription.protocol == description.protocol &&
+                    currentDescription.domain == description.domain &&
+                    currentDescription.path == description.path &&
+                    currentDescription.name == description.name)
                 {
                     entry.selected = true;
                 }
