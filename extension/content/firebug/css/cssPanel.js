@@ -1452,6 +1452,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             items.push(
                 "-",
                 {
+                    id: "fbLoadOriginalSource",
                     label: "Load_Original_Source",
                     tooltiptext: "css.tip.Load_Original_Source",
                     command: Obj.bindFixed(this.loadOriginalSource, this)
@@ -1464,15 +1465,15 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 {
+                    id: "fbCopyRuleDeclaration",
                     label: "Copy_Rule_Declaration",
                     tooltiptext: "css.tip.Copy_Rule_Declaration",
-                    id: "fbCopyRuleDeclaration",
                     command: Obj.bindFixed(this.copyRuleDeclaration, this, target)
                 },
                 {
+                    id: "fbCopyStyleDeclaration",
                     label: "Copy_Style_Declaration",
                     tooltiptext: "css.tip.Copy_Style_Declaration",
-                    id: "fbCopyStyleDeclaration",
                     command: Obj.bindFixed(this.copyStyleDeclaration, this, target)
                 }
             );
@@ -1483,21 +1484,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 {
+                    id: "fbCopyPropertyDeclaration",
                     label: "css.label.Copy_Property_Declaration",
                     tooltiptext: "css.tip.Copy_Property_Declaration",
-                    id: "fbCopyPropertyDeclaration",
                     command: Obj.bindFixed(this.copyPropertyDeclaration, this, prop)
                 },
                 {
+                    id: "fbCopyPropertyName",
                     label: "css.label.Copy_Property_Name",
                     tooltiptext: "css.tip.Copy_Property_Name",
-                    id: "fbCopyPropertyName",
                     command: Obj.bindFixed(this.copyPropertyName, this, prop)
                 },
                 {
+                    id: "fbCopyPropertyValue",
                     label: "css.label.Copy_Property_Value",
                     tooltiptext: "css.tip.Copy_Property_Value",
-                    id: "fbCopyPropertyValue",
                     command: Obj.bindFixed(this.copyPropertyValue, this, prop)
                 }
             );
@@ -1510,6 +1511,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 items.push(
                     {
+                        id: "fbCopyColor",
                         label: "CopyColor",
                         tooltiptext: "css.tip.Copy_Color",
                         command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
@@ -1520,11 +1522,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 items.push(
                     {
+                        id: "fbCopyImageLocation",
                         label: "CopyImageLocation",
                         tooltiptext: "css.tip.Copy_Image_Location",
                         command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
                     },
                     {
+                        id: "fbOpenImageInNewTab",
                         label: "OpenImageInNewTab",
                         tooltiptext: "css.tip.Open_Image_In_New_Tab",
                         command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject)
@@ -1538,9 +1542,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             items.push(
                 "-",
                 {
+                    id: "fbNewCSSRule",
                     label: "NewRule",
                     tooltiptext: "css.tip.New_Rule",
-                    id: "fbNewCSSRule",
                     command: Obj.bindFixed(this.insertRule, this, target)
                 }
             );
@@ -1551,10 +1555,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var selector = Str.cropString(target.textContent, 30);
             items.push(
                 {
+                    id: "fbDeleteRuleDeclaration",
                     label: Locale.$STRF("css.Delete_Rule", [selector]),
                     tooltiptext: Locale.$STRF("css.tip.Delete_Rule", [selector]),
                     nol10n: true,
-                    id: "fbDeleteRuleDeclaration",
                     command: Obj.bindFixed(this.deleteRuleDeclaration, this, target)
                 }
             );
@@ -1568,9 +1572,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 items.push(
                     "-",
                     {
+                        id: "fbNewCSSProp",
                         label: "NewProp",
                         tooltiptext: "css.tip.New_Prop",
-                        id: "fbNewCSSProp",
                         command: Obj.bindFixed(this.insertPropertyRow, this, target)
                     }
                 );
@@ -1583,15 +1587,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
                     items.push(
                         {
+                            id: "fbEditCSSProp",
                             label: Locale.$STRF("EditProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Edit_Prop", [propName]),
                             nol10n: true,
                             command: Obj.bindFixed(this.editPropertyRow, this, propRow)
                         },
                         {
+                            id: "fbDeleteCSSProp",
                             label: Locale.$STRF("DeleteProp", [propName]),
                             tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
-                            id: "fbDeleteCSSProp",
                             nol10n: true,
                             command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
                         },
@@ -1612,9 +1617,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 items.push(
                     {
+                        id: "fbEditMediaQuery",
                         label: "css.menu.Edit_Media_Query",
                         tooltiptext: "css.menu.tip.Edit_Media_Query",
-                        id: "fbEditMediaQuery",
                         command: Obj.bindFixed(this.editMediaQuery, this, target)
                     }
                 );
