@@ -39,41 +39,42 @@
         <!-- Copy content directory -->
         <copy todir="${build.dir}/content">
             <fileset dir="content">
-               <include name="*.js"/>
-               <include name="*.css"/>
-               <include name="*.xml"/>
-               <include name="*.xul"/>
-               <include name="*.html"/>
-               <include name="*.properties"/>
+                <include name="*.js"/>
+                <include name="*.css"/>
+                <include name="*.xml"/>
+                <include name="*.xul"/>
+                <include name="*.html"/>
+                <include name="*.properties"/>
             </fileset>
         </copy>
 
         <!-- Copy defaults directory -->
         <copy todir="${build.dir}/defaults">
             <fileset dir="defaults">
-               <include name="**/*.js"/>
+                <include name="**/*.js"/>
             </fileset>
         </copy>
 
         <!-- Copy locale directory -->
         <copy todir="${build.dir}/locale">
             <fileset dir="locale">
-               <include name="**/*.properties"/>
+                <include name="**/*.properties"/>
             </fileset>
         </copy>
 
         <!-- Copy skin directory -->
         <copy todir="${build.dir}/skin">
             <fileset dir="skin">
-               <include name="**/*.css"/>
-               <include name="**/*.png"/>
+                <include name="**/*.css"/>
+                <include name="**/*.png"/>
+                <include name="**/*.svg"/>
             </fileset>
         </copy>
 
         <!-- Copy modules directory -->
         <copy todir="${build.dir}/modules">
             <fileset dir="modules">
-               <include name="**/*.js"/>
+                <include name="**/*.js"/>
             </fileset>
         </copy>
 
