@@ -17,7 +17,8 @@ function runTest()
             var alertCommand = "alert({toString: function(){ throw 1; }})";
             var expected = {
                 sourceCode: alertCommand,
-                scriptName: "/* EXP... 1; }})",
+                scriptName: "/* " + FW.FBL.$STR("commandline.errorSourceHeader").substr(0, 3) +
+                    "... 1; }})",
                 lineNo: 2
             };
             tasks.push(FBTest.executeCommandAndVerify, alertCommand,
