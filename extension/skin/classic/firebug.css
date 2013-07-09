@@ -490,3 +490,19 @@ textbox[type="fbSearchBox"] > panel {
 #fbToggleSidePanels.closed {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
+
+#fbPanelPane[orient="vertical"] #fbToggleSidePanels {
+    list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
+}
+
+#fbPanelPane[orient="vertical"] #fbToggleSidePanels.closed {
+    list-style-image: url(chrome://firebug/skin/expandSidePanelsVertical.svg);
+}
+
+#fbToggleSidePanels:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+#fbToggleSidePanels:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
+}
