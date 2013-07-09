@@ -1,10 +1,24 @@
 function runTest()
 {
+    iterateBrowserTabs(function(browser)
+    {
+        FBTest.progress("tab " + browser.contentWindow.location)
+    });
+
     openNewTab(basePath + "lib/search/textSearch3.html", function(win)
     {
         var root = win.document.getElementById("content");
         FBTest.progress("Document ready state: " + win.document.readyState);
         FBTest.progress("Location: " + win.location);
+
+        iterateBrowserTabs(function(browser)
+        {
+            FBTest.progress("tab " + browser.contentWindow.location)
+        });
+
+        var tabBrowser = FW.Firebug.Firefox.getTabBrowser();
+        FBTest.progress("tabBrowser.selectedBrowser " +
+            tabBrowser.selectedBrowser.contentWindow.location);
 
         if ((win.location + "").indexOf("textSearch") == -1)
         {
@@ -56,6 +70,10 @@ function waitForWindowLoad(browser, callback)
             FBTest.progress("executeCallback browser.contentWindow: " + browser.contentWindow.location);
             FBTest.progress("executeCallback win: " + win.location);
 
+            var tabBrowser = FW.Firebug.Firefox.getTabBrowser();
+            FBTest.progress("tabBrowser.selectedBrowser " +
+                tabBrowser.selectedBrowser.contentWindow.location);
+
             if (!win)
                 FBTrace.progress("waitForWindowLoad: ERROR no window!");
 
@@ -89,6 +107,10 @@ function waitForWindowLoad(browser, callback)
         // but this shoud be set to 0.
         if (loaded && painted)
         {
+            var tabBrowser = FW.Firebug.Firefox.getTabBrowser();
+            FBTest.progress("tabBrowser.selectedBrowser " +
+                tabBrowser.selectedBrowser.contentWindow.location);
+
             FBTest.progress("waitForEvents; loaded+painted " + win.location);
             setTimeout(function()
             {
@@ -102,3 +124,18 @@ function waitForWindowLoad(browser, callback)
     browser.addEventListener("load", waitForEvents, true);
     browser.addEventListener("MozAfterPaint", waitForEvents, true);
 }
+
+function iterateBrowserTabs(callback)
+{
+    var tabBrowser = FW.Firebug.Firefox.getTabBrowser();
+    var numTabs = tabBrowser.browsers.length;
+    for(var index=0; index<numTabs; index++)
+    {
+        var currentBrowser = tabBrowser.getBrowserAtIndex(index);
+        if (callback(currentBrowser))
+            return true;
+    }
+
+    return false;
+};
+
