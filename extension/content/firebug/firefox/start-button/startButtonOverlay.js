@@ -22,7 +22,7 @@ const Ci = Components.interfaces;
 // Module Implementation
 
 /**
- * @module StartButton module represents the UI entry point to Firebug. This "start buttton"
+ * @module StartButton module represents the UI entry point to Firebug. This "start button"
  * formerly known as "the status bar icon" is automatically appended into Firefox toolbar
  * (since Firefox 4).
  *
