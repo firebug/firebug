@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6582: Removing selected style sheet dynamically breaks CSS panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function removeIFrame()
+        {
+            var iframe = document.getElementById("iframe");
+            iframe.parentNode.removeChild(iframe);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6582">Issue 6582</a>:
+                Removing style sheets dynamically breaks CSS panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe id="iframe" src="issue6582-iframe.html" width="100" height="100"></iframe>
+            </section>
+            <section id="description">
+                <h2>Removing the selected style sheet</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Choose <em>issue6582-iframe.html</em> from the Location Menu</li>
+                    <li>Click this button to remove the iframe+stylesheet
+                        <button id="removeIFrame" onclick="removeIFrame()">Remove</button>
+                    </li>
+                    <li>Another style sheets needs to be selected in the CSS panel.</li>
+                </ol>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>
