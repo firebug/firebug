@@ -29,7 +29,8 @@ define([
     "firebug/lib/wrapper",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
-    "firebug/chrome/searchBox"
+    "firebug/chrome/searchBox",
+    "firebug/css/cssPanelMutationObserver",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
@@ -472,7 +473,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         // unloaded together with the window.
         if (this.location)
         {
-            var styleSheetDoc = this.location.ownerNode.ownerDocument;
+            var ownerNode = this.location.ownerNode;
+            var styleSheetDoc = ownerNode ? ownerNode.ownerDocument : null;
             if (styleSheetDoc == win.document)
             {
                 this.location = null;
@@ -499,7 +501,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             // Still no default location so, keep the updater running.
             if (!defaultLocation)
+            {
+                this.updateLocation(null);
                 return;
+            }
 
             if (FBTrace.DBG_CSS)
                 FBTrace.sysout("cssPanel.updateDefaultLocation; DONE", defaultLocation);

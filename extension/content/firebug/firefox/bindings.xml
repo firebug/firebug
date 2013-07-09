@@ -280,6 +280,8 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
+
+                    Firebug.dispatch(Firebug.uiListeners, "onShowPanel", [panel]);
                 }
                 else
                 {
@@ -300,6 +302,8 @@
                 {
                     var state = FBL.getPersistedState(Firebug.currentContext, oldPanel.name);
                     oldPanel.hide(state);
+
+                    Firebug.dispatch(Firebug.uiListeners, "onHidePanel", [oldPanel]);
 
                     oldPanel.visible = false; // xxxjjb Why three ways to un-show the panel?
                     oldPanel.panelNode.removeAttribute("active");
