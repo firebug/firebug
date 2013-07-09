@@ -15,31 +15,37 @@ function runTest()
             // 3
             tasks.push(logProgress, "Testing the nsIXPCException's with alert()");
             var alertCommand = "alert({toString: function(){ throw 1; }})";
+            var expected = {
+                sourceCode: alertCommand,
+                scriptName: "/* EXP... 1; }})",
+                lineNo: 2
+            };
             tasks.push(FBTest.executeCommandAndVerify, alertCommand,
                 "Error: Could not convert JavaScript argument arg 0 [nsIDOMWindow.alert]", "span",
                 "errorMessage", false);
-            tasks.push(testError, panelNode, alertCommand, 2);
+            tasks.push(testError, expected);
 
             // 4.
             tasks.push(logProgress,
                 "Testing the calls of the console API through the Command Line");
             var textToLog = "some text via the command line";
-            tasks.push(FBTest.executeCommandAndVerify, "console.log('"+textToLog+"')", textToLog, 
-                "div", "logRow-log");
+            tasks.push(FBTest.executeCommandAndVerify, "console.log('" + textToLog + "')",
+                textToLog, "div", "logRow-log");
 
             // 5.
             tasks.push(logProgress, "Testing the calls of the console API through the webpage");
             tasks.push(click, win.document.getElementById("logSomeText"));
-            tasks.push(testLogMessageFromPage, panelNode, "some text via the webpage", 
-                "issue6291.html (line 20)");
+            tasks.push(testLogMessageFromPage, panelNode, "some text via the webpage",
+                FW.FBL.$STRF("Line", ["issue6291.html", 20]));
 
             // 6.
             tasks.push(logProgress, "Testing the evaluation of |debugger;|");
-            tasks.push(FBTest.executeCommandAndVerify, "debugger;", "undefined", 
+            tasks.push(FBTest.executeCommandAndVerify, "debugger;", "undefined",
                 "span", "objectBox-undefined", true, true);
             tasks.push(function(callback)
             {
-                FBTest.compare(null, panelNode.querySelector(".fbCommandEditor"));
+                FBTest.compare(null, panelNode.getElementsByClassName("fbCommandEditor")[0],
+                    "Command Editor should not be defined");
                 callback();
             });
 
@@ -72,7 +78,7 @@ function runTest()
             tasks.push(FBTest.executeCommandAndVerify, 'throw "aaa";', "Error: aaa", "span",
                 "errorMessage");
 
-            // 11. 
+            // 11.
             tasks.push(logProgress, "Testing overriding commands");
             tasks.push(FBTest.executeCommandAndVerify, "window.cd = 'ok';", '"ok"', "span",
                 "objectBox-string");
@@ -96,18 +102,19 @@ function runTest()
     });
 }
 
-function testError(callback, panelNode, errorSourceCode, lineNumber)
+function testError(callback, expected)
 {
-    var row = panelNode.querySelector(".logRow-errorMessage");
-    var reTestLine = new RegExp("\\(line "+lineNumber+"\\)");
-    var source = row.querySelector(".errorSourceBox");
-    var sourceLink = row.querySelector(".objectLink-sourceLink");
+    var panelNode = FBTest.getSelectedPanel().panelNode;
+    var row = panelNode.getElementsByClassName("logRow-errorMessage")[0];
+    var source = row.getElementsByClassName("errorSourceBox")[0];
+    var sourceLink = row.getElementsByClassName("objectLink-sourceLink")[0];
 
-    FBTest.compare(errorSourceCode, source.textContent,
-        "the source of the error should be \""+errorSourceCode+"\"");
+    FBTest.compare(expected.sourceCode, source.textContent,
+        "Source of the error should be \"" + expected.sourceCode + "\"");
 
-    FBTest.compare(reTestLine, sourceLink.textContent,
-        "the error should be located at line "+lineNumber);
+    FBTest.compare(FW.FBL.$STRF("Line", [expected.scriptName, expected.lineNo]),
+        sourceLink.textContent,
+        "Location of the error should be '" + sourceLink + "'");
 
     callback();
 }
@@ -123,9 +130,10 @@ function click(callback, node)
 
 function testLogMessageFromPage(callback, panelNode, textToLog, source)
 {
-    FBTest.compare(textToLog, panelNode.querySelector(".objectBox-text").textContent,
-        "the logged text should be: "+textToLog);
-    FBTest.compare(source, panelNode.querySelector(".objectLink-sourceLink").textContent,
+    FBTest.compare(textToLog, panelNode.getElementsByClassName("objectBox-text")[0].textContent,
+        "Logged text should be: " + textToLog);
+    FBTest.compare(source,
+        panelNode.getElementsByClassName("objectLink-sourceLink")[0].textContent,
         "issue6291.html (line 1)");
     callback();
 }
@@ -138,6 +146,7 @@ function logProgress(callback, message)
 
 function testPanelSelected(callback, panelName)
 {
-    FBTest.compare(true, FBTest.getPanel(panelName).visible);
+    FBTest.compare(true, FBTest.getPanel(panelName).visible,
+        "'" + panelName + "' panel must be visible");
     callback();
 }
