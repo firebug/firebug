@@ -104,7 +104,7 @@ Firebug.InsideOutBox.prototype =
         {
             this.openObjectBox(objectBox);
             if (!noScrollIntoView)
-                Dom.scrollIntoCenterView(objectBox);
+                Dom.scrollIntoCenterView(objectBox, this.box);
         }
 
         return objectBox;
@@ -157,7 +157,7 @@ Firebug.InsideOutBox.prototype =
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
                 Css.setClass(highlightedBox, "highlightOpen");
 
-           Dom.scrollIntoCenterView(objectBox);
+            Dom.scrollIntoCenterView(objectBox, this.box);
         }
     },
 

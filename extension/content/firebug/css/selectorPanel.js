@@ -110,14 +110,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         var refresh = false;
 
         // To refresh the panel check whether there's at least one element, that isn't ignored
-        for (var i=0, len=records.length; i<len; ++i)
+        for (var i=0, recordsLen=records.length; i<recordsLen; ++i)
         {
             var record = records[i];
             switch(record.type)
             {
                 case "childList":
                     var nodes = record.addedNodes;
-                    for (var j=0, len=nodes.length; j<len; ++j)
+                    for (var j=0, nodesLen=nodes.length; j<nodesLen; ++j)
                     {
                         if (!Firebug.shouldIgnore(nodes[j]))
                         {
@@ -129,7 +129,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
                     if (!refresh)
                     {
                         nodes = record.removedNodes;
-                        for (var j=0, len=nodes.length; j<len; ++j)
+                        for (var j=0, nodesLen=nodes.length; j<nodesLen; ++j)
                         {
                             if (!Firebug.shouldIgnore(nodes[j]))
                             {
@@ -228,8 +228,8 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     hide: function()
     {
-        this.context.mutationObserver.disconnect();
-        this.context.mutationObserver = null;
+        this.mutationObserver.disconnect();
+        this.mutationObserver = null;
         this.lastScrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
     },
 
@@ -251,14 +251,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     observeMutations: function(win)
     {
-        var context = this.context;
-        if (!context.mutationObserver)
-            context.mutationObserver = new MutationObserver(this.onMutationObserve);
+        var self = this;
+        if (!self.mutationObserver)
+            self.mutationObserver = new MutationObserver(this.onMutationObserve);
 
         function addObserver(win)
         {
             var doc = win.document;
-            context.mutationObserver.observe(doc, {
+            self.mutationObserver.observe(doc, {
                 attributes: true,
                 childList: true,
                 characterData: true,
