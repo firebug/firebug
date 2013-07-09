@@ -1324,6 +1324,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         this.showToolbarButtons("fbCSSButtons", !Url.isSystemStyleSheet(this.location));
 
+        // Hide CSS Edit button if there is no current location.
+        this.showToolbarButtons("fbToggleCSSEditing", this.location != null);
+
         Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
 
         // If the full editing mode (not the inline) is on while the location changes,
