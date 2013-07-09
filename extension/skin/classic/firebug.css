@@ -491,6 +491,10 @@ textbox[type="fbSearchBox"] > panel {
     list-style-image: url(chrome://firebug/skin/expandSidePanels.svg);
 }
 
+#fbPanelPane:not([orient="vertical"]) #fbToggleSidePanels {
+    margin-right: 2px;
+}
+
 #fbPanelPane[orient="vertical"] #fbToggleSidePanels {
     list-style-image: url(chrome://firebug/skin/collapseSidePanelsVertical.svg);
 }
