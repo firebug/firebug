@@ -162,7 +162,7 @@ var CSSPanelMutationObserver = Obj.extend(Firebug.Module,
                 FBTrace.sysout("CSSPanelMutationObserver.onMutationObserve; refresh");
 
             panel.location = null;
-            panel.updateDefaultLocation();
+            panel.navigate(null);
         }
     }
 });

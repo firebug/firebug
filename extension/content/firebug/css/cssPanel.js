@@ -501,10 +501,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             // Still no default location so, keep the updater running.
             if (!defaultLocation)
-            {
-                this.updateLocation(null);
                 return;
-            }
 
             if (FBTrace.DBG_CSS)
                 FBTrace.sysout("cssPanel.updateDefaultLocation; DONE", defaultLocation);
