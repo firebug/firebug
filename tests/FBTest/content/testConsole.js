@@ -547,7 +547,7 @@ FBTestApp.TestConsole =
                         goQuitApplication();
                 });
             }
-        }, 100);
+        }, 3000);
     },
 
     getTest: function(uri)
