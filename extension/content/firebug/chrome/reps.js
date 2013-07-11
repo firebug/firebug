@@ -1708,7 +1708,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 
 FirebugReps.CSSRule = domplate(Firebug.Rep,
 {
@@ -2436,6 +2436,8 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
 FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 {
+    className: "errorMessage",
+    inspectable: false,
     sourceLimit: 80,
     alterText: "...",
 
@@ -2670,9 +2672,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 }
                 else if (target.repObject.missingTraceBecauseNoDebugger)
                 {
-                    var clickHandler = this.onEnableScriptPanel.bind(this);
-                    var msg = this.getMissingStackTraceMessage();
-                    FirebugReps.Description.render(msg, traceBox, clickHandler);
+                    this.renderStackTraceMessage(traceBox);
                 }
 
                 if (Firebug.A11yModel.enabled)
@@ -2688,23 +2688,60 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         }
     },
 
-    onEnableScriptPanel: function(event)
-    {
-        // Enable the Script panel.
-        var scriptPanelType = Firebug.getPanelType("script");
-        PanelActivation.enablePanel(scriptPanelType);
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stack Trace Message
 
-        // Update the user message (now when the Script panel is enabled).
-        var traceBox = Dom.getAncestorByClass(event.target, "errorTrace");
+    renderStackTraceMessage: function(parentNode)
+    {
+        var clickHandler = this.onClickStackTraceMessage.bind(this);
         var msg = this.getMissingStackTraceMessage();
-        FirebugReps.Description.render(msg, traceBox);
+        FirebugReps.Description.render(msg, parentNode, clickHandler);
+    },
+
+    onClickStackTraceMessage: function(event)
+    {
+        var target = event.target;
+
+        var type = target.getAttribute("type");
+        if (type == "enable")
+        {
+            // Enable the Script panel.
+            var scriptPanelType = Firebug.getPanelType("script");
+            PanelActivation.enablePanel(scriptPanelType);
+        }
+        else if (type == "reload")
+        {
+            var panel = Firebug.getElementPanel(target);
+            Firebug.TabWatcher.reloadPageFromMemory(panel.context);
+
+            // Bail out, not necessary to update existing stack-trace messages.
+            return;
+        }
+
+        // Update all existing user messages in the panel (now when the Script panel is enabled).
+        var panel = Firebug.getElementPanel(event.target);
+        var msg = this.getMissingStackTraceMessage();
+        var errorLogs = panel.panelNode.querySelectorAll(".objectBox-errorMessage");
+
+        for (var i=0; i<errorLogs.length; i++)
+        {
+            var log = errorLogs[i];
+            var repObject = log.repObject;
+
+            if (repObject && repObject.missingTraceBecauseNoDebugger)
+            {
+                // Re-render the user message displayed instead of the stack trace.
+                var traceBox = log.getElementsByClassName("errorTrace").item(0);
+                this.renderStackTraceMessage(traceBox);
+            }
+        }
     },
 
     getMissingStackTraceMessage: function()
     {
         var hasScriptPanel = PanelActivation.isPanelEnabled("script");
-        return (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError") :
-            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+        return (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError2") :
+            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces2"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2737,9 +2774,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "errorMessage",
-    inspectable: false,
 
     supportsObject: function(object, type)
     {
