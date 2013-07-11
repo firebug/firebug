@@ -61,7 +61,7 @@ textbox#fbCommandEditor {
 
 .fbCommandLineCompletionPanel {
     /* height: 270px; */
-    border: 1px solid #BEBEBE;
+    border: none;
 }
 
 .fbCommandLineCompletions {
@@ -69,6 +69,7 @@ textbox#fbCommandEditor {
     font-family: monospace;
     white-space: pre;
     background-color: white;
+    border: 1px solid #BEBEBE;
 }
 
 .fbPopupTitle {
@@ -81,7 +82,7 @@ textbox#fbCommandEditor {
 
 .fbPopupSeparator {
     font-family: Lucida Grande, Tahoma, sans-serif;
-    padding: 2px 18px;
+    padding: 1px 18px;
     color: DarkGrey;
     /*border-top: 1px solid #BEBEBE;
     border-bottom: 1px solid #BEBEBE;*/
