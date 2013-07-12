@@ -2693,16 +2693,19 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     renderStackTraceMessage: function(parentNode)
     {
-        var clickHandler = this.onClickStackTraceMessage.bind(this);
-        var msg = this.getMissingStackTraceMessage();
+        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+        var type = hasScriptPanel ? "reload" : "enable";
+        var clickHandler = this.onClickStackTraceMessage.bind(this, type);
+        var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError2") :
+            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+
         FirebugReps.Description.render(msg, parentNode, clickHandler);
     },
 
-    onClickStackTraceMessage: function(event)
+    onClickStackTraceMessage: function(type, event)
     {
         var target = event.target;
 
-        var type = target.getAttribute("type");
         if (type == "enable")
         {
             // Enable the Script panel.
@@ -2720,7 +2723,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
         // Update all existing user messages in the panel (now when the Script panel is enabled).
         var panel = Firebug.getElementPanel(event.target);
-        var msg = this.getMissingStackTraceMessage();
         var errorLogs = panel.panelNode.querySelectorAll(".objectBox-errorMessage");
 
         for (var i=0; i<errorLogs.length; i++)
@@ -2735,13 +2737,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 this.renderStackTraceMessage(traceBox);
             }
         }
-    },
-
-    getMissingStackTraceMessage: function()
-    {
-        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
-        return (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError2") :
-            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces2"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
