@@ -366,7 +366,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         // the sourceLine will cause the source to be loaded.
         var error = new FirebugReps.ErrorMessageObj(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, null, msgId);
-        error.object = Obj.extend(object, {});
 
         // Display column info only if it isn't zero.
         if (object.columnNumber > 0)

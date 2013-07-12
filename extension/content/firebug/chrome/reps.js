@@ -2437,7 +2437,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 {
     className: "errorMessage",
-    inspectable: true,
+    inspectable: false,
     sourceLimit: 80,
     alterText: "...",
 
@@ -2816,11 +2816,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
         return items;
     },
-
-    getRealObject: function(error)
-    {
-        return error.object;
-    }
 });
 
 // ********************************************************************************************* //
