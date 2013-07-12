@@ -60,13 +60,21 @@ textbox#fbCommandEditor {
 }
 
 .fbCommandLineCompletionPanel {
-    /* height: 270px; */
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
+
+    /* Remove xul panel shadow */
+    -moz-window-shadow: none !important;
 }
 
 .fbCommandLineCompletions {
     cursor: default;
     font-family: monospace;
     white-space: pre;
+    background-color: white;
+    border: 1px solid #BEBEBE;
+    border-radius: 3px;
+    margin: 2px;
 }
 
 .fbPopupTitle {
@@ -75,6 +83,25 @@ textbox#fbCommandEditor {
     background-color: LightYellow;
     border-bottom: 1px solid #BEBEBE;
     color: #666666;
+}
+
+.fbPopupSeparator {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    padding: 1px 18px;
+    color: #646464;
+    /*border-top: 1px solid #BEBEBE;
+    border-bottom: 1px solid #BEBEBE;*/
+    margin: 3px 0 3px 0;
+    background-color: #F0F0F0;
+}
+
+/* The first separator doesn't need margin-top */
+.fbPopupTitle + .fbPopupSeparator {
+    margin-top: 0;
+}
+
+.fbPopupEntry {
+    padding: 0 5px 0 5px;
 }
 
 .completionLine.apiCompletion {
