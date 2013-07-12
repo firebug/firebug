@@ -60,8 +60,11 @@ textbox#fbCommandEditor {
 }
 
 .fbCommandLineCompletionPanel {
-    /* height: 270px; */
-    border: none;
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
+
+    /* Remove xul panel shadow */
+    -moz-window-shadow: none !important;
 }
 
 .fbCommandLineCompletions {
@@ -70,6 +73,7 @@ textbox#fbCommandEditor {
     white-space: pre;
     background-color: white;
     border: 1px solid #BEBEBE;
+    margin: 3px;
 }
 
 .fbPopupTitle {

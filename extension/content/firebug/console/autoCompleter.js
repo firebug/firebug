@@ -849,7 +849,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         var offsetX = Math.round(this.completionBase.pre.length * chWidth) + 2;
 
         // xxxHonza: needs to be properly calculated
-        offsetX -= 3;
+        offsetX -= 7;
 
         this.completionPopup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
     };
