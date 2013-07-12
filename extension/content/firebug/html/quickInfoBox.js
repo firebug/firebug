@@ -89,6 +89,10 @@ var QuickInfoBox =
         vbox.appendChild(lab);
 
         this.addRows(element, vbox, compAttribs, true);
+
+        pin = document.createElement("image");
+        pin.setAttribute("class", "fbQuickInfoPin");
+        vbox.insertBefore(pin, vbox.firstChild);
     },
 
     hide: function()

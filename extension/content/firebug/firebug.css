@@ -364,6 +364,19 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     cursor: move;
 }
 
+.fbQuickInfoPin {
+    background: url(chrome://firebug/skin/pin2.svg);
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.fbQuickInfoPin:hover:active {
+    background: url(chrome://firebug/skin/pin2.svg) no-repeat -16px 0 transparent;
+}
+
 /*************************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
 
