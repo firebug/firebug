@@ -431,12 +431,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             return null;
         }
 
-        // eg some XPCOM messages
-        // xxxHonza: this could cause appearing error messages in wrong tabs.
-        // Is this still necessary?
-        if (!url)
-            return Firebug.currentContext;
-
         if (url && url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
 
