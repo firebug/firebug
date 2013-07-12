@@ -73,7 +73,8 @@ textbox#fbCommandEditor {
     white-space: pre;
     background-color: white;
     border: 1px solid #BEBEBE;
-    margin: 3px;
+    border-radius: 3px;
+    margin: 2px;
 }
 
 .fbPopupTitle {
@@ -87,11 +88,11 @@ textbox#fbCommandEditor {
 .fbPopupSeparator {
     font-family: Lucida Grande, Tahoma, sans-serif;
     padding: 1px 18px;
-    color: DarkGrey;
+    color: #646464;
     /*border-top: 1px solid #BEBEBE;
     border-bottom: 1px solid #BEBEBE;*/
     margin: 3px 0 3px 0;
-    background-color: rgb(243,243,243);
+    background-color: #F0F0F0;
 }
 
 /* The first separator doesn't need margin-top */
