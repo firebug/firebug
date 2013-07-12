@@ -1941,7 +1941,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
         return box;
     },
-    
+
     showActivitySuspended: function(parentNode)
     {
         var args = {

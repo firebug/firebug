@@ -22,7 +22,7 @@ var Cc = Components.classes;
 
 var Css = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS
 
 var cssKeywordMap = {};
@@ -123,7 +123,9 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 /**
  * Parses the CSS properties of a CSSStyleRule
  * @param {Object} style CSSStyleRule to get the properties of
- * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @param {Object} element Element to which the style applies. Needed for parsing
+ *      shorthand properties correctly.
+ *
  * @returns {Array} Properties represented by {name, value, priority, longhandProps}
  */
 Css.parseCSSProps = function(style, element)
@@ -320,7 +322,7 @@ Css.getElementCSSPath = function(element)
     return paths.length ? paths.join(" ") : null;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS classes
 
 var classNameReCache={};
@@ -709,9 +711,11 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
+    {
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
             (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+    }
 
     ownerDocument = ownerDocument || Css.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)

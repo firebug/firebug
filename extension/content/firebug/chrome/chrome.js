@@ -1903,13 +1903,32 @@ function onBlur(event)
 
 function onSelectLocation(event)
 {
-    var locationList = FirebugChrome.getElementById("fbLocationList");
-    var location = locationList.repObject;
+    try
+    {
+        var locationList = FirebugChrome.getElementById("fbLocationList");
+        var location = locationList.repObject;
 
-    FirebugChrome.navigate(location);
+        FirebugChrome.navigate(location);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("chrome.onSelectLocation; EXCEPTION " + err, err);
+    }
 }
 
 function onSelectingPanel(event)
+{
+    try
+    {
+        doSelectingPanel(event);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("chrome.onSelectingPanel; EXCEPTION " + err, err);
+    }
+}
+
+function doSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;

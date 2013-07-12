@@ -1708,7 +1708,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 
 FirebugReps.CSSRule = domplate(Firebug.Rep,
 {
@@ -2436,6 +2436,8 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
 FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 {
+    className: "errorMessage",
+    inspectable: true,
     sourceLimit: 80,
     alterText: "...",
 
@@ -2485,6 +2487,8 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             )
         ),
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     getObjectsTag: function(error)
     {
         return error.objects ? FirebugReps.Arr.tag : SPAN();
@@ -2497,7 +2501,19 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-        return error && error.trace;
+        if (!error)
+            return false;
+
+        if (error.trace)
+            return true;
+
+        // The expand icon is displayed also in case where the actual stack trace
+        // isn't available because the debugger (the Script panel) was disabled.
+        // In this case, an explanatory message is shown instead.
+        if (error.missingTraceBecauseNoDebugger)
+            return true;
+
+        return false;
     },
 
     hasBreakSwitch: function(error)
@@ -2624,12 +2640,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             return "show";
     },
 
-    getTooltip: function(error)
-    {
-        if (error.missingTraceBecauseNoDebugger)
-            return Locale.$STR("console.tip.ErrorWithoutDebugger");
-    },
-
     onToggleError: function(event)
     {
         var target = event.currentTarget;
@@ -2649,35 +2659,25 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var errorTitle = Dom.getAncestorByClass(event.target, "errorTitle");
         if (errorTitle)
         {
-            var traceBox = target.childNodes[1];
+            var traceBox = target.getElementsByClassName("errorTrace").item(0);
+
             Css.toggleClass(target, "opened");
-            event.target.setAttribute('aria-expanded', Css.hasClass(target, "opened"));
+            event.target.setAttribute("aria-expanded", Css.hasClass(target, "opened"));
 
             if (Css.hasClass(target, "opened"))
             {
-                var panel = Firebug.getElementPanel(event.target);
-
                 if (target.stackTrace)
                 {
                     FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
                 }
                 else if (target.repObject.missingTraceBecauseNoDebugger)
                 {
-                    var hasScriptPanel = PanelActivation.isPanelEnabled("script");
-                    var enableScriptPanel = function()
-                    {
-                        var scriptPanelType = Firebug.getPanelType("script");
-                        PanelActivation.enablePanel(scriptPanelType);
-                    };
-                    var msg = (hasScriptPanel ?
-                            "The debugger was deactivated when this error was thrown." : // XXX temporarily hard-coded, until we decide what to do here
-                            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
-
-                    FirebugReps.Description.render(msg, traceBox, enableScriptPanel);
+                    this.renderStackTraceMessage(traceBox);
                 }
 
                 if (Firebug.A11yModel.enabled)
                 {
+                    var panel = Firebug.getElementPanel(event.target);
                     Events.dispatch(panel.fbListeners, "modifyLogRow", [panel, traceBox]);
                 }
             }
@@ -2686,6 +2686,62 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 Dom.clearNode(traceBox);
             }
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stack Trace Message
+
+    renderStackTraceMessage: function(parentNode)
+    {
+        var clickHandler = this.onClickStackTraceMessage.bind(this);
+        var msg = this.getMissingStackTraceMessage();
+        FirebugReps.Description.render(msg, parentNode, clickHandler);
+    },
+
+    onClickStackTraceMessage: function(event)
+    {
+        var target = event.target;
+
+        var type = target.getAttribute("type");
+        if (type == "enable")
+        {
+            // Enable the Script panel.
+            var scriptPanelType = Firebug.getPanelType("script");
+            PanelActivation.enablePanel(scriptPanelType);
+        }
+        else if (type == "reload")
+        {
+            var panel = Firebug.getElementPanel(target);
+            Firebug.TabWatcher.reloadPageFromMemory(panel.context);
+
+            // Bail out, not necessary to update existing stack-trace messages.
+            return;
+        }
+
+        // Update all existing user messages in the panel (now when the Script panel is enabled).
+        var panel = Firebug.getElementPanel(event.target);
+        var msg = this.getMissingStackTraceMessage();
+        var errorLogs = panel.panelNode.querySelectorAll(".objectBox-errorMessage");
+
+        for (var i=0; i<errorLogs.length; i++)
+        {
+            var log = errorLogs[i];
+            var repObject = log.repObject;
+
+            if (repObject && repObject.missingTraceBecauseNoDebugger)
+            {
+                // Re-render the user message displayed instead of the stack trace.
+                var traceBox = log.getElementsByClassName("errorTrace").item(0);
+                this.renderStackTraceMessage(traceBox);
+            }
+        }
+    },
+
+    getMissingStackTraceMessage: function()
+    {
+        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+        return (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError2") :
+            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces2"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2718,9 +2774,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "errorMessage",
-    inspectable: false,
 
     supportsObject: function(object, type)
     {
@@ -2762,6 +2815,11 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         }
 
         return items;
+    },
+
+    getRealObject: function(error)
+    {
+        return error.object;
     }
 });
 
@@ -3160,21 +3218,18 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
     // Use SPAN to make sure the description is nicely inserted into existing text inline.
     tag:
-        SPAN({onclick: "$onClickLink"}),
+        SPAN({"class": "descriptionBox", onclick: "$onClickLink"}),
 
     render: function(text, parentNode, listener)
     {
         var params = {};
-        if (listener)
+        params.onClickLink = function(event)
         {
-            params.onClickLink = function(event)
-            {
-                // Only clicks on links are passed to the original listener.
-                var localName = event.target.localName;
-                if (listener && localName && localName.toLowerCase() == "a")
-                    listener(event);
-            };
-        }
+            // Only clicks on links are passed to the original listener.
+            var localName = event.target.localName;
+            if (listener && localName && localName.toLowerCase() == "a")
+                listener(event);
+        };
 
         var rootNode = this.tag.replace(params, parentNode, this);
 

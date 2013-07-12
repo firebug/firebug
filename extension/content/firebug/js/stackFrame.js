@@ -292,21 +292,9 @@ StackFrame.StackFrame.prototype =
             else
             {
                 scopeVars = Wrapper.unwrapIValue(scope, Firebug.viewChrome);
-                if (scopeVars && scopeVars.hasOwnProperty)
+                if (!scopeVars || !scopeVars.hasOwnProperty)
                 {
-                    if (!scopeVars.hasOwnProperty("toString"))
-                    {
-                        (function() {
-                            var className = scope.jsClassName;
-                            scopeVars.toString = function()
-                            {
-                                return Locale.$STR(className + " Scope");
-                            };
-                        })();
-                    }
-                }
-                else
-                {
+                    // XXXsimon not sure if this ever happens
                     // do not trace scopeVars, you will get a uncatchable exception
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("dom .generateScopeChain: bad scopeVars for " +

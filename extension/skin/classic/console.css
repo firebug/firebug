@@ -272,6 +272,13 @@
     color: blue;
 }
 
+/* Used for a message explaining missing stack trace for an error log */
+.errorTrace .descriptionBox {
+    background-image: url(chrome://firebug/skin/info.svg);
+    background-repeat: no-repeat;
+    padding: 0 0 2px 20px;
+}
+
 .errorDuplication {
     margin-right: 5px;
     font-weight: bold;

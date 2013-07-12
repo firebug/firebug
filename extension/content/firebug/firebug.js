@@ -1836,16 +1836,29 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     navigate: function(object)
     {
+        // Get default location object if none is specified.
         if (!object)
             object = this.getDefaultLocation();
-        if (!object)
-            object = null;  // not undefined.
 
-        // if this.location undefined, may set to null
+        // Make sure the location is *not* undefined.
+        if (!object)
+            object = null;
+
+        // We should be extra careful when dealing with the |location| object (include
+        // converting it to string).
+        // There might be cases where the object is removed from the page (e.g. a stylesheet
+        // that is currently displayed in the CSS panel) and the panel location not updated.
+        //
+        // This might happen because of optimalization where backround panels do not observe
+        // changes on the page (e.g. using Mutation Observer).
+        //
+        // The object is a dead wrapper at such moments, firing an exception anytime
+        // it's properties or methods are accessed.
+        // So, just pass the object back to the panel, which must do proper checking.
         if (!this.location || (object != this.location))
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate "+this.name+" to location "+object, object);
+                FBTrace.sysout("Panel.navigate; " + this.name);
 
             this.location = object;
             this.updateLocation(object);
@@ -1855,11 +1868,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_PANELS)
-            {
-                FBTrace.sysout("navigate skipped for panel " + this.name + " when object " +
-                    object + " vs this.location=" + this.location,
-                    {object: object, location: this.location});
-            }
+                FBTrace.sysout("Panel.navigate; Skipped for panel " + this.name);
         }
     },
 
@@ -2765,7 +2774,7 @@ function shutdownFirebug()
     }
     catch (exc)
     {
-        window.dump("shutdownFirebug FAILS: "+exc+"\n");
+        window.dump("Firebug.shutdownFirebug EXCEPTION: " + exc + "\n");
     }
 
     Firebug.shutdown();

@@ -457,6 +457,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             if (state && state.scrollTop)
                 this.panelNode.scrollTop = state.scrollTop;
         }
+
+        // Solves the problem when the current stylesheet (i.e. the current panel location)
+        // has been removed from the page (or the parent window/iframe has been removed).
+        // In such case we need to update the panel content.
+        if (!this.isValidStyleSheet(this.location))
+            this.navigate(null);
     },
 
     hide: function()
@@ -465,10 +471,33 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    isValidStyleSheet: function(styleSheet)
+    {
+        if (!styleSheet)
+            return false;
+
+        if (Wrapper.isDeadWrapper(styleSheet))
+            return false;
+
+        if (!styleSheet.ownerNode)
+            return false;
+
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // TabWatcher
 
     unwatchWindow: function(context, win)
     {
+        // The update happens only if the CSS panel is selected. If the current location
+        // style sheet is removed while the panel is not selected, the content will be
+        // updated when 'show' method is executed by the framework.
+        var panel = Firebug.chrome.getSelectedPanel();
+        if (!panel || panel.name != "stylesheet")
+            return;
+
         // We need to check whether the current location (a stylesheet) has been
         // unloaded together with the window.
         if (this.location)
@@ -1322,10 +1351,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 warning, Obj.bind(this.insertRule, this));
         }
 
-        this.showToolbarButtons("fbCSSButtons", !Url.isSystemStyleSheet(this.location));
-
-        // Hide CSS Edit button if there is no current location.
-        this.showToolbarButtons("fbToggleCSSEditing", this.location != null);
+        // Show CSS buttons only if there is a stylesheet and it isn't a system stylesheet.
+        // Displaying panel's buttons must happens only if the panel is actually visible
+        // otherwise the button could appear on another panel's toolbar.
+        var showButtons = this.location && !Url.isSystemStyleSheet(this.location);
+        this.showToolbarButtons("fbCSSButtons", showButtons);
 
         Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
 
