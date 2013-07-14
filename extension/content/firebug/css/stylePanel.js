@@ -264,7 +264,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
         // which elements that are
         pseudoElements = pseudoElements.filter(filterMozPseudoElements);
 
-        // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon 
+        // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon
         pseudoElements.forEach(function(pseudoElement, i)
         {
             if (Str.hasPrefix(pseudoElement, "::"))
@@ -675,7 +675,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
-        if (style.font && style.font.rule)
+        if (style && style.font && style.font.rule)
         {
             items.push(
                 "-",
