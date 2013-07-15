@@ -38,7 +38,7 @@ function runTest()
                     el = el.previousSibling;
                     ++count;
                 }
-                return count - 2;
+                return count - 3;
             }
 
             function sendScroll(element, lines)
@@ -60,7 +60,9 @@ function runTest()
                     if (runs++)
                         return;
                     FBTest.ok(true, "The completion popup should be opened.");
-                    var count = popup.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "div").length - 1;
+
+                    // Count number of entries (substract title and section label).
+                    var count = popup.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "div").length - 2;
                     FBTest.compare(size, count, "The completion popup must contain " + size + " rows.");
                     cmdLine.value = "";
                     callback();
