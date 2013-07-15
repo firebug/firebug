@@ -1418,7 +1418,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
                         label: "html.menu.Paste_Replace_Content",
                         tooltiptext: "html.tip.Paste_Replace_Content",
                         id: "fbPasteReplaceInner",
-                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
                             "replaceInner")
                     },
                     {
@@ -1426,7 +1426,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
                         tooltiptext: "html.tip.Paste_Replace_Node",
                         id: "fbPasteReplaceOuter",
                         disabled: isEltRoot,
-                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
                             "replaceOuter")
                     },
                     {
@@ -2696,7 +2696,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var hasScriptPanel = PanelActivation.isPanelEnabled("script");
         var type = hasScriptPanel ? "reload" : "enable";
         var clickHandler = this.onClickStackTraceMessage.bind(this, type);
-        var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError2") :
+        var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError") :
             Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
 
         FirebugReps.Description.render(msg, parentNode, clickHandler);
@@ -2872,7 +2872,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-// xxxsz: Is this code still in use? 
+// xxxsz: Is this code still in use?
 FirebugReps.Assert = domplate(Firebug.Rep,
 {
     tag:
