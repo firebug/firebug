@@ -90,9 +90,13 @@ var QuickInfoBox =
 
         this.addRows(element, vbox, compAttribs, true);
 
-        pin = document.createElement("image");
+        var pinBox = document.createElement("vbox");
+        vbox.insertBefore(pinBox, vbox.firstChild);
+        pinBox.setAttribute("align", "end");
+
+        var pin = document.createElement("image");
         pin.setAttribute("class", "fbQuickInfoPin");
-        vbox.insertBefore(pin, vbox.firstChild);
+        pinBox.appendChild(pin);
     },
 
     hide: function()

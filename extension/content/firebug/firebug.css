@@ -371,6 +371,7 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     height: 16px;
     border: none;
     cursor: pointer;
+    margin: 3px;
 }
 
 .fbQuickInfoPin:hover:active {
