@@ -14,6 +14,8 @@ define([
 function(Firebug, FBTrace, Obj, Domplate, ErrorMessageObj, ErrorMessage, ErrorCopy,
     FirebugReps, StackFrame) {
 
+"use strict"
+
 // ********************************************************************************************* //
 // Constants
 

@@ -18,9 +18,12 @@ define([
     "firebug/lib/system",
     "firebug/lib/events",
     "firebug/js/fbs",
+    "firebug/chrome/panelActivation",
 ],
 function(Firebug, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
-    SourceLink, Dom, Css, Obj, Menu, System, Events, FBS) {
+    SourceLink, Dom, Css, Obj, Menu, System, Events, FBS, PanelActivation) {
+
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -305,6 +308,8 @@ var ErrorMessage = domplate(Firebug.Rep,
         var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError") :
             Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
 
+        Css.setClass(parentNode, "message");
+
         FirebugReps.Description.render(msg, parentNode, clickHandler);
     },
 
@@ -322,26 +327,6 @@ var ErrorMessage = domplate(Firebug.Rep,
         {
             var panel = Firebug.getElementPanel(target);
             Firebug.TabWatcher.reloadPageFromMemory(panel.context);
-
-            // Bail out, not necessary to update existing stack-trace messages.
-            return;
-        }
-
-        // Update all existing user messages in the panel (now when the Script panel is enabled).
-        var panel = Firebug.getElementPanel(event.target);
-        var errorLogs = panel.panelNode.querySelectorAll(".objectBox-errorMessage");
-
-        for (var i=0; i<errorLogs.length; i++)
-        {
-            var log = errorLogs[i];
-            var repObject = log.repObject;
-
-            if (repObject && repObject.missingTraceBecauseNoDebugger)
-            {
-                // Re-render the user message displayed instead of the stack trace.
-                var traceBox = log.getElementsByClassName("errorTrace").item(0);
-                this.renderStackTraceMessage(traceBox);
-            }
         }
     },
 
@@ -420,11 +405,66 @@ var ErrorMessage = domplate(Firebug.Rep,
 });
 
 // ********************************************************************************************* //
+// ErrorMessageUpdater Module
+
+/**
+ * @module Responsible for asynchronous UI update or ErrorMessage template.
+ */
+var ErrorMessageUpdater = Obj.extend(Firebug.Module,
+/** @lends ErrorMessageUpdater */
+{
+    dispatchName: "ErrorMessageUpdater",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        PanelActivation.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        PanelActivation.removeListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // PanelActivation
+
+    activationChanged: function(panelType, enable)
+    {
+        if (!enable)
+            return;
+
+        // The Script panel has been enabled. Make sure all trace messages (for errors)
+        // are updated. It must be done for all contexts since panel activation is always
+        // applied to all contexts.
+        var self = this;
+        Firebug.connection.eachContext(function(context) {
+            self.updateConsolePanel(context);
+        });
+    },
+
+    updateConsolePanel: function(context)
+    {
+        var panel = context.getPanel("console");
+        var messages = panel.panelNode.querySelectorAll(".errorTrace.message");
+
+        // Update all existing user messages in the panel (now when the Script panel is enabled).
+        for (var i=0; i<messages.length; i++)
+            ErrorMessage.renderStackTraceMessage(messages[i]);
+    }
+});
+
+// ********************************************************************************************* //
 // Registration
 
 // xxxHonza: back compatibility
 FirebugReps.ErrorMessage = ErrorMessage;
 
+Firebug.registerModule(ErrorMessageUpdater);
 Firebug.registerRep(ErrorMessage);
 
 return ErrorMessage;

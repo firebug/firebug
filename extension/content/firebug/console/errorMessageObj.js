@@ -8,6 +8,8 @@ define([
 ],
 function(Firebug, FBTrace, SourceFile, SourceLink) {
 
+"use strict"
+
 // ********************************************************************************************* //
 // Constants
 
