@@ -52,7 +52,7 @@ const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleSe
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
-const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+const wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 
 // ********************************************************************************************* //
 
