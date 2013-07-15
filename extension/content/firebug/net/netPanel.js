@@ -394,6 +394,14 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         items.push(
+            {
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, file)
+            }
+        );
+
+        items.push(
             "-",
             {
                 label: "OpenInTab",
@@ -521,6 +529,96 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         // Copy response to the clipboard
         System.copyToClipboard(NetUtils.getResponseText(file, this.context));
+    },
+
+    copyAsCurl: function (file)
+    {
+        var command = ["curl"];
+        var inferredMethod = "GET";
+
+        function escapeCharacter(x)
+        {
+            var code = x.charCodeAt(0);
+            if (code < 256)
+            {
+                // Add leading zero when needed to not care about the next character.
+                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
+            }
+            code = code.toString(16);
+            return "\\u" + ("0000" + code).substr(code.length, 4);
+        }
+
+        function escape(str)
+        {
+            // String has unicode characters or single quotes
+            if (/[^\x20-\x7E]|'/.test(str))
+            {
+                // Use ANSI-C quoting syntax
+                return "$\'" + str.replace(/\\/g, "\\\\")
+                    .replace(/'/g, "\\\'")
+                    .replace(/\n/g, "\\n")
+                    .replace(/\r/g, "\\r")
+                    .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
+            }
+            else
+            {
+                // Use single quote syntax.
+                return "'" + str + "'";
+            }
+        }
+
+        // Create data
+        var isPostRequest = NetUtils.isURLEncodedRequest(file, this.context);
+        var isMultiPartRequest = NetUtils.isMultiPartRequest(file, this.context);
+        var postText = NetUtils.getPostText(file, this.context, true);
+        var data = [];
+        if (isPostRequest && postText) {
+            var lines = postText.split("\n");
+            var params = lines[lines.length - 1];
+
+            data.push("--data");
+            data.push(escape(params));
+
+            inferredMethod = "POST";
+        }
+        else if (isMultiPartRequest && postText) {
+            data.push("--data-binary");
+            data.push(escape(postText));
+
+            inferredMethod = "POST";
+        }
+
+        // Add URL
+        command.push(escape(file.href));
+
+        // Fix method if request is not a GET or POST request
+        if (file.method != inferredMethod) {
+            command.push("-X");
+            command.push(file.method);
+        }
+
+        // Add request headers
+        var requestHeaders = file.requestHeaders;
+        var postRequestHeaders = Http.getHeadersFromPostText(file.request, postText);
+        var headers = requestHeaders.concat(postRequestHeaders);
+        for (var i = 0; i < headers.length; i++)
+        {
+            var header = headers[i];
+            if (header.name.toLowerCase() == 'content-length')
+                continue;
+
+            command.push("-H");
+            command.push(escape(header.name + ": " + header.value));
+        }
+
+        // Add data
+        command = command.concat(data);
+
+        // Add --compressed
+        if (Options.get("net.curlAddCompressedArgument"))
+            command.push("--compressed");
+
+        System.copyToClipboard(command.join(" "));
     },
 
     openRequestInTab: function(file)
