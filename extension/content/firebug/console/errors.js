@@ -52,6 +52,8 @@ const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleSe
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
+const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+
 // ********************************************************************************************* //
 
 var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
@@ -63,7 +65,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        // Make sure the error obsever is removed.
+        // Make sure the error observer is removed.
         this.stopObserving();
 
         Firebug.Module.shutdown.apply(this, arguments);
@@ -845,7 +847,15 @@ function getErrorWindow(object)
         {
             if (object.outerWindowID)
             {
-                var win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+                var win;
+
+                // getOuterWindowWithId moved to nsIWindowMediator in Firefox 23
+                // See: https://bugzilla.mozilla.org/show_bug.cgi?id=861495
+                if (typeof(wm.getOuterWindowWithId) == "function")
+                    win = wm.getOuterWindowWithId(object.outerWindowID);
+                else
+                    win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+
                 if (win)
                     return win;
                 else
