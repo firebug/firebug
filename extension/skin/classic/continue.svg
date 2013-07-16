@@ -7,34 +7,10 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    width="16"
    height="16"
-   id="svg2"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="continue.svg">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1138"
-     id="namedview20"
-     showgrid="false"
-     inkscape:zoom="59"
-     inkscape:cx="12.138575"
-     inkscape:cy="7.848025"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
+   id="svg2">
   <defs
      id="defs4">
     <linearGradient
@@ -98,13 +74,12 @@
        gradientUnits="userSpaceOnUse"
        gradientTransform="translate(14.576271,0.76271164)" />
     <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3858"
-       id="linearGradient3805"
        x1="7.5084748"
        y1="12.491526"
        x2="4.3220339"
        y2="1.559322"
+       id="linearGradient3805"
+       xlink:href="#linearGradient3858"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <metadata
@@ -126,5 +101,5 @@
   <path
      d="M 11.788236,8.0000005 7.9999992,4.602219 4.2117642,1.2044378 l 0,6.7955629 0,6.7955613 3.7882362,-3.397781 z"
      id="path3802-4"
-     style="fill:url(#linearGradient3154);fill-opacity:1;stroke:url(#linearGradient3805);stroke-opacity:1;stroke-linejoin:round" />
+     style="fill:url(#linearGradient3154);fill-opacity:1;stroke:url(#linearGradient3805);stroke-linejoin:round;stroke-opacity:1" />
 </svg>

@@ -7,34 +7,10 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    width="16"
    height="16"
-   id="svg2"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="minimize.svg">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1680"
-     inkscape:window-height="987"
-     id="namedview28"
-     showgrid="false"
-     inkscape:zoom="48.125"
-     inkscape:cx="8"
-     inkscape:cy="8"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
+   id="svg2">
   <defs
      id="defs4">
     <linearGradient
@@ -91,8 +67,8 @@
        color-interpolation-filters="sRGB"
        id="filter3841">
       <feGaussianBlur
-         stdDeviation="0.7125"
-         id="feGaussianBlur3843" />
+         id="feGaussianBlur3843"
+         stdDeviation="0.7125" />
     </filter>
     <filter
        x="-0.23999999"
@@ -102,8 +78,8 @@
        color-interpolation-filters="sRGB"
        id="filter3901">
       <feGaussianBlur
-         stdDeviation="0.8"
-         id="feGaussianBlur3903" />
+         id="feGaussianBlur3903"
+         stdDeviation="0.8" />
     </filter>
     <filter
        x="-0.19499999"
@@ -113,8 +89,8 @@
        color-interpolation-filters="sRGB"
        id="filter3963">
       <feGaussianBlur
-         stdDeviation="0.65"
-         id="feGaussianBlur3965" />
+         id="feGaussianBlur3965"
+         stdDeviation="0.65" />
     </filter>
     <linearGradient
        x1="8.7688313"
@@ -142,32 +118,30 @@
        color-interpolation-filters="sRGB"
        id="filter3820">
       <feGaussianBlur
-         id="feGaussianBlur3822"
-         stdDeviation="0.5" />
+         stdDeviation="0.5"
+         id="feGaussianBlur3822" />
     </filter>
     <filter
-       inkscape:collect="always"
-       id="filter3791"
        x="-0.16"
-       width="1.32"
-       y="-0.48"
-       height="1.96">
+       y="-0.47999999"
+       width="1.3200001"
+       height="1.96"
+       color-interpolation-filters="sRGB"
+       id="filter3791">
       <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.4"
-         id="feGaussianBlur3793" />
+         id="feGaussianBlur3793"
+         stdDeviation="0.4" />
     </filter>
     <filter
-       inkscape:collect="always"
-       id="filter3845"
-       x="-0.195"
+       x="-0.19499999"
+       y="-0.31200001"
        width="1.39"
-       y="-0.312"
-       height="1.624">
+       height="1.624"
+       color-interpolation-filters="sRGB"
+       id="filter3845">
       <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.65"
-         id="feGaussianBlur3847" />
+         id="feGaussianBlur3847"
+         stdDeviation="0.65" />
     </filter>
   </defs>
   <metadata
@@ -192,12 +166,11 @@
      id="rect3768"
      style="fill:url(#linearGradient3017);fill-opacity:1;stroke:url(#linearGradient3019);stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
   <path
-     inkscape:connector-curvature="0"
-     style="fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3845);opacity:0.4"
      d="M 4.5,7 6.5,9.5 8.5000004,12 10.5,9.5 12.5,7 8.5000004,7 4.5,7 z M 6.5,8 8.5000004,8 10.5,8 9.5,9.25 8.5000004,10.5 7.5,9.25 6.5,8 z"
-     id="path3806-4" />
+     id="path3806-4"
+     style="opacity:0.4;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3845)" />
   <path
-     style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none"
-     d="M 4 6 L 6 8.5 L 8 11 L 10 8.5 L 12 6 L 8 6 L 4 6 z M 6 7 L 8 7 L 10 7 L 9 8.25 L 8 9.5 L 7 8.25 L 6 7 z "
-     id="path3806" />
+     d="M 4,6 6,8.5 8,11 10,8.5 12,6 8,6 4,6 z M 6,7 8,7 10,7 9,8.25 8,9.5 7,8.25 6,7 z"
+     id="path3806"
+     style="fill:#ffffff;fill-opacity:1;stroke:none" />
 </svg>
