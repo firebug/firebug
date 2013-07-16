@@ -37,8 +37,8 @@ var {domplate, TAG, SPAN, DIV, TD, TR, TABLE, TBODY, A, PRE} = Domplate;
 // ErrorMessage Template Implementation
 
 /**
- * @domplate Domplate template used to represent Error logs in the UI.
- * Registered as Firebug rep.
+ * @domplate Domplate template used to represent Error logs in the UI. Registered as Firebug rep.
+ * This template is used for {@ErrorMessageObj} instances.
  */
 var ErrorMessage = domplate(Firebug.Rep,
 /** @lends ErrorMessage */
@@ -308,7 +308,7 @@ var ErrorMessage = domplate(Firebug.Rep,
         var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError") :
             Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
 
-        Css.setClass(parentNode, "message");
+        parentNode.classList.add("message");
 
         FirebugReps.Description.render(msg, parentNode, clickHandler);
     },
@@ -435,24 +435,21 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
 
     activationChanged: function(panelType, enable)
     {
-        if (!enable)
-            return;
-
-        // The Script panel has been enabled. Make sure all trace messages (for errors)
-        // are updated. It must be done for all contexts since panel activation is always
-        // applied to all contexts.
-        var self = this;
-        Firebug.connection.eachContext(function(context) {
-            self.updateConsolePanel(context);
-        });
+        // The Script panel's activation changed. Make sure all trace messages (for errors)
+        // are updated. It must be done for all contexts since panel activation always
+        // applies to all contexts.
+        if (panelType.prototype.name == "script")
+            Firebug.connection.eachContext(this.updateConsolePanel.bind(this));
     },
 
     updateConsolePanel: function(context)
     {
-        var panel = context.getPanel("console");
-        var messages = panel.panelNode.querySelectorAll(".errorTrace.message");
+        var panel = context.getPanel("console", true);
+        if (!panel)
+            return;
 
-        // Update all existing user messages in the panel (now when the Script panel is enabled).
+        // Update all existing user messages in the panel.
+        var messages = panel.panelNode.querySelectorAll(".errorTrace.message");
         for (var i=0; i<messages.length; i++)
             ErrorMessage.renderStackTraceMessage(messages[i]);
     }

@@ -26,15 +26,12 @@ define([
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
-    "firebug/console/errorMessageObj",
-    "firebug/console/errorCopy",
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, ErrorMessageObj, ErrorCopy,
-    NetUtils, PanelActivation) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
 
 with (Domplate) {
 
@@ -46,10 +43,6 @@ const Ci = Components.interfaces;
 
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
-
-// xxxHonza: back compatibility
-FirebugReps.ErrorMessageObj = ErrorMessageObj;
-FirebugReps.ErrorCopy = ErrorCopy;
 
 try
 {

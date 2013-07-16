@@ -5,8 +5,9 @@ define([
     "firebug/lib/trace",
     "firebug/js/sourceFile",
     "firebug/js/sourceLink",
+    "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, SourceFile, SourceLink) {
+function(Firebug, FBTrace, SourceFile, SourceLink, FirebugReps) {
 
 "use strict"
 
@@ -19,6 +20,10 @@ var Ci = Components.interfaces;
 // ********************************************************************************************* //
 // ErrorMessageObj Implementation
 
+/**
+ * @object This object collects data about an error that happens in the content. It's used
+ * by {@ErrorMessage} Domplate template as the data source.
+ */
 function ErrorMessageObj(message, href, lineNo, source, category, context,
     trace, msgId, colNumber)
 {
@@ -34,6 +39,7 @@ function ErrorMessageObj(message, href, lineNo, source, category, context,
 };
 
 ErrorMessageObj.prototype =
+/** @lends ErrorMessageObj */
 {
     getSourceLine: function()
     {
@@ -88,6 +94,9 @@ ErrorMessageObj.prototype =
 
 // ********************************************************************************************* //
 // Registration
+
+// xxxHonza: back compatibility
+FirebugReps.ErrorMessageObj = ErrorMessageObj;
 
 return ErrorMessageObj;
 

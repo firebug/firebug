@@ -24,7 +24,12 @@ var {domplate, TAG} = Domplate;
 // ********************************************************************************************* //
 // Exception Template Implementation
 
+/**
+ * @domplate This template represents exceptions that happen in the content and appear
+ * within Firebug UI. It's registered as Firebug rep.
+ */
 var Exception = domplate(Firebug.Rep,
+/** @lends Exception */
 {
     tag:
         TAG(ErrorMessage.tag, {object: "$object|getErrorMessage"}),
