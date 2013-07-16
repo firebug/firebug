@@ -26,15 +26,12 @@ define([
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
-    "firebug/console/errorMessageObj",
-    "firebug/console/errorCopy",
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, ErrorMessageObj, ErrorCopy,
-    NetUtils, PanelActivation) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
 
 with (Domplate) {
 
@@ -46,10 +43,6 @@ const Ci = Components.interfaces;
 
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
-
-// xxxHonza: back compatibility
-FirebugReps.ErrorMessageObj = ErrorMessageObj;
-FirebugReps.ErrorCopy = ErrorCopy;
 
 try
 {
@@ -2736,6 +2729,18 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         SPAN(FirebugReps.Arr.shortTag),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    hasSpecialProperties: function(array)
+    {
+        // xxxHonza: fix for test console/api/log-xpathresult
+        // FirebugReps.Arr.hasSpecialProperties iterates object properties
+        // (using Object.getOwnPropertyNames), but misses 'constructor' if the property
+        // is not explicitely accessed before. Any explanation for such behavior?
+        // (btw. it was actually accessed, but order of 'supportsObject' calls changed when
+        // 'Exception' rep moved into its own module, see issue: 6606)
+        var ctor = array && array.constructor;
+        return FirebugReps.Arr.hasSpecialProperties.apply(this, arguments);
+    },
 
     supportsObject: function(xpathresult, type)
     {

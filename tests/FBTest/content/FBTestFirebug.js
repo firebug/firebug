@@ -1236,6 +1236,16 @@ this.getPref = function(pref)
     return FW.Firebug.getPref(FW.Firebug.prefDomain, pref);
 };
 
+/**
+ * Resets the value of the specified Firebug preference.
+ * @param {Object} pref Name of the preference without <i>extensions.firebug</i> prefix.
+ * For instance: <i>showXMLHttpRequests</i>.
+ */
+this.clearPref = function(pref)
+{
+    FW.Firebug.Options.clearPref(FW.Firebug.prefDomain, pref);
+};
+
 // ********************************************************************************************* //
 // Command Line
 

@@ -233,7 +233,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
             prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
-    
+
             if (!prompts.confirmEx(Firebug.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("annotations.confirm.clear"), flags, "", "", "", null, check) == 0)
             {
