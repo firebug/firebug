@@ -572,7 +572,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var isMultiPartRequest = NetUtils.isMultiPartRequest(file, this.context);
         var postText = NetUtils.getPostText(file, this.context, true);
         var data = [];
-        if (isPostRequest && postText) {
+        if (isPostRequest && postText)
+        {
             var lines = postText.split("\n");
             var params = lines[lines.length - 1];
 
@@ -581,7 +582,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             inferredMethod = "POST";
         }
-        else if (isMultiPartRequest && postText) {
+        else if (isMultiPartRequest && postText)
+        {
             data.push("--data-binary");
             data.push(escape(postText));
 
@@ -592,7 +594,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         command.push(escape(file.href));
 
         // Fix method if request is not a GET or POST request
-        if (file.method != inferredMethod) {
+        if (file.method != inferredMethod)
+        {
             command.push("-X");
             command.push(file.method);
         }
@@ -604,7 +607,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (var i = 0; i < headers.length; i++)
         {
             var header = headers[i];
-            if (header.name.toLowerCase() == 'content-length')
+
+            // Firefox and cURL creates the optional Content-Length header for POST and PUT requests.
+            // Omit adding this header as it is preferred to use the Content-Length cURL creates.
+            if (header.name.toLowerCase() == "content-length")
                 continue;
 
             command.push("-H");
