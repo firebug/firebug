@@ -263,11 +263,11 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             // which elements that are
             pseudoElements = pseudoElements.filter(filterMozPseudoElements);
 
-            // XXXsimon: these are too nice to ignore, but stash them to them bottom of the
+            // XXXsimon: these are too nice to ignore, but stash them to the bottom of the
             // section for now so that e.g. a rule with selector "*::-moz-selection" doesn't
             // get in the way of more element-specific ones (see issue 6480). This should
             // be improved in the future when we do issue 6457 and/or add the ability to figure
-            // out which pseudo-elements are actually applicable.
+            // out which pseudo-elements are actually applicable. (see https://bugzil.la/874227)
             pseudoElements.unshift("::-moz-placeholder");
             pseudoElements.unshift("::-moz-selection");
         }
