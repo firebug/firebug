@@ -395,6 +395,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         items.push(
             {
+                id: "fbCopyAsCurl",
                 label: "CopyAsCurl",
                 tooltiptext: "net.tip.Copy_as_cURL",
                 command: Obj.bindFixed(this.copyAsCurl, this, file)
@@ -568,11 +569,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         // Create data
-        var isPostRequest = NetUtils.isURLEncodedRequest(file, this.context);
-        var isMultiPartRequest = NetUtils.isMultiPartRequest(file, this.context);
-        var postText = NetUtils.getPostText(file, this.context, true);
         var data = [];
-        if (isPostRequest && postText)
+        var postText = NetUtils.getPostText(file, this.context, true);
+        var isURLEncodedRequest = NetUtils.isURLEncodedRequest(file, this.context);
+
+        if (postText && isURLEncodedRequest || file.method == "PUT")
         {
             var lines = postText.split("\n");
             var params = lines[lines.length - 1];
@@ -582,7 +583,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             inferredMethod = "POST";
         }
-        else if (isMultiPartRequest && postText)
+        else if (postText && NetUtils.isMultiPartRequest(file, this.context))
         {
             data.push("--data-binary");
             data.push(escape(postText));
