@@ -181,7 +181,7 @@
                                             <toolbarbutton
                                                 id="fbConsoleFilter-all"
                                                 type="checkbox"
-                                                label="firebug.All"
+                                                label="firebug.console.All"
                                                 class="toolbar-text-button fbConsoleFilter fbInternational"
                                                 tooltiptext="firebug.console.Show All Log Entries"
                                                 oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'all')"/>
