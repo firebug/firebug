@@ -2952,12 +2952,18 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
         if (object.length > max)
         {
-            props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " " + Locale.$STR("firebug.reps.more") + "...",
+            var index = max - 1, more = object.length - max + 1;
+            if (index < 1)
+            {
+                index = 1;
+                more++;
+            }
+            props[index] = {
+                object: more + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
-                equal:"",
-                delim:""
+                equal: "",
+                delim: ""
             };
         }
         else if (props.length > 0)
