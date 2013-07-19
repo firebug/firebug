@@ -133,7 +133,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
     commands.cd = function(object)
     {
         if (!(object instanceof window.Window))
-            throw new Error("Object must be a window.");
+            throw new Error("Error: the cd() argument must be a window.");
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.cd; console ready: " + consoleReady);
