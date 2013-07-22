@@ -546,7 +546,8 @@ var NetUtils =
         return Wrapper.cloneIntoContentScope(global, clone);
     },
 
-    generateCurlCommand: function(file, addCompressedArgument) {
+    generateCurlCommand: function(file, addCompressedArgument)
+    {
         var command = ["curl"];
         var inferredMethod = "GET";
 
@@ -618,12 +619,13 @@ var NetUtils =
         var requestHeaders = file.requestHeaders;
         var postRequestHeaders = Http.getHeadersFromPostText(file.request, postText);
         var headers = requestHeaders.concat(postRequestHeaders);
-        for (var i = 0; i < headers.length; i++)
+        for (var i=0; i<headers.length; i++)
         {
             var header = headers[i];
 
-            // Firefox and cURL creates the optional Content-Length header for POST and PUT requests.
-            // Omit adding this header as it is preferred to use the Content-Length cURL creates.
+            // Firefox and cURL creates the optional Content-Length header for POST and
+            // PUT requests. Omit adding this header as it is preferred to use the
+            // Content-Length cURL creates.
             if (header.name.toLowerCase() == "content-length")
                 continue;
 

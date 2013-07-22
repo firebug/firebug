@@ -1049,9 +1049,10 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         System.copyToClipboard(url);
     },
 
-    copyAsCurl: function (spy)
+    copyAsCurl: function(spy)
     {
-        System.copyToClipboard(NetUtils.generateCurlCommand(spy, Options.get("net.curlAddCompressedArgument")));
+        System.copyToClipboard(NetUtils.generateCurlCommand(spy,
+            Options.get("net.curlAddCompressedArgument")));
     },
 
     copyResponse: function(spy)

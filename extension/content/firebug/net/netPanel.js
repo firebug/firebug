@@ -532,9 +532,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         System.copyToClipboard(NetUtils.getResponseText(file, this.context));
     },
 
-    copyAsCurl: function (file)
+    copyAsCurl: function(file)
     {
-        System.copyToClipboard(NetUtils.generateCurlCommand(file, Options.get("net.curlAddCompressedArgument")));
+        System.copyToClipboard(NetUtils.generateCurlCommand(file,
+            Options.get("net.curlAddCompressedArgument")));
     },
 
     openRequestInTab: function(file)
