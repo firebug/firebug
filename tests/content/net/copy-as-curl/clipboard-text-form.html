@@ -1,0 +1,132 @@
+<html>
+<head>
+    <title>Test Case for Issue #6616: Copy as cURL</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Issue #6616: Copy as cURL: Clipboard data</h1>
+
+<p>
+    Test that the "Copy as cURL" menu item in the Net panel generates the proper cURL command string
+    <br/>
+    <i>Thomas Andersen, thomas@mr-andersen.no</i>
+</p>
+
+<ol>
+    <li>Open Firebug, enable the net panel</li>
+    <li>
+         Choose Use XHR, method and click the submit button
+    </li>
+    <li>Right click on the new entry in the Net panel and execute <i>Copy as cURL</i></li>
+    <li>The clipboard text should have the proper cURL command</li>
+</ol>
+
+<p>
+    Note: Only GET and POST is supported for regular requests
+</p>
+
+<p>
+    <label for="useXHR">Use XHR: </label> <input type="checkbox" value="true" id="useXHR" checked="true"/>
+    <br/>
+    <label for="method">Method: </label>
+    <select name="method" id="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="HEAD">HEAD</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select>
+</p>
+
+<form action="server.php" method="get" id="form">
+    <div>
+        <label for="param1">Param 1: </label>
+        <input type="text" name="param1" value="12345" id="param1"/>
+        <br/>
+        <label for="param2">Param 2: </label>
+        <input type="text" name="param2" value="Test & Test" id="param2"/>
+        <br/>
+        <label for="param3">Param 3: </label>
+        <input type="text" name="param3" value="$&+,/:;=?@ #%{}|\^~[]´'" id="param3"/>
+        <br/>
+        <input type="submit" value="Submit" id="submit-button"/>
+    </div>
+</form>
+
+<script type="text/javascript">
+    var form = document.querySelector("#form");
+    var useXhrCheckbox = document.querySelector("#useXHR");
+    var methodSelector = document.querySelector("#method");
+
+    function setFormMethod(method)
+    {
+        methodSelector.value = method;
+        form.setAttribute("method", method);
+    }
+
+    function submitForm(method, useXhr)
+    {
+        setFormMethod(method);
+        useXhrCheckbox.checked = useXhr;
+        document.getElementById("submit-button").click();
+    }
+
+    function getNameValueForParam(name)
+    {
+        return name + "=" + document.querySelector("[name=" + name + "]").value;
+    }
+
+    function serializeForm()
+    {
+        return getNameValueForParam("param1") + "&" + getNameValueForParam("param2") + "&" + getNameValueForParam("param3");
+    }
+
+    methodSelector.addEventListener("change", function (event)
+    {
+        setFormMethod(this.value);
+    });
+
+    form.addEventListener("submit", function (event)
+    {
+        var method = this.getAttribute("method");
+
+        if (useXhrCheckbox.checked)
+        {
+            var xhr = new XMLHttpRequest();
+            if (method == "GET")
+            {
+                xhr.open(method, "server.php?" + serializeForm());
+                xhr.send(null);
+            }
+            else if (method == "POST")
+            {
+                xhr.open(method, "server.php");
+                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhr.send(serializeForm());
+            }
+            else if (method == "PUT")
+            {
+                var jsonStr = "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}";
+                xhr.open(method, "server.php");
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.send(jsonStr);
+            }
+            else
+            {
+                xhr.open(method, "server.php");
+                xhr.send(null);
+            }
+
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    });
+
+    setFormMethod("GET");
+
+</script>
+
+</body>
+</html>

@@ -394,6 +394,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         items.push(
+            {
+                id: "fbCopyAsCurl",
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, file)
+            }
+        );
+
+        items.push(
             "-",
             {
                 label: "OpenInTab",
@@ -521,6 +530,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         // Copy response to the clipboard
         System.copyToClipboard(NetUtils.getResponseText(file, this.context));
+    },
+
+    copyAsCurl: function (file)
+    {
+        System.copyToClipboard(NetUtils.generateCurlCommand(file, Options.get("net.curlAddCompressedArgument")));
     },
 
     openRequestInTab: function(file)
