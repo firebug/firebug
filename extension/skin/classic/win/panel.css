@@ -61,9 +61,9 @@
 }
 
 .closeButton:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
+    background: url(chrome://firebug/skin/win/closeHovered.svg) no-repeat;
 }
 
-.closeButton:active {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
+.closeButton:hover:active {
+    background: url(chrome://firebug/skin/win/closePressed.svg) no-repeat;
 }

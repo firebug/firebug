@@ -47,8 +47,8 @@
        id="filter3814"
        style="color-interpolation-filters:sRGB">
       <feGaussianBlur
-         id="feGaussianBlur3816"
-         stdDeviation="0.20195313" />
+         stdDeviation="0.20195313"
+         id="feGaussianBlur3816" />
     </filter>
     <linearGradient
        x1="7.977191"
@@ -58,6 +58,13 @@
        id="linearGradient2751"
        xlink:href="#linearGradient3795"
        gradientUnits="userSpaceOnUse" />
+    <filter id="darken">
+        <feComponentTransfer>
+            <feFuncR type="linear" intercept="-0.1" slope="1"/>
+            <feFuncG type="linear" intercept="-0.1" slope="1"/>
+            <feFuncB type="linear" intercept="-0.1" slope="1"/>
+        </feComponentTransfer>
+    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -78,5 +85,5 @@
   <path
      d="M 4.75,4 4,4.75 7.25,8 l -3.3125,3.34375 0.75,0.75 L 8,8.75 11.25,12 12,11.25 8.75,8 11.96875,4.8125 11.21875,4.0625 8,7.25 4.75,4 Z"
      id="rect3963"
-     style="fill:url(#linearGradient3984);fill-opacity:1;stroke:url(#linearGradient2751);stroke-width:0.60000002;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none" />
+     style="fill:url(#linearGradient3984);fill-opacity:1;stroke:url(#linearGradient2751);stroke-width:0.60000002;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#darken)" />
 </svg>

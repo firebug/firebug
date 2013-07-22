@@ -178,8 +178,7 @@
 }
 
 .cssProp.disabledStyle > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
-    filter: url(resource://firebugui/filters.svg#grayscale);
+    background: transparent url(chrome://firebug/skin/disableInactive.svg) no-repeat 2px 1px;
 }
 
 .cssProp.disabledStyle {

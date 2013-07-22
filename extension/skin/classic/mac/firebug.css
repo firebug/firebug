@@ -181,9 +181,30 @@
     list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
+/* Need to use images instead of filters due to https://bugzil.la/886883 */
+#fbMinimizeButton:hover,
+#fbToggleCommandEditor:hover {
+    list-style-image: url(chrome://firebug/skin/mac/minimizeHovered.svg);
+}
+
+#fbMinimizeButton:hover:active,
+#fbToggleCommandEditor:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/minimizePressed.svg);
+}
+
 #fbDetachButton,
 #fbToggleCommandLine {
     list-style-image: url(chrome://firebug/skin/mac/detach.svg);
+}
+
+#fbDetachButton:hover,
+#fbToggleCommandLine:hover {
+    list-style-image: url(chrome://firebug/skin/mac/detachHovered.svg);
+}
+
+#fbDetachButton:hover:active,
+#fbToggleCommandLine:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/detachPressed.svg);
 }
 
 #fbToggleCommandLine,
@@ -195,35 +216,40 @@
     list-style-image: url(chrome://firebug/skin/mac/close.svg);
 }
 
+#fbCloseButton:hover {
+    list-style-image: url(chrome://firebug/skin/mac/closeHovered.svg);
+}
+
+#fbCloseButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/closePressed.svg);
+}
+
 #fbCommandLineHistoryButton {
     list-style-image: url(chrome://firebug/skin/mac/commandHistory.svg);
+}
+
+#fbCommandLineHistoryButton:hover {
+    list-style-image: url(chrome://firebug/skin/mac/commandHistoryHovered.svg);
+}
+
+#fbCommandLineHistoryButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/commandHistoryPressed.svg);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    list-style-image: url(chrome://firebug/skin/mac/commandHistoryDisabled.svg);
 }
 
 #fbToggleCommandEditor {
     list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
 }
 
-#fbMinimizeButton:hover,
-#fbDetachButton:hover,
-#fbCloseButton:hover,
-#fbToggleCommandLine:hover,
-#fbToggleCommandEditor:hover,
-#fbCommandLineHistoryButton:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
+#fbToggleCommandEditor:hover {
+    list-style-image: url(chrome://firebug/skin/mac/minimizeHovered.svg);
 }
 
-#fbMinimizeButton:hover:active,
-#fbDetachButton:hover:active,
-#fbCloseButton:hover:active,
-#fbToggleCommandLine:hover:active,
-#fbToggleCommandEditor:hover:active,
-#fbCommandLineHistoryButton:active,
-#fbCommandLineHistoryButton[checked="true"] {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
-}
-
-#fbCommandLineHistoryButton[disabled] {
-    filter: url(resource://firebugui/filters.svg#brighten);
+#fbToggleCommandEditor:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/minimizePressed.svg);
 }
 
 /********************************************************************************************/

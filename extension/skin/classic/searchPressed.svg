@@ -59,8 +59,29 @@
        height="1.2408867"
        id="filter2984">
       <feGaussianBlur
-         stdDeviation="0.63671875"
-         id="feGaussianBlur2986" />
+         id="feGaussianBlur2986"
+         stdDeviation="0.63671875" />
+    </filter>
+    <filter
+       id="deepDarken">
+      <feComponentTransfer
+         id="feComponentTransfer15">
+        <feFuncR
+           id="feFuncR17"
+           slope="1"
+           intercept="-0.2"
+           type="linear" />
+        <feFuncG
+           id="feFuncG19"
+           slope="1"
+           intercept="-0.2"
+           type="linear" />
+        <feFuncB
+           id="feFuncB21"
+           slope="1"
+           intercept="-0.2"
+           type="linear" />
+      </feComponentTransfer>
     </filter>
   </defs>
   <metadata
@@ -82,5 +103,5 @@
   <path
      d="m 10.140618,1.6562564 c -2.351137,0 -4.2499989,1.8988618 -4.2499989,4.2499996 0,0.751994 0.189088,1.449384 0.53125,2.0625 l -4.8125,4.8125 1.5625001,1.5625 4.7812499,-4.78125 c 0.6402544,0.38528 1.3858222,0.59375 2.1874989,0.59375 2.351138,0 4.25,-1.898861 4.25,-4.25 C 14.390618,3.5551182 12.491756,1.6562564 10.140618,1.6562564 z m 0,1.53125 c 1.503797,0 2.71875,1.2149526 2.71875,2.7187496 0,1.503798 -1.214953,2.71875 -2.71875,2.71875 -1.5037962,0 -2.7187489,-1.214952 -2.7187489,-2.71875 C 7.4218691,4.402459 8.6368218,3.1875064 10.140618,3.1875064 Z"
      id="path3014"
-     style="fill:url(#linearGradient3792);fill-opacity:1;stroke:url(#linearGradient2731);stroke-width:0.60000002;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none" />
+     style="fill:url(#linearGradient3792);fill-opacity:1;stroke:url(#linearGradient2731);stroke-width:0.60000002;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#deepDarken)" />
 </svg>
