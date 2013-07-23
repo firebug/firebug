@@ -1,0 +1,59 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Quick Info Box */
+
+#fbQuickInfoPanel {
+    border: 1px solid threedshadow;
+    opacity: 0.9;
+}
+
+.fbQuickInfoPanelBody {
+    background-color: white;
+    font-family: monospace;
+    font-size: 9px;
+    padding-bottom: 5px;
+    cursor: move;
+    margin: 4;
+}
+
+.fbQuickInfoTable {
+    width: 100%;
+    border: none;
+}
+
+.fbQuickInfoBoxTitle {
+    font-family: Lucida Grande, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    padding-top: 8px;
+    margin-bottom: 0;
+    cursor: move;
+}
+
+.fbQuickInfoName {
+    color: DarkGreen;
+    margin-bottom: 0;
+    -moz-margin-end: 0;
+    cursor: move;
+}
+
+.fbQuickInfoValue {
+    color: DarkBlue;
+    margin-bottom: 0;
+    -moz-margin-start: 0;
+    cursor: move;
+}
+
+.fbQuickInfoPin {
+    background: url(chrome://firebug/skin/pin2.svg);
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.fbQuickInfoPin:hover:active {
+    background: url(chrome://firebug/skin/pin2.svg) no-repeat -16px 0 transparent;
+}
