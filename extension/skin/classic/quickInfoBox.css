@@ -52,6 +52,8 @@
     height: 16px;
     border: none;
     cursor: pointer;
+    position: absolute;
+    right: 5px;
 }
 
 .fbQuickInfoPin:hover:active {

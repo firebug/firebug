@@ -65,7 +65,8 @@ var rowTag =
 // Implementation
 
 /**
- * @domplate TODO: description
+ * Displays the most important DOM properties and computed CSS styles for the currently inspected element. 
+ * It can be freely positioned at the monitor via drag & drop.
  */
 var QuickInfoBox = Obj.extend(Firebug.Module,
 /** @lends QuickInfoBox */
