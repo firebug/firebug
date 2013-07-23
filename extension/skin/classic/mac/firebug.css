@@ -76,13 +76,16 @@
     box-shadow: 0 2px 2px -2px #000000 inset;
 }
 
+/* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
+   up to Firefox 22.0. Use SVGs as soon as Firefox 23.0 is the min. supported version.
+   (see issue 6607) */
 #fbSearchOptionsPanel {
     -moz-appearance: none;
     -moz-window-shadow: none;
     background-color: transparent;
     margin-bottom: 2px;
     margin-right: -12px;
-    border-image: url(chrome://firebug/skin/mac/searchPanel.svg) 16 50 24 12 stretch;
+    border-image: url(chrome://firebug/skin/mac/searchPanel.png) 16 50 24 12 stretch;
     border-image-slice: 16 50 24 12 fill;
     border-width: 16px 50px 24px 12px;
     border-style: solid;
@@ -90,22 +93,18 @@
 }
 
 #fbSearchOptionsPanel[position="after_end"] {
-    border-image: url(chrome://firebug/skin/mac/searchPanelDown.svg) 25 50 18 12 stretch;
+    border-image: url(chrome://firebug/skin/mac/searchPanelDown.png) 25 50 18 12 stretch;
     border-image-slice: 25 50 18 12 fill;
     border-width: 25px 50px 18px 12px;
 }
 
 #fbSearchOptionsPanel > vbox {
     margin-right: -38px;
-    background: #424242;
 }
 
 #fbSearchOptionsPanel > description {
-    background: #424242;
     margin: 0;
 }
-
-
 
 .fbsearch-options-label {
     color: #ffffff;
