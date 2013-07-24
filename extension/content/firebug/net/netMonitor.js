@@ -175,6 +175,11 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             if (persistedPanelState.breakpoints)
                 context.netProgress.breakpoints = persistedPanelState.breakpoints;
         }
+
+        // Update Persist flag according to the default value from preferences.
+        var defaultPersistValue = Options.get("net.defaultPersist");
+        if (defaultPersistValue)
+            this.togglePersist(context);
     },
 
     showContext: function(browser, context)
@@ -254,8 +259,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
         else
         {
-            // If the Net panel is not enabled, we needto make sure the unmonitorContext
-            // is executed and so, the start button (aka firebug status bar icons) is
+            // If the Net panel is not enabled, we need to make sure the unmonitorContext
+            // is executed and so, the start button (aka Firebug status bar icons) is
             // properly updated.
             NetHttpActivityObserver.unregisterObserver();
             Firebug.connection.eachContext(unmonitorContext);
@@ -342,7 +347,9 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         var panel = context.getPanel(panelName);
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", panel.persistContent);
+
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked",
+            panel.persistContent);
     },
 
     updateOption: function(name, value)

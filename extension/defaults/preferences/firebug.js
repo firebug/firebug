@@ -42,6 +42,10 @@ pref("extensions.firebug.netSearchHeaders", false);
 pref("extensions.firebug.netSearchParameters", false);
 pref("extensions.firebug.netSearchResponseBody", false);
 
+// Persist (default values)
+pref("extensions.firebug.console.defaultPersist", false);
+pref("extensions.firebug.net.defaultPersist", false);
+
 // Console
 pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);
