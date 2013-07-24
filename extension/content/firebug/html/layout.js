@@ -25,7 +25,9 @@ var {domplate, DIV, SPAN} = Domplate;
 // LayoutPanel Implementation
 
 /**
- * @panel Represents the Layout side panel available within the HTML panel.
+ * @panel Represents the Layout side panel available within the HTML panel. The Layout
+ * panel allows inspecting and manipulating the layout data of the selected DOM node.
+ * The layout data editing is done through {@LayoutEditor} object.
  */
 function LayoutPanel() {}
 LayoutPanel.prototype = Obj.extend(Firebug.Panel,
@@ -260,7 +262,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.onMouseOver = Obj.bind(this.onMouseOver, this);
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
-        this.onAfterPaint = Obj.bindFixed(this.refresh, this);
+        this.onAfterPaint = Obj.bindFixed(this.onMozAfterPaint, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -294,6 +296,15 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     supportsObject: function(object, type)
     {
         return object instanceof window.Element ? 1 : 0;
+    },
+
+    onMozAfterPaint: function()
+    {
+        // TabContext.invalidatePanels() method calls panel.refresh() on timeout and ensures
+        // that it isn't executed too often. This is necessary in this case since
+        // "MozAfterPaint" event can be fired very often (especially in case of animations)
+        // and the update (see: updateSelection) could consume CPU cycles (see issue 6336).
+        this.context.invalidatePanels("layout");
     },
 
     refresh: function()
@@ -489,7 +500,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 });
 
 // ********************************************************************************************* //
-// LayoutEditor
+// LayoutEditor Implementation
 
 function LayoutEditor(doc)
 {
@@ -499,7 +510,11 @@ function LayoutEditor(doc)
     this.numeric = true;
 }
 
+/**
+ * @editor Represents an inline editor that is used by {@LayoutPanel} to modify layout data.
+ */
 LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+/** @lends LayoutEditor */
 {
     saveEdit: function(target, value, previousValue)
     {
