@@ -13,7 +13,7 @@ function runTest()
     var EXPECTED_DELETE_RESULT = "curl '" + REQUEST_URL + "' -X DELETE -H 'Host: " + HOST + "' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate' -H 'Referer: " + REFERRER_URL + "' -H 'Connection: keep-alive'";
 
     FBTest.setPref("net.curlAddCompressedArgument", false);
-    FBTest.openNewTab(basePath + "lib/netUtils/generateCurlCommand.html", function (win)
+    FBTest.openNewTab(basePath + "lib/netUtils/generateCurlCommand.html", function(win)
     {
         FBTest.enableNetPanel(function (win)
         {
