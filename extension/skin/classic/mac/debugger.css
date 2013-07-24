@@ -175,10 +175,13 @@
 /************************************************************************************************/
 /* Breakpoint condition */
 
+/* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
+   up to Firefox 22.0. Use SVGs as soon as Firefox 23.0 is the min. supported version.
+   (see issue 6607) */
 .conditionEditor {
     border-style: solid;
     border-width: 19px 25px 33px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.svg) 19 25 33 33 fill
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditor.png) 19 25 33 33 fill
         stretch;
 }
 
@@ -203,7 +206,7 @@
 
 .upsideDown {
     border-width: 28px 25px 19px 33px;
-    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.svg) 28 25 19 33 fill
+    border-image: url(chrome://firebug/skin/mac/breakpointConditionEditorDown.png) 28 25 19 33 fill
         stretch;
 }
 
