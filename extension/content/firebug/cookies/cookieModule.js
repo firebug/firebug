@@ -81,7 +81,7 @@ Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
 // Module Implementation
 
 /**
- * @module This class represents a <i>module</i> for Cookies panel.
+ * @module This object represents a <i>module</i> for Cookies panel.
  * The module supports activation (enable/disable of the Cookies panel).
  * This functionality has been introduced in Firebug 1.2 and makes possible
  * to control activity of Firebug panels in order to avoid (performance) expensive
@@ -665,7 +665,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             "", params);
     },
 
-    // UI Commands
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Remove Cookies
+
     onRemoveAllShowTooltip: function(tooltip, context)
     {
         tooltip.label = Locale.$STR("cookies.removeall.tooltip");
@@ -679,7 +681,10 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
     },
 
     /**
-     * Removes cookies defined for a website
+     * Removes cookies defined for a website. This method removes all cookies for
+     * the current page (including cookies from embedded iframes). The method
+     * doesn't check any UI filters.
+     *
      * @param {Object} context context, in which the cookies are defined
      * @param {Object} [filter] filter to define, which cookies should be removed
      *   (format: {session: true/false, host: string})
@@ -713,12 +718,39 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             while (cookieEnumerator.hasMoreElements())
             {
                 var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
-                if (!filter || ((!filter.session || cookie.isSession) &&
-                    (!filter.host || filter.host == cookie.host)))
-                {
-                    cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
-                }
+                this.removeCookie(cookie, filter);
             }
+        }
+    },
+
+    /**
+     * Removes displayed cookies in the Cookies panel.
+     *
+     * @param {Object} context context, in which the cookies are defined
+     * @param {Object} [filter] filter to define, which cookies should be removed
+     *   (format: {session: true/false, host: string})
+     */
+    removeDisplayedCookies: function(context, filter)
+    {
+        var panel = context.getPanel("cookies", false);
+        if (!panel)
+            return;
+
+        // Enumerate all displayed cookies and remove them step by step.
+        var self = this;
+        panel.enumerateCookies(function(cookie)
+        {
+            self.removeCookie(cookie.cookie, filter);
+        });
+    },
+
+    removeCookie: function(cookie, filter)
+    {
+        // Remove the cookie only if the filter says so.
+        if (!filter || ((!filter.session || cookie.isSession) &&
+            (!filter.host || filter.host == cookie.host)))
+        {
+            cookieManager.remove(cookie.host, cookie.name, cookie.path, false);
         }
     },
 
@@ -727,8 +759,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         if (Options.get(removeConfirmation))
         {
             var check = {value: false};
-            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
             if (!prompts.confirmEx(context.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("cookies.confirm.removeall"), flags, "", "", "",
@@ -742,7 +774,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeConfirmation, !check.value);
         }
 
-        Firebug.CookieModule.removeCookies(context);
+        Firebug.CookieModule.removeDisplayedCookies(context);
     },
 
     onRemoveAllSession: function(context)
@@ -765,7 +797,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             Options.set(removeSessionConfirmation, !check.value);
         }
 
-        Firebug.CookieModule.removeCookies(context, {session: true});
+        Firebug.CookieModule.removeDisplayedCookies(context, {session: true});
     },
 
     onRemoveAllFromHost: function(context, host)
@@ -791,6 +823,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         Firebug.CookieModule.removeCookies(context, {host: host});
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Create Cookies
+
     onCreateCookieShowTooltip: function(tooltip, context)
     {
         var host = context.window.location.host;
@@ -805,10 +840,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         // There is an excepion if the window is closed or not initialized (empty tab)
         var host;
-        try {
+        try
+        {
             host = context.window.location.host;
         }
-        catch (err) {
+        catch (err)
+        {
             alert(Locale.$STR("cookies.message.There_is_no_active_page"));
             return;
         }
@@ -886,6 +923,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // Return final expiration time.
         return (now.getTime() / 1000);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * Exports all existing cookies in the browser into a cookies.txt file.
