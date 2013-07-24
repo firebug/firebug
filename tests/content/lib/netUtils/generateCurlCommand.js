@@ -36,13 +36,19 @@ function runTest()
 function submitAndVerify(taskCallback, method, expectedResult, win, whatToExpectText)
 {
     FBTest.progress("Test XHR " + method + " request");
-
     FBTest.selectPanel("net").clear();
+
+    function replaceUserAgentHeader(str)
+    {
+        var replaceWithStr = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:22.0) Gecko/20100101 Firefox/22.0";
+        return str.replace(/(-H 'User-Agent: ).+?(')/i, "$1" + replaceWithStr + "$2");
+    }
+
     onRequestDisplayed(function(netRow)
     {
         var file = FW.Firebug.getRepObject(netRow);
         var generatedCommand = FW.Firebug.NetMonitor.Utils.generateCurlCommand(file);
-        FBTest.compare(generatedCommand, expectedResult, whatToExpectText);
+        FBTest.compare(replaceUserAgentHeader(generatedCommand), expectedResult, whatToExpectText);
 
         taskCallback();
     });
