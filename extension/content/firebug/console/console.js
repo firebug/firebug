@@ -214,11 +214,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
     initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
-
-        // Update Persist flag according to the default value from preferences.
-        var defaultPersistValue = Options.get("console.defaultPersist");
-        if (defaultPersistValue)
-            this.togglePersist(context);
     },
 
     togglePersist: function(context)

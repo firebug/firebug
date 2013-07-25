@@ -64,7 +64,7 @@ var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
  */
 function NetPanel() {}
 NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
-/** lends NetPanel */
+/** @lends NetPanel */
 {
     name: panelName,
     searchable: true,

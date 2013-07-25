@@ -175,11 +175,6 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             if (persistedPanelState.breakpoints)
                 context.netProgress.breakpoints = persistedPanelState.breakpoints;
         }
-
-        // Update Persist flag according to the default value from preferences.
-        var defaultPersistValue = Options.get("net.defaultPersist");
-        if (defaultPersistValue)
-            this.togglePersist(context);
     },
 
     showContext: function(browser, context)
