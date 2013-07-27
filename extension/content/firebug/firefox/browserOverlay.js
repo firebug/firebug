@@ -149,20 +149,7 @@ BrowserOverlay.prototype =
         });
 
         // Create Firebug splitter element.
-        var splitter = $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
-
-        if (this.win.navigator.platform.search("Mac") == 0)
-        {
-            splitter.addEventListener("mouseover", function()
-            {
-                this.style.backgroundColor = "rgba(0, 0, 0, 1)";
-
-            });
-            splitter.addEventListener("mouseout", function()
-            {
-                this.style.backgroundColor = "";
-            });
-        }
+        $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
 
         // Create Firebug main frame and container.
         $el(this.doc, "vbox", {id: "fbMainFrame", collapsed: "true", persist: "height,width"}, [

@@ -40,6 +40,10 @@
     position: relative;
 }
 
+#fbContentSplitter[orient=vertical]:hover {
+    background: #000;
+}
+
 #fbContentSplitter[orient=horizontal] {
     border-right: 1px solid !important;
     border-left: none;
