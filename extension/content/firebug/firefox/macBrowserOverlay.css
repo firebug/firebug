@@ -1,0 +1,49 @@
+#firebug-button .badge > .label {
+    -moz-box-sizing: border-box;
+    visibility: hidden;
+    font-size: 9px;
+    padding: 0 3px;
+    line-height: 13px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    border-radius: 8px;
+    background-color: #d95b09;
+    border: 2px solid #fff;
+    box-shadow: none;
+    background-image: none;
+}
+
+/* Slightly different positions of the badge for individual toolbars */
+#nav-bar #firebug-button .badge {
+    margin: -5px -10px 0 -8px;
+}
+
+#fbContentSplitter{
+    border-color: threedShadow !important;
+    background-color: #FFFFFF;
+}
+
+#fbContentSplitter[dir=reverse]{
+    transform: scale(-1, -1);
+}
+
+#fbContentSplitter[orient=vertical] {
+    transition: background-color 300ms;
+}
+
+#fbContentSplitter[orient=vertical] {
+    background: transparent;
+    border-bottom-width: 0;
+    min-height: 5px;
+    height: 5px;
+    margin-bottom: -5px;
+    position: relative;
+}
+
+#fbContentSplitter[orient=horizontal] {
+    border-right: 1px solid !important;
+    border-left: none;
+    min-width: 5px;
+    max-width: 5px;
+    background-color: -moz-dialog;
+}

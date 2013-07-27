@@ -59,7 +59,6 @@
 
 #fbToolbar {
     padding-left: 4px;
-    background: #F6F6F6 linear-gradient(to top, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
     border-bottom: none;
 }
 
@@ -73,7 +72,23 @@
 
 .fbsearch-textbox {
     border-radius: 10px !important;
-    box-shadow: 0 2px 2px -2px #000000 inset;
+    margin-top: 1px;
+}
+
+
+.fbsearch-icon {
+    /*
+    cursor: default!important;
+    background: url(chrome://firebug/skin/search.svg) no-repeat 0 50%;
+    width: 16px;
+    height: 16px;
+    */
+    width: 22px;
+}
+
+.fbsearch-icon,
+.fbsearch-icon:hover {
+    background-position: 5px 50%;
 }
 
 /* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
@@ -161,10 +176,8 @@
 }
 
 .toolbarbutton-iconic {
-    margin: 0 1px 0 1px !important;
+    margin: 1px 1px 0 1px !important;
     padding: 0 !important;
-    /*border: none !important;*/
-    /*background: transparent !important;*/
 }
 
 .toolbarbutton-iconic > .toolbarbutton-icon {
@@ -268,8 +281,9 @@
 /********************************************************************************************/
 
 .panelTabBox {
-    background: #e0e0e0 linear-gradient(to top, #D7D7D7, #EDEDED) repeat-x;
-    border-bottom: 1px solid #BBB9BA;
+    background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
+    height: 32px;
+    border-bottom: 1px solid #bebebe;
     padding: 0;
     overflow: hidden;
 }
@@ -280,20 +294,26 @@
 }
 
 panelTab {
-    margin: 2px 1px 0 3px;
+    margin: 4px 1px 0 3px;
     border: 1px solid transparent;
     border-bottom: none;
     border-radius: 4px 4px 0 0;
-    padding: 2px 7px 5px 7px;
+    padding: 5px 8px 7px 8px;
     font-size: 11px;
     font-weight: bold;
-    color: #565656;
+    color: #3a3a3a;
     direction: ltr;
 }
+
+panelTab[aria-disabled="true"] .panelTab-text {
+    -moz-appearance: none;
+    color: #7c7c7c !important;
+}
+
 panelTab[selected="true"] {
     border: 1px solid #A0A0A0;
     border-bottom: none;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7)) no-repeat 0 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
     color: inherit;
 }
 
@@ -348,20 +368,20 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button,
 .toolbar-text-menubutton {
-    margin: 0 1px;
     -moz-appearance: none;
-    padding: 1px 0px 1px 7px;
+    margin-top: 7px;
+    margin-bottom: 6px;
+    padding: 0 8px;
     min-width: 0;
     max-width: 13em;
     font-weight: bold;
-    color: #565656;
+    color: #3a3a3a;
     border: none !important;
-    border-radius: 8px;
+    border-radius: 9px;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
     margin-left: 7px;
-    padding-right: 7px;
 }
 
 .toolbar-text-button > .toolbarbutton-icon {
@@ -372,47 +392,46 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-menubutton:hover:not([disabled="true"]) ,
 .toolbar-text-button[checked="true"]:hover:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]) {
-    background: #999999;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .toolbar-text-button:hover:active:not([disabled="true"]),
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) {
-    box-shadow:
-        inset rgba(60, 60, 60, 0.15) 0 -1px 3px,
-        inset #111111 0 1px 3px,
-        inset rgba(60, 60, 60, 0.1) 0 1px 2px,
-        0 1px rgba(244, 244, 244, 0.4);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
-    color: #FFFFFF;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    text-shadow: 0 1px rgba(120, 120, 120, 1);
 }
 
 .toolbar-text-button[checked="true"]:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-    text-shadow: 0 1px rgba(255, 255, 255, 0.4);
-    background-color: #CCCCCC;
+    text-shadow: 0 1px rgba(120, 120, 120, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
-    color: #FFFFFF;
+    color: #fff;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
-    color: #333333;
+    color: #3a3a3a;
 }
+
 .toolbar-text-button[checked="true"] > .toolbarbutton-text {
-    color: #000000;
+    color: #fff;
 }
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
   font-size: 100% !important;
-  margin: 0px !important;
+  margin: 0 !important;
 }
 
 .toolbar-text-button > .toolbarbutton-text,
@@ -471,13 +490,19 @@ panelTab[selected="true"] > panelTabMenu {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    background: #F6F6F6 linear-gradient(to top, #DCDCDC 1px, #FFFFFF 1px, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
+    /*background: linear-gradient(to bottom, #f7f7f7, #f3f3f3) repeat scroll 0 0 transparent;*/
+    /*background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.5)) no-repeat 0 0;*/
+    /*background: linear-gradient(to bottom, #f0f0f0, #d1d1d1) repeat scroll 0 0 transparent;*/
+
+    height: 30px;
+    border-top: 1px solid #fff;
     margin-left: -5px;
-    margin-right: 0px;
+    margin-right: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
 }
 
 .useA11y #fbPanelBar1 textbox[focused],
- .searchOptionsMenu button:focus {
+.searchOptionsMenu button:focus {
     -moz-outline-radius: 10px !important;
 }
 

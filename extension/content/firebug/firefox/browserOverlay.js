@@ -62,6 +62,10 @@ BrowserOverlay.prototype =
             $(this.doc, "mainBroadcasterSet"));
 
         var node = $stylesheet(this.doc, "chrome://firebug/content/firefox/browserOverlay.css");
+
+        if (this.win.navigator.platform.search("Mac") == 0)
+            $stylesheet(this.doc, "chrome://firebug/content/firefox/macBrowserOverlay.css");
+
         this.nodesToRemove.push(node);
 
         this.loadContextMenuOverlay();
@@ -145,7 +149,20 @@ BrowserOverlay.prototype =
         });
 
         // Create Firebug splitter element.
-        $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
+        var splitter = $el(this.doc, "splitter", {id: "fbContentSplitter", collapsed: "true"}, container);
+
+        if (this.win.navigator.platform.search("Mac") == 0)
+        {
+            splitter.addEventListener("mouseover", function()
+            {
+                this.style.backgroundColor = "rgba(0, 0, 0, 1)";
+
+            });
+            splitter.addEventListener("mouseout", function()
+            {
+                this.style.backgroundColor = "";
+            });
+        }
 
         // Create Firebug main frame and container.
         $el(this.doc, "vbox", {id: "fbMainFrame", collapsed: "true", persist: "height,width"}, [
