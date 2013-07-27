@@ -441,28 +441,32 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(object, rep, sourceLink)
+    getMessageId: function(appender, objects, className, rep, sourceLink, noRow)
     {
+        if (!rep)
+            rep = Firebug.getRep(objects, this.context);
+
+        FBTrace.sysout("getMessageId", arguments);
         // Firebug internal message objects could provide their own custom ID
-        if (object instanceof Object && typeof(object.getId) == "function")
-            return object.getId();
+        //if (objects instanceof Object && typeof(objects.getId) == "function")
+        //    return objects.getId();
 
         // The rep for the object could provide its own custom ID
-        if (rep instanceof Object && typeof(rep.getId) == "function")
-            return rep.getId();
+        if (rep instanceof Object && !rep.groupable)
+            return Obj.getUniqueId();
 
-        // object may not be an object
-        if (typeof object != "object")
-            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+        // 'objects' may not be an object
+        if (typeof objects != "object")
+            return objects + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
 
         // object may be NaN
-        if (object !== object)
+        if (objects !== objects)
             return "NotANumber";
 
         // Use all direct properties of the object
-        if (object && (typeof object === "object" || typeof object === "function"))
+        if (objects && (typeof objects === "object" || typeof objects === "function"))
         {
-            var id = Obj.getObjHash(object);
+            var id = Obj.getUniqueId(objects);
             return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
         }
 
@@ -499,7 +503,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(objects, rep, sourceLink);
+            var msgId = this.getMessageId(appender, objects, className, rep, sourceLink, noRow);
 
             if (msgId && msgId == this.lastMsgId)
             {

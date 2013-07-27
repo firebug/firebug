@@ -330,10 +330,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getId: function()
-    {
-        return Obj.getUniqueId();
-    }
+    groupable: false
 });
 };
 
