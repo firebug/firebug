@@ -275,11 +275,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, true);
 
-        // Allow the use of plain "help"
-        // xxxHonza: this is a hack, FIX ME
-        if (expr === "help")
-            expr = "help()";
-
         var self = this;
         var logResult = Firebug.Console.log.bind(Firebug.Console);
 
