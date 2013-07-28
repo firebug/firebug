@@ -718,7 +718,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             while (cookieEnumerator.hasMoreElements())
             {
                 var cookie = cookieEnumerator.getNext().QueryInterface(Ci.nsICookie2);
-                this.removeCookie(cookie, filter);
+                this.removeCookieHelper(cookie, filter);
             }
         }
     },
@@ -740,11 +740,11 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         var self = this;
         panel.enumerateCookies(function(cookie)
         {
-            self.removeCookie(cookie.cookie, filter);
+            self.removeCookieHelper(cookie.cookie, filter);
         });
     },
 
-    removeCookie: function(cookie, filter)
+    removeCookieHelper: function(cookie, filter)
     {
         // Remove the cookie only if the filter says so.
         if (!filter || ((!filter.session || cookie.isSession) &&
