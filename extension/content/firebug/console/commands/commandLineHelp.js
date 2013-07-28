@@ -316,8 +316,7 @@ function onExecuteCommand(context)
 Firebug.registerCommand("help", {
     helpUrl: "http://getfirebug.com/wiki/index.php/help",
     handler: onExecuteCommand.bind(this),
-    description: Locale.$STR("console.cmd.help.help"),
-    getter: true
+    description: Locale.$STR("console.cmd.help.help")
 });
 
 return CommandLineHelp;
