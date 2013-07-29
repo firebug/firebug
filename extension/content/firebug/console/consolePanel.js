@@ -441,36 +441,25 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(appender, objects, className, rep, sourceLink, noRow)
+    getMessageId: function(objects, className, rep, logContent, sourceLink)
     {
-        if (!rep)
-            rep = Firebug.getRep(objects, this.context);
-
-        FBTrace.sysout("getMessageId", arguments);
         // Firebug internal message objects could provide their own custom ID
-        //if (objects instanceof Object && typeof(objects.getId) == "function")
-        //    return objects.getId();
+        if (objects instanceof Object && typeof(objects.getId) == "function")
+            return objects.getId();
 
         // The rep for the object could provide its own custom ID
         if (rep instanceof Object && !rep.groupable)
             return Obj.getUniqueId();
 
-        // 'objects' may not be an object
-        if (typeof objects != "object")
-            return objects + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-
-        // object may be NaN
-        if (objects !== objects)
-            return "NotANumber";
-
-        // Use all direct properties of the object
-        if (objects && (typeof objects === "object" || typeof objects === "function"))
+        var idParts = [className, logContent.textContent];
+        if (sourceLink)
         {
-            var id = Obj.getUniqueId(objects);
-            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+            idParts.push(sourceLink.href, sourceLink.line);
+            if (sourceLink.col)
+                idParts.push(sourceLink.col);
         }
 
-        return Obj.getUniqueId().toString();
+        return idParts.join(":");
     },
 
     increaseRowCount: function(row)
@@ -503,38 +492,36 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(appender, objects, className, rep, sourceLink, noRow);
+            row = this.createRow("logRow", className);
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            appender.apply(this, [objects, logContent, rep]);
 
-            if (msgId && msgId == this.lastMsgId)
+            // If sourceLink is not provided and the object is an instance of Error
+            // convert it into ErrorMessageObj instance, which implements getSourceLink
+            // method.
+            // xxxHonza: is there a better place where to make this kind of conversion?
+            if (!sourceLink && (objects instanceof Error))
+                objects = FirebugReps.Except.getErrorMessage(objects);
+
+            if (!sourceLink && objects && objects.getSourceLink)
+                sourceLink = objects.getSourceLink();
+
+            row.msgId = this.getMessageId(objects, className, rep, logContent, sourceLink);
+
+            if (row.msgId && row.msgId == this.lastMsgId)
             {
                 this.increaseRowCount(container.lastChild);
-
                 row = container.lastChild;
             }
             else
             {
-                row = this.createRow("logRow", className);
-                row.msgId = msgId;
-                var logContent = row.getElementsByClassName("logContent").item(0);
-                appender.apply(this, [objects, logContent, rep]);
-
-                // If sourceLink is not provided and the object is an instance of Error
-                // convert it into ErrorMessageObj instance, which implements getSourceLink
-                // method.
-                // xxxHonza: is there a better place where to make this kind of conversion?
-                if (!sourceLink && (objects instanceof Error))
-                    objects = FirebugReps.Except.getErrorMessage(objects);
-
-                if (!sourceLink && objects && objects.getSourceLink)
-                    sourceLink = objects.getSourceLink();
-
                 if (sourceLink)
                     FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
 
                 container.appendChild(row);
             }
 
-            this.lastMsgId = msgId;
+            this.lastMsgId = row.msgId;
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
