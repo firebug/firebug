@@ -25,7 +25,7 @@
             onmousedown="Firebug.QuickInfoBox.quickInfoBoxHandler(event);"
             onmouseover="Firebug.QuickInfoBox.quickInfoBoxHandler(event);"
             onmouseout="Firebug.QuickInfoBox.quickInfoBoxHandler(event);">
-                <browser class="contentFrame" disablehistory="true"
+                <browser class="fbQuickInfoPanelContent" disablehistory="true"
                     src="about:blank" type="content"
                     height="300" width="200" border="0"/>
         </panel>

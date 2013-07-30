@@ -322,7 +322,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     getContentFrame: function()
     {
         var box = Firebug.chrome.$("fbQuickInfoPanel");
-        return box.getElementsByClassName("contentFrame")[0];
+        return box.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 
     getContentDoc: function()
