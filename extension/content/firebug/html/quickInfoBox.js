@@ -131,7 +131,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
                     box.setAttribute("noautohide", true);
                 }, false);
             }
-
+            box.sizeTo( 200, 350);
             box.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
