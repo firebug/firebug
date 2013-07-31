@@ -58,7 +58,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             debuggerState = Firebug.Debugger.beginInternalOperation();
 
-            var newExpr = this.transformExpression(expr, targetWindow, context);
+            var newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
             {
@@ -231,27 +231,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     isSandbox: function (context)
     {
         return (context.global && context.global+"" === "[object Sandbox]");
-    },
-
-    /**
-     * Transforms the expression before the evaluation.
-     * Used for example by Closure Inspector (".%" => "__fb_scopedVars")
-     *
-     * @param {string} expr The expression to transform.
-     * @param {Window} targetWindow The target window.
-     * @param {Context} context The Firebug context.
-     *
-     * @return {string} The transformed expression.
-     */
-    transformExpression: function(expr, targetWindow, context)
-    {
-        var newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
-        // Allow the use of plain "help". Both "help()" and "help" must work.
-        // xxxHonza: this is a hack, FIX ME
-        if (newExpr === "help")
-            newExpr = "help()";
-
-        return newExpr;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
