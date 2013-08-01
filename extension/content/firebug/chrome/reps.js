@@ -832,9 +832,6 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     getTitle: function(obj, context)
     {
-        if (Arr._isDOMTokenList(obj))
-            return "DOMTokenList";
-
         const re = /\[object ([^\]]*)/;
         var label = Object.prototype.toString.call(obj);
         var m = re.exec(label);
