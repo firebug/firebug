@@ -88,7 +88,8 @@ ErrorMessageObj.prototype =
 
     getId: function()
     {
-        return this.href + ":" + this.message + ":" + this.lineNo + ":" + this.colNumber;
+        return this.href + ":" + this.message + ":" + this.lineNo + ":" +
+            (this.colNumber ? this.colNumber : "");
     }
 };
 
