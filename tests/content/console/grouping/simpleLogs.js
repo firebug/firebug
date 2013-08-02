@@ -10,7 +10,7 @@ function runTest()
         {
             var tasks = new FBTest.TaskList();
             tasks.push(verifyLogs, win, 14, 2, "testButton1", "Verify grouped logs");
-            tasks.push(verifyLogs, win, 37, "", "testButton2", "Verify not grouped logs");
+            tasks.push(verifyLogs, win, 40, "", "testButton2", "Verify not grouped logs");
 
             tasks.run(function() {
                 FBTest.testDone("simpleLogs.DONE");
