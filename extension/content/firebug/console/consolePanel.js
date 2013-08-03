@@ -441,25 +441,101 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(objects, className, rep, logContent, sourceLink)
+    getMessageMatcher: function(object, rep, sourceLink)
     {
-        // Firebug internal message objects could provide their own custom ID
-        if (objects instanceof Object && typeof(objects.getId) == "function")
-            return objects.getId();
-
-        // The rep for the object could provide its own custom ID
-        if (rep instanceof Object && !rep.groupable)
-            return Obj.getUniqueId();
-
-        var idParts = [className, logContent.textContent];
-        if (sourceLink)
+        function matchesMetaData(otherRep, otherLink)
         {
-            idParts.push(sourceLink.href, sourceLink.line);
-            if (sourceLink.col)
-                idParts.push(sourceLink.col);
+            if (otherRep !== rep || (rep && rep.groupable === false))
+                return false;
+
+            var currentSourceInfo = (sourceLink ? sourceLink.href + ":" + sourceLink.line +
+                (sourceLink.col ? ":" + sourceLink.col : "") : "");
+            var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
+                (otherLink.col ? ":" + otherLink.col : "") : "");
+            return currentSourceInfo === otherSourceInfo;
         }
 
-        return idParts.join(":");
+        // Check whether two content objects are approximately the same, one level deep.
+        function areLooselyEqual(a, b)
+        {
+            var r = Obj.areEqual(a, b);
+            if (r !== undefined)
+                return r;
+
+            var proto = Object.getPrototypeOf(a);
+            if (!(Object.getPrototypeOf(proto) === null && "hasOwnProperty" in proto) && !Array.isArray(a))
+            {
+                // Our object is complicated, so we shouldn't attempt a loose comparison.
+                return false;
+            }
+
+            if (Array.isArray(a) && a.length !== b.length)
+                return false;
+
+            var count = 0;
+            for (var prop in a)
+            {
+                var propDescriptorA = Object.getOwnPropertyDescriptor(a, prop);
+                var propDescriptorB = Object.getOwnPropertyDescriptor(b, prop);
+                if (!propDescriptorA || !propDescriptorB ||
+                    propDescriptorA.get || propDescriptorB.get ||
+                    propDescriptorA.set || propDescriptorB.set)
+                {
+                    return false;
+                }
+
+                if (!Obj.areEqual(propDescriptorA.value, propDescriptorB.value))
+                    return false;
+
+                count++;
+            }
+
+            for (var prop in b)
+                count--;
+
+            return (count === 0);
+        }
+
+        return function matchMessage(otherObject, otherRep, otherSourceLink)
+        {
+            try
+            {
+                if (!matchesMetaData(otherRep, otherSourceLink))
+                    return false;
+
+                var equal = Obj.areEqual(object, otherObject);
+                if (equal !== undefined)
+                    return equal;
+
+                var str = Object.prototype.toString.call(object);
+                var isArray = (str === "[object Arguments]" || str === "[object Array]");
+                if (isArray && rep !== FirebugReps.Arr)
+                {
+                    // console.log et al.
+                    if (object.length !== otherObject.length)
+                        return false;
+
+                    for (var i=0, len=object.length; i<len; ++i)
+                    {
+                        if (!areLooselyEqual(object[i], otherObject[i]))
+                            return false;
+                    }
+                    return true;
+                }
+
+                // Internal chrome objects are allowed to implement a custom "getId" function.
+                if (object instanceof Object && "getId" in object)
+                    return ("getId" in otherObject && object.getId() === otherObject.getId());
+
+                return areLooselyEqual(object, otherObject);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("consolePanel.getMessageMatcher; failed to check equality", exc);
+                return false;
+            }
+        };
     },
 
     increaseRowCount: function(row)
@@ -467,11 +543,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var counter = row.getElementsByClassName("logCounter").item(0);
         if (!counter)
             return;
-        var value = counter.getElementsByClassName("logCounterValue");
+        var value = counter.getElementsByClassName("logCounterValue").item(0);
         if (!value)
             return;
-
-        value = value.item(0);
 
         var count = parseInt(value.textContent);
         if (isNaN(count))
@@ -506,9 +580,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (!sourceLink && objects && objects.getSourceLink)
                 sourceLink = objects.getSourceLink();
 
-            row.msgId = this.getMessageId(objects, className, rep, logContent, sourceLink);
-
-            if (row.msgId && row.msgId == this.lastMsgId)
+            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink))
             {
                 this.increaseRowCount(container.lastChild);
                 row = container.lastChild;
@@ -521,13 +593,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 container.appendChild(row);
             }
 
-            this.lastMsgId = row.msgId;
+            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
+            {
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom +
                     " " + row.textContent);
+            }
 
             if (this.wasScrolledToBottom)
                 Dom.scrollToBottom(this.panelNode);
@@ -542,6 +616,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
+
             Dom.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 
