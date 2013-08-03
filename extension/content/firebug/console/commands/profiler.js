@@ -447,7 +447,11 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
             SPAN({"class": "profileCaption"}, "$object.title"),
             " ",
             SPAN({"class": "profileTime"}, "")
-        )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    groupable: false
 });
 
 // ********************************************************************************************* //
