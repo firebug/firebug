@@ -79,8 +79,8 @@ Obj.areEqual = function(a, b)
 {
     if (typeof a === "number")
     {
-        if (a !== a)
-            return (b !== b);
+        if (isNaN(a))
+            return isNaN(b);
 
         // We want 0 == -0, so this is enough.
         return (a === b);
@@ -102,6 +102,9 @@ Obj.areEqual = function(a, b)
 
     if (str === "[object Date]")
         return a.getTime() === b.getTime();
+
+    if (str === "[object RegExp]")
+        return a.toString() === b.toString();
 
     return undefined;
 }
