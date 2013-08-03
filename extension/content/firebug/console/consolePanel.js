@@ -452,18 +452,20 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 (sourceLink.col ? ":" + sourceLink.col : "") : "");
             var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
                 (otherLink.col ? ":" + otherLink.col : "") : "");
+
             return currentSourceInfo === otherSourceInfo;
         }
 
         // Check whether two content objects are approximately the same, one level deep.
         function areLooselyEqual(a, b)
         {
-            var r = Obj.areEqual(a, b);
-            if (r !== undefined)
-                return r;
+            var equal = Obj.areEqual(a, b);
+            if (equal !== undefined)
+                return equal;
 
             var proto = Object.getPrototypeOf(a);
-            if (!(Object.getPrototypeOf(proto) === null && "hasOwnProperty" in proto) && !Array.isArray(a))
+            if (!(Object.getPrototypeOf(proto) === null && "hasOwnProperty" in proto) &&
+                !Array.isArray(a))
             {
                 // Our object is complicated, so we shouldn't attempt a loose comparison.
                 return false;
@@ -475,6 +477,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var count = 0;
             for (var prop in a)
             {
+                // Because prototypes are already checked in Obj.areEqual(),
+                // we just need to compare own properties
+                if (!a.hasOwnProperty(prop))
+                    continue;
+
                 var propDescriptorA = Object.getOwnPropertyDescriptor(a, prop);
                 var propDescriptorB = Object.getOwnPropertyDescriptor(b, prop);
                 if (!propDescriptorA || !propDescriptorB ||
@@ -503,10 +510,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 if (!matchesMetaData(otherRep, otherSourceLink))
                     return false;
 
-                var equal = Obj.areEqual(object, otherObject);
-                if (equal !== undefined)
-                    return equal;
-
                 var str = Object.prototype.toString.call(object);
                 var isArray = (str === "[object Arguments]" || str === "[object Array]");
                 if (isArray && rep !== FirebugReps.Arr)
@@ -517,11 +520,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
                     for (var i=0, len=object.length; i<len; ++i)
                     {
-                        if (!areLooselyEqual(object[i], otherObject[i]))
+                        if (!(Obj.areEqual(object[i], otherObject[i]) ||
+                            areLooselyEqual(object[i], otherObject[i])))
+                        {
                             return false;
+                        }
                     }
                     return true;
                 }
+
+                var equal = Obj.areEqual(object, otherObject);
+                if (equal !== undefined)
+                    return equal;
 
                 // Internal chrome objects are allowed to implement a custom "getId" function.
                 if (object instanceof Object && "getId" in object)
