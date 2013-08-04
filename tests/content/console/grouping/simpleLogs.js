@@ -9,8 +9,8 @@ function runTest()
         FBTest.enableConsolePanel(function(win)
         {
             var tasks = new FBTest.TaskList();
-            tasks.push(verifyLogs, win, 14, 2, "testButton1", "Verify grouped logs");
-            tasks.push(verifyLogs, win, 40, "", "testButton2", "Verify not grouped logs");
+            tasks.push(verifyLogs, win, 16, 2, "testButton1", "Verify grouped logs");
+            tasks.push(verifyLogs, win, 39, "", "testButton2", "Verify not grouped logs");
 
             tasks.run(function() {
                 FBTest.testDone("simpleLogs.DONE");

@@ -13,6 +13,11 @@
             console.log(true); console.log(true);
             console.log(1); console.log(1);
             console.log("test"); console.log("test");
+            console.log(/test/i); console.log(/test/i);
+
+            var date1 = new Date();
+            var date2 = new Date(date1.getTime());
+            console.log(date1); console.log(date2);
 
             var obj = {1:1,x:2};
             console.log(obj); console.log(obj);
@@ -46,7 +51,7 @@
             console.log([{a:1},2,4]); console.log([{a:1},2,5]);
             console.log({a:1,b:2,c:3,d:4}); console.log({a:1,b:2,c:3,d:5});
             var date1 = new Date();
-            var date2 = new Date(date1.toGMTString());
+            var date2 = new Date(date1.getTime());
             date2.setMilliseconds(date2.getMilliseconds() + 1);
             console.log(date1); console.log(date2);
             console.log(1,1); console.log(1,2);
