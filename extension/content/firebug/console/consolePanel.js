@@ -461,10 +461,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Check whether two content objects are approximately the same, one level deep.
         function areLooselyEqual(a, b)
         {
-            var equal = Obj.areEqual(a, b);
-            if (equal !== undefined)
-                return equal;
-
             var proto = Object.getPrototypeOf(a);
             if (!(Object.getPrototypeOf(proto) === null && "hasOwnProperty" in proto) &&
                 !Array.isArray(a))
