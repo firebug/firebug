@@ -441,18 +441,20 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageMatcher: function(object, rep, sourceLink)
+    getMessageMatcher: function(object, rep, sourceLink, level)
     {
-        function matchesMetaData(otherRep, otherLink)
+        function matchesMetaData(otherRep, otherLink, otherLevel)
         {
             if (otherRep !== rep || (rep && rep.groupable === false))
+                return false;
+
+            if (otherLevel !== level)
                 return false;
 
             var currentSourceInfo = (sourceLink ? sourceLink.href + ":" + sourceLink.line +
                 (sourceLink.col ? ":" + sourceLink.col : "") : "");
             var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
                 (otherLink.col ? ":" + otherLink.col : "") : "");
-
             return currentSourceInfo === otherSourceInfo;
         }
 
@@ -503,11 +505,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return (count === 0);
         }
 
-        return function matchMessage(otherObject, otherRep, otherSourceLink)
+        return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
         {
             try
             {
-                if (!matchesMetaData(otherRep, otherSourceLink))
+                if (!matchesMetaData(otherRep, otherSourceLink, otherLevel))
                     return false;
 
                 var str = Object.prototype.toString.call(object);
@@ -526,6 +528,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                             return false;
                         }
                     }
+
                     return true;
                 }
 
@@ -590,7 +593,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (!sourceLink && objects && objects.getSourceLink)
                 sourceLink = objects.getSourceLink();
 
-            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink))
+            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
                 row = container.lastChild;
@@ -603,7 +607,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 container.appendChild(row);
             }
 
-            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink);
+            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
