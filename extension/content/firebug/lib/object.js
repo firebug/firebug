@@ -77,17 +77,11 @@ Obj.isFunction = function(ob)
  */
 Obj.areEqual = function(a, b)
 {
-    if (typeof a === "number")
-    {
-        if (isNaN(a))
-            return isNaN(b);
-
-        // We want 0 == -0, so this is enough.
-        return (a === b);
-    }
-
     if (a === b)
         return true;
+
+    if (typeof a === "number" && typeof b === "number" && isNaN(a))
+        return isNaN(b);
 
     if (typeof a !== "object" || typeof b !== "object" || a === null || b === null)
         return false;
