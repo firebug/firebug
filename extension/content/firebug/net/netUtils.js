@@ -526,14 +526,16 @@ var NetUtils =
         {
             if (!(p in requestProps))
                 continue;
+
             try
             {
                 clone[p] = request[p];
             }
             catch (err)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
+                // xxxHonza: too much unnecessary output
+                //if (FBTrace.DBG_ERRORS)
+                //    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
             }
         }
 
