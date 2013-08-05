@@ -37,8 +37,15 @@
             console.log(true); console.log(false);
             console.log(1); console.log("1");
             console.log([1,2,3]); console.log([1,2,4]);
+            console.log(1, 23); console.log(12, 3);
+            console.log(["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]);
+            console.log(["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]);
             console.log([{a:1},2,4]); console.log([{a:1},2,5]);
-            console.log({a:1,b:2}); console.log({a:1,b:3});
+            console.log({a:1,b:2,c:3,d:4}); console.log({a:1,b:2,c:3,d:5});
+            var date1 = new Date();
+            var date2 = new Date(date1.toGMTString());
+            date2.setMilliseconds(date2.getMilliseconds() + 1);
+            console.log(date1); console.log(date2);
             console.log(1,1); console.log(1,2);
             console.log("1"); console.log(1);
             console.log("null"); console.log(null); console.log(undefined);

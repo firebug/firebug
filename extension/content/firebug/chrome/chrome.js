@@ -1570,6 +1570,10 @@ var FirebugChrome =
             Firebug.currentContext, panel, popup]);
         Menu.createMenuItems(popup, items);
 
+        // Make sure there are no unnecessary separators (e.g. at the top or bottom
+        // of the popup)
+        Menu.optimalizeSeparators(popup);
+
         if (!popup.firstChild)
             return false;
     },

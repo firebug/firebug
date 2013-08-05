@@ -99,9 +99,16 @@ function createFirebugCommandLine(context, win)
         return dglobal.makeDebuggeeValue(wrappedCommand);
     }
 
-    function createVariableHandler(handler)
+    function createVariableHandler(handler, config)
     {
-        var object = dglobal.makeDebuggeeValue({});
+        var debuggeeObj = {}, object;
+
+        // Callable getters are commands whose syntax are both `command` and `command()`.
+        // The help command has this syntax for example.
+        if (config.isCallableGetter === true)
+            debuggeeObj = function(){ return object.handle(); };
+
+        object = dglobal.makeDebuggeeValue(debuggeeObj);
         object.handle = function()
         {
             try
@@ -151,7 +158,7 @@ function createFirebugCommandLine(context, win)
         var config = userCommands[name];
         var command = createUserCommandHandler(config, name);
         if (userCommands[name].getter)
-            commandLine[name] = createVariableHandler(command);
+            commandLine[name] = createVariableHandler(command, config);
         else
             commandLine[name] = createCommandHandler(command);
     }
