@@ -75,14 +75,7 @@
     margin-top: 1px;
 }
 
-
 .fbsearch-icon {
-    /*
-    cursor: default!important;
-    background: url(chrome://firebug/skin/search.svg) no-repeat 0 50%;
-    width: 16px;
-    height: 16px;
-    */
     width: 22px;
 }
 
@@ -490,10 +483,6 @@ panelTab[selected="true"] > panelTabMenu {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    /*background: linear-gradient(to bottom, #f7f7f7, #f3f3f3) repeat scroll 0 0 transparent;*/
-    /*background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.5)) no-repeat 0 0;*/
-    /*background: linear-gradient(to bottom, #f0f0f0, #d1d1d1) repeat scroll 0 0 transparent;*/
-
     height: 30px;
     border-top: 1px solid #fff;
     margin-left: -5px;

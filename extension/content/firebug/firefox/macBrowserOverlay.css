@@ -28,20 +28,12 @@
 }
 
 #fbContentSplitter[orient=vertical] {
-    transition: background-color 300ms;
-}
-
-#fbContentSplitter[orient=vertical] {
     background: transparent;
     border-bottom-width: 0;
-    min-height: 5px;
-    height: 5px;
-    margin-bottom: -5px;
+    min-height: 7px;
+    height: 7px;
+    margin-bottom: -7px;
     position: relative;
-}
-
-#fbContentSplitter[orient=vertical]:hover {
-    background: #000;
 }
 
 #fbContentSplitter[orient=horizontal] {
