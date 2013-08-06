@@ -58,7 +58,7 @@ Menu.createMenuItems = function(popup, items, before)
     {
         var item = items[i];
 
-        // Avoid duplicities
+        // Avoid duplicates
         if (item.id && popup.querySelector("#" + item.id))
             continue;
 
@@ -220,7 +220,7 @@ Menu.optionMenu = function(label, option, tooltiptext)
 /**
  * Remove unnecessary separators (at the top or at the bottom of the menu).
  */
-Menu.optimalizeSeparators = function(popup)
+Menu.optimizeSeparators = function(popup)
 {
     while (popup.firstChild && popup.firstChild.tagName == "menuseparator")
         popup.removeChild(popup.firstChild);
@@ -228,7 +228,7 @@ Menu.optimalizeSeparators = function(popup)
     while (popup.lastChild && popup.lastChild.tagName == "menuseparator")
         popup.removeChild(popup.lastChild);
 
-    // xxxHonza: shell we also check double-separators?
+    // xxxHonza: We should also check double-separators
 };
 
 // ********************************************************************************************* //

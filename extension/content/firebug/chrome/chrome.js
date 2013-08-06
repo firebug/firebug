@@ -1572,7 +1572,7 @@ var FirebugChrome =
 
         // Make sure there are no unnecessary separators (e.g. at the top or bottom
         // of the popup)
-        Menu.optimalizeSeparators(popup);
+        Menu.optimizeSeparators(popup);
 
         if (!popup.firstChild)
             return false;
