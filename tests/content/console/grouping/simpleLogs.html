@@ -31,6 +31,8 @@
             obj = Object.create(null);
             console.log(obj); console.log(obj);
 
+            console.log(document.head.firstChild); console.log(document.head.firstChild);
+
             console.debug("debug"); console.debug("debug");
             console.info("info"); console.info("info");
             console.warn("warning"); console.warn("warning");
@@ -60,7 +62,7 @@
             console.log("null"); console.log(null); console.log(undefined);
 
             console.log(document); console.log(document);
-            console.log(document.head.firstChild); console.log(document.head.firstChild);
+            console.log(document.head.firstChild); document.head.firstChild.textContent = "   "; console.log(document.head.firstChild);
 
             var arr = [1];
             console.log(arr); arr[0] = 2; console.log(arr);
