@@ -62,6 +62,10 @@ BrowserOverlay.prototype =
             $(this.doc, "mainBroadcasterSet"));
 
         var node = $stylesheet(this.doc, "chrome://firebug/content/firefox/browserOverlay.css");
+
+        if (this.win.navigator.platform.search("Mac") == 0)
+            $stylesheet(this.doc, "chrome://firebug/content/firefox/macBrowserOverlay.css");
+
         this.nodesToRemove.push(node);
 
         this.loadContextMenuOverlay();
