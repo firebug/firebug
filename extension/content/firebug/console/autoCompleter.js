@@ -810,7 +810,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
             if (completion.type === CompletionType.API)
             {
-                //xxxHonza: Needed by a test (console/completion/5416). Can we change the test?
                 hbox.classList.add("apiCompletion");
 
                 if (!separatorInserted)
