@@ -131,7 +131,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
                     box.setAttribute("noautohide", true);
                 }, false);
             }
-            box.sizeTo( 200, 350);
+            // box.sizeTo( 200, 350);
             box.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
@@ -322,12 +322,14 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     getContentFrame: function()
     {
         var box = Firebug.chrome.$("fbQuickInfoPanel");
+        box.style.height = "350px";;
         return box.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 
     getContentDoc: function()
     {
         var contentFrame = this.getContentFrame();
+        // contentFrame.contentWindow.document.body.style.height = "350px";
         return contentFrame.contentWindow.document;
     }
 });
