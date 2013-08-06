@@ -782,12 +782,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var separatorInserted = false;
 
-        var separator = this.completionPopup.ownerDocument.
-            createElementNS("http://www.w3.org/1999/xhtml", "div");
-        separator.textContent = Locale.$STR("Firefox DOM API");
-        separator.classList.add("fbPopupSeparator");
-        vbox.appendChild(separator);
-
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
             var prefixLen = this.completions.prefix.length;
@@ -816,7 +810,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
             if (completion.type === CompletionType.API)
             {
-                //xxxHonza: Needed by a test (console/completion/5416). Can we change the test?
                 hbox.classList.add("apiCompletion");
 
                 if (!separatorInserted)
