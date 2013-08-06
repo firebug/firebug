@@ -67,42 +67,6 @@ Obj.isFunction = function(ob)
     return typeof(ob) == "function";
 }
 
-/**
- * Checks whether two variables are equal.
- *
- * @param {*} a First variable to be compared
- * @param {*} b Second variable to be compared
- * @returns {Boolean|undefined} True if values are equal, false if not,
- *     undefined if they are similar
- */
-Obj.areEqual = function(a, b)
-{
-    if (a === b)
-        return true;
-
-    if (typeof a === "number" && typeof b === "number" && isNaN(a))
-        return isNaN(b);
-
-    if (typeof a !== "object" || typeof b !== "object" || a === null || b === null)
-        return false;
-
-    // Do some slightly less strict checks.
-    if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b))
-        return false;
-
-    var str = Object.prototype.toString.call(a);
-    if (str !== Object.prototype.toString.call(b))
-        return false;
-
-    if (str === "[object Date]")
-        return a.getTime() === b.getTime();
-
-    if (str === "[object RegExp]")
-        return a.toString() === b.toString();
-
-    return undefined;
-}
-
 // ********************************************************************************************* //
 
 /**
