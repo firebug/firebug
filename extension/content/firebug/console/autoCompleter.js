@@ -782,12 +782,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 
         var separatorInserted = false;
 
-        var separator = this.completionPopup.ownerDocument.
-            createElementNS("http://www.w3.org/1999/xhtml", "div");
-        separator.textContent = Locale.$STR("Firefox DOM API");
-        separator.classList.add("fbPopupSeparator");
-        vbox.appendChild(separator);
-
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
             var prefixLen = this.completions.prefix.length;
