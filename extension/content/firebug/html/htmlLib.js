@@ -639,6 +639,9 @@ var HTMLLib =
      */
     hasNoElementChildren: function(element)
     {
+        if (element === null)
+            return true;
+
         if (element.childElementCount != 0)  // FF 3.5+
             return false;
 

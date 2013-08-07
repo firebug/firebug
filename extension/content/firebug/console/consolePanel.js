@@ -441,32 +441,87 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(object, rep, sourceLink)
+    getMessageMatcher: function(object, rep, sourceLink, level)
     {
-        // Firebug internal message objects could provide their own custom ID
-        if (object instanceof Object && typeof(object.getId) == "function")
-            return object.getId();
-
-        // The rep for the object could provide its own custom ID
-        if (rep instanceof Object && typeof(rep.getId) == "function")
-            return rep.getId();
-
-        // object may not be an object
-        if (typeof object != "object")
-            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-
-        // object may be NaN
-        if (object !== object)
-            return "NotANumber";
-
-        // Use all direct properties of the object
-        if (object && (typeof object === "object" || typeof object === "function"))
+        function matchesMetaData(otherRep, otherLink, otherLevel)
         {
-            var id = Obj.getObjHash(object);
-            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+            if (otherRep !== rep || (rep && rep.groupable === false))
+                return false;
+
+            if (otherLevel !== level)
+                return false;
+
+            var currentSourceInfo = (sourceLink ? sourceLink.href + ":" + sourceLink.line +
+                (sourceLink.col ? ":" + sourceLink.col : "") : "");
+            var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
+                (otherLink.col ? ":" + otherLink.col : "") : "");
+            return currentSourceInfo === otherSourceInfo;
         }
 
-        return Obj.getUniqueId().toString();
+        /**
+         * Checks whether two variables are equal.
+         *
+         * @param {*} a First variable to be compared
+         * @param {*} b Second variable to be compared
+         * @returns {Boolean|undefined} True if values are equal, false if not,
+         *     undefined if they are similar
+         */
+        function areEqual(a, b)
+        {
+            if (typeof a === "object" && a !== null)
+                return false;
+
+            if (a === b)
+                return true;
+
+            if (typeof a === "number" && typeof b === "number")
+                return isNaN(a) && isNaN(b);
+
+            return false;
+        }
+
+        return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
+        {
+            try
+            {
+                if (!matchesMetaData(otherRep, otherSourceLink, otherLevel))
+                    return false;
+
+                var str = Object.prototype.toString.call(object);
+                var isArray = (str === "[object Arguments]" || str === "[object Array]");
+                if (isArray && rep !== FirebugReps.Arr)
+                {
+                    // console.log et al.
+                    if (object.length !== otherObject.length)
+                        return false;
+
+                    for (var i=0, len=object.length; i<len; ++i)
+                    {
+                        // Internal chrome objects are allowed to implement a custom "getId" function.
+                        if (object[i] instanceof Object && "getId" in object[i])
+                            return ("getId" in otherObject[i] && object[i].getId() === otherObject[i].getId());
+
+                        if (!areEqual(object[i], otherObject[i]))
+                            return false;
+                    }
+
+                    return true;
+                }
+
+                // Internal chrome objects are allowed to implement a custom "getId" function.
+                if (object instanceof Object && "getId" in object)
+                    return ("getId" in otherObject && object.getId() === otherObject.getId());
+
+                return areEqual(object, otherObject);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("consolePanel.getMessageMatcher; failed to check equality", exc);
+
+                return false;
+            }
+        };
     },
 
     increaseRowCount: function(row)
@@ -474,11 +529,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var counter = row.getElementsByClassName("logCounter").item(0);
         if (!counter)
             return;
-        var value = counter.getElementsByClassName("logCounterValue");
+        var value = counter.getElementsByClassName("logCounterValue").item(0);
         if (!value)
             return;
-
-        value = value.item(0);
 
         var count = parseInt(value.textContent);
         if (isNaN(count))
@@ -499,44 +552,44 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(objects, rep, sourceLink);
+            row = this.createRow("logRow", className);
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            appender.apply(this, [objects, logContent, rep]);
 
-            if (msgId && msgId == this.lastMsgId)
+            // If sourceLink is not provided and the object is an instance of Error
+            // convert it into ErrorMessageObj instance, which implements getSourceLink
+            // method.
+            // xxxHonza: is there a better place where to make this kind of conversion?
+            if (!sourceLink && (objects instanceof Error))
+                objects = FirebugReps.Except.getErrorMessage(objects);
+
+            if (!sourceLink && objects && objects.getSourceLink)
+                sourceLink = objects.getSourceLink();
+
+            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
-
                 row = container.lastChild;
             }
             else
             {
-                row = this.createRow("logRow", className);
-                row.msgId = msgId;
-                var logContent = row.getElementsByClassName("logContent").item(0);
-                appender.apply(this, [objects, logContent, rep]);
-
-                // If sourceLink is not provided and the object is an instance of Error
-                // convert it into ErrorMessageObj instance, which implements getSourceLink
-                // method.
-                // xxxHonza: is there a better place where to make this kind of conversion?
-                if (!sourceLink && (objects instanceof Error))
-                    objects = FirebugReps.Except.getErrorMessage(objects);
-
-                if (!sourceLink && objects && objects.getSourceLink)
-                    sourceLink = objects.getSourceLink();
-
                 if (sourceLink)
                     FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
 
                 container.appendChild(row);
             }
 
-            this.lastMsgId = msgId;
+            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
+            {
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom +
                     " " + row.textContent);
+            }
 
             if (this.wasScrolledToBottom)
                 Dom.scrollToBottom(this.panelNode);
@@ -551,6 +604,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
+
             Dom.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 

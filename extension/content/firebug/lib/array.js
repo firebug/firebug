@@ -34,24 +34,12 @@ Arr.isArrayLike = function(obj)
             return true;
         if (typeof obj.splice === "function") // jQuery etc.
             return true;
-        if (Arr._isDOMTokenList(obj))
-            return true;
         var str = Object.prototype.toString.call(obj);
-        if (str === "[object HTMLCollection]" || str === "[object NodeList]")
+        if (str === "[object HTMLCollection]" || str === "[object NodeList]" ||
+            str === "[object DOMTokenList]")
+        {
             return true;
-    }
-    catch (exc) {}
-    return false;
-};
-
-Arr._isDOMTokenList = function(obj)
-{
-    // When minVersion is 19 or so, we can replace this whole function with
-    // (Object.prototype.toString.call(obj) === "[object DOMTokenList]").
-    try
-    {
-        var uwGlobal = XPCNativeWrapper.unwrap(Cu.getGlobalForObject(obj));
-        return obj instanceof uwGlobal.DOMTokenList;
+        }
     }
     catch (exc) {}
     return false;

@@ -12,17 +12,9 @@
             console.log(undefined); console.log(undefined);
             console.log(true); console.log(true);
             console.log(1); console.log(1);
+            console.log(-0); console.log(0);
             console.log("test"); console.log("test");
-
-            var obj = {1:1,x:2};
-            console.log(obj); console.log(obj);
-
-            console.log([{a:1},2,3]); console.log([{a:1},2,3]);
             console.log(Math.sqrt(-1)); console.log(Math.sqrt(-1));
-
-            var obj = Object.create(null);
-            console.log(obj); console.log(obj);
-
             console.debug("debug"); console.debug("debug");
             console.info("info"); console.info("info");
             console.warn("warning"); console.warn("warning");
@@ -40,18 +32,39 @@
             console.log(1, 23); console.log(12, 3);
             console.log(["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]);
             console.log(["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]);
+
+            console.log(/test/i); console.log(/test/i);
+
+            var obj = {1:1,x:2};
+            console.log(obj); console.log(obj);
+
+            var obj2 = [{a:1},2,3];
+            console.log(obj2); console.log(obj2);
+
+            var obj3 = Object.create(null);
+            console.log(obj3); console.log(obj3);
+
+            console.log(document.head.firstChild); console.log(document.head.firstChild);
+
+            console.log([{a:1},2,3]); console.log([{a:1},2,3]);
             console.log([{a:1},2,4]); console.log([{a:1},2,5]);
             console.log({a:1,b:2,c:3,d:4}); console.log({a:1,b:2,c:3,d:5});
+
             var date1 = new Date();
-            var date2 = new Date(date1.toGMTString());
-            date2.setMilliseconds(date2.getMilliseconds() + 1);
+            var date2 = new Date(date1.getTime());
             console.log(date1); console.log(date2);
+
+            var date3 = new Date();
+            var date4 = new Date(date1.getTime());
+            date4.setMilliseconds(date4.getMilliseconds() + 1);
+            console.log(date3); console.log(date4);
+
             console.log(1,1); console.log(1,2);
             console.log("1"); console.log(1);
             console.log("null"); console.log(null); console.log(undefined);
 
             console.log(document); console.log(document);
-            console.log(document.head.firstChild); console.log(document.head.firstChild);
+            console.log(document.head.firstChild); document.head.firstChild.textContent = "   "; console.log(document.head.firstChild);
 
             var arr = [1];
             console.log(arr); arr[0] = 2; console.log(arr);
