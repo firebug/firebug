@@ -8,12 +8,22 @@
         function onExecuteTest()
         {
             logGroup(); logGroup();
+            logCascadedGroup();
         }
 
         function logGroup()
         {
             console.group("Group");
             console.log("test");
+            console.groupEnd();
+        }
+
+        function logCascadedGroup()
+        {
+            console.group("Group");
+            console.group("Group");
+            console.log("test");
+            console.groupEnd();
             console.groupEnd();
         }
         </script>
@@ -34,7 +44,10 @@
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
-                    <li>There should be two groups in the console. They must not be grouped.</li>
+                    <li>
+                        There should be four groups in the console (the last two cascaded).
+                        They must not be grouped.
+                    </li>
                 </ul>
             </section>
             <footer>Jan Odvarko &lt;odvarko@gmail.com&gt;</footer>
