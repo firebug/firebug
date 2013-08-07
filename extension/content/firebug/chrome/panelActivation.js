@@ -18,8 +18,11 @@ function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+const prefs = Xpcom.CCSV("@mozilla.org/preferences-service;1", "nsIPrefBranch");
 const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+
+// ********************************************************************************************* //
+// Panel Activation Implementation
 
 /**
  * @module Implements Panel activation logic. A Firebug panel can support activation in order
@@ -208,6 +211,8 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
         panelType.prototype.onActivationChanged(enable);
 
+        this.dispatch("activationChanged", [panelType, enable]);
+
         Firebug.chrome.$("fbPanelBar1").updateTab(panelType);
         Firebug.chrome.syncPanel();
     },
@@ -228,7 +233,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
             var check = {value: false};
             var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
             prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
-    
+
             if (!prompts.confirmEx(Firebug.chrome.window, Locale.$STR("Firebug"),
                 Locale.$STR("annotations.confirm.clear"), flags, "", "", "", null, check) == 0)
             {

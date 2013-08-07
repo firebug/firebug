@@ -21,7 +21,7 @@ function runTest()
                 "div", "logRow-info");
 
             tasks.push(FBTest.executeCommandAndVerify, "cd(undefined)",
-                "Error: Object must be a window.", "div", "subLogRow", false);
+                "Error: The cd() argument must be a window.", "div", "subLogRow", false);
 
             tasks.push(testErrorInfo);
 

@@ -64,7 +64,7 @@ var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
  */
 function NetPanel() {}
 NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
-/** lends NetPanel */
+/** @lends NetPanel */
 {
     name: panelName,
     searchable: true,
@@ -394,6 +394,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         items.push(
+            {
+                id: "fbCopyAsCurl",
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, file)
+            }
+        );
+
+        items.push(
             "-",
             {
                 label: "OpenInTab",
@@ -413,10 +422,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             );
         }
 
+        items.push("-");
+
         if (!file.loaded)
         {
             items.push(
-                "-",
                 {
                     label: "StopLoading",
                     tooltiptext: "net.tip.Stop_Loading",
@@ -425,8 +435,27 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             );
         }
 
+        items.push(
+            {
+                label: "net.label.Resend",
+                tooltiptext: "net.tip.Resend",
+                id: "fbNetResend",
+                command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
+            }
+        );
+
         if (object)
         {
+            // xxxHonza: This is dangerous constructs. Inspect menu-items are generated
+            // automatically for every context menu in FirebugChrome.onContextShowing()
+            // Also, FirebugChrome is using Rep.getRealObject() while this logic is based
+            // on Firebug.getObjectByURL(), which can return different object to be inspected.
+            // This feature has been introduced to allow inspecting specific network requests
+            // like stylesheets and javascript files. But at that time the network request
+            // template (FirebugReps.NetFile) returned null for getRealObject().
+            // FirebugReps.NetFile.getRealObject now returns an object representing the request
+            // (used also by 'Use in Command Line' feature), which is different from what
+            // Firebug.getObjectByURL() returns. See also issue 6647.
             var subItems = Firebug.chrome.getInspectMenuItems(object);
             if (subItems.length)
             {
@@ -461,16 +490,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 );
             }
         }
-
-        items.push("-");
-        items.push(
-            {
-                label: "net.label.Resend",
-                tooltiptext: "net.tip.Resend",
-                id: "fbNetResend",
-                command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
-            }
-        );
 
         return items;
     },
@@ -521,6 +540,12 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         // Copy response to the clipboard
         System.copyToClipboard(NetUtils.getResponseText(file, this.context));
+    },
+
+    copyAsCurl: function(file)
+    {
+        System.copyToClipboard(NetUtils.generateCurlCommand(file,
+            Options.get("net.curlAddCompressedArgument")));
     },
 
     openRequestInTab: function(file)
@@ -1479,7 +1504,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
 // ********************************************************************************************* //
 
-/*
+/**
  * Use this object to automatically select Net panel and inspect a network request.
  * Firebug.chrome.select(new Firebug.NetMonitor.NetFileLink(url [, request]));
  */

@@ -421,6 +421,7 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return;
 
         var rows = Dom.getElementsByClass(this.table, "cookieRow");
+        rows = Arr.cloneArray(rows);
         for (var i=0; i<rows.length; i++)
         {
             var cookie = Firebug.getRepObject(rows[i]);

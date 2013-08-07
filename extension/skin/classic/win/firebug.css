@@ -89,48 +89,77 @@
     list-style-image: url(chrome://firebug/skin/win/minimize.svg);
 }
 
+#fbMinimizeButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/minimizeHovered.svg);
+}
+
+#fbMinimizeButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/minimizePressed.svg);
+}
+
 #fbDetachButton {
     list-style-image: url(chrome://firebug/skin/win/detach.svg);
+}
+
+#fbDetachButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/detachHovered.svg);
+}
+
+#fbDetachButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/detachPressed.svg);
 }
 
 #fbCloseButton {
     list-style-image: url(chrome://firebug/skin/win/deactivate.svg);
 }
 
+#fbCloseButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/deactivateHovered.svg);
+}
+
+#fbCloseButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/deactivatePressed.svg);
+}
+
 #fbCommandLineHistoryButton {
     list-style-image: url(chrome://firebug/skin/win/commandHistory.svg);
+}
+
+#fbCommandLineHistoryButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/commandHistoryHovered.svg);
+}
+
+#fbCommandLineHistoryButton:active,
+#fbCommandLineHistoryButton[checked="true"] {
+    list-style-image: url(chrome://firebug/skin/win/commandHistoryPressed.svg);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    list-style-image: url(chrome://firebug/skin/win/commandHistoryDisabled.svg);
 }
 
 #fbToggleCommandLine {
     list-style-image: url(chrome://firebug/skin/win/up.svg);
 }
 
+#fbToggleCommandLine:hover {
+    list-style-image: url(chrome://firebug/skin/win/upHovered.svg);
+}
+
+#fbToggleCommandLine:active {
+    list-style-image: url(chrome://firebug/skin/win/upPressed.svg);
+}
+
 #fbToggleCommandEditor {
     list-style-image: url(chrome://firebug/skin/win/down.svg);
 }
 
-
-#fbMinimizeButton:hover,
-#fbDetachButton:hover,
-#fbCloseButton:hover,
-#fbCommandLineHistoryButton:hover,
-#fbToggleCommandLine:hover,
 #fbToggleCommandEditor:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
+    list-style-image: url(chrome://firebug/skin/win/downHovered.svg);
 }
 
-#fbMinimizeButton:active,
-#fbDetachButton:active,
-#fbCloseButton:active,
-#fbCommandLineHistoryButton:active,
-#fbCommandLineHistoryButton[checked="true"],
-#fbToggleCommandLine:active,
 #fbToggleCommandEditor:active {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
-}
-
-#fbCommandLineHistoryButton[disabled] {
-    filter: url(resource://firebugui/filters.svg#brighten);
+    list-style-image: url(chrome://firebug/skin/win/downPressed.svg);
 }
 
 /************************************************************************************************/

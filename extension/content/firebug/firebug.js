@@ -115,7 +115,7 @@ window.Firebug =
         // This says how much time was necessary to load Firebug overlay (+ all script tags).
         FBTrace.timeEnd("SCRIPTTAG_TIME");
 
-        // Measure the entire Firebug initialiation time.
+        // Measure the entire Firebug initialization time.
         FBTrace.time("INITIALIZATION_TIME");
 
         Firebug.chrome = chrome;
@@ -1168,6 +1168,9 @@ window.Firebug =
      * The 'null' return here is a too-subtle signal to the panel code in bindings.xml.
      * Note that panel.context may not have a persistedState, but in addition the persisted
      * state for panel.name may be null.
+     *
+     * xxxHonza: the method should never return null. The implementation should
+     * just use: Persist.getPersistedState() method.
      */
     getPanelState: function(panel)
     {
@@ -1678,6 +1681,10 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
                 this.loadPersistedContent(persistedState);
         }
 
+        // The default value for 'Persist' is set only the first time.
+        if (typeof(this.persistContent) == "undefined")
+            this.persistContent = Options.get(this.name + ".defaultPersist");
+
         doc.body.appendChild(this.panelNode);
 
         // Update panel's tab in case the break-on-next (BON) is active.
@@ -1695,12 +1702,12 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.destroy panelNode for " + this.name);
 
+        state.persistContent = this.persistContent;
+
         if (this.panelNode)
         {
             if (this.persistContent)
                 this.savePersistedContent(state);
-            else
-                delete state.persistContent;
 
             delete this.panelNode.ownerPanel;
         }
@@ -1717,7 +1724,6 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     savePersistedContent: function(state)
     {
         state.panelNode = this.panelNode;
-        state.persistContent = this.persistContent;
     },
 
     loadPersistedContent: function(persistedState)

@@ -16,6 +16,10 @@
 /.settings.xml
 /.settings.xml.old
 /.idea/
+*.iws
+*.ids
+*.iml
+*.ipr
 
 # Build Files
 /extension/build/

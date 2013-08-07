@@ -310,7 +310,9 @@ var FirebugChrome =
     {
         try
         {
-            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+            // If the ID of the active element is related to Firebug, it must have the focus
+            var windowID = wm.getMostRecentWindow(null).document.activeElement.id;
+            return ["firebug", "fbMainContainer"].indexOf(windowID) !== -1;
         }
         catch(ex)
         {
@@ -370,7 +372,7 @@ var FirebugChrome =
         // Command Line Popup can be displayed for all the other panels
         // (except for the Console panel)
         // XXXjjb, xxxHonza, xxxsz: this should be somehow better, more generic and extensible,
-        // e.g. by asking each panel if it supports the Command Line Popup 
+        // e.g. by asking each panel if it supports the Command Line Popup
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
@@ -1568,6 +1570,10 @@ var FirebugChrome =
             Firebug.currentContext, panel, popup]);
         Menu.createMenuItems(popup, items);
 
+        // Make sure there are no unnecessary separators (e.g. at the top or bottom
+        // of the popup)
+        Menu.optimizeSeparators(popup);
+
         if (!popup.firstChild)
             return false;
     },
@@ -2110,7 +2116,7 @@ function onPanelMouseUp(event)
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
-        
+
         if (Dom.getAncestorByClass(selection.focusNode, "editable") ===
             Dom.getAncestorByClass(selection.anchorNode, "editable"))
         {
@@ -2222,7 +2228,7 @@ function fatalError(summary, exc)
 }
 
 return FirebugChrome;
- 
+
 }  // end of createFirebugChrome(win)
 }; // end of var ChromeFactory object
 

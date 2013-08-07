@@ -9,6 +9,8 @@ define([
 ],
 function(FBTrace, Locale, Options, Css, Deprecated) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -53,7 +55,20 @@ Menu.createMenuPopup = function(parent, item)
 Menu.createMenuItems = function(popup, items, before)
 {
     for (var i=0; i<items.length; i++)
-        Menu.createMenuItem(popup, items[i], before);
+    {
+        var item = items[i];
+
+        // Override existing items to avoid duplicates.
+        var existingItem = popup.querySelector("#" + item.id);
+        if (existingItem)
+        {
+            Menu.createMenuItem(popup, item, existingItem);
+            popup.removeChild(existingItem);
+            continue;
+        }
+
+        Menu.createMenuItem(popup, item, before);
+    }
 };
 
 Menu.createMenuItem = function(popup, item, before)
@@ -205,6 +220,20 @@ Menu.optionMenu = function(label, option, tooltiptext)
             return Options.togglePref(option);
         }
     };
+};
+
+/**
+ * Remove unnecessary separators (at the top or at the bottom of the menu).
+ */
+Menu.optimizeSeparators = function(popup)
+{
+    while (popup.firstChild && popup.firstChild.tagName == "menuseparator")
+        popup.removeChild(popup.firstChild);
+
+    while (popup.lastChild && popup.lastChild.tagName == "menuseparator")
+        popup.removeChild(popup.lastChild);
+
+    // xxxHonza: We should also check double-separators
 };
 
 // ********************************************************************************************* //

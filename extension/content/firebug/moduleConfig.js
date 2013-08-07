@@ -68,6 +68,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/cookies/cookieModule",
         "firebug/cookies/cookiePanel",
         "firebug/css/selectorPanel",
+        "firebug/console/errorMessageRep",
+        "firebug/console/exceptionRep",
     ];
 
     return config;

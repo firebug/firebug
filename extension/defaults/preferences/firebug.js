@@ -42,6 +42,10 @@ pref("extensions.firebug.netSearchHeaders", false);
 pref("extensions.firebug.netSearchParameters", false);
 pref("extensions.firebug.netSearchResponseBody", false);
 
+// Persist (default values)
+pref("extensions.firebug.console.defaultPersist", false);
+pref("extensions.firebug.net.defaultPersist", false);
+
 // Console
 pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);
@@ -115,6 +119,7 @@ pref("extensions.firebug.showRulers", true);
 pref("extensions.firebug.netFilterCategories", "all");
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
+pref("extensions.firebug.net.curlAddCompressedArgument", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400);
 pref("extensions.firebug.netDisplayedPostBodyLimit", 10240);
 pref("extensions.firebug.net.hiddenColumns", "netProtocolCol netLocalAddressCol");

@@ -14,19 +14,39 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
 
-// ************************************************************************************************
+"use strict"
 
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, DIV, SPAN} = Domplate;
+
+// ********************************************************************************************* //
+// LayoutPanel Implementation
+
+/**
+ * @panel Represents the Layout side panel available within the HTML panel. The Layout
+ * panel allows inspecting and manipulating the layout data of the selected DOM node.
+ * The layout data editing is done through {@LayoutEditor} object.
+ */
 function LayoutPanel() {}
-
-with (Domplate) {
 LayoutPanel.prototype = Obj.extend(Firebug.Panel,
+/** @lends LayoutPanel */
 {
+    name: "layout",
+    parentPanel: "html",
+    order: 2,
+    enableA11y: true,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
     template: domplate(
     {
         tag:
             DIV({"class": "outerLayoutBox"},
-                DIV({"class": "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode "+
-                        "$outerLeftMode focusGroup"},
+                DIV({"class": "positionLayoutBox $outerTopMode $outerRightMode " +
+                        "$outerBottomMode $outerLeftMode focusGroup"},
                     DIV({"class": "layoutEdgeTop layoutEdge"}),
                     DIV({"class": "layoutEdgeRight layoutEdge"}),
                     DIV({"class": "layoutEdgeBottom layoutEdge"}),
@@ -203,7 +223,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         }
     }),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onMouseOver: function(event)
     {
@@ -235,19 +255,14 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Inspector.highlightObject(null, null, "boxModel");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Panel
-
-    name: "layout",
-    parentPanel: "html",
-    order: 2,
-    enableA11y: true,
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Extends Panel
 
     initialize: function()
     {
         this.onMouseOver = Obj.bind(this.onMouseOver, this);
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
-        this.onAfterPaint = Obj.bindFixed(this.refresh, this);
+        this.onAfterPaint = Obj.bindFixed(this.onMozAfterPaint, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -277,10 +292,19 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     {
         Events.removeEventListener(this.context.browser, "MozAfterPaint", this.onAfterPaint, true);
     },
-    
+
     supportsObject: function(object, type)
     {
         return object instanceof window.Element ? 1 : 0;
+    },
+
+    onMozAfterPaint: function()
+    {
+        // TabContext.invalidatePanels() method calls panel.refresh() on timeout and ensures
+        // that it isn't executed too often. This is necessary in this case since
+        // "MozAfterPaint" event can be fired very often (especially in case of animations)
+        // and the update (see: updateSelection) could consume CPU cycles (see issue 6336).
+        this.context.invalidatePanels("layout");
     },
 
     refresh: function()
@@ -295,7 +319,6 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
             return this.panelNode.textContent = "";
 
         var style = view.getComputedStyle(element, "");
-
         var args = Css.getBoxFromStyles(style, element);
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
@@ -325,21 +348,19 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode =
             "blankEdge";
 
+        function getStyle(style, name)
+        {
+            var value = style.getPropertyCSSValue(name);
+            return value && value.cssText ? parseInt(value.cssText) : " ";
+        }
+
         if (position == "absolute" || position == "fixed" || position == "relative")
         {
-            function getStyle(style, name)
-            {
-                var value = style.getPropertyCSSValue(name);
-                return value && value.cssText ? parseInt(value.cssText) : " ";
-            }
-
             args.outerLabel = Locale.$STR("LayoutPosition");
-
             args.outerLeft = getStyle(style, "left");
             args.outerTop = getStyle(style, "top");
             args.outerRight = getStyle(style, "right");
             args.outerBottom = getStyle(style, "bottom");
-
             args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode =
                 "absoluteEdge";
         }
@@ -351,8 +372,10 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
             // The styles for the positionLayoutBox need to be set manually
             var positionLayoutBox = this.panelNode.getElementsByClassName("positionLayoutBox").
                 item(0);
-            positionLayoutBox.className = "positionLayoutBox "+args.outerTopMode+" "+
-                args.outerRightMode+" "+args.outerBottomMode+" "+args.outerLeftMode+" focusGroup";
+
+            positionLayoutBox.className = "positionLayoutBox " + args.outerTopMode + " " +
+                args.outerRightMode + " " + args.outerBottomMode + " " + args.outerLeftMode +
+                " focusGroup";
 
             var values =
             {
@@ -381,7 +404,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
                 outerLabel: {value: "outerLabel"}
             };
 
-            for (val in values)
+            for (var val in values)
             {
                 var element = this.panelNode.getElementsByClassName(val).item(0);
 
@@ -404,7 +427,9 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Events.dispatch(this.fbListeners, "onLayoutBoxCreated", [this, node, args]);
     },
 
-    /*
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
      * The nested boxes of the Layout panel have digits which need to fit between the boxes.
      * @param maxWidth: pixels the largest digit string
      * @param node: panelNode to be adjusted (from tag:)
@@ -420,39 +445,40 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         this.adjustBoxWidth(node, "paddingLayoutBox", maxWidth);
 
         var box = node.getElementsByClassName("outerLayoutBox").item(0);
-        box.style.cssText = "width: "+(240 + 3*maxWidth)+"px;";  // defaults to 300px
+        box.style.cssText = "width: "+(240 + 3*maxWidth) + "px;";  // defaults to 300px
 
         this.adjustLabelWidth(node, "layoutLabelLeft", maxWidth);
         this.adjustLabelWidth(node, "layoutLabelRight", maxWidth);
     },
 
-    /*
+    /**
      * By adjusting this width, the labels can be centered.
      */
     adjustLabelWidth: function(node, labelName, maxWidth)
     {
         var labels = node.getElementsByClassName(labelName);
         for (var i = 0; i < labels.length; i++)
-            labels[i].style.cssText = "width: "+maxWidth+"px;";
+            labels[i].style.cssText = "width: " + maxWidth + "px;";
     },
 
     adjustBoxWidth: function(node, boxName, width)
     {
         var box = node.getElementsByClassName(boxName).item(0);
-        box.style.cssText = "right: "+width + 'px;'+" left: "+width + "px;";
+        box.style.cssText = "right: " + width + "px;" + " left: " + width + "px;";
     },
 
     getMaxCharWidth: function(args, node)
     {
         Firebug.MeasureBox.startMeasuring(node);
         var maxWidth = Math.max(
-                Firebug.MeasureBox.measureText(args.marginLeft+"").width,
-                Firebug.MeasureBox.measureText(args.marginRight+"").width,
-                Firebug.MeasureBox.measureText(args.borderLeft+"").width,
-                Firebug.MeasureBox.measureText(args.borderRight+"").width,
-                Firebug.MeasureBox.measureText(args.paddingLeft+"").width,
-                Firebug.MeasureBox.measureText(args.paddingRight+"").width
-                );
+            Firebug.MeasureBox.measureText(args.marginLeft + "").width,
+            Firebug.MeasureBox.measureText(args.marginRight + "").width,
+            Firebug.MeasureBox.measureText(args.borderLeft + "").width,
+            Firebug.MeasureBox.measureText(args.borderRight + "").width,
+            Firebug.MeasureBox.measureText(args.paddingLeft + "").width,
+            Firebug.MeasureBox.measureText(args.paddingRight + "").width
+        );
+
         Firebug.MeasureBox.stopMeasuring();
         return maxWidth;
     },
@@ -460,8 +486,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("ShowRulers", "showRulers",
-                "layout.option.tip.Show_Rulers")
+            Menu.optionMenu("ShowRulers", "showRulers", "layout.option.tip.Show_Rulers")
         ];
     },
 
@@ -474,8 +499,8 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     }
 });
 
-// ************************************************************************************************
-// LayoutEditor
+// ********************************************************************************************* //
+// LayoutEditor Implementation
 
 function LayoutEditor(doc)
 {
@@ -485,7 +510,11 @@ function LayoutEditor(doc)
     this.numeric = true;
 }
 
+/**
+ * @editor Represents an inline editor that is used by {@LayoutPanel} to modify layout data.
+ */
 LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+/** @lends LayoutEditor */
 {
     saveEdit: function(target, value, previousValue)
     {
@@ -512,7 +541,8 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (Firebug.Inspector.highlightedElement == this.panel.selection)
         {
             var boxFrame = this.highlightedBox ? getBoxFrame(this.highlightedBox) : null;
-            Firebug.Inspector.highlightObject(this.panel.selection, this.panel.context, "boxModel", boxFrame);
+            Firebug.Inspector.highlightObject(this.panel.selection, this.panel.context,
+                "boxModel", boxFrame);
         }
 
         target.textContent = intValue;
@@ -524,9 +554,8 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         return false;
     }
 });
-};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function getLayoutBox(element)
@@ -553,12 +582,12 @@ function getBoxEdge(element)
     return m ? m[1] : "";
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(LayoutPanel);
 
-return LayoutPanel;  // move into Firebug.Layout ?
+return LayoutPanel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

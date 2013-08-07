@@ -150,11 +150,11 @@ body {
 }
 
 .closeButton:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
+    background: url(chrome://firebug/skin/mac/closeHovered.svg) no-repeat 0 0;
 }
 
 .closeButton:hover:active {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
+    background: url(chrome://firebug/skin/mac/closePressed.svg) no-repeat 0 0;
 }
 
 /************************************************************************************************/

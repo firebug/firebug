@@ -1049,6 +1049,12 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         System.copyToClipboard(url);
     },
 
+    copyAsCurl: function(spy)
+    {
+        System.copyToClipboard(NetUtils.generateCurlCommand(spy,
+            Options.get("net.curlAddCompressedArgument")));
+    },
+
     copyResponse: function(spy)
     {
         System.copyToClipboard(spy.responseText);
@@ -1134,6 +1140,15 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             id: "fbSpyCopyResponse",
             command: Obj.bindFixed(this.copyResponse, this, spy)
         });
+
+        items.push(
+            {
+                id: "fbCopyAsCurl",
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, spy)
+            }
+        );
 
         items.push("-");
 

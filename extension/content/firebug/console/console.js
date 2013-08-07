@@ -151,9 +151,13 @@ Firebug.ConsoleBase =
 
 // ********************************************************************************************* //
 
+/**
+ * @module Represents module for the Console panel. Responsible e.g. for handling
+ * user actions related to Console panel filter.
+ */
 var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
-
 Firebug.Console = Obj.extend(ActivableConsole,
+/** @lends Firebug.Console */
 {
     dispatchName: "console",
     toolName: "console",

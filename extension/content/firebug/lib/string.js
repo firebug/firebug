@@ -670,7 +670,8 @@ Str.toFixedLocaleString = function(number, decimals)
     var precision = Math.pow(10, decimals);
     var formattedNumber = (Math.round(number * precision) / precision).toLocaleString();
     var decimalMark = (0.1).toLocaleString().match(/\D/);
-    var decimalsCount = (formattedNumber.lastIndexOf(decimalMark) == -1) ? 0 : formattedNumber.length - formattedNumber.lastIndexOf(decimalMark) - 1;
+    var decimalsCount = (formattedNumber.lastIndexOf(decimalMark) == -1) ?
+        0 : formattedNumber.length - formattedNumber.lastIndexOf(decimalMark) - 1;
 
     // Append decimals if needed
     if (decimalsCount < decimals)
@@ -695,7 +696,6 @@ Str.formatSize = function(bytes)
     var negative = (bytes < 0);
     bytes = Math.abs(bytes);
 
-    // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
     var sizePrecision = Options.get("sizePrecision");
     if (typeof(sizePrecision) == "undefined")
     {
@@ -713,13 +713,15 @@ Str.formatSize = function(bytes)
     if (sizePrecision == -1)
         result = bytes + " B";
 
+    var precision = Math.pow(10, sizePrecision);
+
     if (bytes == -1 || bytes == undefined)
         return "?";
     else if (bytes == 0)
         return "0 B";
     else if (bytes < 1024)
         result = bytes.toLocaleString() + " B";
-    else if (bytes < (1024 * 1024))
+    else if (Math.round(bytes / 1024 * precision) / precision < 1024)
         result = this.toFixedLocaleString(bytes / 1024, sizePrecision) + " KB";
     else
         result = this.toFixedLocaleString(bytes / (1024 * 1024), sizePrecision) + " MB";
