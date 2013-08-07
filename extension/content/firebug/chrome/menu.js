@@ -58,9 +58,14 @@ Menu.createMenuItems = function(popup, items, before)
     {
         var item = items[i];
 
-        // Avoid duplicates
-        if (item.id && popup.querySelector("#" + item.id))
+        // Override existing items to avoid duplicates.
+        var existingItem = popup.querySelector("#" + item.id);
+        if (existingItem)
+        {
+            Menu.createMenuItem(popup, item, existingItem);
+            popup.removeChild(existingItem);
             continue;
+        }
 
         Menu.createMenuItem(popup, item, before);
     }

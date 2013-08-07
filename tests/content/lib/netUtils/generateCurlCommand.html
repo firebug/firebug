@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<h1>Issue #6616: Copy as cURL: Clipboard data</h1>
+<h1>Issue #6616: Copy as cURL</h1>
 
 <p>
     Test that the "Copy as cURL" menu item in the Net panel generates the proper cURL command string
@@ -16,7 +16,7 @@
 <ol>
     <li>Open Firebug, enable the net panel</li>
     <li>
-         Choose Use XHR, method and click the submit button
+        Choose Use XHR, method and click the submit button
     </li>
     <li>Right click on the new entry in the Net panel and execute <i>Copy as cURL</i></li>
     <li>The clipboard text should have the proper cURL command</li>
@@ -72,17 +72,27 @@
         document.getElementById("submit-button").click();
     }
 
-    function getNameValueForParam(name)
+
+    function replacePct20WithPlus(str)
     {
-        return name + "=" + document.querySelector("[name=" + name + "]").value;
+        return str.replace(/%20/g, "+");
+    }
+
+    function getUriEncodedNameValue(inputName)
+    {
+        var name = encodeURIComponent(inputName);
+        var value = encodeURIComponent(document.querySelector("[name=" + inputName + "]").value);
+
+        return replacePct20WithPlus(name) + "=" + replacePct20WithPlus(value);
     }
 
     function serializeForm()
     {
-        return getNameValueForParam("param1") + "&" + getNameValueForParam("param2") + "&" + getNameValueForParam("param3");
+        return getUriEncodedNameValue("param1") + "&" + getUriEncodedNameValue("param2") + "&" + getUriEncodedNameValue("param3");
     }
 
-    methodSelector.addEventListener("change", function (event)
+
+    methodSelector.addEventListener("change", function ()
     {
         setFormMethod(this.value);
     });
