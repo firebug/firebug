@@ -40,7 +40,7 @@ var tableTag =
         TBODY(
             TR({"class": "pin"},
                 TD({"class": "", align: "right"},
-                    DIV({"class": "fbQuickInfoPin"})
+                    DIV({"class": "fbQuickInfoPin $pin", onclick: "$onClickPin"})
                 )
             )
         )
@@ -65,8 +65,8 @@ var rowTag =
 // Implementation
 
 /**
- * Displays the most important DOM properties and computed CSS styles for the currently inspected element. 
- * It can be freely positioned at the monitor via drag & drop.
+ * Displays the most important DOM properties and computed CSS styles for the currently
+ * inspected element. It can be freely positioned at the monitor via drag & drop.
  */
 var QuickInfoBox = Obj.extend(Firebug.Module,
 /** @lends QuickInfoBox */
@@ -121,7 +121,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             this.storedX = this.storedX || content.tabContainer.boxObject.screenX + 5;
             this.storedY = this.storedY || content.tabContainer.boxObject.screenY + 35;
 
-            // Dynamically set noautohide to avoid mozilla bug 545265.
+            // Dynamically set noautohide to avoid Mozilla bug 545265.
             if (!this.noautohideAdded)
             {
                 this.noautohideAdded = true;
@@ -131,31 +131,53 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
                     box.setAttribute("noautohide", true);
                 }, false);
             }
-            // box.sizeTo( 200, 350);
+
             box.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
         var doc = this.getContentDoc();
         var parentNode = doc.body;
 
-        var table = tableTag.replace({}, parentNode, this);
+        // The tableTag template doesn't have its own object and so, we specify
+        // all event handlers and properties through the input object.
+        var input = {
+            onClickPin: this.onClickPin.bind(this),
+            pin: Options.get("pinQuickInfoBox") ? "pin" : ""
+        }
+
+        // Render the basic quick-box layout. It's a table where every row represents
+        // a CSS property or a section title. The pin icon displayed at the top-right
+        // corner also gets one row.
+        var table = tableTag.replace(input, parentNode, this);
         var tbody = table.firstChild;
 
         var needsTitle = this.addRows(element, tbody, domAttribs);
         var needsTitle2 = this.addRows(element.style, tbody, cssAttribs);
 
+        // Properly create section titles.
         if (needsTitle || needsTitle2)
-        {
             titleTag.insertRows({title: Locale.$STR("quickInfo")}, tbody.firstChild, this);
-        }
 
         titleTag.insertRows({title: Locale.$STR("computedStyle")}, tbody.lastChild, this);
 
+        // Generate content (a row == CSS property)
         this.addRows(element, tbody, compAttribs, true);
+
+        // Always update size of the panel according to the content size. Some elements might
+        // have more styles than others and so, require more space. We always need
+        // to avoid scroll-bars.
+        // Keep the default width (specified in firebugOverlay.xul for fbQuickInfoPanel)
+        // and change only the height.
+        box.sizeTo(box.popupBoxObject.width, doc.documentElement.clientHeight);
     },
 
     hide: function()
     {
+        // If the preference says pin == true then do not hide.
+        // xxxHonza: the box should be hidden when the user switches out of the HTML panel.
+        if (Options.get("pinQuickInfoBox"))
+            return;
+
         // if mouse is over panel defer hiding to mouseout to not cause flickering
         if (this.mouseover || this.dragging)
         {
@@ -169,8 +191,8 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         this.prevY = null;
         this.needsToHide = false;
 
-        // Remove this line if you want to inspect the info-box content
-        // using DOM inspector addon.
+        // Debugging tip: Remove this line if you want to inspect the info-box content
+        // using DOM inspector add-on.
         box.hidePopup();
     },
 
@@ -217,12 +239,28 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
+    onClickPin: function(event)
+    {
+        var target = event.target;
+        if (!Css.hasClass(target, "fbQuickInfoPin"))
+            return;
+
+        // The state of the pin needs to be updated in preferences.
+        Options.togglePref("pinQuickInfoBox");
+
+        // Update also the icon state.
+        Css.toggleClass(target, "pin");
+    },
+
+    // xxxHonza: executed directly from firebugOverlay.xul. We should register
+    // regular listeners so, the QuickInfoBox object doesn't have to be exposed
+    // through Firebug object (see at the bottom of this file).
     handleEvent: function(event)
     {
         switch (event.type)
         {
         case "mousemove":
-            if (!this.dragging)
+            if (!this.dragging || !this.box)
                 return;
 
             var diffX, diffY,
@@ -272,7 +310,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             if (this.dragging)
                 return;
             this.mouseover = false;
-            // if hiding was defered because mouse was over panel hide it
+            // if hiding was deferred because mouse was over panel hide it
             if (this.needsToHide && event.target.nodeName == "panel")
                 this.hide();
             break;
@@ -322,14 +360,12 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     getContentFrame: function()
     {
         var box = Firebug.chrome.$("fbQuickInfoPanel");
-        box.style.height = "350px";;
         return box.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 
     getContentDoc: function()
     {
         var contentFrame = this.getContentFrame();
-        // contentFrame.contentWindow.document.body.style.height = "350px";
         return contentFrame.contentWindow.document;
     }
 });

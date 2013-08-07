@@ -4,7 +4,7 @@
 /* Quick Info Box */
 
 #fbQuickInfoPanel {
-    border: 1px solid threedshadow;
+    border: 0;
     opacity: 0.9;
 }
 
@@ -12,14 +12,15 @@
     background-color: white;
     font-family: monospace;
     font-size: 9px;
-    padding-bottom: 5px;
+    padding: 0;
     cursor: move;
-    margin: 4;
+    margin: 0;
 }
 
 .fbQuickInfoTable {
+    border: 1px solid threedshadow;
     width: 100%;
-    border: none;
+    padding: 4px;
 }
 
 .fbQuickInfoBoxTitle {
@@ -61,6 +62,7 @@
     right: 5px;
 }
 
-.fbQuickInfoPin:hover:active {
+.fbQuickInfoPin:hover:active,
+.fbQuickInfoPin.pin {
     background: url(chrome://firebug/skin/pin2.svg) no-repeat -16px 0 transparent;
 }

@@ -26,8 +26,7 @@
             onmouseover="Firebug.QuickInfoBox.quickInfoBoxHandler(event);"
             onmouseout="Firebug.QuickInfoBox.quickInfoBoxHandler(event);">
                 <browser class="fbQuickInfoPanelContent" disablehistory="true"
-                    src="about:blank" type="content"
-                    height="350" width="200" border="0"/>
+                    src="about:blank" type="content" flex="1" border="0"/>
         </panel>
 
         <menupopup id="fbNavigationHistoryMenu"
