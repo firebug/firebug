@@ -468,73 +468,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
          */
         function areEqual(a, b)
         {
+            if (typeof a === "object" && a !== null)
+                return false;
+
             if (a === b)
                 return true;
 
-            if (typeof a === "number" && typeof b === "number" && isNaN(a))
-                return isNaN(b);
+            if (typeof a === "number" && typeof b === "number")
+                return isNaN(a) && isNaN(b);
 
-            if (typeof a !== "object" || typeof b !== "object" || a === null || b === null)
-                return false;
-
-            // Do some slightly less strict checks.
-            if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b))
-                return false;
-
-            var str = Object.prototype.toString.call(a);
-            if (str !== Object.prototype.toString.call(b))
-                return false;
-
-            if (str === "[object Date]")
-                return a.getTime() === b.getTime();
-
-            if (str === "[object RegExp]")
-                return a.toString() === b.toString();
-
-            return undefined;
-        }
-
-        // Check whether two content objects are approximately the same, one level deep.
-        function areLooselyEqual(a, b)
-        {
-            var proto = Object.getPrototypeOf(a);
-            if (!(Object.getPrototypeOf(proto) === null && "hasOwnProperty" in proto) &&
-                !Array.isArray(a))
-            {
-                // Our object is complicated, so we shouldn't attempt a loose comparison.
-                return false;
-            }
-
-            if (Array.isArray(a) && a.length !== b.length)
-                return false;
-
-            var count = 0;
-            for (var prop in a)
-            {
-                // Because prototypes are already checked in areEqual(),
-                // we just need to compare own properties
-                if (!a.hasOwnProperty(prop))
-                    continue;
-
-                var propDescriptorA = Object.getOwnPropertyDescriptor(a, prop);
-                var propDescriptorB = Object.getOwnPropertyDescriptor(b, prop);
-                if (!propDescriptorA || !propDescriptorB ||
-                    propDescriptorA.get || propDescriptorB.get ||
-                    propDescriptorA.set || propDescriptorB.set)
-                {
-                    return false;
-                }
-
-                if (!areEqual(propDescriptorA.value, propDescriptorB.value))
-                    return false;
-
-                count++;
-            }
-
-            for (var prop in b)
-                count--;
-
-            return (count === 0);
+            return false;
         }
 
         return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
@@ -554,25 +497,22 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
                     for (var i=0, len=object.length; i<len; ++i)
                     {
-                        if (!(areEqual(object[i], otherObject[i]) ||
-                            areLooselyEqual(object[i], otherObject[i])))
-                        {
+                        // Internal chrome objects are allowed to implement a custom "getId" function.
+                        if (object[i] instanceof Object && "getId" in object[i])
+                            return ("getId" in otherObject[i] && object[i].getId() === otherObject[i].getId());
+
+                        if (!areEqual(object[i], otherObject[i]))
                             return false;
-                        }
                     }
 
                     return true;
                 }
 
-                var equal = areEqual(object, otherObject);
-                if (equal !== undefined)
-                    return equal;
-
                 // Internal chrome objects are allowed to implement a custom "getId" function.
                 if (object instanceof Object && "getId" in object)
                     return ("getId" in otherObject && object.getId() === otherObject.getId());
 
-                return areLooselyEqual(object, otherObject);
+                return areEqual(object, otherObject);
             }
             catch (exc)
             {
