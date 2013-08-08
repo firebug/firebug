@@ -58,7 +58,8 @@ EditCookie.prototype =
         // Don't escape using encodeURIComponent, since "+" would be changed, but
         // it's a valid replacement for a space.
         // This is also necessary for issue 45.
-        this.nameNode.value = unescape(this.cookie.name);
+        // Cookie name should not be encoded, see Issue 6653
+        this.nameNode.value = this.cookie.name;
         this.valueNode.value = unescape(this.cookie.rawValue);
 
         this.domainNode.value = this.cookie.host;
