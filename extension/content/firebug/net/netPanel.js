@@ -446,15 +446,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (object)
         {
-            // xxxHonza: This is dangerous constructs. Inspect menu-items are generated
-            // automatically for every context menu in FirebugChrome.onContextShowing()
+            // xxxHonza: This is dangerous construct. Inspect menu-items are generated
+            // automatically for every context menu in FirebugChrome.onContextShowing().
             // Also, FirebugChrome is using Rep.getRealObject() while this logic is based
-            // on Firebug.getObjectByURL(), which can return different object to be inspected.
-            // This feature has been introduced to allow inspecting specific network requests
-            // like stylesheets and javascript files. But at that time the network request
+            // on Firebug.getObjectByURL(), which can return different objects to be inspected.
+            // This feature has been introduced to allow inspecting of specific network requests
+            // like stylesheets and javascript files, but at that time the network request
             // template (FirebugReps.NetFile) returned null for getRealObject().
-            // FirebugReps.NetFile.getRealObject now returns an object representing the request
-            // (used also by 'Use in Command Line' feature), which is different from what
+            // FirebugReps.NetFile.getRealObject() now returns an object representing the request
+            // itself (used also by 'Use in Command Line' feature), which is different from what
             // Firebug.getObjectByURL() returns. See also issue 6647.
             var subItems = Firebug.chrome.getInspectMenuItems(object);
             if (subItems.length)
