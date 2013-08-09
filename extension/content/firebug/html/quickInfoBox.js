@@ -175,7 +175,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     {
         // If the preference says pin == true then do not hide.
         // xxxHonza: the box should be hidden when the user switches out of the HTML panel.
-        if (Options.get("pinQuickInfoBox"))
+        if (Options.get("pinQuickInfoBox") && Firebug.PanelActivation.isPanelEnabled("html") )
             return;
 
         // if mouse is over panel defer hiding to mouseout to not cause flickering
@@ -367,7 +367,15 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     {
         var contentFrame = this.getContentFrame();
         return contentFrame.contentWindow.document;
-    }
+    },
+
+    showPanel: function(browser, panel) {
+        
+        if( panel && panel.name !== 'html' ){
+            var box = Firebug.chrome.$("fbQuickInfoPanel");
+            box.hidePopup();
+        }
+    },
 });
 
 // ********************************************************************************************* //
