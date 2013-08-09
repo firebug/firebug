@@ -497,10 +497,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
                     for (var i=0, len=object.length; i<len; ++i)
                     {
-                        // Internal chrome objects are allowed to implement a custom "getId" function.
-                        if (object[i] instanceof Object && "getId" in object[i])
-                            return ("getId" in otherObject[i] && object[i].getId() === otherObject[i].getId());
-
                         if (!areEqual(object[i], otherObject[i]))
                             return false;
                     }
