@@ -87,6 +87,9 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         var contentFrame = this.getContentFrame();
         Events.addEventListener(contentFrame, "load", this.onContentLoaded.bind(this), true);
+        Events.addEventListener(contentFrame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
+        Events.addEventListener(contentFrame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
+        Events.addEventListener(contentFrame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
     },
 
     shutdown: function()
@@ -340,6 +343,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
      */
     quickInfoBoxHandler: function(event)
     {
+        FBTrace.sysout("event executed");
         QuickInfoBox.handleEvent(event);
     },
 
@@ -394,9 +398,6 @@ function rgbToHex(value)
 // Registration
 
 Firebug.registerModule(QuickInfoBox);
-
-// XUL commands need global access.
-Firebug.QuickInfoBox = QuickInfoBox;
 
 return QuickInfoBox;
 
