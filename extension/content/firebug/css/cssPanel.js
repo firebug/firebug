@@ -2402,7 +2402,23 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else if (Css.hasClass(this.target, "cssPropName"))
         {
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            return Css.getCSSPropertyNames(nodeType);
+            var ret = Css.getCSSPropertyNames(nodeType);
+
+            if (!cycle && expr)
+            {
+                // Make some good default suggestions.
+                var list = ["color", "clear", "display", "float", "overflow"];
+                for (var i = 0; i < list.length; ++i)
+                {
+                    if (Str.hasPrefix(list[i], expr) && ret.indexOf(list[i]) !== -1)
+                    {
+                        out.suggestion = list[i];
+                        break;
+                    }
+                }
+            }
+
+            return ret;
         }
         else if (Dom.getAncestorByClass(this.target, "cssDocumentRule") &&
                 !Css.hasClass(this.target, "cssPropValue"))
