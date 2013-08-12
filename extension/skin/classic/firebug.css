@@ -106,6 +106,7 @@
     z-index: 1;
     color: #A0A0A0;
     bottom: 0;
+    pointer-events: none;
 }
 
 .fbCommandHtmlBox .offScreen {
