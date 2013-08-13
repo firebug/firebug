@@ -95,6 +95,11 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
+
+        var contentFrame = this.getContentFrame();
+        Events.removeEventListener(contentFrame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
+        Events.removeEventListener(contentFrame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
+        Events.removeEventListener(contentFrame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -178,7 +183,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     {
         // If the preference says pin == true then do not hide.
         // xxxHonza: the box should be hidden when the user switches out of the HTML panel.
-        if (Options.get("pinQuickInfoBox") && Firebug.PanelActivation.isPanelEnabled("html") )
+        if (Options.get("pinQuickInfoBox"))
             return;
 
         // if mouse is over panel defer hiding to mouseout to not cause flickering
@@ -343,7 +348,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
      */
     quickInfoBoxHandler: function(event)
     {
-        FBTrace.sysout("event executed");
         QuickInfoBox.handleEvent(event);
     },
 
@@ -373,13 +377,14 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         return contentFrame.contentWindow.document;
     },
 
-    showPanel: function(browser, panel) {
-        
-        if( panel && panel.name !== 'html' ){
+    showPanel: function(browser, panel) 
+    {    
+        if( panel && panel.name !== 'html' )
+        {
             var box = Firebug.chrome.$("fbQuickInfoPanel");
             box.hidePopup();
         }
-    },
+    }
 });
 
 // ********************************************************************************************* //
