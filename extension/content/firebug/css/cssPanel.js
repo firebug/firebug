@@ -3133,9 +3133,7 @@ function parsePriority(value)
 
 function formatColor(color)
 {
-    var colorDisplay = Options.get("colorDisplay");
-
-    switch (colorDisplay)
+    switch (Options.get("colorDisplay"))
     {
         case "hex":
             return Css.rgbToHex(color);
@@ -3147,7 +3145,7 @@ function formatColor(color)
             return Css.colorNameToRGB(color);
 
         default:
-            return value;
+            return color;
     }
 }
 
