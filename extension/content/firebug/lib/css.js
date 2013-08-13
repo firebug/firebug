@@ -786,12 +786,19 @@ Css.extractURLs = function(value)
 
 Css.colorNameToRGB = function(value)
 {
+    if (!domUtils.colorNameToRGB)
+        return value;
+
+    if (value === "transparent")
+        return "rgba(0, 0, 0, 0)";
+
     try
     {
         var rgbValue = domUtils.colorNameToRGB(value);
         return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
     }
-    catch(e) {
+    catch(e)
+    {
         return value;
     }
 };
@@ -803,12 +810,8 @@ Css.rgbToHex = function(value)
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
             toString(16).substr(-6).toUpperCase();
     }
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHex(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
@@ -868,12 +871,7 @@ Css.rgbToHSL = function(value)
             return "hsl("+h+", "+s+"%, "+l+"%)";
     }
 
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHSL(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a)
