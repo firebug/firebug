@@ -275,7 +275,6 @@
 
 .panelTabBox {
     background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
-    height: 32px;
     border-bottom: 1px solid #bebebe;
     padding: 0;
     overflow: hidden;
@@ -483,7 +482,6 @@ panelTab[selected="true"] > panelTabMenu {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    height: 30px;
     border-top: 1px solid #fff;
     margin-left: -5px;
     margin-right: 0;
