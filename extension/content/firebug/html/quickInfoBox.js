@@ -40,7 +40,8 @@ var tableTag =
         TBODY(
             TR({"class": "pin"},
                 TD({"class": "", align: "right"},
-                    DIV({"class": "fbQuickInfoPin $pin", onclick: "$onClickPin"})
+                    DIV({"class": "fbQuickInfoPin $pin", onclick: "$onClickPin"}),
+                    DIV({"class": "fbQuickInfoClose", onclick: "$onClickClose"})
                 )
             )
         )
@@ -150,7 +151,8 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         // all event handlers and properties through the input object.
         var input = {
             onClickPin: this.onClickPin.bind(this),
-            pin: Options.get("pinQuickInfoBox") ? "pin" : ""
+            pin: Options.get("pinQuickInfoBox") ? "pin" : "",
+            onClickClose: this.onClickClose.bind(this),
         }
 
         // Render the basic quick-box layout. It's a table where every row represents
@@ -258,6 +260,16 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         // Update also the icon state.
         Css.toggleClass(target, "pin");
+    },
+
+    onClickClose: function(event)
+    {
+        var target = event.target;
+        if (!Css.hasClass(target, "fbQuickInfoClose"))
+            return;
+
+        var box = Firebug.chrome.$("fbQuickInfoPanel");
+        box.hidePopup();
     },
 
     // xxxHonza: executed directly from firebugOverlay.xul. We should register
@@ -377,14 +389,14 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         return contentFrame.contentWindow.document;
     },
 
-    showPanel: function(browser, panel) 
-    {    
-        if( panel && panel.name !== 'html' )
-        {
-            var box = Firebug.chrome.$("fbQuickInfoPanel");
-            box.hidePopup();
-        }
-    }
+    // showPanel: function(browser, panel) 
+    // {    
+    //     if ( panel && panel.name !== 'html' )
+    //     {
+    //         var box = Firebug.chrome.$("fbQuickInfoPanel");
+    //         box.hidePopup();
+    //     }
+    // }
 });
 
 // ********************************************************************************************* //

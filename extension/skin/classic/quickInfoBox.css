@@ -66,3 +66,14 @@
 .fbQuickInfoPin.pin {
     background: url(chrome://firebug/skin/pin2.svg) no-repeat -16px 0 transparent;
 }
+
+.fbQuickInfoClose {
+    background: url(chrome://firebug/skin/notificationClose.png) no-repeat -32px 0 transparent;
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 18px;
+}
