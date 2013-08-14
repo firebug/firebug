@@ -30,12 +30,12 @@ function runTest()
                     FBTest.clearCache();
                     FBTest.reload(function() {
                         verifyNetPanel("Step 4");
-    
+
                         // Step 5 & 6.
                         nextStep(function() {
                             var tabbrowser = FBTest.getBrowser();
                             tabbrowser.removeTab(tabbrowser.selectedTab);
-    
+
                             // Step 7.
                             nextStep(function() {
                                 // ... clear cache and open again.

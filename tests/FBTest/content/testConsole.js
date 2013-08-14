@@ -95,8 +95,8 @@ FBTestApp.TestWindowLoader =
 
 /**
  * This object represents main Test Console implementation.
- * 
- * @namespace  
+ *
+ * @namespace
  */
 FBTestApp.TestConsole =
 {

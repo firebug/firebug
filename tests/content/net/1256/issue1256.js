@@ -5,7 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "net/1256/issue1256.html", function(win)
     {
         // Open Firebug UI and enable Net panel.
-        FBTest.enableNetPanel(function(win) 
+        FBTest.enableNetPanel(function(win)
         {
             FBTest.sysout("issue1256.onReload; " + win.location.href);
 

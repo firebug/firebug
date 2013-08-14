@@ -1,13 +1,13 @@
 
 /**
  * Test for Browser#getBrowserContext(id)
- * 
+ *
  * A browser context can be retrieved via its identifier.
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browser/testGetContexts.html";
     FBTest.progress("getContext(id), open test page "+url);
     FBTest.openNewTab(url, function(win)

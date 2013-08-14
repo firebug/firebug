@@ -40,7 +40,7 @@ var initTabBody = false;
 var updateTabBody = false;
 var destroyTabBody = false;
 
-var netInfoBodyListener = 
+var netInfoBodyListener =
 {
     initTabBody: function(infoBox, file) {
         initTabBody = true;

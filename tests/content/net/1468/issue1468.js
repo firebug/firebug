@@ -5,7 +5,7 @@ function runTest()
     FBTest.sysout("issue1468.START");
     FBTest.openNewTab(basePath + "net/1468/issue1468.html", function(win)
     {
-        FBTest.enableNetPanel(function(win) 
+        FBTest.enableNetPanel(function(win)
         {
             var filePath = FBTest.getLocalURLBase();
             var doc = win.document;
@@ -49,7 +49,7 @@ function createFile(name)
     var dirService = Cc["@mozilla.org/file/directory_service;1"]
         .getService(Ci.nsIProperties);
 
-    // Get unique file within user profile directory. 
+    // Get unique file within user profile directory.
     var file = dirService.get("TmpD", Ci.nsIFile);
     file.append(name);
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);

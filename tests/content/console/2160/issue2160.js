@@ -55,7 +55,7 @@ function reload(callback)
 
     // Wait for the last log.
     var doc = FBTest.getPanelDocument();
-    var recognizer = new MutationRecognizer(doc.defaultView, "Text", null, "Doing addOnLoad..."); 
+    var recognizer = new MutationRecognizer(doc.defaultView, "Text", null, "Doing addOnLoad...");
     recognizer.onRecognizeAsync(callback);
 }
 

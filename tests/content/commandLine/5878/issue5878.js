@@ -27,7 +27,7 @@ function runTest()
                         "The alias should redirect to " + expectedMyScriptURL);
                 }
             });
-            // test context menu: 
+            // test context menu:
             // (1): test include
             tasks.push(function(callback)
             {

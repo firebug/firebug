@@ -33,7 +33,7 @@ function runTest()
             taskList.push(FBTest.executeCommandAndVerify,
                 "$x(\"//button\", document, \"bool\")", "true", "span",
                 "objectBox objectBox-number");
-            taskList.push(FBTest.executeCommandAndVerify, 
+            taskList.push(FBTest.executeCommandAndVerify,
                 "try{$x(\"test test\")} catch(e){'ex';}", "\"ex\"", "span",
                 "objectBox objectBox-string");
 

@@ -10,8 +10,8 @@
  */
 window.addEventListener("load", function showPage()
 {
-    // If the file is loaded into the Firebug test console don't 
-    // generate the web UI. 
+    // If the file is loaded into the Firebug test console don't
+    // generate the web UI.
     if (document.getElementById("testList"))
         return;
 

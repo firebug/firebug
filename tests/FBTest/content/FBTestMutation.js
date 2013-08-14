@@ -26,8 +26,8 @@
  * @param {String} text Specific text that should be created. The tagName must be set to
  * @param {Object} attributes to be watched, defaults to 'attributes'; use for removals
  * <i>Text</i> in this case.
- * 
- * @class  
+ *
+ * @class
  */
 var MutationRecognizer = function(win, tagName, attributes, text, changedAttributes)
 {

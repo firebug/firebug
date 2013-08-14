@@ -28,8 +28,8 @@ var Cu = Components.utils;
 
 /**
  * Domplate templates in this file are used to generate list of registered tests.
- * 
- * @domplate  
+ *
+ * @domplate
  */
 FBTestApp.GroupList = domplate(Firebug.Rep,
 /** @lends FBTestApp.GroupList */

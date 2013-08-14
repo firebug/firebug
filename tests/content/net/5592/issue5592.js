@@ -11,7 +11,7 @@ function runTest()
     FBTest.openNewTab(basePath + "net/5592/issue5592.html", function(win)
     {
         // Open Firebug UI and enable Net panel.
-        FBTest.enableNetPanel(function(win) 
+        FBTest.enableNetPanel(function(win)
         {
             var options = {
                 tagName: "tr",

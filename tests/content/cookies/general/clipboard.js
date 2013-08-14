@@ -7,7 +7,7 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/general/clipboard.php", function(win)
     {
         FBTest.openFirebug(true);
-        FBTestFireCookie.enableCookiePanel(function(win) 
+        FBTestFireCookie.enableCookiePanel(function(win)
         {
             FBTest.sysout("cookies.general.cookieClipboard; Check clipboard functionality");
 

@@ -31,7 +31,7 @@ Cu["import"]("resource://fbtest/FBTestIntegrate.js");
  * This template represents a "test-result" that is beening displayed within
  * Trace Console window. Expandable and collapsible logic associated with each
  * result is also implemented by this object.
- * 
+ *
  * @domplate
  */
 var TestResultRep = domplate(

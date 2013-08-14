@@ -1,7 +1,7 @@
 /**
  * Test for debugger; keyword used in various contexts (in a function, in an
  * dynamically evaluated functions, etc.)
- * 
+ *
  * The test also verifies  Issue 3082: Disable "debugger;" statements by converting
  * them to conditional breakpoints.
  */
@@ -59,7 +59,7 @@ function executeTest(callback, doc, testId, lineNo, disable)
     var chrome = FW.Firebug.chrome;
     FBTest.waitForBreakInDebugger(chrome, lineNo, false, function(row)
     {
-        // Don't disable if the test says so. 
+        // Don't disable if the test says so.
         if (!disable)
         {
             FBTest.clickContinueButton();

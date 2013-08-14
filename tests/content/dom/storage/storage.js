@@ -2,7 +2,7 @@ var Fx13 = FBTest.compareFirefoxVersion("13.0a1") >= 0;
 
 /**
  * Test for DOM session and local storage.
- * 
+ *
  * Related issues:
  * Issue 3611: localStorage and sessionStorage not shown in DOM panel
  */

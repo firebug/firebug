@@ -56,7 +56,7 @@ function verifyResponse(panel)
 {
     // The response must be displayed to be populated in the UI.
     FBTest.expandElements(panel.panelNode, "netInfoResponseTab");
-    var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText", 
+    var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText",
         "netInfoText");
 
     FBTest.ok(responseBody, "Response tab must exist in: " + panel.name);

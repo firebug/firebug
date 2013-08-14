@@ -12,8 +12,8 @@ function(FBTrace, Arr) {
 /**
  * Text selection event is dispatched to all registered listeners. The original update
  * comes from command updated registered in overlayFirebug.xul
- * 
- * @namespace  
+ *
+ * @namespace
  */
 FBTestApp.SelectionController =
 {

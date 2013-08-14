@@ -42,7 +42,7 @@ function checkNetPanelUI()
         var row = netRows[i];
         var file = FW.Firebug.getRepObject(row);
         var m = row.className.match(/category-/gi);
-        FBTest.compare(1, m.length, "There must be just one file category specified for a request: " + 
+        FBTest.compare(1, m.length, "There must be just one file category specified for a request: " +
             file.href);
     }
 

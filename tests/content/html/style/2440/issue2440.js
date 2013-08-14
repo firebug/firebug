@@ -41,7 +41,7 @@ function executeTest(id, element, callback)
     FBTest.selectElementInHtmlPanel(element, function(sel)
     {
         FBTest.sysout("issue2440; selection: ", sel);
-  
+
         var sidePanel = FBTest.selectSidePanel("css");
         var selectors = sidePanel.panelNode.querySelectorAll(".cssSelector");
         var rules = [];
