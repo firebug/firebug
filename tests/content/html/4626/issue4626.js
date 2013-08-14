@@ -15,7 +15,6 @@ function runTest()
 
             if (FBTest.ok(docTypeNode, "Doctype must exist"))
             {
-                FBTrace.sysout("docTypeNode", docTypeNode);
                 FBTest.compare("<!DOCTYPE html>", docTypeNode.textContent,
                     "Doctype must be correct");
             }
