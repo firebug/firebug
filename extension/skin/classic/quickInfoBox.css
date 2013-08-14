@@ -59,21 +59,30 @@
     border: none;
     cursor: pointer;
     position: absolute;
-    right: 5px;
+    right: 22px;
 }
 
-.fbQuickInfoPin:hover:active,
 .fbQuickInfoPin.pin {
     background: url(chrome://firebug/skin/pin2.svg) no-repeat -16px 0 transparent;
 }
 
 .fbQuickInfoClose {
-    background: url(chrome://firebug/skin/notificationClose.png) no-repeat -32px 0 transparent;
+    background: url(chrome://firebug/skin/win/close.svg);
     background-repeat: no-repeat;
     width: 16px;
     height: 16px;
     border: none;
     cursor: pointer;
     position: absolute;
-    right: 18px;
+    right: 5px;
+}
+
+.fbQuickInfoPin:hover,
+.fbQuickInfoClose:hover {
+    filter: url(resource://firebugui/filters.svg#darken);
+}
+
+.fbQuickInfoPin:active,
+.fbQuickInfoClose:active {
+    filter: url(resource://firebugui/filters.svg#deepDarken);
 }

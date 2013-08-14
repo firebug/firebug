@@ -22,8 +22,10 @@
             onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
 
         <panel id="fbQuickInfoPanel" width="210" noautofocus="true">
-                <browser class="fbQuickInfoPanelContent" disablehistory="true"
-                    src="about:blank" type="content" flex="1" border="0"/>
+            <!-- xxxHonza: type=chrome is allowing filters.svg usage in quickInfoBox.css
+                Could we have filters.svg in the standard skin dir? -->
+            <browser class="fbQuickInfoPanelContent" disablehistory="true"
+                src="about:blank" type="chrome" flex="1" border="0"/>
         </panel>
 
         <menupopup id="fbNavigationHistoryMenu"
