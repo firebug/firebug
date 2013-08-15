@@ -688,6 +688,8 @@ Str.toFixedLocaleString = function(number, decimals)
     return formattedNumber;
 };
 
+// xxxsz: May be refactored when Firefox implements the ECMAScript Internationalization API
+// See https://bugzil.la/853301
 Str.formatNumber = Deprecated.deprecated("use <number>.toLocaleString() instead",
     function(number) { return number.toLocaleString(); });
 
