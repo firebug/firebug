@@ -40,8 +40,8 @@ var tableTag =
         TBODY(
             TR({"class": "pin"},
                 TD({"class": "", align: "right"},
-                    DIV({"class": "fbQuickInfoPin $pin", onclick: "$onClickPin"}),
-                    DIV({"class": "fbQuickInfoClose", onclick: "$onClickClose"})
+                    DIV({"class": "fbQuickInfoPin $pin button", onclick: "$onClickPin"}),
+                    DIV({"class": "fbQuickInfoClose button", onclick: "$onClickClose"})
                 )
             )
         )
@@ -304,6 +304,10 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             break;
 
         case "mousedown":
+            var target = event.target;
+            if (Css.hasClass(target, "button"))
+                return;
+
             Events.addEventListener(this.qiPanel, "mousemove", this, true);
             Events.addEventListener(this.qiPanel, "mouseup", this, true);
             this.dragging = true;
