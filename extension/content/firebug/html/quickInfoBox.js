@@ -86,21 +86,21 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        var contentFrame = this.getContentFrame();
-        Events.addEventListener(contentFrame, "load", this.onContentLoaded.bind(this), true);
-        Events.addEventListener(contentFrame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
-        Events.addEventListener(contentFrame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
-        Events.addEventListener(contentFrame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
+        var frame = this.getContentFrame();
+        Events.addEventListener(frame, "load", this.onContentLoaded.bind(this), true);
+        Events.addEventListener(frame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
+        Events.addEventListener(frame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
+        Events.addEventListener(frame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
     },
 
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
 
-        var contentFrame = this.getContentFrame();
-        Events.removeEventListener(contentFrame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
-        Events.removeEventListener(contentFrame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
-        Events.removeEventListener(contentFrame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
+        var frame = this.getContentFrame();
+        Events.removeEventListener(frame, "mousedown", this.quickInfoBoxHandler.bind(this), true);
+        Events.removeEventListener(frame, "mouseover", this.quickInfoBoxHandler.bind(this), true);
+        Events.removeEventListener(frame, "mouseout", this.quickInfoBoxHandler.bind(this), true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -286,11 +286,12 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             if (!this.dragging || !this.box)
                 return;
 
-            var diffX, diffY,
-                boxX = this.box.screenX,
-                boxY = this.box.screenY,
-                x = event.screenX,
-                y = event.screenY;
+            var diffX;
+            var diffY;
+            var boxX = this.box.screenX;
+            var boxY = this.box.screenY;
+            var x = event.screenX;
+            var y = event.screenY;
 
             diffX = x - this.prevX;
             diffY = y - this.prevY;
@@ -310,6 +311,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
             Events.addEventListener(this.qiPanel, "mousemove", this, true);
             Events.addEventListener(this.qiPanel, "mouseup", this, true);
+
             this.dragging = true;
             this.prevX = event.screenX;
             this.prevY = event.screenY;
@@ -318,6 +320,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         case "mouseup":
             Events.removeEventListener(this.qiPanel, "mousemove", this, true);
             Events.removeEventListener(this.qiPanel, "mouseup", this, true);
+
             this.qiPanel = this.box = null;
             this.prevX = this.prevY = null;
             this.dragging = false;
@@ -328,13 +331,16 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         case "mouseover":
             if (this.dragging)
                 return;
+
             this.mouseover = true;
             break;
 
         case "mouseout":
             if (this.dragging)
                 return;
+
             this.mouseover = false;
+
             // if hiding was deferred because mouse was over panel hide it
             if (this.needsToHide && event.target.nodeName == "panel")
                 this.hide();
@@ -393,15 +399,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         var contentFrame = this.getContentFrame();
         return contentFrame.contentWindow.document;
     },
-
-    // showPanel: function(browser, panel) 
-    // {    
-    //     if ( panel && panel.name !== 'html' )
-    //     {
-    //         var box = Firebug.chrome.$("fbQuickInfoPanel");
-    //         box.hidePopup();
-    //     }
-    // }
 });
 
 // ********************************************************************************************* //
