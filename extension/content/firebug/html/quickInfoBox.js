@@ -277,6 +277,9 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     // through Firebug object (see at the bottom of this file).
     handleEvent: function(event)
     {
+        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
+        this.box = this.qiPanel.boxObject;
+
         switch (event.type)
         {
         case "mousemove":
@@ -301,8 +304,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             break;
 
         case "mousedown":
-            this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-            this.box = this.qiPanel.boxObject;
             Events.addEventListener(this.qiPanel, "mousemove", this, true);
             Events.addEventListener(this.qiPanel, "mouseup", this, true);
             this.dragging = true;
