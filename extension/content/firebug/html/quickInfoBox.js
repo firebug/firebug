@@ -88,11 +88,12 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         var frame = this.getContentFrame();
 
+        this.onMouseLoadListener = this.onContentLoaded.bind(this);
         this.onMouseDownListener = this.onMouseDown.bind(this);
         this.onMouseOverListener = this.onMouseOver.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
 
-        Events.addEventListener(frame, "load", this.onContentLoaded.bind(this), true);
+        Events.addEventListener(frame, "load", this.onMouseLoadListener, true);
         Events.addEventListener(frame, "mousedown", this.onMouseDownListener, true);
         Events.addEventListener(frame, "mouseover", this.onMouseOverListener, true);
         Events.addEventListener(frame, "mouseout", this.onMouseOutListener, true);
@@ -103,7 +104,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         var frame = this.getContentFrame();
-        Events.removeEventListener(frame, "load", this.onContentLoaded.bind(this), true);
+        Events.removeEventListener(frame, "load", this.onMouseLoadListener, true);
         Events.removeEventListener(frame, "mousedown", this.onMouseDownListener, true);
         Events.removeEventListener(frame, "mouseover", this.onMouseOverListener, true);
         Events.removeEventListener(frame, "mouseout", this.onMouseOutListener, true);
