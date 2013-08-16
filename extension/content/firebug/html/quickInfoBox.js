@@ -87,7 +87,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         var frame = this.getContentFrame();
-        this.qiPanel = this.box = null;
 
         this.onMouseLoadListener = this.onContentLoaded.bind(this);
         this.onMouseDownListener = this.onMouseDown.bind(this);
@@ -285,8 +284,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     onMouseDown: function(event)
     {
         var target = event.target;
-        if (Css.hasClass(target, "button") || Css.hasClass(target, "fbQuickInfoBoxTitle") 
-            || Css.hasClass(target, "fbQuickInfoName") || Css.hasClass(target, "fbQuickInfoValue"))
+        if (Css.hasClass(target, "button") || target.firstChild.nodeType == Node.TEXT_NODE)
             return;
 
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
@@ -298,7 +296,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         this.dragging = true;
         this.prevX = event.screenX;
         this.prevY = event.screenY;
-
     },    
 
     onMouseOver: function(event)
