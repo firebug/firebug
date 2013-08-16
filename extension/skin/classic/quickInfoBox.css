@@ -29,7 +29,7 @@
     font-weight: bold;
     padding-top: 8px;
     margin-bottom: 0;
-    cursor: move;
+    cursor: text;
 }
 
 .fbQuickInfoName, .fbQuickInfoValue {
@@ -41,14 +41,14 @@
     color: DarkGreen;
     margin-bottom: 0;
     -moz-margin-end: 0;
-    cursor: move;
+    cursor: text;
 }
 
 .fbQuickInfoValue {
     color: DarkBlue;
     margin-bottom: 0;
     -moz-margin-start: 0;
-    cursor: move;
+    cursor: text;
 }
 
 .fbQuickInfoPin {

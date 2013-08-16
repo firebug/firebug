@@ -87,11 +87,14 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         var frame = this.getContentFrame();
+        this.qiPanel = this.box = null;
 
         this.onMouseLoadListener = this.onContentLoaded.bind(this);
         this.onMouseDownListener = this.onMouseDown.bind(this);
         this.onMouseOverListener = this.onMouseOver.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
+        this.onMouseMoveListener = this.onMouseMove.bind(this);
+        this.onMouseUpListener = this.onMouseUp.bind(this);
 
         Events.addEventListener(frame, "load", this.onMouseLoadListener, true);
         Events.addEventListener(frame, "mousedown", this.onMouseDownListener, true);
@@ -282,14 +285,12 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     onMouseDown: function(event)
     {
         var target = event.target;
-        if (Css.hasClass(target, "button"))
+        if (Css.hasClass(target, "button") || Css.hasClass(target, "fbQuickInfoBoxTitle") 
+            || Css.hasClass(target, "fbQuickInfoName") || Css.hasClass(target, "fbQuickInfoValue"))
             return;
 
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
         this.box = this.qiPanel.boxObject;
-
-        this.onMouseMoveListener = this.onMouseMove.bind(this);
-        this.onMouseUpListener = this.onMouseUp.bind(this);
 
         Events.addEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
         Events.addEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
@@ -323,10 +324,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     onMouseMove: function(event)
     {
         if (!this.dragging || !this.box)
-                return;
-
-        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-        this.box = this.qiPanel.boxObject;
+            return;
 
         var diffX;
         var diffY;
@@ -348,9 +346,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     onMouseUp: function(event)
     {
-
-        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-        this.box = this.qiPanel.boxObject;
 
         Events.removeEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
         Events.removeEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
