@@ -720,6 +720,12 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             this, infoTip, target, x, y, rangeParent, rangeOffset);
     },
 
+    getCurrentColor: function()
+    {
+        var cs = this.selection.ownerDocument.defaultView.getComputedStyle(this.selection);
+        return cs.getPropertyValue("color");
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Extends stylesheet (CSS Panel)
 
