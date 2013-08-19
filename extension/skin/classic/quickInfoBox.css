@@ -29,6 +29,9 @@
     font-weight: bold;
     padding-top: 8px;
     margin-bottom: 0;
+}
+
+.fbQuickInfoBoxTitle > SPAN {
     cursor: text;
 }
 

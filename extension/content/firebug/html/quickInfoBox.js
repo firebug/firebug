@@ -50,7 +50,7 @@ var tableTag =
 var titleTag = 
     TR(
         TD({"class": "fbQuickInfoBoxTitle"},
-            "$title"
+            SPAN("$title")
         )
     );
 
