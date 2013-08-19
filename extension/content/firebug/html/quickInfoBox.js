@@ -86,7 +86,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        var frame = this.getContentFrame();
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
 
         this.onContentLoadedListener = this.onContentLoaded.bind(this);
@@ -96,7 +95,9 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseUpListener = this.onMouseUp.bind(this);
 
+        var frame = this.getContentFrame();
         Events.addEventListener(frame, "load", this.onContentLoadedListener, true);
+
         Events.addEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
         Events.addEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
         Events.addEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
@@ -108,6 +109,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         var frame = this.getContentFrame();
         Events.removeEventListener(frame, "load", this.onContentLoadedListener, true);
+
         Events.removeEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
         Events.removeEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
         Events.removeEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
@@ -133,8 +135,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         this.needsToHide = false;
 
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-        if (box.state === "closed")
+        if (this.qiPanel.state === "closed")
         {
             var content = Firefox.getElementById("content");
             this.storedX = this.storedX || content.tabContainer.boxObject.screenX + 5;
@@ -143,15 +144,16 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             // Dynamically set noautohide to avoid Mozilla bug 545265.
             if (!this.noautohideAdded)
             {
+                var self = this;
                 this.noautohideAdded = true;
-                box.addEventListener("popupshowing", function runOnce()
+                this.qiPanel.addEventListener("popupshowing", function runOnce()
                 {
-                    box.removeEventListener("popupshowing", runOnce, false);
-                    box.setAttribute("noautohide", true);
+                    self.qiPanel.removeEventListener("popupshowing", runOnce, false);
+                    self.qiPanel.setAttribute("noautohide", true);
                 }, false);
             }
 
-            box.openPopupAtScreen(this.storedX, this.storedY, false);
+            this.qiPanel.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
         var doc = this.getContentDoc();
@@ -188,7 +190,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         // to avoid scroll-bars.
         // Keep the default width (specified in firebugOverlay.xul for fbQuickInfoPanel)
         // and change only the height.
-        box.sizeTo(box.popupBoxObject.width, doc.documentElement.clientHeight);
+        this.qiPanel.sizeTo(this.qiPanel.popupBoxObject.width, doc.documentElement.clientHeight);
     },
 
     hide: function()
@@ -205,15 +207,11 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
             return;
         }
 
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-
         this.prevX = null;
         this.prevY = null;
         this.needsToHide = false;
 
-        // Debugging tip: Remove this line if you want to inspect the info-box content
-        // using DOM inspector add-on.
-        box.hidePopup();
+        this.qiPanel.hidePopup();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -278,21 +276,17 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         if (!Css.hasClass(target, "fbQuickInfoClose"))
             return;
 
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-        box.hidePopup();
+        this.qiPanel.hidePopup();
     },
 
     onMouseDown: function(event)
     {
         var target = event.target;
         var node = target.firstChild ? target.firstChild.nodeType : target.nodeType;
-        
+
         // skip dragging when user click on button or on text
         if (Css.hasClass(target, "button") || node == Node.TEXT_NODE)
             return;
-
-        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-        this.box = this.qiPanel.boxObject;
 
         Events.addEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
         Events.addEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
@@ -323,23 +317,21 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         if (this.needsToHide && event.target.nodeName == "panel")
             this.hide();
     },
-    
+
     onMouseMove: function(event)
     {
-        if (!this.dragging || !this.box)
+        if (!this.dragging)
             return;
 
-        var diffX;
-        var diffY;
-        var boxX = this.box.screenX;
-        var boxY = this.box.screenY;
+        var box = this.qiPanel.boxObject;
+        var boxX = box.screenX;
+        var boxY = box.screenY;
         var x = event.screenX;
         var y = event.screenY;
+        var diffX = x - this.prevX;
+        var diffY = y - this.prevY;
 
-        diffX = x - this.prevX;
-        diffY = y - this.prevY;
- 
-        Firebug.chrome.$("fbQuickInfoPanel").boxObject.moveTo(boxX + diffX, boxY + diffY);
+        this.qiPanel.moveTo(boxX + diffX, boxY + diffY);
 
         this.prevX = x;
         this.prevY = y;
@@ -352,10 +344,10 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Events.removeEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
         Events.removeEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
 
-        this.qiPanel = this.box = null;
         this.prevX = this.prevY = null;
         this.dragging = false;
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
@@ -363,9 +355,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
      */
     toggleQuickInfoBox: function()
     {
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (box.state == "open")
+        if (this.qiPanel.state == "open")
             QuickInfoBox.hide();
 
         QuickInfoBox.boxEnabled = !QuickInfoBox.boxEnabled;
@@ -378,9 +368,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
      */
     hideQuickInfoBox: function()
     {
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (box.state === "open")
+        if (this.qiPanel.state === "open")
             QuickInfoBox.hide();
     },
 
@@ -389,8 +377,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     getContentFrame: function()
     {
-        var box = Firebug.chrome.$("fbQuickInfoPanel");
-        return box.getElementsByClassName("fbQuickInfoPanelContent")[0];
+        return this.qiPanel.getElementsByClassName("fbQuickInfoPanelContent")[0];
     },
 
     getContentDoc: function()
