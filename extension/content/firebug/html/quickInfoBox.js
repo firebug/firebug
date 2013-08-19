@@ -9,7 +9,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/domplate",
     "firebug/lib/object",
-    "firebug/lib/css",
+    "firebug/lib/css"
 ],
 function(Firebug, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
 
@@ -87,18 +87,19 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         var frame = this.getContentFrame();
+        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
 
-        this.onMouseLoadListener = this.onContentLoaded.bind(this);
+        this.onContentLoadedListener = this.onContentLoaded.bind(this);
         this.onMouseDownListener = this.onMouseDown.bind(this);
         this.onMouseOverListener = this.onMouseOver.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseUpListener = this.onMouseUp.bind(this);
 
-        Events.addEventListener(frame, "load", this.onMouseLoadListener, true);
-        Events.addEventListener(frame, "mousedown", this.onMouseDownListener, true);
-        Events.addEventListener(frame, "mouseover", this.onMouseOverListener, true);
-        Events.addEventListener(frame, "mouseout", this.onMouseOutListener, true);
+        Events.addEventListener(frame, "load", this.onContentLoadedListener, true);
+        Events.addEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
+        Events.addEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
+        Events.addEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
     },
 
     shutdown: function()
@@ -106,10 +107,10 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         var frame = this.getContentFrame();
-        Events.removeEventListener(frame, "load", this.onMouseLoadListener, true);
-        Events.removeEventListener(frame, "mousedown", this.onMouseDownListener, true);
-        Events.removeEventListener(frame, "mouseover", this.onMouseOverListener, true);
-        Events.removeEventListener(frame, "mouseout", this.onMouseOutListener, true);
+        Events.removeEventListener(frame, "load", this.onContentLoadedListener, true);
+        Events.removeEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
+        Events.removeEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
+        Events.removeEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -284,7 +285,10 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     onMouseDown: function(event)
     {
         var target = event.target;
-        if (Css.hasClass(target, "button") || target.firstChild.nodeType == Node.TEXT_NODE)
+        var node = target.firstChild ? target.firstChild.nodeType : target.nodeType;
+        
+        // skip dragging when user click on button or on text
+        if (Css.hasClass(target, "button") || node == Node.TEXT_NODE)
             return;
 
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
@@ -296,12 +300,14 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         this.dragging = true;
         this.prevX = event.screenX;
         this.prevY = event.screenY;
-    },    
+    },
 
+    // this is a hack to find when mouse enters and leaves panel
+    // it requires that #fbQuickInfoPanel have border
     onMouseOver: function(event)
     {
         if (this.dragging)
-                return;
+            return;
 
         this.mouseover = true;
     },
@@ -309,7 +315,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
     onMouseOut: function(event)
     {
         if (this.dragging)
-                return;
+            return;
 
         this.mouseover = false;
 
@@ -332,8 +338,8 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
         diffX = x - this.prevX;
         diffY = y - this.prevY;
-
-        this.box.moveTo(boxX + diffX, boxY + diffY);
+ 
+        Firebug.chrome.$("fbQuickInfoPanel").boxObject.moveTo(boxX + diffX, boxY + diffY);
 
         this.prevX = x;
         this.prevY = y;
@@ -343,7 +349,6 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     onMouseUp: function(event)
     {
-
         Events.removeEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
         Events.removeEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
 
