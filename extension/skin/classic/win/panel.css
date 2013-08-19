@@ -12,6 +12,7 @@
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
 .memberRow.cropped > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
+.netInfoCol > .netInfoHeadersGroup > .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
 .objectBox-functionCall.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
@@ -46,6 +47,7 @@
 }
 
 .hasHeaders .netHrefLabel,
+.netHrefLabel,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
     background-position: 2px 50%;
 }

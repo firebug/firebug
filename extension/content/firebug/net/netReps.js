@@ -1577,7 +1577,11 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
             DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle collapsed"},
-                SPAN(Locale.$STR("ResponseHeaders")),
+                DIV({"class": "netHrefLabel netLabel",
+                     style: "margin-left: 10px",
+					 onclick: "$onClickRowHeader"}
+                ),
+                SPAN({onclick: "$onClickRowHeader"}, Locale.$STR("ResponseHeaders")),
                 SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
                     _sourceDisplayed: false, _rowName: "ResponseHeaders"},
                     Locale.$STR("net.headers.view source")
@@ -1700,6 +1704,25 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             this.init(parent);
 
         this.insertHeaderRows(parent, headers, rowName);
+    },
+	
+	onClickRowHeader: function(event)
+    {
+		FBTrace.sysout("Hello World!“);
+        // Events.cancelEvent(event);
+
+        // var rowHeader = event.target;
+        // if (!Css.hasClass(rowHeader, "netRowHeader"))
+            // return;
+
+        // var row = Dom.getAncestorByClass(event.target, "netRow");
+        // if (!row)
+            // return;
+
+        // var context = Firebug.getElementPanel(row).context;
+        // var panel = context.getPanel(panelName, true);
+        // if (panel)
+            // panel.breakOnRequest(row.repObject);
     }
 });
 
