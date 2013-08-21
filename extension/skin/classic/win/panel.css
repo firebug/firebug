@@ -4,6 +4,7 @@
 /* Twisties */
 
 .twisty,
+.twistyClosed,
 .foldableGroup > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
@@ -12,7 +13,6 @@
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
 .memberRow.cropped > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
-.netInfoCol > .netInfoHeadersGroup > .netHrefLabel,
 .objectBox-stackFrame.hasTwisty,
 .objectBox-functionCall.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
@@ -26,6 +26,7 @@
     min-height: 12px;
 }
 
+.twistyOpen,
 .foldableGroup.opened > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
@@ -44,12 +45,22 @@
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyOpen.svg);
+	background-repeat: no-repeat;
+	min-height: 12px;
 }
 
 .hasHeaders .netHrefLabel,
 .netHrefLabel,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
     background-position: 2px 50%;
+}
+
+.netInfoHeadersTable TABLE{
+	display:none;
+}
+
+.netInfoHeadersTable TABLE.opened {
+	display:block;
 }
 
 /************************************************************************************************/
