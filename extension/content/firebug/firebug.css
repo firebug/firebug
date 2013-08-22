@@ -325,42 +325,6 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 }
 
 /*************************************************************************************************/
-/* Quick Info Box */
-
-#fbQuickInfoPanel {
-    border: 1px solid threedshadow;
-    background-color: white;
-    opacity: 0.9;
-    font-family: monospace;
-    font-size: 11px;
-    padding-bottom: 5px;
-    cursor: move;
-}
-
-.fbQuickInfoBoxTitle {
-    font-family: Lucida Grande, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    margin-top: 8px;
-    margin-bottom: 0;
-    cursor: move;
-}
-
-.fbQuickInfoName {
-    color: DarkGreen;
-    margin-bottom: 0;
-    -moz-margin-end: 0;
-    cursor: move;
-}
-
-.fbQuickInfoValue {
-    color: DarkBlue;
-    margin-bottom: 0;
-    -moz-margin-start: 0;
-    cursor: move;
-}
-
-/*************************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
 
 #fbContentBox:-moz-lwtheme {
