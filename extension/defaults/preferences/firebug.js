@@ -28,6 +28,7 @@ pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
+pref("extensions.firebug.clearAnnotationsConfirmation", true);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
