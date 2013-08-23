@@ -83,7 +83,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.12",
+    version: "1.13",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -804,7 +804,7 @@ window.Firebug =
 
         if (Firebug.isDetached())
         {
-            //in detached mode, two possibilities exist, the firebug windows is 
+            //in detached mode, two possibilities exist, the firebug windows is
             // the active window of the user or no.
             if ( !Firebug.chrome.hasFocus() || forceOpen)
                 Firebug.chrome.focus();
