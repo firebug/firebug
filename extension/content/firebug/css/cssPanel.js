@@ -86,7 +86,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             ),
 
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
-            SPAN({"class": "cssColon"}, ":&nbsp;"),
+            SPAN({"class": "cssColon"}, ": "),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
                 "$prop|getPropertyValue$prop.important"
             ),
