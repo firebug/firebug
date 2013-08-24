@@ -4,7 +4,6 @@
 /* Twisties */
 
 .twisty,
-.twistyClosed,
 .foldableGroup > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty,
@@ -26,7 +25,7 @@
     min-height: 12px;
 }
 
-.twistyOpen,
+.opened .twisty,
 .foldableGroup.opened > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
@@ -45,8 +44,8 @@
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyOpen.svg);
-	background-repeat: no-repeat;
-	min-height: 12px;
+    background-repeat: no-repeat;
+    min-height: 12px;
 }
 
 .hasHeaders .netHrefLabel,
@@ -55,12 +54,22 @@
     background-position: 2px 50%;
 }
 
-.netInfoHeadersTable TABLE{
-	display:none;
+.netInfoHeadersTable > .netHeadersGroup > TABLE,
+.netInfoHeadersTable > .netHeadersGroup .netHeadersViewSource {
+    display: none;
 }
 
-.netInfoHeadersTable TABLE.opened {
-	display:block;
+.netInfoHeadersTable > .netHeadersGroup.opened > TABLE,
+.netInfoHeadersTable > .netHeadersGroup.opened .netHeadersViewSource {
+    display: block;
+}
+
+.netHeader {
+    cursor: pointer;
+    display: inline-block;
+    position: static;
+    text-indent: 17px;
+    width: 100%;
 }
 
 /************************************************************************************************/

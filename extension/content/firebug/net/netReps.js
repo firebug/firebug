@@ -1576,42 +1576,58 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 {
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
-            DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle collapsed"},
-                DIV({"class": "twistyOpen", onclick: "$toggleHeaderContent"}),
-                SPAN(Locale.$STR("ResponseHeaders")),
-                SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
-                    _sourceDisplayed: false, _rowName: "ResponseHeaders"},
-                    Locale.$STR("net.headers.view source")
+            DIV({"class": "netHeadersGroup opened"},
+                DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
+                    SPAN({"class": "netHeader twisty",
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("ResponseHeaders")
+                    ),
+                    SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
+                        _sourceDisplayed: false, _rowName: "ResponseHeaders"},
+                        Locale.$STR("net.headers.view source")
+                    )
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("ResponseHeaders")})
                 )
             ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("ResponseHeaders")})
-            ),
-            DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle collapsed"},
-                SPAN(Locale.$STR("RequestHeaders")),
-                SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
-                    _sourceDisplayed: false, _rowName: "RequestHeaders"},
-                    Locale.$STR("net.headers.view source")
-                )
-            ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
+            DIV({"class": "netHeadersGroup opened"},
+                DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("RequestHeaders")),
+                    SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
+                        _sourceDisplayed: false, _rowName: "RequestHeaders"},
+                        Locale.$STR("net.headers.view source")
+                    )
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
                     "aria-label": Locale.$STR("RequestHeaders")})
+                )
             ),
-            DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle collapsed"},
-                SPAN(Locale.$STR("CachedResponseHeaders"))
+            DIV({"class": "netHeadersGroup"},
+                DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle collapsed"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("CachedResponseHeaders"))
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoCachedResponseHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("CachedResponseHeaders")})
+                )
             ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoCachedResponseHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("CachedResponseHeaders")})
-            ),
-            DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle collapsed"},
-                SPAN(Locale.$STR("PostRequestHeaders"))
-            ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoPostRequestHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("PostRequestHeaders")})
+            DIV({"class": "netHeadersGroup"},
+                DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle collapsed"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                    Locale.$STR("PostRequestHeaders"))
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoPostRequestHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("PostRequestHeaders")})
+                )
             )
         ),
 
@@ -1624,17 +1640,16 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
     toggleHeaderContent: function(event)
     {
-		var target = event.target,
-			header = Dom.getAncestorByClass(target, "netInfoHeadersGroup"),
-			content = header.nextSibling;
-		
-		FBTrace.sysout(content);
-		Css.toggleClass(content, "opened");
+        var target = event.target,
+            headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
+        
+        FBTrace.sysout(headerGroup);
+        Css.toggleClass(headerGroup, "opened");
+        headerGroup.setAttribute("aria-expanded", (Css.hasClass(headerGroup, "opened") ? "true" : "false"));
     },
-		
+
     onViewSource: function(event)
     {
-	
         var target = event.target;
         var requestHeaders = (target.rowName == "RequestHeaders");
 
