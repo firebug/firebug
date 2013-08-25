@@ -1711,7 +1711,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.search(text, reverse);
         }
 
-        return !search.noMatch && (loopAround ?  "wraparound" : true);
+        return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
     getSearchOptionsMenuItems: function()
@@ -2044,16 +2044,16 @@ var TextTag = Firebug.HTMLPanel.TextTag =
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem", "aria-expanded": "false"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket"}, "&gt;")
                 )
             ),
-            DIV({"class": "nodeChildBox", role :"group"},
+            DIV({"class": "nodeChildBox", role: "group"},
                 FOR("child", "$object|childIterator",
                     TAG("$child|getNodeTag", {object: "$child"})
                 )
@@ -2162,8 +2162,8 @@ Firebug.HTMLPanel.HTMLDocType = domplate(FirebugReps.Element,
 
     getDocType: function(doctype)
     {
-        return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId +
-            '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+        return "<!DOCTYPE " + doctype.name + (doctype.publicId ? " PUBLIC \"" + doctype.publicId +
+            "\"": "") + (doctype.systemId ? " \"" + doctype.systemId + "\"" : "") + ">";
     }
 });
 
@@ -2196,9 +2196,9 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox textNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox textNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2215,9 +2215,9 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2230,9 +2230,9 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2250,7 +2250,7 @@ Firebug.HTMLPanel.AttrNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox", _repObject: "$object", role: "presentation"},
             TextTag
         )
 });
@@ -2258,7 +2258,7 @@ Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox", _repObject: "$object", role: "presentation"},
             "&lt;![CDATA[",
             SPAN({"class": "nodeText nodeCDATA editable"}, "$object.nodeValue"),
             "]]&gt;"
@@ -2268,7 +2268,7 @@ Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox nodeComment", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox nodeComment", _repObject: "$object", role: "presentation"},
             "&lt;!--",
             SPAN({"class": "nodeComment editable"}, "$object.nodeValue"),
             "--&gt;"
@@ -2977,7 +2977,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
             role: "option", "aria-checked": "$bp.checked"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : "-1", onclick: "$onEnable"}),
+                    _checked: "$bp.checked", tabindex: "-1", onclick: "$onEnable"}),
                 TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
                 DIV({"class": "breakpointMutationType"}, "$bp|getChangeLabel"),
                 SPAN({"class": "closeButton", onclick: "$onRemove"})
