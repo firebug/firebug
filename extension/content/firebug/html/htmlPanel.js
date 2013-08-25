@@ -1217,7 +1217,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         if (Events.isLeftClick(event) && Events.isDoubleClick(event))
         {
-            // The double-click (detail == 2) expands an HTML element, but the user must click
+            // The double-click expands an HTML element, but the user must click
             // on the element itself not on the twisty.
             // The logic should be as follow:
             // - click on the twisty expands/collapses the element
@@ -1230,6 +1230,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
+        }
+        else if (Dom.getAncestorByClass(event.target, "nodeBracket"))
+        {
+            var bracketBox = Dom.getAncestorByClass(event.target, "nodeBracket");
+            Firebug.Editor.insertRow(bracketBox, "before");
         }
     },
 
