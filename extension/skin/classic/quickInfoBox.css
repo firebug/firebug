@@ -1,0 +1,89 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Quick Info Box */
+
+#fbQuickInfoPanel {
+    border: 0;
+    opacity: 0.9;
+}
+
+.fbQuickInfoPanelBody {
+    background-color: white;
+    font-family: monospace;
+    font-size: 9px;
+    padding: 0;
+    cursor: move;
+    margin: 0;
+}
+
+.fbQuickInfoTable {
+    border: 1px solid threedshadow;
+    width: 100%;
+    padding: 4px;
+}
+
+.fbQuickInfoBoxTitle {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    padding-top: 8px;
+    margin-bottom: 0;
+}
+
+.fbQuickInfoBoxTitle > SPAN {
+    cursor: text;
+}
+
+.fbQuickInfoName, .fbQuickInfoValue {
+    font-family: monospace;
+    font-size: 11px;
+}
+
+.fbQuickInfoName {
+    color: DarkGreen;
+    margin-bottom: 0;
+    -moz-margin-end: 0;
+    cursor: text;
+}
+
+.fbQuickInfoValue {
+    color: DarkBlue;
+    margin-bottom: 0;
+    -moz-margin-start: 0;
+    cursor: text;
+}
+
+.fbQuickInfoPin {
+    background: url(chrome://firebug-os/skin/pin.png) no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 22px;
+}
+
+.fbQuickInfoClose {
+    background: url(chrome://firebug-os/skin/close.png) no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 5px;
+}
+
+.fbQuickInfoPin:hover,
+.fbQuickInfoClose:hover {
+    background-position: 0 -16px;
+}
+
+.fbQuickInfoPin.pin,
+.fbQuickInfoPin:active {
+    background: url(chrome://firebug-os/skin/pinned.png) no-repeat;
+}
+
+.fbQuickInfoClose:active {
+    background-position: 0 -32px;
+}

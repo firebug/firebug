@@ -201,7 +201,7 @@ panelTab > panelTabMenu .menuTarget {
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
 panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug-os/skin/optionsMenuTarget.svg) no-repeat center;
+    background: url(chrome://firebug-os/skin/optionsMenuTarget.png) no-repeat center;
     width: 11px;
     height: 10px;
     vertical-align: middle;
@@ -209,11 +209,7 @@ panelTab:focus > panelTabMenu .menuTarget {
 }
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background: url(chrome://firebug-os/skin/optionsMenuTargetHover.svg) no-repeat center;
-}
-
-panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
-    filter: url(resource://firebugui/filters.svg#darken);
+    background-image: url(chrome://firebug-os/skin/optionsMenuTargetHover.png);
 }
 
 panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
