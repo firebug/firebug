@@ -19,7 +19,7 @@
 .breakpointHeader > .twisty,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.svg);
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px calc(0.5em - 3px);
     min-height: 12px;
@@ -42,7 +42,7 @@
 .breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.svg);
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
 .hasHeaders .netHrefLabel,
@@ -57,13 +57,13 @@
     display: inline-block;
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/win/close.svg) no-repeat;
+    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    background: url(chrome://firebug/skin/win/closeHovered.svg) no-repeat;
+    background-position: 0 -16px;
 }
 
 .closeButton:hover:active {
-    background: url(chrome://firebug/skin/win/closePressed.svg) no-repeat;
+    background-position: 0 -32px;
 }

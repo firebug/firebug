@@ -99,17 +99,17 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png);
     background-position: 7px 1px;
     color: #000000;
 }
 
 .sourceRow[breakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
 .sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpointCondition.png);
     background-position: 9px 3px, 5px 1px;
 }
 
@@ -124,7 +124,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.5;
 }
 
@@ -135,12 +135,12 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpointCondition.svg) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpointCondition.png) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.5;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png), url(chrome://firebug/skin/breakpoint.png);
     background-position: 7px 1px, 5px 1px;
 }
 
@@ -155,7 +155,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.5;
 }
 
@@ -165,11 +165,11 @@
     left: 7px;
     width: 11px;
     height: 12px;
-    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
+    background: url(chrome://firebug/skin/executionPointer.png) no-repeat;
 }
 
 .sourceLine.editing {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
 /************************************************************************************************/

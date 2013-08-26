@@ -231,7 +231,7 @@ code {
 .infoTipLoading {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/loading.svg) no-repeat;
+    background: url(chrome://firebug/skin/loading.png) no-repeat;
 }
 
 .infoTipImageBox {

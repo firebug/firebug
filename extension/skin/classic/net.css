@@ -62,11 +62,11 @@
 
 .netHeaderSorted > .netHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat calc(100% - 4px);
 }
 
 .netHeaderSorted.sortedAscending > .netHeaderCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.svg);
+    background-image: url(chrome://firebug/skin/arrowUp.png);
 }
 
 .netHeaderSorted:hover:active {
@@ -99,7 +99,7 @@
 }
 
 .netRow[breakpoint="true"] .netRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
 .netRow[breakpoint="true"][disabledBreakpoint="true"] .netRowHeader {
@@ -113,7 +113,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.5;
 }
 
@@ -299,7 +299,7 @@
     width: 16px;
     height: 16px;
     background: transparent no-repeat 0 0;
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
     display:inline-block;
 }
 
