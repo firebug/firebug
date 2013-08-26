@@ -18,7 +18,7 @@ function runTest(request)
                 var postBody = FW.FBL.getElementByClass(panelNode, "netInfoPostText");
                 if (FBTest.ok(postBody, "Post tab must exist."))
                 {
-                    FBTest.compare(win.xml, postBody.textContent, 
+                    FBTest.compare(win.xml, postBody.textContent,
                         "Post tab body content verified");
                 }
 

@@ -22,7 +22,8 @@
     left: 0px;
     top: 0px;
     width: 14px;
-    height: 14px;
+    height: 1em;
+    padding: 4px 0;
 }
 
 .nodeChildBox {
@@ -63,6 +64,10 @@
 
 .nodeText {
     color: #333333;
+}
+
+.panelNode-html .nodeBracket {
+    cursor: pointer;
 }
 
 .documentNodeBox {

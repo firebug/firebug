@@ -31,8 +31,8 @@ Cu["import"]("resource://fbtest/FBTestIntegrate.js");
  * xxxHonza: since the tab view is used already several times, it would
  * be very useful to have a TabView widget defined in Firebug's Domplate
  * repository.
- * 
- * @domplate  
+ *
+ * @domplate
  */
 var TestResultTabView = domplate(
 /** @lends TestResultTabView */
@@ -374,8 +374,8 @@ var TestResultTabView = domplate(
 /**
  * This template displays a parse-erros that can occurs when parsing
  * expected and acuall results (see compare method).
- * 
- * @domplate  
+ *
+ * @domplate
  */
 var ParseErrorRep = domplate(
 /** @lends ParseErrorRep */

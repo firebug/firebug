@@ -8,13 +8,16 @@ define([
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/dom/toggleBranch",
     "firebug/dom/domModule",
+    "firebug/dom/domMemberProvider",
 ],
-function(Firebug, D, FirebugReps, Locale, Events, Dom, Css, Str, ToggleBranch, DOMModule) {
+function(Firebug, D, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
+    DOMModule, DOMMemberProvider) {
 
 "use strict";
 
@@ -48,6 +51,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
     memberRowTag:
         D.TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
             $hasChildren: "$member.hasChildren",
+            $cropped: "$member.value|isCropped",
             role: "presentation",
             level: "$member.level",
             breakable: "$member.breakable",
@@ -108,8 +112,8 @@ var DirTablePlate = D.domplate(Firebug.Rep,
 
     memberIterator: function(object)
     {
-        // xxxHonza: kind of hackish to access DOMBasePanel here, fix me
-        var members = Firebug.DOMBasePanel.prototype.getMembers(object, 0, null);
+        var memberProvider = new DOMMemberProvider(null);
+        var members = memberProvider.getMembers(object, 0);
         if (members.length)
             return members;
 
@@ -120,6 +124,11 @@ var DirTablePlate = D.domplate(Firebug.Rep,
             tag: Firebug.Rep.tag,
             prefix: ""
         }];
+    },
+
+    isCropped: function(value)
+    {
+        return typeof value == "string" && value.length > Options.get("stringCropLength");
     },
 
     getMemberNameTooltip: function(member)
@@ -142,7 +151,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
         var isString = Css.hasClass(target,"objectBox-string");
         var inValueCell = (event.target === valueCell || event.target === target);
 
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        if (label && (Css.hasClass(row, "hasChildren") || (isString && !inValueCell)))
         {
             row = label.parentNode.parentNode;
             this.toggleRow(row);
@@ -150,12 +159,12 @@ var DirTablePlate = D.domplate(Firebug.Rep,
         }
         else
         {
-            if (typeof(object) === "function")
+            if (typeof object === "function")
             {
                 Firebug.chrome.select(object, "script");
                 Events.cancelEvent(event);
             }
-            else if (Events.isDoubleClick(event) && !object)
+            else if ((!object || typeof object !== "object") && Events.isDoubleClick(event))
             {
                 var panel = row.parentNode.parentNode.domPanel;
                 if (panel)
@@ -262,7 +271,7 @@ var DirTablePlate = D.domplate(Firebug.Rep,
                         FBTrace.sysout("toggleRow mark path "+toggles);
                 }
 
-                var members = domPanel.getMembers(target.repObject, level+1, context);
+                var members = domPanel.getMembers(target.repObject, level+1);
 
                 var rowTag = this.rowTag;
                 var lastRow = row;
@@ -326,7 +335,7 @@ var ToolboxPlate = D.domplate(
 {
     tag:
         D.DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
-            D.IMG({"class": "watchDeleteButton closeButton", src: "blank.gif"})
+            D.SPAN({"class": "watchDeleteButton closeButton"})
         ),
 
     onClick: function(event)

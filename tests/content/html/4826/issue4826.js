@@ -44,7 +44,7 @@ function runTest()
                 if (FBTest.ok(editor, "Editor must be available now"))
                 {
                     FBTest.sendString("bar", editor);
-                    
+
                     FBTest.synthesizeMouse(panel.panelNode);
 
                     FBTest.compare("div#bar", elementPathItems.item(0).label,

@@ -25,11 +25,11 @@
             this.lastName = lastName;
             this.age = age;
         }
-        
+
         var table = new Array(3);
         for (var i=0; i<table.length; i++)
             table[i] = [i+1, i+2, i+3];
-        
+
         var family = {};
         family.mother = new Person("Susan", "Doyle", 32);
         family.father = new Person("John", "Doyle", 33);
@@ -37,7 +37,7 @@
         family.son = new Person("Mike", "Doyle", 8);
         family.mother.desc = "mother";
         family.father.desc = "father";
-        
+
         function onExecuteTest1()
         {
             var columns = [
@@ -47,7 +47,7 @@
             ];
             console.table(table, columns);
         }
-        
+
         function onExecuteTest2()
         {
             var columns = [
@@ -57,12 +57,12 @@
             ];
             console.table(table, columns);
         }
-        
+
         function onExecuteTest3()
         {
             console.table(family);
         }
-        
+
         function onExecuteTest4()
         {
             console.table({
@@ -71,19 +71,19 @@
                 c: "propC",
             });
         }
-        
+
         function onExecuteTest5()
         {
             console.groupCollapsed("My family");
             console.table(family);
             console.groupEnd();
         }
-        
+
         function onExecuteTest6()
         {
             console.table(table, [1, 2]);
         }
-        
+
         function onExecuteTest7()
         {
             var columns = [
@@ -92,7 +92,7 @@
             ];
             console.table(table, columns);
         }
-        
+
         function onExecuteTest8()
         {
             var columns = [
@@ -101,7 +101,7 @@
             ];
             console.table(family, columns);
         }
-        
+
         function onExecuteTest9()
         {
             var columns = ["firstName", "lastName"];
@@ -179,7 +179,7 @@
                                     <tr>
                                         <td>"Mike"</td><td>"Doyle"</td><td>8</td><td>undefined</td>
                                     </tr>
-                                </table> 
+                                </table>
                             </code>
                         </span>
                     </li>
@@ -201,14 +201,14 @@
                                     <tr>
                                         <td>"propC"</td>
                                     </tr>
-                                </table> 
+                                </table>
                             </code>
                         </span>
                     </li>
                     <li>
                         Click the <em>Test 5</em> button above<br/>
                         <span class="ok">
-                            A table is shown inside the console wrapped into a collapsed group named <code>My family</code> looking like the one of step 5. 
+                            A table is shown inside the console wrapped into a collapsed group named <code>My family</code> looking like the one of step 5.
                         </span>
                     </li>
                     <li>
@@ -233,7 +233,7 @@
                                         <td>4</td>
                                         <td>5</td>
                                     </tr>
-                                </table> 
+                                </table>
                             </code>
                         </span>
                     </li>
@@ -246,13 +246,13 @@
                     <li>
                         Click the <em>Test 8</em> button above<br/>
                         <span class="ok">
-                            A table is shown inside the console looking like the first two columns of step 5. 
+                            A table is shown inside the console looking like the first two columns of step 5.
                         </span>
                     </li>
                     <li>
                         Click the <em>Test 9</em> button above<br/>
                         <span class="ok">
-                            A table is shown inside the console looking like the one of step 10. 
+                            A table is shown inside the console looking like the one of step 10.
                         </span>
                     </li>
                 </ol>

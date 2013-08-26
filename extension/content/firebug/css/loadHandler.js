@@ -12,12 +12,15 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // ********************************************************************************************* //
-// CSS Module
+// LoadHandler Implementation
 
 /**
- * @object LoadHandler is a helpe objects that automates registerind and unregistering
+ * @object LoadHandler is a helper objects that automates registering and unregistering
  * 'load' listener and executes passed callback. This object is used by CSS panels that
- * need to populat theirs content after document (window) is fully loaded.
+ * need to populate theirs content after document (window) is fully loaded.
+ *
+ * xxxHonza: instead of waiting for window 'load' event (and so wait till all images are
+ * loaded), we should wait for 'load' event fired by the stylesheet itself (see issue 4893).
  */
 function LoadHandler()
 {
@@ -25,7 +28,7 @@ function LoadHandler()
 }
 
 LoadHandler.prototype =
-/** @lends Firebug.TabWatcher */
+/** @lends LoadHandler */
 {
     handle: function(context, handler)
     {

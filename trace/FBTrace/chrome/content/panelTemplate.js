@@ -30,15 +30,15 @@ var PanelTemplate = domplate(
                             DIV({"class": "traceInfoTabs"},
                                 A({"class": "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Logs"},
-                                    Locale.$STR("Logs")
+                                    Locale.$STR("tracing.tab.Logs")
                                 ),
                                 A({"class": "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Options"},
-                                    Locale.$STR("Options")
+                                    Locale.$STR("tracing.tab.Options")
                                 ),
                                 A({"class": "traceInfoGlobalTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Global"},
-                                    Locale.$STR("Global Events")
+                                    Locale.$STR("tracing.tab.Global Events")
                                 )
                             ),
                             DIV({"class": "traceInfoLogsText traceInfoText"},

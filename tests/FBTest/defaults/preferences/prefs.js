@@ -32,5 +32,8 @@ pref("extensions.firebug.DBG_TESTCASE_MUTATION", false); // Tracing from unit-te
 pref("extensions.firebug.key.shortcut.openTestConsole", "shift t");
 
 // Database URL for manual test result upload
-pref("extensions.fbtest.databaseURL", "http://firebug.couchone.com/");  // Must end with slash
-pref("extensions.fbtest.databaseName", "firebug2");                      // Must *not* end with slash
+// Use iriscouch.com domain instead couchone.com to get valid certificate.
+// Due to "Mixed Content Blocking" feature introduced in Firefox 23 the
+// database XHR must use https (since perch on getfirebug.com uses https).
+pref("extensions.fbtest.databaseURL", "https://firebug.iriscouch.com/");  // Must end with slash
+pref("extensions.fbtest.databaseName", "firebug2");                       // Must *not* end with slash

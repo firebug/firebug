@@ -6,7 +6,7 @@ function runTest()
 
     FBTest.openNewTab(basePath + "cookies/25/issue25.php", function(win)
     {
-        FBTestFireCookie.enableCookiePanel(function(win) 
+        FBTestFireCookie.enableCookiePanel(function(win)
         {
             var cookie = null;
             var panelNode = FBTest.selectPanel("cookies").panelNode;

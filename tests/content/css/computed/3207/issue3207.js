@@ -45,7 +45,7 @@ function runTest()
                 }
 
                 // Wait till the new value is displayed in the Style panel
-                // and then switch into the Computed panel. 
+                // and then switch into the Computed panel.
                 FBTest.waitForDisplayedText("css", "Georgia", function()
                 {
                     var sidePanel = FBTest.selectSidePanel("computed");

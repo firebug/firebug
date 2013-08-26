@@ -3,8 +3,10 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/array",
+    "firebug/trace/debug",
+    "firebug/lib/xpcom"
 ],
-function(FBTrace, Arr) {
+function(FBTrace, Arr, Debug, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -38,6 +40,7 @@ System.launchProgram = function(exePath, args)
     {
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(exePath);
+
         if (System.getPlatformName() == "Darwin" && file.isDirectory())
         {
             args = Arr.extendArray(["-a", exePath], args);
@@ -52,10 +55,11 @@ System.launchProgram = function(exePath, args)
         process.run(false, args, args.length, {});
         return true;
     }
-    catch(exc)
+    catch (exc)
     {
-        this.ERROR(exc);
+        Debug.ERROR(exc);
     }
+
     return false;
 };
 
@@ -68,6 +72,7 @@ System.getIconURLForFile = function(path)
     {
         var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         file.initWithPath(path);
+
         if ((System.getPlatformName() == "Darwin") && !file.isDirectory() &&
             (path.indexOf(".app/") != -1))
         {
@@ -80,7 +85,7 @@ System.getIconURLForFile = function(path)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
+            FBTrace.sysout("getIconURLForFile ERROR " + exc + " for " + path, exc);
     }
 
     return null;
@@ -158,8 +163,8 @@ System.checkFirebugVersion = function(expectedVersion)
     var version = Firebug.getVersion();
 
     // Use Firefox comparator service.
-    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
-        getService(Ci.nsIVersionComparator);
+    var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
+        "nsIVersionComparator");
     return versionChecker.compare(version, expectedVersion);
 };
 

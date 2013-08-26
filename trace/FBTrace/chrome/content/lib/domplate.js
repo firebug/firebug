@@ -1301,7 +1301,7 @@ defineTags(
     "thead", "tr", "tt", "ul", "iframe", "code", "style",
 
     // HTML5
-    "article", "aside", "audio", "bb", "canvas", "command", "datagrid", "datalist", "details",
+    "article", "aside", "audio", "bb", "command", "datagrid", "datalist", "details",
     "dialog", "embed", "eventsource", "figure", "footer", "keygen", "mark", "meter", "nav",
     "output", "progress", "ruby", "rp", "rt", "section", "source", "time", "video"
 );

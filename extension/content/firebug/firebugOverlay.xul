@@ -21,11 +21,11 @@
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
 
-        <panel id="fbQuickInfoPanel" width="210" noautofocus="true"
-            onmousedown="Firebug.Inspector.quickInfoBoxHandler(event);"
-            onmouseover="Firebug.Inspector.quickInfoBoxHandler(event);"
-            onmouseout="Firebug.Inspector.quickInfoBoxHandler(event);">
-            <vbox></vbox>
+        <panel id="fbQuickInfoPanel" width="210" noautofocus="true">
+            <!-- xxxHonza: type=chrome is allowing filters.svg usage in quickInfoBox.css
+                Could we have filters.svg in the standard skin dir? -->
+            <browser class="fbQuickInfoPanelContent" disablehistory="true"
+                src="about:blank" type="chrome" flex="1" border="0"/>
         </panel>
 
         <menupopup id="fbNavigationHistoryMenu"
@@ -148,9 +148,7 @@
                                             tooltiptext="script.Break On Next" breakable="disabled"
                                             class="fbInternational">
                                             <stack id="fbBreakOnNextButtonStack">
-                                                <image id="fbBreakOnImageDisabled"></image>
                                                 <image id="fbBreakOnImage" class="fbBreakOnImage"></image>
-                                                <image id="fbBreakOnImageActive" class="fbBreakOnImage"></image>
                                                 <image id="fbBreakOnImageArmed" class="fbBreakOnImage"></image>
                                                 <!-- Badges -->
                                                 <image id="fbBreakOnImageError" class="fbBreakOnImage"></image>
@@ -179,35 +177,43 @@
                                             class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_firebug_toggleMemoryProfiling"/> -->
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
-                                        <toolbarbutton id="fbConsoleFilter-all" label="firebug.All" type="radio"
-                                            class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Show All Log Entries"
-                                            group="firebugConsoleFilter"
-                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'all')"/>
-                                        <toolbarbutton id="fbConsoleFilter-error"
-                                            label="firebug.console.Errors" type="radio"
-                                            class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Filter by Errors"
-                                            group="firebugConsoleFilter"
-                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'error')"/>
-                                        <toolbarbutton id="fbConsoleFilter-warning"
-                                            label="firebug.console.Warnings" type="radio"
-                                            class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Filter by Warnings"
-                                            group="firebugConsoleFilter"
-                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'warning')"/>
-                                        <toolbarbutton id="fbConsoleFilter-info"
-                                            label="firebug.console.Info" type="radio"
-                                            class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Filter by Info"
-                                            group="firebugConsoleFilter"
-                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'info')"/>
-                                        <toolbarbutton id="fbConsoleFilter-debug"
-                                            label="firebug.console.Debug Info" type="radio"
-                                            class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Filter by Debug Info"
-                                            group="firebugConsoleFilter"
-                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'debug')"/>
+                                        <hbox id="fbConsoleFilterButtons" class="noTabStop">
+                                            <toolbarbutton
+                                                id="fbConsoleFilter-all"
+                                                type="checkbox"
+                                                label="firebug.console.All"
+                                                class="toolbar-text-button fbConsoleFilter fbInternational"
+                                                tooltiptext="firebug.console.Show All Log Entries"
+                                                oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'all')"/>
+                                            <toolbarbutton
+                                                id="fbConsoleFilter-error"
+                                                type="checkbox"
+                                                label="firebug.console.Errors"
+                                                class="toolbar-text-button fbConsoleFilter fbInternational"
+                                                tooltiptext="firebug.console.Filter by Errors"
+                                                oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'error')"/>
+                                            <toolbarbutton
+                                                id="fbConsoleFilter-warning"
+                                                type="checkbox"
+                                                label="firebug.console.Warnings"
+                                                class="toolbar-text-button fbConsoleFilter fbInternational"
+                                                tooltiptext="firebug.console.Filter by Warnings"
+                                                oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'warning')"/>
+                                            <toolbarbutton
+                                                id="fbConsoleFilter-info"
+                                                type="checkbox"
+                                                label="firebug.console.Info"
+                                                class="toolbar-text-button fbConsoleFilter fbInternational"
+                                                tooltiptext="firebug.console.Filter by Info"
+                                                oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'info')"/>
+                                            <toolbarbutton
+                                                id="fbConsoleFilter-debug"
+                                                type="checkbox"
+                                                label="firebug.console.Debug Info"
+                                                class="toolbar-text-button fbConsoleFilter fbInternational"
+                                                tooltiptext="firebug.console.Filter by Debug Info"
+                                                oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'debug')"/>
+                                        </hbox>
                                     </hbox>
 
                                     <hbox id="fbHTMLButtons" collapsed="true" class="noTabStop" >
@@ -283,69 +289,59 @@
                                         <hbox id="fbNetButtonsFilter" class="noTabStop">
                                             <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.All"
                                                 tooltiptext="net.filter.tooltip.All"
-                                                class="toolbar-text-button fbInternational"
-                                                checked="true"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'all')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'all')"/>
                                             <toolbarbutton id="fbNetFilter-html"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.HTML"
                                                 tooltiptext="net.filter.tooltip.HTML"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'html')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'html')"/>
                                             <toolbarbutton id="fbNetFilter-css"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.CSS"
                                                 tooltiptext="net.filter.tooltip.CSS"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'css')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'css')"/>
                                             <toolbarbutton id="fbNetFilter-js"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.JS"
                                                 tooltiptext="net.filter.tooltip.JS"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'js')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'js')"/>
                                             <toolbarbutton id="fbNetFilter-xhr"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.XHR"
                                                 tooltiptext="net.filter.tooltip.XHR"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'xhr')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'xhr')"/>
                                             <toolbarbutton id="fbNetFilter-image"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.Images"
                                                 tooltiptext="net.filter.tooltip.Images"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'image')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'image')"/>
                                             <toolbarbutton id="fbNetFilter-plugin"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.Plugins"
                                                 tooltiptext="net.filter.tooltip.Plugins"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'plugin')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'plugin')"/>
                                             <toolbarbutton id="fbNetFilter-media"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.Media"
                                                 tooltiptext="net.filter.tooltip.Media"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'media')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'media')"/>
                                             <toolbarbutton id="fbNetFilter-font"
-                                                type="radio"
-                                                group="firebugNetFilter"
+                                                type="checkbox"
                                                 label="net.filter.label.Fonts"
                                                 tooltiptext="net.filter.tooltip.Fonts"
-                                                class="toolbar-text-button fbInternational"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'font')"/>
+                                                class="toolbar-text-button fbNetFilter fbInternational"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(event, Firebug.currentContext, 'font')"/>
                                         </hbox>
                                     </hbox>
 
@@ -402,6 +398,13 @@
                                     <!-- Toolbar buttons provided by extensions through Firebug API -->
                                     <hbox id="fbPanelToolbar" collapsed="true" class="noTabStop">
                                     </hbox>
+
+                                    <!-- Toggle visibility of the side panels area -->
+                                    <vbox id="fbToggleSidePanelsBox" collapsed="false" align="end" flex="1">
+                                        <toolbarbutton id="fbToggleSidePanels"
+                                            class="toolbar-image-button fbInternational"
+                                            tooltiptext="firebug.tip.Toggle_Side_Panels"/>
+                                    </vbox>
                                 </hbox>
                             </toolbar>
                         </toolbox>
@@ -414,7 +417,7 @@
                             <browser id="fbPanelBar1-browser"
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
-                                     src="chrome://firebug/content/panel.html"
+                                     src="resource://firebugui/panel.html"
                                      type="content"
                                      role="tabpanel" />
                         </deck>
@@ -440,7 +443,7 @@
                                 <browser id="fbPanelBar2-browser"
                                     tooltip="fbTooltip" contextmenu="fbContextMenu"
                                     disablehistory="true"
-                                    src="chrome://firebug/content/panel.html"
+                                    src="resource://firebugui/panel.html"
                                     type="content"
                                     role="tabpanel" />
                             </deck>
@@ -493,7 +496,8 @@
                 <browser id="fbCommandPopupBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                      disablehistory="true"
-                     src="chrome://firebug/content/panel.html"/>
+                     src="resource://firebugui/panel.html"
+                     type="content"/>
             </deck>
         </vbox>
 

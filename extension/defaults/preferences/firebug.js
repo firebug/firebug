@@ -28,6 +28,7 @@ pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
+pref("extensions.firebug.clearAnnotationsConfirmation", true);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
@@ -41,6 +42,10 @@ pref("extensions.firebug.searchUseRegularExpression", false);
 pref("extensions.firebug.netSearchHeaders", false);
 pref("extensions.firebug.netSearchParameters", false);
 pref("extensions.firebug.netSearchResponseBody", false);
+
+// Persist (default values)
+pref("extensions.firebug.console.defaultPersist", false);
+pref("extensions.firebug.net.defaultPersist", false);
 
 // Console
 pref("extensions.firebug.showJSErrors", true);
@@ -69,6 +74,7 @@ pref("extensions.firebug.expandMutations", false);
 pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
 pref("extensions.firebug.showQuickInfoBox", false);
+pref("extensions.firebug.pinQuickInfoBox", false);
 pref("extensions.firebug.displayedAttributeValueLimit", 1024);
 pref("extensions.firebug.multiHighlightLimit", 250);
 
@@ -94,6 +100,7 @@ pref("extensions.firebug.maxScriptLineLength", 10000);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
+pref("extensions.firebug.showStackFrameArguments", true);
 
 // DOM
 pref("extensions.firebug.showUserProps", true);
@@ -111,9 +118,10 @@ pref("extensions.firebug.showOwnProperties", false);
 pref("extensions.firebug.showRulers", true);
 
 // Net
-pref("extensions.firebug.netFilterCategory", "all");
+pref("extensions.firebug.netFilterCategories", "all");
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
+pref("extensions.firebug.net.curlAddCompressedArgument", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400);
 pref("extensions.firebug.netDisplayedPostBodyLimit", 10240);
 pref("extensions.firebug.net.hiddenColumns", "netProtocolCol netLocalAddressCol");

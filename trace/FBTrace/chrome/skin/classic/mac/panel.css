@@ -23,7 +23,7 @@ body {
 .netPageRow > .netCol > .netPageTitle,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 3px;
 }
@@ -42,7 +42,7 @@ body {
 .netPageRow.opened > .netCol > .netPageTitle,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
 }
 
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
@@ -87,83 +87,4 @@ body {
 .arrayRightBracket,
 .arrayComma {
       font-family: Monaco, monospace;
-}
-
-/************************************************************************************************/
-/* HTML panel */
-
-.nodeBox,
-.docType,
-.breakpointCode .nodeBox.containerNodeBox,
-.breakpointCode .nodeLabel {
-    font-family: Monaco, monospace;
-}
-
-.nodeBox.selected > .nodeLabel > .nodeLabelBox,
-.nodeBox.selected > .nodeLabel {
-    border-color: #3875d7;
-    background-color: #3875d7;
-    color: #FFFFFF !important;
-}
-
-.nodeBox.highlighted > .nodeLabel {
-    border-color: #3875d7 !important;
-}
-
-/************************************************************************************************/
-/* Layout panel */
-
-.layoutBox.editing,
-.layoutBox.highlighted {
-    background-color: #3875d7;
-}
-
-.layoutBox.editing,
-.layoutBox.editing > .layoutCaption,
-.layoutBox.editing > .layoutLabel,
-.layoutBox.highlighted,
-.layoutBox.highlighted > .layoutCaption,
-.layoutBox.highlighted > .layoutLabel {
-    color: #FFFFFF;
-}
-
-/************************************************************************************************/
-/* CSS panel */
-
-.cssRule {
-    font-family: Monaco, monospace;
-}
-
-/************************************************************************************************/
-/* DOM panel */
-
-.editor-watchNewRow,
-.editor-memberRow {
-    font-family: Monaco, monospace !important;
-}
-
-.watchRow > .memberLabelCell {
-    font-family: Monaco, monospace;
-}
-
-.closeButton {
-    width: 13px;
-    height: 13px;
-    background: url(chrome://firebug/skin/mac/close.png) no-repeat 0 0;
-}
-
-.closeButton:hover {
-    background-position: 0 -13px;
-}
-
-.closeButton:hover:active {
-    background-position: 0 -26px;
-}
-
-/************************************************************************************************/
-/* Net panel */
-
-.useA11y .a11yShowFullLabel,
-.netInfoText {
-    font-family: Monaco, monospace;
 }

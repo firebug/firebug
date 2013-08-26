@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6435: Create FBTest that covers DOM panel search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6435">Issue 6435</a>:
+    Create FBTest that covers DOM panel search</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the DOM panel</li>
+            <li>Make sure 'Show DOM Properties' option is off.</li>
+            <li>Use the search box to search in the panel</li>
+            <li>There should be 4 occurences of 'test' (case insensitive)</li>
+            <li>There should be 2 occurences of 'Test' (case sensitive)</li>
+            <li>There should be 2 occurences of '21' (case sensitive)</li>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, &lt;odvarko@gmail.com&gt;</footer>
+</div>
+
+<script>
+function testFunction1() {}
+function testFunction2() {}
+var TestProp1 = 21;
+var TestProp2 = 210;
+</script>
+
+</body>
+</html>

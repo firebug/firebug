@@ -2,30 +2,27 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/chrome/menu"
 ],
-function(Firebug, FBTrace, Obj, Dom, Locale, Menu) {
+function(Firebug, Obj, Dom, Locale, Menu) {
 
 // ********************************************************************************************* //
-// Model implementation
+// Module implementation
 
-var SelectorModule = Obj.extend(Firebug.Module,
+var CSSSelectorsModule = Obj.extend(Firebug.Module,
 {
-    dispatchName: "selectorModule",
+    dispatchName: "CSSSelectorsModule",
 
     initialize: function()
     {
-        Firebug.NetMonitor.NetInfoBody.addListener(this);
         Firebug.registerUIListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.NetMonitor.NetInfoBody.removeListener(this);
         Firebug.unregisterUIListener(this);
     },
 
@@ -42,10 +39,10 @@ var SelectorModule = Obj.extend(Firebug.Module,
             return;
 
         var rule = cssRule.repObject;
-        if (!rule)
+        if (!rule || !rule.selectorText)
             return;
 
-        var panel = context.getPanel("selector");
+        var panel = context.getPanel("selectors");
         if (!panel)
             return;
 
@@ -53,7 +50,7 @@ var SelectorModule = Obj.extend(Firebug.Module,
            id: "fbGetMatchingElements",
            nol10n: true,
            label: Locale.$STR("css.selector.cmd.getMatchingElements"),
-           command: Obj.bindFixed(panel.getMatchingElements, panel, rule)
+           command: Obj.bindFixed(panel.addGroup, panel, rule.selectorText)
         };
 
         var refreshMenuItem = popup.querySelector("#fbRefresh");
@@ -61,14 +58,49 @@ var SelectorModule = Obj.extend(Firebug.Module,
 
         return [];
     },
+
+    matchElements: function(windows, selector)
+    {
+        if (selector == "")
+            return;
+
+        var elements = [];
+
+        // Execute the query also in all iframes (see issue 5962)
+        for (var i=0; i<windows.length; ++i)
+        {
+            var win = windows[i];
+            var selections = win.document.querySelectorAll(selector);
+
+            // For some reason the return value of querySelectorAll()
+            // is not recognized as a NodeList anymore since Firefox 10.0.
+            // See issue 5442.
+            // But since there can be more iframes we need to collect all matching
+            // elements in an extra array anyway.
+            if (selections)
+            {
+                for (var j=0; j<selections.length; j++)
+                {
+                    if (!Firebug.shouldIgnore(selections[j]))
+                        elements.push(selections[j]);
+                }
+            }
+            else
+            {
+                throw new Error("Selection Failed: " + selections);
+            }
+        }
+
+        return elements;
+    }
 });
 
-// ********************************************************************************************* //
-// Registration
+//********************************************************************************************* //
+//Registration
 
-Firebug.registerModule(SelectorModule);
+Firebug.registerModule(CSSSelectorsModule);
 
-return SelectorModule;
+return CSSSelectorsModule;
 
-// ********************************************************************************************* //
+//********************************************************************************************* //
 });

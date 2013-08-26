@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2495: The rendered font should be highlighted in Style side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            line-height: 100px;
+            text-align: center;
+            font-family: nofont1, sans-serif, nofont2;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2495">Issue 2495</a>: The rendered font should be highlighted in Style side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element">Test</div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Switch to the <em>HTML</em> panel and there to the <em>Style</em> side
+                        panel
+                    </li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>
+                        Inside the <em>Style</em> side panel check the value for the
+                        <code>font-family</code> property
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The font <code>sans-serif</code> should be shown in blue while
+                        <code>nofont1</code> and <code>nofont2</code> are displayed in gray.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

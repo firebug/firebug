@@ -6,7 +6,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function(win)
         {
-            var config = {tagName: "pre", classes: "objectBox objectBox-number"};
+            var config = {tagName: "span", classes: "objectBox objectBox-number"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 FBTest.compare("3", row.textContent, "Number 3 must be displayed");

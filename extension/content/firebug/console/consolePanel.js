@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -11,20 +12,17 @@ define([
     "firebug/lib/search",
     "firebug/chrome/menu",
     "firebug/lib/options",
-    "firebug/lib/wrapper",
-    "firebug/lib/xpcom",
-    "firebug/console/profiler",
+    "firebug/console/commands/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options) {
+
+with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
 
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
+var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -54,6 +52,19 @@ Firebug.ConsolePanel = function () {};
 
 Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
+    template: domplate(
+    {
+        logRowTag:
+            DIV({"class": "$className", role: "listitem"},
+                DIV(
+                    DIV({"class": "logContent"}),
+                    DIV({"class": "logCounter"},
+                        SPAN({"class": "logCounterValue"})
+                    )
+                )
+            )
+    }),
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Members
 
@@ -78,12 +89,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
-        {
             this.insertLogLimit(this.context);
 
-            if (this.context.consoleReloadWarning)  // we have not yet injected the console
-                this.insertReloadWarning();
-        }
+        // Listen for set filters, so the panel is properly updated when needed
+        Firebug.Console.addListener(this);
     },
 
     destroy: function(state)
@@ -106,6 +115,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
+        Firebug.Console.removeListener(this);
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
@@ -139,9 +149,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 " " + this.context.getName(), state);
 
         this.showCommandLine(true);
+        if (Firebug.chrome.hasFocus())
+            Firebug.CommandLine.focus(this.context);
+
         this.showToolbarButtons("fbConsoleButtons", true);
 
-        this.setFilter(Firebug.consoleFilterTypes);
+        if (!this.filterTypes)
+            this.setFilter(Options.get("consoleFilterTypes").split(" "));
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistConsole", "checked",
             this.persistContent);
@@ -199,18 +213,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.hide; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
-    },
-
-    updateOption: function(name, value)
-    {
-        if (name == "consoleFilterTypes")
-        {
-            Firebug.Console.syncFilterButtons(Firebug.chrome);
-            Firebug.connection.eachContext(function syncFilters(context)
-            {
-                Firebug.Console.onToggleFilter(context, value);
-            });
-        }
     },
 
     shouldBreakOnNext: function()
@@ -272,8 +274,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace",
-            "console.option.tip.Show_Stack_Trace");
+        var label = Locale.$STR("ShowStackTrace");
+        var tooltip = Locale.$STR("console.option.tip.Show_Stack_Trace");
+        tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+
+        var menuItem = Menu.optionMenu(label, "showStackTrace", tooltip);
+        menuItem.nol10n = true;
 
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
@@ -307,24 +313,64 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     setFilter: function(filterTypes)
     {
-        var panelNode = this.panelNode;
+        this.filterTypes = filterTypes;
 
-        Events.dispatch(this.fbListeners, "onFilterSet", [logTypes]);
+        var panelNode = this.panelNode;
+        Events.dispatch(this.fbListeners, "onFiltersSet", [logTypes]);
+
+        // Make previously visible nodes invisible again
+        if (this.filterMatchSet)
+        {
+            for (var i in this.filterMatchSet)
+                Css.removeClass(this.filterMatchSet[i], "contentMatchesFilter");
+        }
+
+        this.filterMatchSet = [];
 
         for (var type in logTypes)
         {
-            // Different types of errors and warnings are combined for filtering
-            if (filterTypes == "all" || filterTypes == "" || filterTypes.indexOf(type) != -1 ||
-                (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
-                (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
-            {
-                Css.removeClass(panelNode, "hideType-" + type);
-            }
-            else
+            if (filterTypes.join(" ") != "all" && filterTypes.indexOf(type) == -1)
             {
                 Css.setClass(panelNode, "hideType-" + type);
             }
+            else
+            {
+                Css.removeClass(panelNode, "hideType-" + type);
+
+                // xxxsz: There can be two kinds of error and warning messages,
+                // which have one type. So map the type to the classes, which match it.
+                // TODO: Merge different CSS class names for log message types
+                var classNames = [type];
+                if (type == "errorMessage")
+                    classNames = ["error"];
+                else if (type == "warning")
+                    classNames = ["warn", "warningMessage"];
+
+                for (var i=0, classNamesLen=classNames.length; i<classNamesLen; ++i)
+                {
+                    var logRows = panelNode.getElementsByClassName("logRow-" + classNames[i]);
+                    for (var j=0, len=logRows.length; j<len; ++j)
+                    {
+                        // Mark the groups, in which the log row is located, also as matched
+                        for (var group = Dom.getAncestorByClass(logRows[j], "logRow-group"); group;
+                            group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                        {
+                            Css.setClass(group, "contentMatchesFilter");
+                            this.filterMatchSet.push(group);
+                        }
+                    }
+                }
+            }
         }
+    },
+
+    matchesFilter: function(logRow)
+    {
+        if (!this.filterTypes || this.filterTypes.join(" ") == "all")
+            return true;
+
+        var type = this.getLogRowType(logRow);
+        return this.filterTypes.indexOf(type) != -1;
     },
 
     search: function(text)
@@ -341,20 +387,36 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return Dom.getAncestorByClass(node, "logRow"); }
+        function findRow(node)
+        {
+            return Dom.getAncestorByClass(node, "logRow");
+        }
+
         var search = new Search.TextSearch(this.panelNode, findRow);
 
-        var logRow = search.find(text);
+        var logRow = search.find(text, false, Firebug.Search.isCaseSensitive(text));
         if (!logRow)
         {
             Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound", [this, text, []]);
             return false;
         }
 
-        for (; logRow; logRow = search.findNext())
+        for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
+            Firebug.Search.isCaseSensitive(text)))
         {
-            Css.setClass(logRow, "matched");
-            this.matchSet.push(logRow);
+            if (this.matchesFilter(logRow))
+            {
+                Css.setClass(logRow, "matched");
+
+                // Mark the groups, in which the log row is located, also as matched
+                for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                    group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                {
+                    Css.setClass(group, "matched");
+                    this.matchSet.push(group);
+                }
+                this.matchSet.push(logRow);
+            }
         }
 
         Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound",
@@ -369,31 +431,161 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Console Listeners
+
+    onFiltersSet: function(filterTypes)
+    {
+        this.setFilter(filterTypes);
+        Firebug.Search.update(this.context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getMessageMatcher: function(object, rep, sourceLink, level)
+    {
+        function matchesMetaData(otherRep, otherLink, otherLevel)
+        {
+            if (otherRep !== rep || (rep && rep.groupable === false))
+                return false;
+
+            if (otherLevel !== level)
+                return false;
+
+            var currentSourceInfo = (sourceLink ? sourceLink.href + ":" + sourceLink.line +
+                (sourceLink.col ? ":" + sourceLink.col : "") : "");
+            var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
+                (otherLink.col ? ":" + otherLink.col : "") : "");
+            return currentSourceInfo === otherSourceInfo;
+        }
+
+        /**
+         * Checks whether two variables are equal.
+         *
+         * @param {*} a First variable to be compared
+         * @param {*} b Second variable to be compared
+         * @returns {Boolean|undefined} True if values are equal, false if not,
+         *     undefined if they are similar
+         */
+        function areEqual(a, b)
+        {
+            if (typeof a === "object" && a !== null)
+                return false;
+
+            if (a === b)
+                return true;
+
+            if (typeof a === "number" && typeof b === "number")
+                return isNaN(a) && isNaN(b);
+
+            return false;
+        }
+
+        return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
+        {
+            try
+            {
+                if (!matchesMetaData(otherRep, otherSourceLink, otherLevel))
+                    return false;
+
+                var str = Object.prototype.toString.call(object);
+                var isArray = (str === "[object Arguments]" || str === "[object Array]");
+                if (isArray && rep !== FirebugReps.Arr)
+                {
+                    // console.log et al.
+                    if (object.length !== otherObject.length)
+                        return false;
+
+                    for (var i=0, len=object.length; i<len; ++i)
+                    {
+                        if (!areEqual(object[i], otherObject[i]))
+                            return false;
+                    }
+
+                    return true;
+                }
+
+                // Internal chrome objects are allowed to implement a custom "getId" function.
+                if (object instanceof Object && "getId" in object)
+                    return ("getId" in otherObject && object.getId() === otherObject.getId());
+
+                return areEqual(object, otherObject);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("consolePanel.getMessageMatcher; failed to check equality", exc);
+
+                return false;
+            }
+        };
+    },
+
+    increaseRowCount: function(row)
+    {
+        var counter = row.getElementsByClassName("logCounter").item(0);
+        if (!counter)
+            return;
+        var value = counter.getElementsByClassName("logCounterValue").item(0);
+        if (!value)
+            return;
+
+        var count = parseInt(value.textContent);
+        if (isNaN(count))
+            count = 1;
+
+        count++;
+        counter.setAttribute("count", count);
+        value.textContent = count;
+    },
 
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
+        var row;
         var container = this.getTopContainer();
-
         if (noRow)
         {
             appender.apply(this, [objects]);
         }
         else
         {
-            var row = this.createRow("logRow", className);
+            row = this.createRow("logRow", className);
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            appender.apply(this, [objects, logContent, rep]);
 
-            appender.apply(this, [objects, row, rep]);
+            // If sourceLink is not provided and the object is an instance of Error
+            // convert it into ErrorMessageObj instance, which implements getSourceLink
+            // method.
+            // xxxHonza: is there a better place where to make this kind of conversion?
+            if (!sourceLink && (objects instanceof Error))
+                objects = FirebugReps.Except.getErrorMessage(objects);
 
-            if (sourceLink)
-                FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
+            if (!sourceLink && objects && objects.getSourceLink)
+                sourceLink = objects.getSourceLink();
 
-            container.appendChild(row);
+            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0))
+            {
+                this.increaseRowCount(container.lastChild);
+                row = container.lastChild;
+            }
+            else
+            {
+                if (sourceLink)
+                    FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
+
+                container.appendChild(row);
+            }
+
+            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink,
+                this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
+            {
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom +
                     " " + row.textContent);
+            }
 
             if (this.wasScrolledToBottom)
                 Dom.scrollToBottom(this.panelNode);
@@ -408,6 +600,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
+
             Dom.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 
@@ -416,6 +609,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Don't forget to clear opened groups, if any.
             this.groups = null;
+
+            this.lastMsgId = null;
         }
     },
 
@@ -441,47 +636,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         container.insertBefore(nodes[0], container.firstChild);
     },
 
-    insertReloadWarning: function()
-    {
-        // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(this.appendObject, Locale.$STR(
-            "message.Reload to activate window console"), "info");
-    },
-
-    clearReloadWarning: function()
-    {
-        if (this.warningRow && this.warningRow.parentNode)
-        {
-            this.warningRow.parentNode.removeChild(this.warningRow);
-            delete this.warningRow;
-        }
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     appendObject: function(object, row, rep)
     {
-        // Issue 5712:  Firefox crashes when trying to log XMLHTTPRequest to console
-        // xxxHonza: should be removed as soon as Firefox 16 is the minimum version.
-        if (!firefox15AndHigher)
-        {
-            if (typeof(object) == "object")
-            {
-                try
-                {
-                    // xxxHonza: could we log directly the unwrapped object?
-                    var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest") 
-                        object = object + "";
-                }
-                catch (e)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
-                }
-            }
-        }
-
         if (!rep)
             rep = Firebug.getRep(object, this.context);
 
@@ -493,7 +651,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // the default subject set within domplate() function.
         try
         {
-            return rep.tag.append({object: object}, row, rep);
+            // XXX Hack until we get IF support in domplate (or bug 116083 gets fixed).
+            var tag = rep.tag;
+            if (rep === FirebugReps.Text)
+                tag = rep.getWhitespaceCorrectedTag(object);
+            return tag.append({object: object}, row, rep);
         }
         catch (e)
         {
@@ -528,6 +690,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var node = row.ownerDocument.createTextNode(text);
             row.appendChild(nodeSpan);
             nodeSpan.appendChild(node);
+        }
+
+        function addStyle(node, css)
+        {
+            var dummyEl = node.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            dummyEl.setAttribute("style", css);
+            node.setAttribute("style", "");
+            for (var i = 0; i < dummyEl.style.length; i++)
+            {
+                var prop = dummyEl.style[i];
+                if (reAllowedCss.test(prop))
+                    node.style.setProperty(prop, dummyEl.style.getPropertyValue(prop));
+            }
         }
 
         if (!objects || !objects.length)
@@ -588,23 +763,32 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[objIndex];
+            	var object = objects[objIndex];
                 if (part.type == "%c")
+                {
                     lastStyle = object.toString();
+                }
                 else if (objIndex < objects.length)
+                {
+                    if (part.type == "%f" && part.precision != -1)
+                        object = parseFloat(object).toFixed(part.precision);
                     node = this.appendObject(object, row, part.rep);
+                }
                 else
+                {
                     node = this.appendObject(part.type, row, FirebugReps.Text);
+                }
                 objIndex++;
             }
             else
             {
-                node = FirebugReps.Text.tag.append({object: part}, row);
+                var tag = FirebugReps.Text.getWhitespaceCorrectedTag(part);
+                node = tag.append({object: part}, row);
             }
 
             // Apply custom style if available.
             if (lastStyle && node)
-                node.setAttribute("style", lastStyle);
+                addStyle(node, lastStyle);
 
             node = null;
         }
@@ -616,7 +800,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var object = objects[i];
             if (typeof(object) == "string")
                 logTextNode(object, row);
-            else 
+            else
                 this.appendObject(object, row);
         }
     },
@@ -645,12 +829,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        Events.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        Events.dispatch(this.fbListeners, "onLogRowCreated", [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-        groupBody.setAttribute('role', 'group');
+        groupBody.setAttribute("role", "group");
         this.groups.push(groupBody);
 
         // Expand/collapse logic.
@@ -662,12 +846,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 if (Css.hasClass(groupRow, "opened"))
                 {
                     Css.removeClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'false');
+                    event.target.setAttribute("aria-expanded", "false");
                 }
                 else
                 {
                     Css.setClass(groupRow, "opened");
-                    event.target.setAttribute('aria-expanded', 'true');
+                    event.target.setAttribute("aria-expanded", "true");
                 }
             }
         }, false);
@@ -685,8 +869,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     createRow: function(rowName, className)
     {
         var elt = this.document.createElement("div");
-        elt.className = rowName + (className ? " " + rowName + "-" + className : "");
-        return elt;
+        var row = this.template.logRowTag.append({className: rowName +
+            (className ? " " + rowName + "-" + className : "")}, elt);
+        return row;
     },
 
     getTopContainer: function()
@@ -697,8 +882,36 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return this.panelNode;
     },
 
+    getLogRowType: function(logRow)
+    {
+        var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
+        var type = typeMatch ? typeMatch[1] : "";
+
+        // xxxsz: There can be two kinds of error and warning messages,
+        // which have one type. So map the different classes to the type
+        // they represent.
+        // TODO: Merge different CSS class names for log message types
+        if (type == "errorMessage")
+            type = "error";
+        else if (type == "warn" || type == "warningMessage")
+            type = "warning";
+
+        return type;
+    },
+
     filterLogRow: function(logRow, scrolledToBottom)
     {
+        if (this.matchesFilter(logRow))
+        {
+            // Mark the groups, in which the log row is located, also as matched
+            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            {
+                Css.setClass(group, "contentMatchesFilter");
+                this.filterMatchSet.push(group);
+            }
+        }
+
         if (this.searchText)
         {
             Css.setClass(logRow, "matching");
@@ -795,18 +1008,19 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /((^%|(?=.)%)(\d+)?(\.)([a-zA-Z]))|((^%|(?=.)%)([a-zA-Z]))/;
+    var reg = /(%{1,2})(\.\d+)?([a-zA-Z])/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
-        if (m[0].substr(0, 2) == "%%")
+        // If the percentage sign is escaped, then just output it
+        if (m[1] == "%%")
         {
-            parts.push(format.substr(0, m.index));
-            parts.push(m[0].substr(1));
+            parts.push(format.substr(0, m.index) + m[0].substr(1));
         }
+        // A pattern was found, so it needs to be interpreted
         else
         {
-            var type = m[8] ? m[8] : m[5];
-            var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
+            var type = m[3];
+            var precision = m[2] ? parseInt(m[2].substr(1)) : -1;
 
             var rep = null;
             switch (type)
@@ -827,11 +1041,11 @@ function parseFormat(format)
                     break;
             }
 
-            parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
-            parts.push({rep: rep, precision: precision, type: ("%" + type)});
+            parts.push(format.substr(0, m.index));
+            parts.push({rep: rep, precision: precision, type: "%" + type});
         }
 
-        format = format.substr(m.index+m[0].length);
+        format = format.substr(m.index + m[0].length);
     }
 
     parts.push(format);
@@ -846,4 +1060,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-});
+}});

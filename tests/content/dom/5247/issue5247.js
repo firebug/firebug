@@ -12,7 +12,7 @@ function runTest()
             FBTest.executeContextMenuCommand(FW.Firebug.chrome.$("fbLocationList"),
                 "InspectIndomPanel", function()
             {
-                // xxxHonza, xxxsz: hack that fixes this text on Mac. The panel can 
+                // xxxHonza, xxxsz: hack that fixes this test on Mac. The panel can
                 // be selected asynchronously.
                 setTimeout(function() {
                     onInspect();
@@ -36,11 +36,18 @@ function onInspect()
 
         for (var i=0; i<props.length; i++)
         {
-            if (props[i].textContent == "cssRules")
+            var propName = props[i].lastChild.textContent
+            if (propName == "cssRules")
             {
                 prop = props[i];
                 break;
             }
+        }
+
+        if (!FBTest.ok(prop, "cssRules property must be there"))
+        {
+            FBTest.testDone("issue5247.DONE");
+            return;
         }
 
         var config = {tagName: "tr", classes: "memberRow ordinalRow", counter: 6};

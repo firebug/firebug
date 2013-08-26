@@ -27,7 +27,7 @@ function runTest()
                        getElementsByClassName("errorColCaret").item(0);
                    var backgroundImage = win.getComputedStyle(errorIndicatorRightPart, "").
                        getPropertyValue("background-image");
-                   FBTest.compare("url(\"chrome://firebug/skin/console-error-caret.png\")",
+                   FBTest.compare("url(\"chrome://firebug/skin/errorColumnIndicator.svg\")",
                        backgroundImage, "The right part of the error indicator must be shown as an arrow");
 
                    FBTest.testDone("issue3042.DONE");

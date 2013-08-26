@@ -21,24 +21,28 @@ const networkPrefDomain = "network.cookie";
 const cookieBehaviorPref = "cookieBehavior";
 const cookieLifeTimePref = "lifetimePolicy";
 
+// The second item in the array says if the localized string expects
+// a domain name at the end.
 const permOptions =
 {
     "default-session": ["cookies.default.session", false],
     "default-third-party-session": ["cookies.default.thirdPartySession", false],
     "default-third-party": ["cookies.default.thirdParty", false],
+    "default-limit-third-party": ["cookies.default.limitThirdParty", false],
     "default-allow": ["cookies.default.allow", false],
     "default-deny": ["cookies.default.deny", false],
     "default-warn": ["cookies.default.warn", false],
     "host-allow-session": ["cookies.host.session", true],
     "host-allow": ["cookies.host.accept", true],
-    "host-deny": ["cookies.host.reject", true]
+    "host-deny": ["cookies.host.reject", true],
+    "host-limit-third-party": ["cookies.host.limitThirdParty", true],
 };
 
 // ********************************************************************************************* //
 // Cookie Permissions
 
 /**
- * @class This class is responsible for managing cookie permisssions.
+ * @class This class is responsible for managing cookie permissions.
  */
 var CookiePermissions = Obj.extend(Object,
 /** @lends CookiePermissions */
@@ -111,11 +115,11 @@ var CookiePermissions = Obj.extend(Object,
             var option = item.value;
 
             items.push({
-              label: this.getLabel(option, location),
-              type: "radio",
-              checked: (option == value),
-              nol10n: true,
-              command: Obj.bindFixed(this.onCommand, this, {target: item}, context, location),
+                label: this.getLabel(option, location),
+                type: "radio",
+                checked: (option == value),
+                nol10n: true,
+                command: Obj.bindFixed(this.onCommand, this, {target: item}, context, location),
             });
         }
 
@@ -132,6 +136,9 @@ var CookiePermissions = Obj.extend(Object,
                 return "host-deny";
             case Ci.nsICookiePermission.ACCESS_SESSION:
                 return "host-allow-session";
+            case Ci.nsICookiePermission.ACCESS_LIMIT_THIRD_PARTY:
+                return "host-limit-third-party";
+
             default:
                 return this.getDefaultPref();
         }
@@ -146,8 +153,11 @@ var CookiePermissions = Obj.extend(Object,
             case "host-allow-session":
                 permissionManager.add(location, "cookie", Ci.nsICookiePermission.ACCESS_SESSION);
                 break;
+            case "host-limit-third-party":
+                permissionManager.add(location, "cookie", Ci.nsICookiePermission.ACCESS_LIMIT_THIRD_PARTY);
+                break;
             case "host-allow":
-                permissionManager.add(location, "cookie", permissionManager.ALLOW_ACTION); 
+                permissionManager.add(location, "cookie", permissionManager.ALLOW_ACTION);
                 break;
             case "host-deny":
                 permissionManager.add(location, "cookie", permissionManager.DENY_ACTION);
@@ -200,19 +210,20 @@ var CookiePermissions = Obj.extend(Object,
 
         switch (Options.getPref(networkPrefDomain, cookieLifeTimePref))
         {
-            case 1: 
+            case 1:
                 return "default-warn";
-            case 2: 
-                return (behavior == 0) ? "default-third-party-session" :
-                    "default-session";
+            case 2:
+                return (behavior == 0) ? "default-third-party-session" : "default-session";
         }
 
         switch (behavior)
         {
-            case 0: 
+            case 0:
                 return "default-third-party";
-            case 1: 
+            case 1:
                 return "default-allow";
+            case 3:
+                return "default-limit-third-party";
         }
 
         return null;

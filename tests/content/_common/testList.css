@@ -69,11 +69,11 @@ h3 {
 }
 
 .testListRow.results .testName {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(twistyClosed.svg);
 }
 
 .testListRow.opened .testName {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-image: url(twistyOpen.svg);
 }
 
 .testListRow.error .testLink {
@@ -157,11 +157,11 @@ h3 {
 }
 
 .opened > .testGroupCol > .testGroupName {
-    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-image: url(twistyOpen.svg);
 }
 
 .testGroupName {
-    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-image: url(twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 1px;
     padding-left: 18px;

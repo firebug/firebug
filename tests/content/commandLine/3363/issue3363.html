@@ -1,111 +1,78 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <title>Test Case for Issue #3363</title>
-</head>
-<body>
-
-<h1>Issue #3363</h1>
-
-<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3363">Issue #3363</a>
-- <span class="h3">groupCollapsed gets confused</span>.
-<br/>
-<i>Jan Odvarko, odvarko@gmail.com</i>
-</p>
-
-<ol>
-<li>Open Firebug and enable the Console panel.</li>
-<li>Copy the code below and paste it into the Firebug's command line.</li>
-<li>The Console panel should display <b>5</b> groups.</li>
-</ol>
-
-<pre>
-console.clear();
-console.groupCollapsed('group1');
-console.log('');
-console.log('');
-console.log('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group2');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group3');
-console.log('');
-console.log('');
-console.log('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group4');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group5');
-console.info('');
-console.groupEnd();
-</pre>
-
-<script type="text/javascript">
-function onExecuteTest()
-{
-console.clear();
-console.groupCollapsed('group1');
-console.log('');
-console.log('');
-console.log('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group2');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group3');
-console.log('');
-console.log('');
-console.log('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group4');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.info('');
-console.log('');
-console.groupEnd();
-console.groupCollapsed('group5');
-console.info('');
-console.groupEnd();
-}
-</script>
-  
-</body>
+    <head>
+        <title>Issue 3363: groupCollapsed gets confused</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function createLogGroups()
+        {
+            console.clear();
+            console.groupCollapsed("Group 1");
+            console.log("");
+            console.log("");
+            console.log("");
+            console.log("");
+            console.groupEnd();
+            console.groupCollapsed("Group 2");
+            console.log("");
+            console.groupEnd();
+            console.groupCollapsed("Group 3");
+            console.log("");
+            console.log("");
+            console.log("");
+            console.log("");
+            console.groupEnd();
+            console.groupCollapsed("Group 4");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.info("");
+            console.log("");
+            console.groupEnd();
+            console.groupCollapsed("Group 5");
+            console.info("");
+            console.groupEnd();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3363">Issue 3363</a>: groupCollapsed gets confused</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="createLogGroups" onclick="createLogGroups()">Create log groups</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Click the button <em>Create log groups</em> above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                        The <em>Console</em> panel should list five collapsed groups named <em>Group 1</em> to
+                        <em>Group 5</em>.
+                    </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
 </html>

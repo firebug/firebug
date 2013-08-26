@@ -22,14 +22,13 @@ define([
     "firebug/trace/traceListener",
     "firebug/trace/traceModule",
     "firebug/lib/wrapper",
-    "firebug/lib/xpcom",
     "firebug/lib/options",
     "firebug/net/netPanel",
-    "firebug/console/errors",
+    "firebug/console/errors"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener, TraceModule, Wrapper, Xpcom, Options) {
+    TraceListener, TraceModule, Wrapper, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -44,10 +43,6 @@ var eventListenerService = Cc["@mozilla.org/eventlistenerservice;1"].
 var contexts = [];
 
 var redirectionLimit = Options.getPref("network.http", "redirection-limit");
-
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var fx20 = versionChecker.compare(appInfo.version, "20") >= 0;
 
 // ********************************************************************************************* //
 // Spy Module
@@ -354,7 +349,7 @@ var SpyHttpObserver =
 
         // Get "body" for POST and PUT requests. It will be displayed in
         // appropriate tab of the XHR.
-        if (method == "POST" || method == "PUT")
+        if (method == "POST" || method == "PUT" || method == "PATCH")
             spy.postText = Http.readPostTextFromRequest(request, context);
 
         spy.urlParams = Url.parseURLParams(spy.href);
@@ -767,8 +762,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // (onreadystatechange) for another request. In such case we need to quickly detach our
     // Spy object. New one will be immediatelly created when HTTP-ON-OPENING-REQUEST is fired.
     // See issue 5049
-    // This approach doesn't work in Firefox 19 (see issue 6304) so, let's enable it for 20+ only.
-    if (spy.xhrRequest.readyState == 1 && fx20)
+    if (spy.xhrRequest.readyState == 1)
     {
         if (FBTrace.DBG_SPY)
         {
@@ -785,7 +779,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // has been already expanded and the response tab selected).
     if (spy.logRow && spy.xhrRequest.readyState >= 3)
     {
-        var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+        var netInfoBox = getInfoBox(spy);
         if (netInfoBox)
         {
             netInfoBox.htmlPresented = false;
@@ -966,7 +960,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                             DIV({"class": "spyStatus"}, "$object|getStatus")
                         ),
                         TD({"class": "spyCol"},
-                            IMG({"class": "spyIcon", src: "blank.gif"})
+                            SPAN({"class": "spyIcon"})
                         ),
                         TD({"class": "spyCol"},
                             SPAN({"class": "spyTime"})
@@ -1010,7 +1004,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             Css.toggleClass(logRow, "opened");
 
-            var spy = Dom.getChildByClass(logRow, "spyHead").repObject;
+            var spy = logRow.getElementsByClassName("spyHead")[0].repObject;
             var spyHeadTable = Dom.getAncestorByClass(target, "spyHeadTable");
 
             if (Css.hasClass(logRow, "opened"))
@@ -1022,7 +1016,9 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             }
             else
             {
-                var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                // Notify all listeners about closing XHR entry and destroying the body.
+                // Any custom tabs should be removed now.
+                var netInfoBox = getInfoBox(spy);
                 Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody",
                     [netInfoBox, spy]);
 
@@ -1051,6 +1047,12 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         var url = Url.reEncodeURL(spy, text, true);
         System.copyToClipboard(url);
+    },
+
+    copyAsCurl: function(spy)
+    {
+        System.copyToClipboard(NetUtils.generateCurlCommand(spy,
+            Options.get("net.curlAddCompressedArgument")));
     },
 
     copyResponse: function(spy)
@@ -1138,6 +1140,15 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             id: "fbSpyCopyResponse",
             command: Obj.bindFixed(this.copyResponse, this, spy)
         });
+
+        items.push(
+            {
+                id: "fbCopyAsCurl",
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, spy)
+            }
+        );
 
         items.push("-");
 
@@ -1241,7 +1252,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
         spy.responseHeaders = getResponseHeaders(spy);
 
     var template = Firebug.NetMonitor.NetInfoBody;
-    var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+    var netInfoBox = getInfoBox(spy);
 
     var defaultTab;
 
@@ -1260,7 +1271,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
 
     if (!netInfoBox)
     {
-        var head = Dom.getChildByClass(spy.logRow, "spyHead");
+        var head = spy.logRow.getElementsByClassName("spyHead")[0];
         netInfoBox = template.tag.append({"file": spy}, head);
 
         // Notify listeners so, custom info tabs can be appended
@@ -1275,6 +1286,16 @@ function updateHttpSpyInfo(spy, updateInfoBody)
     {
         template.updateInfo(netInfoBox, spy, spy.context);
     }
+}
+
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
+}
+
+function getInfoBox(spy)
+{
+    return spy.logRow.querySelector(".spyHead > .netInfoBody");
 }
 
 // ********************************************************************************************* //

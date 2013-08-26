@@ -149,6 +149,15 @@ Dom.getBody = function(doc)
     return doc.documentElement;  // For non-HTML docs
 };
 
+Dom.getNonFrameBody = function(elt)
+{
+    if (Dom.isRange(elt))
+        elt = elt.commonAncestorContainer;
+
+    var body = Dom.getBody(elt.ownerDocument);
+    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
+}
+
 // ********************************************************************************************* //
 // DOM Modification
 
@@ -428,6 +437,11 @@ Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
 // ********************************************************************************************* //
 // Graphics
 
+/**
+ * Gets the absolute offset of an element
+ * @param {Element} elt Element to get the info for
+ * @returns {Object} x and y offset of the element
+ */
 Dom.getClientOffset = function(elt)
 {
     function addOffset(elt, coords, view)
@@ -494,6 +508,25 @@ Dom.getLTRBWH = function(elt)
         }
     }
     return dims;
+};
+
+/**
+ * Gets the offset of an element relative to an ancestor
+ * @param {Element} elt Element to get the info for
+ * @param {Element} ancestor Ancestor element used as origin
+ */
+Dom.getAncestorOffset = function(elt, ancestor)
+{
+    var offset = {x: 0, y: 0};
+    var offsetParent = elt;
+    do
+    {
+        offset.x += offsetParent.offsetLeft;
+        offset.y += offsetParent.offsetTop;
+        offsetParent = offsetParent.offsetParent;
+    } while (offsetParent && offsetParent !== ancestor);
+
+    return offset;
 };
 
 /**
@@ -640,7 +673,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
     if (!scrollBox)
         return;
 
-    var offset = Dom.getClientOffset(element);
+    var offset = Dom.getAncestorOffset(element, scrollBox);
 
     if (!alignmentX)
         alignmentX = "centerOrLeft";
@@ -713,7 +746,7 @@ Dom.scrollTo = function(element, scrollBox, alignmentX, alignmentY, scrollWhenVi
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("dom.scrollTo", element.innerHTML);
+        FBTrace.sysout("dom.scrollTo", element);
 };
 
 /**
@@ -1660,7 +1693,10 @@ domMemberMap.Window =
     "Infinity",
     "NaN",
     "undefined",
-    "eval"
+    "eval",
+
+    "speechSynthesis",
+    "requestAnimationFrame",
 ];
 
 domMemberMap.Location =

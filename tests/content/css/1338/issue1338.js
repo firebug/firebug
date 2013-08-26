@@ -40,6 +40,22 @@ function runTest()
             FBTest.sendShortcut("VK_DOWN", {shiftKey: true});
             FBTest.compare("7em", editor.value, "Must be decremented to 7em");
 
+            // Press 'PageDown' and verify incrementation
+            FBTest.sendShortcut("VK_PAGE_DOWN");
+            FBTest.compare("-3em", editor.value, "Must be decremented to -3em");
+
+            // Press 'PageUp' and verify incrementation
+            FBTest.sendShortcut("VK_PAGE_UP");
+            FBTest.compare("7em", editor.value, "Must be incremented to 7em");
+
+            // Press 'Shift+PageDown' and verify incrementation
+            FBTest.sendShortcut("VK_PAGE_DOWN", {shiftKey: true});
+            FBTest.compare("-93em", editor.value, "Must be decremented to -93em");
+
+            // Press 'Shift+PageUp' and verify incrementation
+            FBTest.sendShortcut("VK_PAGE_UP", {shiftKey: true});
+            FBTest.compare("7em", editor.value, "Must be incremented to 7em");
+
             FBTest.testDone("issue1338.DONE");
         });
     });

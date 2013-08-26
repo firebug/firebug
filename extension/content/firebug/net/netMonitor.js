@@ -15,11 +15,12 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netDebugger",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule"
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events,
+    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events, Locale,
     TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
@@ -50,6 +51,7 @@ var contentLoad = NetProgress.prototype.contentLoad;
  * for the user.
  */
 Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
+/** @lends Firebug.NetMonitor */
 {
     dispatchName: "netMonitor",
     maxQueueRequests: 500,
@@ -83,6 +85,18 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbNetFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbNetFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetMonitor.initializeUI; enabled: " + this.isAlwaysEnabled());
@@ -240,8 +254,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
         else
         {
-            // If the Net panel is not enabled, we needto make sure the unmonitorContext
-            // is executed and so, the start button (aka firebug status bar icons) is
+            // If the Net panel is not enabled, we need to make sure the unmonitorContext
+            // is executed and so, the start button (aka Firebug status bar icons) is
             // properly updated.
             NetHttpActivityObserver.unregisterObserver();
             Firebug.connection.eachContext(unmonitorContext);
@@ -268,34 +282,69 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             panel.clear();
     },
 
-    onToggleFilter: function(context, filterCategory)
+    onToggleFilter: function(event, context, filterCategory)
     {
         if (!context.netProgress)
             return;
 
-        Options.set("netFilterCategory", filterCategory);
-
-        // The content filter has been changed. Make sure that the content
-        // of the panel is updated (CSS is used to hide or show individual files).
-        var panel = context.getPanel(panelName, true);
-        if (panel)
+        var filterCategories = [];
+        if (Events.isControl(event) && filterCategory != "all")
         {
-            panel.setFilter(filterCategory);
-            panel.updateSummaries(NetUtils.now(), true);
+            filterCategories = Options.get("netFilterCategories").split(" ");
+            var filterCategoryIndex = filterCategories.indexOf(filterCategory);
+            if (filterCategoryIndex == -1)
+                filterCategories.push(filterCategory);
+            else
+                filterCategories.splice(filterCategoryIndex, 1);
         }
+        else
+        {
+            filterCategories.push(filterCategory);
+        }
+
+        // Remove "all" filter in case several filters are selected
+        if (filterCategories.length > 1)
+        {
+            var allIndex = filterCategories.indexOf("all");
+            if (allIndex != -1)
+                filterCategories.splice(allIndex, 1);
+        }
+
+        // If no filter categories are selected, use the default
+        if (filterCategories.length == 0)
+            filterCategories = Options.getDefault("netFilterCategories").split(" ");
+
+        Options.set("netFilterCategories", filterCategories.join(" "));
+
+        this.syncFilterButtons(Firebug.chrome);
+
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onFiltersSet", [filterCategories]);
     },
 
     syncFilterButtons: function(chrome)
     {
-        var button = chrome.$("fbNetFilter-" + Firebug.netFilterCategory);
-        button.checked = true;
+        var filterCategories = new Set();
+        Options.get("netFilterCategories").split(" ").forEach(function(element)
+        {
+            filterCategories.add(element);
+        });
+        var doc = chrome.window.document;
+        var buttons = doc.getElementsByClassName("fbNetFilter");
+
+        for (var i=0, len=buttons.length; i<len; ++i)
+        {
+            var filterCategory = buttons[i].id.substr(buttons[i].id.search("-") + 1);
+            buttons[i].checked = filterCategories.has(filterCategory);
+        }
     },
 
     togglePersist: function(context)
     {
         var panel = context.getPanel(panelName);
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", panel.persistContent);
+
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked",
+            panel.persistContent);
     },
 
     updateOption: function(name, value)
@@ -436,7 +485,7 @@ var NetHttpObserver =
             {
                 Firebug.NetMonitor.contexts[tabId] = createNetProgress(null);
 
-                // OK, we definitelly want to watch this page load, temp context is created
+                // OK, we definitely want to watch this page load, temporary context is created
                 // so, make sure the activity-observer is registered and we have detailed
                 // timing info for this first document request.
                 NetHttpActivityObserver.registerObserver();

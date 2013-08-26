@@ -26,7 +26,7 @@ function runTest()
                 if (isPseudoElementSelector(selector))
                     pseudoElementRules.push(rules[i]);
             }
-            // Four pseudo-element rules must be shown inside the Style side panel 
+            // Four pseudo-element rules must be shown inside the Style side panel
             FBTest.compare(4, pseudoElementRules.length, "There must be four pseudo-element rules.");
 
             for (var i=0; i<pseudoElementRules.length; i++)

@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #6476</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Issue #6476</h1>
+
+<p>This test-case is intended for
+  <a href="http://code.google.com/p/fbug/issues/detail?id=6476">Issue #6476</a>
+- <span class="h3">Change directive for sourceURL</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<script type="text/javascript">
+function onEval()
+{
+    var href = window.location.href;
+    var i = href.lastIndexOf(".");
+    var sourceURL = href.substr(0, i) + "-dynamic.js";
+
+    var source =
+        "function myFunc1()\n" +
+        "{\n" +
+        "    return 1+1;\n" +
+        "}\n" +
+        "//# sourceURL=" + sourceURL;
+
+    window.eval(source);
+}
+
+function onExecuteTest()
+{
+    var result = myFunc1();
+    console.log(result);
+}
+</script>
+
+<ol>
+<li>Open Firebug and enable, select the Script panel. Reload this page.</li>
+<li>Click on the button to evaluate a script <button id="testButtonEval" onclick="onEval()">Eval</code>.</li>
+<li>Set a breakpoint in <code style="color:green">issue6476-dynamic.js</code> at line
+    <code style="color:green">3</code> (the file must exist in the location menu)</li>
+<li>Click on the button to execute the script <button id="testButtonExecute" onclick="onExecuteTest()">Execute</code>.</li>
+<li>The execution must stop at the breakpoint.</li>
+</ol>
+
+</body>
+</html>

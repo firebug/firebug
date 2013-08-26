@@ -4,63 +4,38 @@ function runTest()
 
     FBTest.openNewTab(basePath + "console/3292/issue3292.html", function(win)
     {
-        FBTest.progress("Test page opened");
-
         FBTest.openFirebug();
-        FBTest.enableConsolePanel(function(win)
+        FBTest.selectPanel("console");
+
+        FBTest.enableConsolePanel();
+
+        var config = {
+            tagName: "div",
+            classes: "logRow logRow-log",
+            counter: 3
+        };
+
+        FBTest.waitForDisplayedElement("console", config, function(row)
         {
-            FBTest.progress("Console panel enabled");
+            var panel = FBTest.getSelectedPanel();
+            var logContents = panel.panelNode.getElementsByClassName("logContent");
 
-            var config = {
-                tagName: "div",
-                classes: "logRow logRow-log",
-                counter: 4
-            }
+            // Verify the log content
+            FBTest.compare(/parent log/, logContents[0].textContent,
+                "\"parent log\" must be displayed");
 
-            waitForDisplayedElement("console", config, function(textNodes)
-            {
-                // Verify the log content
-                FBTest.compare(/parent log\s*/, textNodes[0].textContent,
-                    "parent log must be displayed");
+            FBTest.compare(/include log/, logContents[1].textContent,
+                "\"include log\" must be displayed");
+            var logCounter = FW.FBL.getAncestorByClass(logContents[1], "logRow").
+                getElementsByClassName("logCounter").item(0);
+            FBTest.compare(2, logCounter.textContent, "\"include log\" must be logged twice");
 
-                FBTest.compare(/included in iframe\s*/,textNodes[1].textContent,
-                    "included in iframe must be displayed");
+            FBTest.compare(/iframe log/, logContents[2].textContent,
+                "\"iframe log\" must be displayed");
 
-                FBTest.compare(/included in iframe\s*/, textNodes[2].textContent,
-                    "included in iframe must be displayed");
-
-                FBTest.compare(/iframe log\s*/, textNodes[3].textContent,
-                    "iframe log must be displayed");
-
-                FBTest.testDone("issue3292.DONE");
-            });
+            FBTest.testDone("issue3292.DONE");
         });
+
+        FBTest.reload();
     });
-}
-
-// The elements might be displayed already or in the future.
-// xxxHonza: if sucessfull, let's put it into FBTestFirebug
-function waitForDisplayedElement(panelName, config, callback)
-{
-    var panelNode = FBTest.selectPanel(panelName).panelNode;
-    var nodes = panelNode.getElementsByClassName(config.classes);
-    FBTest.progress("Number of logs " + nodes.length);
-
-    if (nodes.length >= config.counter)
-    {
-        FBTest.compare(config.counter, nodes.length, "Expected number of elements");
-
-        // Callback is executed after timeout so, this fucntion can finish.
-        // The callback usually ends the test.
-        setTimeout(function() {
-            callback(nodes);
-        });
-    }
-    else
-    {
-        FBTest.waitForDisplayedElement(panelName, config, function()
-        {
-            waitForDisplayedElement(panelName, config, callback);
-        });
-    }
 }

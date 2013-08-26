@@ -37,8 +37,6 @@ const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const panelURL = "chrome://firebug/content/panel.html";
-
 // URLs used in the Firebug Menu and several other places
 const firebugURLs =
 {
@@ -85,7 +83,6 @@ var FirebugChrome =
      */
     initialize: function()
     {
-
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize;");
 
@@ -313,7 +310,9 @@ var FirebugChrome =
     {
         try
         {
-            return (wm.getMostRecentWindow(null).location.href.indexOf("firebug.xul") > 0);
+            // If the ID of the active element is related to Firebug, it must have the focus
+            var windowID = wm.getMostRecentWindow(null).document.activeElement.id;
+            return ["firebug", "fbMainContainer"].indexOf(windowID) !== -1;
         }
         catch(ex)
         {
@@ -373,7 +372,7 @@ var FirebugChrome =
         // Command Line Popup can be displayed for all the other panels
         // (except for the Console panel)
         // XXXjjb, xxxHonza, xxxsz: this should be somehow better, more generic and extensible,
-        // e.g. by asking each panel if it supports the Command Line Popup 
+        // e.g. by asking each panel if it supports the Command Line Popup
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
@@ -474,7 +473,6 @@ var FirebugChrome =
         var watchPanel = context.getPanel("watches", true);
         if (watchPanel)
         {
-            Firebug.CommandLine.isReadyElsePreparing(context);
             watchPanel.editNewWatch();
         }
     },
@@ -937,6 +935,8 @@ var FirebugChrome =
 
         Dom.collapse(sidePanelDeck, !panelBar2.selectedPanel);
         Dom.collapse(panelSplitter, !panelBar2.selectedPanel);
+
+        Events.dispatch(Firebug.uiListeners, "updateSidePanels", [panelBar1.selectedPanel]);
     },
 
     syncTitle: function()
@@ -1359,7 +1359,10 @@ var FirebugChrome =
     obeyOmitObjectPathStack: function(value)
     {
         var panelStatus = this.getElementById("fbPanelStatus");
-        Dom.hide(panelStatus, (value?true:false));
+        // The element does not exist immediately at start-up.
+        if (!panelStatus)
+            return;
+        Dom.hide(panelStatus, (value ? true : false));
     },
 
     getPanelStatusElements: function()
@@ -1576,9 +1579,11 @@ var FirebugChrome =
         var items = [];
         Events.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
             Firebug.currentContext, panel, popup]);
+        Menu.createMenuItems(popup, items);
 
-        if (items)
-            Menu.createMenuItems(popup, items);
+        // Make sure there are no unnecessary separators (e.g. at the top or bottom
+        // of the popup)
+        Menu.optimizeSeparators(popup);
 
         if (!popup.firstChild)
             return false;
@@ -1656,7 +1661,7 @@ var FirebugChrome =
 
         if (object && rep)
         {
-            var label = rep.getTooltip(object, Firebug.currentContext);
+            var label = rep.getTooltip(object, Firebug.currentContext, target);
             if (label)
             {
                 tooltip.setAttribute("label", label);
@@ -1915,13 +1920,32 @@ function onBlur(event)
 
 function onSelectLocation(event)
 {
-    var locationList = FirebugChrome.getElementById("fbLocationList");
-    var location = locationList.repObject;
+    try
+    {
+        var locationList = FirebugChrome.getElementById("fbLocationList");
+        var location = locationList.repObject;
 
-    FirebugChrome.navigate(location);
+        FirebugChrome.navigate(location);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("chrome.onSelectLocation; EXCEPTION " + err, err);
+    }
 }
 
 function onSelectingPanel(event)
+{
+    try
+    {
+        doSelectingPanel(event);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("chrome.onSelectingPanel; EXCEPTION " + err, err);
+    }
+}
+
+function doSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
@@ -2077,11 +2101,13 @@ function onPanelClick(event)
     }
 }
 
+var lastMouseDownPosition = {x: -1000, y: -1000};
 function onPanelMouseDown(event)
 {
     if (Events.isLeftClick(event))
     {
-        this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
+        lastMouseDownPosition.x = event.screenX;
+        lastMouseDownPosition.y = event.screenY;
     }
     else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
@@ -2101,32 +2127,44 @@ function onPanelMouseUp(event)
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
-        if (selection.focusNode === selection.anchorNode)
+
+        if (Dom.getAncestorByClass(selection.focusNode, "editable") ===
+            Dom.getAncestorByClass(selection.anchorNode, "editable"))
         {
             var editable = Dom.getAncestorByClass(target, "editable");
             if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
-                var selFO = selection.focusOffset,selAO = selection.anchorOffset;
+                var unselectedRange = event.target.ownerDocument.createRange();
+                var selectedRange = selection.getRangeAt(0);
+                unselectedRange.setStart(editable.firstElementChild || editable, 0);
+                unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
-                // selection is collapsed
-                if (selFO == selAO)
+                if (selectedRange.collapsed)
                 {
-                    var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
-                        Math.abs(event.screenY - this.lastMouseDownPosition.y);
+                    var distance = Math.abs(event.screenX - lastMouseDownPosition.x) +
+                        Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
                     if (distance > 3)
-                        selectionData = {start: selFO, end: selFO};
+                    {
+                        selectionData =
+                        {
+                            start: selectedRange.startOffset,
+                            end: selectedRange.endOffset
+                        };
+                    }
                     // otherwise leave selectionData undefined to select all text
-                }
-                else if (selFO < selAO)
-                {
-                    selectionData = {start: selFO, end: selAO};
                 }
                 else
                 {
-                    selectionData = {start: selAO, end: selFO};
+                    var unselectedRangeLength = unselectedRange.toString().length;
+                    var selectedRangeLength = selection.getRangeAt(0).toString().length;
+                    selectionData =
+                    {
+                        start: unselectedRangeLength,
+                        end: unselectedRangeLength + selectedRangeLength
+                    };
                 }
 
                 if (editable)
@@ -2135,7 +2173,7 @@ function onPanelMouseUp(event)
                 }
                 else
                 {
-                    Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO});
+                    Firebug.Editor.setSelection(selectionData);
                     selection.removeAllRanges();
                 }
 
@@ -2201,7 +2239,7 @@ function fatalError(summary, exc)
 }
 
 return FirebugChrome;
- 
+
 }  // end of createFirebugChrome(win)
 }; // end of var ChromeFactory object
 

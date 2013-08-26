@@ -1,0 +1,1 @@
+var test = "Hello Firebug user!";

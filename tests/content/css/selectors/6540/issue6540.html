@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6540: Dynamically update selector groups when framed elements change</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            border: none;
+        }
+
+        #actions {
+            margin-top: 5px;
+        }
+        </style>
+        <script type="text/javascript">
+        function removeDIV()
+        {
+            var frameDoc = window.frames[0].document;
+            frameDoc.body.innerHTML = "";
+        }
+
+        function addDIV()
+        {
+            var frameDoc = window.frames[0].document;
+            var div = frameDoc.createElement("div");
+            div.textContent = "Text";
+            frameDoc.body.appendChild(div);
+        }
+
+        function changeText()
+        {
+            var frameDoc = window.frames[0].document;
+            var text = frameDoc.getElementsByTagName("div")[0].firstChild;
+            text.data = "";
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6540">Issue 6540</a>: Dynamically update selector groups when framed elements change</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe src="issue6540-iframe.html" width="100" height="100"></iframe>
+                <div id="actions">
+                    <button id="removeDIV" onclick="removeDIV()">Remove &lt;div&gt;</button>
+                    <button id="addDIV" onclick="addDIV()">Add &lt;div&gt;</button>
+                    <button id="changeText" onclick="changeText()">Change Text</button>
+                </div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Inside the <em>Selectors</em> side panel click the <em>Try a selector...</em> field</li>
+                    <li>
+                        Enter <code>#test > div:not(:empty)</code> and hit <kbd>Enter</kbd><br/>
+                        <span class="ok">
+                            &rArr; A selector trial group named <em>#test > div:not(:empty)</em>
+                            should be shown inside the <em>Selectors</em> side panel.
+                        </span>
+                        <span class="ok">
+                            &rArr; The blue <code>&lt;div&gt;</code> inside the iframe should be
+                            listed inside of that group.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Remove &lt;div&gt;</em> button above<br/>
+                        <span class="ok">
+                            &rArr; The <code>&lt;div&gt;</code> should disappear from the
+                            <em>#test > div:not(:empty)</em> group.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Add &lt;div&gt;</em> button above<br/>
+                        <span class="ok">
+                            &rArr; The blue <code>&lt;div&gt;</code> should be added
+                            again to the list.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Change Text</em> button above<br/>
+                        <span class="ok">
+                            &rArr; The <code>&lt;div&gt;</code> should disappear again from the
+                            <em>#test > div:not(:empty)</em> group.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Selector trials must be dynamically updated when elements inside frames change.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

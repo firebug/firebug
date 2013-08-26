@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6522: Implement the getEventListeners command line API</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body onclick="return 0;">
+<script>
+window.onload = function f1() {};
+window.addEventListener("load", function f2() {}, true);
+document.body.addEventListener("what", function f3(x) { return x + 1; }, false);
+</script>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6522">Issue 6522</a>:
+                Implement the getEventListeners command line API</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the Console and Script panels</li>
+                    <li>Switch to the Console panel</li>
+                    <li>Verify that the following command line expressions give the correct output:</li>
+                    <ul>
+                        <li><code>getEventListeners(window).load[0].useCapture</code> -&gt; false</li>
+                        <li><code>getEventListeners(window).load[1].useCapture</code> -&gt; true</li>
+                        <li><code>getEventListeners(document.body).click[0].listener()</code> -&gt; 0</li>
+                        <li><code>getEventListeners(document.body).what.length</code> -&gt; 1</li>
+                        <li><code>getEventListeners(document.body).what[0].listener(1)</code> -&gt; 2</li>
+                    </ul>
+                </ol>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

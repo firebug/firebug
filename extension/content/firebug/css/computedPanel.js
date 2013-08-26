@@ -25,21 +25,47 @@ function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, Source
 
 with (Domplate) {
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 // Constants
 
 const Cu = Components.utils;
 
 const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBestMatch"];
 
+// xxxHonza: shell we move this mess to lib?
 try
 {
-    Cu.import("resource:///modules/devtools/CssLogic.jsm");
+    // Firefox <= 22
+    // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
+    var scope = {};
+    Cu.import("resource:///modules/devtools/CssLogic.jsm", scope);
+    var CssLogic = scope.CssLogic;
 }
 catch (err)
 {
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available!");
+    try
+    {
+        // Firefox 23
+        var scope = {}
+        Cu.import("resource:///modules/devtools/gDevTools.jsm", scope);
+        var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
+    }
+    catch (err)
+    {
+        try
+        {
+            // Firefox 24
+            // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
+            var scope = {}
+            Cu.import("resource://gre/modules/devtools/Loader.jsm", scope);
+            var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available! " + e, e);
+        }
+    }
 }
 
 // ********************************************************************************************* //
@@ -138,10 +164,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         formatValue: function(value)
         {
-            if (Options.get("colorDisplay") == "hex")
-                value = Css.rgbToHex(value);
-            else if (Options.get("colorDisplay") == "hsl")
-                value = Css.rgbToHSL(value);
+            value = formatColor(value);
 
             var limit = Options.get("stringCropLength");
             if (limit > 0)
@@ -610,7 +633,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var propInfo = Firebug.getRepObject(target);
 
-            var prop = propInfo.property, value = propInfo.value;
+            var prop = propInfo.property;
+            var value = formatColor(propInfo.value);
             var cssValue;
 
             if (prop == "font" || prop == "font-family")
@@ -699,8 +723,26 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     }
 });
 
-//********************************************************************************************* //
-//Helpers
+// ********************************************************************************************* //
+// Helpers
+
+function formatColor(color)
+{
+    switch (Options.get("colorDisplay"))
+    {
+        case "hex":
+            return Css.rgbToHex(color);
+
+        case "hsl":
+            return Css.rgbToHSL(color);
+
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
+        default:
+            return color;
+    }
+}
 
 const styleGroups =
 {
@@ -784,7 +826,7 @@ const styleGroups =
         "-moz-border-end-color",
         "-moz-border-end-style",
         "-moz-border-end-width",
-        "-moz-border-image",
+        "border-image",
         "-moz-border-start",
         "-moz-border-start-color",
         "-moz-border-start-style",
@@ -853,12 +895,12 @@ const styleGroups =
     other: []
 };
 
-//********************************************************************************************* //
-//Registration
+// ********************************************************************************************* //
+// Registration
 
 Firebug.registerPanel(CSSComputedPanel);
 
 return CSSComputedPanel;
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 }});

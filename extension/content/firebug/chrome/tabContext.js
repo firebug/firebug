@@ -243,7 +243,7 @@ Firebug.TabContext.prototype =
             FBTrace.sysout("tabContext.destroy " + this.getName() + " set state ", state);
     },
 
-    getPanel: function(panelName, noCreate)
+    getPanelType: function(panelName)
     {
         // Get "global" panelType, registered using Firebug.registerPanel
         var panelType = Firebug.getPanelType(panelName);
@@ -252,14 +252,20 @@ Firebug.TabContext.prototype =
         if (!panelType && this.panelTypeMap && this.panelTypeMap.hasOwnProperty(panelName))
             panelType = this.panelTypeMap[panelName];
 
+        if (panelType && !panelType.prototype)
+        {
+            FBTrace.sysout("tabContext.getPanel no prototype " + panelType, panelType);
+            return null;
+        }
+
+        return panelType || null;
+    },
+
+    getPanel: function(panelName, noCreate)
+    {
+        var panelType = this.getPanelType(panelName);
         if (!panelType)
             return null;
-
-        if (!panelType.prototype)
-        {
-            FBTrace.sysout("tabContext.getPanel no prototype "+panelType, panelType);
-            return;
-        }
 
         // Create instance of the panelType only if it's enabled.
         var enabled = panelType.prototype.isEnabled ? panelType.prototype.isEnabled() : true;
@@ -267,6 +273,14 @@ Firebug.TabContext.prototype =
             return this.getPanelByType(panelType, noCreate);
 
         return null;
+    },
+
+    isPanelEnabled: function(panelName)
+    {
+        var panelType = this.getPanelType(panelName);
+        if (!panelType)
+            return false;
+        return (!panelType.prototype.isEnabled || panelType.prototype.isEnabled());
     },
 
     getPanelByType: function(panelType, noCreate)

@@ -1562,6 +1562,8 @@ var fbs =
 
     stopProfiling: function()
     {
+        if (profileCount == 0)
+            return -1;
         if (--profileCount == 0)
         {
             jsd.flags &= ~COLLECT_PROFILE_DATA;
@@ -2406,9 +2408,6 @@ var fbs =
                                 (script.baseLineNumber+script.lineExtent) + ")" +
                                 script.fileName);
 
-                            FBTrace.sysout("fbs.onEventScriptCreated name: \'" +
-                                script.functionName + "\'");
-
                             try
                             {
                                 FBTrace.sysout(script.functionSource);
@@ -2669,6 +2668,19 @@ var fbs =
                 }
             }
 
+            var functionName;
+            try
+            {
+                // Accessing the 'functionName' property can throw an exception
+                // if weird characters are used (see issue 6493)
+                functionName = script.functionName;
+            }
+            catch (err)
+            {
+                FBTrace.sysout("fbs.onScriptCreated; ERROR failed to get functionName", err);
+                functionName = "<unknown>";
+            }
+
             if (reXUL.test(script.fileName))
             {
                 fbs.onXScriptCreatedByTag[script.tag] = fbs.onXULScriptCreated;
@@ -2677,7 +2689,7 @@ var fbs =
                 // Stop in the first one called and assign all with this fileName to sourceFile.
                 script.setBreakpoint(0);
             }
-            else if (!script.functionName) // top or eval-level
+            else if (!functionName) // top or eval-level
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
@@ -2732,7 +2744,7 @@ var fbs =
 
                 if (FBTrace.DBG_FBS_CREATION)
                     FBTrace.sysout("fbs.onScriptCreated: nested function named: " +
-                        script.functionName);
+                        functionName);
 
                 dispatch(scriptListeners, "onScriptCreated", [script, fileName, script.baseLineNumber]);
             }
@@ -4187,6 +4199,8 @@ function isFilteredURL(rawJSD_script_filename)
     if (rawJSD_script_filename[0] == 'h')
         return false;
     if (rawJSD_script_filename == "XPCSafeJSObjectWrapper.cpp")
+        return true;
+    if (rawJSD_script_filename === "debugger eval code")
         return true;
     if (fbs.filterSystemURLs)
         return systemURLStem(rawJSD_script_filename);

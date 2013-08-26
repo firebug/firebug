@@ -19,6 +19,7 @@ function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug
 // Constants
 
 const saveTimeout = 400;
+const hugeChangeAmount = 100;
 const largeChangeAmount = 10;
 const smallChangeAmount = 0.1;
 
@@ -377,7 +378,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
                 chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount)),
                 chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
-                chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount))
+                chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                chrome.keyCodeListen("PAGE_UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -hugeChangeAmount)),
+                chrome.keyCodeListen("PAGE_DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, hugeChangeAmount))
             );
         }
 
@@ -415,7 +418,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                     chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
                     chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount)),
                     chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
-                    chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount))
+                    chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                    chrome.keyCodeListen("PAGE_UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -hugeChangeAmount)),
+                    chrome.keyCodeListen("PAGE_DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, hugeChangeAmount))
                 );
             }
         }

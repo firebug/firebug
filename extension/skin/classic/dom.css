@@ -48,6 +48,7 @@
 }
 
 .memberRowHeader {
+    position: relative;
     cursor: pointer;
     display: none;
     height: 100%;
@@ -61,15 +62,26 @@
 
 /* Display brekpoint disc */
 .memberRow .memberRowHeader {
-    background-position: 5px 2px;
+    background-position: 5px 4px;
 }
 
 .memberRow[breakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.memberRow[breakpoint="true"][disabledBreakpoint="true"] .memberRowHeader::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
 }
 
 .memberRow[breakable="true"]:hover .memberRowHeader {
@@ -78,7 +90,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover {
+.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover,
+.memberRow.cropped > .memberLabelCell > .memberLabel:hover {
     cursor: pointer;
     color: blue;
     text-decoration: underline;

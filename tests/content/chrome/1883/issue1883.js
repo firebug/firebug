@@ -6,7 +6,23 @@ function runTest()
 
     FBTest.openNewTab(basePath + "chrome/1883/issue1883.html", function(win)
     {
+        FBTest.progress("Document ready state: " + win.document.readyState);
+        FBTest.progress("Location: " + win.location);
+
+        if ((win.location + "").indexOf("issue1883.html") == -1)
+        {
+            FBTest.ok(false, "Wrong test page location");
+            setTimeout(function()
+            {
+                FBTest.progress("Location again: " + win.location);
+                FBTest.testDone();
+            }, 800);
+            return;
+        }
+
         win = FBTest.FirebugWindow.FBL.getContentView(win);
+
+        FBTest.progress("Test page opened " + win);
 
         with (FBTest.FirebugWindow.FBL) { with (FBTest.FirebugWindow)
         {
@@ -43,6 +59,8 @@ function runTest()
             var table = win.document.createElement("table");
             var tbody = win.document.createElement("tbody");
             table.appendChild(tbody);
+
+            FBTest.progress("table created " + table);
 
             iterTag.tag.insertRows({ test: 10 }, tbody);
 

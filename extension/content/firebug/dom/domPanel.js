@@ -83,8 +83,12 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         var row;
         if (this.currentSearch && text === this.currentSearch.text)
         {
+            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
+            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
+            // TODO: Rework 'searchBox.js', so it doesn't inject itself into the global 'Firebug'
+            // scope anymore
             row = this.currentSearch.findNext(true, undefined, reverse,
-                Search.isCaseSensitive(text));
+                Firebug.Search.isCaseSensitive(text));
         }
         else
         {
@@ -94,7 +98,10 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             };
 
             this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
-            row = this.currentSearch.find(text, reverse, Search.isCaseSensitive(text));
+
+            // xxxsz: 'Firebug.Search' is used here instead of 'Search' because we need to refer to
+            // 'firebug/chrome/searchBox' and not to 'firebug/lib/search'
+            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
         if (row)
@@ -124,7 +131,8 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         if (!target)
             target = row.lastChild.firstChild;
 
-        if (!target || !target.repObject)
+        var object = target && target.repObject, type = typeof object;
+        if (!object || !this.supportsObject(object, type))
             return;
 
         this.pathToAppend = DOMBasePanel.getPath(row);
@@ -141,7 +149,7 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         // it might find the object in the existing path and not refresh it
         Firebug.chrome.clearStatusPath();
 
-        this.select(target.repObject, true);
+        this.select(object, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

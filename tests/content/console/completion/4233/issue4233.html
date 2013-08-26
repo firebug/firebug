@@ -57,8 +57,10 @@ that completions appear for:</li>
     <li><code style="color:green">{a: window, i</code></li>
     <li><code style="color:green">id.get+(i</code></li>
     <li><code style="color:green">date().g</code></li>
-    <li><code style="color:green">mk4().c</code></li>
-    <li><code style="color:green">mk4().chain().c</code></li>
+    <li><code style="color:green">make1().c</code></li>
+    <li><code style="color:green">make1().chain().c</code></li>
+    <li><code style="color:green">make2().c</code></li>
+    <li><code style="color:green">make2().chain().c</code></li>
     <li><code style="color:green">getterSeemingEval('window').i</code></li>
     <li><code style="color:green">getterSeemingEval('[window]')[0].i</code></li>
     <li><code style="color:green">String.prototype.ch</code></li>
@@ -108,13 +110,23 @@ function id(x) {
     return x;
 }
 
-function mkP() {}
-mkP.prototype.chain = function() {
+function cls1() {}
+cls1.prototype.chain = function() {
     return this;
 };
-function mk4() {
-    return new mkP();
+function make1() {
+    return new cls1();
 }
+
+(function() {
+function cls2() {}
+cls2.prototype.chain = function() {
+    return this;
+};
+window.make2 = function() {
+    return new cls2();
+}
+})();
 
 function date() {
     return new Date();

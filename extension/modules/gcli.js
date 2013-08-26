@@ -52,7 +52,7 @@ var FirebugGCLICommands =
 
 /**
  * Read https://developer.mozilla.org/en/Tools/GCLI/Writing_GCLI_Commands
- * about how to implement GCLI comands.
+ * about how to implement GCLI commands.
  */
 var FirebugController =
 {

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4156: Multiple filters selectable in Net panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script src="issue4156-test.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4156">Issue 4156</a>: Multiple filters selectable in Net panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <img src="firebug.png" alt="Logo"/>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>
+                        Click the <em>CSS</em> filter button inside the <em>Net</em> panel,
+                        hold down <kbd>Ctrl</kbd> and click the <em>JavaScript</em> and <em>Images</em> filter button<br/>
+                        <span class="ok">
+                            &rArr; All three buttons should be pressed and the Net panel should list three requests,
+                            one to <code>testcase.css</code>, one to <code>issue4156-test.js</code> and one to <code>firebug.png</code>.
+                        </span>
+                    </li>
+                    <li>
+                        Hold down <kbd>Ctrl</kbd> and click the <em>JavaScript</em> filter button<br/>
+                        <span class="ok">
+                            &rArr; The <em>CSS</em> and <em>Images</em> button should still be pressed and
+                            the Net panel should list two requests, one to <code>testcase.css</code> and one to <code>firebug.png</code>.
+                        </span>
+                    </li>
+                    <li>
+                        Hold down <kbd>Ctrl</kbd> and click the <em>CSS</em> and the <em>Images</em> filter button<br/>
+                        <span class="ok">
+                            &rArr; The <em>All</em> button should be pressed now and
+                            the Net panel should list all four requests, one to <code>issue4156.html</code>, one to <code>testcase.css</code>,
+                            one to <code>issue4156-test.js</code> and one to <code>firebug.png</code>.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Multiple request filters should be activatable by pressing <kbd>Ctrl</kbd> while clicking the filter buttons.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 1738: Properties that don't just have getters must not be displayed as such</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        _testProperty = "Hello Firebug user!";
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=1738">Issue 1738</a>: getters are editable in DOM panels</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>
+                        Switch to the <em>DOM</em> panel<br/>
+                        <span class="ok">&rArr; There should be a property listed named <code>_testProperty</code>. It should appear without <code>get</code> prefix.</span>
+                    </li>
+                    <li>Double-click the value (<code>Hello Firebug user!</code>) of the <code>_testProperty</code> property.</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Properties that do not only have getters shouldn't be listed as such.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -255,7 +255,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
                     FBTrace.sysout("sourceCache.load cacheChannel key" + cacheChannel.cacheKey);
             }
         }
-        else if ((method == "PUT" || method == "POST") && file)
+        else if ((method == "POST" || method == "PUT" || method == "PATCH") && file)
         {
             if (channel instanceof nsIUploadChannel)
             {

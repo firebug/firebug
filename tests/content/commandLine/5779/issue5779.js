@@ -17,7 +17,7 @@ function runTest()
             tasks.push(FBTest.executeCommandAndVerify,
                 "$$('div');",
                 "[div.test, div#root, div.rootdiv1, div.rootdiv2]",
-                "pre", "objectBox-array");
+                "span", "objectBox-array");
 
             tasks.push(FBTest.executeCommandAndVerify,
                 "$('div', document.getElementById('root'));",
@@ -27,7 +27,7 @@ function runTest()
             tasks.push(FBTest.executeCommandAndVerify,
                 "$$('div', document.getElementById('root'));",
                 "[div.rootdiv1, div.rootdiv2]",
-                "pre", "objectBox-array");
+                "span", "objectBox-array");
 
             tasks.run(function() {
                 FBTest.testDone("issue5779.DONE");

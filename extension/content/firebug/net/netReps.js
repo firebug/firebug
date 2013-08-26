@@ -225,7 +225,6 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             switch (colID)
             {
                 case "netTimeCol":
-                    FBTrace.sysout("row.repObject", row.repObject);
                     value = row.repObject.requestNumber;
                     break;
                 case "netSizeCol":
@@ -449,7 +448,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
                 ),
                 TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell",
-                    "aria-describedby": "fbNetTimeInfoTip"  },
+                    "aria-describedby": "fbNetTimeInfoTip" },
                     DIV({"class": "netLoadingIcon"}),
                     DIV({"class": "netBar"},
                         "&nbsp;",
@@ -485,25 +484,30 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             "aria-live": "polite"},
             TD({"class": "netCol"}, "&nbsp;"),
             TD({"class": "netCol netHrefCol a11yFocus", "role" : "rowheader"},
-                DIV({"class": "netCountLabel netSummaryLabel"}, "-")
+                DIV({"class": "netCountLabel netSummaryLabel",
+                    title: Locale.$STR("net.summary.tip.request count")},
+                    "-"
+                )
             ),
             TD({"class": "netCol netStatusCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netProtocolCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netDomainCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
-                DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0 B")
+                DIV({"class": "netTotalSizeLabel netSummaryLabel",
+                    title: Locale.$STR("net.summary.tip.total size")},
+                    "0 B"
+                )
             ),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role":
                 "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
-                    DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
-                        "(",
-                        SPAN("0 B"),
-                        SPAN(" " + Locale.$STR("FromCache")),
-                        ")"
+                    DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true",
+                        title: Locale.$STR("net.summary.tip.total cached size")},
+                        "(" + Locale.$STRF("net.summary.from_cache", ["0 B"]) + ")"
                     ),
-                    DIV({"class": "netTimeBar netSummaryLabel"},
-                        SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
+                    DIV({"class": "netTotalTimeLabel netSummaryLabel",
+                        title: Locale.$STR("net.summary.tip.total request time")},
+                        "0ms"
                     )
                 )
             )
@@ -575,7 +579,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var category = NetUtils.getFileCategory(row.repObject);
             if (category)
                 Css.setClass(netInfoBox, "category-" + category);
-            row.setAttribute('aria-expanded', 'true');
+
+            row.setAttribute("aria-expanded", "true");
         }
         else
         {
@@ -586,7 +591,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 [netInfoBox, file]);
 
             row.parentNode.removeChild(netInfoRow);
-            row.setAttribute('aria-expanded', 'false');
+            row.setAttribute("aria-expanded", "false");
         }
     },
 
@@ -816,15 +821,15 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 $collapsed: "$file|hidePut"},
                 Locale.$STR("Put")
             ),
+            A({"class": "netInfoPatchTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
+                view: "Patch",
+                $collapsed: "$file|hidePatch"},
+                Locale.$STR("net.label.Patch")
+            ),
             A({"class": "netInfoResponseTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Response",
                 $collapsed: "$file|hideResponse"},
                 Locale.$STR("Response")
-            ),
-            A({"class": "netInfoCacheTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
-               view: "Cache",
-               $collapsed: "$file|hideCache"},
-               Locale.$STR("Cache")
             ),
             A({"class": "netInfoHtmlTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                view: "Html",
@@ -840,13 +845,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoHeadersText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPostText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
+            DIV({"class": "netInfoPatchText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
-            DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
-                TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0,
-                    "role": "presentation"},
-                    TBODY({"role": "list", "aria-label": Locale.$STR("Cache")})
-                )
-            ),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
                 IFRAME({"class": "netInfoHtmlPreview", "role": "document"}),
                 DIV({"class": "htmlPreviewResizer"})
@@ -927,6 +927,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         return file.method.toUpperCase() != "PUT";
     },
 
+    hidePatch: function(file)
+    {
+        return file.method.toUpperCase() != "PATCH";
+    },
+
     hideResponse: function(file)
     {
         var headers = file.responseHeaders;
@@ -937,12 +942,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         return file.category in NetUtils.binaryFileCategories || file.responseText == "";
-    },
-
-    hideCache: function(file)
-    {
-        //xxxHonza: I don't see any reason why not to display the cache info also for images.
-        return !file.cacheEntry/* || file.category=="image"*/;
     },
 
     hideHtml: function(file)
@@ -1001,7 +1000,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             netInfoBox.selectedText.removeAttribute("selected");
             netInfoBox.selectedTab.setAttribute("aria-selected", "false");
         }
-
         var textBodyName = "netInfo" + view + "Text";
 
         netInfoBox.selectedTab = tab;
@@ -1101,7 +1099,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             if (!netInfoBox.postPresented)
             {
-                netInfoBox.postPresented  = true;
+                netInfoBox.postPresented = true;
                 var postText = netInfoBox.getElementsByClassName("netInfoPostText").item(0);
                 Firebug.NetMonitor.NetInfoPostData.render(context, postText, file);
             }
@@ -1111,9 +1109,19 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             if (!netInfoBox.putPresented)
             {
-                netInfoBox.putPresented  = true;
+                netInfoBox.putPresented = true;
                 var putText = netInfoBox.getElementsByClassName("netInfoPutText").item(0);
                 Firebug.NetMonitor.NetInfoPostData.render(context, putText, file);
+            }
+        }
+
+        if (Css.hasClass(tab, "netInfoPatchTab"))
+        {
+            if (!netInfoBox.patchPresented)
+            {
+                netInfoBox.patchPresented = true;
+                var patchText = netInfoBox.getElementsByClassName("netInfoPatchText").item(0);
+                Firebug.NetMonitor.NetInfoPostData.render(context, patchText, file);
             }
         }
 
@@ -1131,10 +1139,10 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 if (file.category == "image")
                 {
                     netInfoBox.responsePresented = true;
-    
+
                     var responseImage = netInfoBox.ownerDocument.createElement("img");
                     responseImage.src = file.href;
-    
+
                     Dom.clearNode(responseTextBox);
                     responseTextBox.appendChild(responseImage, responseTextBox);
                 }
@@ -1142,15 +1150,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 {
                     this.setResponseText(file, netInfoBox, responseTextBox, context);
                 }
-            }
-        }
-
-        if (Css.hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
-        {
-            var responseTextBox = netInfoBox.getElementsByClassName("netInfoCacheText").item(0);
-            if (file.cacheEntry) {
-                netInfoBox.cachePresented = true;
-                this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
         }
 
@@ -1639,7 +1638,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         else
         {
             var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
-            this.insertSource(netInfoBox, Str.escapeForTextNode(source), target.rowName);
+            this.insertSource(netInfoBox, source, target.rowName);
             target.textContent = Locale.$STR("net.headers.pretty print");
         }
 
@@ -1650,14 +1649,10 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
     insertSource: function(netInfoBox, source, rowName)
     {
-        // This breaks copy to clipboard.
-        //if (source)
-        //    source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
-
         var tbody = netInfoBox.getElementsByClassName("netInfo" + rowName + "Body").item(0);
         var node = this.sourceTag.replace({}, tbody);
         var sourceNode = node.getElementsByClassName("source").item(0);
-        sourceNode.innerHTML = source;
+        sourceNode.textContent = source;
     },
 
     insertHeaderRows: function(netInfoBox, headers, rowName)
@@ -1705,203 +1700,6 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             this.init(parent);
 
         this.insertHeaderRows(parent, headers, rowName);
-    }
-});
-
-// ********************************************************************************************* //
-
-/**
- * @domplate Represents a template for popup tip that displays detailed timing info about
- * a network request.
- */
-Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
-{
-    tableTag:
-        TABLE({"class": "timeInfoTip", "id": "fbNetTimeInfoTip"},
-            TBODY()
-        ),
-
-    timingsTag:
-        FOR("time", "$timings",
-            TR({"class": "timeInfoTipRow", $collapsed: "$time|hideBar"},
-                TD({"class": "$time|getBarClass timeInfoTipBar",
-                    $loaded: "$time.loaded",
-                    $fromCache: "$time.fromCache",
-                }),
-                TD({"class": "timeInfoTipCell startTime"},
-                    "$time.start|formatStartTime"
-                ),
-                TD({"class": "timeInfoTipCell elapsedTime"},
-                    "$time.elapsed|formatTime"
-                ),
-                TD("$time|getLabel")
-            )
-        ),
-
-    startTimeTag:
-        TR(
-            TD(),
-            TD("$startTime.time|formatStartTime"),
-            TD({"class": "timeInfoTipStartLabel", "colspan": 2},
-                "$startTime|getLabel"
-            )
-        ),
-
-    separatorTag:
-        TR(
-            TD({"class": "timeInfoTipSeparator", "colspan": 4, "height": "10px"},
-                SPAN("$label")
-            )
-        ),
-
-    eventsTag:
-        FOR("event", "$events",
-            TR({"class": "timeInfoTipEventRow"},
-                TD({"class": "timeInfoTipBar", align: "center"},
-                    DIV({"class": "$event|getTimeStampClass timeInfoTipEventBar"})
-                ),
-                TD("$event.start|formatStartTime"),
-                TD({"class": "timeInfotTipEventName", "colspan": 2},
-                    "$event|getTimeStampLabel"
-                )
-            )
-        ),
-
-    hideBar: function(obj)
-    {
-        return !obj.elapsed && obj.bar == "Blocking";
-    },
-
-    getBarClass: function(obj)
-    {
-        return "net" + obj.bar + "Bar";
-    },
-
-    getTimeStampClass: function(obj)
-    {
-        return obj.classes;
-    },
-
-    formatTime: function(time)
-    {
-        return Str.formatTime(time);
-    },
-
-    formatStartTime: function(time)
-    {
-        var label = Str.formatTime(time);
-        if (!time)
-            return label;
-
-        return (time > 0 ? "+" : "") + label;
-    },
-
-    getLabel: function(obj)
-    {
-        return Locale.$STR("requestinfo." + obj.bar);
-    },
-
-    getTimeStampLabel: function(obj)
-    {
-        return obj.name;
-    },
-
-    render: function(context, file, parentNode)
-    {
-        var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
-
-        var elapsed = file.loaded ? file.endTime - file.startTime :
-            file.phase.phaseEndTime - file.startTime;
-        var blockingEnd = NetUtils.getBlockingEndTime(file);
-
-        //Helper log for debugging timing problems.
-        //NetUtils.traceRequestTiming("net.timeInfoTip.render;", file);
-
-        var startTime = 0;
-
-        var timings = [];
-        timings.push({bar: "Blocking",
-            elapsed: blockingEnd - file.startTime,
-            start: startTime});
-
-        timings.push({bar: "Resolving",
-            elapsed: file.connectingTime - file.resolvingTime,
-            start: startTime += timings[0].elapsed});
-
-        // Connecting time is measured till the sending time in order to include
-        // also SSL negotiation.
-        // xxxHonza: time between "connected" and "sending" is SSL negotiation?
-        timings.push({bar: "Connecting",
-            elapsed: file.connectStarted ? file.sendingTime - file.connectingTime : 0,
-            start: startTime += timings[1].elapsed});
-
-        // In Fx3.6 the STATUS_SENDING_TO is always fired (nsIHttpActivityDistributor)
-        // In Fx3.5 the STATUS_SENDING_TO (nsIWebProgressListener) doesn't have to come
-        // This workaround is for 3.5
-        var sendElapsed = file.sendStarted ? file.waitingForTime - file.sendingTime : 0;
-        var sendStarted = timings[0].elapsed + timings[1].elapsed + timings[2].elapsed;
-
-        timings.push({bar: "Sending",
-            elapsed: sendElapsed,
-            start: file.sendStarted ? file.sendingTime - file.startTime : sendStarted});
-
-        timings.push({bar: "Waiting",
-            elapsed: file.respondedTime - file.waitingForTime,
-            start: file.waitingForTime - file.startTime});
-
-        timings.push({bar: "Receiving",
-            elapsed: file.endTime - file.respondedTime,
-            start: file.respondedTime - file.startTime,
-            loaded: file.loaded, fromCache: file.fromCache});
-
-        var events = [];
-        var timeStamps = file.phase.timeStamps;
-        for (var i=0; i<timeStamps.length; i++)
-        {
-            var timeStamp = timeStamps[i];
-            events.push({
-                name: timeStamp.label,
-                classes: timeStamp.classes,
-                start: timeStamp.time - file.startTime
-            });
-        }
-
-        events.sort(function(a, b) {
-            return a.start < b.start ? -1 : 1;
-        });
-
-        var phases = context.netProgress.phases;
-
-        if (FBTrace.DBG_ERROR && phases.length == 0)
-            FBTrace.sysout("net.render; ERROR no phases");
-
-        // Insert start request time. It's computed since the beginning (page load start time)
-        // i.e. from the first phase start.
-        var firstPhaseStartTime = (phases.length > 0) ? phases[0].startTime : file.startTime;
-
-        var startTime = {};
-        startTime.time = file.startTime - firstPhaseStartTime;
-        startTime.bar = "started.label";
-        this.startTimeTag.insertRows({startTime: startTime}, infoTip.firstChild);
-
-        // Insert separator.
-        this.separatorTag.insertRows({label: Locale.$STR("requestinfo.phases.label")},
-            infoTip.firstChild);
-
-        // Insert request timing info.
-        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
-
-        // Insert events timing info.
-        if (events.length)
-        {
-            // Insert separator.
-            this.separatorTag.insertRows({label: Locale.$STR("requestinfo.timings.label")},
-                infoTip.firstChild);
-
-            this.eventsTag.insertRows({events: events}, infoTip.firstChild);
-        }
-
-        return true;
     }
 });
 

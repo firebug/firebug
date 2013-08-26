@@ -16,12 +16,13 @@ function runTest()
             FBTest.waitForDisplayedElement("console", options, function(row)
             {
                 var panel = FBTest.selectPanel("console");
-                var requests = panel.panelNode.querySelectorAll(".logRow.logRow-spy.error.loaded");
+                var requests = panel.panelNode.getElementsByClassName("logRow logRow-spy error loaded");
                 FBTest.compare(2, requests.length, "There must be 2 requests");
 
-                FBTest.executeContextMenuCommand(requests[0], "fbSpyCopyLocation", function()
+                FBTest.executeContextMenuCommand(requests[0].getElementsByClassName("spyTitle")[0],
+                    "fbSpyCopyLocation", function()
                 {
-                    var expected = /\s*path1$/;
+                    var expected = /path1$/;
                     FBTest.waitForClipboard(expected, function(text)
                     {
                         FBTest.compare(expected, text, "Proper URL must be copied. Current: " + text);

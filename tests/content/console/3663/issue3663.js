@@ -7,7 +7,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.enableConsolePanel(function()
         {
-            var config = {tagName: "pre", classes: "objectBox-array"};
+            var config = {tagName: "span", classes: "objectBox-array"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 var expected = /\s*\[\"a1\"\,\s*\[\.\.\.\]\,\s*\"b1\"\]\s*/;

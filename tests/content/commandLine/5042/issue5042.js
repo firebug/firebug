@@ -19,9 +19,9 @@ function runTest()
             {
                 FBTest.ok(cmdLine == FW.FBL.getAncestorByClass(doc.activeElement, "fbCommandLine"),
                     "Command Line must be focused");
-    
+
                 FBTest.synthesizeKey("VK_TAB", null, win);
-    
+
                 FBTest.ok("fbMainContainer" != browserDoc.activeElement.id ||
                     cmdLine != FW.FBL.getAncestorByClass(doc.activeElement, "fbCommandLine"),
                     "Command Line must not be focused anymore");

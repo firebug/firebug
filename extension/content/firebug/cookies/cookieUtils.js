@@ -2,15 +2,42 @@
 
 define([
     "firebug/cookies/cookie",
+    "firebug/lib/wrapper",
     "firebug/lib/string"
 ],
-function(Cookie, Str) {
+function(Cookie, Wrapper, Str) {
 
 // ********************************************************************************************* //
-// Menu Utils
+// Constants
+
+var Cu = Components.utils;
+
+// ********************************************************************************************* //
+// CookieUtils Implementation
 
 var CookieUtils = 
 {
+    isDeletedCookie: function(cookie)
+    {
+        if (cookie.maxAge)
+            return cookie.maxAge <= 0;
+
+        if (cookie.expires)
+        {
+            var expiresDate = new Date(cookie.expires * 1000);
+
+            return expiresDate.getTime() <= Date.now();
+        }
+
+        return false;
+    },
+
+    isSessionCookie: function(cookie)
+    {
+        // maxAge is string value, "0" will not register as session.
+        return (!cookie.expires && !cookie.maxAge)
+    },
+
     getCookieId: function(cookie)
     {
         return cookie.host + cookie.path + cookie.name;
@@ -44,7 +71,7 @@ var CookieUtils =
         }
         catch (exc) { }
 
-        var c = {
+        return {
             name        : cookie.name,
             value       : value,
             isDomain    : cookie.isDomain,
@@ -52,11 +79,11 @@ var CookieUtils =
             path        : cookie.path,
             isSecure    : cookie.isSecure,
             expires     : cookie.expires,
+            maxAge      : cookie.maxAge,
             isHttpOnly  : cookie.isHttpOnly,
-            rawValue    : rawValue
+            rawValue    : rawValue,
+            rawCookie   : cookie,
         };
-
-        return c;
     },
 
     parseFromString: function(string)
@@ -76,32 +103,42 @@ var CookieUtils =
             {
                 var name = option[0].toLowerCase();
                 name = (name == "domain") ? "host" : name;
-                if (name == "httponly")
+                switch(name)
                 {
-                    cookie.isHttpOnly = true;
-                }
-                else if (name == "expires")
-                {
-                    var value = option[1];
-                    value = value.replace(/-/g, " ");
-                    cookie[name] = Date.parse(value) / 1000;
+                    case "httponly":
+                        cookie.isHttpOnly = true;
+                        break;
 
-                    // Log error if the date isn't correctly parsed.
-                    if (FBTrace.DBG_COOKIES)
-                    {
-                        var tempDate = new Date(cookie[name] * 1000);
-                        if (value != tempDate.toGMTString())
+                    case "secure":
+                        cookie.isSecure = true;
+                        break;
+
+                    case "max-age":
+                        //Remove dash from variable name
+                        cookie.maxAge = option[1];
+                        break;
+
+                    case "expires":
+                        var value = option[1];
+                        value = value.replace(/-/g, " ");
+                        cookie[name] = Date.parse(value) / 1000;
+
+                        // Log error if the date isn't correctly parsed.
+                        if (FBTrace.DBG_COOKIES)
                         {
-                            FBTrace.sysout("cookies.parseFromString: ERROR, " + 
-                                "from: " + value + 
-                                ", to: " + tempDate.toGMTString() + 
-                                ", cookie: " + string);
+                            var tempDate = new Date(cookie[name] * 1000);
+                            if (value != tempDate.toGMTString())
+                            {
+                                FBTrace.sysout("cookies.parseFromString: ERROR, " + 
+                                    "from: " + value + 
+                                    ", to: " + tempDate.toGMTString() + 
+                                    ", cookie: " + string);
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    cookie[name] = option[1];
+                        break;
+
+                    default:
+                        cookie[name] = option[1];
                 }
             }
         }
@@ -130,6 +167,15 @@ var CookieUtils =
         }
 
         return cookies;
+    },
+
+    getRealObject: function(cookie, context)
+    {
+        cookie = this.makeCookieObject(cookie);
+        delete cookie.rawCookie;
+
+        var global = context.getCurrentGlobal();
+        return Wrapper.cloneIntoContentScope(global, cookie);
     }
 };
 

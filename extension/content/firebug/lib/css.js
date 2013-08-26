@@ -7,22 +7,29 @@ define([
     "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/lib/http",
-    "firebug/lib/xpath",
+    "firebug/lib/xpath"
 ],
 function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {
+
+// ********************************************************************************************* //
+// Constants
+
+var Ci = Components.interfaces;
+var Cc = Components.classes;
 
 // ********************************************************************************************* //
 // Module Implementation
 
 var Css = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS
 
 var cssKeywordMap = {};
 var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
+var domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 Css.getCSSKeywordsByProperty = function(nodeType, propName, avoid)
 {
@@ -116,7 +123,9 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 /**
  * Parses the CSS properties of a CSSStyleRule
  * @param {Object} style CSSStyleRule to get the properties of
- * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @param {Object} element Element to which the style applies. Needed for parsing
+ *      shorthand properties correctly.
+ *
  * @returns {Array} Properties represented by {name, value, priority, longhandProps}
  */
 Css.parseCSSProps = function(style, element)
@@ -313,7 +322,7 @@ Css.getElementCSSPath = function(element)
     return paths.length ? paths.join(" ") : null;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS classes
 
 var classNameReCache={};
@@ -702,9 +711,11 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
+    {
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
             (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+    }
 
     ownerDocument = ownerDocument || Css.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)
@@ -773,66 +784,99 @@ Css.extractURLs = function(value)
     return urls;
 };
 
+Css.colorNameToRGB = function(value)
+{
+    if (!domUtils.colorNameToRGB)
+        return value;
+
+    if (value === "transparent")
+        return "rgba(0, 0, 0, 0)";
+
+    try
+    {
+        var rgbValue = domUtils.colorNameToRGB(value);
+        return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+    }
+    catch(e)
+    {
+        return value;
+    }
+};
+
 Css.rgbToHex = function(value)
 {
+    function convertRGBToHex(r, g, b)
+    {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
+            toString(16).substr(-6).toUpperCase();
+    }
+
+    value = Css.colorNameToRGB(value);
+
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
-            return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
-                toString(16).substr(-6).toUpperCase();
+            return convertRGBToHex(r, g, b);
         });
 };
 
 Css.rgbToHSL = function(value)
 {
+    function convertRGBToHSL(r, g, b, a)
+    {
+        r = parseInt(r);
+        g = parseInt(g);
+        b = parseInt(b);
+
+        var gray = (r == g && g == b);
+
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        var max = Math.max(r, g, b);
+        var min = Math.min(r, g, b);
+
+        var h = 0;
+        var s = 0;
+        var l = (max+min)/2;
+
+        if (!gray)
+        {
+            var delta = max - min;
+            s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);
+
+            switch (max)
+            {
+                case r:
+                    h = (g-b)/delta + (g < b ? 6 : 0);
+                    break;
+
+                case g:
+                    h = (b-r)/delta + 2;
+                    break;
+
+                case b:
+                    h = (r-g)/delta + 4;
+                    break;
+            }
+        }
+
+        h = Math.round(h * 60);
+        s = Math.round(s * 100);
+        l = Math.round(l * 100);
+
+        if (a)
+            return "hsla("+h+", "+s+"%, "+l+"%, "+a+")";
+        else
+            return "hsl("+h+", "+s+"%, "+l+"%)";
+    }
+
+    value = Css.colorNameToRGB(value);
+
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a)
         {
-            r = parseInt(r);
-            g = parseInt(g);
-            b = parseInt(b);
-
-            var gray = (r == g && g == b);
-
-            r /= 255;
-            g /= 255;
-            b /= 255;
-
-            var max = Math.max(r, g, b);
-            var min = Math.min(r, g, b);
-
-            var h = 0;
-            var s = 0;
-            var l = (max+min)/2;
-
-            if (!gray)
-            {
-                var delta = max - min;
-                s = l > 0.5 ? delta/(2-max-min) : delta/(max+min);
-
-                switch (max)
-                {
-                    case r:
-                        h = (g-b)/delta + (g < b ? 6 : 0);
-                        break;
-
-                    case g:
-                        h = (b-r)/delta + 2;
-                        break;
-
-                    case b:
-                        h = (r-g)/delta + 4;
-                        break;
-                }
-            }
-
-            h = Math.round(h * 60);
-            s = Math.round(s * 100);
-            l = Math.round(l * 100);
-
-            if (a)
-                return "hsla("+h+", "+s+"%, "+l+"%, "+a+")";
-            else
-                return "hsl("+h+", "+s+"%, "+l+"%)";
+            return convertRGBToHSL(r, g, b, a);
         });
 };
 
@@ -889,7 +933,6 @@ Css.cssInfo.html =
     "border-top-right-radius": ["length"], // FF 4.0
     "border-bottom-right-radius": ["length"], // FF 4.0
     "border-bottom-left-radius": ["length"], // FF 4.0
-    "-moz-border-image": ["borderImageRepeat", "thickness", "url()", "none"],
     "border-image": ["borderImageRepeat", "thickness", "url()", "none"], // FF 15.0
     "border-image-outset": ["length"], // FF 15.0
     "border-image-repeat": ["borderImageRepeat"], // FF 15.0
@@ -914,6 +957,16 @@ Css.cssInfo.html =
     "display": ["display"],
     "empty-cells": ["emptyCells"],
     "float": ["float"],
+
+    "align-items": ["alignItems"],
+    "align-self": ["alignSelf"],
+    "flex": ["flexBasis"],
+    "flex-basis": ["flexBasis"],
+    "flex-direction": ["flexDirection"],
+    "flex-grow": [],
+    "flex-shrink": [],
+    "justify-content": ["justifyContent"],
+    "order": [],
 
     // specification of font families in "font" is special-cased
     "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
@@ -942,9 +995,9 @@ Css.cssInfo.html =
     "margin-left": ["auto", "length"],
 
     "marker-offset": ["auto", "length"],
-    "min-height": ["auto", "length"],
+    "min-height": ["length"],
     "max-height": ["none", "length"],
-    "min-width": ["width", "auto", "length"],
+    "min-width": ["width", "length"],
     "max-width": ["width", "none", "length"],
 
     "opacity": [],
@@ -1023,7 +1076,7 @@ Css.cssInfo.html =
     "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
     "-moz-background-inline-policy": [],
-    "-moz-binding": [],
+    "-moz-binding": ["url()", "none"],
     "-moz-columns": ["auto", "length"],
     "-moz-column-count": ["auto"],
     "-moz-column-gap": ["normal", "length"],
@@ -1032,7 +1085,7 @@ Css.cssInfo.html =
     "-moz-column-rule-style": ["borderStyle"],
     "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto", "length"],
-    "-moz-image-region": [],
+    "-moz-image-region": ["rect()"],
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
@@ -1531,6 +1584,48 @@ Css.cssKeywords =
         "-moz-show-background"
     ],
 
+    "alignItems":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "alignSelf":
+    [
+        "auto",
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "flexBasis":
+    [
+        "initial",
+        "auto"
+    ],
+
+    "flexDirection":
+    [
+        "row",
+        "row-reverse",
+        "column",
+        "column-reverse"
+    ],
+
+    "justifyContent":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around"
+    ],
+
     "clear":
     [
         "left",
@@ -1801,7 +1896,7 @@ Css.cssKeywords =
         "break-all",
         "keep-all"
     ],
-         
+
     "fontFamily":
     [
         // Common font families
@@ -1846,7 +1941,7 @@ Css.cssKeywords =
         "-moz-pull-down-menu",
         "-moz-field"
     ],
-       
+
     "display":
     [
         "block",
@@ -1854,6 +1949,8 @@ Css.cssKeywords =
         "inline",
         "inline-block",
         "list-item",
+        "flex",
+        "inline-flex",
         "marker",
         "run-in",
         "compact",
@@ -2002,7 +2099,7 @@ Css.cssKeywords =
         "read-write",
         "write-only"
     ],
-       
+
     "userSelect":
     [
         "text",
@@ -2606,6 +2703,37 @@ Css.charsets =
     "Windows-1257",
     "Windows-1258"
 ];
+
+// http://www.w3.org/TR/CSS21/media.html#media-types
+Css.mediaTypes =
+[
+    "all",
+    "aural",
+    "braille",
+    "embossed",
+    "handheld",
+    "print",
+    "projection",
+    "screen",
+    "tty",
+    "tv"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@document
+Css.documentConditions =
+[
+    "url()",
+    "url-prefix()",
+    "domain()",
+    "regexp()"
+];
+
+// https://developer.mozilla.org/en-US/docs/CSS/@keyframes#Values
+Css.keyframeKeys =
+{
+    "from": "0%",
+    "to": "100%"
+};
 
 // http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSPseudoClassList.h
 // Also http://mxr.mozilla.org/mozilla-central/source/layout/style/nsCSSAnonBoxList.h

@@ -229,7 +229,7 @@ var PerfInfoTip = domplate(Firebug.Rep,
 
     render: function(timing, parentNode)
     {
-        var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
+        var infoTip = PerfInfoTip.tableTag.replace({}, parentNode);
 
         // Insert top description.
         this.separatorTag.insertRows({label: Locale.$STR("perftiming.bars.label")},
@@ -394,7 +394,7 @@ function performanceTiming(context, timing)
 
     DetailsEntry.tag.insertRows({timings: timings}, tBody);
 
-    return Firebug.Console.getDefaultReturnValue(context.window);
+    return Firebug.Console.getDefaultReturnValue();
 }
 
 // ********************************************************************************************* //

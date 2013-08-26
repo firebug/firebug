@@ -98,9 +98,11 @@
                     command="cmd_showCommandLine"/>
                 <menuitem id="turnOffFirebug"
                     label="tracing.cmd.Turn Off Firebug" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Turn Off Firebug"
                     command="cmd_turnOffFirebug"/>
                 <menuitem id="reloadFirebug"
                     label="tracing.cmd.Reload Firebug" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Reload Firebug"
                     command="cmd_reloadFirebug"/>
                 <menuseparator />
                 <menuitem id="clearCache"
@@ -122,6 +124,7 @@
                 <menuseparator />
                 <menuitem id="alwaysOpenTraceConsole"
                     type="checkbox" label="Always_Open"
+                    tooltiptext="Always_Open_Firebug_Tracing"
                     command="cmd_alwaysOpenTraceConsole"
                     class="fbInternational" option="alwaysOpenTraceConsole"/>
             </menupopup>

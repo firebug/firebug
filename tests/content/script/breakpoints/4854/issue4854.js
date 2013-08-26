@@ -14,10 +14,10 @@ function runTest()
                 tagName: "tr",
                 classes: "netRow category-xhr hasHeaders loaded"
             };
-  
+
             var panel = FBTest.selectPanel("net");
             panel.clear();
-  
+
             FBTest.waitForDisplayedElement("net", options, function(row)
             {
                 var breakpointColumn = row.getElementsByClassName("sourceLine").item(0);

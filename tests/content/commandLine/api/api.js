@@ -19,10 +19,10 @@ function runTest()
                 "a", "objectLink objectLink-element");
 
             tasks.push(executeAndVerify, "$$(\".a.c\")", "[div.a, div.a]",
-                "pre", "objectBox objectBox-array");
+                "span", "objectBox objectBox-array");
 
             tasks.push(executeAndVerify, "$x(\"html/body/span/div[1]\")", "[div.test]",
-                "pre", "objectBox objectBox-array");
+                "span", "objectBox objectBox-array");
 
             tasks.push(executeAndVerify, "dir(a)", /\s*a\s*10\s*/,
                 "table", "domTable");
@@ -32,10 +32,10 @@ function runTest()
                 "div", "logRow logRow-dirxml");
 
             tasks.push(executeAndVerify, "keys(b)", "[\"a\", \"name\"]",
-                "pre", "objectBox objectBox-array");
+                "span", "objectBox objectBox-array");
 
             tasks.push(executeAndVerify, "values(b)", "[7, \"a\"]",
-                "pre", "objectBox objectBox-array");
+                "span", "objectBox objectBox-array");
 
             tasks.push(executeAndVerify, "table(a)", FW.FBL.$STR("firebug.reps.table.ObjectProperties") + "10",
                 "div", "logRow logRow-table");
@@ -44,7 +44,7 @@ function runTest()
             tasks.push(executeAndVerify,
                 "$$('.a').map(function(item){return item.localName;});",
                 "[\"div\", \"div\", \"div\"]",
-                "pre", "objectBox objectBox-array");
+                "span", "objectBox objectBox-array");
 
             // $x must also return a real array so, eg map() can be applied.
             tasks.push(executeAndVerify,

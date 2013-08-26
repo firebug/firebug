@@ -11,8 +11,8 @@ function runTest()
             {
                 FBTest.progress("recognized error row: " + el);
 
-                var objBox = el.querySelector("pre.objectBox-errorMessage");
-                var errBP = el.querySelector("img.errorBreak");
+                var objBox = el.querySelector("span.objectBox-errorMessage");
+                var errBP = el.querySelector("span.errorBreak");
 
                 FBTest.progress("Found Breakpoint button: " + errBP);
 

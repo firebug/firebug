@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<root>
+    <steps>
+        <step>Open Firebug and switch to the Console panel</step>
+        <step>Type: console.log("ok");</step>
+    </steps>
+</root>

@@ -185,6 +185,10 @@ function runTest()
                 });
             };
 
+            // Since FF 22.0a2 inIDOMUtils has a function colorNameToRGB()
+            var grayColorValue = (FBTest.compareFirefoxVersion("22.0a2") >= 0) ?
+                "#808080" : "gray";
+
             var tasks = new FBTest.TaskList();
             tasks.push(verify, {}, {"color": "#700020", "font": "1em Verdana"});
             tasks.push(toggleDisable, "color");
@@ -196,11 +200,11 @@ function runTest()
             tasks.push(addProperty, "color", "gray", false);
             tasks.push(verify, {"color": "#700020", "font": "1em Verdana"}, {});
             tasks.push(addProperty, "color", "gray", true);
-            tasks.push(verify, {"font": "1em Verdana"}, {"color": "gray"});
+            tasks.push(verify, {"font": "1em Verdana"}, {"color": grayColorValue});
             tasks.push(changeProperty, "font", "1em Times New Roman", false);
-            tasks.push(verify, {"font": "1em Verdana"}, {"color": "gray"});
+            tasks.push(verify, {"font": "1em Verdana"}, {"color": grayColorValue});
             tasks.push(changeProperty, "font", "1em Times New Roman", true);
-            tasks.push(verify, {}, {"color": "gray", "font": "1em Times New Roman"});
+            tasks.push(verify, {}, {"color": grayColorValue, "font": "1em Times New Roman"});
             tasks.push(toggleDisable, "color");
             tasks.push(addInlineStyle, "padding", "1px");
             tasks.push(verify, {}, {"padding": "1px"});
@@ -212,9 +216,9 @@ function runTest()
             tasks.push(deleteProperty, "margin");
             tasks.push(verify, {"padding": "1px"}, {});
             tasks.push(deleteProperty, "padding");
-            tasks.push(verify, {"color": "gray"}, {"font": "1em Times New Roman"});
+            tasks.push(verify, {"color": grayColorValue}, {"font": "1em Times New Roman"});
             tasks.push(deleteProperty, "font");
-            tasks.push(verify, {"color": "gray"}, {});
+            tasks.push(verify, {"color": grayColorValue}, {});
 
             tasks.run(function()
             {

@@ -43,7 +43,7 @@ this.getCookieRowByName = function(panelNode, cookieName)
             return null;
 
         if (label[0].textContent == cookieName)
-            return row; 
+            return row;
     }
     return null;
 };
@@ -92,7 +92,7 @@ this.expandCookie = function(panelNode, cookieName, infoTab)
 
 /**
  * Verifies content of specified tab for given cookie.
- * 
+ *
  * @param {Element} panelNode Cookie panel node.
  * @param {String} cookieName Name of the cookie under inspection.
  * @param {String} tabName Name of the tab under inspection (Value, RawValue, Json, Xml)
@@ -115,11 +115,11 @@ this.removeCookie = function(host, name, path)
 }
 
 /**
- * Opens editCookie.xul dialog. Since the dialog is modal, the method returns
- * after its closed. Use callback to close the dialog.
- * 
- * @param {Object} cookie Cookie beeing edited
- * @param {Function} callback Callback for dialog manipulation.
+ * Opens 'Edit Cookie' dialog. Since the dialog is modal, the method returns
+ * after its closed. Use the callback to close the dialog.
+ *
+ * @param {Object} cookie Cookie being edited
+ * @param {Function} callback Callback for dialog manipulation
  */
 this.editCookie = function(cookie, callback)
 {
@@ -134,13 +134,13 @@ this.editCookie = function(cookie, callback)
                 {
                     var dialog = subject.QueryInterface(Ci.nsIDOMWindow);
                     FBTest.compare("chrome://firebug/content/cookies/editCookie.xul",
-                        dialog.document.location.href, "The editCookie.xul is opened.");
-                    FBTest.ok(dialog.EditCookie, "The EditCookie varible must exist");
+                        dialog.document.location.href, "The 'Edit Cookie' dialog is opened.");
+                    FBTest.ok(dialog.EditCookie, "The EditCookie variable must exist.");
                     callback(dialog);
 
                 //xxxHonza: increasing from 300 to 500ms to see
                 // if it helps to solve Mac failures.
-                }, 500); 
+                }, 500);
             }
         }
     };

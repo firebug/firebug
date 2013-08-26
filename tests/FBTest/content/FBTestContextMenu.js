@@ -5,7 +5,7 @@
 
 /**
  * The object is responsible for registering 'popupshowing' listeners and safe clean up.
- * The clean up is important since it must happen even if the test doesn't fisnish.
+ * The clean up is important since it must happen even if the test doesn't finish.
  */
 var ContextMenuController =
 {
@@ -13,9 +13,11 @@ var ContextMenuController =
 
     getContextMenu: function(target)
     {
-        return FW.FBL.hasPrefix(target.ownerDocument.documentURI, "chrome://firebug/") ?
-            FW.FBL.$("fbContextMenu") : FW.Firebug.chrome.window.top.window.document.
-                getElementById("contentAreaContextMenu");
+        // (Support chrome://firebug/ for backwards compatibility.)
+        return FW.FBL.hasPrefix(target.ownerDocument.documentURI, "chrome://firebug/") ||
+               FW.FBL.hasPrefix(target.ownerDocument.documentURI, "resource://firebugui/") ?
+            FW.FBL.$("fbContextMenu") :
+            FW.Firebug.chrome.window.top.window.document.getElementById("contentAreaContextMenu");
     },
 
     addListener: function(target, eventName, listener)

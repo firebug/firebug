@@ -22,7 +22,7 @@ Firebug.BalloonNote.prototype = domplate(
                 DIV({"class": "balloonInner2"},
                     DIV({"class": "balloonInner3"},
                         DIV({"class": "balloonInner4"},
-                            IMG({"class": "balloonCloseButton closeButton", src: "blank.gif",
+                            SPAN({"class": "balloonCloseButton closeButton",
                                 onclick: "$onCloseAction"}),
                             DIV({"class": "balloonContent"},
                                 TAG("$cause|getContentTag", {cause: "$cause"})

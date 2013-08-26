@@ -169,13 +169,30 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
                 this.addMember(scopes[0], "user", members, "this", thisVar, 0);
 
             // locals, pre-expanded
-            members.push.apply(members, this.getMembers(scopes[0], 0, context));
+            members.push.apply(members, this.getMembers(scopes[0], 0));
 
             for (var i=1; i<scopes.length; i++)
-                this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
+            {
+                var scope = scopes[i];
+                var name = (scope.hasOwnProperty("toString") ? scope.toString() :
+                    Object.prototype.toString.call(scope));
+
+                // Some objects are stringified as [object ClassName]; extract
+                // the [[Class]] from those.
+                var re = /\[object (.*)\]/.exec(name);
+                if (re)
+                {
+                    if (re[1] === "Window")
+                        name = Locale.$STR("Window_Scope");
+                    else
+                        name = re[1];
+                }
+
+                this.addMember(scope, "scopes", members, name, scope, 0);
+            }
         }
 
-        this.expandMembers(members, this.toggles, 0, 0, context);
+        this.expandMembers(members, this.toggles, 0, 0);
         this.showMembers(members, false);
 
         if (FBTrace.DBG_STACK)

@@ -11,7 +11,7 @@ function runTest()
         {
             var doc = panel.panelNode.ownerDocument;
 
-            // Set focus to Firebug, otherwise the selection and the shortcut will be sent to the browser document 
+            // Set focus to Firebug, otherwise the selection and the shortcut will be sent to the browser document
             doc.documentElement.focus();
 
             var range = doc.createRange();
@@ -22,7 +22,12 @@ function runTest()
             doc.getSelection().addRange(range);
 
             FBTest.sendShortcut("F", {accelKey: true});
-            FBTest.compare("color: blue", FBTest.getSearchFieldText(),
+
+            // Since FF 22.0a2 inIDOMUtils has a function colorNameToRGB()
+            var colorValue = (FBTest.compareFirefoxVersion("22.0a2") >= 0) ?
+                "#0000FF" : "blue";
+
+            FBTest.compare("color: " + colorValue, FBTest.getSearchFieldText(),
                 "The value inside the search field much match the selection.");
         }
 

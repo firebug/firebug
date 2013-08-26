@@ -2,15 +2,19 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/xpcom",
     "firebug/lib/array",
-    "firebug/lib/string",
+    "firebug/lib/string"
 ],
-function(FBTrace, Arr, Str) {
+function(FBTrace, Xpcom, Arr, Str) {
 
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+// ********************************************************************************************* //
 
 var Obj = {};
 
@@ -56,7 +60,14 @@ Obj.descend = function(prototypeParent, childProperties)
     return newOb;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+Obj.isFunction = function(ob)
+{
+    return typeof(ob) == "function";
+}
+
+// ********************************************************************************************* //
 
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
@@ -75,7 +86,7 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         var type = typeof(ob);
         if (type == "string" && ob.length)
             return true;
-         
+
         if (type === "number" || type === "boolean" || type === "undefined" || ob === null)
             return false;
 
@@ -95,7 +106,6 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
                 return true;
             return false;
         }
-
 
         if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);
@@ -140,10 +150,10 @@ Obj.getPrototype = function(ob)
     return null;
 };
 
-
+var uidCounter = 1;
 Obj.getUniqueId = function()
 {
-    return this.getRandomInt(0,65536);
+    return uidCounter++;
 };
 
 Obj.getRandomInt = function(min, max)
@@ -222,6 +232,29 @@ Obj.isNonNativeGetter = function(obj, propName)
     };
 
     return true;
+};
+
+// xxxFlorent: [ES6-getPropertyNames]
+// http://wiki.ecmascript.org/doku.php?id=harmony:extended_object_api&s=getownpropertynames
+/**
+ * Gets property names from an object.
+ *
+ * @param {*} subject The object
+ * @return {Array} The property names
+ *
+ */
+Obj.getPropertyNames = Object.getPropertyNames || function(subject)
+{
+    var props = Object.getOwnPropertyNames(subject);
+    var proto = Object.getPrototypeOf(subject);
+    while (proto !== null)
+    {
+        props = props.concat(Object.getOwnPropertyNames(proto));
+        proto = Object.getPrototypeOf(proto);
+    }
+    // only keep unique elements from props (not optimised):
+    //    props = [...new Set(props)];
+    return Arr.unique(props);
 };
 
 // ********************************************************************************************* //

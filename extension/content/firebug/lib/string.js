@@ -19,7 +19,6 @@ const entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEn
 
 const reNotWhitespace = /[^\s]/;
 
-
 var Str = {};
 
 // ********************************************************************************************* //
@@ -652,6 +651,45 @@ Str.cleanIndentation = function(text)
 //deprecated compatibility functions
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
 
+/**
+ * Formats a number with a fixed number of decimal places considering the locale settings
+ * @param {Integer} number Number to format
+ * @param {Integer} decimals Number of decimal places
+ * @returns {String} Formatted number
+ */
+Str.toFixedLocaleString = function(number, decimals)
+{
+    // Check whether 'number' is a valid number
+    if (isNaN(parseFloat(number)))
+        throw new Error("Value '" + number + "' of the 'number' parameter is not a number");
+
+    // Check whether 'decimals' is a valid number
+    if (isNaN(parseFloat(decimals)))
+        throw new Error("Value '" + decimals + "' of the 'decimals' parameter is not a number");
+
+    var precision = Math.pow(10, decimals);
+    var formattedNumber = (Math.round(number * precision) / precision).toLocaleString();
+    var decimalMark = (0.1).toLocaleString().match(/\D/);
+    var decimalsCount = (formattedNumber.lastIndexOf(decimalMark) == -1) ?
+        0 : formattedNumber.length - formattedNumber.lastIndexOf(decimalMark) - 1;
+
+    // Append decimals if needed
+    if (decimalsCount < decimals)
+    {
+        // If the number doesn't have any decimals, add the decimal mark
+        if (decimalsCount == 0)
+            formattedNumber += decimalMark;
+
+        // Append additional decimals
+        for (var i=0, count = decimals - decimalsCount; i<count; ++i)
+            formattedNumber += "0";
+    }
+
+    return formattedNumber;
+};
+
+// xxxsz: May be refactored when Firefox implements the ECMAScript Internationalization API
+// See https://bugzil.la/853301
 Str.formatNumber = Deprecated.deprecated("use <number>.toLocaleString() instead",
     function(number) { return number.toLocaleString(); });
 
@@ -660,7 +698,6 @@ Str.formatSize = function(bytes)
     var negative = (bytes < 0);
     bytes = Math.abs(bytes);
 
-    // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
     var sizePrecision = Options.get("sizePrecision");
     if (typeof(sizePrecision) == "undefined")
     {
@@ -678,7 +715,7 @@ Str.formatSize = function(bytes)
     if (sizePrecision == -1)
         result = bytes + " B";
 
-    var a = Math.pow(10, sizePrecision);
+    var precision = Math.pow(10, sizePrecision);
 
     if (bytes == -1 || bytes == undefined)
         return "?";
@@ -686,29 +723,113 @@ Str.formatSize = function(bytes)
         return "0 B";
     else if (bytes < 1024)
         result = bytes.toLocaleString() + " B";
-    else if (bytes < (1024*1024))
-        result = (Math.round((bytes/1024)*a)/a).toLocaleString() + " KB";
+    else if (Math.round(bytes / 1024 * precision) / precision < 1024)
+        result = this.toFixedLocaleString(bytes / 1024, sizePrecision) + " KB";
     else
-        result = (Math.round((bytes/(1024*1024))*a)/a).toLocaleString() + " MB";
+        result = this.toFixedLocaleString(bytes / (1024 * 1024), sizePrecision) + " MB";
 
     return negative ? "-" + result : result;
 };
 
-Str.formatTime = function(elapsed)
+/**
+ * Returns a formatted time string
+ *
+ * Examples:
+ * Str.formatTime(12345678) => default formatting options => "3h 25m 45.678s"
+ * Str.formatTime(12345678, "ms") => use milliseconds as min. time unit => "3h 25m 45s 678ms"
+ * Str.formatTime(12345678, null, "m") => use minutes as max. time unit => "205m 45.678s"
+ * Str.formatTime(12345678, "m", "h") => use minutes as min. and hours as max. time unit
+ *     => "3h 25.7613m"
+ *
+ * @param {Integer} time Time to format in milliseconds
+ * @param {Integer} [minTimeUnit=1] Minimal time unit to use in the formatted string
+ *     (default is seconds)
+ * @param {Integer} [maxTimeUnit=4] Maximal time unit to use in the formatted string
+ *     (default is days)
+ * @returns {String} Formatted time string
+ */
+Str.formatTime = function(time, minTimeUnit, maxTimeUnit, decimalPlaces)
 {
-    if (elapsed == -1)
+    var time = parseInt(time);
+
+    if (isNaN(time))
         return "";
-    else if (elapsed == 0)
-        return "0";
-    else if (elapsed < 1000)
-        return elapsed + "ms";
-    else if (elapsed < 60000)
-        return (Math.round(elapsed/10) / 100) + "s";
+
+    var timeUnits = [
+        {
+            unit: "ms",
+            interval: 1000
+        },
+        {
+            unit: "s",
+            interval: 60
+        },
+        {
+            unit: "m",
+            interval: 60
+        },
+        {
+            unit: "h",
+            interval: 24
+        },
+        {
+            unit: "d",
+            interval: 1
+        },
+    ];
+
+    if (time == -1)
+    {
+        return "";
+    }
     else
     {
-        var min = Math.floor(elapsed/60000);
-        var sec = (elapsed % 60000);
-        return min + "m " + (Math.round((elapsed/1000)%60)) + "s";
+        // Get the index of the min. and max. time unit and the decimal places
+        var minTimeUnitIndex = (Math.abs(time) < 1000) ? 0 : 1;
+        var maxTimeUnitIndex = timeUnits.length - 1;
+
+        for (var i=0, len=timeUnits.length; i<len; ++i)
+        {
+            if (timeUnits[i].unit == minTimeUnit)
+                minTimeUnitIndex = i;
+            if (timeUnits[i].unit == maxTimeUnit)
+                maxTimeUnitIndex = i;
+        }
+
+        if (!decimalPlaces)
+            decimalPlaces = (Math.abs(time) >= 60000 && minTimeUnitIndex == 1 ? 0 : 2);
+
+        // Calculate the maximal time interval
+        var timeUnitInterval = 1;
+        for (var i=0; i<maxTimeUnitIndex; ++i)
+            timeUnitInterval *= timeUnits[i].interval;
+
+        var formattedString = (time < 0 ? "-" : "");
+        time = Math.abs(time);
+        for (var i=maxTimeUnitIndex; i>=minTimeUnitIndex; --i)
+        {
+            var value = time / timeUnitInterval;
+            if (i != minTimeUnitIndex)
+            {
+                if (value < 0)
+                    value = Math.ceil(value);
+                else
+                    value = Math.floor(value);
+            }
+            else
+            {
+                var decimalFactor = Math.pow(10, decimalPlaces);
+                value = Math.round(value * decimalFactor) / decimalFactor;
+            }
+
+            if (value != 0 || (i == minTimeUnitIndex && formattedString == ""))
+                formattedString += value.toLocaleString() + timeUnits[i].unit + " ";
+            time %= timeUnitInterval;
+            if (i != 0)
+                timeUnitInterval /= timeUnits[i - 1].interval;
+        }
+
+        return formattedString.trim();
     }
 };
 

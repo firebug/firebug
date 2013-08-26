@@ -18,7 +18,7 @@ function checkCopyLocationWithParametersAction(request)
 {
     // Expand the test request with params
     var panel = FBTest.selectPanel("net");
-    var netRow = FW.FBL.getElementByClass(panel.panelNode, "netRow", "category-xhr", 
+    var netRow = FW.FBL.getElementByClass(panel.panelNode, "netRow", "category-xhr",
         "hasHeaders", "loaded");
 
     if (!netRow)

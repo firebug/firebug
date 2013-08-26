@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+@import "chrome://firebug-os/skin/debugger.css";
+
 .panelNode-script {
     overflow: hidden;
     font-family: monospace;
@@ -40,11 +42,12 @@
 /************************************************************************************************/
 
 .sourceLine {
+    position: relative;
     -moz-user-select: none;
     margin-right: 10px;
     border-right: 1px solid #CCCCCC;
     padding: 0px 4px 0 20px;
-    background: #EEEEEE no-repeat 2px 0px;
+    background: #EEEEEE no-repeat 5px 1px;
     color: #888888;
     white-space: pre;
     font-family: monospace; /* see issue 2953 */
@@ -99,32 +102,78 @@
 }
 
 .sourceRow[exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/exe.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-position: 7px 1px;
     color: #000000;
 }
 
 .sourceRow[breakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 .sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png);
+    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 9px 3px, 5px 1px;
 }
 
 .sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+    background-image: none;
+}
+
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"]:not([condition="true"]) > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
+}
+
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"][condition="true"] > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpointCondition.svg) no-repeat 4px 2px, url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointExe.png);
+    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-position: 7px 1px, 5px 1px;
 }
 
 .sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
+    background-image: none;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::before {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 5px;
+    width: 12px;
+    height: 12px;
+    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    opacity: 0.5;
+}
+
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 7px;
+    width: 11px;
+    height: 12px;
+    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat;
 }
 
 .sourceLine.editing {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
+    background-image: url(chrome://firebug/skin/breakpoint.svg);
 }
 
 /************************************************************************************************/
@@ -136,38 +185,15 @@
     margin-top: 0;
     left: 5px;
     width: 90%;
-    background: linear-gradient(to bottom, #00CEFD, #00BAF6) no-repeat;
-    border-style: solid;
-    border-width: 19px 25px 33px 33px;
-    -moz-border-image: url(condCorners.png) 19 25 33 33 stretch;
-}
-
-.conditionCaption {
-    margin-bottom: 2px;
-    font-family: Lucida Grande, sans-serif;
-    font-weight: bold;
-    font-size: 11px;
-    color: #226679;
 }
 
 .conditionInput {
     width: 100%;
-    border: 1px solid #0096C0;
-    font-family: monospace;
     font-size: inherit;
 }
 
 .conditionInput.completionInput {
     position: relative;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-.upsideDown {
-    background: linear-gradient(to bottom, #00D1FE, #00ADE6) no-repeat;
-    border-style: solid;
-    border-width: 28px 25px 19px 33px;
-    -moz-border-image: url(condCornersUps.png) 28 25 19 33 stretch;
 }
 
 /*************************************************************************************************/
@@ -191,7 +217,7 @@
     font-size: 12px;
     color: #000000;
     width: 100%;
-    box-shadow: gray 2px 2px 3px;
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
     border-radius: 0 0 3px 3px;
     padding: 2px 0;
     pointer-events: auto;

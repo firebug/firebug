@@ -1,12 +1,12 @@
 
 /**
- * Test for CompilationUnit#getSource(listener) for a JavaScript file external 
+ * Test for CompilationUnit#getSource(listener) for a JavaScript file external
  * to its HTML file.
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/compilationunit/testScripts.html";
     browser.addEventListener("onContextCreated", function(context) {
         FBTest.progress("getExternalSource, context created");
@@ -23,7 +23,7 @@ function runTest()
                 FBTest.testDone("done test #getExternalSource()");
             });
         });
-        
+
     });
     FBTest.progress("getExternalSource, open test page "+url);
     FBTest.openNewTab(url, function(win)

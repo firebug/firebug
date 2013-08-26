@@ -8,10 +8,6 @@
     border-top: none;
 }
 
-.breakpointBlock > .breakpointHeader > .twisty {
-    background-position: 4px 4px;
-}
-
 .breakpointsHeaderLabel {
     margin-left: 14px;
 } 

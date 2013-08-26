@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6405: "Get Matching Elements" must not be displayed for @-rules</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @font-face {
+            font-family: "TitilliumMaps";
+            src: local("☺"), url("../../fonts/TitilliumMaps26L002.woff") format("woff"), url("../../fonts/TitilliumMaps26L002.ttf") format("truetype");
+        }
+
+        #test {
+            color: green;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6405">Issue 6405</a>: "Get Matching Elements" must not be displayed for @-rules</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>
+                        Select <em>issue6405.html</em> from the Location Menu<br/>
+                        <span class="ok">&rArr; An <code>@font-face</code> rule should be shown inside the <em>CSS</em> panel.</span>
+                    </li>
+                    <li>Right-click the rule</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>There should be no menu entry <em>Get Matching Elements</em>.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -196,7 +196,7 @@ Breakpoints.BreakpointTemplate = Domplate.domplate(Firebug.Rep,
                     _checked: "$bp.checked", tabindex: "-1", onclick: "$onEnable"}),
                 SPAN("$bp|getTitle"),
                 DIV({"class": "breakpointMutationType"}, "$bp|getType"),
-                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+                SPAN({"class": "closeButton", onclick: "$onRemove"})
             ),
             DIV({"class": "breakpointCode"},
                 SPAN("$bp|getValue")

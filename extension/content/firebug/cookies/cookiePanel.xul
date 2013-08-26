@@ -28,12 +28,13 @@
 
             <!-- Console toolbar -->
             <hbox id="fbConsoleButtons">
-                <toolbarbutton id="fbConsoleFilter-cookies"
-                    label="cookies.console.Cookies" type="radio"
-                    group="firebugConsoleFilter" class="toolbar-text-button fbInternational"
+                <toolbarbutton
+                    id="fbConsoleFilter-cookies"
+                    type="checkbox"
+                    label="cookies.console.Cookies"
+                    class="toolbar-text-button fbConsoleFilter fbInternational"
                     tooltiptext="cookies.console.Filter By Cookies"
-                    oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'cookies')"
-                    collapsed="true"/>
+                    oncommand="Firebug.Console.onToggleFilter(event, Firebug.currentContext, 'cookies')"/>
             </hbox>
 
             <!-- Cookies toolbar -->
@@ -125,6 +126,8 @@
                         <menuitem type="radio" name="fcPerm" value="host-deny"/>
                         <menuitem type="radio" name="fcPerm" value="host-allow"/>
                         <menuitem type="radio" name="fcPerm" value="host-allow-session"/>
+                        <!-- This doesn't seem to be working as expected comment out for now -->
+                        <!-- <menuitem type="radio" name="fcPerm" value="host-limit-third-party"/> -->
                     </menupopup>
                 </toolbarbutton>
 

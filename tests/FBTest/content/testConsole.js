@@ -95,8 +95,8 @@ FBTestApp.TestWindowLoader =
 
 /**
  * This object represents main Test Console implementation.
- * 
- * @namespace  
+ *
+ * @namespace
  */
 FBTestApp.TestConsole =
 {
@@ -547,7 +547,7 @@ FBTestApp.TestConsole =
                         goQuitApplication();
                 });
             }
-        }, 100);
+        }, 5000);
     },
 
     getTest: function(uri)

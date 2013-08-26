@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6454: Create FBTest that covers HTML panel search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6454">Issue 6454</a>:
+    Create FBTest that covers HTML panel search</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the HTML panel</li>
+            <li>Use the search box to search in the panel</li>
+            <li>There should be 10 occurences of 'testing' (case insensitive)</li>
+            <li>There should be 4 occurences of 'testing' (case sensitive)</li>
+            <li>There should be 5 occurences of 'Testing' (case insensitive)</li>
+        </ol>
+    </section>
+    <footer>Jan Odvarko, &lt;odvarko@gmail.com&gt;</footer>
+</div>
+
+<div id="test">
+    <div>Testing</div>
+    <span>Testing2</span>
+    <div style="visibility:collapse;" class="testing">
+        <span>Testing</span>
+        <div class="Testing">testing</span>
+        <testing>1</testing>
+    </div>
+</div>
+
+</body>
+</html>

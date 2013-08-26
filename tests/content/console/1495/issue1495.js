@@ -18,7 +18,7 @@ function runTest()
                 var rows = FW.FBL.getElementsByClass(panel.panelNode,
                     "logRow", "logRow-spy", "loaded");
 
-                for (var i = 0; i < rows.length; i++) 
+                for (var i = 0; i < rows.length; i++)
                 {
                     var logRow = rows[i];
                     var clickTarget = FW.FBL.getElementByClass(logRow, "spyTitleCol", "spyCol");

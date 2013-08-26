@@ -5,7 +5,7 @@ function runTest()
     FBTest.openNewTab(basePath + "cookies/18/issue18.php", function(win)
     {
         // Open Firebug UI and enable Net panel.
-        FBTestFireCookie.enableCookiePanel(function(win) 
+        FBTestFireCookie.enableCookiePanel(function(win)
         {
             FBTest.sysout("cookies.test.issue18; Check clipboard functionality");
 
@@ -23,21 +23,21 @@ function runTest()
             // Expand cookie info.
             FBTest.click(row);
 
-            // Get the only expanded info element and select Raw Value tab so, its 
+            // Get the only expanded info element and select Raw Value tab so, its
             // content is also generated.
             var cookieInfo = FW.FBL.getElementsByClass(panelNode, "cookieInfoRow")[0];
             FBTest.expandElements(cookieInfo, "cookieInfoRawValueTab");
 
             // Verify content of the Value tab.
-            var infoValue = FW.FBL.getElementByClass(cookieInfo, 
+            var infoValue = FW.FBL.getElementByClass(cookieInfo,
                 "cookieInfoValueText", "cookieInfoText");
-            FBTest.compare("1 + 2 = 3", infoValue.textContent, 
+            FBTest.compare("1 + 2 = 3", infoValue.textContent,
                 "Value of the cookie (in the body) validation");
 
             // Verify content of the Raw Value tab.
-            var rawInfoValue = FW.FBL.getElementByClass(cookieInfo, 
+            var rawInfoValue = FW.FBL.getElementByClass(cookieInfo,
                 "cookieInfoRawValueText", "cookieInfoText");
-            FBTest.compare("1+%2B+2+%3D+3", rawInfoValue.textContent, 
+            FBTest.compare("1+%2B+2+%3D+3", rawInfoValue.textContent,
                 "Raw value of the cookie (in the body) validation");
 
             // Finish test

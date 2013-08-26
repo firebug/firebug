@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6356: undefined values are ignored in string formatting of console.log</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    <script src="jquery-1.9.1.js"></script>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6356">Issue 6356</a>:
+        undefined values are ignored in string formatting of console.log</h1>
+</header>
+<div>
+    Test input field: <input id="myInput" value="This is a default value"></input>
+    <br/><br/>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, select the Console panel and enable it</li>
+            <li>Press the test button <button id="testButton1" onclick="onExecuteTest1()">Execute Test</button></li>
+            <li>You should see following in the Console:<br/>
+            <code>Object[input#myInput property value = "1. This is very long va... definitely be cropped."
+attribute value = "2. This is also a very ...e need to make shorter."]</code>
+            </li>
+            <li>Press this test button <button id="testButton2" onclick="onExecuteTest2()">Execute Test</button></li>
+            <li>You should see following in the Console:<br/>
+            <code>Object[input#myInput property value = "test"]</code>
+            </li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko &lt;odvarko@gmail.com&gt;
+    </footer>
+</div>
+
+<script>
+function onExecuteTest1()
+{
+    var myInput = document.getElementById("myInput");
+    myInput.value = "1. This is very long value that should definitely be cropped.";
+    myInput.setAttribute("value", "2. This is also a very long value we need to make shorter.");
+    console.log($("#myInput"));
+}
+function onExecuteTest2()
+{
+    var myInput = document.getElementById("myInput");
+    myInput.value = "test";
+    myInput.setAttribute("value", "test");
+    console.log($("#myInput"));
+}
+</script>
+
+</body>
+</html>

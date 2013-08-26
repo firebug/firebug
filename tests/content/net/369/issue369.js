@@ -34,7 +34,7 @@ function verifyContent()
     var tabs = FBTest.expandElements(panelNode, "netInfoJSONTab");
 
     FBTest.ok(rows.length == 4, "There must be 4 requests in the Net panel.");
-    FBTest.ok(tabs.length == 4, "There must be 4 JSON tabs in the net panel."); 
+    FBTest.ok(tabs.length == 4, "There must be 4 JSON tabs in the net panel.");
 
     if (rows.length != 4 || tabs.length != 4)
         return FBTest.testDone();
@@ -69,25 +69,25 @@ var textContent = "addressObject streetAddress=21 2nd Street city=New York state
 function requestHandler1(metadata, response) {
     response.setHeader("Content-Type", "application/json", false);
     response.write(jsonString);
-} 
+}
 
 // JSON response #2
 function requestHandler2(metadata, response) {
     response.setHeader("Content-Type", "application/json", false);
     response.write("somefunc(" + jsonString + ")");
-} 
+}
 
 // JSON response #3
 function requestHandler3(metadata, response) {
     response.setHeader("Content-Type", "application/json", false);
     response.write("/*-secure-\n" + jsonString + "\n*/");
-} 
+}
 
 // JSON response #4
 function requestHandler4(metadata, response) {
     response.setHeader("Content-Type", "application/json", false);
     response.write("while (true); &&&START&&& " + jsonString + " &&&END&&&");
-} 
+}
 
 // JSON response #5
 function requestHandler5(metadata, response) {

@@ -5,28 +5,28 @@ define([
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",
-    "firebug/console/profiler",
+    "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
     "firebug/console/commandEditor",
     "firebug/console/functionMonitor",
+    "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 var maxQueueRequests = 500;
+
+// Note: createDefaultReturnValueInstance() is a local helper (see below).
+var defaultReturnValue = createDefaultReturnValueInstance();
 
 // ********************************************************************************************* //
 
@@ -151,9 +151,13 @@ Firebug.ConsoleBase =
 
 // ********************************************************************************************* //
 
+/**
+ * @module Represents module for the Console panel. Responsible e.g. for handling
+ * user actions related to Console panel filter.
+ */
 var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
-
 Firebug.Console = Obj.extend(ActivableConsole,
+/** @lends Firebug.Console */
 {
     dispatchName: "console",
     toolName: "console",
@@ -165,38 +169,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
     },
 
-    // this is the only code that should call injector.attachIfNeeded
-    isReadyElsePreparing: function(context, win)
+    getExposedConsole: function(win)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isReadyElsePreparing, win is " +
-                (win?"an argument: ":"null, context.window: ") +
-                (win?win.location:context.window.location));
-
-        if (Xml.isXMLPrettyPrint(context, win))
-            return false;
-
-        if (win)
-        {
-            return this.injector.attachIfNeeded(context, win);
-        }
-        else
-        {
-            var attached = true;
-            for (var i = 0; i < context.windows.length; i++)
-                attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
-
-            // already in the list above:
-            // attached = attached && this.injector.attachIfNeeded(context, context.window);
-            if (context.windows.indexOf(context.window) == -1)
-                FBTrace.sysout("isReadyElsePreparing: context.window not in context.windows");
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.isReadyElsePreparing attached to " +
-                    context.windows.length + " and returns "+attached);
-
-            return attached;
-        }
+        return this.injector.getExposedConsole(win);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -210,8 +185,24 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
+    },
 
+    initializeUI: function()
+    {
+        // Synchronize UI buttons with the current filter
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbConsoleFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbConsoleFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
     },
 
     shutdown: function()
@@ -223,35 +214,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
     initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
-        context.consoleReloadWarning = true;  // mark as need to warn.
-    },
-
-    loadedContext: function(context)
-    {
-        for (var url in context.sourceFileMap)
-            return;  // if there are any sourceFiles, then do nothing
-
-        // Inject console handler if not injected yet. It's injected only in the case that
-        // the page has JS (and thus may call console) and Firebug has been activated after
-        // the first JS call (and thus we have not already injected).
-        if (!this.injector.isAttached(context, context.window) && !context.jsDebuggerCalledUs)
-            this.isReadyElsePreparing(context);
-
-        // else we saw no JS, so the reload warning is not needed.
-        this.clearReloadWarning(context);
-    },
-
-    clearReloadWarning: function(context) // remove the warning about reloading.
-    {
-        if (context.consoleReloadWarning)
-        {
-            var panel = context.getPanel("console");
-            if (panel)
-            {
-                panel.clearReloadWarning();
-                delete context.consoleReloadWarning;
-            }
-        }
     },
 
     togglePersist: function(context)
@@ -270,19 +232,12 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
-    destroyContext: function(context, persistedState)
+    watchWindow: function(context, win)
     {
-        Win.iterateWindows(context.window, function detachOneConsole(win)
-        {
-            // remove this first since it needs the console
-            Firebug.CommandLine.injector.detachCommandLine(context, win);
-            Firebug.Console.injector.detachConsole(context, win);
-        });
-    },
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.watchWindow; " + Win.safeGetWindowLocation(win));
 
-    unwatchWindow: function(context, win)
-    {
-        Firebug.Console.injector.detachConsole(context, win);
+        Firebug.Console.injector.attachConsoleInjector(context, win);
     },
 
     updateOption: function(name, value)
@@ -302,16 +257,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     onObserverChange: function(observer)
     {
-        if (this.isAlwaysEnabled())
-        {
-            // we inject the console during JS compiles so we need jsd
-            Firebug.Debugger.addObserver(this);
-        }
-        else
-        {
-            Firebug.Debugger.removeObserver(this);
-        }
-
         if (!Firebug.getSuspended())  // then Firebug is in action
             this.onResumeFirebug();   // and we need to test to see if we need to addObserver
         else
@@ -343,52 +288,59 @@ Firebug.Console = Obj.extend(ActivableConsole,
             this.setStatus();
     },
 
-    onToggleFilter: function(context, filterType)
+    onToggleFilter: function(event, context, filterType)
     {
         if (!context)
             context = Firebug.currentContext;
 
-        /* Preparation for multiple filters (see issue 4621)
-        if (filterType == "")
-            Firebug.consoleFilterTypes = "";
+        var filterTypes = [];
+        if (Events.isControl(event) && filterType != "all")
+        {
+            filterTypes = Options.get("consoleFilterTypes").split(" ");
+            var filterTypeIndex = filterTypes.indexOf(filterType);
+            if (filterTypeIndex == -1)
+                filterTypes.push(filterType);
+            else
+                filterTypes.splice(filterTypeIndex, 1);
+        }
         else
         {
-            var index = Firebug.consoleFilterTypes.indexOf(filterType);
-            if (index >= 0)
-                Firebug.consoleFilterTypes = Firebug.consoleFilterTypes.substr(0, index-1) +
-                    Firebug.consoleFilterTypes.substr(index+filterType.length);
-            else
-                Firebug.consoleFilterTypes += " " + filterType;
+            filterTypes.push(filterType);
         }
-        */
 
-        Firebug.consoleFilterTypes = filterType;
-
-        Options.set("consoleFilterTypes", Firebug.consoleFilterTypes);
-
-        var panel = this.getPanel(context, true);
-        if (panel)
+        // Remove "all" filter in case several filters are selected
+        if (filterTypes.length > 1)
         {
-            panel.setFilter(Firebug.consoleFilterTypes);
-            Firebug.Search.update(context);
+            var allIndex = filterTypes.indexOf("all");
+            if (allIndex != -1)
+                filterTypes.splice(allIndex, 1);
         }
+
+        // If no filter categories are selected, use the default
+        if (filterTypes.length == 0)
+            filterTypes = Options.getDefault("consoleFilterTypes").split(" ");
+
+        Options.set("consoleFilterTypes", filterTypes.join(" "));
+
+        this.syncFilterButtons(Firebug.chrome);
+
+        Events.dispatch(Firebug.Console.fbListeners, "onFiltersSet", [filterTypes]);
     },
 
     syncFilterButtons: function(chrome)
     {
-        if (Firebug.consoleFilterTypes == "")
+        var filterTypes = new Set();
+        Options.get("consoleFilterTypes").split(" ").forEach(function(element)
         {
-            var button = chrome.$("fbConsoleFilter-all");
-            button.checked = true;
-        }
-        else
+            filterTypes.add(element);
+        });
+        var doc = chrome.window.document;
+        var buttons = doc.getElementsByClassName("fbConsoleFilter");
+
+        for (var i=0, len=buttons.length; i<len; ++i)
         {
-            var filterTypes = Firebug.consoleFilterTypes.split(" ");
-            for (var type = 0; type < filterTypes.length; type++)
-            {
-                var button = chrome.$("fbConsoleFilter-" + filterTypes[type]);
-                button.checked = true;
-            }
+            var filterType = buttons[i].id.substr(buttons[i].id.search("-") + 1);
+            buttons[i].checked = filterTypes.has(filterType);
         }
     },
 
@@ -410,27 +362,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BTI
-
-    /**
-     * A previously enabled tool becomes active and sends us an event.
-     */
-    onActivateTool: function(toolname, active)
-    {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Console.onActivateTool "+toolname+" = "+active);
-
-        // Console depends on script to get injected (for now)
-        if (toolname === "script")
-        {
-            if (this.isAlwaysEnabled())
-            {
-                //this.asTool.setActive(active);  // then track the activation of the debugger;
-            }
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
@@ -445,22 +376,26 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getDefaultReturnValue: function(win)
+    /**
+     * Returns the value that the console must ignore.
+     *
+     * @return {*} The default value
+     */
+    getDefaultReturnValue: function()
     {
-        var defaultValue = "_firebugIgnore";
-        var console = win.wrappedJSObject.console;
-        if (!console)
-            return defaultValue;
+        return defaultReturnValue;
+    },
 
-        if (Obj.isNonNativeGetter(console, "__returnValue__"))
-            return defaultValue;
-
-        var returnValue = console.__returnValue__;
-        if (returnValue)
-            return returnValue;
-
-        return defaultValue;
+    /**
+     * Returns true if the passed object has to be ignored by the console.
+     *
+     * @param {*} o The object to test
+     *
+     * @return {boolean} The result of the test
+     */
+    isDefaultReturnValue: function(obj)
+    {
+        return obj === defaultReturnValue;
     }
 });
 
@@ -484,6 +419,24 @@ var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
 var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
 var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
 var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
+
+// ********************************************************************************************* //
+// Local Helpers
+
+function createDefaultReturnValueInstance()
+{
+    var proto = {
+        __exposedProps__: {
+            "toString": "rw"
+        },
+        toString: function()
+        {
+            return undefined;
+        }
+    };
+
+    return Object.preventExtensions(Object.create(proto));
+}
 
 // ********************************************************************************************* //
 // Registration
