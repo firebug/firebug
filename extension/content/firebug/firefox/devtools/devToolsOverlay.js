@@ -18,7 +18,7 @@ var Cu = Components.utils;
 
 const gDevTools = Cu.import("resource:///modules/devtools/gDevTools.jsm", {}).gDevTools;
 
-var {$stylesheet} = BrowserOverlayLib;
+var {$stylesheet, $el} = BrowserOverlayLib;
 
 // Import CommandUtils object
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -48,6 +48,7 @@ DevToolsOverlay.prototype =
         // Register a new panel
         //this.createFirebugPanel();
         this.createFirebugButton();
+        this.createGcliButton();
     },
 
     createFirebugPanel: function()
@@ -91,8 +92,23 @@ DevToolsOverlay.prototype =
             return;
 
         // Insert Firebug button ID into the array and store in preferences.
+        // The button will appear inside the toolbox toolbar.
         toolbarSpec.unshift("firebug open");
         Options.setPref("devtools", "toolbox.toolbarSpec", toolbarSpec.toSource());
+    },
+
+    createGcliButton: function()
+    {
+        // Insert Firebug button (to open Firebug UI) into GCLI (Developer toolbar)
+        var doc = this.win.document;
+        var parentToolbar = doc.getElementById("developer-toolbar");
+        $el(doc, "toolbarbutton", {
+            position: 2,
+            "class": "developer-toolbar-button",
+            id: "developer-toolbar-firebug-button",
+            tooltiptext: "Firebug",
+            command: "cmd_firebug_toggleFirebug",
+        }, [], parentToolbar);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
