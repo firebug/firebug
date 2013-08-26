@@ -17,7 +17,14 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-Cu["import"]("resource:///modules/devtools/EventEmitter.jsm");
+try
+{
+    Cu.import("resource:///modules/devtools/shared/event-emitter.js");
+}
+catch (err)
+{
+    FBTrace.sysout("devToolsFirebugPanel; EXCEPTION " + err, err)
+}
 
 // ********************************************************************************************* //
 // DevToolsOverlay Implementation

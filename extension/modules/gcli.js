@@ -16,6 +16,7 @@ var scope = {};
 
 try
 {
+    Cu.import("resource://firebug/fbtrace.js");
     Cu.import("resource:///modules/devtools/gcli.jsm", scope);
 }
 catch (err)
@@ -132,6 +133,8 @@ function registerCommands()
 
     addCommand({
         name: "firebug open",
+        buttonId: "command-button-firebugopen",
+        buttonClass: "command-button",
         description: Locale.$STR("firebug.menu.tip.Open_Firebug"),
         exec: FirebugController.openFirebug.bind(FirebugController)
     });

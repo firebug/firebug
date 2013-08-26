@@ -5,8 +5,9 @@ define([
     "firebug/lib/options",
     "firebug/lib/locale",
     "firebug/firefox/devtools/devToolsFirebugPanel",
+    "firebug/firefox/browserOverlayLib",
 ],
-function(FBTrace, Options, Locale, DevToolsFirebugPanel) {
+function(FBTrace, Options, Locale, DevToolsFirebugPanel, BrowserOverlayLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,6 +17,13 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 const gDevTools = Cu.import("resource:///modules/devtools/gDevTools.jsm", {}).gDevTools;
+
+var {$stylesheet} = BrowserOverlayLib;
+
+// Import CommandUtils object
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "CommandUtils",
+    "resource:///modules/devtools/DeveloperToolbar.jsm");
 
 // ********************************************************************************************* //
 // DevToolsOverlay Implementation
@@ -39,6 +47,7 @@ DevToolsOverlay.prototype =
 
         // Register a new panel
         this.createFirebugPanel();
+        this.createFirebugButton();
     },
 
     createFirebugPanel: function()
@@ -69,6 +78,23 @@ DevToolsOverlay.prototype =
        gDevTools.registerTool(firebugPanelDefinition);
     },
 
+    createFirebugButton: function()
+    {
+        // Do not customize the Developer toolbar twice.
+        if (Options.get("devToolbarCustomizationDone"))
+            return;
+
+        var toolbarSpec = CommandUtils.getCommandbarSpec("devtools.toolbox.toolbarSpec");
+
+        // Do not create second Firebug button.
+        if (toolbarSpec.indexOf("firebug open") >= 0)
+            return;
+
+        // Insert Firebug button ID into the array and store in preferences.
+        toolbarSpec.unshift("firebug open");
+        Options.setPref("devtools", "toolbox.toolbarSpec", toolbarSpec.toSource());
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
@@ -76,6 +102,11 @@ DevToolsOverlay.prototype =
     {
         if (FBTrace.DBG_DEVTOOLS) 
             FBTrace.sysout("devToolsOverlay.onToolboxReady;", toolbox);
+
+        // Developer toolbox lives inside an iframe, so in order to set custom styles
+        // we need to append them into the iframe.
+        var node = $stylesheet(toolbox.doc,
+            "chrome://firebug/content/firefox/devtools/devToolsOverlay.css");
 
         // If Firebug UI is opened when the toolbox is opened, hide Firebug since it's
         // available within the toolbox UI. Hide it only if the Firebug panel doesn't exist

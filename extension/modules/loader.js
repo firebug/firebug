@@ -139,7 +139,7 @@ var FirebugLoader =
         // the entire application and all consequently created namespaces and variables should be
         // injected into it.
         // In the future, there should *not* be any other globals except of the Firebug object.
-        // xxxHonza: properties from this object are copied into the new Firebug obect that is
+        // xxxHonza: properties from this object are copied into the new Firebug object that is
         // created within "firebug/firebug" module (a hack).
         win.Firebug = {};
 
