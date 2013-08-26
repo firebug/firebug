@@ -64,3 +64,4 @@ pref("extensions.firebug.DBG_UI_LOOP", false);          // debugger.js
 pref("extensions.firebug.DBG_WATCH", false);            // Watch expressions
 pref("extensions.firebug.DBG_WINDOWS", false);          // tabWatcher, dispatch events; very useful for understand modules/panels
 pref("extensions.firebug.DBG_XMLVIEWER", false);        // XML explorer
+pref("extensions.firebug.DBG_DEVTOOLS", false);         // Firebug and DevTools integration
