@@ -831,6 +831,11 @@ window.Firebug =
         return true;
     },
 
+    hideDeveloperToolbox: function()
+    {
+        top.gDevToolsBrowser.toggleToolboxCommand(top.gBrowser);
+    },
+
     /**
      * Get context for the current website
      */

@@ -46,7 +46,7 @@ DevToolsOverlay.prototype =
         gDevTools.on("toolbox-ready", this.onToolboxReady.bind(this));
 
         // Register a new panel
-        this.createFirebugPanel();
+        //this.createFirebugPanel();
         this.createFirebugButton();
     },
 

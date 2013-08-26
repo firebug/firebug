@@ -60,6 +60,7 @@ var FirebugController =
     openFirebug: function(args, context)
     {
         this.startFirebug(context, function(Firebug) {
+            Firebug.hideDeveloperToolbox();
             Firebug.toggleBar(true);
         });
     },
