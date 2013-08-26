@@ -63,6 +63,7 @@ pref("extensions.firebug.tabularLogMaxHeight", 200);
 pref("extensions.firebug.consoleFilterTypes", "all");
 pref("extensions.firebug.preferJSDSourceLinks", false);
 pref("extensions.firebug.commandLineShowCompleterPopup", true);
+pref("extensions.firebug.console.groupLogMessages", true);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);

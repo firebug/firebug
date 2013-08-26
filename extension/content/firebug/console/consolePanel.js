@@ -562,8 +562,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (!sourceLink && objects && objects.getSourceLink)
                 sourceLink = objects.getSourceLink();
 
-            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink,
-                this.groups ? this.groups.length : 0))
+            if (Options.get("console.groupLogMessages") && this.matchesLastMessage &&
+                this.matchesLastMessage(objects, rep, sourceLink,
+                    this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
                 row = container.lastChild;
