@@ -255,7 +255,7 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
 
-    if (!options.noBindings)
+    if (!options.noCmdLineAPI)
     {
         var bindings = getCommandLineBindings(context, win, dglobal, contentView);
 

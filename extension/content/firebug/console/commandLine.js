@@ -46,7 +46,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
-        exceptionFunction, noStateChange, noBindings)
+        exceptionFunction, noStateChange, noCmdLineAPI)
     {
         if (!context)
             return;
@@ -58,7 +58,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             debuggerState = Firebug.Debugger.beginInternalOperation();
 
-            var newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
+            var newExpr = expr;
+            if (!noCmdLineAPI)
+                newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
             {
@@ -73,7 +75,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr, noBindings);
+                    successConsoleFunction, exceptionFunction, expr, noCmdLineAPI);
             }
 
             if (!noStateChange)
@@ -95,7 +97,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     },
 
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction, origExpr, noBindings)
+        successConsoleFunction, exceptionFunction, origExpr, noCmdLineAPI)
     {
         var win = targetWindow || context.getCurrentGlobal();
 
@@ -146,7 +148,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         };
 
         origExpr = origExpr || expr;
-        var options = {"noBindings": noBindings};
+        var options = {"noCmdLineAPI": noCmdLineAPI};
         CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError, options);
     },
 
