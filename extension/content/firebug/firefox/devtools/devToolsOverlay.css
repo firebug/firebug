@@ -4,5 +4,14 @@
 /* DevTools Integration */
 
 #command-button-firebugopen {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
+    list-style-image: url(chrome://firebug/skin/firebug16DevTools.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#command-button-firebugopen:hover {
+    -moz-image-region: rect(0, 32px, 16px, 16px);
+}
+
+#command-button-firebugopen:active {
+    -moz-image-region: rect(0, 48px, 16px, 32px);
 }
