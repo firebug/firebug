@@ -448,7 +448,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             observer.observe(doc, {
                 attributes: true,
                 childList: true,
-                characterData: true, 
+                characterData: true,
                 subtree: true
             });
             context.registeredHTMLMutationObservers.set(doc, observer);
@@ -1219,14 +1219,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             // The double-click expands an HTML element, but the user must click
             // on the element itself not on the twisty.
-            // The logic should be as follow:
+            // The logic should be as follows:
             // - click on the twisty expands/collapses the element
             // - double click on the element name expands/collapses it
             // - click on the element name selects it
             if (!Css.hasClass(event.target, "twisty") && !Css.hasClass(event.target, "nodeLabel"))
                 this.toggleNode(event);
         }
-        else if (Events.isAltClick(event) && Events.isDoubleClick(event) && !this.editing)
+        else if (Events.isAltClick(event) && !this.editing)
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
