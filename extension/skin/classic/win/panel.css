@@ -25,7 +25,6 @@
     min-height: 12px;
 }
 
-.opened .twisty,
 .foldableGroup.opened > .groupHeader > .twisty,
 .logRow-errorMessage .hasTwisty.opened > .errorTitle,
 .logRow-log .objectBox-array.hasTwisty.opened,
@@ -37,6 +36,7 @@
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
 .netPageRow.opened > .netCol > .netPageTitle,
+.netInfoHeadersTable .netHeadersGroup.opened .twisty,
 .objectBox-stackFrame.hasTwisty.opened,
 .objectBox-functionCall.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
@@ -49,27 +49,10 @@
 }
 
 .hasHeaders .netHrefLabel,
+.netInfoHeadersTable .netHeader,
 .netHrefLabel,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
     background-position: 2px 50%;
-}
-
-.netInfoHeadersTable > .netHeadersGroup > TABLE,
-.netInfoHeadersTable > .netHeadersGroup .netHeadersViewSource {
-    display: none;
-}
-
-.netInfoHeadersTable > .netHeadersGroup.opened > TABLE,
-.netInfoHeadersTable > .netHeadersGroup.opened .netHeadersViewSource {
-    display: block;
-}
-
-.netHeader {
-    cursor: pointer;
-    display: inline-block;
-    position: static;
-    text-indent: 17px;
-    width: 100%;
 }
 
 /************************************************************************************************/

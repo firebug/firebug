@@ -1576,7 +1576,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 {
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
-            DIV({"class": "netHeadersGroup opened"},
+            DIV({"class": "netHeadersGroup"},
                 DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
                     SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
@@ -1592,7 +1592,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                         "aria-label": Locale.$STR("ResponseHeaders")})
                 )
             ),
-            DIV({"class": "netHeadersGroup opened"},
+            DIV({"class": "netHeadersGroup"},
                 DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
@@ -1608,7 +1608,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                 )
             ),
             DIV({"class": "netHeadersGroup"},
-                DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle collapsed"},
+                DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
                         Locale.$STR("CachedResponseHeaders"))
@@ -1619,7 +1619,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                 )
             ),
             DIV({"class": "netHeadersGroup"},
-                DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle collapsed"},
+                DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
                     Locale.$STR("PostRequestHeaders"))
@@ -1640,10 +1640,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
     toggleHeaderContent: function(event)
     {
-        var target = event.target,
-            headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
+        var target = event.target;
+        var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
         
-        FBTrace.sysout(headerGroup);
         Css.toggleClass(headerGroup, "opened");
         headerGroup.setAttribute("aria-expanded", (Css.hasClass(headerGroup, "opened") ? "true" : "false"));
     },
@@ -1711,6 +1710,26 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var file = netInfoBox.repObject;
 
         var viewSource;
+		var headers;
+		var header;
+		
+		headers = rootNode.getElementsByClassName("netHeadersGroup");
+		
+		header = headers[0];
+		if (Options.get("netResponseHeadersVisible"))
+			Css.setClass(header, "opened");
+	
+		header = headers[1];
+		if (Options.get("netRequestHeadersVisible"))
+			Css.setClass(header, "opened");
+		
+		header = headers[2];
+		if (Options.get("netCachedHeadersVisible"))
+			Css.setClass(header, "opened");
+		
+		header = headers[3];
+		if (Options.get("netCachedHeadersVisible"))
+			Css.setClass(header, "opened");
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)
