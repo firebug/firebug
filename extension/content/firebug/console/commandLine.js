@@ -46,10 +46,17 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
-        exceptionFunction, noStateChange, noCmdLineAPI)
+        exceptionFunction, options)
     {
         if (!context)
             return;
+
+        // Previously there was `noStateChange` in place of `options`. For backward compatibility,
+        // if `options` is a boolean, its value is meant to be `noStateChange`.
+        if (typeof options === "boolean")
+            options = {noStateChange: options};
+        else if (options == undefined)
+            options = {};
 
         targetWindow = targetWindow || context.getCurrentGlobal();
 
@@ -59,7 +66,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             debuggerState = Firebug.Debugger.beginInternalOperation();
 
             var newExpr = expr;
-            if (!noCmdLineAPI)
+            if (!options.noCmdLineAPI)
                 newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
 
             if (this.isSandbox(context))
@@ -75,10 +82,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else
             {
                 this.evaluateInGlobal(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr, noCmdLineAPI);
+                    successConsoleFunction, exceptionFunction, expr, options);
             }
 
-            if (!noStateChange)
+            if (!options.noStateChange)
                 context.invalidatePanels("dom", "html");
         }
         catch (exc)
@@ -97,9 +104,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     },
 
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction, origExpr, noCmdLineAPI)
+        successConsoleFunction, exceptionFunction, origExpr, options)
     {
         var win = targetWindow || context.getCurrentGlobal();
+        options = options || {};
 
         if (!win)
         {
@@ -148,7 +156,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         };
 
         origExpr = origExpr || expr;
-        var options = {"noCmdLineAPI": noCmdLineAPI};
         CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError, options);
     },
 

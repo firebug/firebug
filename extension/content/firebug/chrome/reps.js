@@ -3044,7 +3044,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
                             done = true;
                         },
                         function() {},
-                        true
+                        {noStateChange: true}
                     );
                     if (done)
                         break;
