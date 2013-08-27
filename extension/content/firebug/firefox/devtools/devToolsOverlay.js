@@ -106,7 +106,7 @@ DevToolsOverlay.prototype =
             position: 2,
             "class": "developer-toolbar-button",
             id: "developer-toolbar-firebug-button",
-            tooltiptext: "Firebug",
+            tooltiptext: Locale.$STR("firebug.menu.tip.Open_Firebug"),
             command: "cmd_firebug_toggleFirebug",
         }, [], parentToolbar);
     },
