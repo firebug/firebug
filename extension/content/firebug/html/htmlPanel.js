@@ -1891,9 +1891,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     label: "DeleteElement",
                     tooltiptext: "html.Delete_Element",
 
-                    // xxxsz: 'Del' needs to be translated, but therefore customizeShortcuts
-                    // must be turned into a module
-                    acceltext: "Del",
+                    acceltext: Locale.$STR("VK_DELETE"),
                     command: Obj.bindFixed(this.deleteNode, this, node),
                     disabled:(node.localName in Css.innerEditableTags)
                 });
