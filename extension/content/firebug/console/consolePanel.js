@@ -441,10 +441,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageMatcher: function(object, rep, sourceLink, level)
+    getMessageMatcher: function(object, appender, className, rep, sourceLink, level)
     {
-        function matchesMetaData(otherRep, otherLink, otherLevel)
+        function matchesMetaData(otherAppender, otherClassName, otherRep, otherLink, otherLevel)
         {
+            if (otherAppender !== appender)
+                return false;
+
+            if (otherClassName !== className)
+                return false;
+
             if (otherRep !== rep || (rep && rep.groupable === false))
                 return false;
 
@@ -480,12 +486,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return false;
         }
 
-        return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
+        return function matchMessage(otherObject, otherAppender, otherClassName, otherRep,
+            otherSourceLink, otherLevel)
         {
             try
             {
-                if (!matchesMetaData(otherRep, otherSourceLink, otherLevel))
+                if (!matchesMetaData(otherAppender, otherClassName, otherRep, otherSourceLink,
+                    otherLevel))
+                {
                     return false;
+                }
 
                 var str = Object.prototype.toString.call(object);
                 var isArray = (str === "[object Arguments]" || str === "[object Array]");
@@ -563,7 +573,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 sourceLink = objects.getSourceLink();
 
             if (Options.get("console.groupLogMessages") && this.matchesLastMessage &&
-                this.matchesLastMessage(objects, rep, sourceLink,
+                this.matchesLastMessage(objects, appender, className, rep, sourceLink,
                     this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
@@ -577,8 +587,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 container.appendChild(row);
             }
 
-            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink,
-                this.groups ? this.groups.length : 0);
+            this.matchesLastMessage = this.getMessageMatcher(objects, appender, className, rep,
+                sourceLink, this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
