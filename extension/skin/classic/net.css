@@ -727,18 +727,18 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 
 .netInfoHeadersTable > .netHeadersGroup.opened > TABLE,
 .netInfoHeadersTable > .netHeadersGroup.opened .netHeadersViewSource {
-    display: block;
+    display: inline-block;
 }
 
 .netInfoHeadersTable .netHeader {
     cursor: pointer;
     padding-left: 17px;
     position: static;
-	-moz-user-select: none;
+    -moz-user-select: none;
 }
 
 .netInfoHeadersTable .netHeadersViewSource {
-	display:inline-block;
+    display: inline-block;
 }
 
 /*************************************************************************************************/
