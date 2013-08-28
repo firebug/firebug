@@ -1346,12 +1346,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
             }
         }
 
-        // Display xpath of the element.
-        var tooltip = this.getXPath(elt);
-        if (elt.namespaceURI)
-            tooltip += " (" + elt.namespaceURI + ")";
-
-        return tooltip;
+        // Don't show a tooltip when hovering an element (see issue 6706)
+        return "";
     },
 
     getContextMenuItems: function(elt, target, context)
