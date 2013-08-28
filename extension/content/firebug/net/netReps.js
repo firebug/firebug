@@ -1720,10 +1720,10 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             Css.setClass(headers[1], "opened");
 
         if (Options.get("netCachedHeadersVisible"))
+        {
             Css.setClass(headers[2], "opened");
-
-        if (Options.get("netCachedHeadersVisible"))
             Css.setClass(headers[3], "opened");
+        }
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)
