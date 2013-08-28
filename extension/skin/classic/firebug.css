@@ -101,9 +101,13 @@
     background: none repeat scroll 0% 0% transparent;
 }
 
-#fbCommandLineCompletion {
+#fbCommandLineCompletionHolder {
     position: absolute;
+    width: 100%;
     z-index: 1;
+}
+
+#fbCommandLineCompletion {
     color: #A0A0A0;
     pointer-events: none;
 }
