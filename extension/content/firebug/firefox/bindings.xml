@@ -96,8 +96,13 @@
                     tab.setAttribute("aria-disabled", enabled ? "false" : "true");
                 }
 
-                // xxxHonza: Does this belong here?
+                // xxxHonza: This doesn't belong here, the start button should utilize
+                // the onUpdateTab event fired below.
+                // The activation logic (above) should be implemented similarly.
                 Firebug.StartButton.resetTooltip();
+
+                Firebug.dispatch(Firebug.uiListeners, "onUpdateTab",
+                    [Firebug.currentContext, tab, panelType]);
             ]]></body>
         </method>
 
