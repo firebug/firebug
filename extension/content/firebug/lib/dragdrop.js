@@ -55,7 +55,7 @@ Tracker.prototype =
         Events.addEventListener(this.element.ownerDocument, "mousemove", this.onDragOver, false);
         Events.addEventListener(this.element.ownerDocument, "mouseup", this.onDrop, false);
 
-        Events.cancelEvent(e);
+        Events.cancelEvent(event);
     },
 
     onDragOver: function(event)

@@ -30,9 +30,9 @@ function runTest()
                 for (var i=0; i<netRows.length; i++)
                 {
                     var row = netRows[i];
-                    var responseBody = FW.FBL.getElementByClass(row.nextSibling, 
+                    var responseBody = FW.FBL.getElementByClass(row.nextSibling,
                         "netInfoResponseText", "netInfoText");
-                    FBTest.compare(responses[i], responseBody.textContent, 
+                    FBTest.compare(responses[i], responseBody.textContent,
                         "Test response must match");
                 }
 

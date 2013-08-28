@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5454: Scroll to see the props when a group is expanded inside the Computed side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element {
+            width: 100px;
+            height: 100px;
+            background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            font-family: sans-serif;
+        }
+
+        #element {
+            font-family: sans-serif;
+        }
+
+        #element {
+            font-family: sans-serif;
+        }
+
+        #element {
+            font-family: sans-serif;
+        }
+
+        #element {
+            font-family: sans-serif;
+        }
+
+        #element {
+            font-family: sans-serif;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5454">Issue 5454</a>: Scroll to see the props when a group is expanded inside the Computed side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>
+                        Check the panel option <em>Show User Agent CSS</em><br/>
+                        <span class="ok">&rArr; The panel should display CSS properties and a scrollbar to scroll through them.</span>
+                    </li>
+                    <li>Scroll the panel down to the <em>Background</em> category and make sure the whole group is displayed</li>
+                    <li>
+                        Click the group header of the <em>Background</em> category<br/>
+                        <span class="ok">&rArr; The group should be collapsed now.</span>
+                    </li>
+                    <li>
+                        Click the group header again<br/>
+                        <span class="ok">&rArr; The panel should not be scrolled and the group should be expanded again.</span>
+                    </li>
+                    <li>Scroll up again, so that only the header of the <em>Background</em> category is visible</li>
+                    <li>Click the group header of the <em>Background</em> category again to collapse it</li>
+                    <li>
+                        Click the group header again<br/>
+                        <span class="ok">
+                            &rArr; The panel should be scrolled down, so that the whole <em>Background</em> group is visible
+                            (aligned at the bottom of the panel).
+                        </span>
+                    </li>
+                    <li>Scroll the panel, so that just a part of the group header is visible</li>
+                    <li>Click the group header of the <em>Background</em> category again to collapse it</li>
+                    <li>
+                        Click the group header again<br/>
+                        <span class="ok">
+                            &rArr; The panel should be scrolled up, so that the whole <em>Background</em> group is visible
+                            (aligned at the top of the panel).
+                        </span>
+                    </li>
+                    <li>Resize Firebug so that the <em>Background</em> category doesn't fit into the viewport completely</li>
+                    <li>Click the group header it again to collapse it</li>
+                    <li>
+                        Click the group header again<br/>
+                        <span class="ok">
+                            &rArr; The panel should be scrolled down, so that the <em>Background</em> group fills out the whole panel
+                            (aligned at the top of the panel).
+                        </span>
+                    </li>
+                    <li>Expand the <code>font-family</code> property and repeat steps 4 to 13 for it.</code>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Computed</em> side panel should smartly scroll when a category or a property is expanded.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

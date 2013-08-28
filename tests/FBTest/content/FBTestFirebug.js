@@ -1150,6 +1150,22 @@ this.getPanel = function(name)
     return FW.Firebug.currentContext.getPanel(name);
 };
 
+/**
+ * Wait until the debugger has been activated, after enabling the Script panel.
+ *
+ * @param {Object} callback The callback executed when the debugger has been activated.
+ */
+this.waitForDebuggerActivation = function(callback)
+{
+    // Add a function to be executed after we have gone back to the event loop
+    // and activated the debugger.
+    // (Despite the appearance, this shouldn't be a race condition.)
+    setTimeout(function()
+    {
+        callback();
+    }, 0);
+};
+
 this.listenerCleanups = [];
 this.cleanUpListeners = function()
 {
@@ -1218,6 +1234,16 @@ this.setPref = function(pref, value, prefDomain)
 this.getPref = function(pref)
 {
     return FW.Firebug.getPref(FW.Firebug.prefDomain, pref);
+};
+
+/**
+ * Resets the value of the specified Firebug preference.
+ * @param {Object} pref Name of the preference without <i>extensions.firebug</i> prefix.
+ * For instance: <i>showXMLHttpRequests</i>.
+ */
+this.clearPref = function(pref)
+{
+    FW.Firebug.Options.clearPref(FW.Firebug.prefDomain, pref);
 };
 
 // ********************************************************************************************* //
@@ -2704,7 +2730,7 @@ this.compareFirefoxVersion = function(expectedVersion)
 // Support for asynchronous test suites (within a FBTest).
 
 /**
- * Support for set of asynchronouse actions within a FBTest.
+ * Support for set of asynchronous actions within a FBTest.
  *
  * Example:
  * ~~

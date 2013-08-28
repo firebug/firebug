@@ -62,7 +62,7 @@ function runTest()
             msg += " (" + params + ")";
         }
         msg += " must match expected format";
-            
+
         FBTest.compare(value.expected, FW.FBL.formatTime(value.value, value.minUnit, value.maxUnit,
                 value.decimalPlaces), msg);
     }

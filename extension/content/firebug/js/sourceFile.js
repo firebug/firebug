@@ -938,7 +938,7 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
     }
 
     // Do not subtract 1 (see issue 6566)
-    return StackFrame.guessFunctionName(url, line/*-1*/, context);
+    return StackFrame.guessFunctionName(url, line/*-1*/+1, context);
 };
 
 // ********************************************************************************************* //

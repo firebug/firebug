@@ -158,26 +158,37 @@ Xpath.getElementsBySelector = function(doc, css)
 
 Xpath.getElementsByXPath = function(doc, xpath)
 {
-    var result = Xpath.evaluateXPath(doc, xpath);
-
-    if (result instanceof Array)
-        return result;
-
-    return [];
+    try
+    {
+        return Xpath.evaluateXPath(doc, xpath);
+    }
+    catch(ex)
+    {
+        return [];
+    }
 };
 
 /**
  * Evaluates an XPath expression.
  *
- * @param Document doc
- * @param String xpath The XPath expression.
- * @param Node contextNode The context node.
- * @param int resultType
- * @param [bool] throwException If set to true, an invalid XPath expression throws an error.
+ * @param {Document} doc
+ * @param {String} xpath The XPath expression.
+ * @param {Node} contextNode The context node.
+ * @param {int} resultType
  *
- * @return * the result of the XPath expression
+ * @returns {*} The result of the XPath expression, depending on resultType :<br> <ul>
+ *          <li>if it is XPathResult.NUMBER_TYPE, then it returns a Number</li>
+ *          <li>if it is XPathResult.STRING_TYPE, then it returns a String</li>
+ *          <li>if it is XPathResult.BOOLEAN_TYPE, then it returns a boolean</li>
+ *          <li>if it is XPathResult.UNORDERED_NODE_ITERATOR_TYPE
+ *              or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, then it returns an array of nodes</li>
+ *          <li>if it is XPathResult.ORDERED_NODE_SNAPSHOT_TYPE
+ *              or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, then it returns an array of nodes</li>
+ *          <li>if it is XPathResult.ANY_UNORDERED_NODE_TYPE
+ *              or XPathResult.FIRST_ORDERED_NODE_TYPE, then it returns a single node</li>
+ *          </ul>
  */
-Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType, throwException)
+Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType)
 {
     if (contextNode === undefined)
         contextNode = doc;
@@ -185,17 +196,7 @@ Xpath.evaluateXPath = function(doc, xpath, contextNode, resultType, throwExcepti
     if (resultType === undefined)
         resultType = XPathResult.ANY_TYPE;
 
-    try
-    {
-        var result = doc.evaluate(xpath, contextNode, null, resultType, null);
-    }
-    catch (exc)
-    {
-        if (throwException)
-            throw exc;
-        // If an invalid XPath expression was entered, it should be caught without exception.
-        return;
-    }
+    var result = doc.evaluate(xpath, contextNode, null, resultType, null);
 
     switch (result.resultType)
     {

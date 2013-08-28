@@ -105,7 +105,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
         var doc = Wrapper.unwrapObject(context.baseWindow.document);
         try
         {
-            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType, true);
+            return Xpath.evaluateXPath(doc, xpath, contextNode, XPathResultType);
         }
         catch(ex)
         {
@@ -133,7 +133,7 @@ CommandLineAPI.getCommandLineAPI = function(context)
     commands.cd = function(object)
     {
         if (!(object instanceof window.Window))
-            throw new Error("Object must be a window.");
+            throw new Error("The cd() argument must be a window.");
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.cd; console ready: " + consoleReady);

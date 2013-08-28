@@ -49,6 +49,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/html/htmlPanel",
         "firebug/dom/domSidePanel",
         "firebug/console/commandLinePopup",
+        "firebug/chrome/toggleSidePanels",
 
         // Commands
         "firebug/console/commands/lastCommandLineResult",
@@ -67,6 +68,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/cookies/cookieModule",
         "firebug/cookies/cookiePanel",
         "firebug/css/selectorPanel",
+        "firebug/console/errorMessageRep",
+        "firebug/console/exceptionRep",
     ];
 
     return config;

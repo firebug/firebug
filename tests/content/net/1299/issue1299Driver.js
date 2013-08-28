@@ -20,7 +20,7 @@ function runTest()
             };
 
             // Let's load the issue1299.js file again. It's already
-            // included within the test page so, it must be in 
+            // included within the test page so, it must be in
             // Firefox cache now.
             FBTest.waitForDisplayedElement("net", options, function(netRow)
             {

@@ -6,10 +6,15 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
     "firebug/lib/events",
 ],
-function(Firebug, FBTrace, Locale, Wrapper, Events) {
+function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events) {
 "use strict";
+
+const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var pre23 = (versionChecker.compare(appInfo.version, "23.0*") < 0);
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -19,6 +24,13 @@ function onExecuteCommand(context, args)
     var target = args[0];
     if (typeof target !== "object" || target === null)
         return undefined;
+
+    if (pre23 && !context.getPanel("script", true))
+    {
+        // XXXsimon: Don't bother translating this, it will go away in one release,
+        // happen very seldom, and English error messages look better anyway.
+        throw new Error("getEventListeners requires the Script panel to be enabled (or the use of Firefox 23 or higher)");
+    }
 
     var listeners;
     try

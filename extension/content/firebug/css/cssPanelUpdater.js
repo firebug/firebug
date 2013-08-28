@@ -63,7 +63,10 @@ CSSPanelUpdater.prototype =
         this.timeout = this.context.setInterval(this.onTimeout.bind(this), updateTimeout);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.watchWindow; " + Win.safeGetWindowLocation(win) + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.watchWindow; " + Win.safeGetWindowLocation(win) +
+                ", " + this.timeout);
+        }
     },
 
     unwatchWindow: function(win)
@@ -105,7 +108,10 @@ CSSPanelUpdater.prototype =
     destroy: function()
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.destroy; " + this.context.getName() + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.destroy; " + this.context.getName() +
+                ", " + this.timeout);
+        }
 
         if (this.timeout)
             this.context.clearInterval(this.timeout);
@@ -122,7 +128,10 @@ CSSPanelUpdater.prototype =
     onTimeout: function()
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSPanelUpdater.onTimeout; " + this.context.getName() + ", " + this.timeout);
+        {
+            FBTrace.sysout("CSSPanelUpdater.onTimeout; " + this.context.getName() +
+                ", " + this.timeout);
+        }
 
         try
         {
@@ -149,6 +158,11 @@ var CSSPanelUpdaterModule = Obj.extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
+        // The updater works only if the CSS panel is selected (optimization and also avoid
+        // updating panel's toolbar when the panel is not visible).
+        if (!this.isSelected())
+            return;
+
         for (var i=0; i<updaters.length; i++)
         {
             var updater = updaters[i];
@@ -159,6 +173,9 @@ var CSSPanelUpdaterModule = Obj.extend(Firebug.Module,
 
     unwatchWindow: function(context, win)
     {
+        if (!this.isSelected())
+            return;
+
         for (var i=0; i<updaters.length; i++)
         {
             var updater = updaters[i];
@@ -169,6 +186,9 @@ var CSSPanelUpdaterModule = Obj.extend(Firebug.Module,
 
     loadWindow: function(context, win)
     {
+        if (!this.isSelected())
+            return;
+
         for (var i=0; i<updaters.length; i++)
         {
             var updater = updaters[i];
@@ -176,6 +196,12 @@ var CSSPanelUpdaterModule = Obj.extend(Firebug.Module,
                 updater.loadWindow(win);
         }
     },
+
+    isSelected: function()
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        return (panel && panel.name == "stylesheet");
+    }
 });
 
 // ********************************************************************************************* //

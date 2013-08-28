@@ -83,7 +83,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.12",
+    version: "1.13",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -115,7 +115,7 @@ window.Firebug =
         // This says how much time was necessary to load Firebug overlay (+ all script tags).
         FBTrace.timeEnd("SCRIPTTAG_TIME");
 
-        // Measure the entire Firebug initialiation time.
+        // Measure the entire Firebug initialization time.
         FBTrace.time("INITIALIZATION_TIME");
 
         Firebug.chrome = chrome;
@@ -804,7 +804,7 @@ window.Firebug =
 
         if (Firebug.isDetached())
         {
-            //in detached mode, two possibilities exist, the firebug windows is 
+            //in detached mode, two possibilities exist, the firebug windows is
             // the active window of the user or no.
             if ( !Firebug.chrome.hasFocus() || forceOpen)
                 Firebug.chrome.focus();
@@ -1081,6 +1081,17 @@ window.Firebug =
         return tooltip != panelType.prototype.name ? tooltip : this.getPanelTitle(panelType);
     },
 
+    getPanelTab: function(panelName)
+    {
+        var chrome = Firebug.chrome;
+
+        var tab = chrome.$("fbPanelBar2").getTab(panelName);
+        if (!tab)
+            tab = chrome.$("fbPanelBar1").getTab(panelName);
+
+        return tab;
+    },
+
     getMainPanelTypes: function(context)
     {
         var resultTypes = [];
@@ -1168,6 +1179,9 @@ window.Firebug =
      * The 'null' return here is a too-subtle signal to the panel code in bindings.xml.
      * Note that panel.context may not have a persistedState, but in addition the persisted
      * state for panel.name may be null.
+     *
+     * xxxHonza: the method should never return null. The implementation should
+     * just use: Persist.getPersistedState() method.
      */
     getPanelState: function(panel)
     {
@@ -1678,6 +1692,10 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
                 this.loadPersistedContent(persistedState);
         }
 
+        // The default value for 'Persist' is set only the first time.
+        if (typeof(this.persistContent) == "undefined")
+            this.persistContent = Options.get(this.name + ".defaultPersist");
+
         doc.body.appendChild(this.panelNode);
 
         // Update panel's tab in case the break-on-next (BON) is active.
@@ -1695,12 +1713,12 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.destroy panelNode for " + this.name);
 
+        state.persistContent = this.persistContent;
+
         if (this.panelNode)
         {
             if (this.persistContent)
                 this.savePersistedContent(state);
-            else
-                delete state.persistContent;
 
             delete this.panelNode.ownerPanel;
         }
@@ -1717,7 +1735,6 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     savePersistedContent: function(state)
     {
         state.panelNode = this.panelNode;
-        state.persistContent = this.persistContent;
     },
 
     loadPersistedContent: function(persistedState)
@@ -1836,16 +1853,29 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     navigate: function(object)
     {
+        // Get default location object if none is specified.
         if (!object)
             object = this.getDefaultLocation();
-        if (!object)
-            object = null;  // not undefined.
 
-        // if this.location undefined, may set to null
+        // Make sure the location is *not* undefined.
+        if (!object)
+            object = null;
+
+        // We should be extra careful when dealing with the |location| object (include
+        // converting it to string).
+        // There might be cases where the object is removed from the page (e.g. a stylesheet
+        // that is currently displayed in the CSS panel) and the panel location not updated.
+        //
+        // This might happen because of optimalization where backround panels do not observe
+        // changes on the page (e.g. using Mutation Observer).
+        //
+        // The object is a dead wrapper at such moments, firing an exception anytime
+        // it's properties or methods are accessed.
+        // So, just pass the object back to the panel, which must do proper checking.
         if (!this.location || (object != this.location))
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate "+this.name+" to location "+object, object);
+                FBTrace.sysout("Panel.navigate; " + this.name);
 
             this.location = object;
             this.updateLocation(object);
@@ -1855,11 +1885,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_PANELS)
-            {
-                FBTrace.sysout("navigate skipped for panel " + this.name + " when object " +
-                    object + " vs this.location=" + this.location,
-                    {object: object, location: this.location});
-            }
+                FBTrace.sysout("Panel.navigate; Skipped for panel " + this.name);
         }
     },
 
@@ -2184,12 +2210,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     getTab: function()
     {
-        var chrome = Firebug.chrome;
-
-        var tab = chrome.$("fbPanelBar2").getTab(this.name);
-        if (!tab)
-            tab = chrome.$("fbPanelBar1").getTab(this.name);
-        return tab;
+        return Firebug.getPanelTab(this.name);
     },
 
     /**
@@ -2765,7 +2786,7 @@ function shutdownFirebug()
     }
     catch (exc)
     {
-        window.dump("shutdownFirebug FAILS: "+exc+"\n");
+        window.dump("Firebug.shutdownFirebug EXCEPTION: " + exc + "\n");
     }
 
     Firebug.shutdown();

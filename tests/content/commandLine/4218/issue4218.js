@@ -10,11 +10,11 @@ function runTest()
         {
             var doc = FW.Firebug.chrome.window.document;
             var cmdLine = doc.getElementById("fbCommandLine");
-  
+
             // Make sure the Console is focused and command line API loaded
             FBTest.focus(cmdLine);
             FBTest.clearCommand();
-  
+
             // Type '1' into the Command Line and press Enter key
             FBTest.typeCommand("1");
             FBTest.synthesizeKey("VK_RETURN", null, win);

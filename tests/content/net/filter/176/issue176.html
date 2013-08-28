@@ -10,13 +10,13 @@
             appendScript("issue176.txt");
             appendScript("issue176.flv");
         }
-        
+
         function appendScript(uri)
         {
             var script = document.createElement("script");
             script.setAttribute("type", "text/javascript");
             script.setAttribute("src", uri);
-        
+
             var head = document.getElementsByTagName("head")[0];
             head.appendChild(script);
         }

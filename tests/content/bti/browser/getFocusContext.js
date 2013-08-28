@@ -1,13 +1,13 @@
 
 /**
  * Test for Browser#getFocusBrowserContext(id)
- * 
+ *
  * The focus browser context updates as new tabs are opened
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browser/testGetContexts.html";
     FBTest.progress("getFocusContext(), get initial set of contexts");
     var contexts = browser.getBrowserContexts();

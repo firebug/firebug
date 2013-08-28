@@ -10,7 +10,7 @@ function runTest()
             win.runTest(function(request)
             {
                 var panelNode = FBTest.selectPanel("net").panelNode;
-                var netRow = FW.FBL.getElementByClass(panelNode, "netRow", "category-xhr", 
+                var netRow = FW.FBL.getElementByClass(panelNode, "netRow", "category-xhr",
                     "hasHeaders", "loaded");
 
                 // Click to open + click to close.
@@ -33,7 +33,7 @@ var initTabBody = false;
 var updateTabBody = false;
 var destroyTabBody = false;
 
-var netInfoBodyListener = 
+var netInfoBodyListener =
 {
     initTabBody: function(infoBox, file) {
         initTabBody = true;

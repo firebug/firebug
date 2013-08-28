@@ -34,6 +34,16 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 {
     dispatchName: "breakpoints",
 
+    initialize: function()
+    {
+        Firebug.connection.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.connection.removeListener(this);
+    },
+
     toggleBreakOnNext: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
@@ -62,6 +72,17 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        this.updatePanelState(panel);
+    },
+
+    onDebuggerEnabled: function()
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        this.updatePanelState(panel);
+    },
+
+    updatePanelState: function(panel)
+    {
         if (!panel)  // there is no selectedPanel?
             return;
 
@@ -73,8 +94,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
         // The script panel can be created at this moment (the second parameter is false)
-        // It's needed for break on next to work (do not wait till the user actuall
-        // selectes the panel).
+        // It's needed for break on next to work (do not wait till the user actually
+        // selects the panel).
         var scriptPanel = panel.context.getPanel("script");
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");
@@ -235,7 +256,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 with (Domplate) {
 Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
@@ -1057,7 +1078,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
                     TR(
                         TD({"class": "imageCol"},
                             IMG({"class": "notificationImage",
-                                src: "chrome://firebug/skin/breakpoint.svg"})
+                                src: "chrome://firebug/skin/breakpoint.png"})
                         ),
                         TD({"class": "descCol"},
                             SPAN({"class": "notificationDesc"}, "$cause|getDescription"),

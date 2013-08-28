@@ -28,9 +28,9 @@ function runTest()
                 var headersBody = FW.FBL.getElementByClass(panelNode, "netInfoResponseHeadersBody");
                 if (FBTest.ok(headersBody, "Response headers must exist"))
                 {
-                    FBTest.ok(headersBody.textContent.indexOf("Content-Type"),
+                    FBTest.ok(headersBody.textContent.indexOf("Content-Type") !== -1,
                         "Content-Type header exists");
-                    FBTest.ok(headersBody.textContent.indexOf("Content-Length"),
+                    FBTest.ok(headersBody.textContent.indexOf("Content-Length") !== -1,
                         "Content-Length header exists");
                 }
 

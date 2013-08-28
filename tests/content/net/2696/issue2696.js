@@ -33,7 +33,7 @@ function runTest()
                 var netInfoRow = netRow.nextSibling;
                 FBTest.expandElements(netInfoRow, "netInfoResponseTab");
 
-                var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText", 
+                var responseBody = FW.FBL.getElementByClass(panel.panelNode, "netInfoResponseText",
                     "netInfoText");
 
                 // 6) Verify response

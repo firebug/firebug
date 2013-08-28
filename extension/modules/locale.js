@@ -68,9 +68,9 @@ Locale.$STR = function(name, bundle)
         try
         {
             if (bundle)
-                return bundle.getString(strKey);
+                return validate(bundle.getString(strKey));
             else
-                return Locale.getStringBundle().GetStringFromName(strKey);
+                return validate(Locale.getStringBundle().GetStringFromName(strKey));
         }
         catch (err)
         {
@@ -84,7 +84,7 @@ Locale.$STR = function(name, bundle)
         // The en-US string should be always available.
         var defaultBundle = Locale.getDefaultStringBundle();
         if (defaultBundle)
-            return defaultBundle.GetStringFromName(strKey);
+            return validate(defaultBundle.GetStringFromName(strKey));
     }
     catch (err)
     {
@@ -97,6 +97,7 @@ Locale.$STR = function(name, bundle)
     if (index > 0 && name.charAt(index-1) != "\\")
         name = name.substr(index + 1);
     name = name.replace("_", " ", "g");
+
     return name;
 };
 
@@ -109,9 +110,9 @@ Locale.$STRF = function(name, args, bundle)
         try
         {
             if (bundle)
-                return bundle.getFormattedString(strKey, args);
+                return validate(bundle.getFormattedString(strKey, args));
             else
-                return Locale.getStringBundle().formatStringFromName(strKey, args, args.length);
+                return validate(Locale.getStringBundle().formatStringFromName(strKey, args, args.length));
         }
         catch (err)
         {
@@ -125,7 +126,7 @@ Locale.$STRF = function(name, args, bundle)
         // The en-US string should be always available.
         var defaultBundle = Locale.getDefaultStringBundle();
         if (defaultBundle)
-            return defaultBundle.formatStringFromName(strKey, args, args.length);
+            return validate(defaultBundle.formatStringFromName(strKey, args, args.length));
     }
     catch (err)
     {
@@ -163,10 +164,10 @@ Locale.$STRP = function(name, args, index, bundle)
     // Get proper plural form from the string (depends on the current Firefox locale).
     var translatedString = Locale.$STRF(name, args, bundle);
     if (translatedString.search(";") > 0)
-        return getPluralForm(args[index], translatedString);
+        return validate(getPluralForm(args[index], translatedString));
 
     // translatedString contains no ";", either rule 0 or getString fails
-    return translatedString;
+    return validate(translatedString);
 };
 
 /*
@@ -253,6 +254,12 @@ Locale.getPluralRule = function()
 
 // ********************************************************************************************* //
 // Helpers
+
+// Replace forbidden characters(see bug 6630)
+function validate(str)
+{
+    return String(str).replace(/"/g, '\'');
+}
 
 function getDefaultStringBundleURI(bundleURI)
 {

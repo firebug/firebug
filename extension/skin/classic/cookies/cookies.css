@@ -29,9 +29,9 @@
 .logRow-cookiesCleared,
 .logRow-cookiesRejected,
 .logRow-cookie:hover {
-    background-image: url(chrome://firebug/skin/cookies/cookie.svg);
+    background-image: url(chrome://firebug/skin/cookies/cookie.png);
     background-repeat: no-repeat;
-    background-position: 4px 3px;
+    background-position: 3px 2px;
 }
 
 .logRow-cookiesRejected .cookieRejectedList {
@@ -122,11 +122,11 @@
 
 .cookieHeaderSorted > .cookieHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);    
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat calc(100% - 4px);    
 }
 
 .cookieHeaderSorted.sortedAscending > .cookieHeaderCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.svg);
+    background-image: url(chrome://firebug/skin/arrowUp.png);
 }
 
 .cookieHeaderSorted:hover:active {
@@ -206,7 +206,7 @@
 }
 
 .cookieRow[breakpoint="true"] .cookieRowHeader {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
 .cookieRow[breakpoint="true"][disabledBreakpoint="true"] .cookieRowHeader {
@@ -220,7 +220,7 @@
     left: 5px;
     width: 12px;
     height: 12px;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.5;
 }
 

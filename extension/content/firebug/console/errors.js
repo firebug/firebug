@@ -27,7 +27,7 @@ const WARNING_FLAG = nsIScriptError.warningFlag;
 
 const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
 const reUncaught = /uncaught exception/;
-// regular expessions for parsing uncaught exceptions
+// regular expressions for parsing uncaught exceptions
 // see http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcexception.cpp#347
 // and http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcstack.cpp#318
 // and http://lxr.mozilla.org/mozilla/source/dom/src/base/nsDOMException.cpp#351
@@ -52,6 +52,8 @@ const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleSe
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
+const wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+
 // ********************************************************************************************* //
 
 var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
@@ -63,7 +65,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        // Make sure the error obsever is removed.
+        // Make sure the error observer is removed.
         this.stopObserving();
 
         Firebug.Module.shutdown.apply(this, arguments);
@@ -365,7 +367,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
         // the sourceLine will cause the source to be loaded.
         var error = new FirebugReps.ErrorMessageObj(object.errorMessage, object.sourceName,
-            object.lineNumber, object.sourceLine, category, context, null, msgId);
+            object.lineNumber, object.sourceLine, category, context, null);
 
         // Display column info only if it isn't zero.
         if (object.columnNumber > 0)
@@ -382,6 +384,10 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             error.correctWithStackTrace(Firebug.errorStackTrace);
             if (!Firebug.showStackTrace)
                 error.trace = null;
+        }
+        else if (Firebug.showStackTrace && !context.isPanelEnabled("script"))
+        {
+            error.missingTraceBecauseNoDebugger = true;
         }
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
@@ -426,12 +432,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                     "url: " + url + ", outerWindowID: " + object.outerWindowID, object);
             return null;
         }
-
-        // eg some XPCOM messages
-        // xxxHonza: this could cause appearing error messages in wrong tabs.
-        // Is this still necessary?
-        if (!url)
-            return Firebug.currentContext;
 
         if (url && url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
@@ -847,7 +847,15 @@ function getErrorWindow(object)
         {
             if (object.outerWindowID)
             {
-                var win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+                var win;
+
+                // getOuterWindowWithId moved to nsIWindowMediator in Firefox 23
+                // See: https://bugzilla.mozilla.org/show_bug.cgi?id=861495
+                if (typeof(wm.getOuterWindowWithId) == "function")
+                    win = wm.getOuterWindowWithId(object.outerWindowID);
+                else
+                    win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+
                 if (win)
                     return win;
                 else

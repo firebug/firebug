@@ -41,13 +41,25 @@
                     <li>Open Firebug</li>
                     <li>Enable the <em>Cookies</em> and the <em>Console</em> panel and switch to the <em>Console</em> panel</li>
                     <li>Check the <em>Show Cookie Events</em> option</li>
-                    <li>Press the <em>Create cookie events</em> button above</li>
+                    <li>
+                        Press the <em>Create cookie events</em> button above<br/>
+                        <span class="ok">
+                            &rArr; There should be three entries in the console.
+                            Only the last one must have set the group counter set to "2".
+                        </span>
+                    </li>
+                    <li>
+                        Type <code>document.cookie</code> into the Command Line and hit <kbd>Enter</kbd><br/>
+                        <span class="ok">
+                            &rArr; A table should be listed displaying one cookie named <code>issue4979</code>.
+                            Below the table there should be the raw data displayed as <code>&quot;issue4979=value&quot;</code>. 
+                        </span>
+                    </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
                     <li>
-                        There should be three entries in the console. Only the last one must have set the
-                        group counter set to "2".
+                        Cookie events may be grouped, cookie data not.
                     </li>
                 </ul>
             </section>

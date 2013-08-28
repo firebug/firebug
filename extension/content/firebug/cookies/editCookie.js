@@ -55,10 +55,11 @@ EditCookie.prototype =
 
         // Fix for issue 39: decode cookie name and value for usage in the dialog.
         // It'll be encoded again when OK is pressed.
-        // Don't escape using encodeURIComponent sinc "+" would be changed, but 
-        // it's valid replacement for space.
+        // Don't escape using encodeURIComponent, since "+" would be changed, but
+        // it's a valid replacement for a space.
         // This is also necessary for issue 45.
-        this.nameNode.value = unescape(this.cookie.name);
+        // Cookie name should not be encoded, see Issue 6653
+        this.nameNode.value = this.cookie.name;
         this.valueNode.value = unescape(this.cookie.rawValue);
 
         this.domainNode.value = this.cookie.host;
@@ -76,8 +77,8 @@ EditCookie.prototype =
         {
             this.sessionNode.checked = true;
 
-            // Set default value for expire time (current time + some time, see prefs 
-            // defaultInterval) so, the cookie doesn't disappear if the session box 
+            // Set default value for expire time (current time + some time span, see prefs
+            // defaultInterval) so, the cookie doesn't disappear if the session box
             // is just unchecked.
 
             // xxxHonza: the default time is always set to the current time.
@@ -132,13 +133,16 @@ EditCookie.prototype =
         // on cookie name upon editing
         cookieName = cookieName.replace(/\;/g, "%3B");
 
-        // According to the spec cookie value must be escaped
+        // According to RFC 6265 (http://tools.ietf.org/html/rfc6265)
+        // the cookie value should be encoded
         if (this.URLEncodeValue.checked)
+        {
             cookieValue = escape(cookieValue);
 
-        // Issue 45: When I copy and paste or edit a cookie contents + (plus) signs
-        // get converted to spaces.
-        cookieValue = cookieValue.replace(/\+/g, "%2B");
+            // Issue 45: When I copy and paste or edit a cookie contents + (plus) signs
+            // get converted to spaces.
+            cookieValue = cookieValue.replace(/\+/g, "%2B");
+        }
 
         // Create a helper cookie object from the provided data.
         var values = {
@@ -218,7 +222,7 @@ EditCookie.prototype =
         if (!host)
             return false;
 
-        try 
+        try
         {
             var uri = "http://" + host + "/";
             return ioService.newURI(uri, null, null) ? true : false;
@@ -237,7 +241,7 @@ EditCookie.prototype =
         try {
             var uri = "http://" + host + "/" + path;
             return ioService.newURI(uri, null, null) ? true : false;
-        } 
+        }
         catch(err) {
         }
 

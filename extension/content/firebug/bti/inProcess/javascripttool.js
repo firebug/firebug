@@ -161,6 +161,7 @@ JavaScriptTool.onActivateTool = function(toolname, active)
             context.invalidatePanels('script');
         });
         JavaScriptTool.asTool.setActive(active);
+        Firebug.connection.dispatch("onDebuggerEnabled", [active]);
     }
 },
 

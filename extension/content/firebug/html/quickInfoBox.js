@@ -7,27 +7,70 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/options",
+    "firebug/lib/domplate",
+    "firebug/lib/object",
+    "firebug/lib/css"
 ],
-function(Firebug, Firefox, Locale, Events, Dom, Options) {
+function(Firebug, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
+
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
 
 var domAttribs = ["nodeName", "id", "name", "offsetWidth", "offsetHeight"];
 var cssAttribs = ["position"];
 var compAttribs = [
     "width", "height", "zIndex", "position", "top", "right", "bottom", "left",
     "margin-top", "margin-right", "margin-bottom", "margin-left", "color",
-    "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"];
+    "backgroundColor", "fontFamily", "cssFloat", "display", "visibility"
+];
+
+// ********************************************************************************************* //
+// Domplate
+
+var {domplate, DIV, TABLE, TBODY, TR, TD, SPAN} = Domplate;
+
+var tableTag =
+    TABLE({"class": "fbQuickInfoTable", cellpadding: 0, cellspacing: 0},
+        TBODY(
+            TR({"class": "pin"},
+                TD({"class": "", align: "right"},
+                    DIV({"class": "fbQuickInfoPin $pin button", onclick: "$onClickPin"}),
+                    DIV({"class": "fbQuickInfoClose button", onclick: "$onClickClose"})
+                )
+            )
+        )
+    );
+
+var titleTag = 
+    TR(
+        TD({"class": "fbQuickInfoBoxTitle"},
+            SPAN("$title")
+        )
+    );
+
+var rowTag =
+    TR({"class": "row"},
+        TD({"class": ""},
+            SPAN({"class": "fbQuickInfoName"}, "$name: "),
+            SPAN({"class": "fbQuickInfoValue"}, "$value")
+        )
+    );
 
 // ********************************************************************************************* //
 // Implementation
 
-var QuickInfoBox =
+/**
+ * Displays the most important DOM properties and computed CSS styles for the currently
+ * inspected element. It can be freely positioned at the monitor via drag & drop.
+ */
+var QuickInfoBox = Obj.extend(Firebug.Module,
+/** @lends QuickInfoBox */
 {
     boxEnabled: undefined,
     dragging: false,
@@ -36,65 +79,126 @@ var QuickInfoBox =
     prevX: null,
     prevY: null,
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+
+        this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
+
+        this.onContentLoadedListener = this.onContentLoaded.bind(this);
+        this.onMouseDownListener = this.onMouseDown.bind(this);
+        this.onMouseOverListener = this.onMouseOver.bind(this);
+        this.onMouseOutListener = this.onMouseOut.bind(this);
+        this.onMouseMoveListener = this.onMouseMove.bind(this);
+        this.onMouseUpListener = this.onMouseUp.bind(this);
+
+        var frame = this.getContentFrame();
+        Events.addEventListener(frame, "load", this.onContentLoadedListener, true);
+
+        Events.addEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
+        Events.addEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
+        Events.addEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+
+        var frame = this.getContentFrame();
+        Events.removeEventListener(frame, "load", this.onContentLoadedListener, true);
+
+        Events.removeEventListener(this.qiPanel, "mousedown", this.onMouseDownListener, true);
+        Events.removeEventListener(this.qiPanel, "mouseover", this.onMouseOverListener, true);
+        Events.removeEventListener(this.qiPanel, "mouseout", this.onMouseOutListener, true);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onContentLoaded: function(event)
+    {
+        var doc = this.getContentDoc();
+        doc.body.classList.add("fbQuickInfoPanelBody");
+
+        Css.appendStylesheet(doc, "chrome://firebug/skin/quickInfoBox.css");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Show/hide
+
     show: function(element)
     {
-        if (FBTrace.DBG_QUICKINFOBOX)
-            FBTrace.sysout("quickInfoBox.show;");
-
         if (!this.boxEnabled || !element)
             return;
 
         this.needsToHide = false;
 
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-        if (qiBox.state === "closed")
+        if (this.qiPanel.state === "closed")
         {
             var content = Firefox.getElementById("content");
             this.storedX = this.storedX || content.tabContainer.boxObject.screenX + 5;
             this.storedY = this.storedY || content.tabContainer.boxObject.screenY + 35;
 
-            // Dynamically set noautohide to avoid mozilla bug 545265.
+            // Dynamically set noautohide to avoid Mozilla bug 545265.
             if (!this.noautohideAdded)
             {
+                var self = this;
                 this.noautohideAdded = true;
-                qiBox.addEventListener("popupshowing", function runOnce()
+                this.qiPanel.addEventListener("popupshowing", function runOnce()
                 {
-                    qiBox.removeEventListener("popupshowing", runOnce, false);
-                    qiBox.setAttribute("noautohide", true);
+                    self.qiPanel.removeEventListener("popupshowing", runOnce, false);
+                    self.qiPanel.setAttribute("noautohide", true);
                 }, false);
             }
 
-            qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
+            this.qiPanel.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
-        qiBox.removeChild(qiBox.firstChild);
-        var vbox = document.createElement("vbox");
-        qiBox.appendChild(vbox);
+        var doc = this.getContentDoc();
+        var parentNode = doc.body;
 
-        var needsTitle = this.addRows(element, vbox, domAttribs);
-        var needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
+        // The tableTag template doesn't have its own object and so, we specify
+        // all event handlers and properties through the input object.
+        var input = {
+            onClickPin: this.onClickPin.bind(this),
+            pin: Options.get("pinQuickInfoBox") ? "pin" : "",
+            onClickClose: this.onClickClose.bind(this),
+        }
 
-        var lab;
+        // Render the basic quick-box layout. It's a table where every row represents
+        // a CSS property or a section title. The pin icon displayed at the top-right
+        // corner also gets one row.
+        var table = tableTag.replace(input, parentNode, this);
+        var tbody = table.firstChild;
+
+        var needsTitle = this.addRows(element, tbody, domAttribs);
+        var needsTitle2 = this.addRows(element.style, tbody, cssAttribs);
+
+        // Properly create section titles.
         if (needsTitle || needsTitle2)
-        {
-            lab = document.createElement("label");
-            lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", Locale.$STR("quickInfo"));
-            vbox.insertBefore(lab, vbox.firstChild);
-        }
+            titleTag.insertRows({title: Locale.$STR("quickInfo")}, tbody.firstChild, this);
 
-        lab = document.createElement("label");
-        lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", Locale.$STR("computedStyle"));
-        vbox.appendChild(lab);
+        titleTag.insertRows({title: Locale.$STR("computedStyle")}, tbody.lastChild, this);
 
-        this.addRows(element, vbox, compAttribs, true);
+        // Generate content (a row == CSS property)
+        this.addRows(element, tbody, compAttribs, true);
+
+        // Always update size of the panel according to the content size. Some elements might
+        // have more styles than others and so, require more space. We always need
+        // to avoid scroll-bars.
+        // Keep the default width (specified in firebugOverlay.xul for fbQuickInfoPanel)
+        // and change only the height.
+        this.qiPanel.sizeTo(this.qiPanel.popupBoxObject.width, doc.documentElement.clientHeight);
     },
 
     hide: function()
     {
-        if (FBTrace.DBG_QUICKINFOBOX)
-            FBTrace.sysout("quickInfoBox.hide;");
+        // If the preference says pin == true then do not hide.
+        // xxxHonza: the box should be hidden when the user switches out of the HTML panel.
+        if (Options.get("pinQuickInfoBox"))
+            return;
 
         // if mouse is over panel defer hiding to mouseout to not cause flickering
         if (this.mouseover || this.dragging)
@@ -103,90 +207,29 @@ var QuickInfoBox =
             return;
         }
 
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
         this.prevX = null;
         this.prevY = null;
         this.needsToHide = false;
 
-        qiBox.hidePopup();
+        this.qiPanel.hidePopup();
     },
 
-    handleEvent: function(event)
-    {
-        switch (event.type)
-        {
-            case "mousemove":
-                if (!this.dragging)
-                    return;
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-                var diffX, diffY,
-                    boxX = this.qiBox.screenX,
-                    boxY = this.qiBox.screenY,
-                    x = event.screenX,
-                    y = event.screenY;
-
-                diffX = x - this.prevX;
-                diffY = y - this.prevY;
-
-                this.qiBox.moveTo(boxX + diffX, boxY + diffY);
-
-                this.prevX = x;
-                this.prevY = y;
-                this.storedX = boxX;
-                this.storedY = boxY;
-                break;
-
-            case "mousedown":
-                this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
-                this.qiBox = this.qiPanel.boxObject;
-                Events.addEventListener(this.qiPanel, "mousemove", this, true);
-                Events.addEventListener(this.qiPanel, "mouseup", this, true);
-                this.dragging = true;
-                this.prevX = event.screenX;
-                this.prevY = event.screenY;
-                break;
-
-            case "mouseup":
-                Events.removeEventListener(this.qiPanel, "mousemove", this, true);
-                Events.removeEventListener(this.qiPanel, "mouseup", this, true);
-                this.qiPanel = this.qiBox = null;
-                this.prevX = this.prevY = null;
-                this.dragging = false;
-                break;
-
-            // this is a hack to find when mouse enters and leaves panel
-            // it requires that #fbQuickInfoPanel have border
-            case "mouseover":
-                if (this.dragging)
-                    return;
-                this.mouseover = true;
-                break;
-
-            case "mouseout":
-                if (this.dragging)
-                    return;
-                this.mouseover = false;
-                // if hiding was defered because mouse was over panel hide it
-                if (this.needsToHide && event.target.nodeName == "panel")
-                    this.hide();
-                break;
-        }
-    },
-
-    addRows: function(domBase, vbox, attribs, computedStyle)
+    addRows: function(domBase, parentNode, attribs, computedStyle)
     {
         if (!domBase)
             return;
 
+        // Iterate over all attributes and generate HTML content of the info box.
         var needsTitle = false;
         for (var i=0; i<attribs.length; i++)
         {
             var value;
             if (computedStyle)
             {
-                var cs = Dom.getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(
-                    domBase, null);
+                var defaultView = Dom.getNonFrameBody(domBase).ownerDocument.defaultView;
+                var cs = defaultView.getComputedStyle(domBase, null);
 
                 value = cs.getPropertyValue(attribs[i]);
 
@@ -198,23 +241,111 @@ var QuickInfoBox =
                 value = domBase[attribs[i]];
             }
 
-            if (value)
-            {
-                needsTitle = true;
-                var hbox = document.createElement("hbox");
-                var lab = document.createElement("label");
-                lab.setAttribute("class", "fbQuickInfoName");
-                lab.setAttribute("value", attribs[i]);
-                hbox.appendChild(lab);
-                var desc = document.createElement("label");
-                desc.setAttribute("class", "fbQuickInfoValue");
-                desc.appendChild(document.createTextNode(": " + value));
-                hbox.appendChild(desc);
-                vbox.appendChild(hbox);
-            }
+            if (!value)
+                continue;
+
+            // There is at least one value displayed so, the title should be generated.
+            needsTitle = true;
+
+            var input = {name: attribs[i], value: value}
+            rowTag.insertRows(input, parentNode.lastChild, rowTag);
         }
 
         return needsTitle;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClickPin: function(event)
+    {
+        var target = event.target;
+        if (!Css.hasClass(target, "fbQuickInfoPin"))
+            return;
+
+        // The state of the pin needs to be updated in preferences.
+        Options.togglePref("pinQuickInfoBox");
+
+        // Update also the icon state.
+        Css.toggleClass(target, "pin");
+    },
+
+    onClickClose: function(event)
+    {
+        var target = event.target;
+        if (!Css.hasClass(target, "fbQuickInfoClose"))
+            return;
+
+        this.qiPanel.hidePopup();
+    },
+
+    onMouseDown: function(event)
+    {
+        var target = event.target;
+        var node = target.firstChild ? target.firstChild.nodeType : target.nodeType;
+
+        // skip dragging when user click on button or on text
+        if (Css.hasClass(target, "button") || node == Node.TEXT_NODE)
+            return;
+
+        Events.addEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
+        Events.addEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
+
+        this.dragging = true;
+        this.prevX = event.screenX;
+        this.prevY = event.screenY;
+    },
+
+    // this is a hack to find when mouse enters and leaves panel
+    // it requires that #fbQuickInfoPanel have border
+    onMouseOver: function(event)
+    {
+        if (this.dragging)
+            return;
+
+        this.mouseover = true;
+    },
+
+    onMouseOut: function(event)
+    {
+        if (this.dragging)
+            return;
+
+        this.mouseover = false;
+
+        // if hiding was deferred because mouse was over panel hide it
+        if (this.needsToHide && event.target.nodeName == "panel")
+            this.hide();
+    },
+
+    onMouseMove: function(event)
+    {
+        if (!this.dragging)
+            return;
+
+        var box = this.qiPanel.boxObject;
+        var boxX = box.screenX;
+        var boxY = box.screenY;
+        var x = event.screenX;
+        var y = event.screenY;
+        var diffX = x - this.prevX;
+        var diffY = y - this.prevY;
+
+        this.qiPanel.moveTo(boxX + diffX, boxY + diffY);
+
+        this.prevX = x;
+        this.prevY = y;
+        this.storedX = boxX;
+        this.storedY = boxY;
+    },
+
+    onMouseUp: function(event)
+    {
+        Events.removeEventListener(this.qiPanel, "mousemove", this.onMouseMoveListener, true);
+        Events.removeEventListener(this.qiPanel, "mouseup", this.onMouseUpListener, true);
+
+        this.prevX = this.prevY = null;
+        this.dragging = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -224,9 +355,7 @@ var QuickInfoBox =
      */
     toggleQuickInfoBox: function()
     {
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state == "open")
+        if (this.qiPanel.state == "open")
             QuickInfoBox.hide();
 
         QuickInfoBox.boxEnabled = !QuickInfoBox.boxEnabled;
@@ -235,25 +364,28 @@ var QuickInfoBox =
     },
 
     /**
-     * Pass all quick info box events to QuickInfoBox.handleEvent() for handling.
-     * @param {Event} event Event to handle
-     */
-    quickInfoBoxHandler: function(event)
-    {
-        QuickInfoBox.handleEvent(event);
-    },
-
-    /**
      * Hide the quick info box.
      */
     hideQuickInfoBox: function()
     {
-        var qiBox = Firebug.chrome.$("fbQuickInfoPanel");
-
-        if (qiBox.state === "open")
+        if (this.qiPanel.state === "open")
             QuickInfoBox.hide();
     },
-};
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Helpers
+
+    getContentFrame: function()
+    {
+        return this.qiPanel.getElementsByClassName("fbQuickInfoPanelContent")[0];
+    },
+
+    getContentDoc: function()
+    {
+        var contentFrame = this.getContentFrame();
+        return contentFrame.contentWindow.document;
+    },
+});
 
 // ********************************************************************************************* //
 // Helpers
@@ -270,8 +402,7 @@ function rgbToHex(value)
 // ********************************************************************************************* //
 // Registration
 
-// XUL commands need global access.
-Firebug.QuickInfoBox = QuickInfoBox;
+Firebug.registerModule(QuickInfoBox);
 
 return QuickInfoBox;
 

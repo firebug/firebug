@@ -1,13 +1,13 @@
 
 /**
  * Test for Browser#getBrowserContexts()
- * 
+ *
  * When a new tab is opened, a new context should appear in the returned array.
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browser/testGetContexts.html";
     FBTest.progress("getContexts, get initial set of contexts");
     var contexts = browser.getBrowserContexts();

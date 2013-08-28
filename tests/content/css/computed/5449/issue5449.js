@@ -90,7 +90,7 @@ function executeStylePropTest(propName, type, expectedValue, callback)
 
                 callback();
             });
-    
+
             FBTest.mouseOver(propValue, 0, 0);
         }
     }
@@ -139,7 +139,7 @@ function executeMatchedSelectorTest(propName, type, expectedValue, selectorIndex
 
                     callback();
                 });
-        
+
                 FBTest.mouseOver(propValue, 0, 0);
             });
 

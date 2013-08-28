@@ -35,8 +35,9 @@ StackFrame.getCorrectedStackTrace = function(frame, context)
         var nextOlderFrame = null;
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
-            if (!(Options.get("filterSystemURLs") &&
-                Url.isSystemURL(Url.normalizeURL(frame.script.fileName))))
+            var skip = Options.get("filterSystemURLs") &&
+                Url.isSystemURL(Url.normalizeURL(frame.script.fileName));
+            if (!skip)
             {
                 var stackFrame = StackFrame.getStackFrame(frame, context, newestFrame);
                 if (stackFrame)
@@ -291,21 +292,9 @@ StackFrame.StackFrame.prototype =
             else
             {
                 scopeVars = Wrapper.unwrapIValue(scope, Firebug.viewChrome);
-                if (scopeVars && scopeVars.hasOwnProperty)
+                if (!scopeVars || !scopeVars.hasOwnProperty)
                 {
-                    if (!scopeVars.hasOwnProperty("toString"))
-                    {
-                        (function() {
-                            var className = scope.jsClassName;
-                            scopeVars.toString = function()
-                            {
-                                return Locale.$STR(className + " Scope");
-                            };
-                        })();
-                    }
-                }
-                else
-                {
+                    // XXXsimon not sure if this ever happens
                     // do not trace scopeVars, you will get a uncatchable exception
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("dom .generateScopeChain: bad scopeVars for " +
@@ -364,31 +353,26 @@ StackFrame.parseToStackFrame = function(line, context) // function name (arg, ar
 
 StackFrame.parseToStackTrace = function(stack, context)
 {
-     var lines = stack.split('\n');
-     var trace = new StackFrame.StackTrace();
-     for (var i = 0; i < lines.length; i++)
-     {
-         var frame = StackFrame.parseToStackFrame(lines[i],context);
+    var lines = stack.split('\n');
+    var trace = new StackFrame.StackTrace();
+    for (var i = 0; i < lines.length; i++)
+    {
+        var frame = StackFrame.parseToStackFrame(lines[i],context);
 
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
 
-         if (frame)
-             trace.frames.push(frame);
-     }
-     return trace;
+        if (frame)
+            trace.frames.push(frame);
+    }
+    return trace;
 };
 
 StackFrame.cleanStackTraceOfFirebug = function(trace)
 {
     if (trace && trace.frames)
     {
-        while (trace.frames.length &&
-            (
-             /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn) ||
-             /^\s*with\s*\(\s*_[fF]irebug/.test(trace.frames[trace.frames.length - 1].sourceFile.source)
-            )
-        )
+        while (trace.frames.length && /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn))
         {
             trace.frames.pop();
         }
@@ -443,7 +427,7 @@ StackFrame.getFrameSourceLink = function(frame)
         return null;
 };
 
-// TODO delete this, only used by console and console injector.
+// TODO delete this, it's unused
 StackFrame.getStackFrameId = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
@@ -612,9 +596,9 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     // matches the pattern above, which is the function definition
     var line = "";
     if (FBTrace.DBG_FUNCTION_NAMES)
-        FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");
+        FBTrace.sysout("getFunctionNameFromLines for line@URL=" + lineNo + "@" + url);
 
-    for (var i = 0; i < 4; ++i)
+    for (var i=0; i<4; ++i)
     {
         line = sourceCache.getLine(url, lineNo-i) + line;
         if (line != undefined)
@@ -627,8 +611,10 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
             else
             {
                 if (FBTrace.DBG_FUNCTION_NAMES)
-                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+
-                        "-"+i+" line="+line+"\n");
+                {
+                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i=" + lineNo +
+                        "-" + i + " line=" + line);
+                }
             }
 
             m = reFunctionArgNames.exec(line);
@@ -636,7 +622,29 @@ StackFrame.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
                 return m[1];
         }
     }
+
     return "(?)";
+};
+
+StackFrame.guessFunctionArgNamesFromSource = function(source)
+{
+    // XXXsimon: This fails with ES6 destructuring and parentheses in default parameters.
+    // We'd need a proper JavaScript parser for that.
+    var m = /[^\(]*\(([^\)]*)\)/.exec(source);
+    if (!m)
+        return null;
+    var args = m[1].split(",");
+    for (var i = 0; i < args.length; i++)
+    {
+        var arg = args[i];
+        if (arg.indexOf("=") !== -1)
+            arg = arg.substr(0, arg.indexOf("="));
+        arg = arg.trim();
+        if (!/^[a-zA-Z$_][a-zA-Z$_0-9]*$/.test(arg))
+            return null;
+        args[i] = arg;
+    }
+    return args;
 };
 
 // Mozilla

@@ -32,7 +32,9 @@ var BrowserToolbar =
             label: "firebug.Inspect",
             tooltiptext: "firebug.InspectElement",
             observes: "cmd_firebug_toggleInspecting",
-            style: "list-style-image: url(chrome://firebug/skin/inspect.svg);"
+            // Needed for the 'Customize Toolbar' dialog
+            style: "list-style-image: url(chrome://firebug/skin/inspect.png); " +
+                "-moz-image-region: rect(0, 16px, 16px, 0);"
         });
 
         // Start Button Tooltip. As soon as Firebug is fully loaded, the tooltip content will be
@@ -62,7 +64,9 @@ var BrowserToolbar =
             command: "cmd_firebug_toggleFirebug",
             contextmenu: "fbStatusContextMenu",
             observes: "firebugStatus",
-            style: "list-style-image: url(chrome://firebug/skin/firebug16.png)"
+            // Needed for the 'Customize Toolbar' dialog
+            style: "list-style-image: url(chrome://firebug/skin/firebug16.png); " +
+                "-moz-image-region: rect(0, 16px, 16px, 0);"
         }, [$(doc, "fbStatusContextMenu").cloneNode(true)]);
     },
 

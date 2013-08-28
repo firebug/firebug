@@ -13,7 +13,7 @@ function runTest()
             FBTest.expandElements(panelNode, "netRow", "category-html", "hasHeaders", "loaded");
             FBTest.expandElements(panelNode, "netInfoResponseTab");
 
-            var responseBody = FW.FBL.getElementByClass(panelNode, "netInfoResponseText", 
+            var responseBody = FW.FBL.getElementByClass(panelNode, "netInfoResponseText",
                 "netInfoText");
 
             // The response must be displayed.

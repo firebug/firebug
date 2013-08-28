@@ -149,6 +149,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
            "font-size:14px;",
            "font-size:18px;"
         ];
+
         var fontObject = Fonts.getFontInfo(null, null,
             fontName.replace(/^(["'])?(.*?)\1$/g, "$2"));
 
@@ -183,8 +184,8 @@ var CSSInfoTip = Obj.extend(InfoTip,
     }
 });
 
-//********************************************************************************************* //
-//Local Helpers
+// ********************************************************************************************* //
+// Local Helpers
 
 /**
 * Returns the CSS for the infotip @font-face CSS
@@ -200,7 +201,7 @@ function getFontFaceCSS(font)
     if (typeof font == "object")
     {
         if (font.rule)
-            fontFaceCSS = font.rule.cssText.replace(/url\(.*?\)/g, "url("+font.URI+")");
+            fontFaceCSS = font.rule.cssText.replace(/url\(.*?\)/g, "url(" + font.URI + ")");
         fontName = font.CSSFamilyName;
     }
     else
@@ -208,7 +209,7 @@ function getFontFaceCSS(font)
         fontName = font;
     }
 
-    fontFaceCSS += " .infoTipFontFace {font-family: "+fontName+";}";
+    fontFaceCSS += " .infoTipFontFace {font-family: " + fontName + ";}";
 
     return fontFaceCSS;
 }

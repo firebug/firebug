@@ -16,6 +16,9 @@ define([
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
     DebuggerLib) {
 
+// Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
+//"use strict";
+
 // ********************************************************************************************* //
 
 /**
@@ -92,11 +95,15 @@ function createFirebugConsole(context, win)
 
     console.trace = function firebugDebuggerTracer()
     {
-        var unwrapped = Wrapper.unwrapObject(win);
-        unwrapped.top._firebugStackTrace = "console-tracer";
-        debugger;
-        delete unwrapped.top._firebugStackTrace;
+        var trace = getJSDUserStack();
+        if (!trace)
+            trace = getComponentsUserStack();
 
+        // This should never happen, but inform the user if it does.
+        if (!trace)
+            trace = "(No stack trace available)";
+
+        Firebug.Console.log(trace, context, "stackTrace");
         return Console.getDefaultReturnValue();
     };
 
@@ -128,13 +135,13 @@ function createFirebugConsole(context, win)
 
     console.profile = function(title)
     {
-        Firebug.Profiler.startProfiling(context, title);
+        Firebug.Profiler.commandLineProfileStart(context, title);
         return Console.getDefaultReturnValue();
     };
 
     console.profileEnd = function()
     {
-        Firebug.Profiler.stopProfiling(context);
+        Firebug.Profiler.commandLineProfileEnd(context);
         return Console.getDefaultReturnValue();
     };
 
@@ -243,7 +250,6 @@ function createFirebugConsole(context, win)
 
     console.error = function error()
     {
-        // TODO stack trace
         if (arguments.length == 1)
         {
             return logAssert("error", arguments);  // add more info based on stack trace
@@ -302,7 +308,7 @@ function createFirebugConsole(context, win)
     {
         var sourceLink = null;
 
-        // Using JSD to get user stack is time consuming.
+        // Using JSD to get user stack is time consuming, so there is a pref.
         if (Options.get("preferJSDSourceLinks"))
         {
             var stack = getJSDUserStack();
@@ -316,7 +322,7 @@ function createFirebugConsole(context, win)
         var ignoreReturnValue = Firebug.Console.getDefaultReturnValue();
         var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : ignoreReturnValue;
-    };
+    }
 
     function logAssert(category, args)
     {
@@ -326,20 +332,24 @@ function createFirebugConsole(context, win)
             [Locale.$STR("Assertion")] : args[0];
 
         // If there's no error message, there's also no stack trace. See Issue 4700.
-        var trace = null;
-        if (msg)
+        var trace;
+        if (msg && msg.stack)
         {
-            if (msg.stack)
+            trace = StackFrame.parseToStackTrace(msg.stack, context);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from msg.stack", trace);
+        }
+        else
+        {
+            trace = getJSDUserStack();
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+
+            if (!trace)
             {
-                trace = StackFrame.parseToStackTrace(msg.stack, context);
+                trace = getComponentsUserStack();
                 if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from msg.stack", trace);
-            }
-            else
-            {
-                trace = getJSDUserStack();
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+                    FBTrace.sysout("logAssert trace from getComponentsUserStack", trace);
             }
         }
 
@@ -369,7 +379,7 @@ function createFirebugConsole(context, win)
             row.scrollIntoView();
 
         return Console.getDefaultReturnValue();
-    };
+    }
 
     function getComponentsStackDump()
     {
@@ -396,7 +406,7 @@ function createFirebugConsole(context, win)
                 userURL, frame);
 
         return frame;
-    };
+    }
 
     function getStackLink()
     {
@@ -406,52 +416,123 @@ function createFirebugConsole(context, win)
         if (DebuggerLib.isFrameLocationEval(sourceLink.href))
             return null;
         return sourceLink;
-    };
+    }
+
+    function removeChromeFrames(trace)
+    {
+        var frames = trace ? trace.frames : null;
+        if (!frames || !frames.length)
+            return null;
+
+        var filteredFrames = [];
+        for (var i = 0; i < frames.length; i++)
+        {
+            if (Str.hasPrefix(frames[i].href, "chrome:"))
+                continue;
+
+            if (Str.hasPrefix(frames[i].href, "resource:"))
+                continue;
+
+            // firebug-service scope reached, in some cases the url starts with file://
+            if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+                continue;
+
+            // xxxFlorent: should be reverted if we integrate
+            // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
+            if (DebuggerLib.isFrameLocationEval(frames[i].href))
+                continue;
+
+            // command line
+            var fn = frames[i].getFunctionName() + "";
+            if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
+                continue;
+
+            filteredFrames.push(frames[i]);
+        }
+
+        trace.frames = filteredFrames;
+
+        return trace;
+    }
 
     function getJSDUserStack()
     {
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return null;
         var trace = Firebug.Debugger.getCurrentStackTrace(context);
+        return removeChromeFrames(trace);
+    }
 
-        var frames = trace ? trace.frames : null;
-        if (frames && (frames.length > 0) )
+    function getComponentsUserStack()
+    {
+        // Walk Components.stack and function.caller/arguments simultaneously.
+        var func = arguments.callee;
+        var seenFunctions = new Set();
+        seenFunctions.add(func);
+
+        var trace = new StackFrame.StackTrace();
+        var frame = Components.stack;
+        while (frame)
         {
-            var filteredFrames = [];
-
-            for (var i = 0; i < frames.length; i++)
+            var fileName = frame.filename;
+            if (fileName)
             {
-                if (Str.hasPrefix(frames[i].href, "chrome:"))
-                    continue;
+                var frameName = frame.name;
+                var args = [];
+                if (func)
+                {
+                    try
+                    {
+                        if (func.name && func.name !== frameName)
+                        {
+                            // Something is off, abort!
+                            func = null;
+                        }
+                        else
+                        {
+                            var argValues = Array.prototype.slice.call(func.arguments);
+                            var argNames = StackFrame.guessFunctionArgNamesFromSource(func + "");
+                            if (argNames && argNames.length === func.length)
+                            {
+                                for (var i = 0; i < func.length; i++)
+                                    args.push({name: argNames[i], value: argValues[i]});
+                            }
+                        }
+                    }
+                    catch (exc) {} // strict mode etc.
+                }
 
-                if (Str.hasPrefix(frames[i].href, "resource:"))
-                    continue;
-
-                // firebug-service scope reached, in some cases the url starts with file://
-                if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
-                    continue;
-
-                // xxxFlorent: should be reverted if we integrate
-                // https://github.com/fflorent/firebug/commit/d5c65e8 (related to issue6268)
-                if (DebuggerLib.isFrameLocationEval(frames[i].href))
-                    continue;
-
-                // command line
-                var fn = frames[i].getFunctionName() + "";
-                if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
-                    continue;
-
-                filteredFrames.push(frames[i]);
+                var sframe = new StackFrame.StackFrame({href: fileName},
+                    frame.lineNumber, frameName, args, null, null, context);
+                trace.frames.push(sframe);
             }
 
-            // take the oldest frames, leave 2 behind they are injection code
-            trace.frames = filteredFrames; //trace.frames.slice(2 - i);
+            frame = frame.caller;
+            if (func)
+            {
+                try
+                {
+                    func = func.caller;
+                    if (seenFunctions.has(func))
+                    {
+                        // Recursion; we cannot go on unfortunately.
+                        func = null;
+                    }
+                    else
+                    {
+                        seenFunctions.add(func);
+                    }
+                }
+                catch (exc)
+                {
+                    // Strict mode functions etc.
+                    func = null;
+                }
+            }
+        }
 
-            return trace;
-        }
-        else
-        {
-            return "Firebug failed to get stack trace with any frames";
-        }
-    };
+        return removeChromeFrames(trace);
+    }
 
     function getStackFrameId(inputFrame)
     {
@@ -464,7 +545,7 @@ function createFirebugConsole(context, win)
             }
         }
         return null;
-    };
+    }
 
     return console;
 }

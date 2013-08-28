@@ -110,14 +110,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         var refresh = false;
 
         // To refresh the panel check whether there's at least one element, that isn't ignored
-        for (var i=0, len=records.length; i<len; ++i)
+        for (var i=0, recordsLen=records.length; i<recordsLen; ++i)
         {
             var record = records[i];
             switch(record.type)
             {
                 case "childList":
                     var nodes = record.addedNodes;
-                    for (var j=0, len=nodes.length; j<len; ++j)
+                    for (var j=0, nodesLen=nodes.length; j<nodesLen; ++j)
                     {
                         if (!Firebug.shouldIgnore(nodes[j]))
                         {
@@ -129,7 +129,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
                     if (!refresh)
                     {
                         nodes = record.removedNodes;
-                        for (var j=0, len=nodes.length; j<len; ++j)
+                        for (var j=0, nodesLen=nodes.length; j<nodesLen; ++j)
                         {
                             if (!Firebug.shouldIgnore(nodes[j]))
                             {
@@ -156,7 +156,10 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         if (refresh)
+        {
+            this.scrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
             this.refresh();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -177,6 +180,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     destroy: function(state)
     {
+        var scrollContainer = this.panelNode.getElementsByClassName("elementsGroups")[0];
+        state.scrollTop = scrollContainer.scrollTop ?
+            scrollContainer.scrollTop : this.lastScrollTop;
         state.groups = this.groups;
         Persist.persistObjects(this, state);
 
@@ -208,6 +214,9 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (state)
         {
+            if (state.scrollTop)
+                this.scrollTop = state.scrollTop;
+
             if (state.groups)
                 this.groups = state.groups;
         }
@@ -217,15 +226,16 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         this.observeMutations();
     },
 
+    hide: function()
+    {
+        this.mutationObserver.disconnect();
+        this.mutationObserver = null;
+        this.lastScrollTop = this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop;
+    },
+
     watchWindow: function(context, win)
     {
         this.observeMutations(win);
-    },
-
-    hide: function()
-    {
-        this.context.mutationObserver.disconnect();
-        this.context.mutationObserver = null;
     },
 
     getEditor: function(target, value)
@@ -241,14 +251,14 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
 
     observeMutations: function(win)
     {
-        var context = this.context;
-        if (!context.mutationObserver)
-            context.mutationObserver = new MutationObserver(this.onMutationObserve);
+        var self = this;
+        if (!self.mutationObserver)
+            self.mutationObserver = new MutationObserver(this.onMutationObserve);
 
         function addObserver(win)
         {
             var doc = win.document;
-            context.mutationObserver.observe(doc, {
+            self.mutationObserver.observe(doc, {
                 attributes: true,
                 childList: true,
                 characterData: true,
@@ -272,13 +282,28 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.groups.length == 0)
         {
             var elementsGroups = parentNode.getElementsByClassName("elementsGroups")[0];
-            WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+            var box = WarningTemplate.noSelectionTag.replace({}, elementsGroups);
+
+            var readMore = box.getElementsByClassName("readMore")[0];
+            FirebugReps.Description.render(Locale.$STR("css.selector.readMore"),
+                readMore, Obj.bind(this.onReadMore, this));
         }
         else
         {
             for (var i=0, len=this.groups.length; i<len; ++i)
                 this.displayGroup(this.groups[i]);
         }
+
+        if (this.scrollTop)
+        {
+            this.panelNode.getElementsByClassName("elementsGroups")[0].scrollTop = this.scrollTop;
+            delete this.scrollTop;
+        }
+    },
+
+    onReadMore: function()
+    {
+        Win.openNewTab("https://getfirebug.com/wiki/index.php/Selectors_Side_Panel");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -394,7 +419,8 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
 
     isValidSelector: function(value)
     {
-        try {
+        try
+        {
             this.panel.panelNode.querySelector(value);
             return true;
         }
@@ -405,13 +431,15 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 
 var WarningTemplate = domplate(Firebug.Rep,
 {
     noSelectionTag:
         DIV({"class": "selectorWarning noSelection"},
-            SPAN(Locale.$STR("css.selector.noSelection"))
+            DIV(Locale.$STR("css.selector.noSelection")),
+            BR(),
+            DIV({"class": "readMore"})
         ),
 
     noSelectionResultsTag:
@@ -425,12 +453,12 @@ var WarningTemplate = domplate(Firebug.Rep,
         )
 });
 
-//********************************************************************************************* //
-//Registration
+// ********************************************************************************************* //
+// Registration
 
 Firebug.registerPanel(CSSSelectorsPanel);
 
 return CSSSelectorsPanel;
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 }});

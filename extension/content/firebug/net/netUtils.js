@@ -526,14 +526,16 @@ var NetUtils =
         {
             if (!(p in requestProps))
                 continue;
+
             try
             {
                 clone[p] = request[p];
             }
             catch (err)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
+                // xxxHonza: too much unnecessary output
+                //if (FBTrace.DBG_ERRORS)
+                //    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
             }
         }
 
@@ -544,6 +546,103 @@ var NetUtils =
         clone.responseHeaders = cloneHeaders(file.responseHeaders);
 
         return Wrapper.cloneIntoContentScope(global, clone);
+    },
+
+    generateCurlCommand: function(file, addCompressedArgument)
+    {
+        var command = ["curl"];
+        var inferredMethod = "GET";
+
+        function escapeCharacter(x)
+        {
+            var code = x.charCodeAt(0);
+            if (code < 256)
+            {
+                // Add leading zero when needed to not care about the next character.
+                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
+            }
+            code = code.toString(16);
+            return "\\u" + ("0000" + code).substr(code.length, 4);
+        }
+
+        function escape(str)
+        {
+            // String has unicode characters or single quotes
+            if (/[^\x20-\x7E]|'/.test(str))
+            {
+                // Use ANSI-C quoting syntax
+                return "$\'" + str.replace(/\\/g, "\\\\")
+                    .replace(/'/g, "\\\'")
+                    .replace(/\n/g, "\\n")
+                    .replace(/\r/g, "\\r")
+                    .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
+            }
+            else
+            {
+                // Use single quote syntax.
+                return "'" + str + "'";
+            }
+        }
+
+        // Create data
+        var data = [];
+        var postText = NetUtils.getPostText(file, this.context, true);
+        var isURLEncodedRequest = NetUtils.isURLEncodedRequest(file, this.context);
+
+        if (postText && isURLEncodedRequest || file.method == "PUT")
+        {
+            var lines = postText.split("\n");
+            var params = lines[lines.length - 1];
+
+            data.push("--data");
+            data.push(escape(params));
+
+            inferredMethod = "POST";
+        }
+        else if (postText && NetUtils.isMultiPartRequest(file, this.context))
+        {
+            data.push("--data-binary");
+            data.push(escape(postText));
+
+            inferredMethod = "POST";
+        }
+
+        // Add URL
+        command.push(escape(file.href));
+
+        // Fix method if request is not a GET or POST request
+        if (file.method != inferredMethod)
+        {
+            command.push("-X");
+            command.push(file.method);
+        }
+
+        // Add request headers
+        var requestHeaders = file.requestHeaders;
+        var postRequestHeaders = Http.getHeadersFromPostText(file.request, postText);
+        var headers = requestHeaders.concat(postRequestHeaders);
+        for (var i=0; i<headers.length; i++)
+        {
+            var header = headers[i];
+
+            // Firefox and cURL creates the optional Content-Length header for POST and
+            // PUT requests. Omit adding this header as it is preferred to use the
+            // Content-Length cURL creates.
+            if (header.name.toLowerCase() == "content-length")
+                continue;
+
+            command.push("-H");
+            command.push(escape(header.name + ": " + header.value));
+        }
+
+        // Add data
+        command = command.concat(data);
+
+        // Add --compressed
+        if (addCompressedArgument)
+            command.push("--compressed");
+
+        return command.join(" ");
     }
 };
 

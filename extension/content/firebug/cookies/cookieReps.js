@@ -88,17 +88,17 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
                     DIV({"class": "cookieNameLabel cookieLabel"}, "$cookie|getName")
                 ),
                 TD({"class": "cookieValueCol cookieCol"},
-                    DIV({"class": "cookieValueLabel cookieLabel"}, 
+                    DIV({"class": "cookieValueLabel cookieLabel"},
                         SPAN("$cookie.cookie.value|getValue")
                     )
                 ),
                 TD({"class": "cookieRawValueCol cookieCol"},
-                    DIV({"class": "cookieRawValueLabel cookieLabel"}, 
+                    DIV({"class": "cookieRawValueLabel cookieLabel"},
                         SPAN("$cookie.cookie.rawValue|getValue")
                     )
                 ),
                 TD({"class": "cookieDomainCol cookieCol"},
-                    SPAN({"class": "cookieDomainLabel cookieLabel", onclick: "$onClickDomain"}, 
+                    SPAN({"class": "cookieDomainLabel cookieLabel", onclick: "$onClickDomain"},
                         "$cookie|getDomain")
                 ),
                 TD({"class": "cookieRawSizeCol cookieCol"},
@@ -576,7 +576,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         var tab = Dom.getChildByClass(cookieInfoBody, "cookieInfoTabs",
             "cookieInfo" + tabName + "Tab");
 
-        // Don't select collapsed tabs. 
+        // Don't select collapsed tabs.
         if (tab && !Css.hasClass(tab, "collapsed"))
             return this.selectTab(tab);
 
@@ -624,7 +624,7 @@ CookieReps.CookieRow = domplate(CookieReps.Rep,
         var nextSibling = cookie.row.nextSibling;
         parent.removeChild(cookie.row);
 
-        var row = CookieReps.CookieRow.cookieTag.insertRows({cookies: [cookie]}, 
+        var row = CookieReps.CookieRow.cookieTag.insertRows({cookies: [cookie]},
             panel.table.lastChild.lastChild)[0];
 
         var opened = Css.hasClass(cookie.row, "opened");
@@ -750,13 +750,13 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
     tag:
         DIV({"class": "cookieEvent", _repObject: "$object"},
         	SPAN(Locale.$STR("cookies.console.cookie"), " "),
-            SPAN({"class": "cookieNameLabel", onclick: "$onClick"}, 
-                "$object|getName", 
+            SPAN({"class": "cookieNameLabel", onclick: "$onClick"},
+                "$object|getName",
                 " "),
-            SPAN({"class": "cookieActionLabel"}, 
-                "$object|getAction", 
+            SPAN({"class": "cookieActionLabel"},
+                "$object|getAction",
                 ".&nbsp;&nbsp;"),
-            SPAN({"class": "cookieValueLabel"}, 
+            SPAN({"class": "cookieValueLabel"},
                 "$object|getValue"),
             DIV({"class": "cookieDomainLabel", onclick: "$onClickDomain",
                 title: "$object|getOriginalURI"}, "$object|getDomain")
@@ -802,7 +802,7 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
         var originalURI;
         if (activeCookie)
             originalURI = activeCookie.originalURI.spec;
-        else 
+        else
             originalURI = cookieEvent.rawHost;
 
         if (FBTrace.DBG_COOKIES)
@@ -810,7 +810,7 @@ CookieReps.CookieChanged = domplate(CookieReps.Rep,
             FBTrace.sysout("cookies.context.cookies.activeCookies[" + cookie.host + "]",
                 activeCookies);
 
-            FBTrace.sysout("cookies.Original URI for: " + CookieUtils.getCookieId(cookie) + 
+            FBTrace.sysout("cookies.Original URI for: " + CookieUtils.getCookieId(cookie) +
                 " is: " + originalURI, activeCookie);
         }
 
@@ -896,9 +896,9 @@ CookieReps.CookieRejected = domplate(CookieReps.Rep,
                                 "$object|getCookieList")
                         ),
                         TD(
-                            SPAN({"class": "cookieDomainLabel", onclick: "$onClickDomain"}, 
+                            SPAN({"class": "cookieDomainLabel", onclick: "$onClickDomain"},
                                 "$object|getDomain"),
-                            SPAN("&nbsp;") 
+                            SPAN("&nbsp;")
                         )
                     )
                 )
@@ -1000,7 +1000,7 @@ CookieReps.SizeInfoTip = domplate(Firebug.Rep,
 
     formatNumber: function(size)
     {
-        return size.size && size.size >= 1024 ? "(" + Str.formatNumber(size.size) + " B)" : "";
+        return size.size && size.size >= 1024 ? "(" + size.size.toLocaleString() + " B)" : "";
     },
 
     render: function(cookie, parentNode)
@@ -1046,61 +1046,61 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
                     TD({id: "colValue", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.value.tooltip")}, 
+                            title: Locale.$STR("cookies.header.value.tooltip")},
                         Locale.$STR("cookies.header.value"))
                     ),
                     TD({id: "colRawValue", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.rawValue.tooltip")}, 
+                            title: Locale.$STR("cookies.header.rawValue.tooltip")},
                             Locale.$STR("cookies.header.rawValue"))
                     ),
                     TD({id: "colDomain", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.domain.tooltip")}, 
+                            title: Locale.$STR("cookies.header.domain.tooltip")},
                         Locale.$STR("cookies.header.domain"))
                     ),
                     TD({id: "colRawSize", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.rawSize.tooltip")}, 
+                            title: Locale.$STR("cookies.header.rawSize.tooltip")},
                         Locale.$STR("cookies.header.rawSize"))
                     ),
                     TD({id: "colSize", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.size.tooltip")}, 
+                            title: Locale.$STR("cookies.header.size.tooltip")},
                         Locale.$STR("cookies.header.size"))
                     ),
                     TD({id: "colPath", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.path.tooltip")}, 
+                            title: Locale.$STR("cookies.header.path.tooltip")},
                         Locale.$STR("cookies.header.path"))
                     ),
                     TD({id: "colExpires", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.expires.tooltip")}, 
+                            title: Locale.$STR("cookies.header.expires.tooltip")},
                         Locale.$STR("cookies.header.expires"))
                     ),
                     TD({id: "colMaxAge", role: "columnheader",
                         "class": "cookieHeaderCell a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.maxAge.tooltip")}, 
+                            title: Locale.$STR("cookies.header.maxAge.tooltip")},
                         Locale.$STR("cookies.header.maxAge"))
                     ),
                     TD({id: "colHttpOnly", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.httponly.tooltip")}, 
+                            title: Locale.$STR("cookies.header.httponly.tooltip")},
                         Locale.$STR("cookies.header.httponly"))
                     ),
                     TD({id: "colSecurity", role: "columnheader",
                         "class": "cookieHeaderCell alphaValue a11yFocus"},
                         DIV({"class": "cookieHeaderCellBox",
-                            title: Locale.$STR("cookies.header.security.tooltip")}, 
+                            title: Locale.$STR("cookies.header.security.tooltip")},
                         Locale.$STR("cookies.header.security"))
                     )
                 )
@@ -1279,7 +1279,7 @@ CookieReps.CookieTable = domplate(CookieReps.Rep,
         items.push("-");
         items.push({
             label: Locale.$STR("net.header.Reset Header"),
-            nol10n: true, 
+            nol10n: true,
             command: Obj.bindFixed(this.onResetColumns, this, context)
         });
 
@@ -1407,7 +1407,7 @@ function checkList(panel)
         return;
 
     if (!panel || !this.panelNode)
-        return; 
+        return;
 
     var row = this.panelNode.getElementsByClassName("cookieRow")[0];
     while (row)

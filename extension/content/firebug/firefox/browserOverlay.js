@@ -26,6 +26,8 @@ var Cu = Components.utils;
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
+Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
+Locale.registerStringBundle("chrome://global/locale/keys.properties");
 
 Cu.import("resource://firebug/loader.js");
 Cu.import("resource://firebug/fbtrace.js");
@@ -62,6 +64,10 @@ BrowserOverlay.prototype =
             $(this.doc, "mainBroadcasterSet"));
 
         var node = $stylesheet(this.doc, "chrome://firebug/content/firefox/browserOverlay.css");
+
+        if (this.win.navigator.platform.search("Mac") == 0)
+            $stylesheet(this.doc, "chrome://firebug/content/firefox/macBrowserOverlay.css");
+
         this.nodesToRemove.push(node);
 
         this.loadContextMenuOverlay();

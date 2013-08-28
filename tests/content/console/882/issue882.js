@@ -18,11 +18,11 @@ function runTest()
                 var expected = [
                 {
                     msg: "log",
-                    link: /^issue882\.html\s+\(line 9\)$/
+                    link: FW.FBL.$STRF("Line", ["issue882.html", 9])
                 },
                 {
                     msg: "external",
-                    link: /^external\.js\s+\(line 2\)$/
+                    link: FW.FBL.$STRF("Line", ["external.js", 2])
                 }];
 
                 for (var i=0; i < rows.length; ++i)
@@ -30,7 +30,7 @@ function runTest()
                     var msg = rows[i].getElementsByClassName("objectBox-text")[0];
                     FBTest.compare(expected[i].msg, msg.textContent,
                         "The proper message must be displayed: " + msg.textContent);
-                    
+
                     var sourceLink = rows[i].getElementsByClassName("objectLink")[0];
                     FBTest.compare(expected[i].link, sourceLink.textContent,
                         "The proper source link must be displayed: " + sourceLink.textContent);

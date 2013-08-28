@@ -22,7 +22,7 @@ var Cc = Components.classes;
 
 var Css = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS
 
 var cssKeywordMap = {};
@@ -123,7 +123,9 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 /**
  * Parses the CSS properties of a CSSStyleRule
  * @param {Object} style CSSStyleRule to get the properties of
- * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @param {Object} element Element to which the style applies. Needed for parsing
+ *      shorthand properties correctly.
+ *
  * @returns {Array} Properties represented by {name, value, priority, longhandProps}
  */
 Css.parseCSSProps = function(style, element)
@@ -320,7 +322,7 @@ Css.getElementCSSPath = function(element)
     return paths.length ? paths.join(" ") : null;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS classes
 
 var classNameReCache={};
@@ -709,9 +711,11 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
+    {
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
             (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+    }
 
     ownerDocument = ownerDocument || Css.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)
@@ -782,12 +786,19 @@ Css.extractURLs = function(value)
 
 Css.colorNameToRGB = function(value)
 {
+    if (!domUtils.colorNameToRGB)
+        return value;
+
+    if (value === "transparent")
+        return "rgba(0, 0, 0, 0)";
+
     try
     {
         var rgbValue = domUtils.colorNameToRGB(value);
         return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
     }
-    catch(e) {
+    catch(e)
+    {
         return value;
     }
 };
@@ -799,12 +810,8 @@ Css.rgbToHex = function(value)
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
             toString(16).substr(-6).toUpperCase();
     }
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHex(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
@@ -864,12 +871,7 @@ Css.rgbToHSL = function(value)
             return "hsl("+h+", "+s+"%, "+l+"%)";
     }
 
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHSL(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a)

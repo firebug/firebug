@@ -285,11 +285,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, true);
 
-        // Allow the use of plain "help"
-        // xxxHonza: this is a hack, FIX ME
-        if (expr === "help")
-            expr = "help()";
-
         var self = this;
         var logResult = Firebug.Console.log.bind(Firebug.Console);
 
@@ -700,26 +695,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         this.autoCompleter.complete(context);
         this.update(context);
-    },
-
-    onPanelEnable: function(panelName)
-    {
-        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
-
-        this.setMultiLine(Firebug.commandEditor, Firebug.chrome);
-    },
-
-    onPanelDisable: function(panelName)
-    {
-        // We don't care about other panels.
-        if (panelName !== "console")
-            return;
-
-        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
     },
 
     getCommandLine: function(context)

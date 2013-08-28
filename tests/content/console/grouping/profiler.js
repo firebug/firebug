@@ -6,6 +6,7 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("console");
 
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {
@@ -19,7 +20,7 @@ function runTest()
                 var panelNode = FBTest.getPanel("console").panelNode;
 
                 var rows = panelNode.querySelectorAll(".logRow-profile .logCounterValue");
-                FBTest.compare(2, rows.length, "There must be two XHR entries");
+                FBTest.compare(2, rows.length, "There must be two profiler entries");
 
                 FBTest.compare("", rows[0].textContent, "The log counter must be empty");
                 FBTest.compare("", rows[1].textContent, "The log counter must be empty");

@@ -12,7 +12,7 @@ function runTest() {
       FBTest.compare(null, result, "No result returned");
     }
   }
-  
+
   // Forward, case sensitive, single char
   var re = new FW.FBL.LiteralRegExp("t", false, true);
   FBTest.progress("Forward, case sensitive, single char");
@@ -23,7 +23,7 @@ function runTest() {
   testRE("", "ttatt", -1, 0);
 
   testRE("", "aaaaaaa", -1, 0);
-  
+
   var re = /t/g;
   FBTest.progress("Native, forward, case sensitive, single char");
   testRE("t", "ttatt", 0, 1);
@@ -33,7 +33,7 @@ function runTest() {
   testRE("", "ttatt", -1, 0);
 
   testRE("", "aaaaaaa", -1, 0);
-  
+
   // Reverse, case sensitive, single char
   re = new FW.FBL.LiteralRegExp("t", true, true);
   FBTest.progress("Reverse, case sensitive, single char");
@@ -83,7 +83,7 @@ function runTest() {
   testRE("", "te(st test Te(st te(st", -1, 0);
 
   testRE("te(st", "test test test", -1, 0);
-  
+
   FBTest.progress("Native, forward, case insensitive");
   re = /te\(st/gi;
   testRE("te(st", "te(st test Te(st te(st", 0, 5);
@@ -102,6 +102,6 @@ function runTest() {
   testRE("", "te(st test Te(st te(st", -1, 0);
 
   testRE("", "test test test", -1, 0);
-  
+
   FBTest.testDone();
 }

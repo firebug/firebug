@@ -1562,6 +1562,8 @@ var fbs =
 
     stopProfiling: function()
     {
+        if (profileCount == 0)
+            return -1;
         if (--profileCount == 0)
         {
             jsd.flags &= ~COLLECT_PROFILE_DATA;

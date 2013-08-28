@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6582: Removing selected style sheet dynamically breaks CSS panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        iframe {
+            width: 100px;
+            height: 100px;
+            border: none;
+            margin-right: 5px;
+        }
+
+        #actions {
+            margin-top: 5px;
+        }
+        </style>
+        <script type="text/javascript">
+        function removeStyleSheets(styleSheets)
+        {
+            for (var i=styleSheets.length - 1; i>=0; --i)
+                styleSheets[i].parentNode.removeChild(styleSheets[i]);
+        }
+
+        function removeAllStyleSheets()
+        {
+            var frameDoc = window.frames[0].document;
+            var styleSheets = frameDoc.querySelectorAll("link,style");
+            removeStyleSheets(styleSheets);
+
+            // Remove stylesheets from main page
+            styleSheets = document.querySelectorAll("link,style");
+            removeStyleSheets(styleSheets);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6582">Issue 6582</a>:
+                Removing style sheets dynamically breaks CSS panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe id="iframe" src="issue6582-iframe.html"></iframe>
+            </section>
+            <section id="description">
+                <h2>Removing all style sheets</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Click this button to remove all stylesheets
+                        <button id="removeAllStyleSheets" onclick="removeAllStyleSheets()">Remove all style sheets</button>
+                    </li>
+                    <li>The Location button as well as the Edit button should be hidden (or deactivated)</li>
+                    <li>The <em>CSS</em> panel should show an info that there are no style sheets inside the page</li>
+                </ol>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>

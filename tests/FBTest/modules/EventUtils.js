@@ -3,7 +3,7 @@ var EXPORTED_SYMBOLS = ["sendMouseEvent", "sendChar", "sendString", "sendKey",
                         "synthesizeMouse", "synthesizeMouseScroll", "synthesizeKey",
                         "synthesizeMouseExpectEvent", "synthesizeKeyExpectEvent",
                         "synthesizeDragStart", "synthesizeDrop", "synthesizeText",
-                        "disableNonTestMouseEvents", "synthesizeComposition", 
+                        "disableNonTestMouseEvents", "synthesizeComposition",
                         "synthesizeQuerySelectedText", "synthesizeQueryTextContent",
                         "synthesizeQueryCaretRect", "synthesizeQueryTextRect",
                         "synthesizeQueryEditorRect", "synthesizeCharAtPoint",
@@ -45,7 +45,7 @@ function sendMouseEvent(aEvent, aTarget, aWindow) {
   }
 
   // xxxpedro when running as a module, there are no global Element class, so we must use
-  // aWindow.Element instead to avoid "Element is not defined" error. I believe a better 
+  // aWindow.Element instead to avoid "Element is not defined" error. I believe a better
   // approach would be using 'if (typeof aTarget == "string")' instead.
   if (!(aTarget instanceof aWindow.Element)) {
     aTarget = aWindow.document.getElementById(aTarget);

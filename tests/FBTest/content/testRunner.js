@@ -29,8 +29,8 @@ var Ci = Components.interfaces;
 
 /**
  * Test runner is intended to run single tests or test suites.
- * 
- * @class  
+ *
+ * @class
  */
 FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
 /** @lends FBTestApp.TestRunner */
@@ -350,7 +350,7 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
         if (/\.js$/.test(testURL))  // then the js needs a wrapper
         {
             // a data url with script tags for FBTestFirebug.js and the test.path
-            testURL = this.wrapJS(test); 
+            testURL = this.wrapJS(test);
 
             // Load the empty test frame
             this.browser.loadURI(testURL);
