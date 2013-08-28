@@ -1282,6 +1282,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (ch == "*")
             this.toggleAll(event, node);
 
+        // Edit the HTML on Ctrl/Meta+E
+        if (Events.isControl(event) && ch === "e");
+            this.editNode(node);
+
         if (!Events.noKeyModifiers(event))
           return;
 
@@ -1885,12 +1889,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     label: Locale.$STRF("html.Edit_Node", [type]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
                     nol10n: true,
+                    acceltext: (window.navigator.platform.indexOf("Mac") !== -1 ?
+                        Locale.$STR("VK_META") : Locale.$STR("VK_CONTROL")) + "+E",
                     command: Obj.bindFixed(this.editNode, this, node)
                 },
                 {
                     label: "DeleteElement",
                     tooltiptext: "html.Delete_Element",
-
                     acceltext: Locale.$STR("VK_DELETE"),
                     command: Obj.bindFixed(this.deleteNode, this, node),
                     disabled:(node.localName in Css.innerEditableTags)
