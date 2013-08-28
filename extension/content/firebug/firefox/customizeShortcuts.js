@@ -20,7 +20,6 @@ var Locale;
 // Global variables used by this dialog.
 var shortcutNames = null;
 var gVKNames = [];
-var gLocaleKeys = [];
 var gPlatformKeys = new Object();
 var updatedShortcuts = {};
 var modified = false;
@@ -65,13 +64,11 @@ function init()
 
 function setKeyInfo()
 {
-    gLocaleKeys = document.getElementById("localeKeys");
-    var platformKeys = document.getElementById("platformKeys");
-    gPlatformKeys.shift = Locale.$STR("VK_SHIFT", platformKeys);
-    gPlatformKeys.meta = Locale.$STR("VK_META", platformKeys);
-    gPlatformKeys.alt = Locale.$STR("VK_ALT", platformKeys);
-    gPlatformKeys.ctrl = Locale.$STR("VK_CONTROL", platformKeys);
-    gPlatformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR", platformKeys);
+    gPlatformKeys.shift = Locale.$STR("VK_SHIFT");
+    gPlatformKeys.meta = Locale.$STR("VK_META");
+    gPlatformKeys.alt = Locale.$STR("VK_ALT");
+    gPlatformKeys.ctrl = Locale.$STR("VK_CONTROL");
+    gPlatformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR");
 
     switch (Services.prefs.getIntPref("ui.key.accelKey"))
     {
@@ -297,7 +294,7 @@ function getFormattedKey(modifiers, key, keyConstant)
         try
         {
             // See if a localized version for keyConstant exists (F keys, arrow, enter, pgup, etc.)
-            val += gLocaleKeys.getString(keyConstant);
+            val += Locale.$STR(keyConstant);
         }
         catch (e)
         {
@@ -307,5 +304,3 @@ function getFormattedKey(modifiers, key, keyConstant)
     }
     return val;
 }
-
-// ********************************************************************************************* //
