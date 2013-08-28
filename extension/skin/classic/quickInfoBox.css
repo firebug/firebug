@@ -3,11 +3,6 @@
 /*************************************************************************************************/
 /* Quick Info Box */
 
-#fbQuickInfoPanel {
-    border: 0;
-    opacity: 0.9;
-}
-
 .fbQuickInfoPanelBody {
     background-color: white;
     font-family: monospace;
@@ -87,3 +82,6 @@
 .fbQuickInfoClose:active {
     background-position: 0 -32px;
 }
+
+/* Overwrite styles with OS-specific ones */
+@import "chrome://firebug-os/skin/quickInfoBox.css";
