@@ -5,14 +5,15 @@ define([
     "firebug/lib/options",
     "firebug/lib/locale",
     "firebug/lib/array",
+    "firebug/lib/string",
     "firebug/lib/xpcom",
     "firebug/firefox/browserOverlayLib",
     "firebug/firefox/browserCommands",
     "firebug/firefox/browserMenu",
     "firebug/firefox/browserToolbar",
 ],
-function(FBTrace, Options, Locale, Arr, Xpcom, BrowserOverlayLib, BrowserCommands, BrowserMenu,
-    BrowserToolbar) {
+function(FBTrace, Options, Locale, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
+    BrowserMenu, BrowserToolbar) {
 
 with (BrowserOverlayLib) {
 
@@ -331,7 +332,7 @@ BrowserOverlay.prototype =
         for (var i=0; i<positions.length; i++)
         {
             var pos = positions[i];
-            var label = pos.charAt(0).toUpperCase() + pos.slice(1);
+            var label = Str.capitalize(pos);
 
             var item = $menuitem(this.doc, {
                 label: Locale.$STR("firebug.menu." + label),

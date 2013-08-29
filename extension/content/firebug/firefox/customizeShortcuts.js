@@ -5,9 +5,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
+    "firebug/lib/string",
     "firebug/lib/events",
 ],
-function(FBTrace, Obj, Locale, Events) {
+function(FBTrace, Obj, Locale, Str, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -305,16 +306,14 @@ CustomizeShortcuts.prototype =
 
         if (keyConstant)
         {
-            try
-            {
-                // See if a localized version for keyConstant exists (F keys, arrow, enter, pgup, etc.)
-                val += Locale.$STR(keyConstant);
-            }
-            catch (e)
-            {
-                // Create human friendly alternative ourself
-                val += keyConstant.replace("VK_", "").replace("_", " ").toLowerCase();
-            }
+            var localizedKey = Locale.$STR(keyConstant);
+
+            // Create human friendly alternative ourself, if there is no translation
+            // for the key constant
+            if (Str.hasPrefix(localizedKey, "VK "))
+                localizedKey = Str.capitalize(localizedKey.replace("VK ", ""), True);
+
+            val += localizedKey;
         }
         return val;
     }
