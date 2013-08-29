@@ -857,7 +857,7 @@ Str.formatIP = function(address, port)
 
 /**
  * Capitalizes the first letter of a string or each word in it
- * 
+ *
  * @param {String} string String to format
  * @param {Boolean} [capitalizeEachWord=false] If true, the first character of each word will be
  *     transformed to uppercase, otherwise only the very first character of the string
@@ -867,10 +867,10 @@ Str.formatIP = function(address, port)
  */
 Str.capitalize = function(string, capitalizeEachWord, restToLowerCase)
 {
-    function capitalizeFirstLetter(string, restToLowerCase)
+    function capitalizeFirstLetter(string)
     {
         var rest = string.slice(1);
-        
+
         if (restToLowerCase !== false)
             rest = rest.toLowerCase();
 
@@ -880,11 +880,7 @@ Str.capitalize = function(string, capitalizeEachWord, restToLowerCase)
     if (!capitalizeEachWord)
         return capitalizeFirstLetter(string, restToLowerCase);
 
-    var words = string.split(" ");
-    for (var i=0, len=words.length; i<len; ++i)
-        words[i] = capitalizeFirstLetter(words[i], restToLowerCase);
-
-    return words.join(" ");
+    return string.split(" ").map(capitalizeFirstLetter).join(" ");
 };
 
 // ********************************************************************************************* //
