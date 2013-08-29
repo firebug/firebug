@@ -286,7 +286,8 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
         this.context.setTimeout(Obj.bindFixed(function()
         {
-            this.showToolbox(null);
+            var watchRow = this.panelNode.getElementsByClassName("watchRow")[rowIndex];
+            this.showToolbox(watchRow);
         }, this));
     },
 
