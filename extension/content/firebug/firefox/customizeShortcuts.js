@@ -311,7 +311,7 @@ CustomizeShortcuts.prototype =
             // Create human friendly alternative ourself, if there is no translation
             // for the key constant
             if (Str.hasPrefix(localizedKey, "VK "))
-                localizedKey = Str.capitalize(localizedKey.replace("VK ", ""), True);
+                localizedKey = Str.capitalize(localizedKey.replace("VK ", ""), true);
 
             val += localizedKey;
         }
