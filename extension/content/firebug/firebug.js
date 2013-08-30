@@ -1728,7 +1728,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         // xxxHonza: not exactly sure why, but it helps when testing memory-leask.
         // Note the the selection can point to a document (in case of the HTML panel).
         // Perhaps it breaks a cycle (page -> firebug -> page)?
-        delete this.selection;
+        this.selection = null;
         delete this.panelBrowser;
     },
 
@@ -2261,6 +2261,28 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
         return null;
     },
+});
+
+// Define getter and setter for |selection| property. This way we can always check if the
+// current selected object is valid and reset if necessary.
+Firebug.Panel.__defineGetter__("selection", function()
+{
+    try
+    {
+        if (this._selection && Wrapper.isDeadWrapper(this._selection))
+            this._selection = null;
+    }
+    catch (err)
+    {
+        this._selection = null;
+    }
+
+    return this._selection;
+});
+
+Firebug.Panel.__defineSetter__("selection", function(val)
+{
+    this._selection = val;
 });
 
 // ********************************************************************************************* //

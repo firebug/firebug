@@ -229,7 +229,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             // If the source link is selected, clear it so the next link will scroll and highlight.
             if (sourceLink == this.selection)
-                delete this.selection;
+                this.selection = null;
         }
     },
 
@@ -679,7 +679,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     destroy: function(state)
     {
         // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
-        delete this.selection;
+        this.selection = null;
 
         var sourceBox = this.selectedSourceBox;
         if (sourceBox)
