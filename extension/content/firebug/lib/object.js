@@ -43,24 +43,15 @@ Obj.extend = function()
     var newOb = {};
     for (var i = 0, len = arguments.length; i < len; ++i)
     {
-        for (var prop in arguments[i])
+        var ob = arguments[i];
+        for (var prop in ob)
         {
-            var ob = arguments[i];
-
-            // Make sure that getters and setters are also properly inherited
-            var getter = ob.__lookupGetter__(prop);
-            var setter = ob.__lookupSetter__(prop);
-
-            if (getter)
-                newOb.__defineGetter__(prop, getter);
-
-            if (setter)
-                newOb.__defineSetter__(prop, setter);
-
-            if (getter || setter)
-                continue;
-
-            newOb[prop] = ob[prop];
+            // Use property descriptor to clone also getters and setters.
+            var pd = Object.getOwnPropertyDescriptor(ob, prop);
+            if (pd)
+                Object.defineProperty(newOb, prop, pd);
+            else
+                newOb[prop] = ob[prop];
         }
     }
 
