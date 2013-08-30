@@ -2261,28 +2261,33 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
         return null;
     },
-});
 
-// Define getter and setter for |selection| property. This way we can always check if the
-// current selected object is valid and reset if necessary.
-Firebug.Panel.__defineGetter__("selection", function()
-{
-    try
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Selected Object
+
+    /**
+     * Define getter for the |selection| property. This way we can always check if the current
+     * selected object is valid and reset if necessary.
+     */
+    get selection()
     {
-        if (this._selection && Wrapper.isDeadWrapper(this._selection))
+        try
+        {
+            if (this._selection && Wrapper.isDeadWrapper(this._selection))
+                this._selection = null;
+        }
+        catch (err)
+        {
             this._selection = null;
-    }
-    catch (err)
+        }
+
+        return this._selection;
+    },
+
+    set selection(val)
     {
-        this._selection = null;
+        this._selection = val;
     }
-
-    return this._selection;
-});
-
-Firebug.Panel.__defineSetter__("selection", function(val)
-{
-    this._selection = val;
 });
 
 // ********************************************************************************************* //
