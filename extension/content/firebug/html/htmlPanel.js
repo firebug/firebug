@@ -629,7 +629,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 if (FBTrace.DBG_HTML)
                 {
-                    FBTrace.sysout("mutateAttr getAttributeNode " + removal + " " + attrName +
+                    FBTrace.sysout("mutateAttr attribute node " + removal + " " + attrName +
                         "=" + attrValue + " node: " + attr, attr);
                 }
 
