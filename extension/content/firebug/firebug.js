@@ -1725,9 +1725,9 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
         this.destroyNode();
 
-        // xxxHonza: not exactly sure why, but it helps when testing memory-leask.
-        // Note the the selection can point to a document (in case of the HTML panel).
-        // Perhaps it breaks a cycle (page -> firebug -> page)?
+        // xxxHonza: not exactly sure why, but it helps when testing memory-leaks.
+        // Note that the selection can point to a document (in case of the HTML panel).
+        // Perhaps it breaks a cycle (page -> Firebug -> page)?
         this.selection = null;
         delete this.panelBrowser;
     },
@@ -1746,13 +1746,13 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         Dom.scrollToBottom(this.panelNode);
     },
 
-    // called when a panel in one XUL window is about to disappear to later reappear
+    // Called when a panel in one XUL window is about to disappear to later reappear in
     // another XUL window.
     detach: function(oldChrome, newChrome)
     {
     },
 
-    // this is how a panel in one window reappears in another window; lazy called
+    // This is how a panel in one window reappears in another window; lazily called
     reattach: function(doc)
     {
         this.document = doc;
@@ -1846,7 +1846,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         return 0;
     },
 
-    hasObject: function(object)  // beyond type testing, is this object selectable?
+    // beyond type testing, is this object selectable?
+    hasObject: function(object)
     {
         return false;
     },
@@ -1866,12 +1867,12 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         // There might be cases where the object is removed from the page (e.g. a stylesheet
         // that is currently displayed in the CSS panel) and the panel location not updated.
         //
-        // This might happen because of optimalization where backround panels do not observe
-        // changes on the page (e.g. using Mutation Observer).
+        // This might happen because of optimization, where backround panels do not observe
+        // changes on the page (e.g. using a Mutation Observer).
         //
-        // The object is a dead wrapper at such moments, firing an exception anytime
-        // it's properties or methods are accessed.
-        // So, just pass the object back to the panel, which must do proper checking.
+        // The object is a dead wrapper in such moments firing an exception anytime
+        // its properties or methods are accessed.
+        // So just pass the object back to the panel, which must do proper checking.
         if (!this.location || (object != this.location))
         {
             if (FBTrace.DBG_PANELS)
@@ -1891,6 +1892,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     /**
      * The location object has been changed, the panel should update it view
+     *
      * @param object a location, must be one of getLocationList() returns
      *  if  getDefaultLocation() can return null, then updateLocation must handle it here.
      */
@@ -1966,10 +1968,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     },
 
     /**
-     * Called by the framework when inspecting is in progress and the user moves mouse over
+     * Called by the framework when inspecting is in progress and the user moves the mouse over
      * a new page element. Inspecting must be enabled for the panel (panel.inspectable == true).
      * This method is called in a timeout to avoid performance penalties when the user moves
      * the mouse over the page elements too fast.
+     *
      * @param {Element} node The page element being inspected
      * @returns {Boolean} Returns true if the node should be selected within the panel using
      *      the default panel selection mechanism (i.e. by calling panel.select(node) method).
@@ -1982,6 +1985,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     /**
      * Called by the framework when the user stops inspecting. Inspecting must be enabled
      * for the panel (panel.inspectable == true)
+     *
      * @param {Element} node The last page element inspected
      * @param {Boolean} canceled Set to true if inspecing has been canceled
      *          by pressing the escape key.
@@ -2026,12 +2030,13 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
             Css.setClassTimed(node, "jumpHighlight", this.context);
     },
 
-    /*
+    /**
      * Called by the framework when panel search is used.
      * This is responsible for finding and highlighting search matches.
+     *
      * @param {String} text String to search for
      * @param {Boolean} reverse Indicates, if search is reversed
-     * @return true, if search matched, otherwise false
+     * @returns {Boolean} true, if search matched, otherwise false
      */
     search: function(text, reverse)
     {
@@ -2105,9 +2110,22 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Called when "Options" clicked. Return array of
-    // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>,
-    //      command:function to set <value>}
+    /**
+     * Options menu item
+     * @typedef {Object} OptionsMenuItem
+     * @property {String} label - Label of the item
+     * @property {String} tooltiptext - Tooltip text of the item
+     * @property {Boolean} nol10n - If true, the label and tooltiptext won't be translated
+     * @property {String} type - Type of the menu item
+     * @property {Boolean} checked - If true, the item is checked
+     * @property {Function} command - Command, which is executed when the item is clicked
+     */
+
+    /**
+     * Called when "Options" clicked. Return array of
+     *
+     * @returns {OptionsMenuItem[]} Generated menu items
+     */
     getOptionsMenuItems: function()
     {
         return null;
@@ -2117,9 +2135,10 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
      * Called by chrome.onContextMenu to build the context menu when this panel has focus.
      * See also FirebugRep for a similar function also called by onContextMenu
      * Extensions may monkey patch and chain off this call
+     *
      * @param object: the 'realObject', a model value, eg a DOM property
      * @param target: the HTML element clicked on.
-     * @return an array of menu items.
+     * @returns an array of menu items.
      */
     getContextMenuItems: function(object, target)
     {
@@ -2166,9 +2185,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         return null;
     },
 
-    // An array of objects that can be passed to getObjectLocation.
-    // The list of things a panel can show, eg sourceFiles.
-    // Only shown if panel.location defined and supportsObject true
+    /**
+     * An array of objects that can be passed to getObjectLocation.
+     * The list of things a panel can show, e.g. sourceFiles.
+     * Only shown if panel.location is defined and supportsObject is true
+     */
     getLocationList: function()
     {
         return null;
@@ -2184,8 +2205,18 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         return "";
     },
 
-    // Text for the location list menu eg script panel source file list
-    // return.path: group/category label, return.name: item label
+    /**
+     * URL parts
+     * @typedef {Object} URLParts
+     * @property {String} path - Group/category label
+     * @property {String} name - Item label
+     */
+
+    /**
+     * Text for the location list menu e.g. Script panel source file list
+     *
+     * @returns {URLParts} Object description
+     */
     getObjectDescription: function(object)
     {
         var url = this.getObjectLocation(object);
@@ -2193,8 +2224,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     },
 
     /**
-     *  UI signal that a tab needs attention, eg Script panel is currently stopped on a breakpoint
-     *  @param: show boolean, true turns on.
+     *  UI signal that a tab needs attention, e.g. Script panel is currently stopped on a breakpoint
+     *  @param {Boolean} show If true, highlighting is turned on
      */
     highlight: function(show)
     {
@@ -2215,6 +2246,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     /**
      * If the panel supports source viewing, then return a SourceLink, else null
+     *
      * @param target an element from the panel under the mouse
      * @param object the realObject under the mouse
      */
@@ -2235,6 +2267,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     /**
      * Called by the framework when the user clicks on the Break On Next button.
+     *
      * @param {Boolean} armed Set to true if the Break On Next feature is
      * to be armed for action and set to false if the Break On Next should be disarmed.
      * If 'armed' is true, then the next call to shouldBreakOnNext should be |true|.
@@ -2254,6 +2287,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     /**
      * Returns labels for Break On Next tooltip (one for enabled and one for disabled state).
+     *
      * @param {Boolean} enabled Set to true if the Break On Next feature is
      * currently activated for this panel.
      */
