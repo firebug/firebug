@@ -17,7 +17,6 @@
         <command id="cmd_firebug_toggleQuickInfoBox" oncommand="Firebug.QuickInfoBox.toggleQuickInfoBox()"
                  checked="false"/>
         <command id="cmd_firebug_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
-        <!-- <command id="cmd_firebug_toggleMemoryProfiling" oncommand="Firebug.MemoryProfiler.toggleProfiling(Firebug.currentContext)"/> -->
         <command id="cmd_firebug_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
         <command id="cmd_firebug_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
 

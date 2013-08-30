@@ -173,9 +173,6 @@
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile"
                                             class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_firebug_toggleProfiling"/>
-                                        <!-- <toolbarbutton id="fbToggleMemoryProfiling" label="firebug.Memory Profile"
-                                            class="toolbar-text-button fbInternational"
-                                            type="checkbox" command="cmd_firebug_toggleMemoryProfiling"/> -->
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <hbox id="fbConsoleFilterButtons" class="noTabStop">
                                             <toolbarbutton

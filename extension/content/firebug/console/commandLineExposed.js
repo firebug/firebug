@@ -23,7 +23,7 @@ const Cu = Components.utils;
 // List of command line APIs
 var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-    "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+    "traceAll", "untraceAll", "copy"];
 
 // List of shortcuts for some console methods
 var consoleShortcuts = ["dir", "dirxml", "table"];
