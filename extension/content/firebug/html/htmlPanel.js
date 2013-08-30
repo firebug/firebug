@@ -1238,6 +1238,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
+            this.setEditEnableState();
         }
         else if (Dom.getAncestorByClass(event.target, "nodeBracket"))
         {
