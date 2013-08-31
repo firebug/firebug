@@ -234,6 +234,7 @@ function unregisterCommand(name)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  *
  * @see CommandLine.evaluate
  */
@@ -251,6 +252,7 @@ function evaluateInPageContext(context, win)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
 function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 {

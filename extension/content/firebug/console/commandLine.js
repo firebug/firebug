@@ -45,6 +45,24 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /**
+     * Evaluates an expression either in the global scope, in the sandbox or in the current scope
+     * of the JS debugger, depending on the state of Firebug (i.e. if the debugger is currently
+     * active, etc.).
+     *
+     * @param {string} expr The expression.
+     * @param {Context} context The Firebug context.
+     * @param {*} [thisValue] The value for "this" in the evaluated expression.
+     * @param {Window} [targetWindow] The window in which the expression is evaluated.
+     * @param {function} [successConsoleFunction] The callback function in case of 
+     *      evaluation without errors.
+     * @param {function} [exceptionFunction] The callback function in case of 
+     *      evaluation with errors.
+     * @param {object} [options] The options with the following properties:
+     *      - noStateChange: if set to true, do not update the DOM and HTML panels. (default=false)
+     *      - noBindings: if set to true, do not evaluate with the Firebug commands. (default=false)
+     *
+     */
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
         exceptionFunction, options)
     {
@@ -103,6 +121,23 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         }
     },
 
+    /**
+     * Evaluates an expression in the global scope.
+     *
+     * @param {string} expr The expression.
+     * @param {Context} context The Firebug context.
+     * @param {*} [thisValue] The value for "this" in the evaluated expression.
+     * @param {Window} [targetWindow] The window in which the expression is evaluated.
+     * @param {function} [successConsoleFunction] The callback function in case of 
+     *      evaluation without errors.
+     * @param {function} [exceptionFunction] The callback function in case of 
+     *      evaluation with errors.
+     * @param {string} [origExpr] The original expression before it has been transformed
+     *          (mainly used by ClosureInspector). If not set, origExpr=expr.
+     * @param {object} [options] The options with the following properties:
+     *      - noBindings: if set to true, do not evaluate with the Firebug commands. (default=false)
+     *
+     */
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction, origExpr, options)
     {
