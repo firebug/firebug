@@ -47,7 +47,7 @@ var tableTag =
         )
     );
 
-var titleTag = 
+var titleTag =
     TR(
         TD({"class": "fbQuickInfoBoxTitle"},
             SPAN("$title")
@@ -122,7 +122,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
         var doc = this.getContentDoc();
         doc.body.classList.add("fbQuickInfoPanelBody");
 
-        Css.appendStylesheet(doc, "chrome://firebug/skin/quickInfoBox.css");
+        Css.appendStylesheet(doc, "chrome://firebug/content/html/quickInfoBox.css");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -43,8 +43,16 @@ Obj.extend = function()
     var newOb = {};
     for (var i = 0, len = arguments.length; i < len; ++i)
     {
-        for (var prop in arguments[i])
-            newOb[prop] = arguments[i][prop];
+        var ob = arguments[i];
+        for (var prop in ob)
+        {
+            // Use property descriptor to clone also getters and setters.
+            var pd = Object.getOwnPropertyDescriptor(ob, prop);
+            if (pd)
+                Object.defineProperty(newOb, prop, pd);
+            else
+                newOb[prop] = ob[prop];
+        }
     }
 
     return newOb;

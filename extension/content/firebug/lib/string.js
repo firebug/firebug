@@ -855,6 +855,34 @@ Str.formatIP = function(address, port)
     return result;
 };
 
+/**
+ * Capitalizes the first letter of a string or each word in it
+ *
+ * @param {String} string String to format
+ * @param {Boolean} [capitalizeEachWord=false] If true, the first character of each word will be
+ *     transformed to uppercase, otherwise only the very first character of the string
+ * @param {Boolean} [restToLowerCase=true] If true, the rest of the string will be transformed
+ *     to lower case, otherwise it will stay untouched
+ * @returns {String} Converted string
+ */
+Str.capitalize = function(string, capitalizeEachWord, restToLowerCase)
+{
+    function capitalizeFirstLetter(string)
+    {
+        var rest = string.slice(1);
+
+        if (restToLowerCase !== false)
+            rest = rest.toLowerCase();
+
+        return string.charAt(0).toUpperCase() + rest;
+    }
+
+    if (!capitalizeEachWord)
+        return capitalizeFirstLetter(string, restToLowerCase);
+
+    return string.split(" ").map(capitalizeFirstLetter).join(" ");
+};
+
 // ********************************************************************************************* //
 // Conversions
 

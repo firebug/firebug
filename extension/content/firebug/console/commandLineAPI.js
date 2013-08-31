@@ -236,19 +236,6 @@ CommandLineAPI.getCommandLineAPI = function(context)
         return Firebug.Console.getDefaultReturnValue();
     };
 
-    // xxxHonza: removed from 1.10 (issue 5599)
-    /*commands.memoryProfile = function(title)
-    {
-        Firebug.MemoryProfiler.start(context, title);
-        return Firebug.Console.getDefaultReturnValue();
-    };
-
-    commands.memoryProfileEnd = function()
-    {
-        Firebug.MemoryProfiler.stop(context);
-        return Firebug.Console.getDefaultReturnValue();
-    };*/
-
     return commands;
 };
 

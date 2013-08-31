@@ -44,7 +44,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/firefox/start-button/startButtonOverlay",
         "firebug/firefox/external-editors/externalEditors",
         "firebug/chrome/panelActivation",
-        //"firebug/console/memoryProfiler", xxxHonza: removed from 1.10 (issue 5599)
         "firebug/chrome/tableRep",
         "firebug/html/htmlPanel",
         "firebug/dom/domSidePanel",

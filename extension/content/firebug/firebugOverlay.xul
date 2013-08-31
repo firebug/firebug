@@ -173,9 +173,6 @@
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile"
                                             class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_firebug_toggleProfiling"/>
-                                        <!-- <toolbarbutton id="fbToggleMemoryProfiling" label="firebug.Memory Profile"
-                                            class="toolbar-text-button fbInternational"
-                                            type="checkbox" command="cmd_firebug_toggleMemoryProfiling"/> -->
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <hbox id="fbConsoleFilterButtons" class="noTabStop">
                                             <toolbarbutton
@@ -515,8 +512,10 @@
                     <!-- transparent background, silver text over user inputs -->
                     <html:div class="background">
                         <!-- completion text -->
-                        <html:input id="fbCommandLineCompletion" class="fbCommandLine"
-                            type="text" maxlength="2048" autocomplete="off" tabindex="-1" />
+                        <html:div id="fbCommandLineCompletionHolder">
+                            <textbox id="fbCommandLineCompletion" class="fbCommandLine"
+                                autocomplete="off" tabindex="-1" />
+                        </html:div>
                         <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
                             aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
                         <!-- font width measurer, contains 60 arbitrary characters -->

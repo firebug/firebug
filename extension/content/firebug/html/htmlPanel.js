@@ -619,11 +619,19 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             }
             else
             {
-                var attr = target.getAttributeNode(attrName);
+                function filterAttributeByName(attr)
+                {
+                    return attr.name == attrName;
+                }
+
+                var attributes = Array.prototype.slice.call(target.attributes);
+                var attr = attributes.filter(filterAttributeByName)[0];
 
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("mutateAttr getAttributeNode " + removal + " " + attrName +
+                {
+                    FBTrace.sysout("mutateAttr attribute node " + removal + " " + attrName +
                         "=" + attrValue + " node: " + attr, attr);
+                }
 
                 if (attr)
                 {
@@ -1230,6 +1238,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
+            this.setEditEnableState();
         }
         else if (Dom.getAncestorByClass(event.target, "nodeBracket"))
         {
