@@ -46,13 +46,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
-     * Evaluates an expression either in the global scope, in the sandbox or in the current scope
+     * Evaluates an expression either in the global scope or in the current scope
      * of the JS debugger, depending on the state of Firebug (i.e. if the debugger is currently
      * active, etc.).
      *
      * @param {string} expr The expression.
      * @param {Context} context The Firebug context.
-     * @param {*} [thisValue] The value for "this" in the evaluated expression.
+     * @param {*} [thisValue] Deprecated. Set it to null or undefined.
      * @param {Window} [targetWindow] The window in which the expression is evaluated.
      * @param {function} [successConsoleFunction] The callback function in case of 
      *      evaluation without errors.
@@ -125,7 +125,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
      *
      * @param {string} expr The expression.
      * @param {Context} context The Firebug context.
-     * @param {*} [thisValue] The value for "this" in the evaluated expression.
+     * @param {*} [thisValue] Deprecated. Set it to null or undefined.
      * @param {Window} [targetWindow] The window in which the expression is evaluated.
      * @param {function} [successConsoleFunction] The callback function in case of 
      *      evaluation without errors.
