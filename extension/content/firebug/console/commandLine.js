@@ -60,8 +60,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
      *      evaluation with errors.
      * @param {object} [options] The options with the following properties:
      *      - noStateChange: if set to true, do not update the DOM and HTML panels. (default=false)
-     *      - noBindings: if set to true, do not evaluate with the Firebug commands. (default=false)
-     *
+     *      - noCmdLineAPI: if set to true, do not evaluate with the Firebug commands. (default=false)
      */
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction,
         exceptionFunction, options)
@@ -135,8 +134,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
      * @param {string} [origExpr] The original expression before it has been transformed
      *          (mainly used by ClosureInspector). If not set, origExpr=expr.
      * @param {object} [options] The options with the following properties:
-     *      - noBindings: if set to true, do not evaluate with the Firebug commands. (default=false)
-     *
+     *      - noCmdLineAPI: if set to true, do not evaluate with the Firebug commands. (default=false)
      */
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction, origExpr, options)

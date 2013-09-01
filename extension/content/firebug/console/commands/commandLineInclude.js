@@ -386,7 +386,6 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
      * @param {Context} context The Firebug context.
      * @param {string} url The location of the script.
      * @param {string} [newAlias] The alias to define for the script.
-     *
      */
     include: function(context, url, newAlias)
     {
@@ -465,7 +464,6 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
      * @param {function} [errorFunction] The callback if the expression has been run with errors.
      * @param {*} [loadingMsgRow] The row in the console printed while the script is loading and
      *      that has to be cleared.
-     *
      */
     evaluateRemoteScript: function(url, context, successFunction, errorFunction, loadingMsgRow)
     {
