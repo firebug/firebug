@@ -789,6 +789,9 @@ Css.formatColor = function(color)
 {
     switch (Options.get("colorDisplay"))
     {
+        case "authored":
+            return color;
+
         case "hex":
             return Css.rgbToHex(color);
 
