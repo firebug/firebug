@@ -944,7 +944,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         name = this.translateName(name, value);
         if (name)
         {
-            value = Css.stripUnits(formatColor(value));
+            value = Css.stripUnits(Css.formatColor(value));
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -1686,7 +1686,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             if (text != "")
             {
-                text = formatColor(text);
+                text = Css.formatColor(text);
             }
             else
             {
@@ -3135,24 +3135,6 @@ function parsePriority(value)
     var propValue = m ? m[1] : "";
     var priority = m && m[2] ? "important" : "";
     return {value: propValue, priority: priority};
-}
-
-function formatColor(color)
-{
-    switch (Options.get("colorDisplay"))
-    {
-        case "hex":
-            return Css.rgbToHex(color);
-
-        case "hsl":
-            return Css.rgbToHSL(color);
-
-        case "rgb":
-            return Css.colorNameToRGB(color);
-
-        default:
-            return color;
-    }
 }
 
 function getRuleLine(rule)

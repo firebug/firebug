@@ -761,6 +761,7 @@ Css.getDocumentForStyleSheet = function(styleSheet)
 };
 
 // ********************************************************************************************* //
+// Formatting
 
 Css.stripUnits = function(value)
 {
@@ -783,6 +784,24 @@ Css.extractURLs = function(value)
 
     return urls;
 };
+
+Css.formatColor = function(color)
+{
+    switch (Options.get("colorDisplay"))
+    {
+        case "hex":
+            return Css.rgbToHex(color);
+
+        case "hsl":
+            return Css.rgbToHSL(color);
+
+        case "rgb":
+            return Css.colorNameToRGB(color);
+
+        default:
+            return color;
+    }
+}
 
 Css.colorNameToRGB = function(value)
 {
