@@ -24,6 +24,7 @@ define([
     "firebug/net/netProgress",
     "firebug/css/cssReps",
     "firebug/net/timeInfoTip",
+    "firebug/chrome/panelNotification",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -39,7 +40,8 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip,
+    PanelNotification) {
 
 with (Domplate) {
 
@@ -873,7 +875,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             this.table = Firebug.NetMonitor.NetRequestTable.tableTag.append({}, this.panelNode);
             var tbody = this.table.querySelector(".netTableBody");
-            this.limitRow = Firebug.NetMonitor.NetLimit.createRow(tbody, limitInfo);
+            this.limitRow = PanelNotification.createRow(tbody, limitInfo);
             this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
 
             NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
@@ -1334,7 +1336,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.limitRow.limitInfo.totalCount++;
 
-        Firebug.NetMonitor.NetLimit.updateCounter(this.limitRow);
+        PanelNotification.updateCounter(this.limitRow);
 
         //if (netProgress.currentPhase == file.phase)
         //  netProgress.currentPhase = null;
