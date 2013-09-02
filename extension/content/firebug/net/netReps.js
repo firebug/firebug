@@ -130,6 +130,13 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             TBODY({"class": "netTableBody", "role" : "presentation"})
         ),
 
+    limitTag:
+        TR({"class": "limitRowContainer collapsed"},
+            TD({colspan: 9})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     onClickHeader: function(event)
     {
         if (FBTrace.DBG_NET)

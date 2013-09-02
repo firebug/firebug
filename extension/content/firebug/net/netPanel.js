@@ -55,6 +55,7 @@ const Cr = Components.results;
 var layoutInterval = 300;
 var panelName = "net";
 var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
+var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 
 // ********************************************************************************************* //
 
@@ -281,7 +282,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var header = Dom.getAncestorByClass(target, "netHeaderRow");
         if (header)
-            return Firebug.NetMonitor.NetRequestTable;
+            return NetRequestTable;
 
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
@@ -873,9 +874,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     [Options.prefDomain+".net.logLimit"])
             };
 
-            this.table = Firebug.NetMonitor.NetRequestTable.tableTag.append({}, this.panelNode);
+            this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             var tbody = this.table.querySelector(".netTableBody");
-            this.limitRow = PanelNotification.createRow(tbody, limitInfo);
+            var row = NetRequestTable.limitTag.insertRows({}, tbody, this)[0];
+            this.limitRow = PanelNotification.render(row.firstChild, limitInfo);
             this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
 
             NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
@@ -944,8 +946,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Allow customization of request entries in the list. A row is represented
             // by <TR> HTML element.
-            Events.dispatch(Firebug.NetMonitor.NetRequestTable.fbListeners,
-                "onCreateRequestEntry", [this, row]);
+            Events.dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
 
             row = row.nextSibling;
         }
@@ -1657,7 +1658,7 @@ var NetPanelSearch = function(panel, rowFinder)
     };
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ********************************************************************************************* //
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {

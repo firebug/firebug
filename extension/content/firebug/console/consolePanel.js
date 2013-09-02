@@ -64,7 +64,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                         SPAN({"class": "logCounterValue"})
                     )
                 )
-            )
+            ),
+
+        limitTag:
+            DIV({"class": "limitRowContainer collapsed"},
+                TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
+                    TBODY(
+                        TR(
+                            TD({"class": "consolPanelNotification"})
+                        )
+                    )
+                )
+            ),
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -637,15 +648,15 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var limitInfo = {
             totalCount: 0,
             limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                [Options.prefDomain+".console.logLimit"])
+                [Options.prefDomain + ".console.logLimit"])
         };
 
-        var nodes = PanelNotification.createTable(row, limitInfo);
+        var container = this.template.limitTag.replace({}, row);
+        container = container.querySelector(".consolPanelNotification");
 
-        this.limit = nodes[1];
+        this.limit = PanelNotification.render(container, limitInfo);
 
-        var container = this.panelNode;
-        container.insertBefore(nodes[0], container.firstChild);
+        this.panelNode.insertBefore(row, this.panelNode.firstChild);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
