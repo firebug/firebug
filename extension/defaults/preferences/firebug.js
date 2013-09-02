@@ -138,7 +138,7 @@ pref("extensions.firebug.sortJsonPreview", false);
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", "");
-pref("extensions.firebug.cache.responseLimit", 10485760);
+pref("extensions.firebug.cache.responseLimit", 5242880);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");
