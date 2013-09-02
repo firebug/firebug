@@ -789,7 +789,7 @@ Css.colorNameToRGB = function(value)
     if (!domUtils.colorNameToRGB)
         return value;
 
-    var reSplit = /(\(|,|\)|\s)\s*/;
+    var reSplit = /(\(|,|\)|\s)/;
     var parts = value.split(reSplit);
 
     var newValue = "";
