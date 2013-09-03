@@ -1576,7 +1576,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 {
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
-            DIV({"class": "netHeadersGroup collapsed"},
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netResponseHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
                     SPAN({"class": "netHeader twisty",
                         onclick: "$toggleHeaderContent"},
@@ -1592,7 +1592,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                         "aria-label": Locale.$STR("ResponseHeaders")})
                 )
             ),
-            DIV({"class": "netHeadersGroup collapsed"},
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
@@ -1607,7 +1607,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                     "aria-label": Locale.$STR("RequestHeaders")})
                 )
             ),
-            DIV({"class": "netHeadersGroup collapsed"},
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netCachedHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
@@ -1618,7 +1618,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                         "aria-label": Locale.$STR("CachedResponseHeaders")})
                 )
             ),
-            DIV({"class": "netHeadersGroup collapsed"},
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netPostRequestHeadersVisible"},
                 DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle"},
                     SPAN({"class": "netHeader twisty", 
                         onclick: "$toggleHeaderContent"},
@@ -1644,7 +1644,15 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
         
         Css.toggleClass(headerGroup, "opened");
-        headerGroup.setAttribute("aria-expanded", (Css.hasClass(headerGroup, "opened") ? "true" : "false"));
+        if (Css.hasClass(headerGroup, "opened")) {
+            headerGroup.setAttribute("aria-expanded", "true");
+            Options.set(headerGroup.getAttribute("data-pref"), true);
+        }
+        else
+        {
+            headerGroup.setAttribute("aria-expanded", "false");
+            Options.set(headerGroup.getAttribute("data-pref"), false);
+        }
     },
 
     onViewSource: function(event)
@@ -1716,14 +1724,14 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         if (Options.get("netResponseHeadersVisible"))
             Css.setClass(headers[0], "opened");
 
-        if (Options.get("netPostRequestHeadersVisible"))
+        if (Options.get("netRequestHeadersVisible"))
             Css.setClass(headers[1], "opened");
 
         if (Options.get("netCachedHeadersVisible"))
-        {
             Css.setClass(headers[2], "opened");
+
+        if (Options.get("netPostRequestHeadersVisible"))
             Css.setClass(headers[3], "opened");
-        }
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)

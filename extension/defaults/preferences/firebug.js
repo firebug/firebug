@@ -130,8 +130,9 @@ pref("extensions.firebug.netShowPaintEvents", false);
 pref("extensions.firebug.netShowBFCacheResponses", false);
 pref("extensions.firebug.netHtmlPreviewHeight", 100);
 pref("extensions.firebug.netResponseHeadersVisible", true);
-pref("extensions.firebug.netPostRequestHeadersVisible", true);
+pref("extensions.firebug.netRequestHeadersVisible", true);
 pref("extensions.firebug.netCachedHeadersVisible", false);
+pref("extensions.firebug.netPostRequestHeadersVisible", false);
 
 // JSON Preview
 pref("extensions.firebug.sortJsonPreview", false);
