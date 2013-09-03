@@ -1292,7 +1292,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.toggleAll(event, node);
 
         // Edit the HTML on Ctrl/Meta+E
-        if (Events.isControl(event) && ch === "e");
+        if (Events.isControl(event) && ch === "e")
             this.editNode(node);
 
         if (!Events.noKeyModifiers(event))
