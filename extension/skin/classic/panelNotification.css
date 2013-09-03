@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 /*************************************************************************************************/
+/* Panel Notification Styles */
 
 .panelNotification {
     width: 100%;
@@ -19,8 +20,9 @@
     font-weight: normal;
 }
 
-.panelNotification .panelNotificationLabel {
+.panelNotification .panelNotificationMessage {
     padding-left: 18px;
+    font-family: Lucida Grande,Tahoma,sans-serif;
 }
 
 .panelNotification .panelNotificationCol {
@@ -34,5 +36,9 @@
     font-size: 11px;
     padding-top: 1px;
     padding-bottom: 1px;
+    margin-right: 3px;
 }
 
+.panelNotification .panelSeparatorCol {
+    width: 100%;
+}

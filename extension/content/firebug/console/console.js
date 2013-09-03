@@ -85,7 +85,7 @@ Firebug.ConsoleBase =
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
                     container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.limitInfo.totalCount++;
+                    panel.limit.config.totalCount++;
                     PanelNotification.updateCounter(panel.limit);
                 }
                 Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);

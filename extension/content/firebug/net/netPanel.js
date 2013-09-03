@@ -868,15 +868,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         if (!this.table)
         {
-            var limitInfo = {
+            var config = {
                 totalCount: 0,
-                limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
+                buttonTooltip: Locale.$STRF("LimitPrefsTitle",
                     [Options.prefDomain + ".net.logLimit"])
             };
 
             // Render notification box
             var limitBox = NetRequestTable.limitTag.append({}, this.panelNode);
-            this.limitRow = PanelNotification.render(limitBox, limitInfo);
+            this.limitRow = PanelNotification.render(limitBox, config);
 
             // Render basic Net panel table (a row == one HTTP request)
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
@@ -1343,7 +1343,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (noInfo || !this.limitRow)
             return;
 
-        this.limitRow.limitInfo.totalCount++;
+        this.limitRow.config.totalCount++;
 
         PanelNotification.updateCounter(this.limitRow);
 

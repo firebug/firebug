@@ -67,7 +67,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             ),
 
         limitTag:
-            DIV({"class": "limitRowContainer collapsed"},
+            DIV({"class": "panelNofiticationBox collapsed"},
                 TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(
@@ -645,16 +645,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // entries reaches the limit.
         var row = this.createRow("limitRow");
 
-        var limitInfo = {
+        var config = {
             totalCount: 0,
-            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle",
                 [Options.prefDomain + ".console.logLimit"])
         };
 
         var container = this.template.limitTag.replace({}, row);
         container = container.querySelector(".consolPanelNotification");
 
-        this.limit = PanelNotification.render(container, limitInfo);
+        this.limit = PanelNotification.render(container, config);
 
         this.panelNode.insertBefore(row, this.panelNode.firstChild);
     },

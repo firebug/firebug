@@ -31,18 +31,18 @@ var PanelNotification = domplate(
             TBODY(
                 TR({"class": "panelNotificationRow"},
                     TD({"class": "panelNotificationCol"},
-                        SPAN({"class": "panelNotificationLabel"},
-                            Locale.$STRP("plural.Limit_Exceeded2", [0])
+                        SPAN({"class": "panelNotificationMessage"},
+                            "$message"
                         )
                     ),
-                    TD({style: "width:100%"}),
-                    TD(
-                        BUTTON({"class": "panelNotificationButton", title: "$limitPrefsTitle",
+                    TD({"class": "panelSeparatorCol"}),
+                    TD({"class": "panelNotificationCol"},
+                        BUTTON({"class": "panelNotificationButton",
+                            title: "$buttonTooltip",
                             onclick: "$onPreferences"},
-                          Locale.$STR("LimitPrefs")
+                            "$buttonLabel"
                         )
-                    ),
-                    TD("&nbsp;")
+                    )
                 )
             )
         ),
@@ -54,22 +54,28 @@ var PanelNotification = domplate(
         Win.openNewTab("about:config");
     },
 
+    // xxxHonza: this API should be a little more generic
     updateCounter: function(row)
     {
-        var container = Dom.getAncestorByClass(row, "limitRowContainer");
+        var container = Dom.getAncestorByClass(row, "panelNofiticationBox");
         if (container)
             Css.removeClass(container, "collapsed");
 
         // Update info within the limit row.
-        var limitLabel = row.getElementsByClassName("panelNotificationLabel").item(0);
-        limitLabel.firstChild.nodeValue = Locale.$STRP("plural.Limit_Exceeded2",
-            [row.limitInfo.totalCount]);
+        var message = row.getElementsByClassName("panelNotificationMessage").item(0);
+        message.firstChild.nodeValue = Locale.$STRP("plural.Limit_Exceeded2",
+            [row.config.totalCount]);
     },
 
-    render: function(parent, limitInfo)
+    render: function(parent, config)
     {
-        var element = this.tag.replace(limitInfo, parent, this);
-        element.limitInfo = limitInfo;
+        // Set default values
+        config.buttonTooltip = config.buttonTooltip || null;
+        config.buttonLabel = config.buttonLabel || Locale.$STR("LimitPrefs");
+        config.message = config.message || Locale.$STRP("plural.Limit_Exceeded2", [0]);
+
+        var element = this.tag.append(config, parent, this);
+        element.config = config;
         return element;
     }
 });
