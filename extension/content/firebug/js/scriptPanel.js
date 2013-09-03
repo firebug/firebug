@@ -22,6 +22,8 @@ define([
     "firebug/chrome/menu",
     "firebug/trace/debug",
     "firebug/lib/keywords",
+    "firebug/chrome/panelNotification",
+    "firebug/lib/options",
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
@@ -30,7 +32,7 @@ define([
 ],
 function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
     Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords) {
+    System, Menu, Debug, Keywords, PanelNotification, Options) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -139,6 +141,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     updateSourceBox: function(sourceBox)
     {
         this.location = sourceBox.repObject;
+
+        this.onUpdateSourceBox(sourceBox);
     },
 
     /**
@@ -718,11 +722,22 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     initializeNode: function(oldPanelNode)
     {
+        // xxxHonza: is this tooltip still used?
         this.tooltip = this.document.createElement("div");
         Css.setClass(this.tooltip, "scriptTooltip");
-        this.tooltip.setAttribute('aria-live', 'polite');
+        this.tooltip.setAttribute("aria-live", "polite");
         Css.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
+
+        var config = {
+            message: Locale.$STR("script.SourceLimited"),
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle",
+                [Options.prefDomain + ".cache.responseLimit"])
+        };
+
+        // Render panel notification box (hidden by default).
+        this.notificationBox = PanelNotification.render(this.panelNode, config);
+        Css.setClass(this.notificationBox, "panelNofiticationBox collapsed");
 
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
         Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
@@ -756,7 +771,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
-        var jsEnabled = Firebug.Options.getPref("javascript", "enabled");
+        var jsEnabled = Options.getPref("javascript", "enabled");
 
         if (FBTrace.DBG_PANELS)
         {
@@ -954,6 +969,22 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         delete this.infoTipExpr;
     },
 
+    onUpdateSourceBox: function(sourceBox)
+    {
+        var url = sourceBox.repObject.url;
+        if (!url)
+            return;
+
+        var limited = this.context.sourceCache.isLimited(url);
+        if (!limited)
+            return;
+
+        // Show the notification box, so the user knows the scrip has
+        // been limited in the cache.
+        Css.removeClass(this.notificationBox, "collapsed");
+        this.selectedSourceBox.style.top = "30px";
+    },
+ 
     ableWatchSidePanel: function(context)
     {
         // TODO if (commandline is not active, then we should not show the new watch feature)
@@ -1244,7 +1275,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!allSources.length)
             return [];
 
-        var filter = Firebug.Options.get("scriptsFilter");
+        var filter = Options.get("scriptsFilter");
         this.showEvents = (filter == "all" || filter == "events");
         this.showEvals = (filter == "all" || filter == "evals");
 
@@ -1384,13 +1415,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     optionMenu: function(label, option)
     {
-        var checked = Firebug.Options.get(option);
+        var checked = Options.get(option);
         return {
             label: label, type: "checkbox", checked: checked,
             command: function()
             {
                 var checked = this.hasAttribute("checked");
-                Firebug.Options.set(option, checked);
+                Options.set(option, checked);
             }
         };
     },
@@ -1840,7 +1871,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onEnableScript: function(event)
     {
-        Firebug.Options.setPref("javascript", "enabled", true);
+        Options.setPref("javascript", "enabled", true);
 
         Firebug.TabWatcher.reloadPageFromMemory(Firebug.currentContext);
     },

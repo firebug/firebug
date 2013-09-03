@@ -1,0 +1,44 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Panel Notification Styles */
+
+.panelNotification {
+    width: 100%;
+    padding: 0;
+    border-bottom: 2px solid;
+    -moz-border-bottom-colors: #EFEFEF #999999;
+    height: 17px;
+    background: rgb(255, 255, 225) !important;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.panelNotification .panelNotificationRow {
+    font-weight: normal;
+    color: black;
+    font-weight: normal;
+}
+
+.panelNotification .panelNotificationMessage {
+    padding-left: 18px;
+    font-family: Lucida Grande,Tahoma,sans-serif;
+}
+
+.panelNotification .panelNotificationCol {
+    padding: 0;
+    white-space: nowrap;
+    height: 17px;
+    vertical-align: middle !important;
+}
+
+.panelNotification .panelNotificationButton {
+    font-size: 11px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-right: 3px;
+}
+
+.panelNotification .panelSeparatorCol {
+    width: 100%;
+}
