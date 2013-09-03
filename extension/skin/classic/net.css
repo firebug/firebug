@@ -694,16 +694,22 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 }
 
 /*************************************************************************************************/
+/* Net Activation Message */
 
 .netActivationRow {
-    background: rgb(229, 229, 229) !important;
+    background: rgb(238, 238, 238) !important;
     font-weight: normal;
     color: black;
 }
 
+.netActivationRow > TD {
+    vertical-align: middle !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 .netActivationLabel {
-    background: url(chrome://firebug/skin/info.svg) no-repeat 3px 2px;
-    padding-left: 22px;
+    padding-left: 28px;
 }
 
 /*************************************************************************************************/
@@ -736,13 +742,6 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 }
 
 /*************************************************************************************************/
-
-.netActivationRow > .netCol {
-    border-bottom: 2px solid;
-    -moz-border-bottom-colors: #EFEFEF #999999;
-    padding-top: 2px;
-    padding-bottom: 3px;
-}
 
 .useA11y .panelNode-net .a11yFocus:focus,
 .useA11y .panelNode-net .focusRow:focus {

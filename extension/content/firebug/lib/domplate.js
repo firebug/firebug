@@ -1085,6 +1085,10 @@ var Renderer =
 
         var tbody = table.firstChild;
         var parent = before.localName.toLowerCase() == "tr" ? before.parentNode : before;
+
+        // xxxHonza: 'before.nextSibling' is wrong. There is no way to insert a new row
+        // before the current first row in a table. This should be changed, but Firebug
+        // extensions are using this method. Shell we introduce 'insertRow2'?
         var after = before.localName.toLowerCase() == "tr" ? before.nextSibling : null;
 
         var firstRow = tbody.firstChild;

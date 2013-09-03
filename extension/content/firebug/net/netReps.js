@@ -131,9 +131,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     limitTag:
-        TR({"class": "limitRowContainer collapsed"},
-            TD({colspan: 9})
-        ),
+        DIV({"class": "limitRowContainer collapsed"}),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

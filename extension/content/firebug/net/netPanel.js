@@ -871,16 +871,24 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var limitInfo = {
                 totalCount: 0,
                 limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                    [Options.prefDomain+".net.logLimit"])
+                    [Options.prefDomain + ".net.logLimit"])
             };
 
+            // Render notification box
+            var limitBox = NetRequestTable.limitTag.append({}, this.panelNode);
+            this.limitRow = PanelNotification.render(limitBox, limitInfo);
+
+            // Render basic Net panel table (a row == one HTTP request)
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             var tbody = this.table.querySelector(".netTableBody");
-            var row = NetRequestTable.limitTag.insertRows({}, tbody, this)[0];
-            this.limitRow = PanelNotification.render(row.firstChild, limitInfo);
-            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
 
-            NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
+            // xxxHonza: Fake first row (shold be renamed, but it's hack anyway).
+            // There is no way to insert a row befor the current first row in a table.
+            // See Domplate.insertRows() comment for more details.
+            NetRequestEntry.footerTag.insertRows({}, tbody);
+
+            // Render summary row
+            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, tbody)[0];
 
             // Update visibility of columns according to the preferences
             var hiddenCols = Options.get("net.hiddenColumns");
@@ -1384,17 +1392,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Make sure the basic structure of the table panel is there.
         this.initLayout();
 
-        // Get the last request row before summary row.
-        var lastRow = this.summaryRow.previousSibling;
-
-        // Insert an activation message (if the last row isn't the message already);
-        if (Css.hasClass(lastRow, "netActivationRow"))
+        // Bail out if the activation message is already there.
+        if (this.table.querySelector(".netActivationRow"))
             return;
 
-        var message = NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
+        // Insert activation message
+        var lastRow = this.summaryRow.previousSibling;
+        NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName(), message);
+            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName());
     },
 
     enumerateRequests: function(fn)
