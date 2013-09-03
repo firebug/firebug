@@ -882,7 +882,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             var tbody = this.table.querySelector(".netTableBody");
 
-            // xxxHonza: Fake first row (shold be renamed, but it's hack anyway).
+            // xxxHonza: Fake first row (shold be renamed, but it's a hack anyway).
             // There is no way to insert a row befor the current first row in a table.
             // See Domplate.insertRows() comment for more details.
             NetRequestEntry.footerTag.insertRows({}, tbody);

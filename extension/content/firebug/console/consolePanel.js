@@ -67,7 +67,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             ),
 
         limitTag:
-            DIV({"class": "panelNofiticationBox collapsed"},
+            DIV({"class": "panelNotificationBox collapsed"},
                 TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(

@@ -737,7 +737,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         // Render panel notification box (hidden by default).
         this.notificationBox = PanelNotification.render(this.panelNode, config);
-        Css.setClass(this.notificationBox, "panelNofiticationBox collapsed");
+        Css.setClass(this.notificationBox, "panelNotificationBox collapsed");
 
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
         Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);

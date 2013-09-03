@@ -57,7 +57,7 @@ var PanelNotification = domplate(
     // xxxHonza: this API should be a little more generic
     updateCounter: function(row)
     {
-        var container = Dom.getAncestorByClass(row, "panelNofiticationBox");
+        var container = Dom.getAncestorByClass(row, "panelNotificationBox");
         if (container)
             Css.removeClass(container, "collapsed");
 
