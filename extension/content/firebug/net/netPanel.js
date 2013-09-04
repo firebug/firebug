@@ -868,10 +868,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         if (!this.table)
         {
+            var prefName = Options.prefDomain + ".net.logLimit";
             var config = {
                 totalCount: 0,
-                buttonTooltip: Locale.$STRF("LimitPrefsTitle",
-                    [Options.prefDomain + ".net.logLimit"])
+                prefName: prefName,
+                buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
             };
 
             // Render notification box

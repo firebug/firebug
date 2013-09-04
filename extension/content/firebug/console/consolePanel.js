@@ -645,10 +645,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // entries reaches the limit.
         var row = this.createRow("limitRow");
 
+        // Configure the panel notification box.
+        var prefName = Options.prefDomain + ".console.logLimit";
         var config = {
             totalCount: 0,
-            buttonTooltip: Locale.$STRF("LimitPrefsTitle",
-                [Options.prefDomain + ".console.logLimit"])
+            prefName: prefName,
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
         };
 
         var container = this.template.limitTag.replace({}, row);

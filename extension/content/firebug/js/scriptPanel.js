@@ -729,10 +729,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         Css.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
+        var prefName = Options.prefDomain + ".cache.responseLimit";
         var config = {
             message: Locale.$STR("script.SourceLimited"),
-            buttonTooltip: Locale.$STRF("LimitPrefsTitle",
-                [Options.prefDomain + ".cache.responseLimit"])
+            prefName: prefName,
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
         };
 
         // Render panel notification box (hidden by default).

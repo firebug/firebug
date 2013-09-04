@@ -51,7 +51,8 @@ var PanelNotification = domplate(
 
     onPreferences: function(event)
     {
-        Win.openNewTab("about:config");
+        var table = Dom.getAncestorByClass(event.target, "panelNotification");
+        Win.openNewTab("about:config?filter=" + table.config.prefName);
     },
 
     // xxxHonza: this API should be a little more generic
