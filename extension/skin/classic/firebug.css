@@ -19,6 +19,7 @@
 /* end overrides */
 
 /*************************************************************************************************/
+/* Toolbar buttons */
 
 #fbInspectButton {
     margin-bottom: 1px;
@@ -513,6 +514,22 @@ textbox[type="fbSearchBox"] > panel {
 /* Collision with CuteButtons - Crystal SVG 0.2.5, see 3374 */
 #fbNetPersist {
     -moz-image-region: rect(0, 1px, 1px, 0);
+}
+
+/*************************************************************************************************/
+/* Panel Tabs */
+
+panelTab[selected="true"] > panelTabMenu .menuTarget,
+panelTab:focus > panelTabMenu .menuTarget {
+    background: url(chrome://firebug/skin/win/optionsMenuTarget.png) no-repeat center;
+    width: 11px;
+    height: 10px;
+    vertical-align: middle;
+    visibility: visible;
+}
+
+panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
+    background-image: url(chrome://firebug/skin/win/optionsMenuTargetHover.png);
 }
 
 /*************************************************************************************************/
