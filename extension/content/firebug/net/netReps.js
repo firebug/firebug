@@ -1644,14 +1644,15 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
         
         Css.toggleClass(headerGroup, "opened");
-        if (Css.hasClass(headerGroup, "opened")) {
+        if (Css.hasClass(headerGroup, "opened")) 
+        {
             headerGroup.setAttribute("aria-expanded", "true");
-            Options.set(headerGroup.getAttribute("data-pref"), true);
+            Options.set(headerGroup.dataset.pref, true);
         }
         else
         {
             headerGroup.setAttribute("aria-expanded", "false");
-            Options.set(headerGroup.getAttribute("data-pref"), false);
+            Options.set(headerGroup.dataset.pref, false);
         }
     },
 
