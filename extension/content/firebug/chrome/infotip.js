@@ -10,6 +10,8 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Dom) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -17,7 +19,7 @@ const infoTipMargin = 10;
 
 // ********************************************************************************************* //
 
-with (Domplate) {
+var {domplate, DIV} = Domplate;
 Firebug.InfoTip = Obj.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
@@ -173,7 +175,6 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         this.showPanel(browser, panel);
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration
