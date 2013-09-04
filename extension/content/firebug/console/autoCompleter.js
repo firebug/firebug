@@ -1770,16 +1770,16 @@ function propertiesToHide(expr, obj)
     ret.push("__defineGetter__", "__defineSetter__",
         "__lookupGetter__", "__lookupSetter__");
 
-    // function.caller/arguments are deprecated and ugly.
+    // function.caller/arguments are deprecated and ugly, and don't hold values when
+    // evaluated from the command line.
     if (typeof obj === "function")
         ret.push("caller", "arguments");
 
     if (Object.prototype.toString.call(obj) === "[object String]")
     {
         // Unused, cluttery.
-        ret.push("toLocaleLowerCase", "toLocaleUpperCase", "quote", "bold",
-            "italics", "fixed", "fontsize", "fontcolor", "link", "anchor",
-            "strike", "small", "big", "blink", "sup", "sub");
+        ret.push("quote", "bold", "italics", "fixed", "fontsize", "fontcolor",
+            "link", "anchor", "strike", "small", "big", "blink", "sup", "sub");
     }
 
     if (expr === "" || expr === "window.")
@@ -1809,7 +1809,7 @@ function propertiesToHide(expr, obj)
         ret.push("link", "aLink", "vLink");
 
     // Rather universal and feel like built-ins.
-    ret.push("valueOf", "toSource", "constructor", "QueryInterface");
+    ret.push("constructor", "QueryInterface");
 
     return ret;
 }
