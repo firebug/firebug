@@ -113,7 +113,7 @@ function pseudoJsonToJson(json)
     for (var i = 0, len = json.length; i < len; ++i)
     {
         var ch = json[i];
-        if (ch === " " || ch === "\n" || ch === "\t")
+        if (/\s/.test(ch))
             continue;
 
         if (ch === '"')
@@ -177,7 +177,7 @@ function pseudoJsonToJson(json)
             }
             ch = "\0";
         }
-        else if (/[a-zA-Z$_]/.test(ch))
+        else if (/[a-zA-Z$_]/.test(ch) && lastch !== ":")
         {
             // Non-quoted identifier. Quote it.
             ret += json.slice(at, i) + "\"";
