@@ -13,6 +13,8 @@ define([
 ],
 function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // EventMonitor Module
 
@@ -322,7 +324,8 @@ var EventLog = function(event)
 // ********************************************************************************************* //
 // Rep Template
 
-with (Domplate) {
+var {domplate, TAG, SPAN} = Domplate;
+
 var EventLogRep = domplate(FirebugReps.Event,
 {
     className: "eventLog",
@@ -365,7 +368,7 @@ var EventLogRep = domplate(FirebugReps.Event,
     {
         return object instanceof EventLog;
     },
-})};
+});
 
 // ********************************************************************************************* //
 // CommandLine Support
