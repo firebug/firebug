@@ -41,6 +41,7 @@ body {
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
 .netPageRow.opened > .netCol > .netPageTitle,
+.netHeadersGroup.opened > .netInfoHeadersGroup > .twisty,
 .objectBox-stackFrame.hasTwisty.opened,
 .objectBox-functionCall.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
