@@ -177,12 +177,12 @@ function pseudoJsonToJson(json)
             }
             ch = "\0";
         }
-        else if (/[a-zA-Z0-9]/.test(ch))
+        else if (/[a-zA-Z$_]/.test(ch))
         {
             // Non-quoted identifier. Quote it.
             ret += json.slice(at, i) + "\"";
             at = i;
-            i = i + json.slice(i).search(/[^a-zA-Z0-9]|$/);
+            i = i + json.slice(i).search(/[^a-zA-Z0-9$_]|$/);
             ret += json.slice(at, i) + "\"";
             at = i;
         }
