@@ -261,19 +261,6 @@ function createFirebugConsole(context, win)
         }
     };
 
-    // xxxHonza: removed from 1.10 (issue 5599)
-    /*console.memoryProfile = function(title)
-    {
-        Firebug.MemoryProfiler.start(context, title);
-        return Console.getDefaultReturnValue();
-    };
-
-    console.memoryProfileEnd = function()
-    {
-        Firebug.MemoryProfiler.stop(context);
-        return Console.getDefaultReturnValue();
-    };*/
-
     // Expose only these properties to the content scope (read only).
     console.__exposedProps__.log = "r";
     console.__exposedProps__.debug = "r";
@@ -296,8 +283,6 @@ function createFirebugConsole(context, win)
     console.__exposedProps__.clear = "r";
     console.__exposedProps__.table = "r";
     console.__exposedProps__.error = "r";
-    //console.__exposedProps__.memoryProfile = "r";
-    //console.__exposedProps__.memoryProfileEnd = "r";
 
     // DBG console.uid = Math.random();
 

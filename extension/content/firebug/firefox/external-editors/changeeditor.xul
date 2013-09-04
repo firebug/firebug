@@ -8,42 +8,43 @@
         buttons="extra2,accept,cancel"
         id="firebug-external-editors-change"
         title="changeEditor.Editor_Configuration"
-        onload="onLoad();"
-        ondialogaccept="return onAccept();"
+        onload="dlg.onLoad(this);"
+        ondialogaccept="return dlg.onAccept();"
         persist="screenX screenY"
         class="fbInternational"
         buttonlabelextra2="test"
-        ondialogextra2="testEditor()">
+        ondialogextra2="dlg.testEditor()">
 
-    <script src="chrome://firebug/content/trace.js"/>
-    <script src="chrome://firebug/content/firefox/external-editors/changeeditor.js"/>
+    <script type="application/x-javascript">
+    var dlg = window.arguments[0];
+    </script>
 
     <vbox flex="1">
         <hbox align="center">
             <label id="fbNameLabel" control="name"
                 value="changeEditor.Name" class="fbInternational"/>
-            <textbox id="name" flex="1" oninput="onChange()"/>
+            <textbox id="name" flex="1" oninput="dlg.onChange()"/>
         </hbox>
         <separator class="groove"/>
         <hbox align="center">
             <label id="fbExecutableLabel" control="executable" align="baseline"
                 value="changeEditor.Executable" class="fbInternational"/>
             <filefield id="executable" flex="1"/>
-            <button id="browse-button" oncommand="onBrowse();"
+            <button id="browse-button" oncommand="dlg.onBrowse();"
                 label="editors.Browse" class="fbInternational"/>
         </hbox>
         <separator class="thin"/>
         <hbox align="center">
             <label id="fbCmdLineLabel" control="cmdline"
                 value="changeEditor.CmdLine" class="fbInternational"/>
-            <textbox id="cmdline" flex="1" oninput="onChange()"/>
+            <textbox id="cmdline" flex="1" oninput="dlg.onChange()"/>
             <toolbarbutton type="menu" label="">
-                <panel onpopupshowing="suggestionPopupShowing(this)"
-                    onclick="if(event.target.className=='text-link') insertText(event.target.value,true);"
+                <panel onpopupshowing="dlg.suggestionPopupShowing(this)"
+                    onclick="if(event.target.className=='text-link') dlg.insertText(event.target.value,true);"
                     position="after_end"/>
             </toolbarbutton>
         </hbox>
-        <vbox align="left" onclick="if(event.target.className=='text-link') insertText(event.target.textContent);">
+        <vbox align="left" onclick="if(event.target.className=='text-link') dlg.insertText(event.target.textContent);">
             <description class="fbInternational">changeEditor.Supplied_arguments</description>
             <hbox><label class='text-link'>%url </label> <description class="fbInternational">changeEditor.URL_of_file</description></hbox>
             <hbox><label class='text-link'>%file </label><description class="fbInternational">changeEditor.Path_to_local_file</description></hbox>

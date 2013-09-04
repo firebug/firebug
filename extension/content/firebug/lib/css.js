@@ -789,18 +789,32 @@ Css.colorNameToRGB = function(value)
     if (!domUtils.colorNameToRGB)
         return value;
 
-    if (value === "transparent")
-        return "rgba(0, 0, 0, 0)";
+    var reSplit = /(\(|,|\)|\s)/;
+    var parts = value.split(reSplit);
 
-    try
+    var newValue = "";
+    for (var i=0, len=parts.length; i<len; ++i)
     {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+        var part = parts[i];
+        if (part === "transparent")
+        {
+            newValue += "rgba(0, 0, 0, 0)";
+        }
+        else
+        {
+            if (Css.isColorKeyword(part))
+            {
+                var rgbValue = domUtils.colorNameToRGB(part);
+                newValue += "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+            }
+            else
+            {
+                newValue += part;
+            }
+        }
     }
-    catch(e)
-    {
-        return value;
-    }
+
+    return newValue;
 };
 
 Css.rgbToHex = function(value)

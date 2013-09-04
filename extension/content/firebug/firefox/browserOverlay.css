@@ -5,18 +5,22 @@
 
 /* Inspector button */
 #firebug-inspectorButton {
-    list-style-image: url(chrome://firebug/skin/inspect.svg);
+    list-style-image: url(chrome://firebug/skin/inspect.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#firebug-inspectorButton:hover {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
 /* Firebug Start Button */
 #firebug-button {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-    list-style-image: url(chrome://firebug/skin/firebug16.png)!important;
-    filter: url(resource://firebugui/filters.svg#grayscale);
+    list-style-image: url(chrome://firebug/skin/firebug16Disabled.png) !important;
 }
 
 #firebug-button[firebugActive="true"] {
-    filter: none;
+    list-style-image: url(chrome://firebug/skin/firebug16.png) !important;
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
@@ -98,15 +102,12 @@
 }
 
 #menu_firebug_firebugInspect {
-    list-style-image: url(chrome://firebug/skin/inspect.svg);
+    list-style-image: url(chrome://firebug/skin/inspect.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
 #menu_firebug_firebugInspect:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
-}
-
-#menu_firebug_firebugInspect:active {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
+    -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
 /*************************************************************************************************/

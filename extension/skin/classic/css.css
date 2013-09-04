@@ -169,7 +169,7 @@
 }
 
 .cssProp.editGroup:hover > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disable.svg) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
     filter: none;
 }
 
@@ -178,7 +178,7 @@
 }
 
 .cssProp.disabledStyle > .cssPropIndent {
-    background: transparent url(chrome://firebug/skin/disableInactive.svg) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disableInactive.png) no-repeat 2px 1px;
 }
 
 .cssProp.disabledStyle {

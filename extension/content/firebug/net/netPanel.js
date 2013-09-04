@@ -24,6 +24,7 @@ define([
     "firebug/net/netProgress",
     "firebug/css/cssReps",
     "firebug/net/timeInfoTip",
+    "firebug/chrome/panelNotification",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -39,7 +40,8 @@ define([
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip,
+    PanelNotification) {
 
 with (Domplate) {
 
@@ -53,6 +55,7 @@ const Cr = Components.results;
 var layoutInterval = 300;
 var panelName = "net";
 var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
+var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 
 // ********************************************************************************************* //
 
@@ -279,7 +282,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var header = Dom.getAncestorByClass(target, "netHeaderRow");
         if (header)
-            return Firebug.NetMonitor.NetRequestTable;
+            return NetRequestTable;
 
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
@@ -865,18 +868,28 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         if (!this.table)
         {
-            var limitInfo = {
+            var prefName = Options.prefDomain + ".net.logLimit";
+            var config = {
                 totalCount: 0,
-                limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                    [Options.prefDomain+".net.logLimit"])
+                prefName: prefName,
+                buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
             };
 
-            this.table = Firebug.NetMonitor.NetRequestTable.tableTag.append({}, this.panelNode);
-            var tbody = this.table.querySelector(".netTableBody");
-            this.limitRow = Firebug.NetMonitor.NetLimit.createRow(tbody, limitInfo);
-            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+            // Render notification box
+            var limitBox = NetRequestTable.limitTag.append({}, this.panelNode);
+            this.limitRow = PanelNotification.render(limitBox, config);
 
-            NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
+            // Render basic Net panel table (a row == one HTTP request)
+            this.table = NetRequestTable.tableTag.append({}, this.panelNode);
+            var tbody = this.table.querySelector(".netTableBody");
+
+            // xxxHonza: Fake first row (shold be renamed, but it's a hack anyway).
+            // There is no way to insert a row befor the current first row in a table.
+            // See Domplate.insertRows() comment for more details.
+            NetRequestEntry.footerTag.insertRows({}, tbody);
+
+            // Render summary row
+            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, tbody)[0];
 
             // Update visibility of columns according to the preferences
             var hiddenCols = Options.get("net.hiddenColumns");
@@ -942,8 +955,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Allow customization of request entries in the list. A row is represented
             // by <TR> HTML element.
-            Events.dispatch(Firebug.NetMonitor.NetRequestTable.fbListeners,
-                "onCreateRequestEntry", [this, row]);
+            Events.dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
 
             row = row.nextSibling;
         }
@@ -1332,9 +1344,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (noInfo || !this.limitRow)
             return;
 
-        this.limitRow.limitInfo.totalCount++;
+        this.limitRow.config.totalCount++;
 
-        Firebug.NetMonitor.NetLimit.updateCounter(this.limitRow);
+        PanelNotification.updateCounter(this.limitRow);
 
         //if (netProgress.currentPhase == file.phase)
         //  netProgress.currentPhase = null;
@@ -1381,17 +1393,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Make sure the basic structure of the table panel is there.
         this.initLayout();
 
-        // Get the last request row before summary row.
-        var lastRow = this.summaryRow.previousSibling;
-
-        // Insert an activation message (if the last row isn't the message already);
-        if (Css.hasClass(lastRow, "netActivationRow"))
+        // Bail out if the activation message is already there.
+        if (this.table.querySelector(".netActivationRow"))
             return;
 
-        var message = NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
+        // Insert activation message
+        var lastRow = this.summaryRow.previousSibling;
+        NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName(), message);
+            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName());
     },
 
     enumerateRequests: function(fn)
@@ -1655,7 +1666,7 @@ var NetPanelSearch = function(panel, rowFinder)
     };
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ********************************************************************************************* //
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {

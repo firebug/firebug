@@ -38,7 +38,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
 
         imgTag:
             DIV({"class": "infoTipImageBox infoTipLoading"},
-                IMG({"class": "infoTipImage", src: "$urlValue", repeat: "$repeat",
+                IMG({"class": "infoTipImage", src: "$urlValue", "data-repeat": "$repeat",
                     onload: "$onLoadImage", onerror: "$onErrorImage"}),
                 DIV({"class": "infoTipBgImage", collapsed: true}),
                 DIV({"class": "infoTipCaption"})
@@ -65,8 +65,9 @@ var CSSInfoTip = Obj.extend(InfoTip,
             var caption = bgImg.nextSibling;
             var innerBox = img.parentNode;
 
-            var w = img.naturalWidth, h = img.naturalHeight;
-            var repeat = img.getAttribute("repeat");
+            var w = img.naturalWidth;
+            var h = img.naturalHeight;
+            var repeat = img.dataset.repeat;
 
             if (repeat == "repeat-x" || (w == 1 && h > 1))
             {

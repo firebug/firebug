@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.12.0b6</em:version>
+    <em:version>1.13.0a0</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -13,7 +13,7 @@
     <em:targetApplication>
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
-        <em:minVersion>22.0</em:minVersion>
+        <em:minVersion>23.0</em:minVersion>
         <em:maxVersion>26.0</em:maxVersion>
       </Description>
     </em:targetApplication>
@@ -22,7 +22,7 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>22.0</em:minVersion>
+        <em:minVersion>23.0</em:minVersion>
         <em:maxVersion>26.0</em:maxVersion>
       </Description>
     </em:targetApplication>
@@ -58,7 +58,7 @@
 
     <em:iconURL>chrome://firebug/skin/firebug64.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>https://getfirebug.com/releases/firebug/1.12/update.rdf</em:updateURL>
+    <em:updateURL>https://getfirebug.com/releases/firebug/1.13/update.rdf</em:updateURL>
 
     <em:translator>Leszek(teo)Zyczkowski (pl-PL)</em:translator>
     <em:translator>markh (nl)</em:translator>

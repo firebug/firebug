@@ -9,23 +9,14 @@
         id="firebug-external-editors"
         width="600" height="300"
         title="firebug.Configure_Editors"
-        onload="gEditorManager.init();/*gUrlMappingManager.init()*/"
+        onload="gEditorManager.init(this);/*gUrlMappingManager.init()*/"
         onunload="gEditorManager.uninit();/*gUrlMappingManager.uninit()*/"
         persist="screenX screenY width height">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
-    <script type="application/x-javascript"
-        src="chrome://firebug/content/firefox/external-editors/editors.js"/>
+    <script type="application/x-javascript">
+    var gEditorManager = window.arguments[0];
+    </script>
 
-    <!--
-    <tabbox flex="1" class="contentPane">
-        <tabs>
-            <tab label="editors.Configured_Firebug_Editors" class="fbInternational"/>
-            <tab label="editors.Url_mappings" class="fbInternational"/>
-        </tabs>
-        <tabpanels flex="1">
-            <tabpanel flex="1" orient="vertical">
-    -->
     <vbox flex="1" class="contentPane">
         <label id="actionsIntro" control="editorsList"
             value="editors.Configured_Firebug_Editors" class="fbInternational"/>
@@ -74,20 +65,5 @@
         </hbox>
         <resizer dir="bottomright"/>
     </hbox>
-    <!--
-            </tabpanel>
-            <tabpanel flex="1" orient="vertical">
-                <textbox id="urlMappings" multiline="true" flex="1" wrap="off"
-                    oninput="gUrlMappingManager.schedule('onMainInput')"/>
-                <hbox>
-                    <textbox id="test" flex="1"
-                        oninput="gUrlMappingManager.schedule('onTestInput')"/>
-                    <splitter class='plain'/>
-                    <textbox id="result" flex="1" />
-                </hbox>
-            </tabpanel>
-        </tabpanels>
-    </tabbox>
-    -->
 
 </window>

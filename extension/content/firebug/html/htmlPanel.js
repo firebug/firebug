@@ -448,7 +448,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             observer.observe(doc, {
                 attributes: true,
                 childList: true,
-                characterData: true, 
+                characterData: true,
                 subtree: true
             });
             context.registeredHTMLMutationObservers.set(doc, observer);
@@ -619,11 +619,19 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             }
             else
             {
-                var attr = target.getAttributeNode(attrName);
+                function filterAttributeByName(attr)
+                {
+                    return attr.name == attrName;
+                }
+
+                var attributes = Array.prototype.slice.call(target.attributes);
+                var attr = attributes.filter(filterAttributeByName)[0];
 
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("mutateAttr getAttributeNode " + removal + " " + attrName +
+                {
+                    FBTrace.sysout("mutateAttr attribute node " + removal + " " + attrName +
                         "=" + attrValue + " node: " + attr, attr);
+                }
 
                 if (attr)
                 {
@@ -1217,19 +1225,25 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         if (Events.isLeftClick(event) && Events.isDoubleClick(event))
         {
-            // The double-click (detail == 2) expands an HTML element, but the user must click
+            // The double-click expands an HTML element, but the user must click
             // on the element itself not on the twisty.
-            // The logic should be as follow:
+            // The logic should be as follows:
             // - click on the twisty expands/collapses the element
             // - double click on the element name expands/collapses it
             // - click on the element name selects it
             if (!Css.hasClass(event.target, "twisty") && !Css.hasClass(event.target, "nodeLabel"))
                 this.toggleNode(event);
         }
-        else if (Events.isAltClick(event) && Events.isDoubleClick(event) && !this.editing)
+        else if (Events.isAltClick(event) && !this.editing)
         {
             var node = Firebug.getRepObject(event.target);
             this.editNode(node);
+            this.setEditEnableState();
+        }
+        else if (Dom.getAncestorByClass(event.target, "nodeBracket"))
+        {
+            var bracketBox = Dom.getAncestorByClass(event.target, "nodeBracket");
+            Firebug.Editor.insertRow(bracketBox, "before");
         }
     },
 
@@ -1276,6 +1290,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         var ch = String.fromCharCode(event.charCode);
         if (ch == "*")
             this.toggleAll(event, node);
+
+        // Edit the HTML on Ctrl/Meta+E
+        if (Events.isControl(event) && ch === "e")
+            this.editNode(node);
 
         if (!Events.noKeyModifiers(event))
           return;
@@ -1711,7 +1729,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.search(text, reverse);
         }
 
-        return !search.noMatch && (loopAround ?  "wraparound" : true);
+        return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
     getSearchOptionsMenuItems: function()
@@ -1880,15 +1898,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     label: Locale.$STRF("html.Edit_Node", [type]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
                     nol10n: true,
+                    acceltext: (window.navigator.platform.indexOf("Mac") !== -1 ?
+                        Locale.$STR("VK_META") : Locale.$STR("VK_CONTROL")) + "+E",
                     command: Obj.bindFixed(this.editNode, this, node)
                 },
                 {
                     label: "DeleteElement",
                     tooltiptext: "html.Delete_Element",
-
-                    // xxxsz: 'Del' needs to be translated, but therefore customizeShortcuts
-                    // must be turned into a module
-                    acceltext: "Del",
+                    acceltext: Locale.$STR("VK_DELETE"),
                     command: Obj.bindFixed(this.deleteNode, this, node),
                     disabled:(node.localName in Css.innerEditableTags)
                 });
@@ -2044,16 +2061,16 @@ var TextTag = Firebug.HTMLPanel.TextTag =
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem", "aria-expanded": "false"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket"}, "&gt;")
                 )
             ),
-            DIV({"class": "nodeChildBox", role :"group"},
+            DIV({"class": "nodeChildBox", role: "group"},
                 FOR("child", "$object|childIterator",
                     TAG("$child|getNodeTag", {object: "$child"})
                 )
@@ -2162,8 +2179,8 @@ Firebug.HTMLPanel.HTMLDocType = domplate(FirebugReps.Element,
 
     getDocType: function(doctype)
     {
-        return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId +
-            '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+        return "<!DOCTYPE " + doctype.name + (doctype.publicId ? " PUBLIC \"" + doctype.publicId +
+            "\"": "") + (doctype.systemId ? " \"" + doctype.systemId + "\"" : "") + ">";
     }
 });
 
@@ -2196,9 +2213,9 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox textNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox textNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2215,9 +2232,9 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2230,9 +2247,9 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role: "presentation"},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
+                SPAN({"class": "nodeLabelBox repTarget", role: "treeitem"},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -2250,7 +2267,7 @@ Firebug.HTMLPanel.AttrNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox", _repObject: "$object", role: "presentation"},
             TextTag
         )
 });
@@ -2258,7 +2275,7 @@ Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox", _repObject: "$object", role: "presentation"},
             "&lt;![CDATA[",
             SPAN({"class": "nodeText nodeCDATA editable"}, "$object.nodeValue"),
             "]]&gt;"
@@ -2268,7 +2285,7 @@ Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox nodeComment", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox nodeComment", _repObject: "$object", role: "presentation"},
             "&lt;!--",
             SPAN({"class": "nodeComment editable"}, "$object.nodeValue"),
             "--&gt;"
@@ -2977,7 +2994,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
             role: "option", "aria-checked": "$bp.checked"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : "-1", onclick: "$onEnable"}),
+                    _checked: "$bp.checked", tabindex: "-1", onclick: "$onEnable"}),
                 TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
                 DIV({"class": "breakpointMutationType"}, "$bp|getChangeLabel"),
                 SPAN({"class": "closeButton", onclick: "$onRemove"})

@@ -8,9 +8,12 @@ define([
     "firebug/lib/domplate",
     "firebug/lib/xpcom",
     "firebug/lib/url",
-    "firebug/lib/dom"
+    "firebug/lib/dom",
+    "firebug/lib/options",
 ],
-function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom) {
+function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -228,17 +231,31 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     clearAnnotations: function(force)
     {
-        if (!force)
+        // If 'force' is set to true, ignore preference and skip the confirmation dialog.
+        // Note that the argument is used by automated tests.
+        var skipConfirmation = (typeof(force) == "boolean" && force === true);
+        if (skipConfirmation)
+        {
+            Firebug.connection.clearAnnotations();
+            return;
+        }
+
+        // Show the confirmation dialog only if the preference/user says so.
+        var clearConfirmationPref = "clearAnnotationsConfirmation";
+        if (Options.get(clearConfirmationPref))
         {
             var check = {value: false};
-            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +  
-            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;  
+            var flags = prompts.BUTTON_POS_0 * prompts.BUTTON_TITLE_YES +
+            prompts.BUTTON_POS_1 * prompts.BUTTON_TITLE_NO;
 
             if (!prompts.confirmEx(Firebug.chrome.window, Locale.$STR("Firebug"),
-                Locale.$STR("annotations.confirm.clear"), flags, "", "", "", null, check) == 0)
+                Locale.$STR("annotations.confirm.clear"), flags, "", "", "",
+                Locale.$STR("Do_not_show_this_message_again"), check) == 0)
             {
                 return;
             }
+
+            Options.set(clearConfirmationPref, !check.value);
         }
 
         Firebug.connection.clearAnnotations();
@@ -293,7 +310,9 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 /**
  * @domplate This template renders default content for disabled panels.
  */
-with (Domplate) {
+
+var {domplate, DIV, H1, SPAN, P, A} = Domplate;
+
 Firebug.DisabledPanelBox = domplate(Firebug.Rep,
 /** @lends Firebug.DisabledPanelBox */
 {
@@ -328,8 +347,10 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         else
         {
             if (FBTrace.DBG_ERRORS)
+            {
                 FBTrace.sysout("panelActivation.onEnable; panel is not activable: " +
                     Firebug.getPanelTitle(panelType));
+            }
         }
     },
 
@@ -376,7 +397,6 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         return doc.documentElement.querySelector(".disabledPanelNode");
     },
 });
-};
 
 // ********************************************************************************************* //
 // Registration

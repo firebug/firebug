@@ -147,22 +147,22 @@
 }
 
 .logRow-info {
-    background-image: url(chrome://firebug/skin/info.svg);
+    background-image: url(chrome://firebug/skin/info.png);
 }
 
 .logRow-loading {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
 }
 
 .logRow-warn,
 .logRow-warningMessage {
-    background-image: url(chrome://firebug/skin/warning.svg);
+    background-image: url(chrome://firebug/skin/warning.png);
 }
 
 .logRow-error,
 .logRow-assert,
 .logRow-errorMessage {
-    background-image: url(chrome://firebug/skin/error.svg);
+    background-image: url(chrome://firebug/skin/error.png);
 }
 
 /*************************************************************************************************/
@@ -329,7 +329,7 @@
     width: 12px;
     height: 12px;
     vertical-align: baseline;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
     opacity: 0.1;
 }
 
@@ -367,7 +367,7 @@
 }
 
 .profilerRunning .logRow {
-    background: transparent url(chrome://firebug/skin/loading.svg) no-repeat 2px 0 !important;
+    background: transparent url(chrome://firebug/skin/loading.png) no-repeat 2px 0 !important;
     padding-left: 22px !important;
 }
 
@@ -453,11 +453,11 @@
 
 .headerSorted > .headerCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.svg) no-repeat calc(100% - 4px);
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat calc(100% - 4px);
 }
 
 .headerSorted.sortedAscending > .headerCellBox {
-    background-image: url(chrome://firebug/skin/arrowUp.svg);
+    background-image: url(chrome://firebug/skin/arrowUp.png);
 }
 
 .headerSorted:hover:active {
@@ -826,7 +826,7 @@
 }
 
 .logRow-spy.loading .spyHead .spyRow .spyIcon {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
 }
 
 .logRow-spy.loaded:not(.error) .spyHead .spyRow .spyIcon {

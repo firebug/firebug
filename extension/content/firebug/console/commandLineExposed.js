@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false, evil:true, forin: false*/
+/*jshint esnext:true, curly:false, evil:true, forin: false*/
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
@@ -23,7 +23,7 @@ const Cu = Components.utils;
 // List of command line APIs
 var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-    "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+    "traceAll", "untraceAll", "copy"];
 
 // List of shortcuts for some console methods
 var consoleShortcuts = ["dir", "dirxml", "table"];
@@ -234,6 +234,7 @@ function unregisterCommand(name)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  *
  * @see CommandLine.evaluate
  */
@@ -251,19 +252,29 @@ function evaluateInPageContext(context, win)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(context, win, expr, origExpr, onSuccess, onError)
+function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 {
+    if (!options)
+        options = {};
+
     var result;
     var contentView = Wrapper.getContentView(win);
-    var commandLine = createFirebugCommandLine(context, win);
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
 
-    updateVars(commandLine, dglobal, context);
-    removeConflictingNames(commandLine, context, contentView);
+    if (!options.noCmdLineAPI)
+    {
+        var bindings = getCommandLineBindings(context, win, dglobal, contentView);
 
-    resObj = dglobal.evalInGlobalWithBindings(expr, commandLine);
+        resObj = dglobal.evalInGlobalWithBindings(expr, bindings);
+    }
+    else
+    {
+        resObj = dglobal.evalInGlobal(expr);
+    }
+
 
     var unwrap = function(obj)
     {
@@ -484,6 +495,16 @@ function getAutoCompletionList()
         completionList.sort();
     }
     return completionList;
+}
+
+function getCommandLineBindings(context, win, dglobal, contentView)
+{
+    var commandLine = createFirebugCommandLine(context, win);
+
+    updateVars(commandLine, dglobal, context);
+    removeConflictingNames(commandLine, context, contentView);
+
+    return commandLine;
 }
 
 // ********************************************************************************************* //

@@ -12,10 +12,12 @@ define([
     "firebug/lib/search",
     "firebug/chrome/menu",
     "firebug/lib/options",
+    "firebug/chrome/panelNotification",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
+    PanelNotification) {
 
 with (Domplate) {
 
@@ -62,7 +64,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                         SPAN({"class": "logCounterValue"})
                     )
                 )
-            )
+            ),
+
+        limitTag:
+            DIV({"class": "panelNotificationBox collapsed"},
+                TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
+                    TBODY(
+                        TR(
+                            TD({"class": "consolPanelNotification"})
+                        )
+                    )
+                )
+            ),
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -441,10 +454,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageMatcher: function(object, rep, sourceLink, level)
+    getMessageMatcher: function(object, appender, className, rep, sourceLink, level)
     {
-        function matchesMetaData(otherRep, otherLink, otherLevel)
+        function matchesMetaData(otherAppender, otherClassName, otherRep, otherLink, otherLevel)
         {
+            if (otherAppender !== appender)
+                return false;
+
+            if (otherClassName !== className)
+                return false;
+
             if (otherRep !== rep || (rep && rep.groupable === false))
                 return false;
 
@@ -480,12 +499,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return false;
         }
 
-        return function matchMessage(otherObject, otherRep, otherSourceLink, otherLevel)
+        return function matchMessage(otherObject, otherAppender, otherClassName, otherRep,
+            otherSourceLink, otherLevel)
         {
             try
             {
-                if (!matchesMetaData(otherRep, otherSourceLink, otherLevel))
+                if (!matchesMetaData(otherAppender, otherClassName, otherRep, otherSourceLink,
+                    otherLevel))
+                {
                     return false;
+                }
 
                 var str = Object.prototype.toString.call(object);
                 var isArray = (str === "[object Arguments]" || str === "[object Array]");
@@ -562,8 +585,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (!sourceLink && objects && objects.getSourceLink)
                 sourceLink = objects.getSourceLink();
 
-            if (this.matchesLastMessage && this.matchesLastMessage(objects, rep, sourceLink,
-                this.groups ? this.groups.length : 0))
+            if (Options.get("console.groupLogMessages") && this.matchesLastMessage &&
+                this.matchesLastMessage(objects, appender, className, rep, sourceLink,
+                    this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
                 row = container.lastChild;
@@ -576,8 +600,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 container.appendChild(row);
             }
 
-            this.matchesLastMessage = this.getMessageMatcher(objects, rep, sourceLink,
-                this.groups ? this.groups.length : 0);
+            this.matchesLastMessage = this.getMessageMatcher(objects, appender, className, rep,
+                sourceLink, this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
@@ -621,19 +645,20 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // entries reaches the limit.
         var row = this.createRow("limitRow");
 
-        var limitInfo = {
+        // Configure the panel notification box.
+        var prefName = Options.prefDomain + ".console.logLimit";
+        var config = {
             totalCount: 0,
-            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                [Options.prefDomain+".console.logLimit"])
+            prefName: prefName,
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
         };
 
-        var netLimitRep = Firebug.NetMonitor.NetLimit;
-        var nodes = netLimitRep.createTable(row, limitInfo);
+        var container = this.template.limitTag.replace({}, row);
+        container = container.querySelector(".consolPanelNotification");
 
-        this.limit = nodes[1];
+        this.limit = PanelNotification.render(container, config);
 
-        var container = this.panelNode;
-        container.insertBefore(nodes[0], container.firstChild);
+        this.panelNode.insertBefore(row, this.panelNode.firstChild);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
