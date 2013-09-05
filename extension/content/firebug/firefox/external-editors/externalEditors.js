@@ -224,8 +224,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     createContextMenuItem: function(doc)
     {
-        var item = doc.createElement("menu");
-        item.setAttribute("type", "splitmenu");
+        // xxxHonza: splite menu isn't properly styled on Mac
+        // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
+        var item = doc.createElement(System.isMac() ? "menu" : "splitmenu");
         item.setAttribute("iconic", "true");
 
         item.addEventListener("command", function(event)
@@ -607,6 +608,7 @@ function fixupFilePath(path)
 }
 
 // object.extend doesn't handle getters
+// xxxHonza: now it does we should fix this.
 Firebug.ExternalEditors.__defineGetter__("pathTransformations",
     lazyLoadUrlMappings.bind(Firebug.ExternalEditors, "pathTransformations"));
 

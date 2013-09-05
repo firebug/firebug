@@ -5,9 +5,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options",
     "firebug/lib/css",
-    "firebug/lib/deprecated"
+    "firebug/lib/deprecated",
+    "firebug/lib/system",
 ],
-function(FBTrace, Locale, Options, Css, Deprecated) {
+function(FBTrace, Locale, Options, Css, Deprecated, System) {
 
 "use strict";
 
@@ -27,7 +28,15 @@ Menu.createMenu = function(popup, item)
             Menu.createMenu, [popup, {label: item}])();
     }
 
-    var menu = popup.ownerDocument.createElement("menu");
+    var elementName = "menu";
+
+    // If a command is associated with the item we need to use 'splitmenu'.
+    // xxxHonza: Split menu is not properly styled on Mac,
+    // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
+    if (!System.isMac() && (item.command || item.commandID))
+        elementName = "splitmenu";
+
+    var menu = popup.ownerDocument.createElement(elementName);
     popup.appendChild(menu);
 
     Menu.setItemIntoElement(menu, item);
@@ -120,7 +129,11 @@ Menu.setItemIntoElement = function(element, item)
     }
 
     if (item.command)
-        element.addEventListener("command", item.command, false);
+    {
+        // xxxHonza: register 'click' event handler since 'command' isn't fired
+        // by splitmenu binding from some reason.
+        element.addEventListener("click", item.command, false);
+    }
 
     if (item.commandID)
         element.setAttribute("command", item.commandID);
@@ -145,14 +158,6 @@ Menu.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
-    if (item.items && (item.command || item.commandID))
-    {
-        element.setAttribute("type", "splitmenu");
-        element.setAttribute("iconic", "true");
-    }
-
-    // xxxHonza: must be done after 'type' == 'splitmenu' otherwise the menu-item
-    // is not checked (the check icon is not displayed from some reason).
     if (item.checked)
         element.setAttribute("checked", "true");
 

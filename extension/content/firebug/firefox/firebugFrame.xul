@@ -8,6 +8,7 @@
 <?xml-stylesheet href="chrome://firebug/skin/window.css"?>
 <?xml-stylesheet href="chrome://browser/skin/browser.css"?>
 <?xml-stylesheet href="chrome://firebug/skin/quickInfoBoxPanel.css"?>
+<?xml-stylesheet href="chrome://browser/content/browser.css"?>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         id="firebug"

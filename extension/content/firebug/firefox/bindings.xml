@@ -1924,34 +1924,4 @@
     </handlers>
 </binding>
 
-<binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
-    <content align="stretch">
-        <xul:menuitem anonid="item" flex="1"
-            class="menuitem-tooltip split-menuitem-item"
-            xbl:inherits="label,key,image,value,checked" allowevents="true"/>
-        <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
-            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
-                <xul:image/>
-            </xul:hbox>
-        </xul:hbox>
-        <children includes="menupopup"/>
-    </content>
-
-    <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
-        <constructor><![CDATA[
-            if (this.getAttribute("iconic") == "true")
-            {
-                this.item.classList.remove("menuitem-tooltip");
-                this.item.classList.add("menuitem-iconic-tooltip");
-                this.item.classList.add("menuitem-iconic");
-            }
-            // workaround for 3.6 bug
-            this.item.classList.add("split-menuitem-item");
-      ]]></constructor>
-
-      <field name="item" readonly="true">
-          document.getAnonymousElementByAttribute(this, "anonid", "item");
-      </field>
-    </implementation>
-</binding>
 </bindings>

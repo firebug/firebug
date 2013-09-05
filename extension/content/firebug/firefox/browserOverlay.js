@@ -87,7 +87,7 @@ BrowserOverlay.prototype =
     internationalize: function()
     {
         // Internationalize all elements with 'fbInternational' class. Clone
-        // before internationalizing.
+        // before internationalization.
         var elements = Arr.cloneArray(this.doc.getElementsByClassName("fbInternational"));
         Locale.internationalizeElements(this.doc, elements, ["label", "tooltiptext", "aria-label"]);
     },
