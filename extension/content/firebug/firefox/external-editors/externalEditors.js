@@ -224,9 +224,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     createContextMenuItem: function(doc)
     {
-        // xxxHonza: splite menu isn't properly styled on Mac
+        // xxxHonza: split menu isn't properly styled on Mac
         // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
-        var item = doc.createElement(System.isMac() ? "menu" : "splitmenu");
+        var item = doc.createElement(System.isMac(doc.defaultView) ? "menu" : "splitmenu");
         item.setAttribute("iconic", "true");
 
         item.addEventListener("command", function(event)

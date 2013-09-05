@@ -8,6 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/html/htmlLib",
     "firebug/lib/events",
+    "firebug/lib/system",
     "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -29,7 +30,7 @@ define([
     "firebug/html/inspector",
     "firebug/html/layout"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
     Url, CSSModule, CSSInfoTip) {
 
@@ -1898,8 +1899,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     label: Locale.$STRF("html.Edit_Node", [type]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
                     nol10n: true,
-                    acceltext: (window.navigator.platform.indexOf("Mac") !== -1 ?
-                        Locale.$STR("VK_META") : Locale.$STR("VK_CONTROL")) + "+E",
+                    acceltext: (System.isMac(window) ? Locale.$STR("VK_META") :
+                        Locale.$STR("VK_CONTROL")) + "+E",
                     command: Obj.bindFixed(this.editNode, this, node)
                 },
                 {

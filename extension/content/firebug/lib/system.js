@@ -141,9 +141,14 @@ System.getStringDataFromClipboard = function()
 // ********************************************************************************************* //
 // OS Checkers
 
-System.isMac = function()
+System.isMac = function(win)
 {
-    return window.navigator.platform.search("Mac") == 0;
+    return win.navigator.platform.search("Mac") != -1;
+}
+
+System.isWin = function(win)
+{
+    return win.navigator.platform.search("Win") != -1;
 }
 
 // ********************************************************************************************* //

@@ -33,7 +33,7 @@ Menu.createMenu = function(popup, item)
     // If a command is associated with the item we need to use 'splitmenu'.
     // xxxHonza: Split menu is not properly styled on Mac,
     // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
-    if (!System.isMac() && (item.command || item.commandID))
+    if (!System.isMac(window) && (item.command || item.commandID))
         elementName = "splitmenu";
 
     var menu = popup.ownerDocument.createElement(elementName);
