@@ -82,6 +82,3 @@
 .fbQuickInfoClose:active {
     background-position: 0 -32px;
 }
-
-/* Overwrite styles with OS-specific ones */
-@import "chrome://firebug-os/skin/quickInfoBox.css";

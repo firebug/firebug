@@ -12,7 +12,8 @@ define([
     "firebug/lib/object",
 ],
 function(Firebug, Domplate, Locale, Dom, CommandLineExposed, Win, Xpcom, Events, Obj) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -30,6 +31,8 @@ var CLOSURE_INSPECTOR_HELP_URL = "https://getfirebug.com/wiki/index.php/Closure_
 
 // ********************************************************************************************* //
 // Command Line Help
+
+var {domplate, SPAN, TABLE, THEAD, TR, TH, DIV, TBODY, TD, A, UL, LI, FOR, TAG} = Domplate;
 
 var HelpCaption = domplate(
 {
@@ -166,7 +169,7 @@ var Tip = domplate(
     tag:
         LI({"class": "tip"},
             SPAN({"class": "text"}, "$tip|getText"),
-            SPAN("&nbsp"),
+            SPAN("&nbsp;"),
             SPAN({"class": "example"},"$tip|getExample")
         ),
 
@@ -318,4 +321,4 @@ Firebug.registerCommand("help", {
 return CommandLineHelp;
 
 // ********************************************************************************************* //
-}});
+});

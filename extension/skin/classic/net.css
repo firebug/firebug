@@ -693,6 +693,27 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
     cursor: pointer;
 }
 
+.netInfoHeadersTable > .netHeadersGroup > TABLE,
+.netInfoHeadersTable > .netHeadersGroup .netHeadersViewSource {
+    display: none;
+}
+
+.netInfoHeadersTable > .netHeadersGroup.opened > TABLE,
+.netInfoHeadersTable > .netHeadersGroup.opened .netHeadersViewSource {
+    display: inline-block;
+}
+
+.netInfoHeadersTable .netHeader {
+    cursor: pointer;
+    padding-left: 17px;
+    position: static;
+    -moz-user-select: none;
+}
+
+.netInfoHeadersTable .netHeadersViewSource {
+    display: inline-block;
+}
+
 /*************************************************************************************************/
 /* Net Activation Message */
 

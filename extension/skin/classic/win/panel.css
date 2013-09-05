@@ -36,6 +36,7 @@
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
 .netPageRow.opened > .netCol > .netPageTitle,
+.netHeadersGroup.opened > .netInfoHeadersGroup > .twisty,
 .objectBox-stackFrame.hasTwisty.opened,
 .objectBox-functionCall.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty,
@@ -43,9 +44,13 @@
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+    background-repeat: no-repeat;
+    min-height: 12px;
 }
 
 .hasHeaders .netHrefLabel,
+.netInfoHeadersTable .netHeader,
+.netHrefLabel,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
     background-position: 2px 50%;
 }

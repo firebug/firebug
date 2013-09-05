@@ -69,6 +69,11 @@ Json.parseJSONString = function(jsonString, originURL)
     }
     catch (exc) {}
 
+    // Give up if we don't have valid start, to avoid some unnecessary overhead.
+    first = firstNonWs(jsonString);
+    if (first !== "[" && first !== "{" && isNaN(first) && first !== '"')
+        return null;
+
     // Remove JavaScript comments, quote non-quoted identifiers, and merge
     // multi-line structures like |{"a": 1} \n {"b": 2}| into a single JSON
     // object [{"a": 1}, {"b": 2}].
@@ -108,6 +113,9 @@ function pseudoJsonToJson(json)
     for (var i = 0, len = json.length; i < len; ++i)
     {
         var ch = json[i];
+        if (/\s/.test(ch))
+            continue;
+
         if (ch === '"')
         {
             // Consume a string.
@@ -119,6 +127,26 @@ function pseudoJsonToJson(json)
                 else if (json[i] === '"')
                     break;
                 ++i;
+            }
+        }
+        else if (ch === "'")
+        {
+            // Convert an invalid string into a valid one.
+            ret += json.slice(at, i) + "\"";
+            at = i + 1;
+            ++i;
+            while (i < len)
+            {
+                if (json[i] === "\\")
+                    ++i;
+                else if (json[i] === "'")
+                    break;
+                ++i;
+            }
+            if (i < len)
+            {
+                ret += json.slice(at, i) + "\"";
+                at = i + 1;
             }
         }
         else if ((ch === "[" || ch === "{") && (lastch === "]" || lastch === "}"))
@@ -149,19 +177,19 @@ function pseudoJsonToJson(json)
             }
             ch = "\0";
         }
-        else if (/[a-zA-Z0-9]/.test(ch))
+        else if (/[a-zA-Z$_]/.test(ch) && lastch !== ":")
         {
             // Non-quoted identifier. Quote it.
             ret += json.slice(at, i) + "\"";
             at = i;
-            i = i + json.slice(i).search(/[^a-zA-Z0-9]|$/);
+            i = i + json.slice(i).search(/[^a-zA-Z0-9$_]|$/);
             ret += json.slice(at, i) + "\"";
             at = i;
         }
 
-        if (ch !== "\n" && ch !== " " && ch !== "\t")
-            lastch = ch;
+        lastch = ch;
     }
+
     ret += json.slice(at);
     if (hasMultipleParts)
         ret = "[" + ret + "]";
