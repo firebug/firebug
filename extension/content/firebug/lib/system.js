@@ -139,6 +139,14 @@ System.getStringDataFromClipboard = function()
 };
 
 // ********************************************************************************************* //
+// OS Checkers
+
+System.isMac = function()
+{
+    return window.navigator.platform.search("Mac") == 0;
+}
+
+// ********************************************************************************************* //
 // Firebug Version Comparator
 
 /**
