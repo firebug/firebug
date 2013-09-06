@@ -153,7 +153,12 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var href = selector.href.href || selector.href;
             var line = selector.ruleLine;
-            var rule = selector.selector._cssRule._domRule;
+            var selectorDef = selector.selector;
+            // Dev tools API starting from FF 26.0 renamed the "_cssRule" property to "cssRule"
+            // (see issue 6609)  
+            // TODO: This check can be removed as soon as FF 26.0 is the minimum supported version 
+            var rule = selectorDef.cssRule ?
+                selectorDef.cssRule.domRule : selectorDef._cssRule._domRule;
 
             var instance = Css.getInstanceForStyleSheet(rule.parentStyleSheet);
             var sourceLink = line != -1 ? new SourceLink.SourceLink(href, line, "css",
