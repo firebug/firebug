@@ -132,7 +132,10 @@ Menu.setItemIntoElement = function(element, item)
     {
         // xxxHonza: register 'click' event handler since 'command' isn't fired
         // by splitmenu binding from some reason.
-        element.addEventListener("click", item.command, false);
+        if (element.tagName == "splitmenu")
+            element.addEventListener("click", item.command, false);
+        else
+            element.addEventListener("command", item.command, false);
     }
 
     if (item.commandID)
