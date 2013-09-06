@@ -260,7 +260,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
             var Element = FirebugReps.Element;
             var selector = Element.getSelectorTag(elt) +
                 Element.getSelectorId(elt) +
-                Element.getSelectorClass(elt);
+                Element.getSelectorClasses(elt);
 
             // xxxHonza: localization?
             tooltipText += "\n\nCommand Line Example:\n" +

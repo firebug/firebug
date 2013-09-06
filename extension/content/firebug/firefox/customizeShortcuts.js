@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
+    "firebug/lib/system",
 ],
-function(FBTrace, Obj, Locale, Str, Events) {
+function(FBTrace, Obj, Locale, Str, Events, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -93,9 +94,10 @@ CustomizeShortcuts.prototype =
             case KeyEvent.DOM_VK_META:
                 gPlatformKeys.accel = gPlatformKeys.meta;
                 break;
+
             default:
-                gPlatformKeys.accel = (this.win.navigator.platform.search("Mac") == 0 ?
-                    gPlatformKeys.meta : gPlatformKeys.ctrl);
+                gPlatformKeys.accel = (System.isMac(this.win) ? gPlatformKeys.meta :
+                    gPlatformKeys.ctrl);
         }
 
         for (var property in KeyEvent)
