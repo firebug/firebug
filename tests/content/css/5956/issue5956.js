@@ -24,8 +24,8 @@ function runTest()
 function propDeclaration(callback)
 {
     executeTest("fbCopyPropertyDeclaration",
-    	"background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);",
-    	"Property declaration must be copied correctly", callback);
+        "background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);",
+        "Property declaration must be copied correctly", callback);
 }
 
 function propName(callback)
