@@ -9,7 +9,7 @@ define([
 ],
 function(Obj, Locale, Firebug, Dom, Menu) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -17,7 +17,7 @@ const Ci = Components.interfaces;
 
 const MAX_HISTORY_MENU_ITEMS = 15;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @class Support for back and forward pattern for navigating within Firebug UI (panels).
@@ -26,7 +26,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
 {
     dispatchName: "navigationHistory",
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Extending Module
 
     initContext: function(context, persistedState)
@@ -55,7 +55,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // History popup menu
 
     onPopupShowing: function(popup, context)
@@ -63,7 +63,10 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
         var currIndex = this.getCurrentIndex(context);
 
         if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " + context.getName(), context);
+        {
+            FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " +
+                context.getName(), context);
+        }
 
         Dom.eraseNode(popup);
 
@@ -221,7 +224,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
         return context.navigationHistoryIndex;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI Listener
 
     onPanelNavigate: function(location, panel)
@@ -282,7 +285,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.NavigationHistory);
@@ -290,5 +293,5 @@ Firebug.registerUIListener(Firebug.NavigationHistory);
 
 return Firebug.NavigationHistory;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

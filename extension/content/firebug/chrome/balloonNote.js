@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-define(["firebug/lib/domplate"], function(Domplate) {
+define([
+    "firebug/lib/domplate"
+],
+function(Domplate) {
 
 "use strict";
 
