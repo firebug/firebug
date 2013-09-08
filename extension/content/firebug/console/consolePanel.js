@@ -634,7 +634,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // Don't forget to clear opened groups, if any.
             this.groups = null;
 
-            this.lastMsgId = null;
+            this.matchesLastMessage = null;
         }
     },
 
