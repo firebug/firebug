@@ -10,7 +10,7 @@
 }
 
 .logRow {
-    /*display: table;*/
+    display: table;
     position: relative;
     width: 100%;
     border-bottom: 1px solid #D7D7D7;
@@ -49,11 +49,11 @@
 }
 
 .logRow > div {
-    /*display: table-row;*/
+    display: table-row;
 }
 
 .logContent {
-    /*display: table-cell;*/
+    display: table-cell;
     padding: 2px 0 2px 4px;
 }
 
@@ -241,7 +241,7 @@
 
 .logRow:not(.logRow-group) > div > .objectLink-sourceLink {
     position: relative;
-    /*display: table-cell;*/
+    display: table-cell;
     padding: 0 4px;
     text-align: right;
     width: 0;
