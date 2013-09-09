@@ -1859,6 +1859,7 @@
                 {
                     this.value = "";
                     this.status = "noSearch";
+                    Firebug.Search.setPlaceholder();
                 }
             }
             else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)

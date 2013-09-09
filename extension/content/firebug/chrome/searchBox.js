@@ -275,10 +275,11 @@ Firebug.Search = Obj.extend(Firebug.Module,
         return history[0];
     },
 
-    setPlaceholder: function(panelName)
+    setPlaceholder: function()
     {
+        var panel = Firebug.chrome.getSelectedPanel();
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var panelType = Firebug.getPanelType(panelName);
+        var panelType = Firebug.getPanelType(panel.name);
         var title = Firebug.getPanelTitle(panelType);
         searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
     },
@@ -319,7 +320,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
             searchBox.collapsed = false;
         }
 
-        this.setPlaceholder(panel.name);
+        this.setPlaceholder();
     }
 });
 
