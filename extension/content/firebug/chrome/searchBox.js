@@ -278,12 +278,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
     setPlaceholder: function(panelName)
     {
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var title = panelName;
         var panelType = Firebug.getPanelType(panelName);
-        
-        if (panelType)
-            title = Firebug.getPanelTitle(panelType);
-        
+        var title = Firebug.getPanelTitle(panelType);
         searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
     },
 
