@@ -1859,6 +1859,7 @@
                 {
                     this.value = "";
                     this.status = "noSearch";
+                    Firebug.Search.setPlaceholder();
                 }
             }
             else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
@@ -1893,6 +1894,7 @@
                 hideOptions();
                 status = "noSearch";
                 focused = false;
+                Firebug.Search.setPlaceholder();
             }, 0);
         ]]></handler>
     </handlers>
