@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6557: Font previews don't work</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6557">Issue 6557</a>: Font previews don't work</h1>
+        </header>
+        <div>
+            <section id="content">
+                <style>
+                    @import "./font_declarations.css";
+
+                    #remotefont {
+                        font-family: "Konstytucyja";
+                        font-size: 1.5em;
+                    }
+
+
+                    #localfont {
+                        font-family: "DeLarge";
+                    }
+                </style>
+
+                <p id="remotefont">I am a remote font</p>
+                <p id="localfont">I am a local font (using data-url)</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug, and switch to the HTML panel</li>
+                    <li>Inspect the first paragraph, whose text is: <b>"I am a remote font"</b></li>
+                    <li>In the style panel, hover "Konstytucyja" (the value of the font-family property)
+                        <br/>&#x21b3; The preview should display a text with the "Konstytucyja" font</li>
+                    <li>Inspect the second paragraph, whose text is: <b>"I am a local font (using data-url)"</b></li>
+                    <li>In the style panel, hover "DeLarge" (the value of the font-family property)
+                        <br/>&#x21b3; The preview should display a text with the "DeLarge" font</li>
+                    </li>
+                </ol>
+            </section>
+            <footer>
+                Florent Fayolle, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
