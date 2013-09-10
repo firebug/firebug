@@ -853,7 +853,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoPatchText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
-                IFRAME({"class": "netInfoHtmlPreview", "role": "document"}),
+                IFRAME({"class": "netInfoHtmlPreview", "role": "document", "sandbox": ""}),
                 DIV({"class": "htmlPreviewResizer"})
             )
         ),
@@ -1171,7 +1171,15 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             // The event is sent only for the iframes in the Console panel.
             context.addEventListener(this.htmlPreview, "load", function(event)
             {
-                event.target.contentDocument.body.innerHTML = text;
+                try
+                {
+                    event.target.contentDocument.body.innerHTML = text;
+                }
+                catch (err)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("net.updateInfo; EXCEPTION " + err, err);
+                }
             });
 
             var defaultHeight = parseInt(Options.get("netHtmlPreviewHeight"));
