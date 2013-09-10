@@ -643,13 +643,19 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onKeyPress: function(event)
     {
         var ch = String.fromCharCode(event.charCode);
-        var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (ch == "l" && Events.isControl(event))
         {
+            var searchBox = Firebug.chrome.$("fbSearchBox");
             searchBox.value = "#";
             searchBox.focus();
 
+            Events.cancelEvent(event);
+        }
+
+        if (ch == "w" && Events.isAlt(event))
+        {
+            this.addSelectionWatch();
             Events.cancelEvent(event);
         }
     },
@@ -1460,6 +1466,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 {
                     label: "AddWatch",
                     tooltiptext: "watch.tip.Add_Watch",
+                    acceltext: Locale.getFormattedKey(window, "alt", "W"),
                     command: Obj.bind(this.addSelectionWatch, this)
                 }
             );
