@@ -1,8 +1,6 @@
 /* See license.txt for terms of usage */
-
 /*jshint esnext:true, es5:true, curly:false*/
 /*global FBTrace:true, Components:true, define:true */
-
 
 define([
     "firebug/lib/wrapper",
@@ -14,11 +12,9 @@ function(Wrapper) {
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-// Debugees
+// Debuggees
 var dglobalWeakMap = new WeakMap();
 
 // Module object
@@ -36,24 +32,13 @@ var DebuggerLib = {};
  *
  * @return {object} the unwrapped object
  */
-DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
+DebuggerLib.unwrapDebuggeeValue = function(obj)
 {
     // If not a debuggee object, return it immediately.
     if (typeof obj !== "object" || obj === null)
         return obj;
 
-    if (obj.unsafeDereference)
-        return Wrapper.unwrapObject(obj.unsafeDereference());
-
-    // Define a new property to get the debuggee value.
-    dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
-        value: obj,
-        writable: true,
-        configurable: true
-    });
-
-    // Get the debuggee value using the property through the unwrapped global object.
-    return global._firebugUnwrappedDebuggerObject;
+    return Wrapper.unwrapObject(obj.unsafeDereference());
 };
 
 /**

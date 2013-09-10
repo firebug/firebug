@@ -276,11 +276,6 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     }
 
 
-    var unwrap = function(obj)
-    {
-        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dglobal);
-    };
-
     // In case of abnormal termination, as if by the "slow script" dialog box,
     // do not print anything in the console.
     if (!resObj)
@@ -293,7 +288,7 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 
     if (resObj.hasOwnProperty("return"))
     {
-        result = unwrap(resObj.return);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.return);
         if (resObj.return && resObj.return.handle)
         {
             resObj.return.handle();
@@ -303,11 +298,11 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     }
     else if (resObj.hasOwnProperty("yield"))
     {
-        result = unwrap(resObj.yield);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.yield);
     }
     else if (resObj.hasOwnProperty("throw"))
     {
-        var exc = unwrap(resObj.throw);
+        var exc = DebuggerLib.unwrapDebuggeeValue(resObj.throw);
         handleException(exc, origExpr, context, onError);
         return;
     }

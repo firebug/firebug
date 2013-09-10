@@ -135,9 +135,7 @@ Wrapper.ignoreVars =
 
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
-    "_firebugUnwrappedDebuggerObject": 1,
     "__fb_scopedVars": 1,
-    "_FirebugCommandLine": 1,
 };
 
 Wrapper.shouldIgnore = function(name)
