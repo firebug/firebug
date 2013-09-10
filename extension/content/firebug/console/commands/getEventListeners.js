@@ -10,11 +10,7 @@ define([
     "firebug/lib/events",
 ],
 function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events) {
-
 "use strict";
-
-// ********************************************************************************************* //
-// Constants
 
 // ********************************************************************************************* //
 // Command Implementation
