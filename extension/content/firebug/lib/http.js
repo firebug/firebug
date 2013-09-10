@@ -43,6 +43,9 @@ Http.readFromStream = function(stream, charset, noClose)
 
     var text = segments.join("");
 
+    if (!charset)
+        return text;
+
     try
     {
         return Str.convertToUnicode(text, charset);

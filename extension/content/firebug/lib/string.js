@@ -518,15 +518,8 @@ Str.splitLines = function(text)
 
     const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
     var lines;
-    if (text.match)
-    {
-        lines = text.match(reSplitLines2);
-    }
-    else
-    {
-        var str = text+"";
-        lines = str.match(reSplitLines2);
-    }
+    var str = text.match ? text : text + "";
+    lines = str.match(reSplitLines2);
     lines.pop();
     return lines;
 };

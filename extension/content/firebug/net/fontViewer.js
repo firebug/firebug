@@ -89,7 +89,7 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
         // which represents a little overhead, but this happens only if the request
         // is actually expanded by the user in the UI (Net & Console panel).
         var extension = Url.getFileExtension(url);
-        var validExtension = /woff|otf|ttf/.exec(extension);
+        var validExtension = (["otf", "woff", "ttf"].indexOf(extension) !== -1);
         if (validExtension && (!data || Str.hasPrefix(data, "wOFF") || Str.hasPrefix(data, "OTTO")))
         {
             if (FBTrace.DBG_FONTS)
