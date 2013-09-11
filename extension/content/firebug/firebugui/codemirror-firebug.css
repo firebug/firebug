@@ -88,19 +88,19 @@
 /* Breakpoints */
 
 .cm-s-firebug .breakpoint {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpointLoading {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpoint.condition {
-    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpointCondition.png), url(chrome://firebug/skin/breakpoint.png);
     background-position: center;
     padding: 6px;
 }
