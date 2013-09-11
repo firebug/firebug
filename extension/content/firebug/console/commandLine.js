@@ -284,13 +284,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (expr === "")
             return;
 
-        var mozJSEnabled = Firebug.Options.getPref("javascript", "enabled");
-        if (!mozJSEnabled)
-        {
-            Firebug.Console.log(Locale.$STR("console.JSDisabledInFirefoxPrefs"), context, "info");
-            return;
-        }
-
         if (!Firebug.commandEditor || context.panelName !== "console")
         {
             this.clear(context);
