@@ -15,12 +15,12 @@ function testCommandLineForError()
     var panel = FW.Firebug.chrome.selectPanel("console");
     FBTest.progress("looking up command line in " + panel);
     FBTest.ok(panel, "The console panel is found ");
-    
+
     var clickTarget = FW.Firebug.chrome.$("fbCommandLine");
 
     FBTest.progress("command line: " + clickTarget);
     FBTest.focus(clickTarget);
-    
+
     // gather rows from panel
     var rows = FW.FBL.getElementsByClass(panel.panelNode,
         "logRow", "logRow-error");

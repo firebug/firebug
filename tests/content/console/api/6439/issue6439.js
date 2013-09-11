@@ -27,7 +27,7 @@ function runTest()
             // 0 digits precision
             tasks.push(FBTest.executeCommandAndVerify, "console.log('amount: %.0f', " + float + ")",
                 "amount: 4", "div", "logRow-log");
-            
+
             // 5 digits precision
             tasks.push(FBTest.executeCommandAndVerify, "console.log('amount: %.5f', " + float + ")",
                 "amount: 4.31520", "div", "logRow-log");

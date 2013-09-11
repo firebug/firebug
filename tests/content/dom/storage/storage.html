@@ -29,12 +29,12 @@
 <br/>
 <li>Verify following properties:<br/>
 <code>localStorage</code> should display <code>10 items in Storage item6="6", item3="3", more...</code><br/>
-<code>sessionStorage</code> should display <code>2 items in Storage issue="value1", name="item1"</code><br/>
+<code>sessionStorage</code> should display <code>2 items in Storage key="a", getItem="b"</code><br/>
 </li>
 <br/>
 <li>Switch to the Console panel and verify the log<br/>
 <code>localStorage:</code> <span style="color: green">10 items in Storage item6="6", item3="3", item8="8", item0="0", item5="5", item2="2", item7="7", item4="4", item9="9", item1="1"</span><br/>
-<code>sessionStorage:</code> <span style="color: green">2 items in Storage issue="value1", name="item1"</span><br/>
+<code>sessionStorage:</code> <span style="color: green">2 items in Storage key="a", getItem="b"</span><br/>
 <br/>
 </ol>
 
@@ -57,8 +57,8 @@ function initStorage()
 
 
     // Initialize session storage
-    sessionStorage.name = "item1";
-    sessionStorage.issue = "value1";
+    sessionStorage.key = "a";
+    sessionStorage.getItem = "b";
 
     if (window.console)
         console.log("sessionStorage: ", sessionStorage);

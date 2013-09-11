@@ -2,8 +2,11 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/chrome/reps",
 ],
-function(FBTrace) {
+function(FBTrace, FirebugReps) {
+
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -21,6 +24,9 @@ var ErrorCopy = function(message)
 
 // ********************************************************************************************* //
 // Registration
+
+// xxxHonza: back compatibility
+FirebugReps.ErrorCopy = ErrorCopy;
 
 return ErrorCopy;
 

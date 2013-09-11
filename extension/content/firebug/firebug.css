@@ -60,13 +60,21 @@ textbox#fbCommandEditor {
 }
 
 .fbCommandLineCompletionPanel {
-    /* height: 270px; */
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
+
+    /* Remove xul panel shadow */
+    -moz-window-shadow: none !important;
 }
 
 .fbCommandLineCompletions {
     cursor: default;
     font-family: monospace;
     white-space: pre;
+    background-color: white;
+    border: 1px solid #BEBEBE;
+    border-radius: 3px;
+    margin: 2px;
 }
 
 .fbPopupTitle {
@@ -77,8 +85,23 @@ textbox#fbCommandEditor {
     color: #666666;
 }
 
-.completionLine.apiCompletion {
-    font-style: italic;
+.fbPopupSeparator {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    padding: 1px 18px;
+    color: #646464;
+    /*border-top: 1px solid #BEBEBE;
+    border-bottom: 1px solid #BEBEBE;*/
+    margin: 3px 0 3px 0;
+    background-color: #F0F0F0;
+}
+
+/* The first separator doesn't need margin-top */
+.fbPopupTitle + .fbPopupSeparator {
+    margin-top: 0;
+}
+
+.fbPopupEntry {
+    padding: 0 5px 0 5px;
 }
 
 .completionText {
@@ -174,23 +197,6 @@ panelTabMenu {
 
 panelTab > panelTabMenu .menuTarget {
     visibility: collapse;
-}
-
-panelTab[selected="true"] > panelTabMenu .menuTarget,
-panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug-os/skin/optionsMenuTarget.svg) no-repeat center;
-    width: 11px;
-    height: 10px;
-    vertical-align: middle;
-    visibility: visible;
-}
-
-panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background: url(chrome://firebug-os/skin/optionsMenuTargetHover.svg) no-repeat center;
-}
-
-panelTab[selected="true"]:hover:active > panelTabMenu .menuTarget {
-    filter: url(resource://firebugui/filters.svg#darken);
 }
 
 panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
@@ -302,42 +308,6 @@ panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
 }
 
 /*************************************************************************************************/
-/* Quick Info Box */
-
-#fbQuickInfoPanel {
-    border: 1px solid threedshadow;
-    background-color: white;
-    opacity: 0.9;
-    font-family: monospace;
-    font-size: 11px;
-    padding-bottom: 5px;
-    cursor: move;
-}
-
-.fbQuickInfoBoxTitle {
-    font-family: Lucida Grande, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    margin-top: 8px;
-    margin-bottom: 0;
-    cursor: move;
-}
-
-.fbQuickInfoName {
-    color: DarkGreen;
-    margin-bottom: 0;
-    -moz-margin-end: 0;
-    cursor: move;
-}
-
-.fbQuickInfoValue {
-    color: DarkBlue;
-    margin-bottom: 0;
-    -moz-margin-start: 0;
-    cursor: move;
-}
-
-/*************************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
 
 #fbContentBox:-moz-lwtheme {
@@ -384,21 +354,13 @@ panelBarTabList {
 
 /*************************************************************************************************/
 /* splitmenu */
+/* xxxHonza:  splitmenu does not support checkbox by default, so following styles are introduced */
 
-menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {
-    background-color: -moz-menuhover;
-    color: -moz-menuhovertext;
+splitmenu#fbShowEventsInConsole {
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
-.split-menu-right-image {
-    -moz-appearance: menuitem;
-    -moz-box-pack: end;
-}
-
-menu[type=splitmenu] {
-    -moz-binding: url("firefox/bindings.xml#splitmenu");
-    -moz-box-orient: horizontal;
-    -moz-appearance: none !important;
-    color: menutext;
-    background-color: transparent !important;
+splitmenu#fbShowEventsInConsole[checked="true"] {
+    -moz-appearance: menucheckbox;
 }

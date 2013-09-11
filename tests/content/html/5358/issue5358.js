@@ -45,7 +45,7 @@ function runTest()
             tasks.push(copyAndPasteXMLContent, "onlyContent", "fbPasteReplaceOuter",
                 '<item id="3">Item Number</item>');
             tasks.push(copyAndPasteXMLContent, "3", "fbPasteReplaceInner", "3");
-            tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild", 
+            tasks.push(copyAndPasteXMLContent, "root", "fbPasteFirstChild",
                 '<item id="2">2</item>');
             tasks.push(copyAndPasteXMLContent, "root", "fbPasteLastChild", '<item id="4">4</item>');
             tasks.push(copyAndPasteXMLContent, "2", "fbPasteBefore", '<item id="1">1</item>');
@@ -118,7 +118,7 @@ function checkTableContent(callback)
         "#table > tbody > #middleRow:nth-child(2) > #rightCell, "+
         "#table > tbody > #bottomRow:nth-child(3) > #bottomCell:only-child"
     );
-    FBTest.compare(5, childrenOk.length, 
+    FBTest.compare(5, childrenOk.length,
         "the table should contain 5 cells: Top, Left, Middle, Right and Bottom");
     Array.forEach(childrenOk, function(e)
     {

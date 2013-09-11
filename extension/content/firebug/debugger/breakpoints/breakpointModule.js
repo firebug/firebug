@@ -31,6 +31,16 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
+    initialize: function()
+    {
+        Firebug.connection.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.connection.removeListener(this);
+    },
+
     initContext: function(context)
     {
         var tool = context.getTool("debugger");
@@ -74,6 +84,17 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        this.updatePanelState(panel);
+    },
+
+    onDebuggerEnabled: function()
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        this.updatePanelState(panel);
+    },
+
+    updatePanelState: function(panel)
+    {
         if (!panel)  // there is no selectedPanel?
             return;
 
@@ -85,8 +106,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
         // The script panel can be created at this moment (the second parameter is false)
-        // It's needed for break on next to work (do not wait till the user actuall
-        // selectes the panel).
+        // It's needed for break on next to work (do not wait till the user actually
+        // selects the panel).
         var scriptPanel = panel.context.getPanel("script");
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");

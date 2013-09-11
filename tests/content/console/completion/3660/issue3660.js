@@ -33,12 +33,15 @@ function runTest()
             function findIndex()
             {
                 var el = popup.querySelector("div[selected=true]"), count = 0;
-                while (el)
+                for (;;)
                 {
                     el = el.previousSibling;
-                    ++count;
+                    if (!el)
+                        break;
+                    if (el.classList.contains("completionLine"))
+                        ++count;
                 }
-                return count - 2;
+                return count;
             }
 
             function sendScroll(element, lines)
@@ -60,7 +63,7 @@ function runTest()
                     if (runs++)
                         return;
                     FBTest.ok(true, "The completion popup should be opened.");
-                    var count = popup.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "div").length - 1;
+                    var count = popup.getElementsByClassName("completionLine").length;
                     FBTest.compare(size, count, "The completion popup must contain " + size + " rows.");
                     cmdLine.value = "";
                     callback();

@@ -15,11 +15,12 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netDebugger",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/trace/traceListener",
     "firebug/trace/traceModule"
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events,
+    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events, Locale,
     TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
@@ -50,6 +51,7 @@ var contentLoad = NetProgress.prototype.contentLoad;
  * for the user.
  */
 Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
+/** @lends Firebug.NetMonitor */
 {
     dispatchName: "netMonitor",
     maxQueueRequests: 500,
@@ -83,6 +85,18 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbNetFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbNetFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetMonitor.initializeUI; enabled: " + this.isAlwaysEnabled());
@@ -240,8 +254,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
         else
         {
-            // If the Net panel is not enabled, we needto make sure the unmonitorContext
-            // is executed and so, the start button (aka firebug status bar icons) is
+            // If the Net panel is not enabled, we need to make sure the unmonitorContext
+            // is executed and so, the start button (aka Firebug status bar icons) is
             // properly updated.
             NetHttpActivityObserver.unregisterObserver();
             Firebug.connection.eachContext(unmonitorContext);
@@ -299,7 +313,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         // If no filter categories are selected, use the default
         if (filterCategories.length == 0)
             filterCategories = Options.getDefault("netFilterCategories").split(" ");
-        
+
         Options.set("netFilterCategories", filterCategories.join(" "));
 
         this.syncFilterButtons(Firebug.chrome);
@@ -320,7 +334,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         for (var i=0, len=buttons.length; i<len; ++i)
         {
             var filterCategory = buttons[i].id.substr(buttons[i].id.search("-") + 1);
-            buttons[i].checked = filterCategories.has(filterCategory); 
+            buttons[i].checked = filterCategories.has(filterCategory);
         }
     },
 
@@ -328,7 +342,9 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         var panel = context.getPanel(panelName);
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked", panel.persistContent);
+
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_togglePersistNet", "checked",
+            panel.persistContent);
     },
 
     updateOption: function(name, value)
@@ -469,7 +485,7 @@ var NetHttpObserver =
             {
                 Firebug.NetMonitor.contexts[tabId] = createNetProgress(null);
 
-                // OK, we definitelly want to watch this page load, temp context is created
+                // OK, we definitely want to watch this page load, temporary context is created
                 // so, make sure the activity-observer is registered and we have detailed
                 // timing info for this first document request.
                 NetHttpActivityObserver.registerObserver();

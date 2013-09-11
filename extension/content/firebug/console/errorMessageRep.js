@@ -17,11 +17,12 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/system",
     "firebug/lib/events",
+    "firebug/chrome/panelActivation",
 ],
 function(Firebug, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
-    SourceLink, Dom, Css, Obj, Menu, System, Events) {
+    SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
 
-with (Domplate) {
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -29,13 +30,20 @@ with (Domplate) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
+var {domplate, TAG, SPAN, DIV, TD, TR, TABLE, TBODY, A, PRE} = Domplate;
+
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_ERRORLOG");
 
 // ********************************************************************************************* //
 // ErrorMessage Template Implementation
 
+/**
+ * @domplate Domplate template used to represent Error logs in the UI. Registered as Firebug rep.
+ * This template is used for {@ErrorMessageObj} instances.
+ */
 var ErrorMessage = domplate(Firebug.Rep,
+/** @lends ErrorMessage */
 {
     className: "errorMessage",
     inspectable: false,
@@ -53,7 +61,6 @@ var ErrorMessage = domplate(Firebug.Rep,
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
             DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
-                SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
@@ -61,7 +68,7 @@ var ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role: "presentation"}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow",
-                role : "listitem"},
+                role: "listitem"},
                 TABLE({cellspacing: 0, cellpadding: 0},
                     TBODY(
                         TR(
@@ -74,8 +81,7 @@ var ErrorMessage = domplate(Firebug.Rep,
                                 A({"class": "errorSource a11yFocus"},
                                     PRE({"class": "errorSourceCode",
                                         title: "$object|getSourceTitle"}, "$object|getSource")
-                                ),
-                                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                                )
                             )
                         ),
                         TR({$collapsed: "$object|hideErrorCaret"},
@@ -106,7 +112,19 @@ var ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-        return error && error.trace;
+        if (!error)
+            return false;
+
+        if (error.trace)
+            return true;
+
+        // The expand icon is displayed also in case where the actual stack trace
+        // isn't available because the debugger (the Script panel) was disabled.
+        // In this case, an explanatory message is shown instead.
+        if (error.missingTraceBecauseNoDebugger)
+            return true;
+
+        return false;
     },
 
     hasBreakSwitch: function(error)
@@ -124,11 +142,6 @@ var ErrorMessage = domplate(Firebug.Rep,
         var url = Url.normalizeURL(error.href);
         var line = error.lineNo - 1;
         return Errors.hasErrorBreakpoint(url, line);
-    },
-
-    getDuplication: function(msgId)
-    {
-        return ""; // filled in later
     },
 
     getSource: function(error, noCrop)
@@ -221,7 +234,7 @@ var ErrorMessage = domplate(Firebug.Rep,
         var begin = Math.max(0, pivot - halfLimit);
         colNumber -= begin;
 
-        // Add come cols because there is an alterText at the beginning now.
+        // Add come columns because there is an alterText at the beginning now.
         if (begin > 0)
             colNumber += this.alterText.length;
 
@@ -281,7 +294,8 @@ var ErrorMessage = domplate(Firebug.Rep,
         var errorTitle = Dom.getAncestorByClass(event.target, "errorTitle");
         if (errorTitle)
         {
-            var traceBox = target.childNodes[1];
+            var traceBox = target.getElementsByClassName("errorTrace").item(0);
+
             Css.toggleClass(target, "opened");
             event.target.setAttribute("aria-expanded", Css.hasClass(target, "opened"));
 
@@ -291,6 +305,10 @@ var ErrorMessage = domplate(Firebug.Rep,
                 {
                     var rep = Firebug.getRep(target.stackTrace);
                     rep.tag.append({object: target.stackTrace}, traceBox);
+                }
+                else if (target.repObject.missingTraceBecauseNoDebugger)
+                {
+                    this.renderStackTraceMessage(traceBox);
                 }
 
                 if (Firebug.A11yModel.enabled)
@@ -303,6 +321,39 @@ var ErrorMessage = domplate(Firebug.Rep,
             {
                 Dom.clearNode(traceBox);
             }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Stack Trace Message
+
+    renderStackTraceMessage: function(parentNode)
+    {
+        var hasScriptPanel = PanelActivation.isPanelEnabled("script");
+        var type = hasScriptPanel ? "reload" : "enable";
+        var clickHandler = this.onClickStackTraceMessage.bind(this, type);
+        var msg = (hasScriptPanel ? Locale.$STR("console.DebuggerWasDisabledForError") :
+            Locale.$STR("console.ScriptPanelMustBeEnabledForTraces"));
+
+        parentNode.classList.add("message");
+
+        FirebugReps.Description.render(msg, parentNode, clickHandler);
+    },
+
+    onClickStackTraceMessage: function(type, event)
+    {
+        var target = event.target;
+
+        if (type == "enable")
+        {
+            // Enable the Script panel.
+            var scriptPanelType = Firebug.getPanelType("script");
+            PanelActivation.enablePanel(scriptPanelType);
+        }
+        else if (type == "reload")
+        {
+            var panel = Firebug.getElementPanel(target);
+            Firebug.TabWatcher.reloadPageFromMemory(panel.context);
         }
     },
 
@@ -375,14 +426,14 @@ var ErrorMessage = domplate(Firebug.Rep,
         }
 
         return items;
-    }
+    },
 });
 
 // ********************************************************************************************* //
 // ErrorMessageUpdater Module
 
 /**
- * @module Responsible for asynchronous UI update.
+ * @module Responsible for asynchronous UI update or ErrorMessage template.
  *
  * 1) Error logs usually display one line script where the error happened and the source
  *    needs to be fetched asynchronously sometimes.
@@ -397,6 +448,18 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module
+
+    initialize: function()
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        PanelActivation.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        PanelActivation.removeListener(this);
+    },
 
     initContext: function(context)
     {
@@ -509,10 +572,37 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
             }
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // PanelActivation
+
+    activationChanged: function(panelType, enable)
+    {
+        // The Script panel's activation changed. Make sure all trace messages (for errors)
+        // are updated. It must be done for all contexts since panel activation always
+        // applies to all contexts.
+        if (panelType.prototype.name == "script")
+            Firebug.connection.eachContext(this.updateConsolePanel.bind(this));
+    },
+
+    updateConsolePanel: function(context)
+    {
+        var panel = context.getPanel("console", true);
+        if (!panel)
+            return;
+
+        // Update all existing user messages in the panel.
+        var messages = panel.panelNode.querySelectorAll(".errorTrace.message");
+        for (var i=0; i<messages.length; i++)
+            ErrorMessage.renderStackTraceMessage(messages[i]);
+    }
 });
 
 // ********************************************************************************************* //
 // Registration
+
+// xxxHonza: back compatibility
+FirebugReps.ErrorMessage = ErrorMessage;
 
 Firebug.registerModule(ErrorMessageUpdater);
 Firebug.registerRep(ErrorMessage);
@@ -520,4 +610,4 @@ Firebug.registerRep(ErrorMessage);
 return ErrorMessage;
 
 // ********************************************************************************************* //
-}});
+});

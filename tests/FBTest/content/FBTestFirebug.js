@@ -223,6 +223,10 @@ this.setToKnownState = function()
 {
     FBTest.sysout("FBTestFirebug setToKnownState");
 
+    // xxxHonza: TODO
+    // 1) cookies permissions are not reset
+    // 2) Net panel filter is not reset (the preference is, but the UI isn't)
+
     var Firebug = FBTest.FirebugWindow.Firebug;
     Firebug.PanelActivation.toggleAll("off");  // These should be done with button presses not API calls.
     Firebug.PanelActivation.toggleAll("none");
@@ -236,7 +240,7 @@ this.setToKnownState = function()
     Firebug.Debugger.clearAllBreakpoints(null);
     Firebug.resetAllOptions(false);
 
-    // Console preview is hiden by default
+    // Console preview is hidden by default
     if (this.isConsolePreviewVisible())
         this.clickConsolePreviewButton();
 
@@ -1119,6 +1123,13 @@ this.getSelectedPanel = function()
     return panelBar1.selectedPanel; // may be null
 };
 
+/* selected side panel on UI (not via context) */
+this.getSelectedSidePanel = function()
+{
+    var panelBar2 = FW.Firebug.chrome.$("fbPanelBar2");
+    return panelBar2.selectedPanel; // may be null
+};
+
 /**
  * Returns document object of Main Firebug content UI (content of all panels is presented
  * in this document).
@@ -1131,8 +1142,8 @@ this.getPanelDocument = function()
 
 this.getSidePanelDocument = function()
 {
-    var panelBar1 = FW.Firebug.chrome.$("fbPanelBar2");
-    return panelBar1.browser.contentDocument;
+    var panelBar2 = FW.Firebug.chrome.$("fbPanelBar2");
+    return panelBar2.browser.contentDocument;
 };
 
 /* user sees panel tab disabled? */
@@ -1167,6 +1178,22 @@ this.getPanel = function(name)
     }
 
     return FW.Firebug.currentContext.getPanel(name);
+};
+
+/**
+ * Wait until the debugger has been activated, after enabling the Script panel.
+ *
+ * @param {Object} callback The callback executed when the debugger has been activated.
+ */
+this.waitForDebuggerActivation = function(callback)
+{
+    // Add a function to be executed after we have gone back to the event loop
+    // and activated the debugger.
+    // (Despite the appearance, this shouldn't be a race condition.)
+    setTimeout(function()
+    {
+        callback();
+    }, 0);
 };
 
 this.listenerCleanups = [];
@@ -1237,6 +1264,16 @@ this.setPref = function(pref, value, prefDomain)
 this.getPref = function(pref)
 {
     return FW.Firebug.getPref(FW.Firebug.prefDomain, pref);
+};
+
+/**
+ * Resets the value of the specified Firebug preference.
+ * @param {Object} pref Name of the preference without <i>extensions.firebug</i> prefix.
+ * For instance: <i>showXMLHttpRequests</i>.
+ */
+this.clearPref = function(pref)
+{
+    FW.Firebug.Options.clearPref(FW.Firebug.prefDomain, pref);
 };
 
 // ********************************************************************************************* //
@@ -2720,7 +2757,7 @@ this.compareFirefoxVersion = function(expectedVersion)
 // Support for asynchronous test suites (within a FBTest).
 
 /**
- * Support for set of asynchronouse actions within a FBTest.
+ * Support for set of asynchronous actions within a FBTest.
  *
  * Example:
  * ~~

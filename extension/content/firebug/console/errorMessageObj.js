@@ -4,8 +4,11 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/debugger/script/sourceFile",
+    "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, SourceFile) {
+function(Firebug, FBTrace, SourceFile, FirebugReps) {
+
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -19,6 +22,10 @@ var Trace = FBTrace.to("DBG_ERRORLOG");
 // ********************************************************************************************* //
 // ErrorMessageObj Implementation
 
+/**
+ * @object This object collects data about an error that happens in the content. It's used
+ * by {@ErrorMessage} Domplate template as the data source.
+ */
 function ErrorMessageObj(message, href, lineNo, source, category, context,
     trace, msgId, colNumber)
 {
@@ -62,7 +69,7 @@ ErrorMessageObj.prototype =
 
     resetSource: function()
     {
-        if (this.href && this.lineNo)
+        if (this.href && this.lineNo != null)
             this.source = this.getSourceLine();
     },
 
@@ -85,12 +92,16 @@ ErrorMessageObj.prototype =
 
     getId: function()
     {
-        return this.href + ":" + this.message + ":" + this.lineNo;
+        return this.href + ":" + this.message + ":" + this.lineNo + ":" +
+            (this.colNumber ? this.colNumber : "");
     }
 };
 
 // ********************************************************************************************* //
 // Registration
+
+// xxxHonza: back compatibility
+FirebugReps.ErrorMessageObj = ErrorMessageObj;
 
 return ErrorMessageObj;
 

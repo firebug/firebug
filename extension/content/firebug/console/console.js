@@ -5,10 +5,12 @@ define([
     "firebug/firebug",
     "firebug/chrome/firefox",
     "firebug/lib/events",
+    "firebug/lib/locale",
     "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",
+    "firebug/chrome/panelNotification",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
@@ -17,15 +19,10 @@ define([
     "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options, PanelNotification) {
 
 // ********************************************************************************************* //
 // Constants
-
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var maxQueueRequests = 500;
 
@@ -84,13 +81,12 @@ Firebug.ConsoleBase =
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
                 var container = panel.panelNode;
-                var template = Firebug.NetMonitor.NetLimit;
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
                     container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.limitInfo.totalCount++;
-                    template.updateCounter(panel.limit);
+                    panel.limit.config.totalCount++;
+                    PanelNotification.updateCounter(panel.limit);
                 }
                 Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
                 return row;
@@ -155,9 +151,13 @@ Firebug.ConsoleBase =
 
 // ********************************************************************************************* //
 
+/**
+ * @module Represents module for the Console panel. Responsible e.g. for handling
+ * user actions related to Console panel filter.
+ */
 var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
-
 Firebug.Console = Obj.extend(ActivableConsole,
+/** @lends Firebug.Console */
 {
     dispatchName: "console",
     toolName: "console",
@@ -185,8 +185,24 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
+    },
 
+    initializeUI: function()
+    {
+        // Synchronize UI buttons with the current filter
         this.syncFilterButtons(Firebug.chrome);
+
+        // Initialize filter button tooltips
+        var doc = Firebug.chrome.window.document;
+        var filterButtons = doc.getElementsByClassName("fbConsoleFilter");
+        for (var i=0, len=filterButtons.length; i<len; ++i)
+        {
+            if (filterButtons[i].id != "fbConsoleFilter-all")
+            {
+                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
+                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
+            }
+        }
     },
 
     shutdown: function()
@@ -241,16 +257,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     onObserverChange: function(observer)
     {
-        if (this.isAlwaysEnabled())
-        {
-            // we inject the console during JS compiles so we need jsd
-            Firebug.Debugger.addObserver(this);
-        }
-        else
-        {
-            Firebug.Debugger.removeObserver(this);
-        }
-
         if (!Firebug.getSuspended())  // then Firebug is in action
             this.onResumeFirebug();   // and we need to test to see if we need to addObserver
         else
@@ -352,27 +358,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("console.setStatus ERROR no firebugStatus element");
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // BTI
-
-    /**
-     * A previously enabled tool becomes active and sends us an event.
-     */
-    onActivateTool: function(toolname, active)
-    {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Console.onActivateTool "+toolname+" = "+active);
-
-        // Console depends on script to get injected (for now)
-        if (toolname === "script")
-        {
-            if (this.isAlwaysEnabled())
-            {
-                //this.asTool.setActive(active);  // then track the activation of the debugger;
-            }
         }
     },
 

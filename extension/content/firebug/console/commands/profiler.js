@@ -36,6 +36,18 @@ var Profiler = Obj.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 
+    profilerEnabled: false,
+
+    initialize: function()
+    {
+        Firebug.connection.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.connection.removeListener(this);
+    },
+
     showContext: function(browser, context)
     {
         this.setEnabled();
@@ -44,20 +56,11 @@ var Profiler = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Activation
 
-    onPanelEnable: function(panelName)
+    showPanel: function(browser, panel)
     {
-        Trace.sysout("Profiler.onPanelEnable panelName: " + panelName);
-
-        if (panelName == "console")
-            this.setEnabled();
-    },
-
-    onPanelDisable: function(panelName)
-    {
-        Trace.sysout("Profiler.onPanelDisable panelName: " + panelName);
-
-        if (panelName == "console")
-            this.setEnabled();
+        if (FBTrace.DBG_PROFILER)
+            FBTrace.sysout("Profiler.showPanel");
+        this.setEnabled();
     },
 
     setEnabled: function()
@@ -72,14 +75,22 @@ var Profiler = Obj.extend(Firebug.Module,
         var consolePanel = Firebug.currentContext.getPanel("console", true);
         var disabled = (consolePanel && !consolePanel.isEnabled());
 
+        this.profilerEnabled = !disabled;
+
+        if (disabled && this.isProfiling())
+            this.stopProfiling(context);
+
         // Attributes must be modified on the <command> element. All toolbar buttons
         // and menuitems are hooked up to the command.
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "disabled",
             disabled ? "true" : "false");
 
-        // Update button's tooltip.
-        var tooltipText = disabled ? Locale.$STR("ProfileButton.Disabled.Tooltip2")
-            : Locale.$STR("ProfileButton.Enabled.Tooltip");
+        // Update the button's tooltip.
+        var tooltipText = Locale.$STR("ProfileButton.Tooltip");
+
+        // xxxHonza: localization (make sure the string exists).
+        if (disabled)
+            tooltipText = Locale.$STRF("script.Console_panel_must_be_enabled", [tooltipText]);
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling",
             "tooltiptext", tooltipText);
@@ -91,6 +102,11 @@ var Profiler = Obj.extend(Firebug.Module,
     {
         if (this.isProfiling())
             this.stopProfiling(context, true);
+    },
+
+    onDebuggerEnabled: function()
+    {
+        this.setEnabled();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -109,6 +125,11 @@ var Profiler = Obj.extend(Firebug.Module,
         context.profiling.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
+
+        if (FBS.profiling)
+            return;
+
+        FBS.startProfiling();
 
         var originalTitle = title;
         var isCustomMessage = !!title;
@@ -158,10 +179,8 @@ var Profiler = Obj.extend(Firebug.Module,
 
     logProfileRow: function(context, title)
     {
-        var now = new Date().toISOString();
         var objects =
         {
-            getId: function() { return title + now; },
             title: title
         };
 
@@ -264,6 +283,25 @@ var Profiler = Obj.extend(Firebug.Module,
 
         Events.dispatch(this.fbListeners, "stopProfiling", [context,
             groupRow.originalTitle, calls, cancelReport]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    commandLineProfileStart: function(context, title)
+    {
+        if (!this.profilerEnabled)
+        {
+            var msg = Locale.$STR("ProfilerRequiresTheScriptPanel");
+            Firebug.Console.logFormatted([msg], context, "warn");
+            return;
+        }
+        Firebug.Profiler.startProfiling(context, title);
+    },
+
+    commandLineProfileEnd: function(context)
+    {
+        if (this.profilerEnabled)
+            this.stopProfiling(context);
     }
 });
 
@@ -430,7 +468,11 @@ Profiler.ProfileCaption = domplate(Firebug.Rep,
             SPAN({"class": "profileCaption"}, "$object.title"),
             " ",
             SPAN({"class": "profileTime"}, "")
-        )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    groupable: false
 });
 
 // ********************************************************************************************* //
@@ -536,13 +578,13 @@ function ProfileCall(script, context, funcName, callCount, totalTime, totalOwnTi
 function profile(context, args)
 {
     var title = args[0];
-    Profiler.startProfiling(context, title);
+    Profiler.commandLineProfileStart(context, title);
     return Firebug.Console.getDefaultReturnValue();
 };
 
 function profileEnd(context)
 {
-    Profiler.stopProfiling(context);
+    Profiler.commandLineProfileEnd(context);
     return Firebug.Console.getDefaultReturnValue();
 };
 

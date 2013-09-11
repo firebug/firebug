@@ -59,7 +59,6 @@
 
 #fbToolbar {
     padding-left: 4px;
-    background: #F6F6F6 linear-gradient(to top, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
     border-bottom: none;
 }
 
@@ -73,16 +72,28 @@
 
 .fbsearch-textbox {
     border-radius: 10px !important;
-    box-shadow: 0 2px 2px -2px #000000 inset;
+    margin-top: 1px;
 }
 
+.fbsearch-icon {
+    width: 22px;
+}
+
+.fbsearch-icon,
+.fbsearch-icon:hover {
+    background-position: 5px 50%;
+}
+
+/* xxxsz: Use PNG images for condition editor, because using SVGs as border images is broken
+   up to Firefox 22.0. Use SVGs as soon as Firefox 23.0 is the min. supported version.
+   (see issue 6607) */
 #fbSearchOptionsPanel {
     -moz-appearance: none;
     -moz-window-shadow: none;
     background-color: transparent;
     margin-bottom: 2px;
     margin-right: -12px;
-    border-image: url(chrome://firebug/skin/mac/searchPanel.svg) 16 50 24 12 stretch;
+    border-image: url(chrome://firebug/skin/mac/searchPanel.png) 16 50 24 12 stretch;
     border-image-slice: 16 50 24 12 fill;
     border-width: 16px 50px 24px 12px;
     border-style: solid;
@@ -90,22 +101,18 @@
 }
 
 #fbSearchOptionsPanel[position="after_end"] {
-    border-image: url(chrome://firebug/skin/mac/searchPanelDown.svg) 25 50 18 12 stretch;
+    border-image: url(chrome://firebug/skin/mac/searchPanelDown.png) 25 50 18 12 stretch;
     border-image-slice: 25 50 18 12 fill;
     border-width: 25px 50px 18px 12px;
 }
 
 #fbSearchOptionsPanel > vbox {
     margin-right: -38px;
-    background: #424242;
 }
 
 #fbSearchOptionsPanel > description {
-    background: #424242;
     margin: 0;
 }
-
-
 
 .fbsearch-options-label {
     color: #ffffff;
@@ -162,10 +169,8 @@
 }
 
 .toolbarbutton-iconic {
-    margin: 0 1px 0 1px !important;
+    margin: 1px 1px 0 1px !important;
     padding: 0 !important;
-    /*border: none !important;*/
-    /*background: transparent !important;*/
 }
 
 .toolbarbutton-iconic > .toolbarbutton-icon {
@@ -178,12 +183,35 @@
 
 #fbMinimizeButton,
 #fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
+    list-style-image: url(chrome://firebug/skin/mac/minimize.png);
+    -moz-image-region: rect(0px, 13px, 13px, 0px);
+}
+
+/* Need to use images instead of filters due to https://bugzil.la/886883 */
+#fbMinimizeButton:hover,
+#fbToggleCommandEditor:hover {
+    -moz-image-region: rect(13px, 13px, 26px, 0px);
+}
+
+#fbMinimizeButton:hover:active,
+#fbToggleCommandEditor:hover:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0px);
 }
 
 #fbDetachButton,
 #fbToggleCommandLine {
-    list-style-image: url(chrome://firebug/skin/mac/detach.svg);
+    list-style-image: url(chrome://firebug/skin/mac/detach.png);
+    -moz-image-region: rect(0px, 13px, 13px, 0px);
+}
+
+#fbDetachButton:hover,
+#fbToggleCommandLine:hover {
+    -moz-image-region: rect(13px, 13px, 26px, 0px);
+}
+
+#fbDetachButton:hover:active,
+#fbToggleCommandLine:hover:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0px);
 }
 
 #fbToggleCommandLine,
@@ -192,38 +220,46 @@
 }
 
 #fbCloseButton {
-    list-style-image: url(chrome://firebug/skin/mac/close.svg);
+    list-style-image: url(chrome://firebug/skin/mac/close.png);
+    -moz-image-region: rect(0px, 13px, 13px, 0px);
+}
+
+#fbCloseButton:hover {
+    -moz-image-region: rect(13px, 13px, 26px, 0px);
+}
+
+#fbCloseButton:hover:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0px);
 }
 
 #fbCommandLineHistoryButton {
-    list-style-image: url(chrome://firebug/skin/mac/commandHistory.svg);
+    list-style-image: url(chrome://firebug/skin/mac/commandHistory.png);
+    -moz-image-region: rect(0px, 13px, 13px, 0px);
 }
 
-#fbToggleCommandEditor {
-    list-style-image: url(chrome://firebug/skin/mac/minimize.svg);
-}
-
-#fbMinimizeButton:hover,
-#fbDetachButton:hover,
-#fbCloseButton:hover,
-#fbToggleCommandLine:hover,
-#fbToggleCommandEditor:hover,
 #fbCommandLineHistoryButton:hover {
-    filter: url(resource://firebugui/filters.svg#darken);
+    -moz-image-region: rect(13px, 13px, 26px, 0px);
 }
 
-#fbMinimizeButton:hover:active,
-#fbDetachButton:hover:active,
-#fbCloseButton:hover:active,
-#fbToggleCommandLine:hover:active,
-#fbToggleCommandEditor:hover:active,
-#fbCommandLineHistoryButton:active,
-#fbCommandLineHistoryButton[checked="true"] {
-    filter: url(resource://firebugui/filters.svg#deepDarken);
+#fbCommandLineHistoryButton:hover:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0px);
 }
 
 #fbCommandLineHistoryButton[disabled] {
-    filter: url(resource://firebugui/filters.svg#brighten);
+    -moz-image-region: rect(39px, 13px, 52px, 0px);
+}
+
+#fbToggleCommandEditor {
+    list-style-image: url(chrome://firebug/skin/mac/minimize.png);
+    -moz-image-region: rect(0px, 13px, 13px, 0px);
+}
+
+#fbToggleCommandEditor:hover {
+    -moz-image-region: rect(13px, 13px, 26px, 0px);
+}
+
+#fbToggleCommandEditor:hover:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0px);
 }
 
 /********************************************************************************************/
@@ -243,8 +279,8 @@
 /********************************************************************************************/
 
 .panelTabBox {
-    background: #e0e0e0 linear-gradient(to top, #D7D7D7, #EDEDED) repeat-x;
-    border-bottom: 1px solid #BBB9BA;
+    background: linear-gradient(to bottom, #f1f1f1, #d2d2d2) no-repeat 0 0;
+    border-bottom: 1px solid #bebebe;
     padding: 0;
     overflow: hidden;
 }
@@ -255,20 +291,26 @@
 }
 
 panelTab {
-    margin: 2px 1px 0 3px;
+    margin: 4px 1px 0 3px;
     border: 1px solid transparent;
     border-bottom: none;
     border-radius: 4px 4px 0 0;
-    padding: 2px 7px 5px 7px;
+    padding: 5px 8px 7px 8px;
     font-size: 11px;
     font-weight: bold;
-    color: #565656;
+    color: #3a3a3a;
     direction: ltr;
 }
+
+panelTab[aria-disabled="true"] .panelTab-text {
+    -moz-appearance: none;
+    color: #7c7c7c !important;
+}
+
 panelTab[selected="true"] {
     border: 1px solid #A0A0A0;
     border-bottom: none;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7)) no-repeat 0 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
     color: inherit;
 }
 
@@ -323,20 +365,20 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button,
 .toolbar-text-menubutton {
-    margin: 0 1px;
     -moz-appearance: none;
-    padding: 1px 0px 1px 7px;
+    margin-top: 7px;
+    margin-bottom: 6px;
+    padding: 0 8px;
     min-width: 0;
     max-width: 13em;
     font-weight: bold;
-    color: #565656;
+    color: #3a3a3a;
     border: none !important;
-    border-radius: 8px;
+    border-radius: 9px;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
     margin-left: 7px;
-    padding-right: 7px;
 }
 
 .toolbar-text-button > .toolbarbutton-icon {
@@ -347,47 +389,46 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-menubutton:hover:not([disabled="true"]) ,
 .toolbar-text-button[checked="true"]:hover:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]) {
-    background: #999999;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .toolbar-text-button:hover:active:not([disabled="true"]),
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) {
-    box-shadow:
-        inset rgba(60, 60, 60, 0.15) 0 -1px 3px,
-        inset #111111 0 1px 3px,
-        inset rgba(60, 60, 60, 0.1) 0 1px 2px,
-        0 1px rgba(244, 244, 244, 0.4);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
-    color: #FFFFFF;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    text-shadow: 0 1px rgba(120, 120, 120, 1);
 }
 
 .toolbar-text-button[checked="true"]:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-    text-shadow: 0 1px rgba(255, 255, 255, 0.4);
-    background-color: #CCCCCC;
+    text-shadow: 0 1px rgba(120, 120, 120, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5) inset;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
-    color: #FFFFFF;
+    color: #fff;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
-    color: #333333;
+    color: #3a3a3a;
 }
+
 .toolbar-text-button[checked="true"] > .toolbarbutton-text {
-    color: #000000;
+    color: #fff;
 }
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
   font-size: 100% !important;
-  margin: 0px !important;
+  margin: 0 !important;
 }
 
 .toolbar-text-button > .toolbarbutton-text,
@@ -446,13 +487,14 @@ panelTab[selected="true"] > panelTabMenu {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    background: #F6F6F6 linear-gradient(to top, #DCDCDC 1px, #FFFFFF 1px, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
+    border-top: 1px solid #fff;
     margin-left: -5px;
-    margin-right: 0px;
+    margin-right: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)) no-repeat 0 0;
 }
 
 .useA11y #fbPanelBar1 textbox[focused],
- .searchOptionsMenu button:focus {
+.searchOptionsMenu button:focus {
     -moz-outline-radius: 10px !important;
 }
 
@@ -506,6 +548,22 @@ panelTab[selected="true"] > panelTabMenu {
     border-right: 2px solid !important;
     -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
     -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+}
+
+/*************************************************************************************************/
+/* Panel Tabs */
+
+panelTab[selected="true"] > panelTabMenu .menuTarget,
+panelTab:focus > panelTabMenu .menuTarget {
+    background: url(chrome://firebug/skin/mac/optionsMenuTarget.png) no-repeat center;
+    width: 11px;
+    height: 10px;
+    vertical-align: middle;
+    visibility: visible;
+}
+
+panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
+    background-image: url(chrome://firebug/skin/mac/optionsMenuTargetHover.png);
 }
 
 /************************************************************************************************/

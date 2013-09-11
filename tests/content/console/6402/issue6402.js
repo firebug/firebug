@@ -68,7 +68,7 @@ function testGetConsoleByGlobal(callback, iframe, oriIframeConsoleInstance)
     var newIframeConsoleInstance = FW.Firebug.getConsoleByGlobal(iframe.contentWindow);
     FBTest.ok(newIframeConsoleInstance, "newIframeConsoleInstance should be non-null");
     FBTest.ok(oriIframeConsoleInstance, "oriIframeConsoleInstance should be non-null");
-    FBTest.compare(newIframeConsoleInstance, oriIframeConsoleInstance, 
+    FBTest.compare(newIframeConsoleInstance, oriIframeConsoleInstance,
         "newIframeConsoleInstance should be different from oriIframeConsoleInstance", true);
     callback();
 }

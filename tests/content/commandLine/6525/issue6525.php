@@ -25,8 +25,8 @@
                     <li>Enable the Console, Net and Cookies panels</li>
                     <li>Switch to the Net panel</li>
                     <li>Right click on the <i>issue6525.php</i> request and pick <i>Use in Command Line</i></li>
-                    <li>Type <code>$p.contentType</code> into the Command Line</li>
-                    <li>The command output should be: <code style="color:red">text/html</code></li>
+                    <li>Type <code>$p.responseHeaders[0].name</code> into the Command Line</li>
+                    <li>The command output should be a string.</li>
                     <br/>
                     <li>Switch to the Cookies panel</li>
                     <li>Right click on the <i>TestCookieIssue6525</i> cookie and pick <i>Use in Command Line</i></li>

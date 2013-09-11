@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false, evil:true, forin: false*/
+/*jshint esnext:true, curly:false, evil:true, forin: false*/
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
@@ -17,17 +17,13 @@ function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
 
 const Cu = Components.utils;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-var commandLineCache = new WeakMap();
-
 // ********************************************************************************************* //
 // Command Line APIs
 
 // List of command line APIs
 var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
     "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-    "traceAll", "untraceAll", "copy" /*, "memoryProfile", "memoryProfileEnd"*/];
+    "traceAll", "untraceAll", "copy"];
 
 // List of shortcuts for some console methods
 var consoleShortcuts = ["dir", "dirxml", "table"];
@@ -71,6 +67,10 @@ function createFirebugCommandLine(context, win)
     // The debuggee global.
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
 
+    if (!context.commandLineCache)
+        context.commandLineCache = new WeakMap();
+    var commandLineCache = context.commandLineCache;
+
     var commandLine = commandLineCache.get(win.document);
     if (commandLine)
         return copyCommandLine(commandLine, dglobal);
@@ -99,9 +99,16 @@ function createFirebugCommandLine(context, win)
         return dglobal.makeDebuggeeValue(wrappedCommand);
     }
 
-    function createVariableHandler(handler)
+    function createVariableHandler(handler, config)
     {
-        var object = dglobal.makeDebuggeeValue({});
+        var debuggeeObj = {}, object;
+
+        // Callable getters are commands whose syntax are both `command` and `command()`.
+        // The help command has this syntax for example.
+        if (config.isCallableGetter === true)
+            debuggeeObj = function(){ return object.handle(); };
+
+        object = dglobal.makeDebuggeeValue(debuggeeObj);
         object.handle = function()
         {
             try
@@ -124,15 +131,9 @@ function createFirebugCommandLine(context, win)
             {
                 return config.handler.call(null, context, arguments);
             }
-            catch (exc)
+            catch(ex)
             {
-                Firebug.Console.log(exc, context, "errorMessage");
-
-                if (FBTrace.DBG_ERRORS)
-                {
-                    FBTrace.sysout("commandLine.api; EXCEPTION when executing " +
-                        "a command: " + name + ", " + exc, exc);
-                }
+                throw new Error(ex.message, ex.fileName, ex.lineNumber);
             }
         };
     }
@@ -157,7 +158,7 @@ function createFirebugCommandLine(context, win)
         var config = userCommands[name];
         var command = createUserCommandHandler(config, name);
         if (userCommands[name].getter)
-            commandLine[name] = createVariableHandler(command);
+            commandLine[name] = createVariableHandler(command, config);
         else
             commandLine[name] = createCommandHandler(command);
     }
@@ -223,25 +224,6 @@ function unregisterCommand(name)
 }
 
 /**
- * Returns true if the scope is specific of the commands bindings.
- *
- * @param {Scope} scope
- * @param {Window} win The (wrapped) window
- *
- * @return {boolean}
- */
-function isCommandLineScope(scope, win)
-{
-    var commandLine = commandLineCache.get(win.document);
-
-    // This should never occur.
-    if (!commandLine && (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS))
-        FBTrace.sysout("CommandLineExposed.isCommandLineScope; could not get commandLine");
-    // Test whether the scope is an object and if its object contains commandLine functions
-    return scope.type === "object" && commandLine && commandLine.cd === scope.getVariable("cd");
-}
-
-/**
  * Evaluates an expression in the thread of the webpage, so the Firebug UI is not frozen
  * when the expression calls a function which will be paused.
  *
@@ -252,6 +234,7 @@ function isCommandLineScope(scope, win)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  *
  * @see CommandLine.evaluate
  */
@@ -269,19 +252,29 @@ function evaluateInPageContext(context, win)
  * @param {string} origExpr The expression as typed by the user
  * @param {function} onSuccess The function to trigger in case of success
  * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(context, win, expr, origExpr, onSuccess, onError)
+function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 {
+    if (!options)
+        options = {};
+
     var result;
     var contentView = Wrapper.getContentView(win);
-    var commandLine = createFirebugCommandLine(context, win);
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
 
-    updateVars(commandLine, dglobal, context);
-    removeConflictingNames(commandLine, context, contentView);
+    if (!options.noCmdLineAPI)
+    {
+        var bindings = getCommandLineBindings(context, win, dglobal, contentView);
 
-    resObj = dglobal.evalInGlobalWithBindings(expr, commandLine);
+        resObj = dglobal.evalInGlobalWithBindings(expr, bindings);
+    }
+    else
+    {
+        resObj = dglobal.evalInGlobal(expr);
+    }
+
 
     var unwrap = function(obj)
     {
@@ -504,6 +497,16 @@ function getAutoCompletionList()
     return completionList;
 }
 
+function getCommandLineBindings(context, win, dglobal, contentView)
+{
+    var commandLine = createFirebugCommandLine(context, win);
+
+    updateVars(commandLine, dglobal, context);
+    removeConflictingNames(commandLine, context, contentView);
+
+    return commandLine;
+}
+
 // ********************************************************************************************* //
 // Registration
 
@@ -516,7 +519,6 @@ Firebug.CommandLineExposed =
     userCommands: userCommands,
     registerCommand: registerCommand,
     unregisterCommand: unregisterCommand,
-    isCommandLineScope: isCommandLineScope,
     evaluate: evaluateInPageContext,
     getAutoCompletionList: getAutoCompletionList,
 };

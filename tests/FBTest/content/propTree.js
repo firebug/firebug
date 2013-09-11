@@ -29,8 +29,8 @@ var Ci = Components.interfaces;
  * This object is intended as a domplate widget for displaying hierarchical
  * structure (tree). Specific tree should be derived from this object and
  * getMembers method should be implemented.
- * 
- * @domplate  
+ *
+ * @domplate
  */
 var Tree = domplate(Firebug.Rep,
 /** @lends FBTestApp.Tree */

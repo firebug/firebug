@@ -1,7 +1,7 @@
 // 1) Load test case page.
 // 2) Open Firebug and enable the Net panel
 // 3) Select Net panel
-// 4) Execute test implemented on the test page. 
+// 4) Execute test implemented on the test page.
 // 5) Perform test-driver code
 // 6) Finish test.
 function runTest()

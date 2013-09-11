@@ -17,7 +17,7 @@
 <binding id="panelBar">
     <!-- The XUL structure for the panel bar is specified in the XUL source
          inside each "panelBar" element.  This allows us to have panel bars
-         with substantially different layous, including the ability to embed
+         with substantially different layout, including the ability to embed
          one panel bar within another - albeit at some cost in maintainability. -->
     <content>
         <children/>
@@ -57,15 +57,15 @@
             <body><![CDATA[
                 var tab = document.createElement("panelTab");
                 tab.panelType = panelType;
-    
+
                 var title = Firebug.getPanelTitle(panelType);
                 var tooltip = Firebug.getPanelTooltip(panelType);
                 tab.setAttribute("label", title);
                 tab.setAttribute("tooltiptext", tooltip);
-    
+
                 this.tabMap[panelType.prototype.name] = tab;
                 this.updateTab(panelType);
-    
+
                 return tab;
             ]]></body>
         </method>
@@ -89,15 +89,20 @@
             <parameter name="panelType"/>
             <body><![CDATA[
                 var tab = this.getTab(panelType.prototype.name);
-    
+
                 if (tab && panelType.prototype.activable)
                 {
                     var enabled = panelType.prototype.isEnabled();
                     tab.setAttribute("aria-disabled", enabled ? "false" : "true");
                 }
-    
-                // xxxHonza: Does this belong here?
+
+                // xxxHonza: This doesn't belong here, the start button should utilize
+                // the onUpdateTab event fired below.
+                // The activation logic (above) should be implemented similarly.
                 Firebug.StartButton.resetTooltip();
+
+                Firebug.dispatch(Firebug.uiListeners, "onUpdateTab",
+                    [Firebug.currentContext, tab, panelType]);
             ]]></body>
         </method>
 
@@ -284,6 +289,8 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
+
+                    Firebug.dispatch(Firebug.uiListeners, "onShowPanel", [panel]);
                 }
                 else
                 {
@@ -304,6 +311,8 @@
                 {
                     var state = FBL.getPersistedState(oldPanel.context, oldPanel.name);
                     oldPanel.hide(state);
+
+                    Firebug.dispatch(Firebug.uiListeners, "onHidePanel", [oldPanel]);
 
                     oldPanel.visible = false; // xxxjjb Why three ways to un-show the panel?
                     oldPanel.panelNode.removeAttribute("active");
@@ -492,19 +501,19 @@
             <body><![CDATA[
                 if (!this.initialized)
                     return;
-    
+
                 // Don't shrink at all, if the pref is set to zero or less
                 if (Firebug.panelTabMinWidth <= 0)
                     return;
-    
+
                 var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
                 if (!totalWidth)
                     return;
-    
+
                 var tabs = FBL.cloneArray(this.panelTabs.children);
                 if (!tabs.length)
                     return;
-    
+
                 var availableSpace = totalWidth;
                 while (tabs.length && availableSpace > 0)
                 {
@@ -534,10 +543,10 @@
             <body><![CDATA[
                 if (this.initialized)
                     return;
-    
+
                 if (!this.panelTabs)
                     return;
-    
+
                 var tab = this.panelTabs.firstChild;
                 while (tab)
                 {
@@ -596,11 +605,11 @@
                     var checked = menuItem.getAttribute("checked") == "true";
                     if (checked)
                         visibleTabs.push(menuItem);
-    
+
                     menuItem.removeAttribute("disabled");
                     menuItem = menuItem.nextSibling;
                 }
-    
+
                 // If there is only one panel visible don't allow to close it.
                 if (visibleTabs.length == 1)
                     visibleTabs[0].setAttribute("disabled", true);
@@ -674,12 +683,12 @@
             <body><![CDATA[
                 if (this.getAttribute("disabled") == "true")
                     return;
-    
+
                 var panelName = this.panelType.prototype.name;
                 var checked = this.getAttribute("checked") == "true";
                 this.setAttribute("checked", checked ? "false" : "true");
                 this.panelBar.togglePanel(panelName, !checked);
-    
+
                 Firebug.chrome.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
@@ -1087,12 +1096,14 @@
                 else if (val)
                 {
                     var description = locator.getObjectDescription(val);
-                    fileName = description.label ? description.label : description.name;
+                    fileName = (description.protocol == "file" && description.path == "" &&
+                        description.name == "") ? description.domain : description.name;
                 }
 
                 this.repObject = val;
 
                 var button = document.getAnonymousElementByAttribute(this, "anonid", "button");
+                
                 var path = description.path != "/" ? description.path : description.domain;
                 if (fileName == path)
                     FBL.setClass(button, "fbInlineItem");
@@ -1100,7 +1111,7 @@
                     FBL.removeClass(button, "fbInlineItem");
 
                 this.setAttribute("label", fileName != path ?
-                    FBL.cropString(fileName, 80) : "Inline");
+                    FBL.cropString(fileName, 80) : FBL.$STR("location.inline"));
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
                 {
@@ -1237,10 +1248,15 @@
                 if (!description)
                     FBTrace.sysout("binding.xml popupshowing Fails", object);
 
-                var entry = {object: object, fileName: description.name};
+                var name = (description.protocol == "file" && description.path == "" &&
+                    description.name == "") ? description.domain : description.name;
+                var entry = {object: object, fileName: name};
 
-                if (currentDescription && currentDescription.name == description.name &&
-                    currentDescription.path == description.path)
+                if (currentDescription &&
+                    currentDescription.protocol == description.protocol &&
+                    currentDescription.domain == description.domain &&
+                    currentDescription.path == description.path &&
+                    currentDescription.name == description.name)
                 {
                     entry.selected = true;
                 }
@@ -1265,12 +1281,18 @@
                 var urls = groups[path];
                 urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
 
-                var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                var menuHeader = FBL.createMenuHeader(this.popup, {
+                    label: path || FBL.$STR("location.no_domain"),
+                    nol10n: true
+                });
                 FBL.setClass(menuHeader, "fbURLMenuItem");
+                if (path == "")
+                    FBL.setClass(menuHeader, "fbNoDomain");
 
                 for (var j = 0; j < urls.length; ++j)
                 {
-                    var label = urls[j].fileName != path ? urls[j].fileName : "Inline";
+                    var label = urls[j].fileName != path ?
+                        urls[j].fileName : FBL.$STR("location.inline");
                     var menuInfo = {
                         label: FBL.cropString(label, Firebug.Options.get("stringCropLength")),
                         tooltiptext: path + urls[j].fileName,
@@ -1833,14 +1855,15 @@
                 if (!optionsPopup || !searchBox)
                     return;
                 searchBox.focus();
-                if (optionsPopup.state == "open")
+                if (optionsPopup.state == "open" && this.value.length == 0)
                 {
-                    event.stopPropagation(); // prevent cmd popup toggle
                     optionsPopup.hidePopup();
                 }
                 else
                 {
-                    return;
+                    this.value = "";
+                    this.status = "noSearch";
+                    Firebug.Search.setPlaceholder();
                 }
             }
             else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
@@ -1875,6 +1898,7 @@
                 hideOptions();
                 status = "noSearch";
                 focused = false;
+                Firebug.Search.setPlaceholder();
             }, 0);
         ]]></handler>
     </handlers>
@@ -1906,34 +1930,4 @@
     </handlers>
 </binding>
 
-<binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
-    <content align="stretch">
-        <xul:menuitem anonid="item" flex="1"
-            class="menuitem-tooltip split-menuitem-item"
-            xbl:inherits="label,key,image,value,checked" allowevents="true"/>
-        <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
-            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
-                <xul:image/>
-            </xul:hbox>
-        </xul:hbox>
-        <children includes="menupopup"/>
-    </content>
-
-    <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
-        <constructor><![CDATA[
-            if (this.getAttribute("iconic") == "true")
-            {
-                this.item.classList.remove("menuitem-tooltip");
-                this.item.classList.add("menuitem-iconic-tooltip");
-                this.item.classList.add("menuitem-iconic");
-            }
-            // workaround for 3.6 bug
-            this.item.classList.add("split-menuitem-item");
-      ]]></constructor>
-
-      <field name="item" readonly="true">
-          document.getAnonymousElementByAttribute(this, "anonid", "item");
-      </field>
-    </implementation>
-</binding>
 </bindings>

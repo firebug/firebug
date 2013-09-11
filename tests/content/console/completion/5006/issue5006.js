@@ -39,7 +39,7 @@ function openEditor(callback)
     FBTest.selectPanel("console");
     verifyConsolePopup(false);
 
-    // Click the Command Line toggle button to switch to the Command Editor 
+    // Click the Command Line toggle button to switch to the Command Editor
     FBTest.clickToolbarButton(null, "fbToggleCommandLine");
 
     FBTest.selectPanel("html");

@@ -58,7 +58,7 @@ var UseInCommandLine = Obj.extend(Firebug.Module,
         // Get the object that should be associated with '$p' variable.
         // The same way is used by e.g. 'Inspect In DOM panel' command.
         object = rep.getRealObject(object, context);
-        if (object instanceof SourceLink.SourceLink)
+        if (object instanceof SourceLink)
             return;
 
         var item = {

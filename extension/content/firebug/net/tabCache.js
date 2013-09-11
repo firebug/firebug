@@ -15,10 +15,11 @@ define([
     "firebug/net/jsonViewer",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
-    "firebug/net/sourceCache"
+    "firebug/net/sourceCache",
+    "firebug/lib/options",
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener) {
+    Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener, SourceCache, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -27,12 +28,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-
-// Maximum cached size of a single response (bytes)
-var responseSizeLimit = 1024 * 1024 * 5;
 
 // List of text content types. These content-types are cached.
 var contentTypes =
@@ -110,11 +105,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.initializeUI;");
 
-        // Read maximum size limit for cached response from preferences.
-        responseSizeLimit = Firebug.Options.get("cache.responseLimit");
-
         // Read additional text MIME types from preferences.
-        var mimeTypes = Firebug.Options.get("cache.mimeTypes");
+        var mimeTypes = Options.get("cache.mimeTypes");
         if (mimeTypes)
         {
             var list = mimeTypes.split(" ");
@@ -305,10 +297,14 @@ Firebug.TabCache = function(context)
     if (FBTrace.DBG_CACHE)
         FBTrace.sysout("tabCache.TabCache Created for: " + context.getName());
 
-    Firebug.SourceCache.call(this, context);
+    SourceCache.call(this, context);
+
+    // Set of HTTP responses (URLs) that has been limited in the cache.
+    // Used by the UI to notify the user.
+    this.limitedResponses = {};
 };
 
-Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
+Firebug.TabCache.prototype = Obj.extend(SourceCache.prototype,
 {
     // Responses in progress
     responses: [],
@@ -350,11 +346,19 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 
         // Size of each response is limited.
         var limitNotReached = true;
+        var responseSizeLimit = Options.get("cache.responseLimit");
         if (response.size + responseText.length >= responseSizeLimit)
         {
             limitNotReached = false;
             responseText = responseText.substr(0, responseSizeLimit - response.size);
-            FBTrace.sysout("tabCache.storePartialResponse Max size limit reached for: " + url);
+
+            this.limitedResponses[url] = true;
+
+            if (FBTrace.DBG_CACHE)
+            {
+                FBTrace.sysout("tabCache.storePartialResponse; Maximum response limit " +
+                    "reached for: " + url);
+            }
         }
 
         response.size += responseText.length;
@@ -365,6 +369,11 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 
         // Return false if furhter parts of this response should be ignored.
         return limitNotReached;
+    },
+
+    isLimited: function(url)
+    {
+        return this.limitedResponses[url];
     },
 
     getResponse: function(request)

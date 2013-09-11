@@ -25,4 +25,12 @@
     <filter id="grayscale">
         <feColorMatrix type="saturate" values="0"/>
     </filter>
+    <filter id="brightenedGrayscale">
+        <feColorMatrix type="saturate" values="0" result="grayscale"/>
+        <feComponentTransfer in="grayscale">
+            <feFuncR type="linear" intercept="0.2" slope="1"/>
+            <feFuncG type="linear" intercept="0.2" slope="1"/>
+            <feFuncB type="linear" intercept="0.2" slope="1"/>
+        </feComponentTransfer>
+    </filter>
 </svg>

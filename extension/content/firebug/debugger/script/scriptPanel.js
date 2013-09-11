@@ -91,7 +91,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     destroy: function(state)
     {
         // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
-        delete this.selection;
+        this.selection = null;
 
         // Remember data for Script panel restore.
         state.location = this.location;
@@ -1000,7 +1000,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!chrome)
         {
             TraceError.sysout("debugger.syncCommand, context with no chrome: " +
-                context.getGlobalScope());
+                context.getCurrentGlobal());
 
             return;
         }

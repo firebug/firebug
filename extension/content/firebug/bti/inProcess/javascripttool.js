@@ -163,6 +163,8 @@ JavaScriptTool.onActivateTool = function(toolname, active)
 
         if (JavaScriptTool.asTool)
             JavaScriptTool.asTool.setActive(active);
+
+        Firebug.connection.dispatch("onDebuggerEnabled", [active]);
     }
 },
 

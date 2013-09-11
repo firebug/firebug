@@ -1,7 +1,7 @@
 function runTest()
 {
     FBTest.sysout("issue68Frame.START");
-        
+
     FBTest.openNewTab(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameExpected.htm", function(win)
     {
         var actualImage, expectedImage,
@@ -10,7 +10,7 @@ function runTest()
             height = ifr.contentDocument.body.clientHeight;
 
         expectedImage = FBTest.getImageDataFromWindow(ifr.contentWindow, width, height);
-        
+
         FBTest.openURL(basePath + "inspector/InspectorTestIframe.htm?url=Issue68FrameActual.htm", function(win)
         {
             FBTest.openFirebug();
@@ -19,7 +19,7 @@ function runTest()
 
             var target = ifr.contentDocument.getElementById("testTarget1");
 
-            // To get full html for expected page break here and use: ifr.contentDocument.documentElement.innerHTML            
+            // To get full html for expected page break here and use: ifr.contentDocument.documentElement.innerHTML
 
             FBTest.inspectUsingFrame(target);
 

@@ -15,7 +15,7 @@ define([
 function(Firebug, FBTrace, Obj, Domplate, ErrorMessageObj, ErrorMessage, ErrorCopy,
     FirebugReps, StackFrame, StackTrace) {
 
-with (Domplate) {
+"use strict"
 
 // ********************************************************************************************* //
 // Constants
@@ -23,11 +23,14 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+var {domplate, TAG} = Domplate;
+
 // ********************************************************************************************* //
 // Exception Template Implementation
 
 /**
- * @domplate
+ * @domplate This template represents exceptions that happen in the content and appear
+ * within Firebug UI. It's registered as Firebug rep.
  */
 var Exception = domplate(Firebug.Rep,
 /** @lends Exception */
@@ -69,7 +72,7 @@ var Exception = domplate(Firebug.Rep,
                 lineNo = 0;
         }
 
-        var errorObject = new ErrorMessageObj(message, url, lineNo, null, "js",
+        var errorObject = new ErrorMessageObj(message, url, lineNo, "", "js",
             context, trace);
 
         if (trace && trace.frames && trace.frames[0])
@@ -81,19 +84,20 @@ var Exception = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        var str = Object.prototype.toString.call(object);
-        return (object instanceof ErrorCopy) || str == "[object Error]";
+        return (object instanceof ErrorCopy) || Obj.XW_instanceof(object, Error);
     }
 });
 
 // ********************************************************************************************* //
 // Registration
 
+// xxxHonza: which one is needed for back compatibility
 FirebugReps.ExceptionRep = Exception;
+FirebugReps.Except = Exception;
 
 Firebug.registerRep(Exception);
 
 return Exception;
 
 // ********************************************************************************************* //
-}});
+});

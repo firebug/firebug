@@ -121,9 +121,18 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
         // responses (and post data) (with "{") can be parsed unnecessarily,
         // which represents a little overhead, but this happens only if the request
         // is actually expanded by the user in the UI (Net & Console panels).
-        var responseText = data ? Str.trimLeft(data) : null;
-        if (responseText && responseText.charAt(0) === "{")
-            return true;
+        // Do a manual string search instead of checking (data.strip()[0] === "{")
+        // to improve performance/memory usage.
+        var len = data ? data.length : 0;
+        for (var i = 0; i < len; i++)
+        {
+            var ch = data.charAt(i);
+            if (ch === "{")
+                return true;
+            if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r")
+                continue;
+            break;
+        }
 
         if (!contentType)
             return false;

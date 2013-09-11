@@ -25,7 +25,7 @@ function runTest()
                     FBTest.testDone("refreshHaltedDebugger; DONE");
                 });
 
-                // If the debugger is resumed before refresh, the test passes. 
+                // If the debugger is resumed before refresh, the test passes.
                 //FBTest.clickContinueButton(chrome);
 
                 // 4) Reload page and wait for another break.

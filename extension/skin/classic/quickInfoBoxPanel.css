@@ -1,0 +1,10 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Quick Info Box */
+
+#fbQuickInfoPanel {
+    border: none;
+    opacity: 0.9;
+    overflow: hidden;
+}

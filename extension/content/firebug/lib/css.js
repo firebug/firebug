@@ -22,7 +22,7 @@ var Cc = Components.classes;
 
 var Css = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS
 
 var cssKeywordMap = {};
@@ -123,7 +123,9 @@ Css.getCSSShorthandCategory = function(nodeType, shorthandProp, keyword)
 /**
  * Parses the CSS properties of a CSSStyleRule
  * @param {Object} style CSSStyleRule to get the properties of
- * @param {Object} element Element to which the style applies. Needed for parsing shorthand properties correctly.
+ * @param {Object} element Element to which the style applies. Needed for parsing
+ *      shorthand properties correctly.
+ *
  * @returns {Array} Properties represented by {name, value, priority, longhandProps}
  */
 Css.parseCSSProps = function(style, element)
@@ -301,8 +303,11 @@ Css.getElementCSSSelector = function(element)
     if (element.id)
         label += "#" + element.id;
 
-    if (element.classList && element.classList.length > 0)
-        label += "." + element.classList[0];
+    if (element.classList)
+    {
+        for (var i=0, len=element.classList.length; i<len; ++i)
+            label += "." + element.classList[i];
+    }
 
     return label;
 };
@@ -320,7 +325,7 @@ Css.getElementCSSPath = function(element)
     return paths.length ? paths.join(" ") : null;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSS classes
 
 var classNameReCache={};
@@ -709,9 +714,11 @@ Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
+    {
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
             (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+    }
 
     ownerDocument = ownerDocument || Css.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)
@@ -782,14 +789,45 @@ Css.extractURLs = function(value)
 
 Css.colorNameToRGB = function(value)
 {
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
-    }
-    catch(e) {
+    if (!domUtils.colorNameToRGB)
         return value;
+
+    var reSplit = /(\(|,|\)|\s)/;
+    var parts = value.split(reSplit);
+
+    var newValue = "";
+    for (var i=0, len=parts.length; i<len; ++i)
+    {
+        var part = parts[i];
+        if (part === "transparent")
+        {
+            newValue += "rgba(0, 0, 0, 0)";
+        }
+        else
+        {
+            if (Css.isColorKeyword(part))
+            {
+                try
+                {
+                    var rgbValue = domUtils.colorNameToRGB(part);
+                    newValue += "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+                }
+                catch(e)
+                {
+                    // Color keyword is a system color, which can't be resolved by
+                    // domUtils.colorNameToRGB(), so just return the keyword itself
+                    // (see issue 6753)
+                    newValue += part;
+                }
+            }
+            else
+            {
+                newValue += part;
+            }
+        }
     }
+
+    return newValue;
 };
 
 Css.rgbToHex = function(value)
@@ -799,12 +837,8 @@ Css.rgbToHex = function(value)
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
             toString(16).substr(-6).toUpperCase();
     }
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHex(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
@@ -864,12 +898,7 @@ Css.rgbToHSL = function(value)
             return "hsl("+h+", "+s+"%, "+l+"%)";
     }
 
-    try
-    {
-        var rgbValue = domUtils.colorNameToRGB(value);
-        return convertRGBToHSL(rgbValue.r, rgbValue.g, rgbValue.b);
-    }
-    catch(e) {}
+    value = Css.colorNameToRGB(value);
 
     return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d.\d+|\d))?\)/gi,
         function(_, r, g, b, _, a)
@@ -956,6 +985,16 @@ Css.cssInfo.html =
     "empty-cells": ["emptyCells"],
     "float": ["float"],
 
+    "align-items": ["alignItems"],
+    "align-self": ["alignSelf"],
+    "flex": ["flexBasis"],
+    "flex-basis": ["flexBasis"],
+    "flex-direction": ["flexDirection"],
+    "flex-grow": [],
+    "flex-shrink": [],
+    "justify-content": ["justifyContent"],
+    "order": [],
+
     // specification of font families in "font" is special-cased
     "font": ["fontStyle", "fontVariant", "namedFontWeight", "fontSize", "lineHeight", "mozFont"],
     "font-family": ["fontFamily"],
@@ -983,9 +1022,9 @@ Css.cssInfo.html =
     "margin-left": ["auto", "length"],
 
     "marker-offset": ["auto", "length"],
-    "min-height": ["auto", "length"],
+    "min-height": ["length"],
     "max-height": ["none", "length"],
-    "min-width": ["width", "auto", "length"],
+    "min-width": ["width", "length"],
     "max-width": ["width", "none", "length"],
 
     "opacity": [],
@@ -1064,7 +1103,7 @@ Css.cssInfo.html =
     "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
     "-moz-background-inline-policy": [],
-    "-moz-binding": [],
+    "-moz-binding": ["url()", "none"],
     "-moz-columns": ["auto", "length"],
     "-moz-column-count": ["auto"],
     "-moz-column-gap": ["normal", "length"],
@@ -1073,7 +1112,7 @@ Css.cssInfo.html =
     "-moz-column-rule-style": ["borderStyle"],
     "-moz-column-rule-color": ["color"],
     "-moz-column-width": ["auto", "length"],
-    "-moz-image-region": [],
+    "-moz-image-region": ["rect()"],
     "-moz-font-feature-settings": ["mozFontFeatureSettings"], // FF 4.0
     "-moz-font-language-override": ["normal"],
     "-moz-tab-size": [], // FF 4.0,
@@ -1572,6 +1611,48 @@ Css.cssKeywords =
         "-moz-show-background"
     ],
 
+    "alignItems":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "alignSelf":
+    [
+        "auto",
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch"
+    ],
+
+    "flexBasis":
+    [
+        "initial",
+        "auto"
+    ],
+
+    "flexDirection":
+    [
+        "row",
+        "row-reverse",
+        "column",
+        "column-reverse"
+    ],
+
+    "justifyContent":
+    [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around"
+    ],
+
     "clear":
     [
         "left",
@@ -1842,7 +1923,7 @@ Css.cssKeywords =
         "break-all",
         "keep-all"
     ],
-         
+
     "fontFamily":
     [
         // Common font families
@@ -1887,7 +1968,7 @@ Css.cssKeywords =
         "-moz-pull-down-menu",
         "-moz-field"
     ],
-       
+
     "display":
     [
         "block",
@@ -1895,6 +1976,8 @@ Css.cssKeywords =
         "inline",
         "inline-block",
         "list-item",
+        "flex",
+        "inline-flex",
         "marker",
         "run-in",
         "compact",
@@ -2043,7 +2126,7 @@ Css.cssKeywords =
         "read-write",
         "write-only"
     ],
-       
+
     "userSelect":
     [
         "text",

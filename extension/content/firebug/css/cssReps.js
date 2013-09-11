@@ -38,7 +38,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
 
         imgTag:
             DIV({"class": "infoTipImageBox infoTipLoading"},
-                IMG({"class": "infoTipImage", src: "$urlValue", repeat: "$repeat",
+                IMG({"class": "infoTipImage", src: "$urlValue", "data-repeat": "$repeat",
                     onload: "$onLoadImage", onerror: "$onErrorImage"}),
                 DIV({"class": "infoTipBgImage", collapsed: true}),
                 DIV({"class": "infoTipCaption"})
@@ -65,8 +65,9 @@ var CSSInfoTip = Obj.extend(InfoTip,
             var caption = bgImg.nextSibling;
             var innerBox = img.parentNode;
 
-            var w = img.naturalWidth, h = img.naturalHeight;
-            var repeat = img.getAttribute("repeat");
+            var w = img.naturalWidth;
+            var h = img.naturalHeight;
+            var repeat = img.dataset.repeat;
 
             if (repeat == "repeat-x" || (w == 1 && h > 1))
             {
@@ -149,6 +150,7 @@ var CSSInfoTip = Obj.extend(InfoTip,
            "font-size:14px;",
            "font-size:18px;"
         ];
+
         var fontObject = Fonts.getFontInfo(null, null,
             fontName.replace(/^(["'])?(.*?)\1$/g, "$2"));
 
@@ -183,8 +185,8 @@ var CSSInfoTip = Obj.extend(InfoTip,
     }
 });
 
-//********************************************************************************************* //
-//Local Helpers
+// ********************************************************************************************* //
+// Local Helpers
 
 /**
 * Returns the CSS for the infotip @font-face CSS
@@ -200,7 +202,7 @@ function getFontFaceCSS(font)
     if (typeof font == "object")
     {
         if (font.rule)
-            fontFaceCSS = font.rule.cssText.replace(/url\(.*?\)/g, "url("+font.URI+")");
+            fontFaceCSS = font.rule.cssText.replace(/url\(.*?\)/g, "url(" + font.URI + ")");
         fontName = font.CSSFamilyName;
     }
     else
@@ -208,7 +210,7 @@ function getFontFaceCSS(font)
         fontName = font;
     }
 
-    fontFaceCSS += " .infoTipFontFace {font-family: "+fontName+";}";
+    fontFaceCSS += " .infoTipFontFace {font-family: " + fontName + ";}";
 
     return fontFaceCSS;
 }

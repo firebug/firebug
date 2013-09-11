@@ -48,7 +48,7 @@ function createFile(name)
     var dirService = Cc["@mozilla.org/file/directory_service;1"]
         .getService(Ci.nsIProperties);
 
-    // Get unique file within user profile directory. 
+    // Get unique file within user profile directory.
     var file = dirService.get("TmpD", Ci.nsIFile);
     file.append(name);
     file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);

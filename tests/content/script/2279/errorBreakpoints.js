@@ -11,7 +11,9 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(el)
             {
                 var objBox = el.querySelector("span.objectBox-errorMessage");
-                var errBP = objBox.querySelector("img.errorBreak");
+                var errBP = el.querySelector("span.errorBreak");
+
+                FBTest.progress("Found Breakpoint button: " + errBP);
 
                 FBTest.ok(!hasClass(objBox, "breakForError"), "Must be unchecked");
 

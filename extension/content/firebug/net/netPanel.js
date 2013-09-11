@@ -25,6 +25,7 @@ define([
     "firebug/css/cssReps",
     "firebug/debugger/breakpoints/breakpointConditionEditor",
     "firebug/net/timeInfoTip",
+    "firebug/chrome/panelNotification",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",
@@ -34,11 +35,13 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
-    "firebug/net/netReps"
+    "firebug/net/netReps",
+    "firebug/net/netCacheReader",
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
-    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor, TimeInfoTip) {
+    Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor, TimeInfoTip,
+    PanelNotification) {
 
 with (Domplate) {
 
@@ -52,6 +55,7 @@ const Cr = Components.results;
 var layoutInterval = 300;
 var panelName = "net";
 var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
+var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 
 // ********************************************************************************************* //
 
@@ -63,7 +67,7 @@ var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
  */
 function NetPanel() {}
 NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
-/** lends NetPanel */
+/** @lends NetPanel */
 {
     name: panelName,
     searchable: true,
@@ -84,18 +88,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.onContextMenu = Obj.bind(this.onContextMenu, this);
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
-
-        // Initialize filter button tooltips
-        var doc = this.context.chrome.window.document;
-        var filterButtons = doc.getElementsByClassName("fbNetFilter");
-        for (var i=0, len=filterButtons.length; i<len; ++i)
-        {
-            if (filterButtons[i].id != "fbNetFilter-all")
-            {
-                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
-                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
-            }
-        }
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.NetMonitor.addListener(this);
@@ -290,7 +282,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var header = Dom.getAncestorByClass(target, "netHeaderRow");
         if (header)
-            return Firebug.NetMonitor.NetRequestTable;
+            return NetRequestTable;
 
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
@@ -405,6 +397,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         items.push(
+            {
+                id: "fbCopyAsCurl",
+                label: "CopyAsCurl",
+                tooltiptext: "net.tip.Copy_as_cURL",
+                command: Obj.bindFixed(this.copyAsCurl, this, file)
+            }
+        );
+
+        items.push(
             "-",
             {
                 label: "OpenInTab",
@@ -424,10 +425,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             );
         }
 
+        items.push("-");
+
         if (!file.loaded)
         {
             items.push(
-                "-",
                 {
                     label: "StopLoading",
                     tooltiptext: "net.tip.Stop_Loading",
@@ -436,8 +438,27 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             );
         }
 
+        items.push(
+            {
+                label: "net.label.Resend",
+                tooltiptext: "net.tip.Resend",
+                id: "fbNetResend",
+                command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
+            }
+        );
+
         if (object)
         {
+            // xxxHonza: This is dangerous construct. Inspect menu-items are generated
+            // automatically for every context menu in FirebugChrome.onContextShowing().
+            // Also, FirebugChrome is using Rep.getRealObject() while this logic is based
+            // on Firebug.getObjectByURL(), which can return different objects to be inspected.
+            // This feature has been introduced to allow inspecting of specific network requests
+            // like stylesheets and javascript files, but at that time the network request
+            // template (FirebugReps.NetFile) returned null for getRealObject().
+            // FirebugReps.NetFile.getRealObject() now returns an object representing the request
+            // itself (used also by 'Use in Command Line' feature), which is different from what
+            // Firebug.getObjectByURL() returns. See also issue 6647.
             var subItems = Firebug.chrome.getInspectMenuItems(object);
             if (subItems.length)
             {
@@ -472,16 +493,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 );
             }
         }
-
-        items.push("-");
-        items.push(
-            {
-                label: "net.label.Resend",
-                tooltiptext: "net.tip.Resend",
-                id: "fbNetResend",
-                command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
-            }
-        );
 
         return items;
     },
@@ -532,6 +543,12 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         // Copy response to the clipboard
         System.copyToClipboard(NetUtils.getResponseText(file, this.context));
+    },
+
+    copyAsCurl: function(file)
+    {
+        System.copyToClipboard(NetUtils.generateCurlCommand(file,
+            Options.get("net.curlAddCompressedArgument")));
     },
 
     openRequestInTab: function(file)
@@ -851,18 +868,28 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         if (!this.table)
         {
-            var limitInfo = {
+            var prefName = Options.prefDomain + ".net.logLimit";
+            var config = {
                 totalCount: 0,
-                limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                    [Options.prefDomain+".net.logLimit"])
+                prefName: prefName,
+                buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
             };
 
-            this.table = Firebug.NetMonitor.NetRequestTable.tableTag.append({}, this.panelNode);
-            var tbody = this.table.querySelector(".netTableBody");
-            this.limitRow = Firebug.NetMonitor.NetLimit.createRow(tbody, limitInfo);
-            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+            // Render notification box
+            var limitBox = NetRequestTable.limitTag.append({}, this.panelNode);
+            this.limitRow = PanelNotification.render(limitBox, config);
 
-            NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
+            // Render basic Net panel table (a row == one HTTP request)
+            this.table = NetRequestTable.tableTag.append({}, this.panelNode);
+            var tbody = this.table.querySelector(".netTableBody");
+
+            // xxxHonza: Fake first row (shold be renamed, but it's a hack anyway).
+            // There is no way to insert a row befor the current first row in a table.
+            // See Domplate.insertRows() comment for more details.
+            NetRequestEntry.footerTag.insertRows({}, tbody);
+
+            // Render summary row
+            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, tbody)[0];
 
             // Update visibility of columns according to the preferences
             var hiddenCols = Options.get("net.hiddenColumns");
@@ -928,8 +955,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             // Allow customization of request entries in the list. A row is represented
             // by <TR> HTML element.
-            Events.dispatch(Firebug.NetMonitor.NetRequestTable.fbListeners,
-                "onCreateRequestEntry", [this, row]);
+            Events.dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
 
             row = row.nextSibling;
         }
@@ -1318,9 +1344,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (noInfo || !this.limitRow)
             return;
 
-        this.limitRow.limitInfo.totalCount++;
+        this.limitRow.config.totalCount++;
 
-        Firebug.NetMonitor.NetLimit.updateCounter(this.limitRow);
+        PanelNotification.updateCounter(this.limitRow);
 
         //if (netProgress.currentPhase == file.phase)
         //  netProgress.currentPhase = null;
@@ -1367,17 +1393,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Make sure the basic structure of the table panel is there.
         this.initLayout();
 
-        // Get the last request row before summary row.
-        var lastRow = this.summaryRow.previousSibling;
-
-        // Insert an activation message (if the last row isn't the message already);
-        if (Css.hasClass(lastRow, "netActivationRow"))
+        // Bail out if the activation message is already there.
+        if (this.table.querySelector(".netActivationRow"))
             return;
 
-        var message = NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
+        // Insert activation message
+        var lastRow = this.summaryRow.previousSibling;
+        NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName(), message);
+            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName());
     },
 
     enumerateRequests: function(fn)
@@ -1490,7 +1515,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
 // ********************************************************************************************* //
 
-/*
+/**
  * Use this object to automatically select Net panel and inspect a network request.
  * Firebug.chrome.select(new Firebug.NetMonitor.NetFileLink(url [, request]));
  */
@@ -1641,7 +1666,7 @@ var NetPanelSearch = function(panel, rowFinder)
     };
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ********************************************************************************************* //
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {

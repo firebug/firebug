@@ -15,21 +15,18 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
     "firebug/console/errorMessageObj",
-    "firebug/debugger/breakpoints/breakpointStore",
+    "firebug/chrome/panelNotification",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom, ErrorMessageObj, BreakpointStore) {
+    Wrapper, Xpcom, ErrorMessageObj, PanelNotification) {
 
 with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
 
-var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
-var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var firefox15AndHigher = versionChecker.compare(appInfo.version, "15") >= 0;
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
 const Cc = Components.classes;
@@ -74,7 +71,18 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                         SPAN({"class": "logCounterValue"})
                     )
                 )
-            )
+            ),
+
+        limitTag:
+            DIV({"class": "panelNotificationBox collapsed"},
+                TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
+                    TBODY(
+                        TR(
+                            TD({"class": "consolPanelNotification"})
+                        )
+                    )
+                )
+            ),
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -100,12 +108,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
-        {
             this.insertLogLimit(this.context);
-
-            if (this.context.consoleReloadWarning)  // we have not yet injected the console
-                this.insertReloadWarning();
-        }
 
         // Update visibility of stack frame arguments.
         var name = "showStackFrameArguments";
@@ -115,18 +118,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // when a new error-breakpoint is created or removed. It also listens to
         // debugger tool to update BON error UI.
         this.context.getTool("debugger").addListener(this);
-
-        // Initialize filter button tooltips
-        var doc = this.context.chrome.window.document;
-        var filterButtons = doc.getElementsByClassName("fbConsoleFilter");
-        for (var i=0, len=filterButtons.length; i<len; ++i)
-        {
-            if (filterButtons[i].id != "fbConsoleFilter-all")
-            {
-                filterButtons[i].tooltipText = Locale.$STRF("firebug.labelWithShortcut",
-                    [filterButtons[i].tooltipText, Locale.$STR("tooltip.multipleFiltersHint")]);
-            }
-        }
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.Console.addListener(this);
@@ -190,7 +181,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 " " + this.context.getName(), state);
 
         this.showCommandLine(true);
-        Firebug.CommandLine.focus(this.context);
+        if (Firebug.chrome.hasFocus())
+            Firebug.CommandLine.focus(this.context);
 
         this.showToolbarButtons("fbConsoleButtons", true);
 
@@ -337,8 +329,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace",
-            "console.option.tip.Show_Stack_Trace");
+        var label = Locale.$STR("ShowStackTrace");
+        var tooltip = Locale.$STR("console.option.tip.Show_Stack_Trace");
+        tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+
+        var menuItem = Menu.optionMenu(label, "showStackTrace", tooltip);
+        menuItem.nol10n = true;
 
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
@@ -377,13 +373,59 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var panelNode = this.panelNode;
         Events.dispatch(this.fbListeners, "onFiltersSet", [logTypes]);
 
+        // Make previously visible nodes invisible again
+        if (this.filterMatchSet)
+        {
+            for (var i in this.filterMatchSet)
+                Css.removeClass(this.filterMatchSet[i], "contentMatchesFilter");
+        }
+
+        this.filterMatchSet = [];
+
         for (var type in logTypes)
         {
             if (filterTypes.join(" ") != "all" && filterTypes.indexOf(type) == -1)
+            {
                 Css.setClass(panelNode, "hideType-" + type);
+            }
             else
+            {
                 Css.removeClass(panelNode, "hideType-" + type);
+
+                // xxxsz: There can be two kinds of error and warning messages,
+                // which have one type. So map the type to the classes, which match it.
+                // TODO: Merge different CSS class names for log message types
+                var classNames = [type];
+                if (type == "errorMessage")
+                    classNames = ["error"];
+                else if (type == "warning")
+                    classNames = ["warn", "warningMessage"];
+
+                for (var i=0, classNamesLen=classNames.length; i<classNamesLen; ++i)
+                {
+                    var logRows = panelNode.getElementsByClassName("logRow-" + classNames[i]);
+                    for (var j=0, len=logRows.length; j<len; ++j)
+                    {
+                        // Mark the groups, in which the log row is located, also as matched
+                        for (var group = Dom.getAncestorByClass(logRows[j], "logRow-group"); group;
+                            group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                        {
+                            Css.setClass(group, "contentMatchesFilter");
+                            this.filterMatchSet.push(group);
+                        }
+                    }
+                }
+            }
         }
+    },
+
+    matchesFilter: function(logRow)
+    {
+        if (!this.filterTypes || this.filterTypes.join(" ") == "all")
+            return true;
+
+        var type = this.getLogRowType(logRow);
+        return this.filterTypes.indexOf(type) != -1;
     },
 
     search: function(text)
@@ -417,15 +459,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (; logRow; logRow = search.findNext(undefined, undefined, undefined,
             Firebug.Search.isCaseSensitive(text)))
         {
-            Css.setClass(logRow, "matched");
-
-            // Mark the groups, in which the low row is located, also as matched
-            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
-                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            if (this.matchesFilter(logRow))
             {
-                Css.setClass(group, "matched");
+                Css.setClass(logRow, "matched");
+
+                // Mark the groups, in which the log row is located, also as matched
+                for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                    group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+                {
+                    Css.setClass(group, "matched");
+                    this.matchSet.push(group);
+                }
+                this.matchSet.push(logRow);
             }
-            this.matchSet.push(logRow);
         }
 
         Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound",
@@ -445,32 +491,93 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getMessageId: function(object, rep, sourceLink)
+    getMessageMatcher: function(object, appender, className, rep, sourceLink, level)
     {
-        // Firebug internal message objects could provide their own custom ID
-        if (object instanceof Object && typeof(object.getId) == "function")
-            return object.getId();
-
-        // The rep for the object could provide its own custom ID
-        if (rep instanceof Object && typeof(rep.getId) == "function")
-            return rep.getId();
-
-        // object may not be an object
-        if (typeof object != "object")
-            return object + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
-
-        // object may be NaN
-        if (object !== object)
-            return "NotANumber";
-
-        // Use all direct properties of the object
-        if (object && (typeof object === "object" || typeof object === "function"))
+        function matchesMetaData(otherAppender, otherClassName, otherRep, otherLink, otherLevel)
         {
-            var id = Obj.getObjHash(object);
-            return id + (sourceLink ? sourceLink.href + ":" + sourceLink.line : "");
+            if (otherAppender !== appender)
+                return false;
+
+            if (otherClassName !== className)
+                return false;
+
+            if (otherRep !== rep || (rep && rep.groupable === false))
+                return false;
+
+            if (otherLevel !== level)
+                return false;
+
+            var currentSourceInfo = (sourceLink ? sourceLink.href + ":" + sourceLink.line +
+                (sourceLink.col ? ":" + sourceLink.col : "") : "");
+            var otherSourceInfo = (otherLink ? otherLink.href + ":" + otherLink.line +
+                (otherLink.col ? ":" + otherLink.col : "") : "");
+            return currentSourceInfo === otherSourceInfo;
         }
 
-        return Obj.getUniqueId().toString();
+        /**
+         * Checks whether two variables are equal.
+         *
+         * @param {*} a First variable to be compared
+         * @param {*} b Second variable to be compared
+         * @returns {Boolean|undefined} True if values are equal, false if not,
+         *     undefined if they are similar
+         */
+        function areEqual(a, b)
+        {
+            if (typeof a === "object" && a !== null)
+                return false;
+
+            if (a === b)
+                return true;
+
+            if (typeof a === "number" && typeof b === "number")
+                return isNaN(a) && isNaN(b);
+
+            return false;
+        }
+
+        return function matchMessage(otherObject, otherAppender, otherClassName, otherRep,
+            otherSourceLink, otherLevel)
+        {
+            try
+            {
+                if (!matchesMetaData(otherAppender, otherClassName, otherRep, otherSourceLink,
+                    otherLevel))
+                {
+                    return false;
+                }
+
+                var str = Object.prototype.toString.call(object);
+                var isArray = (str === "[object Arguments]" || str === "[object Array]");
+                if (isArray && rep !== FirebugReps.Arr)
+                {
+                    // console.log et al.
+                    if (object.length !== otherObject.length)
+                        return false;
+
+                    for (var i=0, len=object.length; i<len; ++i)
+                    {
+                        if (!areEqual(object[i], otherObject[i]))
+                            return false;
+                    }
+
+                    return true;
+                }
+
+                // Internal chrome objects are allowed to implement a custom "getId" function.
+                if (object instanceof Object && "getId" in object)
+                    return ("getId" in otherObject && object.getId() === otherObject.getId());
+
+                return areEqual(object, otherObject);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("consolePanel.getMessageMatcher; failed to check equality", exc);
+
+                return false;
+            }
+        };
     },
 
     increaseRowCount: function(row)
@@ -478,11 +585,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var counter = row.getElementsByClassName("logCounter").item(0);
         if (!counter)
             return;
-        var value = counter.getElementsByClassName("logCounterValue");
+        var value = counter.getElementsByClassName("logCounterValue").item(0);
         if (!value)
             return;
-
-        value = value.item(0);
 
         var count = parseInt(value.textContent);
         if (isNaN(count))
@@ -503,44 +608,45 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var msgId = this.getMessageId(objects, rep, sourceLink);
+            row = this.createRow("logRow", className);
+            var logContent = row.getElementsByClassName("logContent").item(0);
+            appender.apply(this, [objects, logContent, rep]);
 
-            if (msgId && msgId == this.lastMsgId)
+            // If sourceLink is not provided and the object is an instance of Error
+            // convert it into ErrorMessageObj instance, which implements getSourceLink
+            // method.
+            // xxxHonza: is there a better place where to make this kind of conversion?
+            if (!sourceLink && (objects instanceof Error))
+                objects = FirebugReps.Except.getErrorMessage(objects);
+
+            if (!sourceLink && objects && objects.getSourceLink)
+                sourceLink = objects.getSourceLink();
+
+            if (Options.get("console.groupLogMessages") && this.matchesLastMessage &&
+                this.matchesLastMessage(objects, appender, className, rep, sourceLink,
+                    this.groups ? this.groups.length : 0))
             {
                 this.increaseRowCount(container.lastChild);
-
                 row = container.lastChild;
             }
             else
             {
-                row = this.createRow("logRow", className);
-                row.msgId = msgId;
-                var logContent = row.getElementsByClassName("logContent").item(0);
-                appender.apply(this, [objects, logContent, rep]);
-
-                // If sourceLink is not provided and the object is an instance of Error
-                // convert it into ErrorMessageObj instance, which implements getSourceLink
-                // method.
-                // xxxHonza: is there a better place where to make this kind of conversion?
-                if (!sourceLink && (objects instanceof Error))
-                    objects = FirebugReps.ExceptionRep.getErrorMessage(objects);
-
-                if (!sourceLink && objects && objects.getSourceLink)
-                    sourceLink = objects.getSourceLink();
-
                 if (sourceLink)
                     FirebugReps.SourceLink.tag.append({object: sourceLink}, row.firstChild);
 
                 container.appendChild(row);
             }
 
-            this.lastMsgId = msgId;
+            this.matchesLastMessage = this.getMessageMatcher(objects, appender, className, rep,
+                sourceLink, this.groups ? this.groups.length : 0);
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
+            {
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom +
                     " " + row.textContent);
+            }
 
             if (this.wasScrolledToBottom)
                 Dom.scrollToBottom(this.panelNode);
@@ -555,6 +661,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
+
             Dom.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 
@@ -564,7 +671,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // Don't forget to clear opened groups, if any.
             this.groups = null;
 
-            this.lastMsgId = null;
+            this.matchesLastMessage = null;
         }
     },
 
@@ -575,46 +682,26 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // entries reaches the limit.
         var row = this.createRow("limitRow");
 
-        var limitInfo = {
+        // Configure the panel notification box.
+        var prefName = Options.prefDomain + ".console.logLimit";
+        var config = {
             totalCount: 0,
-            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
-                [Options.prefDomain+".console.logLimit"])
+            prefName: prefName,
+            buttonTooltip: Locale.$STRF("LimitPrefsTitle", [prefName])
         };
 
-        var netLimitRep = Firebug.NetMonitor.NetLimit;
-        var nodes = netLimitRep.createTable(row, limitInfo);
+        var container = this.template.limitTag.replace({}, row);
+        container = container.querySelector(".consolPanelNotification");
 
-        this.limit = nodes[1];
+        this.limit = PanelNotification.render(container, config);
 
-        var container = this.panelNode;
-        container.insertBefore(nodes[0], container.firstChild);
+        this.panelNode.insertBefore(row, this.panelNode.firstChild);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     appendObject: function(object, row, rep)
     {
-        // Issue 5712:  Firefox crashes when trying to log XMLHTTPRequest to console
-        // xxxHonza: should be removed as soon as Firefox 16 is the minimum version.
-        if (!firefox15AndHigher)
-        {
-            if (typeof(object) == "object")
-            {
-                try
-                {
-                    // xxxHonza: could we log directly the unwrapped object?
-                    var unwrapped = Wrapper.unwrapObject(object);
-                    if (unwrapped.constructor.name == "XMLHttpRequest")
-                        object = object + "";
-                }
-                catch (e)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("consolePanel.appendObject; EXCEPTION " + e, e);
-                }
-            }
-        }
-
         if (!rep)
             rep = Firebug.getRep(object, this.context);
 
@@ -857,8 +944,36 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             return this.panelNode;
     },
 
+    getLogRowType: function(logRow)
+    {
+        var typeMatch = /logRow-(\S*)/.exec(logRow.classList);
+        var type = typeMatch ? typeMatch[1] : "";
+
+        // xxxsz: There can be two kinds of error and warning messages,
+        // which have one type. So map the different classes to the type
+        // they represent.
+        // TODO: Merge different CSS class names for log message types
+        if (type == "errorMessage")
+            type = "error";
+        else if (type == "warn" || type == "warningMessage")
+            type = "warning";
+
+        return type;
+    },
+
     filterLogRow: function(logRow, scrolledToBottom)
     {
+        if (this.matchesFilter(logRow))
+        {
+            // Mark the groups, in which the log row is located, also as matched
+            for (var group = Dom.getAncestorByClass(logRow, "logRow-group"); group;
+                group = Dom.getAncestorByClass(group.parentNode, "logRow-group"))
+            {
+                Css.setClass(group, "contentMatchesFilter");
+                this.filterMatchSet.push(group);
+            }
+        }
+
         if (this.searchText)
         {
             Css.setClass(logRow, "matching");

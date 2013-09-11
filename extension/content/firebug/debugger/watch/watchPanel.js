@@ -242,7 +242,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.tree.replace(this.panelNode, input);
 
         // Pre-expand the global scope item.
-        var scope = this.context.getGlobalScope();
+        var scope = this.context.getCurrentGlobal();
         this.tree.expandObject(scope);
 
         // The direction needs to be adjusted according to the direction
@@ -317,7 +317,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         this.context.setTimeout(Obj.bindFixed(function()
         {
-            this.showToolbox(null);
+            var watchRow = this.panelNode.getElementsByClassName("watchRow")[rowIndex];
+            this.showToolbox(watchRow);
         }, this));
     },
 

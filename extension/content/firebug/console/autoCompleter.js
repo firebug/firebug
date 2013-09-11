@@ -385,6 +385,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             "toFixed": "toString",
             "watch": "toString",
             "pattern": "parentNode",
+            "getSelection": "getEventListeners",
             "inspect": "include",
             "home": "history"
         };
@@ -779,6 +780,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             }
         }
 
+        var separatorInserted = false;
+
         for (var i = this.popupTop; i < this.popupBottom; i++)
         {
             var prefixLen = this.completions.prefix.length;
@@ -788,6 +791,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 createElementNS("http://www.w3.org/1999/xhtml", "div");
             hbox.completionIndex = i;
             hbox.classList.add("completionLine");
+            hbox.classList.add("fbPopupEntry");
 
             var pre = this.completionPopup.ownerDocument.
                 createElementNS("http://www.w3.org/1999/xhtml", "span");
@@ -805,7 +809,25 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
                 this.selectedPopupElement = hbox;
 
             if (completion.type === CompletionType.API)
+            {
                 hbox.classList.add("apiCompletion");
+
+                if (!separatorInserted)
+                {
+                    var separator = this.completionPopup.ownerDocument.
+                        createElementNS("http://www.w3.org/1999/xhtml", "div");
+                    separator.textContent = Locale.$STR("Firebug Command Line API");
+                    separator.classList.add("fbPopupSeparator");
+                    vbox.appendChild(separator);
+
+                    separatorInserted = true;
+                }
+            }
+
+            if (completion.type === CompletionType.API)
+                hbox.classList.add("cmd");
+            else
+                hbox.classList.add("dom");
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
@@ -820,6 +842,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         // plus apparent padding, is a good enough approximation of this.
         var chWidth = this.getCharWidth(this.completionBase.pre);
         var offsetX = Math.round(this.completionBase.pre.length * chWidth) + 2;
+
+        // xxxHonza: needs to be properly calculated
+        offsetX -= 5;
+
         this.completionPopup.openPopup(this.textBox, "before_start", offsetX, 0, false, false);
     };
 
@@ -1744,16 +1770,16 @@ function propertiesToHide(expr, obj)
     ret.push("__defineGetter__", "__defineSetter__",
         "__lookupGetter__", "__lookupSetter__");
 
-    // function.caller/arguments are deprecated and ugly.
+    // function.caller/arguments are deprecated and ugly, and don't hold values when
+    // evaluated from the command line.
     if (typeof obj === "function")
         ret.push("caller", "arguments");
 
     if (Object.prototype.toString.call(obj) === "[object String]")
     {
         // Unused, cluttery.
-        ret.push("toLocaleLowerCase", "toLocaleUpperCase", "quote", "bold",
-            "italics", "fixed", "fontsize", "fontcolor", "link", "anchor",
-            "strike", "small", "big", "blink", "sup", "sub");
+        ret.push("quote", "bold", "italics", "fixed", "fontsize", "fontcolor",
+            "link", "anchor", "strike", "small", "big", "blink", "sup", "sub");
     }
 
     if (expr === "" || expr === "window.")
@@ -1783,7 +1809,7 @@ function propertiesToHide(expr, obj)
         ret.push("link", "aLink", "vLink");
 
     // Rather universal and feel like built-ins.
-    ret.push("valueOf", "toSource", "constructor", "QueryInterface");
+    ret.push("constructor", "QueryInterface");
 
     return ret;
 }
@@ -2196,11 +2222,16 @@ function evalPropChain(out, preExpr, origExpr, context)
             else if (ch === "(")
             {
                 // Function call. Save the function name and the arguments if
-                // they are safe to evaluate.
+                // they are safe to evaluate. Currently literals and single
+                // variables not occurring previously on the command line are
+                // treated as safe.
                 var endCont = matchingBracket(preExpr, linkStart);
                 var cont = preExpr.substring(linkStart+1, endCont), origCont = null;
-                if (reLiteralExpr.test(cont))
+                if (reLiteralExpr.test(cont) || (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(cont) &&
+                    preExpr.lastIndexOf(cont, linkStart) === -1))
+                {
                     origCont = origExpr.substring(linkStart+1, endCont);
+                }
                 linkStart = endCont + 1;
                 evalChain.push({
                     "type": LinkType.CALL,

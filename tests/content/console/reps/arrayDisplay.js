@@ -98,12 +98,12 @@ function runTest()
                     array: false
                 },
                 {
-                    expression: "0 items in Storage",
+                    expression: FW.FBL.$STRP("firebug.storage.totalItems", [0]),
                     message: "Session storage must not be displayed as array",
                     array: false
                 }
             ];
-            
+
             var tasks = new FBTest.TaskList();
             tasks.push(verifyLogs, win, 10, expectedArrays, "logArrays", "Verify array logs");
             tasks.push(verifyLogs, win, 7, expectedNonArrays, "logNonArrays",
@@ -155,7 +155,7 @@ function onVerify(callback, numberOfLogs, expected)
 
         var objectBox = row.getElementsByClassName("objectBox-array").item(0);
         FBTest.ok(!!objectBox == expected[i].array, expected[i].array ?
-            "objectBox should be an array" : "objectBox should not be an array"); 
+            "objectBox should be an array" : "objectBox should not be an array");
 
         var logContent = row.getElementsByClassName("logContent").item(0);
         FBTest.compare(expected[i].expression, logContent.textContent.trim(), expected[i].message);

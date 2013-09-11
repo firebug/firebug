@@ -5,9 +5,12 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options",
     "firebug/lib/css",
-    "firebug/lib/deprecated"
+    "firebug/lib/deprecated",
+    "firebug/lib/system",
 ],
-function(FBTrace, Locale, Options, Css, Deprecated) {
+function(FBTrace, Locale, Options, Css, Deprecated, System) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -25,7 +28,15 @@ Menu.createMenu = function(popup, item)
             Menu.createMenu, [popup, {label: item}])();
     }
 
-    var menu = popup.ownerDocument.createElement("menu");
+    var elementName = "menu";
+
+    // If a command is associated with the item we need to use 'splitmenu'.
+    // xxxHonza: Split menu is not properly styled on Mac,
+    // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
+    if (!System.isMac(window) && (item.command || item.commandID))
+        elementName = "splitmenu";
+
+    var menu = popup.ownerDocument.createElement(elementName);
     popup.appendChild(menu);
 
     Menu.setItemIntoElement(menu, item);
@@ -53,7 +64,20 @@ Menu.createMenuPopup = function(parent, item)
 Menu.createMenuItems = function(popup, items, before)
 {
     for (var i=0; i<items.length; i++)
-        Menu.createMenuItem(popup, items[i], before);
+    {
+        var item = items[i];
+
+        // Override existing items to avoid duplicates.
+        var existingItem = popup.querySelector("#" + item.id);
+        if (existingItem)
+        {
+            Menu.createMenuItem(popup, item, existingItem);
+            popup.removeChild(existingItem);
+            continue;
+        }
+
+        Menu.createMenuItem(popup, item, before);
+    }
 };
 
 Menu.createMenuItem = function(popup, item, before)
@@ -105,7 +129,14 @@ Menu.setItemIntoElement = function(element, item)
     }
 
     if (item.command)
-        element.addEventListener("command", item.command, false);
+    {
+        // xxxHonza: register 'click' event handler since 'command' isn't fired
+        // by splitmenu binding from some reason.
+        if (element.tagName == "splitmenu")
+            element.addEventListener("click", item.command, false);
+        else
+            element.addEventListener("command", item.command, false);
+    }
 
     if (item.commandID)
         element.setAttribute("command", item.commandID);
@@ -130,14 +161,6 @@ Menu.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
-    if (item.items && (item.command || item.commandID))
-    {
-        element.setAttribute("type", "splitmenu");
-        element.setAttribute("iconic", "true");
-    }
-
-    // xxxHonza: must be done after 'type' == 'splitmenu' otherwise the menu-item
-    // is not checked (the check icon is not displayed from some reason).
     if (item.checked)
         element.setAttribute("checked", "true");
 
@@ -205,6 +228,20 @@ Menu.optionMenu = function(label, option, tooltiptext)
             return Options.togglePref(option);
         }
     };
+};
+
+/**
+ * Remove unnecessary separators (at the top or at the bottom of the menu).
+ */
+Menu.optimizeSeparators = function(popup)
+{
+    while (popup.firstChild && popup.firstChild.tagName == "menuseparator")
+        popup.removeChild(popup.firstChild);
+
+    while (popup.lastChild && popup.lastChild.tagName == "menuseparator")
+        popup.removeChild(popup.lastChild);
+
+    // xxxHonza: We should also check double-separators
 };
 
 // ********************************************************************************************* //

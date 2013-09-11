@@ -126,6 +126,8 @@
                         <menuitem type="radio" name="fcPerm" value="host-deny"/>
                         <menuitem type="radio" name="fcPerm" value="host-allow"/>
                         <menuitem type="radio" name="fcPerm" value="host-allow-session"/>
+                        <!-- This doesn't seem to be working as expected comment out for now -->
+                        <!-- <menuitem type="radio" name="fcPerm" value="host-limit-third-party"/> -->
                     </menupopup>
                 </toolbarbutton>
 

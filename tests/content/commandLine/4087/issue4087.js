@@ -41,7 +41,7 @@ function testCommandLine(callback)
 
 function testCommandEditor(callback)
 {
-    // Click the Command Line toggle button to switch to the Command Editor 
+    // Click the Command Line toggle button to switch to the Command Editor
     FBTest.clickToolbarButton(null, "fbToggleCommandLine");
 
     FBTest.clearAndTypeCommand("var test = 'Hello';", true);

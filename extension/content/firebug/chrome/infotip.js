@@ -10,7 +10,8 @@ define([
     "firebug/lib/trace",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Dom, FBTrace) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -18,6 +19,8 @@ with (Domplate) {
 const infoTipMargin = 10;
 
 // ********************************************************************************************* //
+
+var {domplate, DIV} = Domplate;
 
 Firebug.InfoTip = Obj.extend(Firebug.Module,
 {
@@ -179,7 +182,6 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
     }
 });
 
-
 // ********************************************************************************************* //
 // Registration
 
@@ -188,4 +190,4 @@ Firebug.registerModule(Firebug.InfoTip);
 return Firebug.InfoTip;
 
 // ********************************************************************************************* //
-}});
+});

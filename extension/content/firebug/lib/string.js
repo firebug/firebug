@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/deprecated",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/system",
 ],
-function(FBTrace, Options, Deprecated, Xpcom) {
+function(FBTrace, Options, Deprecated, Xpcom, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,7 +19,6 @@ const Cu = Components.utils;
 const entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEntityConverter");
 
 const reNotWhitespace = /[^\s]/;
-
 
 var Str = {};
 
@@ -492,10 +492,10 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
 
 Str.lineBreak = function()
 {
-    if (navigator.appVersion.indexOf("Win") != -1)
+    if (System.isWin(window))
         return "\r\n";
 
-    if (navigator.appVersion.indexOf("Mac") != -1)
+    if (System.isMac(window))
         return "\r";
 
     return "\n";
@@ -652,6 +652,45 @@ Str.cleanIndentation = function(text)
 //deprecated compatibility functions
 Str.deprecateEscapeHTML = createSimpleEscape("text", "normal");
 
+/**
+ * Formats a number with a fixed number of decimal places considering the locale settings
+ * @param {Integer} number Number to format
+ * @param {Integer} decimals Number of decimal places
+ * @returns {String} Formatted number
+ */
+Str.toFixedLocaleString = function(number, decimals)
+{
+    // Check whether 'number' is a valid number
+    if (isNaN(parseFloat(number)))
+        throw new Error("Value '" + number + "' of the 'number' parameter is not a number");
+
+    // Check whether 'decimals' is a valid number
+    if (isNaN(parseFloat(decimals)))
+        throw new Error("Value '" + decimals + "' of the 'decimals' parameter is not a number");
+
+    var precision = Math.pow(10, decimals);
+    var formattedNumber = (Math.round(number * precision) / precision).toLocaleString();
+    var decimalMark = (0.1).toLocaleString().match(/\D/);
+    var decimalsCount = (formattedNumber.lastIndexOf(decimalMark) == -1) ?
+        0 : formattedNumber.length - formattedNumber.lastIndexOf(decimalMark) - 1;
+
+    // Append decimals if needed
+    if (decimalsCount < decimals)
+    {
+        // If the number doesn't have any decimals, add the decimal mark
+        if (decimalsCount == 0)
+            formattedNumber += decimalMark;
+
+        // Append additional decimals
+        for (var i=0, count = decimals - decimalsCount; i<count; ++i)
+            formattedNumber += "0";
+    }
+
+    return formattedNumber;
+};
+
+// xxxsz: May be refactored when Firefox implements the ECMAScript Internationalization API
+// See https://bugzil.la/853301
 Str.formatNumber = Deprecated.deprecated("use <number>.toLocaleString() instead",
     function(number) { return number.toLocaleString(); });
 
@@ -660,7 +699,6 @@ Str.formatSize = function(bytes)
     var negative = (bytes < 0);
     bytes = Math.abs(bytes);
 
-    // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
     var sizePrecision = Options.get("sizePrecision");
     if (typeof(sizePrecision) == "undefined")
     {
@@ -678,7 +716,7 @@ Str.formatSize = function(bytes)
     if (sizePrecision == -1)
         result = bytes + " B";
 
-    var a = Math.pow(10, sizePrecision);
+    var precision = Math.pow(10, sizePrecision);
 
     if (bytes == -1 || bytes == undefined)
         return "?";
@@ -686,10 +724,10 @@ Str.formatSize = function(bytes)
         return "0 B";
     else if (bytes < 1024)
         result = bytes.toLocaleString() + " B";
-    else if (bytes < (1024*1024))
-        result = (Math.round((bytes/1024)*a)/a).toLocaleString() + " KB";
+    else if (Math.round(bytes / 1024 * precision) / precision < 1024)
+        result = this.toFixedLocaleString(bytes / 1024, sizePrecision) + " KB";
     else
-        result = (Math.round((bytes/(1024*1024))*a)/a).toLocaleString() + " MB";
+        result = this.toFixedLocaleString(bytes / (1024 * 1024), sizePrecision) + " MB";
 
     return negative ? "-" + result : result;
 };
@@ -816,6 +854,34 @@ Str.formatIP = function(address, port)
         result += ":"+port;
 
     return result;
+};
+
+/**
+ * Capitalizes the first letter of a string or each word in it
+ *
+ * @param {String} string String to format
+ * @param {Boolean} [capitalizeEachWord=false] If true, the first character of each word will be
+ *     transformed to uppercase, otherwise only the very first character of the string
+ * @param {Boolean} [restToLowerCase=true] If true, the rest of the string will be transformed
+ *     to lower case, otherwise it will stay untouched
+ * @returns {String} Converted string
+ */
+Str.capitalize = function(string, capitalizeEachWord, restToLowerCase)
+{
+    function capitalizeFirstLetter(string)
+    {
+        var rest = string.slice(1);
+
+        if (restToLowerCase !== false)
+            rest = rest.toLowerCase();
+
+        return string.charAt(0).toUpperCase() + rest;
+    }
+
+    if (!capitalizeEachWord)
+        return capitalizeFirstLetter(string, restToLowerCase);
+
+    return string.split(" ").map(capitalizeFirstLetter).join(" ");
 };
 
 // ********************************************************************************************* //

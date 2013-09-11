@@ -105,7 +105,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                     _checked: "$bp|isEnabled", tabindex : '-1'}),
                 SPAN({"class": "breakpointName"}, "$bp|getName"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
-                IMG({"class": "closeButton", src: "blank.gif"})
+                SPAN({"class": "closeButton"})
             ),
             DIV({"class": "breakpointCode"}, "$bp|getSource")
         ),

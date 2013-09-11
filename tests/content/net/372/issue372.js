@@ -19,7 +19,7 @@ function runTest(request)
                 if (FBTest.ok(postBody, "Post tab must exist."))
                 {
                     var row = postBody.firstChild.childNodes[1];
-                    FBTest.compare(win.xml, row.textContent, 
+                    FBTest.compare(win.xml, row.textContent,
                         "Post tab body content verified");
                 }
 

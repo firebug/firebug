@@ -28,14 +28,13 @@ define([
     "firebug/console/closureInspector",
     "firebug/chrome/menu",
     "arch/compilationunit",
-    "firebug/console/errorMessageObj",
-    "firebug/console/errorCopy",
     "firebug/net/netUtils",
+    "firebug/chrome/panelActivation",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, SourceFile, StackFrame, StackTrace, Css, Dom, Win, System,
     Xpath, Str, Xml, ToggleBranch, ClosureInspector, Menu, CompilationUnit,
-    ErrorMessageObj, ErrorCopy, NetUtils) {
+    NetUtils, PanelActivation) {
 
 with (Domplate) {
 
@@ -47,10 +46,6 @@ const Ci = Components.interfaces;
 
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
-
-// xxxHonza: back compatibility
-FirebugReps.ErrorMessageObj = ErrorMessageObj;
-FirebugReps.ErrorCopy = ErrorCopy;
 
 // ********************************************************************************************* //
 // Common Tags
@@ -297,7 +292,8 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var sourceLink = Firebug.SourceFile.findSourceForFunction(fn, context);
         if (sourceLink)
             Firebug.chrome.select(sourceLink);
-        if (FBTrace.DBG_FUNCTION_NAME)
+
+        if (FBTrace.DBG_FUNCTION_NAMES)
             FBTrace.sysout("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
 
@@ -430,7 +426,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
         if (props.length <= max)
         {
-            // There is not enough props yet (or at least, not enough props to
+            // There are not enough props yet (or at least, not enough props to
             // be able to know whether we should print "more..." or not).
             // Let's display also empty members and functions.
             this.getProps(props, object, max, function(t, value)
@@ -469,6 +465,9 @@ FirebugReps.Obj = domplate(Firebug.Rep,
         {
             for (var name in object)
             {
+                if (props.length > max)
+                    return;
+
                 var value;
                 try
                 {
@@ -493,10 +492,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                             tag = FirebugReps.Obj.titleTag;
                     }
 
-                    if (props.length <= max)
-                        props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
-                    else
-                        break;
+                    props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
                 }
             }
         }
@@ -831,9 +827,6 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
     getTitle: function(obj, context)
     {
-        if (Arr._isDOMTokenList(obj))
-            return "DOMTokenList";
-
         const re = /\[object ([^\]]*)/;
         var label = Object.prototype.toString.call(obj);
         var m = re.exec(label);
@@ -944,7 +937,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             SPAN({"class": "$object|getVisible"},
                 SPAN({"class": "selectorTag"}, "$object|getSelectorTag"),
                 SPAN({"class": "selectorId"}, "$object|getSelectorId"),
-                SPAN({"class": "selectorClass"}, "$object|getSelectorClass"),
+                SPAN({"class": "selectorClass"}, "$object|getSelectorClasses"),
                 TAG("$object|getValueTag", {object: "$object"})
             )
          ),
@@ -1090,11 +1083,14 @@ FirebugReps.Element = domplate(Firebug.Rep,
         }
     },
 
-    getSelectorClass: function(elt)
+    getSelectorClasses: function(elt)
     {
         try
         {
-            return elt.classList.length > 0 ? ("." + elt.classList[0]) : "";
+            var selectorClasses = "";
+            for (var i=0, len=elt.classList.length; i<len; ++i)
+                selectorClasses += "." + elt.classList[i];
+            return selectorClasses;
         }
         catch (err)
         {
@@ -1353,12 +1349,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
             }
         }
 
-        // Display xpath of the element.
-        var tooltip = this.getXPath(elt);
-        if (elt.namespaceURI)
-            tooltip += " (" + elt.namespaceURI + ")";
-
-        return tooltip;
+        // Don't show a tooltip when hovering an element (see issue 6706)
+        return "";
     },
 
     getContextMenuItems: function(elt, target, context)
@@ -1422,7 +1414,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
                         label: "html.menu.Paste_Replace_Content",
                         tooltiptext: "html.tip.Paste_Replace_Content",
                         id: "fbPasteReplaceInner",
-                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
                             "replaceInner")
                     },
                     {
@@ -1430,7 +1422,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
                         tooltiptext: "html.tip.Paste_Replace_Node",
                         id: "fbPasteReplaceOuter",
                         disabled: isEltRoot,
-                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent, 
+                        command: Obj.bindFixed(this.paste, this, elt, clipboardContent,
                             "replaceOuter")
                     },
                     {
@@ -1712,7 +1704,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     }
 });
 
-//********************************************************************************************* //
+// ********************************************************************************************* //
 
 FirebugReps.CSSRule = domplate(Firebug.Rep,
 {
@@ -2338,8 +2330,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        var object = this.objectView(storage);
-        return Locale.$STRP("firebug.storage.totalItems", [Object.keys(object).length]);
+        return Locale.$STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2366,72 +2357,14 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     propIterator: function(storage, max)
     {
-        var object = this.objectView(storage);
-        return FirebugReps.Obj.propIterator(object, max);
-    },
-
-    objectView: function(storage)
-    {
-        var object = this.makeObject(storage);
-        for (var any in object)
-            return object;
-
-        // We might have hit upon an https site (bug 709238).
-        // As a hack, we'll check if the current context's window
-        // contains the object as localStorage or sessionStorage.
-        try {
-            var context = Firebug.currentContext;
-            var win = context && context.window;
-            if (win && win.location.protocol === "https:")
-            {
-                var names = ["localStorage", "sessionStorage"], done = false;
-                for (var i = 0; i < 2; ++i)
-                {
-                    if (win[names[i]] !== storage)
-                        continue;
-                    Firebug.CommandLine.evaluate(
-                        "((" + this.makeObject + ")(" + names[i] + "))",
-                        context,
-                        null, null,
-                        function(result) {
-                            object = result;
-                            done = true;
-                        },
-                        function() {},
-                        true
-                    );
-                    if (done)
-                        break;
-                }
-            }
-        }
-        catch(e)
+        // Extract names/values and pass them through to the standard propIterator.
+        var obj = Object.create(null);
+        for (var i = 0, len = storage.length; i < len; i++)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.Storage.objectView; EXCEPTION " + e, e);
+            var name = storage.key(i);
+            obj[name] = storage.getItem(name);
         }
-
-        return object;
-    },
-
-    makeObject: function(storage)
-    {
-        // Create a raw object, free from getItem etc., from a storage.
-        // May be serialized and run in page scope.
-        var object = {};
-        try
-        {
-            for (var name in storage)
-            {
-                var value = storage.getItem(name);
-                Object.defineProperty(object, name, {value: value, enumerable: true});
-            }
-        }
-        catch(e)
-        {
-            // We can't log an error in page scope.
-        }
-        return object;
+        return FirebugReps.Obj.propIterator(obj, max);
     }
 });
 
@@ -2449,6 +2382,18 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         SPAN(FirebugReps.Arr.shortTag),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    hasSpecialProperties: function(array)
+    {
+        // xxxHonza: fix for test console/api/log-xpathresult
+        // FirebugReps.Arr.hasSpecialProperties iterates object properties
+        // (using Object.getOwnPropertyNames), but misses 'constructor' if the property
+        // is not explicitely accessed before. Any explanation for such behavior?
+        // (btw. it was actually accessed, but order of 'supportsObject' calls changed when
+        // 'Exception' rep moved into its own module, see issue: 6606)
+        var ctor = array && array.constructor;
+        return FirebugReps.Arr.hasSpecialProperties.apply(this, arguments);
+    },
 
     supportsObject: function(xpathresult, type)
     {
@@ -2490,21 +2435,18 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
     // Use SPAN to make sure the description is nicely inserted into existing text inline.
     tag:
-        SPAN({onclick: "$onClickLink"}),
+        SPAN({"class": "descriptionBox", onclick: "$onClickLink"}),
 
     render: function(text, parentNode, listener)
     {
         var params = {};
-        if (listener)
+        params.onClickLink = function(event)
         {
-            params.onClickLink = function(event)
-            {
-                // Only clicks on links are passed to the original listener.
-                var localName = event.target.localName;
-                if (listener && localName && localName.toLowerCase() == "a")
-                    listener(event);
-            };
-        }
+            // Only clicks on links are passed to the original listener.
+            var localName = event.target.localName;
+            if (listener && localName && localName.toLowerCase() == "a")
+                listener(event);
+        };
 
         var rootNode = this.tag.replace(params, parentNode, this);
 
@@ -2645,8 +2587,6 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
     propIterator: function (object, max)
     {
         max = max || 3;
-        if (!object)
-            return [];
 
         var props = [];
         for (var i=0; i<object.length && i<max; i++)
@@ -2663,17 +2603,23 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
         if (object.length > max)
         {
-            props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " " + Locale.$STR("firebug.reps.more") + "...",
+            var index = max - 1, more = object.length - max + 1;
+            if (index < 1)
+            {
+                index = 1;
+                more++;
+            }
+            props[index] = {
+                object: more + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
-                equal:"",
-                delim:""
+                equal: "",
+                delim: ""
             };
         }
         else if (props.length > 0)
         {
-            props[props.length-1].delim = '';
+            props[props.length-1].delim = "";
         }
 
         return props;

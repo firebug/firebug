@@ -5,6 +5,7 @@ define([], function() {
 // ********************************************************************************************* //
 // Constants
 
+var Cu = Components.utils;
 var Wrapper = {};
 
 // ********************************************************************************************* //
@@ -36,7 +37,7 @@ Wrapper.wrapObject = function(object)
 
 Wrapper.isDeadWrapper = function(wrapper)
 {
-    return Components.utils.isDeadWrapper(wrapper);
+    return Cu.isDeadWrapper(wrapper);
 };
 
 Wrapper.unwrapIValue = function(object, viewChrome)
@@ -95,6 +96,27 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
     }
 
     return scopeVars;
+};
+
+/**
+ * Create a content-accessible view of a simple chrome object. All properties
+ * are marked as non-writable, except if they have explicit getters/setters.
+ */
+Wrapper.cloneIntoContentScope = function(global, obj)
+{
+    var newObj = Cu.createObjectIn(global);
+    for (var prop in obj)
+    {
+        var desc = Object.getOwnPropertyDescriptor(obj, prop);
+        if (!desc)
+            continue;
+        if ("writable" in desc)
+            desc.writable = false;
+        desc.configurable = false;
+        Object.defineProperty(newObj, prop, desc);
+    }
+    Cu.makeObjectPropsNormal(newObj);
+    return newObj;
 };
 
 // ********************************************************************************************* //

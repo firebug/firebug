@@ -42,12 +42,41 @@ const STATE_FOCUS   = 0x02;
 const STATE_HOVER   = 0x04;
 
 // ********************************************************************************************* //
-// CSS Elemenet Panel (HTML side panel)
+// CSSStylePanel Panel (HTML side panel)
 
+/**
+ * @panel Represents the Style side panel available within HTML panel. This panel is responsible
+ * for displaying CSS rules associated with the currently selected element in the HTML panel.
+ * See more: https://getfirebug.com/wiki/index.php/Style_Side_Panel
+ */
 function CSSStylePanel() {}
-
 CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
+/** @lends CSSStylePanel */
 {
+    name: "css",
+    parentPanel: "html",
+    order: 0,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
+
+    initialize: function()
+    {
+        this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
+        this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
+        this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+
+        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+
+        // Destroy derived updater for now.
+        // xxxHonza: the Style panel could use it too?
+        this.updater.destroy();
+        this.updater = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
     template: domplate(
     {
         cascadedTag:
@@ -86,7 +115,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         CSSFontPropValueTag:
                 FOR("part", "$propValueParts",
-                    SPAN({"class": "$part.type|getClass", _repObject: "$part.font"}, "$part.value"),
+                    SPAN({"class": "$part.type|getClass", _repObject: "$part"}, "$part.value"),
                     SPAN({"class": "cssFontPropSeparator"}, "$part|getSeparator")
                 ),
 
@@ -218,24 +247,32 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     {
         function filterMozPseudoElements(pseudoElement)
         {
-            return !Str.hasPrefix(pseudoElement, "::-moz") ||
-                pseudoElement == "::-moz-placeholder" ||
-                pseudoElement == "::-moz-selection";;
+            return !Str.hasPrefix(pseudoElement, "::-moz");
         }
 
         var pseudoElements = [""];
         var inspectedRules, displayedRules = {};
 
-        // Firefox 6+ allows inspecting of pseudo-elements (see issue 537)
+        // Add pseudo-elements
         if (!inheritMode)
+        {
             pseudoElements = Arr.extendArray(pseudoElements, Css.pseudoElements);
 
-        // xxxsz: Do not show Mozilla-specific pseudo-elements for now (see issue 6451)
-        // Pseudo-element rules just apply to specific elements, so we need a way to find out
-        // which elements that are
-        pseudoElements = pseudoElements.filter(filterMozPseudoElements);
-        
-        // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon 
+            // xxxsz: Do not show Mozilla-specific pseudo-elements for now (see issue 6451)
+            // Pseudo-element rules just apply to specific elements, so we need a way to find out
+            // which elements that are
+            pseudoElements = pseudoElements.filter(filterMozPseudoElements);
+
+            // XXXsimon: these are too nice to ignore, but stash them to the bottom of the
+            // section for now so that e.g. a rule with selector "*::-moz-selection" doesn't
+            // get in the way of more element-specific ones (see issue 6480). This should
+            // be improved in the future when we do issue 6457 and/or add the ability to figure
+            // out which pseudo-elements are actually applicable. (see https://bugzil.la/874227)
+            pseudoElements.unshift("::-moz-placeholder");
+            pseudoElements.unshift("::-moz-selection");
+        }
+
+        // The domUtils API requires the pseudo-element selectors to be prefixed by only one colon
         pseudoElements.forEach(function(pseudoElement, i)
         {
             if (Str.hasPrefix(pseudoElement, "::"))
@@ -479,19 +516,6 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
-    name: "css",
-    parentPanel: "html",
-    order: 0,
-
-    initialize: function()
-    {
-        this.onStateChange = Obj.bindFixed(this.contentStateCheck, this);
-        this.onHoverChange = Obj.bindFixed(this.contentStateCheck, this, STATE_HOVER);
-        this.onActiveChange = Obj.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
-
-        CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
-    },
-
     show: function(state)
     {
         if (this.selection)
@@ -659,7 +683,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             command: Obj.bindFixed(this.addRelatedRule, this)
         });
 
-        if (style instanceof Ci.nsIDOMFontFace && style.rule)
+        if (style && style.font && style.font.rule)
         {
             items.push(
                 "-",
@@ -667,7 +691,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     label: "css.label.Inspect_Declaration",
                     tooltiptext: "css.tip.Inspect_Declaration",
                     id: "fbInspectDeclaration",
-                    command: Obj.bindFixed(this.inspectDeclaration, this, style.rule)
+                    command: Obj.bindFixed(this.inspectDeclaration, this, style.font.rule)
                 }
             );
         }
@@ -694,6 +718,12 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         return CSSStyleSheetPanel.prototype.showInfoTip.call(
             this, infoTip, target, x, y, rangeParent, rangeOffset);
+    },
+
+    getCurrentColor: function()
+    {
+        var cs = this.selection.ownerDocument.defaultView.getComputedStyle(this.selection);
+        return cs.getPropertyValue("color");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

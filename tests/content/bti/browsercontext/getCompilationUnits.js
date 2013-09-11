@@ -2,13 +2,13 @@
 /**
  * Test for BrowserContext#getCompilationUnits() and #getCompilationUnit(url)
  * Also tests CompilationUnit#getURL() and CompilationUnit#getBrowserContext()
- * 
+ *
  * A HTML file with two scripts (one internal, one external).
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browsercontext/testScripts.html";
     browser.addEventListener("onContextCreated", function(context) {
         FBTest.progress("getCompilationUnits, context created");
@@ -28,7 +28,7 @@ function runTest()
             FBTest.ok(unit.getBrowserContext() == context, "compilation unit browser context is not consistent");
             FBTest.testDone("done test #getCompilationUnits()");
         });
-        
+
     });
     FBTest.progress("getCompilationUnits, open test page "+url);
     FBTest.openNewTab(url, function(win)

@@ -11,7 +11,7 @@ function runTest()
         {
             var doc = panel.panelNode.ownerDocument;
 
-            // Set focus to Firebug, otherwise the selection and the shortcut will be sent to the browser document 
+            // Set focus to Firebug, otherwise the selection and the shortcut will be sent to the browser document
             doc.documentElement.focus();
 
             var range = doc.createRange();

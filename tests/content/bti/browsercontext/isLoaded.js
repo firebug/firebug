@@ -1,14 +1,14 @@
 
 /**
  * Test for BrowserContext#exists()
- * 
+ *
  * A browser context should exist when a tab is opened. It should no longer exist after
  * being disconnected.
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/browsercontext/testScripts.html";
     browser.addEventListener("onContextCreated", function(context) {
         FBTest.compare(context.getURL(), url, "URL of newly created context should be " +url);

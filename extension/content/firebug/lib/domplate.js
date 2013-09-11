@@ -1049,7 +1049,13 @@ FBL.$break = function()
 
 // ********************************************************************************************* //
 
+/**
+ * @object Domplate Renderer object implements API for template rendering.
+ * Every Domplate template inherits this APIs (through extend API) and should use
+ * them every time it's rendered into DOM.
+ */
 var Renderer =
+/** @lends Renderer */
 {
     renderHTML: function(args, outputs, self)
     {
@@ -1069,7 +1075,16 @@ var Renderer =
         }
     },
 
-    insertRows: function(args, before, self)
+    /**
+     * This method is used when rendering (inserting) table rows into an existing
+     * table (i.e. tbody) element.
+     *
+     * @param {Object} args Template input object (can be null).
+     * @param {Node} after The row after which the new row will be inserted.
+     *      If <tbody> element is passed the new row will be inserted at the end.
+     * @param {Template} self Reference to the template object (can be null).
+     */
+    insertRows: function(args, after, self)
     {
         if (!args)
             args = {};
@@ -1079,21 +1094,22 @@ var Renderer =
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
 
-        var doc = before.ownerDocument;
+        var doc = after.ownerDocument;
         var table = doc.createElement("table");
         table.innerHTML = html;
 
         var tbody = table.firstChild;
-        var parent = before.localName.toLowerCase() == "tr" ? before.parentNode : before;
-        var after = before.localName.toLowerCase() == "tr" ? before.nextSibling : null;
+        var localName = after.localName.toLowerCase();
+        var parent = (localName == "tr") ? after.parentNode : after;
+        var referenceElement = (localName == "tr") ? after.nextSibling : null;
 
         var firstRow = tbody.firstChild;
         var lastRow = null;
         while (tbody.firstChild)
         {
             lastRow = tbody.firstChild;
-            if (after)
-                parent.insertBefore(lastRow, after);
+            if (referenceElement)
+                parent.insertBefore(lastRow, referenceElement);
             else
                 parent.appendChild(lastRow);
         }
@@ -1111,7 +1127,6 @@ var Renderer =
         //
         // This fails when applied to a non-loop element as non-loop elements
         // do not generate to proper path to bounce up and down the tree.
-        //
         var offset = 0;
         if (this.tag.isLoop)
         {
@@ -1312,7 +1327,7 @@ defineTags(
     "thead", "tr", "tt", "ul", "iframe", "code", "style",
 
     // HTML5
-    "article", "aside", "audio", "bb", "canvas", "command", "datagrid", "datalist", "details",
+    "article", "aside", "audio", "bb", "command", "datagrid", "datalist", "details",
     "dialog", "embed", "eventsource", "figure", "footer", "keygen", "mark", "meter", "nav",
     "output", "progress", "ruby", "rp", "rt", "section", "source", "time", "video"
 );

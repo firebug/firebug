@@ -42,7 +42,7 @@ function verifyContent(numberOfRequests)
     FBTest.ok(rows.length == numberOfRequests, "There must be " +
         numberOfRequests + " requests in the Net panel.");
     FBTest.ok(tabs.length == numberOfRequests, "There must be " +
-        numberOfRequests + " JSON tabs in the net panel."); 
+        numberOfRequests + " JSON tabs in the net panel.");
 
     if (rows.length != numberOfRequests || tabs.length != numberOfRequests)
         return FBTest.testDone();

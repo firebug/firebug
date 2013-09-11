@@ -6,12 +6,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/chrome/firefox",
+    "firebug/lib/wrapper",
     "firebug/lib/xpcom",
     "firebug/lib/http",
     "firebug/lib/string",
     "firebug/lib/xml"
 ],
-function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
+function(Firebug, Locale, Events, Url, Firefox, Wrapper, Xpcom, Http, Str, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -25,7 +26,6 @@ const Cu = Components.utils;
 
 const mimeExtensionMap =
 {
-    "txt": "text/plain",
     "html": "text/html",
     "htm": "text/html",
     "xhtml": "text/html",
@@ -49,7 +49,10 @@ const mimeExtensionMap =
 
 const mimeCategoryMap =
 {
+    // xxxHonza: note that there is no filter for 'txt' category,
+    // shell we use e.g. 'media' instead?
     "text/plain": "txt",
+
     "application/octet-stream": "bin",
     "text/html": "html",
     "text/xml": "html",
@@ -495,48 +498,29 @@ var NetUtils =
     },
 
     /**
-     * Returns a 'real object' that is used by 'Inspect in DOM Panel' or
-     * 'Use in Command Line' features. Firebug is primarily a tool for web developers
-     * and so, it shouldn't expose internal chrome objects.
+     * Returns a content-accessible 'real object' that is used by 'Inspect in DOM Panel'
+     * or 'Use in Command Line' features. Firebug is primarily a tool for web developers
+     * and thus shouldn't expose internal chrome objects.
      */
     getRealObject: function(file, context)
     {
         var global = context.getCurrentGlobal();
-        var realObject = Cu.createObjectIn(global);
+        var clone = {};
 
-        // xxxHonza: it would be great to have some lib/object API for object creation/cloning
-        // with support for content-access.
-
-        // All properties must be read-only so, they can't be modified in the DOM panel.
-        function genPropDesc(value)
-        {
-            return {
-                enumerable: true,
-                configurable: false,
-                writable: false,
-                value: value
-            };
-        }
-
-        // Make sure headers are also cloned and created in the right content scope.
         function cloneHeaders(headers)
         {
             var newHeaders = [];
-            for (var i=0; i<headers.length; i++)
+            for (var i=0; headers && i<headers.length; i++)
             {
-                var header = headers[i];
-                var newHeader = Cu.createObjectIn(global);
-                Object.defineProperty(newHeader, "name", genPropDesc(header["name"]));
-                Object.defineProperty(newHeader, "value", genPropDesc(header["value"]));
-                Cu.makeObjectPropsNormal(newHeader);
-                newHeaders.push(newHeader);
+                var header = {name: headers[i].name, value: headers[i].value};
+                header = Wrapper.cloneIntoContentScope(global, header);
+                newHeaders.push(header);
             }
-            return genPropDesc(newHeaders);
+            return newHeaders;
         }
 
         // Iterate over all properties of the request object (nsIHttpChannel)
         // and pick only those that are specified in 'requestProps' list.
-        // Make sure the result |realObject| is content-accessible.
         var request = file.request;
         for (var p in request)
         {
@@ -545,24 +529,120 @@ var NetUtils =
 
             try
             {
-                Object.defineProperty(realObject, p, genPropDesc(request[p]));
+                clone[p] = request[p];
             }
             catch (err)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
+                // xxxHonza: too much unnecessary output
+                //if (FBTrace.DBG_ERRORS)
+                //    FBTrace.sysout("net.getRealObject EXCEPTION " + err, err);
             }
         }
 
         // Additional props from |file|
-        Object.defineProperty(realObject, "responseBody", genPropDesc(file.responseText));
-        Object.defineProperty(realObject, "postBody", genPropDesc(file.postBody));
-        Object.defineProperty(realObject, "requestHeaders", cloneHeaders(file.requestHeaders));
-        Object.defineProperty(realObject, "responseHeaders", cloneHeaders(file.responseHeaders));
+        clone.responseBody = file.responseText;
+        clone.postBody = file.postBody;
+        clone.requestHeaders = cloneHeaders(file.requestHeaders);
+        clone.responseHeaders = cloneHeaders(file.responseHeaders);
 
-        Cu.makeObjectPropsNormal(realObject);
+        return Wrapper.cloneIntoContentScope(global, clone);
+    },
 
-        return realObject;
+    generateCurlCommand: function(file, addCompressedArgument)
+    {
+        var command = ["curl"];
+        var inferredMethod = "GET";
+
+        function escapeCharacter(x)
+        {
+            var code = x.charCodeAt(0);
+            if (code < 256)
+            {
+                // Add leading zero when needed to not care about the next character.
+                return code < 16 ? "\\x0" + code.toString(16) : "\\x" + code.toString(16);
+            }
+            code = code.toString(16);
+            return "\\u" + ("0000" + code).substr(code.length, 4);
+        }
+
+        function escape(str)
+        {
+            // String has unicode characters or single quotes
+            if (/[^\x20-\x7E]|'/.test(str))
+            {
+                // Use ANSI-C quoting syntax
+                return "$\'" + str.replace(/\\/g, "\\\\")
+                    .replace(/'/g, "\\\'")
+                    .replace(/\n/g, "\\n")
+                    .replace(/\r/g, "\\r")
+                    .replace(/[^\x20-\x7E]/g, escapeCharacter) + "'";
+            }
+            else
+            {
+                // Use single quote syntax.
+                return "'" + str + "'";
+            }
+        }
+
+        // Create data
+        var data = [];
+        var postText = NetUtils.getPostText(file, this.context, true);
+        var isURLEncodedRequest = NetUtils.isURLEncodedRequest(file, this.context);
+
+        if (postText && isURLEncodedRequest || file.method == "PUT")
+        {
+            var lines = postText.split("\n");
+            var params = lines[lines.length - 1];
+
+            data.push("--data");
+            data.push(escape(params));
+
+            inferredMethod = "POST";
+        }
+        else if (postText && NetUtils.isMultiPartRequest(file, this.context))
+        {
+            data.push("--data-binary");
+            data.push(escape(postText));
+
+            inferredMethod = "POST";
+        }
+
+        // Add URL
+        command.push(escape(file.href));
+
+        // Fix method if request is not a GET or POST request
+        if (file.method != inferredMethod)
+        {
+            command.push("-X");
+            command.push(file.method);
+        }
+
+        // Add request headers
+        var requestHeaders = file.requestHeaders;
+        var postRequestHeaders = Http.getHeadersFromPostText(file.request, postText);
+        var headers = requestHeaders.concat(postRequestHeaders);
+        for (var i=0; i<headers.length; i++)
+        {
+            var header = headers[i];
+
+            // Firefox and cURL creates the optional Content-Length header for POST and
+            // PUT requests. Omit adding this header as it is preferred to use the
+            // Content-Length cURL creates.
+            if (header.name.toLowerCase() == "content-length")
+                continue;
+
+            command.push("-H");
+            command.push(escape(header.name + ": " + header.value));
+        }
+
+        // Add data
+        command = command.concat(data);
+
+        // Add --compressed
+        if (addCompressedArgument)
+            command.push("--compressed");
+
+        return command.join(" ");
     }
 };
 

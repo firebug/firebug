@@ -220,7 +220,7 @@ WatchProvider.DefaultWatchPanelInput.prototype.getChildren = function()
 {
     var children = [];
     children.push.apply(children, this.panel.watches);
-    children.push(this.panel.context.getGlobalScope());
+    children.push(this.panel.context.getCurrentGlobal());
     return children;
 }
 

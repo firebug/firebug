@@ -40,7 +40,7 @@ function runTest()
                       FBTest.ok(FW.FBL.hasClass(props[i], "cssOverridden"), "The 'width' property of the second rule must be overwritten.")
                 }
             }
-            
+
             FBTest.testDone("issue4583.DONE");
         });
     });

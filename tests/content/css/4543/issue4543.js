@@ -15,7 +15,7 @@ function runTest()
             // Click at the left-top corner of the first client rect (see issue 6049).
             var rects = node.getClientRects();
             FBTest.synthesizeMouse(value, rects[0].left, rects[0].top);
-  
+
             var editor = panel.panelNode.querySelector(".textEditorInner");
             if (FBTest.ok(editor, "editor must be available now"))
             {
@@ -27,7 +27,7 @@ function runTest()
                 // Move text cursor between 'g' and 'b' of 'pngbase64'
                 for (var i=0; i<19; i++)
                     FBTest.sendKey("RIGHT", editor);
-  
+
                 // Enter a semicolon
                 FBTest.sendChar(";", editor);
                 FBTest.compare(/png;base64/, editor.value, "Semicolon must be entered");

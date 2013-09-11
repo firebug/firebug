@@ -1,12 +1,12 @@
 
 /**
- * Test for CompilationUnit#setBreakpoint(line) for a JavaScript file external 
+ * Test for CompilationUnit#setBreakpoint(line) for a JavaScript file external
  * to its HTML file, and CompilationUnit#getBreakpoints().
  */
 
 function runTest()
 {
-    var browser = new FW.Firebug.BTI.Browser(); // TODO 
+    var browser = new FW.Firebug.BTI.Browser(); // TODO
     var url = FBTest.getHTTPURLBase()+"bti/compilationunit/testScripts.html";
     var cuURL = FBTest.getHTTPURLBase()+"bti/compilationunit/simpleExternal.js";
     browser.addEventListener("onToggleBreakpoint", function(breakpoint){
@@ -32,7 +32,7 @@ function runTest()
             FBTest.compare(1, bps.length, "Should be 1 breakpoint now");
             FBTest.ok(bp === bps[0], "Breakpoint retrieved should be the one just created");
         });
-        
+
     });
     FBTest.progress("setBreakpoint, open test page "+url);
     FBTest.openNewTab(url, function(win)

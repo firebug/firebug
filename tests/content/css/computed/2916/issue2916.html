@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 2916: Trace Styles Feature</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #content > div {
+            font-family: Arial, sans-serif;
+        }
+
+        #element {
+            width: 100px;
+            height: 100px;
+            background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            font-size: 150%;
+            font-family: monospace;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2916">Issue 2916</a>: Trace Styles Feature</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Computed</em> side panel</li>
+                    <li>
+                        Inspect the blue <code>&lt;div&gt;</code> above<br/>
+                        <span class="ok">
+                            &rArr; The <em>Computed</em> side panel should show a <em>Text</em> category containing a
+                            <code>font-family</code> property with the value <code>Arial,​sans-serif</code>.
+                        </span>
+                    </li>
+                    <li>
+                        Expand the <code>font-family</code> property<br/>
+                        <span class="ok">
+                            &rArr; Three selectors should be listed with their related values and the source file and line number,
+                            where they are defined:
+<code>
+#content > div   Arial,​sans-serif                      issue2916.html (line 8)
+#element         monospace                             issue2916.html (line 12)
+body             "Trebuchet MS",​Helvetica,​sans-serif   testcase.css (line 19)
+</code>
+                            <code>#element</code> should be lined-through to indicate that it's overwritten. <code>body</code>
+                            should be grayed out to indicate that it's an inherited value.
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Style traces should be displayed correctly.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

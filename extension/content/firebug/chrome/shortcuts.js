@@ -1,21 +1,21 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
+    "firebug/firefox/customizeShortcuts",
 ],
-function(FBL, Obj, Firebug, Firefox) {
+function(Obj, Firebug, Firefox, CustomizeShortcuts) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var KeyEvent = window.KeyEvent;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.
@@ -131,27 +131,23 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
             this.keysets.push(keyElem.parentNode);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI Commands
+
     customizeShortcuts: function()
     {
-        var args = {
-            FBL: FBL,
-            FBTrace: FBTrace
-        };
-
-        // Open the "customize shortcuts" dialog. Pass FBL into the XUL window so that
-        // common APIs can be used (e.g. localization).
+        // Open the "customize shortcuts" dialog.
         window.openDialog("chrome://firebug/content/firefox/customizeShortcuts.xul", "",
-            "chrome,centerscreen,dialog,modal,resizable=yes", args);
+            "chrome,centerscreen,dialog,modal,resizable=yes", new CustomizeShortcuts());
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.ShortcutsModel);
 
 return Firebug.ShortcutsModel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

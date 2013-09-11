@@ -78,12 +78,12 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
     getUrlTag: function(href, aliasName)
     {
         var urlTag =
-            SPAN({style:"height:100%"},
+            SPAN({style: "height:100%"},
                 A({"href": href, "target": "_blank", "class": "url"},
                     Str.cropString(href, 100)
                 ),
                 SPAN({"class": "commands"}
-                // xxxFlorent: temporarily disabled, see: 
+                // xxxFlorent: temporarily disabled, see:
                 //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
                 /*,
                 SPAN({
@@ -114,19 +114,30 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         {
             var aliasName = keys[i];
             arrayToDisplay.push({
-                "alias": SPAN({"class":"aliasName", "data-aliasname": aliasName}, aliasName),
-                "URL": this.getUrlTag(store.getItem(aliasName), aliasName, context)
+                alias: SPAN({"class": "aliasName", "data-aliasname": aliasName}, aliasName),
+                URL: this.getUrlTag(store.getItem(aliasName), aliasName, context)
             });
         }
 
+        var columns = [
+            {
+                property: "alias",
+                label: Locale.$STR("commandline.include.Alias")
+            },
+            {
+                property: "URL",
+                label: Locale.$STR("commandline.include.URL")
+            }
+        ];
+
         var input = new CommandLineIncludeObject();
-        this.log(arrayToDisplay, ["alias", "URL"], context, input);
+        this.log(arrayToDisplay, columns, context, input);
         return returnValue;
     },
 
     deleteAlias: function(aliasName, ev)
     {
-        // NOTE: that piece of code has not been tested since deleting aliases through the table 
+        // NOTE: that piece of code has not been tested since deleting aliases through the table
         // has been disabled.
         // Once it is enabled again, make sure FBTests is available for this feature
         var store = CommandLineInclude.getStore();
@@ -242,7 +253,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                 tooltiptext: "clipboard.tip.Copy_Location",
                 command: Obj.bindFixed(System.copyToClipboard, System, url)
             },
-            // xxxFlorent: temporarily disabled, see: 
+            // xxxFlorent: temporarily disabled, see:
             //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
             /*"-",
             {
@@ -379,8 +390,14 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         return Firebug.Console.logFormatted.apply(Firebug.Console, logArgs);
     },
 
-    // include(context, url[, newAlias])
-    // includes a remote script
+    /**
+     * Includes a remote script.
+     * Executed by the include() command.
+     *
+     * @param {Context} context The Firebug context.
+     * @param {string} url The location of the script.
+     * @param {string} [newAlias] The alias to define for the script.
+     */
     include: function(context, url, newAlias)
     {
         var reNotAlias = /[\.\/]/;
@@ -449,6 +466,16 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         return returnValue;
     },
 
+    /**
+     * Evaluates a remote script. Prints a warning message in the console in case of syntax error.
+     *
+     * @param {string} url The URL.
+     * @param {Context} context The Firebug context.
+     * @param {function} [successFunction] The callback if the script has been successfully run.
+     * @param {function} [errorFunction] The callback if the expression has been run with errors.
+     * @param {*} [loadingMsgRow] The row in the console printed while the script is loading and
+     *      that has to be cleared.
+     */
     evaluateRemoteScript: function(url, context, successFunction, errorFunction, loadingMsgRow)
     {
         var xhr = new XMLHttpRequest({ mozAnon: true, timeout:30});
@@ -470,7 +497,14 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
                 hasWarnings = true;
             }
 
-            Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
+            // Do not print anything if  the inclusion succeeds.
+            var successFunctionEval = function() { };
+            // Let's use the default function to handle errors.
+            var errorFunctionEval = null;
+
+            Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
+                successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
+
             if (successFunction)
                 successFunction(xhr, hasWarnings);
         };
@@ -495,7 +529,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             throw ex;
         }
 
-        if (!~acceptedSchemes.indexOf(xhr.channel.URI.scheme))
+        if (acceptedSchemes.indexOf(xhr.channel.URI.scheme) === -1)
         {
             this.log("invalidRequestProtocol", [], [context, "error"]);
             this.clearLoadingMessage(loadingMsgRow);
@@ -503,8 +537,6 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         }
 
         xhr.send(null);
-
-        // xxxFlorent: TODO show XHR progress
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //

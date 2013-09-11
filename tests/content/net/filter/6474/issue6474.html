@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6474: Fonts filter should also work for fonts with incorrect MIME type</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function runTest()
+        {
+            appendScript("issue6474.woff");
+        }
+
+        function appendScript(uri)
+        {
+            var script = document.createElement("script");
+            script.setAttribute("type", "text/javascript");
+            script.setAttribute("src", uri);
+
+            var head = document.getElementsByTagName("head")[0];
+            head.appendChild(script);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6474">Issue 6474</a>:
+            Fonts filter should also work for fonts with incorrect MIME type</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="runTest()">Execute Test</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>
+                        Click the <em>Execute Test</em> button above<br/>
+                        <span class="ok">&rArr; One request must be displayed: <em>issue6474.woff</em></span>
+                    </li>
+                    <li>Change the <em>Net</em> panel filter to <em>Font</em></li>
+                    <li>The request must still be displayed.</li>
+                </ol>
+            </section>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>

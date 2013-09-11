@@ -13,6 +13,8 @@ define([
 ],
 function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // EventMonitor Module
 
@@ -144,12 +146,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
         var eventTypes = getMonitoredEventTypes(types);
         var monitoredObjectEvents = monitoredEvents.get(object);
         if (!monitoredObjectEvents)
-            return;
+            return false;
 
         if (typeof allMonitored == "undefined")
             allMonitored = true;
 
-        for (var i = 0, len = eventTypes.length; i < len; ++i)
+        for (var i=0, len=eventTypes.length; i<len; ++i)
         {
             var monitored = monitoredObjectEvents.has(eventTypes[i]);
 
@@ -203,8 +205,47 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
         var elt = object;
 
-        // Create sub-menu-items for "Log Event"
+        function onToggleAll(event)
+        {
+            Events.cancelEvent(event);
+
+            var checked = event.target.getAttribute("checked") == "true";
+            var menupopup = event.target.parentNode;
+
+            // Iterate over all event families (menu items) and check/uncheck them.
+            var child = menupopup.firstChild;
+            while (child)
+            {
+                if (child.tagName != "separator" && child.id != "fbLogAllEvents")
+                    child.setAttribute("checked", checked ? "false" : "true");
+
+                child = child.nextSibling;
+            }
+
+            this.toggleMonitorEvents(elt, null, !checked, context);
+
+            // The parent (splitmenu) item.
+            var doc = event.target.ownerDocument;
+            var logEvents = doc.getElementById("fbShowEventsInConsole");
+            logEvents.setAttribute("checked", !checked);
+        }
+
         var logEventItems = [];
+
+        // The first item allows to select all event type (families) at once. Just like if
+        // the user clicks directly the parent item (it's split-menu).
+        logEventItems.push({
+            label: "html.logAllEvents",
+            tooltiptext: "html.logAllEvents.tip",
+            id: "fbLogAllEvents",
+            type: "checkbox",
+            checked: this.areEventsMonitored(elt, null, context, true),
+            command: onToggleAll.bind(this),
+        });
+
+        logEventItems.push("-");
+
+        // Create sub-menu-items for "Log Event"
         var eventFamilies = Events.getEventFamilies();
         for (var i=0, count=eventFamilies.length; i<count; ++i)
         {
@@ -219,7 +260,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
             var Element = FirebugReps.Element;
             var selector = Element.getSelectorTag(elt) +
                 Element.getSelectorId(elt) +
-                Element.getSelectorClass(elt);
+                Element.getSelectorClasses(elt);
 
             // xxxHonza: localization?
             tooltipText += "\n\nCommand Line Example:\n" +
@@ -236,6 +277,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
             });
         }
 
+        // Helper for monitoring all event families at once.
         function onCommand(event)
         {
             Events.cancelEvent(event);
@@ -263,14 +305,18 @@ var EventMonitor = Obj.extend(Firebug.Module,
     onToggleMonitorEvents: function(event, elt, type, context)
     {
         var checked = event.target.getAttribute("checked") == "true";
-        this.toggleMonitorEvents(elt, type, checked, context);
+        this.toggleMonitorEvents(elt, type, !checked, context);
 
         Events.cancelEvent(event);
 
-        // Toggle the main "Log Events" option depending on whether all events are monitored.
+        // Toggle the main "Log Events" option depending on whether events are monitored.
         var doc = event.target.ownerDocument;
         var logEvents = doc.getElementById("fbShowEventsInConsole");
         logEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, false));
+
+        // The 'Log All Events' helper item.
+        var logAllEvents = doc.getElementById("fbLogAllEvents");
+        logAllEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, true));
     },
 });
 
@@ -322,7 +368,8 @@ var EventLog = function(event)
 // ********************************************************************************************* //
 // Rep Template
 
-with (Domplate) {
+var {domplate, TAG, SPAN} = Domplate;
+
 var EventLogRep = domplate(FirebugReps.Event,
 {
     className: "eventLog",
@@ -365,7 +412,7 @@ var EventLogRep = domplate(FirebugReps.Event,
     {
         return object instanceof EventLog;
     },
-})};
+});
 
 // ********************************************************************************************* //
 // CommandLine Support

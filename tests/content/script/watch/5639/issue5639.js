@@ -56,7 +56,7 @@ function testDeleteAllWatches(callback, panelNode, targetSelector, watchExpressi
             callback();
         };
 
-        // the timeout is triggered if the MutationObserver has not detected 
+        // the timeout is triggered if the MutationObserver has not detected
         // the deletion of the watch expressions
         timeout = setTimeout(compareAndCallback, 1000);
 
