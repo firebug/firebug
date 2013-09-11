@@ -274,7 +274,7 @@
 
 /* Used for a message explaining missing stack trace for an error log */
 .errorTrace .descriptionBox {
-    background-image: url(chrome://firebug/skin/info.svg);
+    background-image: url(chrome://firebug/skin/info.png);
     background-repeat: no-repeat;
     padding: 0 0 2px 20px;
 }
@@ -316,7 +316,7 @@
 .errorColCaret {
     width: 7px;
     height: 9px;
-    background: url(chrome://firebug/skin/errorColumnIndicator.svg) no-repeat 100% 100%;
+    background: url(chrome://firebug/skin/errorColumnIndicator.png) no-repeat 100% 100%;
     display: inline-block;
     vertical-align: top;
     margin-left: 1px;
