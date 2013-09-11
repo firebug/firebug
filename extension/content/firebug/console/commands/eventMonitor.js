@@ -217,17 +217,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
             while (child)
             {
                 if (child.tagName != "separator" && child.id != "fbLogAllEvents")
-                    child.setAttribute("checked", checked ? "false" : "true");
+                    child.setAttribute("checked", checked ? "true" : "false");
 
                 child = child.nextSibling;
             }
 
-            this.toggleMonitorEvents(elt, null, !checked, context);
-
-            // The parent (splitmenu) item.
-            var doc = event.target.ownerDocument;
-            var logEvents = doc.getElementById("fbShowEventsInConsole");
-            logEvents.setAttribute("checked", !checked);
+            this.toggleMonitorEvents(elt, null, checked, context);
         }
 
         var logEventItems = [];
@@ -290,9 +285,6 @@ var EventMonitor = Obj.extend(Firebug.Module,
             label: "ShowEventsInConsole",
             tooltiptext: "html.tip.Show_Events_In_Console",
             id: "fbShowEventsInConsole",
-            type: "checkbox",
-            checked: this.areEventsMonitored(elt, null, context, false),
-            command: onCommand.bind(this),
             items: logEventItems
         };
 
@@ -305,16 +297,12 @@ var EventMonitor = Obj.extend(Firebug.Module,
     onToggleMonitorEvents: function(event, elt, type, context)
     {
         var checked = event.target.getAttribute("checked") == "true";
-        this.toggleMonitorEvents(elt, type, !checked, context);
+        this.toggleMonitorEvents(elt, type, checked, context);
 
         Events.cancelEvent(event);
 
-        // Toggle the main "Log Events" option depending on whether events are monitored.
-        var doc = event.target.ownerDocument;
-        var logEvents = doc.getElementById("fbShowEventsInConsole");
-        logEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, false));
-
         // The 'Log All Events' helper item.
+        var doc = event.target.ownerDocument;
         var logAllEvents = doc.getElementById("fbLogAllEvents");
         logAllEvents.setAttribute("checked", this.areEventsMonitored(elt, null, context, true));
     },

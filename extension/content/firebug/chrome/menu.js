@@ -28,15 +28,7 @@ Menu.createMenu = function(popup, item)
             Menu.createMenu, [popup, {label: item}])();
     }
 
-    var elementName = "menu";
-
-    // If a command is associated with the item we need to use 'splitmenu'.
-    // xxxHonza: Split menu is not properly styled on Mac,
-    // see: https://bugzilla.mozilla.org/show_bug.cgi?id=770316
-    if (!System.isMac(window) && (item.command || item.commandID))
-        elementName = "splitmenu";
-
-    var menu = popup.ownerDocument.createElement(elementName);
+    var menu = popup.ownerDocument.createElement("menu");
     popup.appendChild(menu);
 
     Menu.setItemIntoElement(menu, item);
@@ -129,14 +121,7 @@ Menu.setItemIntoElement = function(element, item)
     }
 
     if (item.command)
-    {
-        // xxxHonza: register 'click' event handler since 'command' isn't fired
-        // by splitmenu binding from some reason.
-        if (element.tagName == "splitmenu")
-            element.addEventListener("click", item.command, false);
-        else
-            element.addEventListener("command", item.command, false);
-    }
+        element.addEventListener("command", item.command, false);
 
     if (item.commandID)
         element.setAttribute("command", item.commandID);
