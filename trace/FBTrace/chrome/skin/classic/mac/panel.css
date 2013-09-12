@@ -23,7 +23,7 @@ body {
 .netPageRow > .netCol > .netPageTitle,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
+    background-image: url(chrome://fbtrace/skin/mac/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 3px;
 }
@@ -42,7 +42,7 @@ body {
 .netPageRow.opened > .netCol > .netPageTitle,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
+    background-image: url(chrome://fbtrace/skin/mac/twistyOpen.svg);
 }
 
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
