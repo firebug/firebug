@@ -43,11 +43,11 @@
 
 .annotation.breakpoint > DIV.annotationHTML {
     position: relative;
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
 .annotation.breakpoint.condition > DIV.annotationHTML {
-    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpointCondition.png), url(chrome://firebug/skin/breakpoint.png);
 }
 
 .annotation.breakpoint.disabled:not(.debugLocation) > DIV.annotationHTML {
@@ -65,7 +65,7 @@
     left: 0;
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/breakpoint.svg) no-repeat center center;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat center center;
     opacity: 0.5;
 }
 
@@ -76,7 +76,7 @@
     left: 0;
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/executionPointer.svg) no-repeat 70% center;
+    background: url(chrome://firebug/skin/executionPointer.png) no-repeat 70% center;
 }
 
 .annotationOverview.breakpoint.disabled {
@@ -85,12 +85,12 @@
 }
 
 .annotation.debugLocation > DIV.annotationHTML {
-    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png);
     color: #000000;
 }
 
 .annotation.breakpointLoading > DIV.annotationHTML {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
     background-position: top !important;
 }
 
@@ -98,7 +98,8 @@
 /* The current debug location (execution line) */
 
 .annotation.breakpoint.debugLocation > DIV.annotationHTML {
-    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png),
+        url(chrome://firebug/skin/breakpoint.png);
     background-position: 70% center, center center;
     background-size: auto auto;
 }

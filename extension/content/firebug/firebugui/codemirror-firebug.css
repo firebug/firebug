@@ -88,19 +88,19 @@
 /* Breakpoints */
 
 .cm-s-firebug .breakpoint {
-    background-image: url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpoint.png);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpointLoading {
-    background-image: url(chrome://firebug/skin/loading.svg);
+    background-image: url(chrome://firebug/skin/loading.png);
     background-repeat: no-repeat;
     padding: 7px;
 }
 
 .cm-s-firebug .breakpoint.condition {
-    background-image: url(chrome://firebug/skin/breakpointCondition.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/breakpointCondition.png), url(chrome://firebug/skin/breakpoint.png);
     background-position: center;
     padding: 6px;
 }
@@ -113,7 +113,7 @@
 /* Debug Location */
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .debugLocation {
-    background-image: url(chrome://firebug/skin/executionPointer.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png);
     background-position: 2px 0;
     color: #000000;
     background-repeat: no-repeat;
@@ -121,7 +121,7 @@
 }
 
 .cm-s-firebug .CodeMirror-debugLocation .CodeMirror-gutter-elt .breakpoint {
-    background-image: url(chrome://firebug/skin/executionPointer.svg), url(chrome://firebug/skin/breakpoint.svg);
+    background-image: url(chrome://firebug/skin/executionPointer.png), url(chrome://firebug/skin/breakpoint.png);
     background-position: 2px 0, 0 0;
 }
 
