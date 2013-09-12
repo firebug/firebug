@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/breakpoints/breakpointStore"
 ],
-function(FBTrace, RDP, DebuggerLib) {
+function(FBTrace, RDP, DebuggerLib, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -124,8 +125,33 @@ function threadBreakpoints(context, args)
         if (!threadActor)
             return "No threadActor?";
 
-        var store = threadActor.breakpointStore._wholeLineBreakpoints;
-        Firebug.Console.log(store);
+        // Log breakpoints on the server side.
+        var actors = threadActor.breakpointStore._wholeLineBreakpoints;
+        Firebug.Console.logFormatted(["Server actors %o", actors], context, "info");
+
+        // xxxHonza: Clone all breakpoints before logging. There is an exception
+        // when the DOM panel (used after clicking on the logged object)
+        // is trying to display instances of {@Breakpoint} using
+        // {@Firebug.Breakpoint.BreakpointRep}
+        var result = {};
+        BreakpointStore.enumerateBreakpoints(null, function(bp)
+        {
+            var newBp = {};
+            for (var p in bp)
+                newBp[p] = bp[p];
+
+            if (!result[bp.href])
+                result[bp.href] = [];
+
+            result[bp.href].push(newBp);
+        });
+
+        // Log Firebug breakpoint objects.
+        Firebug.Console.logFormatted(["Breakpoint Store %o", result], context, "info");
+
+        // Log breakpoint clients objects
+        Firebug.Console.logFormatted(["Breakpoint Clients %o", context.breakpointClients],
+            context, "info");
     }
     catch (e)
     {
@@ -191,7 +217,7 @@ Firebug.registerCommand("pausePool", {
     description: "Helper command for accessing server side pause pool. For debugging purposes only."
 })
 
-Firebug.registerCommand("threadBreakpoints", {
+Firebug.registerCommand("breakpoints", {
     handler: threadBreakpoints.bind(this),
     description: "Helper command for accessing breakpoints on the server side. For debugging purposes only."
 })
