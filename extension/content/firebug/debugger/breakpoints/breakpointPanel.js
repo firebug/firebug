@@ -108,7 +108,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         function sortBreakpoints(a, b)
         {
             if (a.href == b.href)
-                return a.lineNumber < b.lineNumber ? -1 : 1;
+                return a.lineNo < b.lineNo ? -1 : 1;
             else
                 return a.href < b.href ? -1 : 1;
         }

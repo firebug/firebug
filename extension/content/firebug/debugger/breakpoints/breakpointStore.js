@@ -308,6 +308,16 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     removeBreakpoint: function(url, lineNo, type)
     {
+        var removedBp = this.removeBreakpointInernal(url, lineNo, type)
+        if (removedBp)
+            this.dispatch("onRemoveBreakpoint", [removedBp]);
+
+        return removedBp;
+    },
+
+    // Removes a breakpoint silently (doesn't fire an event). Used by {@BreakpointTool}.
+    removeBreakpointInternal: function(url, lineNo, type)
+    {
         type = type || BP_NORMAL;
 
         Trace.sysout("removeBreakpoint; " + url + " (" + lineNo + "), type: " + type);
@@ -352,8 +362,6 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         this.save(url);
 
         Trace.sysout("breakpointStore.removeBreakpoint; " + url + " (" + lineNo + ")", removedBp);
-
-        this.dispatch("onRemoveBreakpoint", [removedBp]);
 
         return removedBp;
     },

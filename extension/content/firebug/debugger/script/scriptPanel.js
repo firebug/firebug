@@ -691,7 +691,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         else
             this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
 
-        // Now insert the breakpoint at the rigth location.
+        // Now insert the breakpoint at the right location.
         this.scriptView.addBreakpoint(bp);
 
         // If BP condition is set, the breakpoint has been initialized by the condition

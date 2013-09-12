@@ -83,6 +83,17 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
                 // line numbers (indexes)
                 bp.params.originLineNo = bp.lineNo;
                 bp.lineNo = currentLine;
+
+                // The breakpoint line has been corrected, let's check if there isn't
+                // an existing breakpoint at the new line (see issue: 6253).
+                // If an existing breakpoint is found we need to remove the newly created one.
+                // Do not fire an event when removing, it's just client side thing.
+                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+                if (dupBp)
+                {
+                    BreakpointStore.removeBreakpointInternal(dupBp.href, dupBp.lineNo);
+                    Trace.sysout("breakpointTool.onAddBreakpoint; remove new BP it's a dup");
+                }
             }
 
             // Breakpoint is ready on the server side, let's notify all listeners so,
@@ -254,9 +265,9 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
         if (!this.context.breakpointClients)
             this.context.breakpointClients = [];
 
-        // FF 19+: uses same breakpoint client object for a executable line and
-        // all non-executable lines above that, so doesn't store breakpoint client
-        // objects if there is already one with same actor.
+        // Check if the breakpoint-client object already exist. The line could
+        // have been corrected on the server side and there can already be a breakpoint
+        // on the new line.
         if (!this.breakpointActorExists(bpClient))
             this.context.breakpointClients.push(bpClient);
 
