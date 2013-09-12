@@ -142,12 +142,15 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoint Store
 
+    /**
+     * Load breakpoints from the associated storage (see initialize).
+     */
     restore: function()
     {
         this.breakpoints = {};
 
         var urls = this.storage.getKeys();
-        for (var i=0; i<urls.length; i++)
+        for (var i = 0; i < urls.length; i++)
         {
             var url = urls[i];
             var bps = this.storage.getItem(url);
@@ -175,8 +178,28 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             this.breakpoints[url] = bps;
 
             // 'params' contains transient data (not persistent).
-            for (var j=0; j<bps.length; j++)
+            for (var j = 0; j < bps.length; j++)
                 bps[j].params = {};
+        }
+
+        // Remove duplicities (breakpoints with the same URL and line).
+        for (var url in this.breakpoints)
+        {
+            var bps = this.breakpoints[url];
+
+            var map = {};
+            var result = [];
+            for (var i = 0; i < bps.length; i++)
+            {
+                var bp = bps[i];
+                if (map[bp.lineNo])
+                    continue;
+
+                result.push(bp);
+                map[bp.lineNo] = bp;
+            }
+
+            this.breakpoints[url] = result;
         }
     },
 
@@ -187,7 +210,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             return;
 
         var cleanBPs = [];
-        for (var i=0; i<bps.length; i++)
+        for (var i = 0; i < bps.length; i++)
         {
             var bp = bps[i];
 
