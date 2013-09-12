@@ -3,8 +3,9 @@
 define([
     "firebug/lib/trace",
     "firebug/debugger/rdp",
+    "firebug/debugger/debuggerLib",
 ],
-function(FBTrace, RDP) {
+function(FBTrace, RDP, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -77,9 +78,11 @@ function threadPool(context, args)
 {
     try
     {
-        var conn = DebuggerServer._connections["conn0."];
-        var tabActor = conn.rootActor._tabActors.get(context.browser);
-        var pool = tabActor.threadActor.threadLifetimePool;
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        if (!threadActor)
+            return "No threadActor?";
+
+        var pool = threadActor.threadLifetimePool;
         Firebug.Console.log(pool);
     }
     catch (e)
@@ -96,9 +99,11 @@ function pausePool(context, args)
 {
     try
     {
-        var conn = DebuggerServer._connections["conn0."];
-        var tabActor = conn.rootActor._tabActors.get(context.browser);
-        var pool = tabActor.threadActor._pausePool;
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        if (!threadActor)
+            return "No threadActor?";
+
+        var pool = threadActor._pausePool;
         Firebug.Console.log(pool);
     }
     catch (e)
@@ -115,11 +120,12 @@ function threadBreakpoints(context, args)
 {
     try
     {
-        var conn = DebuggerServer._connections["conn0."];
-        var tabActor = conn.rootActor._tabActors.get(context.browser);
-        var store = tabActor.threadActor._breakpointStore;
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        if (!threadActor)
+            return "No threadActor?";
+
+        var store = threadActor.breakpointStore._wholeLineBreakpoints;
         Firebug.Console.log(store);
-        FBTrace.sysout("Breakpoint Store:", store);
     }
     catch (e)
     {
