@@ -184,7 +184,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
                 panel.searchText = value;
                 searchBox.status = (found ? "found" : "notfound");
-                sBox.setPlaceholder(panel.name);
+                sBox.setPlaceholder();
 
                 if (FBTrace.DBG_SEARCH)
                     FBTrace.sysout("search " + searchBox.status + " " + value);
@@ -278,6 +278,9 @@ Firebug.Search = Obj.extend(Firebug.Module,
     setPlaceholder: function()
     {
         var panel = Firebug.chrome.getSelectedPanel();
+        if (!panel)
+            return;
+
         var searchBox = Firebug.chrome.$("fbSearchBox");
         var panelType = Firebug.getPanelType(panel.name);
         var title = Firebug.getPanelTitle(panelType);

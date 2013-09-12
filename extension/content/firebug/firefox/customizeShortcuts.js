@@ -7,7 +7,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
-    "firebug/lib/system",
+    "firebug/lib/system"
 ],
 function(FBTrace, Obj, Locale, Str, Events, System) {
 
@@ -77,29 +77,6 @@ CustomizeShortcuts.prototype =
 
     setKeyInfo: function()
     {
-        gPlatformKeys.shift = Locale.$STR("VK_SHIFT");
-        gPlatformKeys.meta = Locale.$STR("VK_META");
-        gPlatformKeys.alt = Locale.$STR("VK_ALT");
-        gPlatformKeys.ctrl = Locale.$STR("VK_CONTROL");
-        gPlatformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR");
-
-        switch (Services.prefs.getIntPref("ui.key.accelKey"))
-        {
-            case KeyEvent.DOM_VK_CONTROL:
-                gPlatformKeys.accel = gPlatformKeys.ctrl;
-                break;
-            case KeyEvent.DOM_VK_ALT:
-                gPlatformKeys.accel = gPlatformKeys.alt;
-                break;
-            case KeyEvent.DOM_VK_META:
-                gPlatformKeys.accel = gPlatformKeys.meta;
-                break;
-
-            default:
-                gPlatformKeys.accel = (System.isMac(this.win) ? gPlatformKeys.meta :
-                    gPlatformKeys.ctrl);
-        }
-
         for (var property in KeyEvent)
             gVKNames[KeyEvent[property]] = property.replace("DOM_", "");
 
@@ -161,9 +138,9 @@ CustomizeShortcuts.prototype =
         var keyCode = tokens.pop();
 
         if (keyCode.length == 1)
-            return this.getFormattedKey(tokens.join(","), keyCode, null);
+            return Locale.getFormattedKey(this.win, tokens.join(","), keyCode, null);
         else
-            return this.getFormattedKey(tokens.join(","), null, keyCode);
+            return Locale.getFormattedKey(this.win, tokens.join(","), null, keyCode);
     },
 
     addShortcutRow: function(element, index, array)
@@ -276,48 +253,13 @@ CustomizeShortcuts.prototype =
 
         // Show formatted shortcut in textbox
         modifiers = modifiers.replace(" ", ",");
-        var formatted = this.getFormattedKey(modifiers, key, keyConstant);
+        var formatted = Locale.getFormattedKey(this.win, modifiers, key, keyConstant);
 
         target.value = formatted;
 
         // Update reset button visibility
         target.nextSibling.hidden = formatted == target.getAttribute("default_value");
         return false;
-    },
-
-    getFormattedKey: function(modifiers, key, keyConstant)
-    {
-        if ((modifiers == "shift,alt,control,accel" && keyConstant == "VK_SCROLL_LOCK") ||
-            (key == "" || (!key && keyConstant == "")))
-        {
-            return "";
-        }
-
-        var val = "";
-        if (modifiers)
-        {
-            val = modifiers.replace(/^[\s,]+|[\s,]+$/g, "").split(/[\s,]+/g).join(gPlatformKeys.sep).
-                replace("alt", gPlatformKeys.alt).replace("shift", gPlatformKeys.shift).
-                replace("control", gPlatformKeys.ctrl).replace("meta", gPlatformKeys.meta).
-                replace("accel", gPlatformKeys.accel) +
-                gPlatformKeys.sep;
-        }
-
-        if (key)
-            return val += key;
-
-        if (keyConstant)
-        {
-            var localizedKey = Locale.$STR(keyConstant);
-
-            // Create human friendly alternative ourself, if there is no translation
-            // for the key constant
-            if (Str.hasPrefix(localizedKey, "VK "))
-                localizedKey = Str.capitalize(localizedKey.replace("VK ", ""), true);
-
-            val += localizedKey;
-        }
-        return val;
     }
 }
 

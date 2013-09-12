@@ -358,7 +358,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.updateLocation; " + object, object);
 
         // Make sure the update panel's content. If there is currently a warning displayed
-        // it might disappers since no longer valid (e.g. "Debugger is already active").
+        // it might disappears since no longer valid (e.g. "Debugger is already active").
         if (ScriptPanelWarning.updateLocation(this))
             return;
 
@@ -523,7 +523,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Are not displayed in the breakpoint column.
         BreakpointStore.enumerateBreakpoints(url, function(bp)
         {
-            // xxxHonza: perhaps we should pass onlye line numbers to the ScriptView?
+            // xxxHonza: perhaps we should pass only line numbers to the ScriptView?
             breakpoints.push(bp);
         });
     },

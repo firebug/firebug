@@ -351,16 +351,3 @@ panelBarTabList {
 .panelBarTabListMenuItem {
     -moz-binding: url("firefox/bindings.xml#panelBarTabListMenuItem");
 }
-
-/*************************************************************************************************/
-/* splitmenu */
-/* xxxHonza:  splitmenu does not support checkbox by default, so following styles are introduced */
-
-splitmenu#fbShowEventsInConsole {
-    padding-top: 3px;
-    padding-bottom: 3px;
-}
-
-splitmenu#fbShowEventsInConsole[checked="true"] {
-    -moz-appearance: menucheckbox;
-}

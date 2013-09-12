@@ -252,6 +252,65 @@ Locale.getPluralRule = function()
     }
 };
 
+Locale.getFormattedKey = function(win, modifiers, key, keyConstant)
+{
+    platformKeys = {};
+    platformKeys.shift = Locale.$STR("VK_SHIFT");
+    platformKeys.meta = Locale.$STR("VK_META");
+    platformKeys.alt = Locale.$STR("VK_ALT");
+    platformKeys.ctrl = Locale.$STR("VK_CONTROL");
+    platformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR");
+
+    switch (Services.prefs.getIntPref("ui.key.accelKey"))
+    {
+        case win.KeyEvent.DOM_VK_CONTROL:
+            platformKeys.accel = platformKeys.ctrl;
+            break;
+        case win.KeyEvent.DOM_VK_ALT:
+            platformKeys.accel = platformKeys.alt;
+            break;
+        case win.KeyEvent.DOM_VK_META:
+            platformKeys.accel = platformKeys.meta;
+            break;
+
+        default:
+            platformKeys.accel = (win.navigator.platform.search("Mac") != -1 ? platformKeys.meta :
+                platformKeys.ctrl);
+    }
+
+    if ((modifiers == "shift,alt,control,accel" && keyConstant == "VK_SCROLL_LOCK") ||
+        (key == "" || (!key && keyConstant == "")))
+    {
+        return "";
+    }
+
+    var val = "";
+    if (modifiers)
+    {
+        val = modifiers.replace(/^[\s,]+|[\s,]+$/g, "").split(/[\s,]+/g).join(platformKeys.sep).
+            replace("alt", platformKeys.alt).replace("shift", platformKeys.shift).
+            replace("control", platformKeys.ctrl).replace("meta", platformKeys.meta).
+            replace("accel", platformKeys.accel) +
+            platformKeys.sep;
+    }
+
+    if (key)
+        return val += key;
+
+    if (keyConstant)
+    {
+        var localizedKey = Locale.$STR(keyConstant);
+
+        // Create human friendly alternative ourself, if there is no translation
+        // for the key constant
+        if (localizedKey.lastIndexOf("VK ", 0) === 0)
+            localizedKey = capitalize(localizedKey.replace("VK ", ""), true);
+
+        val += localizedKey;
+    }
+    return val;
+}
+
 // ********************************************************************************************* //
 // Helpers
 
@@ -259,6 +318,19 @@ Locale.getPluralRule = function()
 function validate(str)
 {
     return String(str).replace(/"/g, '\'');
+}
+
+// This module needs to be independent of any other modules, so this is mainly a copy of
+// Str.capitalize().
+function capitalize(string)
+{
+    function capitalizeFirstLetter(string)
+    {
+        var rest = string.slice(1).toLowerCase();
+        return string.charAt(0).toUpperCase() + rest;
+    }
+
+    return string.split(" ").map(capitalizeFirstLetter).join(" ");
 }
 
 function getDefaultStringBundleURI(bundleURI)
