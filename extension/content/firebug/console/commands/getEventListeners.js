@@ -129,11 +129,10 @@ function getMutationObserversForTarget(context, target)
 {
     var result = [];
 
-    // xxxHonza: Firefox 26+ should be the minimum for Firebug 1.13, so
-    // this condition should disappear eventually.
+    // xxxHonza: The message is good for debugging (till the support is in Nightly at least).
     if (typeof(target.getBoundMutationObservers) !== "function")
     {
-        var msg = "ERROR not supported by the current version of " +
+        var msg = "Get mutation-observers is not supported by the current version of " +
             "Firefox (see: https://bugzilla.mozilla.org/show_bug.cgi?id=912874)";
 
         FBTrace.sysout("getMutationObservers: " + msg);
@@ -179,28 +178,33 @@ function consoleLog(context, target, listeners, observers)
     // xxxHonza: the function displayed in the Console panel doesn't
     // navigate to the Script panel. 
 
-    // Group for event listeners list
-    input.title = Locale.$STR("eventListeners.group_title");
-    var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
-        GroupCaption, true, null, true);
-
     // xxxHonza: fix me, this is the second time we get the listeners.
     listeners = Events.getEventListenersForTarget(target);
+    if (listeners && listeners.length > 0)
+    {
+        // Group for event listeners list
+        input.title = Locale.$STR("eventListeners.group_title");
+        var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+            GroupCaption, true, null, true);
 
-    // xxxHonza: tableRep should have a 'render' methods with parent-node passed in.
-    TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
-    Console.closeGroup(context, true);
+        // xxxHonza: tableRep should have a 'render' methods with parent-node passed in.
+        TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
+        Console.closeGroup(context, true);
+    }
 
-    // Group for mutation observers list
-    input.title = Locale.$STR("mutationObservers.group_title");
-    row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
-        GroupCaption, true, null, true);
+    if (observers && observers.length > 0)
+    {
+        // Group for mutation observers list
+        input.title = Locale.$STR("mutationObservers.group_title");
+        row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+            GroupCaption, true, null, true);
 
-    // xxxHonza: column labels localization?
-    TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
-        "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
-        "mutationCallback"], context);
-    Console.closeGroup(context, true);
+        // xxxHonza: column labels localization?
+        TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
+            "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
+            "mutationCallback"], context);
+        Console.closeGroup(context, true);
+    }
 }
 
 // ********************************************************************************************* //
