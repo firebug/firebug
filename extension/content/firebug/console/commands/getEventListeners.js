@@ -8,13 +8,26 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
     "firebug/lib/events",
+    "firebug/lib/domplate",
+    "firebug/console/console",
+    "firebug/chrome/tableRep",
 ],
-function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events) {
+function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events, Domplate, Console, TableRep) {
 
 "use strict";
 
 // ********************************************************************************************* //
+// Resources
+
+// https://bugzilla.mozilla.org/show_bug.cgi?id=912874
+
+// ********************************************************************************************* //
 // Constants
+
+var {domplate, SPAN, TAG} = Domplate;
+
+// xxxHonza: localization?
+var mutationObserversType = "Mutation Observers";
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -25,7 +38,43 @@ function onExecuteCommand(context, args)
     if (typeof target !== "object" || target === null)
         return undefined;
 
+    try
+    {
+        var result = {};
+
+        // Get event listeners.
+        var listeners = getEventListenersForTarget(context, target);
+        if (listeners)
+            result = listeners;
+
+        // Append also mutation observers into the result (if there are any).
+        var observers = getMutationObserversForTarget(context, target);
+        if (observers && observers.length > 0)
+            result[mutationObserversType] = observers;
+
+        var global = context.getCurrentGlobal();
+        var objects = Wrapper.cloneIntoContentScope(global, result);
+
+        consoleLog(context, target, listeners, observers);
+
+        return objects;
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getEventListeners FAILS to create content view" + exc, exc);
+    }
+
+    return undefined;
+}
+
+// ********************************************************************************************* //
+// Event Listeners
+
+function getEventListenersForTarget(context, target)
+{
     var listeners;
+
     try
     {
         listeners = Events.getEventListenersForTarget(target);
@@ -50,27 +99,19 @@ function onExecuteCommand(context, args)
     try
     {
         var global = context.getCurrentGlobal();
-        var ret = {};
+        var result = {};
         for (let li of listeners)
         {
-            if (!ret[li.type])
-                ret[li.type] = [];
+            if (!result[li.type])
+                result[li.type] = [];
 
-            ret[li.type].push(Wrapper.cloneIntoContentScope(global, {
+            result[li.type].push(Wrapper.cloneIntoContentScope(global, {
                 listener: li.func,
                 useCapture: li.capturing
             }));
         }
 
-        // Append also mutation observers into the result if there are any.
-        var observers = getMutationObserversForTarget(context, target);
-        if (observers.length > 0)
-        {
-            // xxxHonza: localization?
-            ret["Mutation Observers"] = observers;
-        }
-
-        return Wrapper.cloneIntoContentScope(global, ret);
+        return result;
     }
     catch (exc)
     {
@@ -96,9 +137,9 @@ function getMutationObserversForTarget(context, target)
             "Firefox (see: https://bugzilla.mozilla.org/show_bug.cgi?id=912874)";
 
         FBTrace.sysout("getMutationObservers: " + msg);
-        Firebug.Console.logFormatted([msg], context, "warn");
+        Console.logFormatted([msg], context, "warn");
 
-        return result;
+        return undefined;
     }
 
     var global = context.getCurrentGlobal();
@@ -125,6 +166,67 @@ function getMutationObserversForTarget(context, target)
 
     return result;
 }
+
+// ********************************************************************************************* //
+// Console Logging
+
+function consoleLog(context, target, listeners, observers)
+{
+    var input = {
+        target: target,
+    };
+
+    // xxxHonza: the function displayed in the Console panel doesn't
+    // navigate to the Script panel. 
+
+    // Group for event listeners list
+    input.title = Locale.$STR("eventListeners.group_title");
+    var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+        GroupCaption, true, null, true);
+
+    // xxxHonza: fix me, this is the second time we get the listeners.
+    listeners = Events.getEventListenersForTarget(target);
+
+    // xxxHonza: tableRep should have a 'render' methods with parent-node passed in.
+    TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
+    Console.closeGroup(context, true);
+
+    // Group for mutation observers list
+    input.title = Locale.$STR("mutationObservers.group_title");
+    row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
+        GroupCaption, true, null, true);
+
+    // xxxHonza: column labels localization?
+    TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
+        "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
+        "mutationCallback"], context);
+    Console.closeGroup(context, true);
+}
+
+// ********************************************************************************************* //
+// Domplate Templates
+
+var GroupCaption = domplate(
+{
+    tag:
+        SPAN({"class": "eventListenersTitle"},
+            SPAN({"class": "eventListenersCaption"},
+                "$object.title"
+            ),
+            SPAN("&nbsp"),
+            SPAN("&#187;"),
+            SPAN("&nbsp"),
+            SPAN({"class": "eventListenersTarget"},
+                TAG("$object|getTargetTag", {object: "$object.target"})
+            )
+        ),
+
+    getTargetTag: function(object)
+    {
+        var rep = Firebug.getRep(object.target);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    }
+});
 
 // ********************************************************************************************* //
 // Registration

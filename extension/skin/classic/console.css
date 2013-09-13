@@ -902,6 +902,7 @@
 
 /************************************************************************************************/
 /* include() command */
+
 .tableCommandLineInclude td {
     height: 17px;
 }
@@ -925,4 +926,16 @@
 .tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 
+}
+
+/************************************************************************************************/
+/* getEventListeners() command */
+
+.logRow-eventListenersDetails .logGroup {
+    background: none;
+    background-color: rgb(244, 244, 244) !important;
+}
+
+.logRow-eventListenersDetails .logRow-table .logContent {
+    padding: 0;
 }
