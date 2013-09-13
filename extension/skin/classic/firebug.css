@@ -394,11 +394,16 @@ textbox[type="fbSearchBox"] > panel {
 /*************************************************************************************************/
 
 #fbCommandPopupButton {
-    list-style-image: url(chrome://firebug/skin/commandLinePopup.svg);
+    list-style-image: url(chrome://firebug/skin/commandLinePopup.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#fbCommandPopupButton:hover {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
 #fbCommandPopupButton[disabled="true"] {
-    filter: url(resource://firebugui/filters.svg#brightenedGrayscale);
+    -moz-image-region: rect(32px, 16px, 48px, 0);
 }
 
 /************************************************************************************************/

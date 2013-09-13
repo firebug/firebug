@@ -10,7 +10,7 @@
 }
 
 .logRow {
-    /*display: table;*/
+    display: table;
     position: relative;
     width: 100%;
     border-bottom: 1px solid #D7D7D7;
@@ -38,6 +38,10 @@
 .logGroup > .logRow {
     background-color: transparent !important;
     font-weight: bold;
+
+    /* Override the value from panel.css, so the twisty button is
+    vertically centered with the group label row */
+    background-position: 2px calc(0.5em - 5px) !important;
 }
 
 .logGroup.opened > .logRow {
@@ -49,11 +53,11 @@
 }
 
 .logRow > div {
-    /*display: table-row;*/
+    display: table-row;
 }
 
 .logContent {
-    /*display: table-cell;*/
+    display: table-cell;
     padding: 2px 0 2px 4px;
 }
 
@@ -241,7 +245,7 @@
 
 .logRow:not(.logRow-group) > div > .objectLink-sourceLink {
     position: relative;
-    /*display: table-cell;*/
+    display: table-cell;
     padding: 0 4px;
     text-align: right;
     width: 0;
@@ -274,7 +278,7 @@
 
 /* Used for a message explaining missing stack trace for an error log */
 .errorTrace .descriptionBox {
-    background-image: url(chrome://firebug/skin/info.svg);
+    background-image: url(chrome://firebug/skin/info.png);
     background-repeat: no-repeat;
     padding: 0 0 2px 20px;
 }
@@ -316,7 +320,7 @@
 .errorColCaret {
     width: 7px;
     height: 9px;
-    background: url(chrome://firebug/skin/errorColumnIndicator.svg) no-repeat 100% 100%;
+    background: url(chrome://firebug/skin/errorColumnIndicator.png) no-repeat 100% 100%;
     display: inline-block;
     vertical-align: top;
     margin-left: 1px;

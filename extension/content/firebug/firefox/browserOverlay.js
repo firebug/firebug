@@ -28,6 +28,7 @@ var Cu = Components.utils;
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
+Locale.registerStringBundle("chrome://firebug/locale/keys.properties");
 Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
 Locale.registerStringBundle("chrome://global/locale/keys.properties");
 

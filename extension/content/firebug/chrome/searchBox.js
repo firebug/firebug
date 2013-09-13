@@ -163,6 +163,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         }
         else
         {
+            var sBox = this;
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
@@ -183,6 +184,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
                 panel.searchText = value;
                 searchBox.status = (found ? "found" : "notfound");
+                sBox.setPlaceholder();
 
                 if (FBTrace.DBG_SEARCH)
                     FBTrace.sysout("search " + searchBox.status + " " + value);
@@ -273,6 +275,18 @@ Firebug.Search = Obj.extend(Firebug.Module,
         return history[0];
     },
 
+    setPlaceholder: function()
+    {
+        var panel = Firebug.chrome.getSelectedPanel();
+        if (!panel)
+            return;
+
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        var panelType = Firebug.getPanelType(panel.name);
+        var title = Firebug.getPanelTitle(panelType);
+        searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
@@ -308,6 +322,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
         {
             searchBox.collapsed = false;
         }
+
+        this.setPlaceholder();
     }
 });
 

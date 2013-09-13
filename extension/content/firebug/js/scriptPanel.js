@@ -643,13 +643,19 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onKeyPress: function(event)
     {
         var ch = String.fromCharCode(event.charCode);
-        var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (ch == "l" && Events.isControl(event))
         {
+            var searchBox = Firebug.chrome.$("fbSearchBox");
             searchBox.value = "#";
             searchBox.focus();
 
+            Events.cancelEvent(event);
+        }
+
+        if (ch == "w" && Events.isAlt(event))
+        {
+            this.addSelectionWatch();
             Events.cancelEvent(event);
         }
     },
@@ -934,16 +940,20 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbLocationList", active);
 
         Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"),
+                Locale.getFormattedKey(window, "shift", null, "VK_F8")]));
         Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"),
+                Locale.getFormattedKey(window, null, null, "VK_F8")]));
         Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F11"]));
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"),
+                Locale.getFormattedKey(window, null, null, "VK_F11")]));
         Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F10"]));
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"),
+                Locale.getFormattedKey(window, null, null, "VK_F10")]));
         Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
-            Locale.$STRF("firebug.labelWithShortcut",
-                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Out"),
+                Locale.getFormattedKey(window, "shift", null, "VK_F11")]));
 
         // Additional debugger panels are visible only, if debugger is active.
         this.panelSplitter.collapsed = !active;
@@ -1456,6 +1466,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 {
                     label: "AddWatch",
                     tooltiptext: "watch.tip.Add_Watch",
+                    acceltext: Locale.getFormattedKey(window, "alt", "W"),
                     command: Obj.bind(this.addSelectionWatch, this)
                 }
             );
@@ -1513,35 +1524,35 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                         tooltiptext: "script.tip.Rerun",
                         id: "contextMenuRerun",
                         command: Obj.bindFixed(debuggr.rerun, debuggr, this.context),
-                        acceltext: "Shift+F8"
+                        acceltext: Locale.getFormattedKey(window, "shift", null, "VK_F8")
                     },
                     {
                         label: "script.Continue",
                         tooltiptext: "script.tip.Continue",
                         id: "contextMenuContinue",
                         command: Obj.bindFixed(debuggr.resume, debuggr, this.context),
-                        acceltext: "F8"
+                        acceltext: Locale.getFormattedKey(window, null, null, "VK_F8")
                     },
                     {
                         label: "script.Step_Over",
                         tooltiptext: "script.tip.Step_Over",
                         id: "contextMenuStepOver",
                         command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context),
-                        acceltext: "F10"
+                        acceltext: Locale.getFormattedKey(window, null, null, "VK_F10")
                     },
                     {
                         label: "script.Step_Into",
                         tooltiptext: "script.tip.Step_Into",
                         id: "contextMenuStepInto",
                         command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context),
-                        acceltext: "F11"
+                        acceltext: Locale.getFormattedKey(window, null, null, "VK_F11")
                     },
                     {
                         label: "script.Step_Out",
                         tooltiptext: "script.tip.Step_Out",
                         id: "contextMenuStepOut",
                         command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
-                        acceltext: "Shift+F11"
+                        acceltext: Locale.getFormattedKey(window, "shift", null, "VK_F11")
                     },
                     {
                         label: "firebug.RunUntil",

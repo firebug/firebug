@@ -125,9 +125,6 @@ Menu.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
-    if (item.items && (item.command || item.commandID))
-        element.setAttribute("type", "splitmenu");
-
     return element;
 };
 
