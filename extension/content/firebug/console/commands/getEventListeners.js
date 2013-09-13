@@ -74,6 +74,14 @@ function onExecuteCommand(context, args)
             }));
         }
 
+        // Append also mutation observers into the result if there are any.
+        var observers = getMutationObserversForTarget(context, target);
+        if (observers.length > 0)
+        {
+            // xxxHonza: localization?
+            ret["Mutation Observers"] = observers;
+        }
+
         return Wrapper.cloneIntoContentScope(global, ret);
     }
     catch (exc)
@@ -83,6 +91,51 @@ function onExecuteCommand(context, args)
     }
 
     return undefined;
+}
+
+// ********************************************************************************************* //
+// Mutation Observers
+
+function getMutationObserversForTarget(context, target)
+{
+    var result = [];
+
+    // xxxHonza: Firefox 26+ should be the minimum for Firebug 1.13, so
+    // this condition should disappear eventually.
+    if (typeof(target.getBoundMutationObservers) !== "function")
+    {
+        var msg = "ERROR not supported by the current version of " +
+            "Firefox (see: https://bugzilla.mozilla.org/show_bug.cgi?id=912874)";
+
+        FBTrace.sysout("getMutationObservers: " + msg);
+        Firebug.Console.logFormatted([msg], context, "warn");
+
+        return result;
+    }
+
+    var global = context.getCurrentGlobal();
+    var observers = target.getBoundMutationObservers();
+    for (var i=0; i<observers.length; i++)
+    {
+        var observer = observers[i];
+        var infos = observer.getObservingInfo();
+        for (var j=0; j<infos.length; j++)
+        {
+            var info = infos[j];
+            result.push(Wrapper.cloneIntoContentScope(global, {
+                attributeOldValue: info.attributeOldValue,
+                attributes: info.attributes,
+                characterData: info.characterData,
+                characterDataOldValue: info.characterDataOldValue,
+                childList: info.childList,
+                subtree: info.subtree,
+                observedNode: info.observedNode,
+                mutationCallback: observer.mutationCallback,
+            }));
+        }
+    }
+
+    return result;
 }
 
 // ********************************************************************************************* //
