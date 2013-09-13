@@ -308,7 +308,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     removeBreakpoint: function(url, lineNo, type)
     {
-        var removedBp = this.removeBreakpointInernal(url, lineNo, type)
+        var removedBp = this.removeBreakpointInternal(url, lineNo, type)
         if (removedBp)
             this.dispatch("onRemoveBreakpoint", [removedBp]);
 
