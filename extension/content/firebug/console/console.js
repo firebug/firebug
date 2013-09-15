@@ -213,7 +213,37 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initContext: function(context, persistedState)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.initContext");
+
         Firebug.ActivableModule.initContext.apply(this, arguments);
+
+        this.addDOMWindowCreatedListener(context);
+        this.injector.attachConsoleInjector(context, context.window);
+    },
+
+    destroyContext: function(context)
+    {
+        this.removeDOMWindowCreatedListener(context);
+    },
+
+    addDOMWindowCreatedListener: function(context)
+    {
+        context.consoleOnDOMWindowCreated = function(ev)
+        {
+            if (ev && ev.target)
+                Firebug.Console.injector.attachConsoleInjector(context, ev.target.ownerGlobal);
+        };
+        context.browser.addEventListener("DOMWindowCreated", context.consoleOnDOMWindowCreated);
+    },
+
+    removeDOMWindowCreatedListener: function(context)
+    {
+        if (context && context.consoleOnDOMWindowCreated)
+        {
+            context.browser.removeEventListener("DOMWindowCreated",
+                context.consoleOnDOMWindowCreated);
+        }
     },
 
     togglePersist: function(context)
@@ -230,14 +260,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
-    },
-
-    watchWindow: function(context, win)
-    {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.watchWindow; " + Win.safeGetWindowLocation(win));
-
-        Firebug.Console.injector.attachConsoleInjector(context, win);
     },
 
     updateOption: function(name, value)
@@ -263,7 +285,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
             this.onSuspendFirebug();
     },
 
-    onSuspendFirebug: function()
+    onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:" +
@@ -276,9 +298,11 @@ Firebug.Console = Obj.extend(ActivableConsole,
             // status bar are removed.
             this.clear();
         }
+        context = context || Firebug.currentContext;
+        this.removeDOMWindowCreatedListener(context);
     },
 
-    onResumeFirebug: function()
+    onResumeFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
@@ -286,6 +310,15 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
+
+        context = context || Firebug.currentContext;
+
+        Win.iterateWindows(context.window, function(win)
+        {
+            Firebug.Console.injector.attachConsoleInjector(context, win);
+        });
+        // Also attach console for future dynamically-added iframes.
+        this.addDOMWindowCreatedListener(context);
     },
 
     onToggleFilter: function(event, context, filterType)
