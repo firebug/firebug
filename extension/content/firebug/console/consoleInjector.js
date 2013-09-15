@@ -33,7 +33,7 @@ Firebug.Console.injector =
                 wmExposedConsoles.get(winDoc).context === context)
             {
                 if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("Console already attached for " + url + ". Skip.");
+                    FBTrace.sysout("Console already attached for " + url + ". Skipping.");
                 return;
             }
             // Get the 'console' object (this comes from chrome scope).
@@ -69,11 +69,12 @@ Firebug.Console.injector =
             var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
             var exposedConsole = getConsoleWrapper(console);
 
-            // Note: to early to use weakmap's + win.document in case of iframes. So we use an expando.
+            // Store the context and the exposedConsole in a WeakMap.
             wmExposedConsoles.set(winDoc, {
                 context: context,
                 console: exposedConsole
             });
+
             win.wrappedJSObject.console = exposedConsole;
 
             if (FBTrace.DBG_CONSOLE)

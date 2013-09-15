@@ -218,31 +218,46 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
-        this.addDOMWindowCreatedListener(context);
-        this.injector.attachConsoleInjector(context, context.window);
+        this.attachConsoleToWindows(context);
     },
 
     destroyContext: function(context)
-    {
-        this.removeDOMWindowCreatedListener(context);
-    },
-
-    addDOMWindowCreatedListener: function(context)
-    {
-        context.consoleOnDOMWindowCreated = function(ev)
-        {
-            if (ev && ev.target)
-                Firebug.Console.injector.attachConsoleInjector(context, ev.target.ownerGlobal);
-        };
-        context.browser.addEventListener("DOMWindowCreated", context.consoleOnDOMWindowCreated);
-    },
-
-    removeDOMWindowCreatedListener: function(context)
     {
         if (context && context.consoleOnDOMWindowCreated)
         {
             context.browser.removeEventListener("DOMWindowCreated",
                 context.consoleOnDOMWindowCreated);
+
+            context.consoleOnDOMWindowCreated = null;
+        }
+    },
+
+    /**
+     * Attach the `console` object to the window of the context and its iframes.
+     * Also listen to iframe creations to attach it automatically.
+     *
+     * *Caution*: Designed to be used only in Firebug.Console. Should not be used elsewhere.
+     *
+     * @param {Context} context
+     */
+    attachConsoleToWindows: function(context)
+    {
+        // Attach the Console for the window and its iframes.
+        Win.iterateWindows(context.window, function(win)
+        {
+            Firebug.Console.injector.attachConsoleInjector(context, win);
+        });
+
+        // Listen to DOMWindowCreated for future iframes. Also necessary when Firebug is enabled at
+        // page load.
+        if (!context.consoleOnDOMWindowCreated)
+        {
+            context.consoleOnDOMWindowCreated = function(ev)
+            {
+                if (ev && ev.target)
+                    Firebug.Console.injector.attachConsoleInjector(context, ev.target.defaultView);
+            };
+            context.browser.addEventListener("DOMWindowCreated", context.consoleOnDOMWindowCreated);
         }
     },
 
@@ -285,7 +300,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
             this.onSuspendFirebug();
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:" +
@@ -298,11 +313,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
             // status bar are removed.
             this.clear();
         }
-        context = context || Firebug.currentContext;
-        this.removeDOMWindowCreatedListener(context);
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
@@ -310,15 +323,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
         if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
             this.setStatus();
-
-        context = context || Firebug.currentContext;
-
-        Win.iterateWindows(context.window, function(win)
-        {
-            Firebug.Console.injector.attachConsoleInjector(context, win);
-        });
-        // Also attach console for future dynamically-added iframes.
-        this.addDOMWindowCreatedListener(context);
     },
 
     onToggleFilter: function(event, context, filterType)
