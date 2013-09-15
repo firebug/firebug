@@ -5,9 +5,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options",
     "firebug/lib/css",
-    "firebug/lib/deprecated"
+    "firebug/lib/deprecated",
+    "firebug/lib/system",
 ],
-function(FBTrace, Locale, Options, Css, Deprecated) {
+function(FBTrace, Locale, Options, Css, Deprecated, System) {
 
 "use strict";
 
@@ -145,14 +146,6 @@ Menu.setItemIntoElement = function(element, item)
     if (item.name)
         element.setAttribute("name", item.name);
 
-    if (item.items && (item.command || item.commandID))
-    {
-        element.setAttribute("type", "splitmenu");
-        element.setAttribute("iconic", "true");
-    }
-
-    // xxxHonza: must be done after 'type' == 'splitmenu' otherwise the menu-item
-    // is not checked (the check icon is not displayed from some reason).
     if (item.checked)
         element.setAttribute("checked", "true");
 

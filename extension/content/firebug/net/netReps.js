@@ -853,7 +853,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoPatchText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
-                IFRAME({"class": "netInfoHtmlPreview", "role": "document"}),
+                IFRAME({"class": "netInfoHtmlPreview", "role": "document", "sandbox": ""}),
                 DIV({"class": "htmlPreviewResizer"})
             )
         ),
@@ -1171,7 +1171,15 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             // The event is sent only for the iframes in the Console panel.
             context.addEventListener(this.htmlPreview, "load", function(event)
             {
-                event.target.contentDocument.body.innerHTML = text;
+                try
+                {
+                    event.target.contentDocument.body.innerHTML = text;
+                }
+                catch (err)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("net.updateInfo; EXCEPTION " + err, err);
+                }
             });
 
             var defaultHeight = parseInt(Options.get("netHtmlPreviewHeight"));
@@ -1581,45 +1589,58 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 {
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
-            DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle collapsed"},
-                DIV({"class": "netHrefLabel netLabel",
-                     style: "margin-left: 10px",
-					 onclick: "$onClickRowHeader"}
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netResponseHeadersVisible"},
+                DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
+                    SPAN({"class": "netHeader twisty",
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("ResponseHeaders")
+                    ),
+                    SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
+                        _sourceDisplayed: false, _rowName: "ResponseHeaders"},
+                        Locale.$STR("net.headers.view source")
+                    )
                 ),
-                SPAN({onclick: "$onClickRowHeader"}, Locale.$STR("ResponseHeaders")),
-                SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
-                    _sourceDisplayed: false, _rowName: "ResponseHeaders"},
-                    Locale.$STR("net.headers.view source")
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("ResponseHeaders")})
                 )
             ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("ResponseHeaders")})
-            ),
-            DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle collapsed"},
-                SPAN(Locale.$STR("RequestHeaders")),
-                SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
-                    _sourceDisplayed: false, _rowName: "RequestHeaders"},
-                    Locale.$STR("net.headers.view source")
-                )
-            ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netRequestHeadersVisible"},
+                DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("RequestHeaders")),
+                    SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
+                        _sourceDisplayed: false, _rowName: "RequestHeaders"},
+                        Locale.$STR("net.headers.view source")
+                    )
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
                     "aria-label": Locale.$STR("RequestHeaders")})
+                )
             ),
-            DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle collapsed"},
-                SPAN(Locale.$STR("CachedResponseHeaders"))
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netCachedHeadersVisible"},
+                DIV({"class": "netInfoHeadersGroup netInfoCachedResponseHeadersTitle"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                        Locale.$STR("CachedResponseHeaders"))
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoCachedResponseHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("CachedResponseHeaders")})
+                )
             ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoCachedResponseHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("CachedResponseHeaders")})
-            ),
-            DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle collapsed"},
-                SPAN(Locale.$STR("PostRequestHeaders"))
-            ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY({"class": "netInfoPostRequestHeadersBody", "role": "list",
-                    "aria-label": Locale.$STR("PostRequestHeaders")})
+            DIV({"class": "netHeadersGroup collapsed", "data-pref": "netPostRequestHeadersVisible"},
+                DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle"},
+                    SPAN({"class": "netHeader twisty", 
+                        onclick: "$toggleHeaderContent"},
+                    Locale.$STR("PostRequestHeaders"))
+                ),
+                TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY({"class": "netInfoPostRequestHeadersBody", "role": "list",
+                        "aria-label": Locale.$STR("PostRequestHeaders")})
+                )
             )
         ),
 
@@ -1629,6 +1650,24 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
                 PRE({"class": "source"})
             )
         ),
+
+    toggleHeaderContent: function(event)
+    {
+        var target = event.target;
+        var headerGroup = Dom.getAncestorByClass(target, "netHeadersGroup");
+        
+        Css.toggleClass(headerGroup, "opened");
+        if (Css.hasClass(headerGroup, "opened")) 
+        {
+            headerGroup.setAttribute("aria-expanded", "true");
+            Options.set(headerGroup.dataset.pref, true);
+        }
+        else
+        {
+            headerGroup.setAttribute("aria-expanded", "false");
+            Options.set(headerGroup.dataset.pref, false);
+        }
+    },
 
     onViewSource: function(event)
     {
@@ -1680,8 +1719,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
             Firebug.NetMonitor.NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
 
-            var titleRow = Dom.getChildByClass(headersTable, "netInfo" + rowName + "Title");
-            Css.removeClass(titleRow, "collapsed");
+            var titleRow = headersTable.getElementsByClassName("netInfo" + rowName + "Title").item(0)
+            var parent = Dom.getAncestorByClass(titleRow, "netHeadersGroup");
+            Css.removeClass(parent, "collapsed");
         }
     },
 
@@ -1693,6 +1733,19 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var file = netInfoBox.repObject;
 
         var viewSource;
+        var headers = rootNode.getElementsByClassName("netHeadersGroup");
+
+        if (Options.get("netResponseHeadersVisible"))
+            Css.setClass(headers[0], "opened");
+
+        if (Options.get("netRequestHeadersVisible"))
+            Css.setClass(headers[1], "opened");
+
+        if (Options.get("netCachedHeadersVisible"))
+            Css.setClass(headers[2], "opened");
+
+        if (Options.get("netPostRequestHeadersVisible"))
+            Css.setClass(headers[3], "opened");
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)
@@ -1709,25 +1762,6 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             this.init(parent);
 
         this.insertHeaderRows(parent, headers, rowName);
-    },
-	
-	onClickRowHeader: function(event)
-    {
-		FBTrace.sysout("Hello World!“);
-        // Events.cancelEvent(event);
-
-        // var rowHeader = event.target;
-        // if (!Css.hasClass(rowHeader, "netRowHeader"))
-            // return;
-
-        // var row = Dom.getAncestorByClass(event.target, "netRow");
-        // if (!row)
-            // return;
-
-        // var context = Firebug.getElementPanel(row).context;
-        // var panel = context.getPanel(panelName, true);
-        // if (panel)
-            // panel.breakOnRequest(row.repObject);
     }
 });
 

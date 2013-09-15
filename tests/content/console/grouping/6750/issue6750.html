@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6750: Console message grouping happens across console clearing</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script>
+        var interval;
+
+        function createLog()
+        {
+            console.log("Log message");
+        }
+
+        function createLogs()
+        {
+            createLog();
+            console.clear();
+            createLog();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6750">Issue 6750</a>: Console message grouping happens across console clearing</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="createLogs" onclick="createLogs()">Create logs</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>Press the <em>Create logs</em> button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>A log message <code>Log message</code> should be shown within the <em>Console</em> panel.</li>
+                </ul>
+
+                <div id="output"></div>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmail.com</footer>
+        </div>
+    </body>
+</html>

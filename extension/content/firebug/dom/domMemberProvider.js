@@ -372,8 +372,8 @@ DOMMemberProvider.prototype =
         var o = this.getObjectView(object);
         if (o && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
         {
-            var getter = o.__lookupGetter__(name);
-            var setter = o.__lookupSetter__(name);
+            var getter = (o.__lookupGetter__) ? o.__lookupGetter__(name) : null;
+            var setter = (o.__lookupSetter__) ? o.__lookupSetter__(name) : null;
 
             // both, getter and setter
             if (getter && setter)

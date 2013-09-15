@@ -303,8 +303,11 @@ Css.getElementCSSSelector = function(element)
     if (element.id)
         label += "#" + element.id;
 
-    if (element.classList && element.classList.length > 0)
-        label += "." + element.classList.item(0);
+    if (element.classList)
+    {
+        for (var i=0, len=element.classList.length; i<len; ++i)
+            label += "." + element.classList[i];
+    }
 
     return label;
 };
@@ -804,8 +807,18 @@ Css.colorNameToRGB = function(value)
         {
             if (Css.isColorKeyword(part))
             {
-                var rgbValue = domUtils.colorNameToRGB(part);
-                newValue += "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+                try
+                {
+                    var rgbValue = domUtils.colorNameToRGB(part);
+                    newValue += "rgb(" + rgbValue.r + ", " + rgbValue.g + ", " + rgbValue.b + ")";
+                }
+                catch(e)
+                {
+                    // Color keyword is a system color, which can't be resolved by
+                    // domUtils.colorNameToRGB(), so just return the keyword itself
+                    // (see issue 6753)
+                    newValue += part;
+                }
             }
             else
             {

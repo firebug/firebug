@@ -942,7 +942,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             SPAN({"class": "$object|getVisible"},
                 SPAN({"class": "selectorTag"}, "$object|getSelectorTag"),
                 SPAN({"class": "selectorId"}, "$object|getSelectorId"),
-                SPAN({"class": "selectorClass"}, "$object|getSelectorClass"),
+                SPAN({"class": "selectorClass"}, "$object|getSelectorClasses"),
                 TAG("$object|getValueTag", {object: "$object"})
             )
          ),
@@ -1088,11 +1088,14 @@ FirebugReps.Element = domplate(Firebug.Rep,
         }
     },
 
-    getSelectorClass: function(elt)
+    getSelectorClasses: function(elt)
     {
         try
         {
-            return elt.classList.length > 0 ? ("." + elt.classList[0]) : "";
+            var selectorClasses = "";
+            for (var i=0, len=elt.classList.length; i<len; ++i)
+                selectorClasses += "." + elt.classList[i];
+            return selectorClasses;
         }
         catch (err)
         {

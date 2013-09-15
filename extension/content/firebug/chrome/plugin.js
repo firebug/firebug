@@ -7,7 +7,7 @@ define([
 ],
 function(Obj, Firebug, Debug) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // This is a panel implemented as its own browser with its own URL
 
 Firebug.PluginPanel = function() {};
@@ -39,7 +39,10 @@ Firebug.PluginPanel.prototype = Obj.extend(Firebug.Panel,
     browserReady: function()
     {
         this.browser.removeEventListener("DOMContentLoaded", this.browserReady, false);
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener\n");
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener");
+
         this.innerPanel = this.browser.contentWindow.FirebugPanel; // XXXjjb ?
         if (this.visible)
         {
@@ -49,7 +52,7 @@ Firebug.PluginPanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     initialize: function()
@@ -115,7 +118,7 @@ Firebug.PluginPanel.prototype = Obj.extend(Firebug.Panel,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function innerCall(innerPanel, name, args)
 {
@@ -129,10 +132,10 @@ function innerCall(innerPanel, name, args)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 return Firebug.PluginPanel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

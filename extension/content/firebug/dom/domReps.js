@@ -16,7 +16,7 @@ define([
     "firebug/dom/domModule",
     "firebug/dom/domMemberProvider",
 ],
-function(Firebug, D, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
+function(Firebug, Domplate, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
     DOMModule, DOMMemberProvider) {
 
 "use strict";
@@ -27,12 +27,14 @@ function(Firebug, D, FirebugReps, Locale, Events, Options, Dom, Css, Str, Toggle
 const insertSliceSize = 18;
 const insertInterval = 40;
 
+var {domplate, TABLE, TBODY, TR, TD, DIV, SPAN, TAG, FOR} = Domplate;
+
 // ********************************************************************************************* //
 
 var WatchRowTag =
-    D.TR({"class": "watchNewRow", level: 0},
-        D.TD({"class": "watchEditCell", colspan: 3},
-            D.DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
+    TR({"class": "watchNewRow", level: 0},
+        TD({"class": "watchEditCell", colspan: 3},
+            DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
                 "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
                     Locale.$STR("NewWatch")
             )
@@ -40,16 +42,16 @@ var WatchRowTag =
     );
 
 var SizerRow =
-    D.TR({role: "presentation"},
-        D.TD(),
-        D.TD({width: "30%"}),
-        D.TD({width: "70%"})
+    TR({role: "presentation"},
+        TD(),
+        TD({width: "30%"}),
+        TD({width: "70%"})
     );
 
-var DirTablePlate = D.domplate(Firebug.Rep,
+var DirTablePlate = domplate(Firebug.Rep,
 {
     memberRowTag:
-        D.TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
+        TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
             $hasChildren: "$member.hasChildren",
             $cropped: "$member.value|isCropped",
             role: "presentation",
@@ -57,57 +59,57 @@ var DirTablePlate = D.domplate(Firebug.Rep,
             breakable: "$member.breakable",
             breakpoint: "$member.breakpoint",
             disabledBreakpoint: "$member.disabledBreakpoint"},
-            D.TD({"class": "memberHeaderCell"},
-                D.DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
+            TD({"class": "memberHeaderCell"},
+                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
                     "&nbsp;"
                )
             ),
-            D.TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
+            TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
                 role: "presentation"},
-                D.DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
-                    D.SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
-                    D.SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
+                DIV({"class": "memberLabel $member.type\\Label", title: "$member.title"},
+                    SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
+                    SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
                 )
             ),
-            D.TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
+            TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
-                D.TAG("$member.tag", {object: "$member.value"})
+                TAG("$member.tag", {object: "$member.value"})
             )
         ),
 
     tag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
             _repObject: "$object", role: "tree",
             "aria-label": Locale.$STR("aria.labels.dom properties")},
-            D.TBODY({role: "presentation"},
+            TBODY({role: "presentation"},
                 SizerRow,
-                D.FOR("member", "$object|memberIterator",
-                    D.TAG("$memberRowTag", {member: "$member"})
+                FOR("member", "$object|memberIterator",
+                    TAG("$memberRowTag", {member: "$member"})
                 )
             )
         ),
 
     watchTag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
                _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
-            D.TBODY({role: "presentation"},
+            TBODY({role: "presentation"},
                 SizerRow,
                 WatchRowTag
             )
         ),
 
     tableTag:
-        D.TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
             _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
             role: "tree", "aria-label": Locale.$STR("a11y.labels.dom_properties")},
-            D.TBODY({role: "presentation"},
+            TBODY({role: "presentation"},
                 SizerRow
             )
         ),
 
     rowTag:
-        D.FOR("member", "$members",
-            D.TAG("$memberRowTag", {member: "$member"})
+        FOR("member", "$members",
+            TAG("$memberRowTag", {member: "$member"})
         ),
 
     memberIterator: function(object)
@@ -331,11 +333,11 @@ var DirTablePlate = D.domplate(Firebug.Rep,
     }
 });
 
-var ToolboxPlate = D.domplate(
+var ToolboxPlate = domplate(
 {
     tag:
-        D.DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
-            D.SPAN({"class": "watchDeleteButton closeButton"})
+        DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
+            SPAN({"class": "watchDeleteButton closeButton"})
         ),
 
     onClick: function(event)

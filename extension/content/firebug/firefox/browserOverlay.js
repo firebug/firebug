@@ -11,9 +11,10 @@ define([
     "firebug/firefox/browserCommands",
     "firebug/firefox/browserMenu",
     "firebug/firefox/browserToolbar",
+    "firebug/lib/system",
 ],
 function(FBTrace, Options, Locale, Arr, Str, Xpcom, BrowserOverlayLib, BrowserCommands,
-    BrowserMenu, BrowserToolbar) {
+    BrowserMenu, BrowserToolbar, System) {
 
 with (BrowserOverlayLib) {
 
@@ -27,6 +28,7 @@ var Cu = Components.utils;
 Locale.registerStringBundle("chrome://firebug/locale/firebug.properties");
 Locale.registerStringBundle("chrome://firebug/locale/cookies.properties");
 Locale.registerStringBundle("chrome://firebug/locale/selectors.properties");
+Locale.registerStringBundle("chrome://firebug/locale/keys.properties");
 Locale.registerStringBundle("chrome://global-platform/locale/platformKeys.properties");
 Locale.registerStringBundle("chrome://global/locale/keys.properties");
 
@@ -66,7 +68,7 @@ BrowserOverlay.prototype =
 
         var node = $stylesheet(this.doc, "chrome://firebug/content/firefox/browserOverlay.css");
 
-        if (this.win.navigator.platform.search("Mac") == 0)
+        if (System.isMac(this.win))
             $stylesheet(this.doc, "chrome://firebug/content/firefox/macBrowserOverlay.css");
 
         this.nodesToRemove.push(node);
@@ -87,7 +89,7 @@ BrowserOverlay.prototype =
     internationalize: function()
     {
         // Internationalize all elements with 'fbInternational' class. Clone
-        // before internationalizing.
+        // before internationalization.
         var elements = Arr.cloneArray(this.doc.getElementsByClassName("fbInternational"));
         Locale.internationalizeElements(this.doc, elements, ["label", "tooltiptext", "aria-label"]);
     },

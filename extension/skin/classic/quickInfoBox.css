@@ -50,7 +50,7 @@
 }
 
 .fbQuickInfoPin {
-    background: url(chrome://firebug-os/skin/pin.png) no-repeat;
+    background: url(chrome://firebug/skin/win/pin.png) no-repeat;
     width: 16px;
     height: 16px;
     border: none;
@@ -60,7 +60,7 @@
 }
 
 .fbQuickInfoClose {
-    background: url(chrome://firebug-os/skin/close.png) no-repeat;
+    background: url(chrome://firebug/skin/win/close.png) no-repeat;
     width: 16px;
     height: 16px;
     border: none;
@@ -76,12 +76,9 @@
 
 .fbQuickInfoPin.pin,
 .fbQuickInfoPin:active {
-    background: url(chrome://firebug-os/skin/pinned.png) no-repeat;
+    background: url(chrome://firebug/skin/win/pinned.png) no-repeat;
 }
 
 .fbQuickInfoClose:active {
     background-position: 0 -32px;
 }
-
-/* Overwrite styles with OS-specific ones */
-@import "chrome://firebug-os/skin/quickInfoBox.css";

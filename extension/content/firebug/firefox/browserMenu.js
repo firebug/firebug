@@ -99,7 +99,7 @@ var BrowserMenu =
      * There are more instances of Firebug Menu (e.g. one in Firefox -> Tools -> Web Developer
      * and one in Firefox 4 (top-left orange button menu) -> Web Developer
      *
-     * If extensions want to override the menu thay need to iterate all existing instance
+     * If extensions want to override the menu they need to iterate all existing instance
      * using document.querySelectorAll(".fbFirebugMenuPopup") and append new menu items to all
      * of them. Iteration must be done in the global space (browser.xul)
      *
@@ -150,8 +150,8 @@ var BrowserMenu =
             $menu(doc,
             {
                 id: "FirebugMenu_OpenWith",
-                label:"firebug.OpenWith",
-                tooltiptext:"firebug.menu.tip.Open_With",
+                label: "firebug.OpenWith",
+                tooltiptext: "firebug.menu.tip.Open_With",
                 "class": "fbInternational",
                 insertafter: "menu_firebug_openActionsSeparator",
                 openFromContext: "true",
@@ -481,14 +481,12 @@ var BrowserMenu =
 
         // Firefox Button -> Web Developer Menu
         $menupopupOverlay(doc, $(doc, "appmenu_webDeveloper_popup"), [
-            $splitmenu(doc, {
+            $menu(doc, {
                 id: "appmenu_firebug",
                 position: 1,
-                command: "cmd_firebug_toggleFirebug",
-                key: "key_firebug_toggleFirebug",
                 label: "firebug.Firebug",
                 iconic: "true",
-                "class": "fbInternational"
+                "class": "menu-iconic fbInternational"
             }, [
                 $menupopup(doc, {
                     id: "appmenu_firebugMenuPopup",
