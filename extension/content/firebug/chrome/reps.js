@@ -431,7 +431,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
         if (props.length <= max)
         {
-            // There is not enough props yet (or at least, not enough props to
+            // There are not enough props yet (or at least, not enough props to
             // be able to know whether we should print "more..." or not).
             // Let's display also empty members and functions.
             this.getProps(props, object, max, function(t, value)
@@ -470,6 +470,9 @@ FirebugReps.Obj = domplate(Firebug.Rep,
         {
             for (var name in object)
             {
+                if (props.length > max)
+                    return;
+
                 var value;
                 try
                 {
@@ -494,10 +497,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                             tag = FirebugReps.Obj.titleTag;
                     }
 
-                    if (props.length <= max)
-                        props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
-                    else
-                        break;
+                    props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
                 }
             }
         }
@@ -1346,12 +1346,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
             }
         }
 
-        // Display xpath of the element.
-        var tooltip = this.getXPath(elt);
-        if (elt.namespaceURI)
-            tooltip += " (" + elt.namespaceURI + ")";
-
-        return tooltip;
+        // Don't show a tooltip when hovering an element (see issue 6706)
+        return "";
     },
 
     getContextMenuItems: function(elt, target, context)
@@ -2615,8 +2611,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        var object = this.objectView(storage);
-        return Locale.$STRP("firebug.storage.totalItems", [Object.keys(object).length]);
+        return Locale.$STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2643,72 +2638,14 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     propIterator: function(storage, max)
     {
-        var object = this.objectView(storage);
-        return FirebugReps.Obj.propIterator(object, max);
-    },
-
-    objectView: function(storage)
-    {
-        var object = this.makeObject(storage);
-        for (var any in object)
-            return object;
-
-        // We might have hit upon an https site (bug 709238).
-        // As a hack, we'll check if the current context's window
-        // contains the object as localStorage or sessionStorage.
-        try {
-            var context = Firebug.currentContext;
-            var win = context && context.window;
-            if (win && win.location.protocol === "https:")
-            {
-                var names = ["localStorage", "sessionStorage"], done = false;
-                for (var i = 0; i < 2; ++i)
-                {
-                    if (win[names[i]] !== storage)
-                        continue;
-                    Firebug.CommandLine.evaluate(
-                        "((" + this.makeObject + ")(" + names[i] + "))",
-                        context,
-                        null, null,
-                        function(result) {
-                            object = result;
-                            done = true;
-                        },
-                        function() {},
-                        true
-                    );
-                    if (done)
-                        break;
-                }
-            }
-        }
-        catch(e)
+        // Extract names/values and pass them through to the standard propIterator.
+        var obj = Object.create(null);
+        for (var i = 0, len = storage.length; i < len; i++)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.Storage.objectView; EXCEPTION " + e, e);
+            var name = storage.key(i);
+            obj[name] = storage.getItem(name);
         }
-
-        return object;
-    },
-
-    makeObject: function(storage)
-    {
-        // Create a raw object, free from getItem etc., from a storage.
-        // May be serialized and run in page scope.
-        var object = {};
-        try
-        {
-            for (var name in storage)
-            {
-                var value = storage.getItem(name);
-                Object.defineProperty(object, name, {value: value, enumerable: true});
-            }
-        }
-        catch(e)
-        {
-            // We can't log an error in page scope.
-        }
-        return object;
+        return FirebugReps.Obj.propIterator(obj, max);
     }
 });
 
@@ -2931,8 +2868,6 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
     propIterator: function (object, max)
     {
         max = max || 3;
-        if (!object)
-            return [];
 
         var props = [];
         for (var i=0; i<object.length && i<max; i++)
@@ -2965,7 +2900,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         }
         else if (props.length > 0)
         {
-            props[props.length-1].delim = '';
+            props[props.length-1].delim = "";
         }
 
         return props;

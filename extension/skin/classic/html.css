@@ -66,6 +66,10 @@
     color: #333333;
 }
 
+.panelNode-html .nodeBracket {
+    cursor: pointer;
+}
+
 .documentNodeBox {
     padding-left: 0;
 }

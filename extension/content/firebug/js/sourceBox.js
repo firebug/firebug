@@ -392,7 +392,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         // then clear it so the next link will scroll and highlight.
         if (sourceLink == this.selection)
-            delete this.selection;
+            this.selection = null;
     },
 
     showSourceBox: function(sourceBox, lineNo)

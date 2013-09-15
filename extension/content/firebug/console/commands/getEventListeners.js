@@ -10,11 +10,15 @@ define([
     "firebug/lib/events",
 ],
 function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events) {
+
 "use strict";
 
-const versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+// ********************************************************************************************* //
+// Constants
+
+const comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 const appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
-var pre23 = (versionChecker.compare(appInfo.version, "23.0*") < 0);
+var pre23 = (comparator.compare(appInfo.version, "23.0*") < 0);
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -29,7 +33,8 @@ function onExecuteCommand(context, args)
     {
         // XXXsimon: Don't bother translating this, it will go away in one release,
         // happen very seldom, and English error messages look better anyway.
-        throw new Error("getEventListeners requires the Script panel to be enabled (or the use of Firefox 23 or higher)");
+        throw new Error("getEventListeners requires the Script panel to be enabled " +
+            "(or the use of Firefox 23 or higher)");
     }
 
     var listeners;
@@ -41,6 +46,7 @@ function onExecuteCommand(context, args)
     {
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("getEventListenersForTarget threw an exception", exc);
+
         return undefined;
     }
 
@@ -67,6 +73,7 @@ function onExecuteCommand(context, args)
                 useCapture: li.capturing
             }));
         }
+
         return Wrapper.cloneIntoContentScope(global, ret);
     }
     catch (exc)
@@ -74,6 +81,7 @@ function onExecuteCommand(context, args)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("getEventListeners FAILS to create content view" + exc, exc);
     }
+
     return undefined;
 }
 

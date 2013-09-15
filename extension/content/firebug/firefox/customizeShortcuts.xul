@@ -9,17 +9,14 @@
         id="firebug-customize-keyboard"
         width="400" height="500"
         buttons="accept,cancel"
-        onload="init();"
-        ondialogaccept="return saveChanges();"
+        onload="dlg.initialize(this);"
+        ondialogaccept="return dlg.saveChanges();"
         ondialogcancel="return true;"
         persist="screenX screenY width height">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/firefox/customizeShortcuts.js" />
-
-    <stringbundleset>
-        <stringbundle id="platformKeys" src="chrome://global-platform/locale/platformKeys.properties"/>
-        <stringbundle id="localeKeys" src="chrome://global/locale/keys.properties"/>
-    </stringbundleset>
+    <script type="application/x-javascript">
+    var dlg = window.arguments[0];
+    </script>
 
     <!-- Dialog UI structure (list of registered shortcuts) -->
     <grid flex="1" id="shortcutGrid">
@@ -30,4 +27,5 @@
         </columns>
         <rows id="shortcutGridRows"></rows>
     </grid>
+
 </dialog>

@@ -96,8 +96,13 @@
                     tab.setAttribute("aria-disabled", enabled ? "false" : "true");
                 }
 
-                // xxxHonza: Does this belong here?
+                // xxxHonza: This doesn't belong here, the start button should utilize
+                // the onUpdateTab event fired below.
+                // The activation logic (above) should be implemented similarly.
                 Firebug.StartButton.resetTooltip();
+
+                Firebug.dispatch(Firebug.uiListeners, "onUpdateTab",
+                    [Firebug.currentContext, tab, panelType]);
             ]]></body>
         </method>
 
@@ -1846,14 +1851,14 @@
                 if (!optionsPopup || !searchBox)
                     return;
                 searchBox.focus();
-                if (optionsPopup.state == "open")
+                if (optionsPopup.state == "open" && this.value.length == 0)
                 {
-                    event.stopPropagation(); // prevent cmd popup toggle
                     optionsPopup.hidePopup();
                 }
                 else
                 {
-                    return;
+                    this.value = "";
+                    this.status = "noSearch";
                 }
             }
             else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)

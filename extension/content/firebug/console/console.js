@@ -10,6 +10,7 @@ define([
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",
+    "firebug/chrome/panelNotification",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
@@ -18,7 +19,7 @@ define([
     "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options, PanelNotification) {
 
 // ********************************************************************************************* //
 // Constants
@@ -80,13 +81,12 @@ Firebug.ConsoleBase =
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
                 var container = panel.panelNode;
-                var template = Firebug.NetMonitor.NetLimit;
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
                     container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.limitInfo.totalCount++;
-                    template.updateCounter(panel.limit);
+                    panel.limit.config.totalCount++;
+                    PanelNotification.updateCounter(panel.limit);
                 }
                 Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
                 return row;

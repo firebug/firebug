@@ -119,9 +119,9 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         var permTooltip = Firebug.chrome.$("fcPermTooltip");
         permTooltip.fcEnabled = true;
 
-        // All the necessary observers are registered by default. Even if the 
+        // All the necessary observers are registered by default. Even if the
         // panel can be disabled (entirely or for a specific host) there is
-        // no simple way to find out this now, as the context isn't available. 
+        // no simple way to find out this now, as the context isn't available.
         // All will be unregistered again in the initContext (if necessary).
         // There is no big overhead, the initContext is called just after the
         // first document request.
@@ -148,7 +148,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             var image = document.createElement("image");
             image.setAttribute("id", "fbBreakOnImageCookies");
             image.setAttribute("class", "fbBreakOnImage");
-            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.svg");
+            image.setAttribute("src", "chrome://firebug/skin/cookies/breakOnCookie.png");
             bonStack.appendChild(image);
         }
 
@@ -287,7 +287,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     /**
      * Called by the framework when a context is created for Firefox tab.
-     * 
+     *
      *  @param {Firebug.TabContext} Context for the current Firefox tab.
      */
     initContext: function(context)
@@ -298,8 +298,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("cookies.INIT real context for: " + tabId + ", " +
                 context.getName());
 
-        // Create sub-context for cookies. 
-        // xxxHonza: the cookies object exists within the context even if 
+        // Create sub-context for cookies.
+        // xxxHonza: the cookies object exists within the context even if
         // the panel is disabled.
         context.cookies = {};
         context.cookies.activeHosts = [];
@@ -322,7 +322,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
                 FBTrace.sysout("cookies.DESTROY temporary context, tabId: " + tempContext.tabId);
         }
 
-        // The base class must be called after the context for Cookies panel is 
+        // The base class must be called after the context for Cookies panel is
         // properly initialized. The panel can be created inside this function
         // (within Firebug.ActivableModule.enablePanel), which can result in
         // calling CookiePanel.initialize method. This method directly calls
@@ -334,7 +334,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             this.unregisterObservers(context);
     },
 
-    destroyContext: function(context) 
+    destroyContext: function(context)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
 
@@ -448,12 +448,12 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             this.addStyleSheet(panel);
     },
 
-    watchWindow: function(context, win) 
+    watchWindow: function(context, win)
     {
         context.window.addEventListener("beforeunload", this.onBeforeUnload, false);
     },
 
-    onBeforeUnload: function(event) 
+    onBeforeUnload: function(event)
     {
         var view = event.target.defaultView;
         var context = TabWatcher.getContextByWindow(view);
@@ -498,8 +498,8 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
             var c = cookie.cookie;
 
-            // Fix for issue 34. The domain must be included in the cookieString if it 
-            // starts with "." But don't include it otherwise, since the "." would be 
+            // Fix for issue 34. The domain must be included in the cookieString if it
+            // starts with "." But don't include it otherwise, since the "." would be
             // appended by the service.
             var host = cookie.cookie.host;
             var cookieString = cookie.toString(!(host.charAt(0) == "."));
@@ -932,7 +932,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     onExportAll: function(context)
     {
-        try 
+        try
         {
             var fp = Xpcom.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
             fp.init(window, null, Ci.nsIFilePicker.modeSave);
@@ -979,7 +979,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     onExportForSite: function(context)
     {
-        try 
+        try
         {
             var fp = Xpcom.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
             fp.init(window, null, Ci.nsIFilePicker.modeSave);
@@ -1044,7 +1044,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
-    // Custom path filter 
+    // Custom path filter
     onFilterPanelShowing: function(filterPanel, context)
     {
         if (FBTrace.DBG_COOKIES)
@@ -1053,7 +1053,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         // Initialize filter input field.
         filterPanel.init(context.cookies.pathFilter);
 
-        // A menu does not take the keyboard focus and keyboard messages are 
+        // A menu does not take the keyboard focus and keyboard messages are
         // sent to the window. In order to avoid unwante shortcuts execution
         // register a window keypress listeners for the time when the filter
         // popup is displayed and stop propagation of these events.
@@ -1068,7 +1068,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
-    onFilterKeyPress: function(event) 
+    onFilterKeyPress: function(event)
     {
         // Stop propagation of keypress events when filter popup is displayed.
         event.stopPropagation();
@@ -1094,7 +1094,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         parentMenu.hidePopup();
     },
 
-    onViewAll: function(context) 
+    onViewAll: function(context)
     {
         parent.openDialog("chrome://browser/content/preferences/cookies.xul",
             "_blank", "chrome,resizable=yes", null);
@@ -1102,7 +1102,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     onViewExceptions: function(context)
     {
-        var params = {  
+        var params = {
             blockVisible   : true,
             sessionVisible : true,
             allowVisible   : true,
@@ -1156,7 +1156,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 // Custom info tab within Net panel
 
 /**
- * @domplate Represents domplate template for cookie body that is displayed if 
+ * @domplate Represents domplate template for cookie body that is displayed if
  * a cookie entry in the cookie list is expanded.
  */
 Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
@@ -1164,11 +1164,11 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
 {
     tag:
         DIV({"class": "netInfoCookiesList"},
-            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"}, 
+            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideReceivedCookies"},
                 SPAN(Locale.$STR("cookies.netinfo.Received Cookies"))
             ),
             DIV({"class": "netInfoReceivedCookies netInfoCookies"}),
-            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"}, 
+            DIV({"class": "netInfoHeadersGroup netInfoCookiesGroup", $collapsed: "$cookiesInfo|hideSentCookies"},
                 SPAN(Locale.$STR("cookies.netinfo.Sent Cookies"))
             ),
             DIV({"class": "netInfoSentCookies netInfoCookies"})
@@ -1278,7 +1278,7 @@ Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
 var PermissionObserver = Obj.extend(BaseObserver,
 /** @lends PermissionObserver */
 {
-    observe: function(aSubject, aTopic, aData) 
+    observe: function(aSubject, aTopic, aData)
     {
         if (aTopic != "perm-changed")
             return;
@@ -1375,7 +1375,7 @@ function unregisterCookieObserver(observer)
 
 // xxxHonza: is this still needed?
 /**
- * @class Represents an observer for nsPref:changed event dispatched when 
+ * @class Represents an observer for nsPref:changed event dispatched when
  * an user preference is changed (e.g. using about:config)
  */
 var PrefObserver = Obj.extend(BaseObserver,
@@ -1389,7 +1389,7 @@ var PrefObserver = Obj.extend(BaseObserver,
         if (FBTrace.DBG_COOKIES)
             FBTrace.sysout("cookies.observe: " + aTopic + ", " + aData);
 
-        if (aData == networkPrefDomain + "." + cookieBehaviorPref || 
+        if (aData == networkPrefDomain + "." + cookieBehaviorPref ||
             aData == networkPrefDomain + "." + cookieLifeTimePref) {
             var fn = CookiePermissions.updatePermButton;
             TabWatcher.iterateContexts(fn);

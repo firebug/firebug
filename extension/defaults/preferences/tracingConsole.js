@@ -40,7 +40,6 @@ pref("extensions.firebug.DBG_JSONVIEWER", false);       // JSON explorer
 pref("extensions.firebug.DBG_LINETABLE", false);        //
 pref("extensions.firebug.DBG_LOCALE", false);           // localization, missing strings
 pref("extensions.firebug.DBG_LOCATIONS", false);        // panelFileList
-pref("extensions.firebug.DBG_MEMORY_PROFILER", false);  //
 pref("extensions.firebug.DBG_MENU", false);             // Menus and context menus in Firebug
 pref("extensions.firebug.DBG_MODULES", false);          // moduleloading
 pref("extensions.firebug.DBG_NET", false);              // net.js

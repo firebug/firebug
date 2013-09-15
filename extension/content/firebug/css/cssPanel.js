@@ -86,7 +86,7 @@ var CSSPropTag = domplate(CSSDomplateBase,
             ),
 
             // Use a space here, so that "copy to clipboard" has it (issue 3266).
-            SPAN({"class": "cssColon"}, ":&nbsp;"),
+            SPAN({"class": "cssColon"}, ": "),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
                 "$prop|getPropertyValue$prop.important"
             ),
@@ -346,12 +346,6 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
 });
 
 Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
-
-// ********************************************************************************************* //
-
-const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
-const reURL = /url\("?([^"\)]+)?"?\)/;
-const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 // ********************************************************************************************* //
 // CSSStyleSheetPanel (CSS Panel)
@@ -1728,6 +1722,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             if (!cssValue)
                 return false;
 
+            if (cssValue.value === "currentcolor")
+            {
+                cssValue.value = this.getCurrentColor();
+                if (cssValue.value === "")
+                    return false;
+            }
+
             if (cssValue.value == this.infoTipValue)
                 return true;
 
@@ -1771,6 +1772,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
             return false;
         }
+    },
+
+    getCurrentColor: function()
+    {
+        return "";
     },
 
     getEditor: function(target, value)

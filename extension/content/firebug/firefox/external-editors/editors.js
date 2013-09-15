@@ -1,6 +1,16 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+define([
+    "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/locale",
+    "firebug/lib/array",
+    "firebug/lib/system",
+    "firebug/firefox/external-editors/changeeditor",
+],
+function(Firebug, FBTrace, Locale, Arr, System, ChangeEditor) {
+
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -10,28 +20,31 @@ const Cu = Components.utils;
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 const names = ["label", "executable", "cmdline", "image"];
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Globals
 
-var gEditorManager =
+function EditorManager(prefName)
 {
-    _tree : null,
-    _data : [],
-    _removeButton : null,
-    _changeButton : null,
-    _moveUpButton : null,
+    this._prefName = prefName;
 
-    init: function()
+    this._tree = null;
+    this._data = [];
+    this._removeButton = null;
+    this._changeButton = null;
+    this._moveUpButton = null;
+}
+
+EditorManager.prototype =
+{
+    init: function(win)
     {
-        var args = window.arguments[0];
-        this._FBL = args.FBL;
-        this._prefName = args.prefName;
+        this.win = win;
 
-        (this._removeButton = document.getElementById("removeEditor")).disabled = true;
-        (this._changeButton = document.getElementById("changeEditor")).disabled = true;
-        (this._moveUpButton = document.getElementById("moveUpEditor")).disabled = true;
+        (this._removeButton = this.win.document.getElementById("removeEditor")).disabled = true;
+        (this._changeButton = this.win.document.getElementById("changeEditor")).disabled = true;
+        (this._moveUpButton = this.win.document.getElementById("moveUpEditor")).disabled = true;
 
-        this._tree = document.getElementById("editorsList");
+        this._tree = this.win.document.getElementById("editorsList");
 
         this._treeView =
         {
@@ -41,7 +54,7 @@ var gEditorManager =
             get rowCount() { return this.data.length; },
             getCellText: function(row, column)
             {
-                switch(column.id)
+                switch (column.id)
                 {
                 case "editorName":
                     return " "+this.data[row].label;
@@ -59,7 +72,8 @@ var gEditorManager =
             isSeparator: function(row) { return false; },
             isSorted: function() { return false; },
             getLevel: function(row) { return 0; },
-            getImageSrc: function(row,column) { return column.id=="editorName" ? this.data[row].image : null; },
+            getImageSrc: function(row,column) {
+                return column.id=="editorName" ? this.data[row].image : null; },
             getRowProperties: function(row,props) {},
             getCellProperties: function(row,column,props) {},
             getColumnProperties: function(colid,column,props) {}
@@ -68,7 +82,7 @@ var gEditorManager =
         this._load();
         this._tree.view = this._treeView;
 
-        this.internationalizeUI(document);
+        this.internationalizeUI(this.win.document);
     },
 
     uninit: function()
@@ -79,12 +93,13 @@ var gEditorManager =
     {
         var elements = doc.getElementsByClassName("fbInternational");
         var attributes = ["title", "label", "value"];
+
         for (var i=0; i<elements.length; i++)
         {
-            for(var j=0; j<attributes.length; j++)
+            for (var j=0; j<attributes.length; j++)
             {
                 if (elements[i].hasAttribute(attributes[j]))
-                    this._FBL.internationalize(elements[i], attributes[j]);
+                    Locale.internationalize(elements[i], attributes[j]);
             }
         }
     },
@@ -101,13 +116,9 @@ var gEditorManager =
     {
         var item = { label: "", executable: null, cmdline: "" };
         var result = {};
-        var args = {
-            item: item,
-            FBL: this._FBL
-        };
 
-        openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
-            "_blank", "modal,centerscreen,resizable", args, result);
+        this.win.openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
+            "_blank", "modal,centerscreen,resizable", new ChangeEditor(item), result);
 
         if (result.saveChanges)
         {
@@ -119,18 +130,21 @@ var gEditorManager =
             this._tree.view = this._treeView;
 
             var editors = [];
-            try {
+            try
+            {
                 editors = prefs.getCharPref(this._prefName).split(",");
-                for( var i = 0; i < editors.length; ++i )
+                for (var i=0; i<editors.length; ++i)
                 {
-                    if ( editors[i].replace(/^\s+|\s+$/,"") == "" )
+                    if (editors[i].replace(/^\s+|\s+$/,"") == "")
                         editors.splice(i, 1);
                 }
             }
-            catch(exc)
+            catch (exc)
             {
-                this._FBL.ERROR(exc);
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("EXCEPTION " + exc, exc);
             }
+
             editors.push(item.id);
             prefs.setCharPref(this._prefName, editors.join(","));
         }
@@ -141,20 +155,25 @@ var gEditorManager =
         var selection = this._tree.view.selection;
         if (selection.count < 1)
             return;
+
         var item = this._data[selection.currentIndex];
         this._data.splice(selection.currentIndex, 1);
         this._tree.view = this._treeView;
 
-        try {
+        try
+        {
             var editors = prefs.getCharPref(this._prefName).split(",");
-            this._FBL.remove(editors, item.id);
+            Arr.remove(editors, item.id);
+
             prefs.setCharPref(this._prefName, editors.join(","));
             prefs.deleteBranch(this._prefName+"."+item.id);
         }
-        catch(exc)
+        catch (exc)
         {
-            this._FBL.ERROR(exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("EXCEPTION " + exc, exc);
         }
+
         // update disabled state of buttons
         if (this._data.length == 0)
             selection.clearSelection();
@@ -165,20 +184,16 @@ var gEditorManager =
         var selection = this._tree.view.selection;
         if (selection.count != 1)
             return;
+
         var item = this._data[selection.currentIndex];
-        var args = {
-            item: item,
-            FBL: this._FBL
-        };
         var result = {};
 
-        openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
-            "_blank", "modal,centerscreen", args, result);
+        this.win.openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
+            "_blank", "modal,centerscreen", new ChangeEditor(item), result);
 
         if (result.saveChanges)
-        {
             this._saveItem(item);
-        }
+
         this._loadItem(item);
         this._tree.view = this._treeView;
     },
@@ -188,17 +203,21 @@ var gEditorManager =
         var selection = this._tree.view.selection;
         if (selection.count < 1)
             return;
+
         var item = this._data[selection.currentIndex];
         this._data.splice(selection.currentIndex, 1);
         this._data.unshift(item);
         this._tree.view = this._treeView;
-        try {
+
+        try
+        {
             var editors = this._data.map(function(x) x.id);
             prefs.setCharPref(this._prefName, editors.join(","));
         }
-        catch(exc)
+        catch (exc)
         {
-            this._FBL.ERROR(exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("EXCEPTION " + exc, exc);
         }
     },
 
@@ -206,61 +225,71 @@ var gEditorManager =
     _loadItem: function(item)
     {
         const prefName = this._prefName;
-        for( var i = 0; i < names.length; ++i )
+
+        for (var i=0; i<names.length; ++i)
         {
-            try {
+            try
+            {
                 item[names[i]] = prefs.getCharPref(prefName+"."+item.id+"."+names[i]);
             }
             catch(exc)
-            {}
+            {
+            }
         }
+
         if (!item.image)
-            item.image = this._FBL.getIconURLForFile(item.executable);
+            item.image = System.getIconURLForFile(item.executable);
     },
 
     _saveItem: function(item)
     {
-        if ( item.image && item.image == this._FBL.getIconURLForFile(item.executable) )
+        if (item.image && item.image == System.getIconURLForFile(item.executable))
             item.image = null;
 
         const prefName = this._prefName;
-        for( var i = 0; i < names.length; ++i )
+        for (var i=0; i<names.length; ++i)
         {
-            try {
+            try
+            {
                 var value = item[names[i]];
-                if ( value )
-                    prefs.setCharPref(prefName+"."+item.id+"."+names[i], value);
+                if (value)
+                    prefs.setCharPref(prefName + "." + item.id + "." + names[i], value);
                 else
-                    prefs.clearUserPref(prefName+"."+item.id+"."+names[i]);
+                    prefs.clearUserPref(prefName + "." + item.id + "." + names[i]);
             }
-            catch(exc)
-            {}
+            catch (exc)
+            {
+            }
         }
     },
 
     _load: function()
     {
-        try {
+        try
+        {
             var list = prefs.getCharPref(this._prefName).split(",");
-            for (var i = 0; i < list.length; ++i)
+            for (var i=0; i<list.length; ++i)
             {
                 var editorId = list[i].replace(/\s/g, "_");
-                if ( !editorId )
+                if (!editorId)
                     continue;
+
                 var item = { id: editorId };
                 this._data.push(item);
                 this._loadItem(item);
             }
         }
-        catch(exc)
+        catch (exc)
         {
-            this._FBL.ERROR(exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("EXCEPTION " + exc, exc);
         }
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // URLMappings
+
 Cu.import("resource://firebug/loader.js");
 
 var headerName = "X-Local-File-Path";
@@ -278,16 +307,16 @@ var noMapping = "no mappings for tested url";
 var willQueryServer = "for this url Firebug will send query to server";
 
 var splitter = " => ";
-var gUrlMappingManager = {
+var gUrlMappingManager =
+{
     init: function()
     {
-        var Firebug = opener.Firebug;
         var extModule = Firebug.ExternalEditors;
         this.checkHeaderRe = extModule.checkHeaderRe;
         this.pathTransformations = extModule.pathTransformations;
 
         var val = [
-            headerExplaination,    "\n",
+            headerExplaination, "\n",
             headerName, splitter, extModule.checkHeaderRe.source,
             "\n\n",
             listExplaination,
@@ -297,13 +326,13 @@ var gUrlMappingManager = {
         for (var i = 0; i < this.pathTransformations.length; i++)
         {
             var transform = this.pathTransformations[i];
-            val.push(transform.regexp.source, splitter, transform.filePath, '\n');
+            val.push(transform.regexp.source, splitter, transform.filePath, "\n");
         }
 
         val.push(splitter, "\n");
 
-        document.getElementById("urlMappings").value = val.join("");
-        document.getElementById("test").value = Firebug.Firefox.getCurrentBrowser().currentURI.spec;
+        this.win.document.getElementById("urlMappings").value = val.join("");
+        this.win.document.getElementById("test").value = Firebug.Firefox.getCurrentBrowser().currentURI.spec;
 
         this.onMainInput();
     },
@@ -311,7 +340,7 @@ var gUrlMappingManager = {
     uninit: function()
     {
         this.save();
-        opener.Firebug.ExternalEditors.saveUrlMappings();
+        Firebug.ExternalEditors.saveUrlMappings();
     },
 
     save: function()
@@ -373,10 +402,12 @@ var gUrlMappingManager = {
                     this.checkHeaderRe = addRegexp(end, i);
                 continue;
             }
+
             var t = {
                 regexp: addRegexp(start, i),
                 filePath: end
             };
+
             if (t.regexp && t.filePath)
                 this.pathTransformations.push(t);
         }
@@ -387,8 +418,8 @@ var gUrlMappingManager = {
 
     onTestInput: function()
     {
-        var testBox = document.getElementById("test");
-        var resultBox = document.getElementById("result");
+        var testBox = this.win.document.getElementById("test");
+        var resultBox = this.win.document.getElementById("result");
         var href = testBox.value;
 
         if (this.checkHeaderRe.test(href))
@@ -397,7 +428,7 @@ var gUrlMappingManager = {
         }
         else
         {
-            for (var i = 0; i < this.pathTransformations.length; i++)
+            for (var i=0; i<this.pathTransformations.length; i++)
             {
                 var transform = this.pathTransformations[i];
                 if (transform.regexp.test(href))
@@ -419,13 +450,14 @@ var gUrlMappingManager = {
 
     onMainInput: function()
     {
-        this.parse(document.getElementById("urlMappings").value);
-        var resultBox = document.getElementById("result");
+        this.parse(this.win.document.getElementById("urlMappings").value);
+        var resultBox = this.win.document.getElementById("result");
         if (this.errors.length)
         {
             resultBox.value = this.errors;
             resultBox.style.cssText = "box-shadow: 0px 0px 1.5px 1px red;";
-        } else
+        }
+        else
         {
             resultBox.style.cssText = "";
             this.onTestInput();
@@ -439,6 +471,7 @@ var gUrlMappingManager = {
 
         if (this.timeOut != null)
             return;
+
         this.timeOut = setTimeout(function(_this)
         {
             _this[_this._scheduled]();
@@ -448,5 +481,10 @@ var gUrlMappingManager = {
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
 
+return EditorManager;
+
+// ********************************************************************************************* //
+});

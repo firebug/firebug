@@ -13,7 +13,7 @@ var prefDomain = "extensions.firebug";
 // xxxHonza: I am getting the following exception sometimes:
 // Console Firebug.getModuleLoaderConfig is not a function"
 // This could be be the reason why users can't open Firebug even if clicking on the start button.
-// Looks like 'moduleConfig.js' is not loaded yet?
+// Looks like 'moduleConfig.js' is not loaded yet? (reported as Issue 6731)
 if (typeof(Firebug.getModuleLoaderConfig) != "function")
 {
     FBTrace.sysout("main; ERROR Firebug.getModuleLoaderConfig is not a function!");

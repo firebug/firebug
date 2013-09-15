@@ -25,7 +25,7 @@ body {
 .netPageRow > .netCol > .netPageTitle,
 .computedStyle.hasSelectors > .stylePropName,
 .cookieRow > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyClosed.svg);
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px calc(0.5em - 3px);
 }
@@ -47,7 +47,7 @@ body {
 .breakpointBlock.opened > .breakpointHeader > .twisty,
 .computedStyle.hasSelectors.opened > .stylePropName,
 .cookieRow.opened > .cookieNameCol > .cookieNameLabel {
-    background-image: url(chrome://firebug/skin/mac/twistyOpen.svg);
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
 }
 
 /************************************************************************************************/
@@ -146,15 +146,15 @@ body {
     display: inline-block;
     width: 13px;
     height: 13px;
-    background: url(chrome://firebug/skin/mac/close.svg) no-repeat 0 0;
+    background: url(chrome://firebug/skin/mac/close.png) no-repeat 0 0;
 }
 
 .closeButton:hover {
-    background: url(chrome://firebug/skin/mac/closeHovered.svg) no-repeat 0 0;
+    background-position: 0 -13px;
 }
 
 .closeButton:hover:active {
-    background: url(chrome://firebug/skin/mac/closePressed.svg) no-repeat 0 0;
+    background-position: 0 -26px;
 }
 
 /************************************************************************************************/

@@ -28,6 +28,7 @@ pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
+pref("extensions.firebug.clearAnnotationsConfirmation", true);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
@@ -62,6 +63,7 @@ pref("extensions.firebug.tabularLogMaxHeight", 200);
 pref("extensions.firebug.consoleFilterTypes", "all");
 pref("extensions.firebug.preferJSDSourceLinks", false);
 pref("extensions.firebug.commandLineShowCompleterPopup", true);
+pref("extensions.firebug.console.groupLogMessages", true);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -73,6 +75,7 @@ pref("extensions.firebug.expandMutations", false);
 pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
 pref("extensions.firebug.showQuickInfoBox", false);
+pref("extensions.firebug.pinQuickInfoBox", false);
 pref("extensions.firebug.displayedAttributeValueLimit", 1024);
 pref("extensions.firebug.multiHighlightLimit", 250);
 

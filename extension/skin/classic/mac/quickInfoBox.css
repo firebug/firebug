@@ -1,0 +1,36 @@
+/* See license.txt for terms of usage */
+
+/*************************************************************************************************/
+/* Quick Info Box */
+
+.fbQuickInfoPanelBody {
+    font-family: Monaco, monospace;
+}
+
+.fbQuickInfoName, .fbQuickInfoValue {
+    font-family: Monaco, monospace;
+}
+
+.fbQuickInfoPin {
+    width: 13px;
+    height: 13px;
+}
+
+.fbQuickInfoClose {
+    width: 13px;
+    height: 13px;
+}
+
+.fbQuickInfoPin:hover,
+.fbQuickInfoClose:hover {
+    background-position: 0 -13px;
+}
+
+.fbQuickInfoPin.pin,
+.fbQuickInfoPin:active {
+    background: url(chrome://firebug-os/skin/pinned.png) no-repeat;
+}
+
+.fbQuickInfoClose:active {
+    background-position: 0 -26px;
+}
