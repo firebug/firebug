@@ -26,9 +26,6 @@ function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events, Domplate, Console, Ta
 
 var {domplate, SPAN, TAG} = Domplate;
 
-// xxxHonza: localization?
-var mutationObserversType = "Mutation Observers";
-
 // ********************************************************************************************* //
 // Command Implementation
 
@@ -50,7 +47,7 @@ function onExecuteCommand(context, args)
         // Append also mutation observers into the result (if there are any).
         var observers = getMutationObserversForTarget(context, target);
         if (observers && observers.length > 0)
-            result[mutationObserversType] = observers;
+            result["MutationObserver"] = observers;
 
         var global = context.getCurrentGlobal();
         var objects = Wrapper.cloneIntoContentScope(global, result);
@@ -129,17 +126,9 @@ function getMutationObserversForTarget(context, target)
 {
     var result = [];
 
-    // xxxHonza: The message is good for debugging (till the support is in Nightly at least).
+    // xxxHonza: avoid exception in preceding Fx23 versions (we can remove at some point).
     if (typeof(target.getBoundMutationObservers) !== "function")
-    {
-        var msg = "Get mutation-observers is not supported by the current version of " +
-            "Firefox (see: https://bugzilla.mozilla.org/show_bug.cgi?id=912874)";
-
-        FBTrace.sysout("getMutationObservers: " + msg);
-        Console.logFormatted([msg], context, "warn");
-
         return undefined;
-    }
 
     var global = context.getCurrentGlobal();
     var observers = target.getBoundMutationObservers();
@@ -187,7 +176,7 @@ function consoleLog(context, target, listeners, observers)
         var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
-        // xxxHonza: tableRep should have a 'render' methods with parent-node passed in.
+        // xxxHonza: tableRep should have a 'render' method with parent-node passed in.
         TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
         Console.closeGroup(context, true);
     }
@@ -217,9 +206,9 @@ var GroupCaption = domplate(
             SPAN({"class": "eventListenersCaption"},
                 "$object.title"
             ),
-            SPAN("&nbsp"),
+            SPAN("&nbsp;"),
             SPAN("&#187;"),
-            SPAN("&nbsp"),
+            SPAN("&nbsp;"),
             SPAN({"class": "eventListenersTarget"},
                 TAG("$object|getTargetTag", {object: "$object.target"})
             )
