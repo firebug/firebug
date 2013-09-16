@@ -13,10 +13,11 @@ define([
     "firebug/lib/css",
 ],
 function(Firebug, FBTrace, Domplate, Obj, Locale, Dom, Events, Str, Wrapper, Css) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
-// Docs
+// Documentation
 
 // See http://www.w3.org/TR/navigation-timing/
 
@@ -50,6 +51,8 @@ var timingProps = [
     "unloadEventEnd",
     "unloadEventStart",
 ];
+
+var {domplate, TABLE, THEAD, TH, TBODY, TR, TD, DIV, SPAN, FOR} = Domplate;
 
 // ********************************************************************************************* //
 // Module
@@ -363,12 +366,14 @@ function performanceTiming(context, timing)
     var input = new PerfTimingObj(result, t);
     Firebug.Console.log(input, context, "perfTiming", rep, true);
 
-    // Details
+    // Create a log group first (collapsed by default). All the timing details will be rendered
+    // inside the group (within 'logGroupBody' element).
     var row = Firebug.Console.openCollapsedGroup("perfTimingDetails", context, "perfTimingDetails",
         DetailsCaption, true, null, true);
     Firebug.Console.closeGroup(context, true);
 
-    var logGroupBody = row.lastChild;
+    // Get 'logGroupBody' element and render the timing details.
+    var logGroupBody = row.getElementsByClassName("logGroupBody")[0];
     var table = DetailsTable.tag.replace({object: t}, logGroupBody);
     var tBody = table.lastChild;
 
@@ -401,7 +406,7 @@ function performanceTiming(context, timing)
 // Detailed Log
 
 /**
- * A capation for detailed performance timing info.
+ * A caption for detailed performance timing info.
  */
 var DetailsCaption = domplate(
 /** @lends DetailsCaption */
@@ -627,4 +632,4 @@ Firebug.registerModule(PerformanceTimingModule);
 return PerformanceTimingModule;
 
 // ********************************************************************************************* //
-}});
+});

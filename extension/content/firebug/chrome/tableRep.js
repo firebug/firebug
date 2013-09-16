@@ -11,12 +11,15 @@ define([
 ],
 function(Domplate, Locale, FirebugReps, Dom, Css, Obj, Arr) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, DIV, TABLE, THEAD, TR, FOR, TH, TBODY, TD, TAG} = Domplate;
+
 // ********************************************************************************************* //
 
-with (Domplate) {
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
@@ -266,7 +269,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
     },
 
     /**
-     * Analyse data and return dynamically created list of columns.
+     * Analyze data and return dynamically created list of columns.
      * @param {Object} data
      */
     getHeaderColumns: function(data)
@@ -332,7 +335,6 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     groupable: false
 });
-};
 
 // ********************************************************************************************* //
 // Registration

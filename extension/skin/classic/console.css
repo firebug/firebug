@@ -38,6 +38,10 @@
 .logGroup > .logRow {
     background-color: transparent !important;
     font-weight: bold;
+
+    /* Override the value from panel.css, so the twisty button is
+    vertically centered with the group label row */
+    background-position: 2px calc(0.5em - 5px) !important;
 }
 
 .logGroup.opened > .logRow {

@@ -20,13 +20,15 @@ define([
 function(FBTrace, Obj, Domplate, Reps, StackFrame, StackFrameRep, SourceFile, Events, Css, Dom,
     Url, Locale, DebuggerLib, BreakpointStore, StackTrace) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_FUNCTIONMONITOR");
+
+var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 
 // ********************************************************************************************* //
 // Function Monitor
@@ -366,4 +368,4 @@ Firebug.registerRep(FunctionMonitorRep);
 return FunctionMonitor;
 
 // ********************************************************************************************* //
-}});
+});
