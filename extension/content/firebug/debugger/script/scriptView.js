@@ -499,13 +499,17 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     onGutterClick: function(event)
     {
-        Trace.sysout("scriptView.gutterClick; ", event);
+        var e = event.rawEvent;
 
         if (event.lineNo != null)
         {
             // Right click on the breakpoint column opens the breakpoint condition editor.
-            if (Events.isRightClick(event.rawEvent))
-                this.dispatch("startBreakpointConditionEditor", [event.lineNo, event.rawEvent]);
+            // Shift + left clicking disables/enables the breakpoint.
+            // Simple clicking adds or removes the breakpoint.
+            if (Events.isRightClick(e))
+                this.dispatch("startBreakpointConditionEditor", [event.lineNo, e]);
+            else if (Events.isShiftClick(e))
+                this.dispatch("disableBreakpoint", [event.lineNo, e]);
             else
                 this.toggleBreakpoint(event.lineNo);
         }

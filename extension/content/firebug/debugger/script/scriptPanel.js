@@ -513,6 +513,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         BreakpointStore.removeBreakpoint(url, bp.line);
     },
 
+    disableBreakpoint: function(lineIndex, event)
+    {
+        Trace.sysout("scriptPanel.disableBreakpoint; line: " + lineIndex, event);
+
+        this.toggleDisableBreakpoint(lineIndex);
+
+        Events.cancelEvent(event);
+    },
+
     getBreakpoints: function(breakpoints)
     {
         var url = this.getCurrentURL();
