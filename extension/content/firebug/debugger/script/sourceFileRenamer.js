@@ -106,8 +106,8 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
 
         if (context.sourceCache.isCached(oldURL))
         {
-            var rawContent = context.sourceCache.loadRaw(oldURL);
-            context.sourceCache.store(newURL.href, rawContent);
+            var lines = context.sourceCache.load(oldURL);
+            context.sourceCache.storeSplitLines(newURL.href, lines);
             context.sourceCache.invalidate(oldURL);
         }
 

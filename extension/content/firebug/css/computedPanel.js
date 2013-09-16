@@ -690,8 +690,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
                     break;
 
                 case "fontFamily":
-                    return CSSInfoTip.populateFontFamilyInfoTip(this.context, infoTip,
-                        cssValue.value);
+                    return CSSInfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
             }
 
             delete this.infoTipType;

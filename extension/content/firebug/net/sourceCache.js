@@ -38,7 +38,6 @@ Firebug.SourceCache = function(context)
 {
     this.context = context;
     this.cache = {};
-    this.cacheRaw = {};
 };
 
 Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
@@ -48,37 +47,14 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         return (this.cache[url] ? true : false);
     },
 
-    /**
-     * Returns as text the charset-converted content of the cache for the given URL.
-     *
-     * @param {string} url
-     * @param {string} [method]
-     * @param {*} [file]
-     * @param {object} [options] List of options:
-     *      - {boolean} dontLoadFromCache If set to true, don't load from the Firefox cache if no
-     *                                    content has been found.
-     *
-     * @returns {string} The cache content
-     */
-    loadText: function(url, method, file, options)
+    loadText: function(url, method, file)
     {
-        var lines = this.load(url, method, file, options);
+        var lines = this.load(url, method, file);
         return lines ? lines.join("") : null;
     },
 
-    /**
-     * Returns the charset-converted content of the cache for the given URL.
-     * The return value is a split by line text array.
-     *
-     * @param {string} url
-     * @param {string} [method]
-     * @param {*} [file]
-     *
-     * @returns {Array of strings} The cache content
-     */
-    load: function(url, method, file, options)
+    load: function(url, method, file)
     {
-        options = options || {};
         if (FBTrace.DBG_CACHE)
         {
             FBTrace.sysout("sourceCache.load: " + url);
@@ -88,17 +64,11 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
                     "but the URL is cached: " + url, this.cache[url]);
         }
 
-        var urlNoAnchor = this.removeAnchor(url);
-
         // xxxHonza: sometimes hasOwnProperty return false even if the URL is obviously there.
         //if (this.cache.hasOwnProperty(url))
-        var response = this.cache[urlNoAnchor];
+        var response = this.cache[this.removeAnchor(url)];
         if (response)
             return response;
-
-        response = this.cacheRaw[urlNoAnchor];
-        if (response)
-            return this.convertCachedData(urlNoAnchor);
 
         if (FBTrace.DBG_CACHE)
         {
@@ -116,8 +86,6 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             var data = decodeURIComponent(src);
             var lines = Str.splitLines(data);
             this.cache[url] = lines;
-            // For fonts, data URLs don't need to be stored as raw.
-            // this.cacheRaw[url] = src;
 
             return lines;
         }
@@ -128,8 +96,6 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             var src = url.substring(Url.reJavascript.lastIndex);
             var lines = Str.splitLines(src);
             this.cache[url] = lines;
-            // Do not cache as raw (only useful when dealing with fonts).
-            // this.cacheRaw[url] = src;
 
             return lines;
         }
@@ -187,67 +153,21 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         // Unfortunately, the URL isn't available, so let's try to use FF cache.
         // Note that an additional network request to the server could be made
         // in this method (a double-load).
-
-        if (!options.dontLoadFromCache)
-            return this.loadFromCache(url, method, file);
-        return [];
+        return this.loadFromCache(url, method, file);
     },
 
-    /**
-     * Returns the non-charset-converted cache for the given url.
-     *
-     * @param {string} url The url.
-     *
-     * @return {string} The cache content.
-     */
-    loadRaw: function(url)
+    store: function(url, text)
     {
-        url = this.removeAnchor(url);
-
-        // If `this.cacheRaw[url]` doesn't exist, attempt to return the content from the FF cache.
-        if (!this.cacheRaw[url])
-            return this.loadFromCache(url, null, null, {"getRaw": true});
-
-        return this.cacheRaw[url];
-    },
-
-    /**
-     * Stores the response of a request in the Firebug cache.
-     *
-     * @param {string} url The url of the request.
-     * @param {string} rawText The raw response text.
-     * @param {Boolean} append If set to true, don't invalidate the cache,
-     *                         and append the data to it.
-     *
-     * @return {string} The stored text.
-     */
-    store: function(url, rawText, append)
-    {
-        url = this.removeAnchor(url);
+        var tempURL = this.removeAnchor(url);
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
-                url, rawText);
+                url + ((tempURL != url) ? " -> " + tempURL : ""), text);
 
-        // We need to invalidate the transformed cache data because
-        // it does not fit with cacheRaw anymore.
-        delete this.cache[url];
-
-        if (!this.cacheRaw[url] || !append)
-            this.cacheRaw[url] = "";
-
-        this.cacheRaw[url] += rawText;
-
-        return this.cacheRaw[url];
+        var lines = Str.splitLines(text);
+        return this.storeSplitLines(tempURL, lines);
     },
 
-    /**
-     * Removes the anchor of a URL
-     *
-     * @param {string} url
-     *
-     * @return {string} The url without anchor.
-     */
     removeAnchor: function(url)
     {
         if (FBTrace.DBG_ERRORS && !url)
@@ -258,31 +178,6 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             return url;
 
         return url.substr(0, index);
-    },
-
-    /**
-     * Convert into the charset of the document and split by line the raw cached data. 
-     * Then stores it in a seperate cache object.
-     * Should not be used directly. Prefer using `sourceCache.load`, which will do the conversion
-     * lazily for you.
-     *
-     * @param {string} url The url of the request.
-     *
-     * @return {Array of strings} The charset-converted and split by line data.
-     */
-    convertCachedData: function(url)
-    {
-        url = this.removeAnchor(url);
-        var text = this.cacheRaw[url];
-        var doc = this.context.window.document;
-        var charset = doc ? doc.characterSet : "UTF-8";
-        if (FBTrace.DBG_CACHE)
-        {
-            FBTrace.sysout("sourceCache.convertCachedData; Convert cached data for " + url +
-                " to " + charset);
-        }
-        var convertedText = Str.convertFromUnicode(text, charset);
-        return this.cache[url] = Str.splitLines(convertedText);
     },
 
     loadFromLocal: function(url)
@@ -304,22 +199,15 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         }
     },
 
-    /**
-     * Returns the content of a response of a request from the FF cache.
-     *
-     * @param {string} url The URL of the request.
-     * @param {string} [method] The method ("GET", "POST"...)
-     * @param {*} [file] The file.
-     * @param {object} [options] List of options:
-     *      - {boolean} getRaw If set to true, return the raw (non-charset-converted) content
-     *                         of the cache.
-     *
-     * @return {string} The content of the cache.
-     */
-    loadFromCache: function(url, method, file, options)
+    loadFromCache: function(url, method, file)
     {
-        var getRaw = options && options.getRaw;
         if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.loadFromCache url:"+url);
+
+        var doc = this.context.window.document;
+        if (doc)
+            var charset = doc.characterSet;
+        else
+            var charset = "UTF-8";
 
         var channel;
         try
@@ -390,7 +278,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("sourceCache.load url:" + url);
+                FBTrace.sysout("sourceCache.load url:" + url + " with charset" + charset);
 
             stream = channel.open();
         }
@@ -415,9 +303,10 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 
         try
         {
-            var data = Http.readFromStream(stream);
-            var storedData = this.store(url, data);
-            return getRaw ? storedData : this.convertCachedData(url);
+            var data = Http.readFromStream(stream, charset);
+            var lines = Str.splitLines(data);
+            this.cache[url] = lines;
+            return lines;
         }
         catch (exc)
         {
@@ -450,7 +339,6 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache.invalidate; " + url);
 
         delete this.cache[url];
-        delete this.cacheRaw[url];
     },
 
     getLine: function(url, lineNo)
