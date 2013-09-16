@@ -110,7 +110,7 @@ SourceEditor.Events =
  * switch to another editor in the future.
  */
 SourceEditor.prototype =
-/** lends SourceEditor */
+/** @lends SourceEditor */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
@@ -326,7 +326,6 @@ SourceEditor.prototype =
             {
                 if (this.BuiltInEventsHandlers[type][i].handler == handler)
                 {
-
                     this.editorObject.off(type, this.BuiltInEventsHandlers[type][i].func);
 
                     this.BuiltInEventsHandlers[type].splice(i, 1);
@@ -842,8 +841,8 @@ SourceEditor.prototype =
 
         lineElement = lineElement.parentNode;
 
-        //var lineObj = lineElement.lineObj; // other useful info
-        var lineNo = parseInt(lineElement.lineNumber.textContent, 10);
+        var lineNumber = lineElement.getElementsByClassName("CodeMirror-linenumber")[0];
+        var lineNo = parseInt(lineNumber.textContent, 10);
         if (isNaN(lineNo))
             return -1;
 
