@@ -11,7 +11,14 @@ define([
     "firebug/lib/dom",
     "firebug/lib/url",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) { with (Domplate) {
+function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) {
+
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 
 // ********************************************************************************************* //
 // Function Monitor
@@ -188,4 +195,4 @@ Firebug.registerRep(FunctionMonitorRep);
 return FunctionMonitor;
 
 // ********************************************************************************************* //
-}});
+});
