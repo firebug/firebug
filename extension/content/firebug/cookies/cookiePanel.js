@@ -449,8 +449,8 @@ CookiePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (FBTrace.DBG_COOKIES)
         {
-            FBTrace.sysout("cookies.breakOnNext; " + context.breakOnCookie + ", " +
-                context.getName());
+            FBTrace.sysout("cookies.breakOnNext; " + this.context.breakOnCookie + ", " +
+                this.context.getName());
         }
     },
 
