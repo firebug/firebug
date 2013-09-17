@@ -14,10 +14,12 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Str, Options) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, TABLE, TBODY, TR, TD, IMG, SPAN, BUTTON, TAG} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
@@ -26,7 +28,8 @@ var Trace = FBTrace.to("DBG_BREAKNOTIFICATION");
 // Breakpoint Notification
 
 /**
- * Construct a break notification popup
+ * @domplate Construct a break notification popup
+ *
  * @param doc the document to contain the notification
  * @param cause info object for the popup, with these optional fields:
  *   strings: title, message, attrName
@@ -39,7 +42,7 @@ function BreakNotification(cause)
 }
 
 BreakNotification.prototype = domplate(Firebug.Rep,
-/** @lends Firebug.ScriptPanel.Notification */
+/** @lends BreakNotification */
 {
     tag:
         DIV({"class": "notificationBox"},
@@ -265,7 +268,7 @@ BreakNotification.prototype = domplate(Firebug.Rep,
     {
         Trace.sysout("breakNotification.show;");
 
-        // Reneder the entire notification box.
+        // Render the entire notification box.
         this.box = this.tag.append(this.cause, parentNode, this);
         this.box.repObject = this;
 
@@ -358,7 +361,7 @@ BreakNotification.show = function(context, parentNode, breakType)
 {
     Trace.sysout("BreakNotification.show");
 
-    // There is a global option that can be used to swith off the break notification
+    // There is a global option that can be used to switch off the break notification
     // (it can be annoying sometimes)
     if (!Options.get("showBreakNotification"))
         return;
@@ -393,4 +396,4 @@ BreakNotification.hide = function(context)
 return BreakNotification;
 
 // ********************************************************************************************* //
-}});
+});
