@@ -87,17 +87,20 @@ var DebuggerHalter = Obj.extend(Firebug.Module,
         // the debugger completely.
         if (type == "debuggerStatement" && context.breakNowCallback)
         {
-            var callback = context.breakNowCallback
-            delete context.breakNowCallback;
+            context.breakNowInProgress = false;
 
-            callback();
+            var callback = context.breakNowCallback
+            context.breakNowCallback = null;
+
+            if (callback)
+                callback();
 
             // null means resume completely.
             context.resumeLimit = null;
             return true;
         }
 
-        // Resume the debugger till the url is not from chrome (e.g. Firebug). This way we
+        // Resume the debugger till the URL is not from chrome (e.g. Firebug). This way we
         // unwind all frames that don't come from the page content.
         if (DebuggerLib.isFrameLocationEval(where.url))
         {
@@ -115,8 +118,9 @@ var DebuggerHalter = Obj.extend(Firebug.Module,
     {
         Trace.sysout("debuggerHalter.breakNow; " + context.getName());
 
-        // Executed when the debugger breaks.
+        // The callback (if any) will be executed when the debugger breaks.
         context.breakNowCallback = callback;
+        context.breakNowInProgress = true;
 
         DebuggerLib.breakNow(context);
     }

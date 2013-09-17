@@ -18,10 +18,13 @@ var Trace = FBTrace.to("DBG_BREAKPOINTS");
 // Debugger Keyword
 
 /**
- * @module Javascript debugger; keyword can be prevented by a disabled breakpoint
- * created at the same line/url. This module implements related logic by handling
- * {@DebuggerTool} object events.
+ * @module This module implements logic related to debugger; keyword support. The logic
+ * is based on events sent by {@DebuggerTool} object.
  *
+ * Breaking on JavaScript debugger; keyword can be prevented by creating disabled breakpoint
+ * at the same line and URL.
+ *
+ * Handled events:
  * 1) onDebuggerPaused: if debugger halts at a debugger; keyword, the 'breaking cause'
  *    is created and initialized.
  *
@@ -53,11 +56,14 @@ var DebuggerKeyword = Obj.extend(Firebug.Module,
 
     onDebuggerPaused: function(context, event, packet)
     {
-        Trace.sysout("debuggerKeyword.onDebuggerPaused;", arguments);
-
         // The function monitor is only interested in 'breakpoint' type of interrupts.
         var type = packet.why.type;
         if (type != "debuggerStatement")
+            return;
+
+        // Ignore 'breakNow' type of break. In this case the type is also 'debuggerStatement'
+        // since the debugger keyword is used for break-now logic.
+        if (context.breakNowInProgress)
             return;
 
         if (!context.stoppedFrame)
@@ -68,6 +74,8 @@ var DebuggerKeyword = Obj.extend(Firebug.Module,
 
         var href = context.stoppedFrame.href;
         var line = context.stoppedFrame.line - 1;
+
+        Trace.sysout("debuggerKeyword.onDebuggerPaused; " + href + " (" + line + ")", arguments);
 
         // Return breaking cause object. This one is for disabling the debugger; keyword
         // that caused the break in the first place.

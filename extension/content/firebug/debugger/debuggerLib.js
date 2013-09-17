@@ -85,9 +85,9 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         if (!dbg)
             return;
 
-        // xxxFlorent: For a reason I ignore, there are some conflicts with the ShareMeNot addon.
-        //   As a workaround, we unwrap the global object.
-        //   TODO see what cause that behavior, why, and if there are no other addons in that case.
+        // xxxFlorent: For a reason I ignore, there are some conflicts with the ShareMeNot add-on.
+        // As a workaround, we unwrap the global object.
+        // TODO see what cause that behavior, why, and if there are no other add-ons in that case.
         var contentView = Wrapper.getContentView(global);
         dglobal = dbg.addDebuggee(contentView);
         dbg.removeDebuggee(contentView);
@@ -292,7 +292,7 @@ DebuggerLib.isExecutableLine = function(context, location)
 
 DebuggerLib.breakNow = function(context)
 {
-    // getDebugeeGlobal uses the current global (ie. stopped frame, current iframe or
+    // getDebugeeGlobal uses the current global (i.e. stopped frame, current iframe or
     // top level window associated with the context object).
     // There can be cases (e.g. BON XHR) where the current window is an iframe, but
     // the event the debugger breaks on - comes from top level window (or vice versa).
