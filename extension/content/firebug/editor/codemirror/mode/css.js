@@ -103,7 +103,8 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     startState: function(base) {
       return {tokenize: tokenBase,
               baseIndent: base || 0,
-              stack: []};
+              stack: [],
+              lastToken: null};
     },
 
     token: function(stream, state) {
@@ -163,28 +164,29 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
       var context = state.stack[state.stack.length-1];
       if (style == "variable") {
         if (type == "variable-definition") state.stack.push("propertyValue");
-        return "variable-2";
+        return state.lastToken = "variable-2";
       } else if (style == "property") {
-        if (context == "propertyValue"){
-          if (valueKeywords[stream.current()]) {
+        var word = stream.current().toLowerCase();
+        if (context == "propertyValue") {
+          if (valueKeywords.hasOwnProperty(word)) {
             style = "string-2";
-          } else if (colorKeywords[stream.current()]) {
+          } else if (colorKeywords.hasOwnProperty(word)) {
             style = "keyword";
           } else {
             style = "variable-2";
           }
         } else if (context == "rule") {
-          if (!propertyKeywords[stream.current()]) {
+          if (!propertyKeywords.hasOwnProperty(word)) {
             style += " error";
           }
         } else if (context == "block") {
           // if a value is present in both property, value, or color, the order
           // of preference is property -> color -> value
-          if (propertyKeywords[stream.current()]) {
+          if (propertyKeywords.hasOwnProperty(word)) {
             style = "property";
-          } else if (colorKeywords[stream.current()]) {
+          } else if (colorKeywords.hasOwnProperty(word)) {
             style = "keyword";
-          } else if (valueKeywords[stream.current()]) {
+          } else if (valueKeywords.hasOwnProperty(word)) {
             style = "string-2";
           } else {
             style = "tag";
@@ -194,42 +196,42 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
         } else if (context == "@media") {
           if (atMediaTypes[stream.current()]) {
             style = "attribute"; // Known attribute
-          } else if (/^(only|not)$/i.test(stream.current())) {
+          } else if (/^(only|not)$/.test(word)) {
             style = "keyword";
-          } else if (stream.current().toLowerCase() == "and") {
+          } else if (word == "and") {
             style = "error"; // "and" is only allowed in @mediaType
-          } else if (atMediaFeatures[stream.current()]) {
+          } else if (atMediaFeatures.hasOwnProperty(word)) {
             style = "error"; // Known property, should be in @mediaType(
           } else {
             // Unknown, expecting keyword or attribute, assuming attribute
             style = "attribute error";
           }
         } else if (context == "@mediaType") {
-          if (atMediaTypes[stream.current()]) {
+          if (atMediaTypes.hasOwnProperty(word)) {
             style = "attribute";
-          } else if (stream.current().toLowerCase() == "and") {
+          } else if (word == "and") {
             style = "operator";
-          } else if (/^(only|not)$/i.test(stream.current())) {
+          } else if (/^(only|not)$/.test(word)) {
             style = "error"; // Only allowed in @media
-          } else if (atMediaFeatures[stream.current()]) {
-            style = "error"; // Known property, should be in parentheses
           } else {
             // Unknown attribute or property, but expecting property (preceded
             // by "and"). Should be in parentheses
             style = "error";
           }
         } else if (context == "@mediaType(") {
-          if (propertyKeywords[stream.current()]) {
+          if (propertyKeywords.hasOwnProperty(word)) {
             // do nothing, remains "property"
-          } else if (atMediaTypes[stream.current()]) {
+          } else if (atMediaTypes.hasOwnProperty(word)) {
             style = "error"; // Known property, should be in parentheses
-          } else if (stream.current().toLowerCase() == "and") {
+          } else if (word == "and") {
             style = "operator";
-          } else if (/^(only|not)$/i.test(stream.current())) {
+          } else if (/^(only|not)$/.test(word)) {
             style = "error"; // Only allowed in @media
           } else {
             style += " error";
           }
+        } else if (context == "@import") {
+          style = "tag";
         } else {
           style = "error";
         }
@@ -250,7 +252,6 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
       // Push/pop context stack
       if (type == "{") {
         if (context == "@media" || context == "@mediaType") {
-          state.stack.pop();
           state.stack[state.stack.length-1] = "@media{";
         }
         else {
@@ -259,31 +260,52 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
         }
       }
       else if (type == "}") {
-        var lastState = state.stack[state.stack.length - 1];
-        if (lastState == "interpolation") style = "operator";
+        if (context == "interpolation") style = "operator";
         state.stack.pop();
         if (context == "propertyValue") state.stack.pop();
       }
       else if (type == "interpolation") state.stack.push("interpolation");
       else if (type == "@media") state.stack.push("@media");
+      else if (type == "@import") state.stack.push("@import");
       else if (context == "@media" && /\b(keyword|attribute)\b/.test(style))
-        state.stack.push("@mediaType");
-      else if (context == "@mediaType" && stream.current() == ",") state.stack.pop();
-      else if (context == "@mediaType" && type == "(") state.stack.push("@mediaType(");
-      else if (context == "@mediaType(" && type == ")") state.stack.pop();
-      else if ((context == "rule" || context == "block") && type == ":") state.stack.push("propertyValue");
+        state.stack[state.stack.length-1] = "@mediaType";
+      else if (context == "@mediaType" && stream.current() == ",")
+        state.stack[state.stack.length-1] = "@media";
+      else if (type == "(") {
+        if (context == "@media" || context == "@mediaType") {
+          // Make sure @mediaType is used to avoid error on {
+          state.stack[state.stack.length-1] = "@mediaType";
+          state.stack.push("@mediaType(");
+        }
+      }
+      else if (type == ")") {
+        if (context == "propertyValue" && state.stack[state.stack.length-2] == "@mediaType(") {
+          // In @mediaType( without closing ; after propertyValue
+          state.stack.pop();
+          state.stack.pop();
+        }
+        else if (context == "@mediaType(") {
+          state.stack.pop();
+        }
+      }
+      else if (type == ":" && state.lastToken == "property") state.stack.push("propertyValue");
       else if (context == "propertyValue" && type == ";") state.stack.pop();
-      return style;
+      else if (context == "@import" && type == ";") state.stack.pop();
+
+      return state.lastToken = style;
     },
 
     indent: function(state, textAfter) {
       var n = state.stack.length;
       if (/^\}/.test(textAfter))
-        n -= state.stack[state.stack.length-1] == "propertyValue" ? 2 : 1;
+        n -= state.stack[n-1] == "propertyValue" ? 2 : 1;
       return state.baseIndent + n * indentUnit;
     },
 
-    electricChars: "}"
+    electricChars: "}",
+    blockCommentStart: "/*",
+    blockCommentEnd: "*/",
+    fold: "brace"
   };
 });
 
@@ -344,8 +366,8 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     "drop-initial-before-align", "drop-initial-size", "drop-initial-value",
     "elevation", "empty-cells", "fit", "fit-position", "flex", "flex-basis",
     "flex-direction", "flex-flow", "flex-grow", "flex-shrink", "flex-wrap",
-    "float", "float-offset", "font", "font-feature-settings", "font-family",
-    "font-kerning", "font-language-override", "font-size", "font-size-adjust",
+    "float", "float-offset", "flow-from", "flow-into", "font", "font-feature-settings",
+    "font-family", "font-kerning", "font-language-override", "font-size", "font-size-adjust",
     "font-stretch", "font-style", "font-synthesis", "font-variant",
     "font-variant-alternates", "font-variant-caps", "font-variant-east-asian",
     "font-variant-ligatures", "font-variant-numeric", "font-variant-position",
@@ -369,52 +391,88 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     "page", "page-break-after", "page-break-before", "page-break-inside",
     "page-policy", "pause", "pause-after", "pause-before", "perspective",
     "perspective-origin", "pitch", "pitch-range", "play-during", "position",
-    "presentation-level", "punctuation-trim", "quotes", "rendering-intent",
-    "resize", "rest", "rest-after", "rest-before", "richness", "right",
-    "rotation", "rotation-point", "ruby-align", "ruby-overhang",
-    "ruby-position", "ruby-span", "size", "speak", "speak-as", "speak-header",
+    "presentation-level", "punctuation-trim", "quotes", "region-break-after",
+    "region-break-before", "region-break-inside", "region-fragment",
+    "rendering-intent", "resize", "rest", "rest-after", "rest-before", "richness",
+    "right", "rotation", "rotation-point", "ruby-align", "ruby-overhang",
+    "ruby-position", "ruby-span", "shape-inside", "shape-outside", "size",
+    "speak", "speak-as", "speak-header",
     "speak-numeral", "speak-punctuation", "speech-rate", "stress", "string-set",
     "tab-size", "table-layout", "target", "target-name", "target-new",
     "target-position", "text-align", "text-align-last", "text-decoration",
     "text-decoration-color", "text-decoration-line", "text-decoration-skip",
     "text-decoration-style", "text-emphasis", "text-emphasis-color",
     "text-emphasis-position", "text-emphasis-style", "text-height",
-    "text-indent", "text-justify", "text-outline", "text-shadow",
-    "text-space-collapse", "text-transform", "text-underline-position",
+    "text-indent", "text-justify", "text-outline", "text-overflow", "text-shadow",
+    "text-size-adjust", "text-space-collapse", "text-transform", "text-underline-position",
     "text-wrap", "top", "transform", "transform-origin", "transform-style",
     "transition", "transition-delay", "transition-duration",
     "transition-property", "transition-timing-function", "unicode-bidi",
     "vertical-align", "visibility", "voice-balance", "voice-duration",
     "voice-family", "voice-pitch", "voice-range", "voice-rate", "voice-stress",
     "voice-volume", "volume", "white-space", "widows", "width", "word-break",
-    "word-spacing", "word-wrap", "z-index"
+    "word-spacing", "word-wrap", "z-index", "zoom",
+    // SVG-specific
+    "clip-path", "clip-rule", "mask", "enable-background", "filter", "flood-color",
+    "flood-opacity", "lighting-color", "stop-color", "stop-opacity", "pointer-events",
+    "color-interpolation", "color-interpolation-filters", "color-profile",
+    "color-rendering", "fill", "fill-opacity", "fill-rule", "image-rendering",
+    "marker", "marker-end", "marker-mid", "marker-start", "shape-rendering", "stroke",
+    "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin",
+    "stroke-miterlimit", "stroke-opacity", "stroke-width", "text-rendering",
+    "baseline-shift", "dominant-baseline", "glyph-orientation-horizontal",
+    "glyph-orientation-vertical", "kerning", "text-anchor", "writing-mode"
   ]);
 
   var colorKeywords = keySet([
-    "black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia",
-    "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua"
+    "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige",
+    "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown",
+    "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue",
+    "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod",
+    "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen",
+    "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen",
+    "darkslateblue", "darkslategray", "darkturquoise", "darkviolet",
+    "deeppink", "deepskyblue", "dimgray", "dodgerblue", "firebrick",
+    "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite",
+    "gold", "goldenrod", "gray", "grey", "green", "greenyellow", "honeydew",
+    "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender",
+    "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral",
+    "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightpink",
+    "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+    "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
+    "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+    "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+    "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin",
+    "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered",
+    "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred",
+    "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue",
+    "purple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon",
+    "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue",
+    "slateblue", "slategray", "snow", "springgreen", "steelblue", "tan",
+    "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white",
+    "whitesmoke", "yellow", "yellowgreen"
   ]);
 
   var valueKeywords = keySet([
     "above", "absolute", "activeborder", "activecaption", "afar",
     "after-white-space", "ahead", "alias", "all", "all-scroll", "alternate",
     "always", "amharic", "amharic-abegede", "antialiased", "appworkspace",
-    "arabic-indic", "armenian", "asterisks", "auto", "avoid", "background",
-    "backwards", "baseline", "below", "bidi-override", "binary", "bengali",
-    "blink", "block", "block-axis", "bold", "bolder", "border", "border-box",
-    "both", "bottom", "break-all", "break-word", "button", "button-bevel",
+    "arabic-indic", "armenian", "asterisks", "auto", "avoid", "avoid-column", "avoid-page",
+    "avoid-region", "background", "backwards", "baseline", "below", "bidi-override", "binary",
+    "bengali", "blink", "block", "block-axis", "bold", "bolder", "border", "border-box",
+    "both", "bottom", "break", "break-all", "break-word", "button", "button-bevel",
     "buttonface", "buttonhighlight", "buttonshadow", "buttontext", "cambodian",
     "capitalize", "caps-lock-indicator", "caption", "captiontext", "caret",
     "cell", "center", "checkbox", "circle", "cjk-earthly-branch",
     "cjk-heavenly-stem", "cjk-ideographic", "clear", "clip", "close-quote",
-    "col-resize", "collapse", "compact", "condensed", "contain", "content",
+    "col-resize", "collapse", "column", "compact", "condensed", "contain", "content",
     "content-box", "context-menu", "continuous", "copy", "cover", "crop",
     "cross", "crosshair", "currentcolor", "cursive", "dashed", "decimal",
     "decimal-leading-zero", "default", "default-button", "destination-atop",
     "destination-in", "destination-out", "destination-over", "devanagari",
     "disc", "discard", "document", "dot-dash", "dot-dot-dash", "dotted",
     "double", "down", "e-resize", "ease", "ease-in", "ease-in-out", "ease-out",
-    "element", "ellipsis", "embed", "end", "ethiopic", "ethiopic-abegede",
+    "element", "ellipse", "ellipsis", "embed", "end", "ethiopic", "ethiopic-abegede",
     "ethiopic-abegede-am-et", "ethiopic-abegede-gez", "ethiopic-abegede-ti-er",
     "ethiopic-abegede-ti-et", "ethiopic-halehame-aa-er",
     "ethiopic-halehame-aa-et", "ethiopic-halehame-am-et",
@@ -430,7 +488,7 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     "inactiveborder", "inactivecaption", "inactivecaptiontext", "infinite",
     "infobackground", "infotext", "inherit", "initial", "inline", "inline-axis",
     "inline-block", "inline-table", "inset", "inside", "intrinsic", "invert",
-    "italic", "justify", "kannada", "katakana", "katakana-iroha", "khmer",
+    "italic", "justify", "kannada", "katakana", "katakana-iroha", "keep-all", "khmer",
     "landscape", "lao", "large", "larger", "left", "level", "lighter",
     "line-through", "linear", "lines", "list-item", "listbox", "listitem",
     "local", "logical", "loud", "lower", "lower-alpha", "lower-armenian",
@@ -449,11 +507,11 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     "no-open-quote", "no-repeat", "none", "normal", "not-allowed", "nowrap",
     "ns-resize", "nw-resize", "nwse-resize", "oblique", "octal", "open-quote",
     "optimizeLegibility", "optimizeSpeed", "oriya", "oromo", "outset",
-    "outside", "overlay", "overline", "padding", "padding-box", "painted",
-    "paused", "persian", "plus-darker", "plus-lighter", "pointer", "portrait",
-    "pre", "pre-line", "pre-wrap", "preserve-3d", "progress", "push-button",
-    "radio", "read-only", "read-write", "read-write-plaintext-only", "relative",
-    "repeat", "repeat-x", "repeat-y", "reset", "reverse", "rgb", "rgba",
+    "outside", "outside-shape", "overlay", "overline", "padding", "padding-box",
+    "painted", "page", "paused", "persian", "plus-darker", "plus-lighter", "pointer",
+    "polygon", "portrait", "pre", "pre-line", "pre-wrap", "preserve-3d", "progress", "push-button",
+    "radio", "read-only", "read-write", "read-write-plaintext-only", "rectangle", "region",
+    "relative", "repeat", "repeat-x", "repeat-y", "reset", "reverse", "rgb", "rgba",
     "ridge", "right", "round", "row-resize", "rtl", "run-in", "running",
     "s-resize", "sans-serif", "scroll", "scrollbar", "se-resize", "searchfield",
     "searchfield-cancel-button", "searchfield-decoration",
@@ -475,7 +533,7 @@ CodeMirror.defineMode("css-base", function(config, parserConfig) {
     "upper-alpha", "upper-armenian", "upper-greek", "upper-hexadecimal",
     "upper-latin", "upper-norwegian", "upper-roman", "uppercase", "urdu", "url",
     "vertical", "vertical-text", "visible", "visibleFill", "visiblePainted",
-    "visibleStroke", "visual", "w-resize", "wait", "wave", "white", "wider",
+    "visibleStroke", "visual", "w-resize", "wait", "wave", "wider",
     "window", "windowframe", "windowtext", "x-large", "x-small", "xor",
     "xx-large", "xx-small"
   ]);
