@@ -501,6 +501,23 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.filterMenuUpdate value: "+value+" label:"+
                 this.filterButton.label+'\n');
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BTI
+
+    toolName: "script",
+
+    // xxxHonza: events are dispatched to connection (BTI.Browser) listeners
+    // It's e.g. "getBreakpoints" at this moment.
+    addListener: function(listener)
+    {
+        Firebug.connection.addListener(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        Firebug.connection.removeListener(listener);
+    },
 });
 
 // ********************************************************************************************* //
