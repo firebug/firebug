@@ -47,7 +47,7 @@ function onExecuteCommand(context, args)
         // Append also mutation observers into the result (if there are any).
         var observers = getMutationObserversForTarget(context, target);
         if (observers && observers.length > 0)
-            result["MutationObserver"] = observers;
+            result["MutationObservers"] = observers;
 
         var global = context.getCurrentGlobal();
         var objects = Wrapper.cloneIntoContentScope(global, result);
