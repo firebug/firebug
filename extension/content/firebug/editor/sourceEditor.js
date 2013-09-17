@@ -2,13 +2,14 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/http",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
 ],
-function(Firebug, Http, Dom, Css, Wrapper, Arr) {
+function(Firebug, FBTrace, Http, Dom, Css, Wrapper, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -77,7 +78,7 @@ SourceEditor.DefaultConfig =
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
     // There is one-line editor created at the bottom of the Script panel.
     // Just switch to the CSS panel and back to reproduce the problem.
-    //autofocus: true
+    // autofocus: true
 };
 
 SourceEditor.Events =
@@ -115,7 +116,7 @@ SourceEditor.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    init: function (parentNode, config, callback)
+    init: function(parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
@@ -123,7 +124,7 @@ SourceEditor.prototype =
         this.loadScripts(doc, onInit);
     },
 
-    onInit: function (parentNode, config, callback)
+    onInit: function(parentNode, config, callback)
     {
         var doc = parentNode.ownerDocument;
 
@@ -153,6 +154,10 @@ SourceEditor.prototype =
             var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
             Object.defineProperty(newConfig, prop, genPropDesc(value));
         }
+
+        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
+        // debugging is easier. Should not be part of the distribution.
+        //view.FBTrace = ExposedFBTrace;
 
         var self = this;
 
@@ -198,7 +203,7 @@ SourceEditor.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Load CM Scripts
 
-    loadScripts: function (doc, callback)
+    loadScripts: function(doc, callback)
     {
         Trace.sysout("sourceEditor.loadScripts;");
 
@@ -217,7 +222,7 @@ SourceEditor.prototype =
             Dom.addScript(doc, id, Http.getResource(url));
             return;
 
-            //xxxHonza: The rest is for CM debugging. If <script> tag are inserted with
+            //xxxHonza: The rest is for CM debugging. If <script> tags are inserted with
             // properly set 'src' attribute, stack traces produced by Firebug tracing
             // console are correct. But it's asynchronous causing the Script panel UI
             // to blink so, we don't need it for production.
@@ -374,7 +379,7 @@ SourceEditor.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Text Content
 
-    setText: function (text, type)
+    setText: function(text, type)
     {
         Trace.sysout("sourceEditor.setText: " + type, text);
 
@@ -611,10 +616,14 @@ SourceEditor.prototype =
     {
         options = options || {};
 
+        // The pos object is passed into CodeMirror that is running within
+        // a content scope (restricted privileges, in panel.html).
+        var pos = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+
         if (options.scrollTo == "top")
         {
             // Scroll so, the specified line is displayed at the top of the editor.
-            this.editorObject.scrollIntoView({line: line});
+            this.editorObject.scrollIntoView(pos);
         }
         else
         {
@@ -624,22 +633,9 @@ SourceEditor.prototype =
             // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
             // returns the visible area minus scrollbars, it doesn't seem to work).
             var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
-
-            var coords;
-            try
-            {
-                coords = this.editorObject.charCoords({line: line, ch: 0}, "local");
-            }
-            catch (err)
-            {
-                // xxxHonza: why this exception happens?
-                FBTrace.sysout("sourceEditor.scrollToLine; EXCEPTION " + err, err);
-                return;
-            }
-
+            var coords = this.editorObject.charCoords(pos, "local");
             var top = coords.top;
             var bottom = coords.bottom;
-
             var lineHeight = this.editorObject.defaultTextHeight();
 
             // Scroll only if the target line is outside of the viewport.
@@ -909,6 +905,22 @@ function getEventObject(type, eventArg)
 
     return event;
 }
+
+// ********************************************************************************************* //
+// Support for Debugging
+
+var ExposedFBTrace =
+{
+    sysout: function(msg, obj)
+    {
+        FBTrace.sysout(msg, obj);
+    },
+
+    __exposedProps__:
+    {
+        sysout: "r"
+    }
+};
 
 // ********************************************************************************************* //
 // Registration
