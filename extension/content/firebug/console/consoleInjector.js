@@ -15,7 +15,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-const EXPOSED_CONSOLE_KEY = "fbConsoleExposed"+Math.random();
+var wmExposedConsoles = new WeakMap();
 
 // ********************************************************************************************* //
 // Console Injector
@@ -26,6 +26,16 @@ Firebug.Console.injector =
     {
         try
         {
+            var url = win.location.href;
+            var winDoc = win.document;
+            // Don't run the function twice for the same window and the same context.
+            if (wmExposedConsoles.has(winDoc) &&
+                wmExposedConsoles.get(winDoc).context === context)
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("Console already attached for " + url + ". Skipping.");
+                return;
+            }
             // Get the 'console' object (this comes from chrome scope).
             var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
 
@@ -59,18 +69,17 @@ Firebug.Console.injector =
             var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
             var exposedConsole = getConsoleWrapper(console);
 
-            // Note: to early to use weakmap's + win.document in case of iframes. So we use an expando.
-            Object.defineProperty(win, EXPOSED_CONSOLE_KEY, {
-                configurable: true,
-                writable: true,
-                enumerable: false,
-                value: exposedConsole
+            // Store the context and the exposedConsole in a WeakMap.
+            wmExposedConsoles.set(winDoc, {
+                context: context,
+                console: exposedConsole
             });
+
             win.wrappedJSObject.console = exposedConsole;
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("console.attachConsoleInjector; Firebug console attached to: " +
-                    context.getName());
+                    url);
         }
         catch (ex)
         {
@@ -84,7 +93,10 @@ Firebug.Console.injector =
 
     getExposedConsole: function(win)
     {
-        return win[EXPOSED_CONSOLE_KEY];
+        var winDoc = win.document;
+        return  wmExposedConsoles.has(winDoc) ?
+                wmExposedConsoles.get(winDoc).console :
+                undefined;
     },
 
     // For extensions that still use this function.
