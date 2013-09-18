@@ -2278,13 +2278,6 @@ var CompletionType = {
 
 function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, options)
 {
-    // If we are doing index-completions, add "] to everything.
-    function convertQuotes(x)
-    {
-        x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
-        return x + out.indexQuoteType + "]";
-    }
-
     var out = {
         spreExpr: spreExpr,
         completions: [],
@@ -2358,6 +2351,13 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
 
         if (indexCompletion)
         {
+            // If we are doing index-completions, add "] to everything.
+            var convertQuotes = function(x)
+            {
+                x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
+                return x + out.indexQuoteType + "]";
+            }
+
             out.completions = out.completions.map(convertQuotes);
             out.hiddenCompletions = out.hiddenCompletions.map(convertQuotes);
         }
