@@ -24,8 +24,8 @@ const Ci = Components.interfaces;
  *
  * 1) Part of the logic is based on annotation service (see components/firebug-annotations.js)
  *    in order to remember whether Firebug is activated for given site or not.
- *    If there is "firebugged.showFirebug" annotation for a given site Firbug is activated.
- *    If there is "firebugged.closed" annotation for a given site Firbug is not activated.
+ *    If there is "firebugged.showFirebug" annotation for a given site Firebug is activated.
+ *    If there is "firebugged.closed" annotation for a given site Firebug is not activated.
  *
  * 2) Other part is based on extensions.firebug.allPagesActivation option. This option
  *    can be set to the following values:

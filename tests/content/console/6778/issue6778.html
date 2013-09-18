@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 6778: Cross-domain log messages aren't displayed within the console</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6778">Issue 6778</a>: Cross-domain log messages aren't displayed within the console</h1>
+        </header>
+        <div>
+            <section id="content">
+                <iframe sandbox="allow-scripts" src="./iframe.php">
+
+                </iframe>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch and enable the Console panel</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The console should display: <code style="color:black;">XDM Console message</code></li>
+                </ul>
+            </section>
+            <footer>
+                Florent Fayolle, florent.fayolle69@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>

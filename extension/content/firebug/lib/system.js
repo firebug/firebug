@@ -139,6 +139,19 @@ System.getStringDataFromClipboard = function()
 };
 
 // ********************************************************************************************* //
+// OS Checkers
+
+System.isMac = function(win)
+{
+    return win.navigator.platform.search("Mac") != -1;
+}
+
+System.isWin = function(win)
+{
+    return win.navigator.platform.search("Win") != -1;
+}
+
+// ********************************************************************************************* //
 // Firebug Version Comparator
 
 /**

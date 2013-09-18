@@ -27,8 +27,8 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
 }
 
 .sourceRow {
@@ -102,15 +102,6 @@
     background-image: url(chrome://firebug/skin/executionPointer.png);
     background-position: 7px 1px;
     color: #000000;
-}
-
-.sourceRow[breakpoint="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpoint.png);
-}
-
-.sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
-    background-image: url(chrome://firebug/skin/breakpointCondition.png);
-    background-position: 9px 3px, 5px 1px;
 }
 
 .sourceRow[breakpoint="true"][disabledbreakpoint="true"] > .sourceLine {

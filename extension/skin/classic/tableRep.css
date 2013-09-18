@@ -9,7 +9,16 @@
 /* Console Panel */
 
 .logRow-table {
+    display: block;
     padding: 0;
+}
+
+.logRow-table > div {
+    display: block;
+}
+
+.logRow-table > div > .logContent {
+    display: block;    
 }
 
 .dataTableSizer {

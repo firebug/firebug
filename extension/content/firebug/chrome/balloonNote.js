@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-define(["firebug/lib/domplate"], function(Domplate) {
+define([
+    "firebug/lib/domplate"
+],
+function(Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -10,7 +15,8 @@ Firebug.BalloonNote = function(doc, object)
     this.initialize(doc, object);
 };
 
-with (Domplate) {
+var {domplate, DIV, SPAN, TAG} = Domplate;
+
 Firebug.BalloonNote.prototype = domplate(
 {
     tag:
@@ -53,7 +59,6 @@ Firebug.BalloonNote.prototype = domplate(
         // move from Firebug.BreakNotification
     }
 });
-};
 
 // ********************************************************************************************* //
 });

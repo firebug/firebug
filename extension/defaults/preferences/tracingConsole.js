@@ -53,7 +53,6 @@ pref("extensions.firebug.DBG_REGISTRATION", false);     // registry (modules pan
 pref("extensions.firebug.DBG_SEARCH", false);           // search box
 pref("extensions.firebug.DBG_SHORTCUTS", false);        // Keyboard shortcuts
 pref("extensions.firebug.DBG_SOURCEFILES", false);      // debugger and sourceCache
-pref("extensions.firebug.DBG_SPY", false);              // spy.js
 pref("extensions.firebug.DBG_STACK", false);            // call stack, mostly debugger.js
 pref("extensions.firebug.DBG_STORAGE", false);          // storageService
 pref("extensions.firebug.DBG_SVGVIEWER", false);        // SVG explorer

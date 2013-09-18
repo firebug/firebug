@@ -78,12 +78,12 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
     getUrlTag: function(href, aliasName)
     {
         var urlTag =
-            SPAN({style:"height:100%"},
+            SPAN({style: "height:100%"},
                 A({"href": href, "target": "_blank", "class": "url"},
                     Str.cropString(href, 100)
                 ),
                 SPAN({"class": "commands"}
-                // xxxFlorent: temporarily disabled, see: 
+                // xxxFlorent: temporarily disabled, see:
                 //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
                 /*,
                 SPAN({
@@ -114,19 +114,30 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         {
             var aliasName = keys[i];
             arrayToDisplay.push({
-                "alias": SPAN({"class":"aliasName", "data-aliasname": aliasName}, aliasName),
-                "URL": this.getUrlTag(store.getItem(aliasName), aliasName, context)
+                alias: SPAN({"class": "aliasName", "data-aliasname": aliasName}, aliasName),
+                URL: this.getUrlTag(store.getItem(aliasName), aliasName, context)
             });
         }
 
+        var columns = [
+            {
+                property: "alias",
+                label: Locale.$STR("commandline.include.Alias")
+            },
+            {
+                property: "URL",
+                label: Locale.$STR("commandline.include.URL")
+            }
+        ];
+
         var input = new CommandLineIncludeObject();
-        this.log(arrayToDisplay, ["alias", "URL"], context, input);
+        this.log(arrayToDisplay, columns, context, input);
         return returnValue;
     },
 
     deleteAlias: function(aliasName, ev)
     {
-        // NOTE: that piece of code has not been tested since deleting aliases through the table 
+        // NOTE: that piece of code has not been tested since deleting aliases through the table
         // has been disabled.
         // Once it is enabled again, make sure FBTests is available for this feature
         var store = CommandLineInclude.getStore();
@@ -242,7 +253,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
                 tooltiptext: "clipboard.tip.Copy_Location",
                 command: Obj.bindFixed(System.copyToClipboard, System, url)
             },
-            // xxxFlorent: temporarily disabled, see: 
+            // xxxFlorent: temporarily disabled, see:
             //    http://code.google.com/p/fbug/issues/detail?id=5878#c27
             /*"-",
             {

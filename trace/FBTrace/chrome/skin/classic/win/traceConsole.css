@@ -1,14 +1,12 @@
 /* See license.txt for terms of usage */
 
-/* Currently empty for Windows, but needed for Mac OS */
-
 .memberRow.hasChildren > .memberLabelCell > .memberLabel {
-    background-image: url(chrome://fbtrace-os/skin/twistyClosed.svg);
+    background-image: url(chrome://fbtrace/skin/win/twistyClosed.svg);
     background-repeat: no-repeat;
     background-position: 2px 2px;
     min-height: 12px;
 }
 
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel {
-    background-image: url(chrome://fbtrace-os/skin/twistyOpen.svg);
+    background-image: url(chrome://fbtrace/skin/win/twistyOpen.svg);
 }

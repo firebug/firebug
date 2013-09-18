@@ -132,13 +132,17 @@ pref("extensions.firebug.netParamNameLimit", 25);
 pref("extensions.firebug.netShowPaintEvents", false);
 pref("extensions.firebug.netShowBFCacheResponses", false);
 pref("extensions.firebug.netHtmlPreviewHeight", 100);
+pref("extensions.firebug.netResponseHeadersVisible", true);
+pref("extensions.firebug.netRequestHeadersVisible", true);
+pref("extensions.firebug.netCachedHeadersVisible", false);
+pref("extensions.firebug.netPostRequestHeadersVisible", false);
 
 // JSON Preview
 pref("extensions.firebug.sortJsonPreview", false);
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", "");
-pref("extensions.firebug.cache.responseLimit", 10485760);
+pref("extensions.firebug.cache.responseLimit", 5242880);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

@@ -7,8 +7,14 @@ define([], function() {
 
 const Cu = Components.utils;
 
-var scope = {};
-Cu["import"]("resource://firebug/fbtrace.js", scope);
+var fbTraceScope = {};
+Cu["import"]("resource://firebug/fbtrace.js", fbTraceScope);
+
+var prefLoaderScope = {};
+Cu["import"]("resource://firebug/prefLoader.js", prefLoaderScope);
+
+//xxxHonza: duplicated from modules/firebug-trace-service.js
+var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
 
 // ********************************************************************************************* //
 // Wrapper
@@ -36,23 +42,39 @@ function TraceWrapper(tracer, option)
         var method = TraceAPI[i];
         this[method] = createMethodWrapper(method);
     }
+
+    /**
+     * Use to check whether scoped tracer is on/off.
+     */
+    this.__defineGetter__("active", function()
+    {
+        return tracer[option];
+    });
 }
 
 // ********************************************************************************************* //
 
-var tracer = scope.FBTrace;
+var tracer = fbTraceScope.FBTrace;
 
 /**
  * Support for scoped logging.
  * 
- * Example:
- * FBTrace = FBTrace.to("DBG_NET");
- * 
- * // This log will be displayed only if DBG_NET option is on
- * FBTrace.sysout("net.initialiaze");
+ * // The log will be displayed only if DBG_MYMODULE option is on. 'DBG_MYMODULE' preference
+ * // will be automatically created and appear in the FBTrace console (after restart).
+ * FBTrace = FBTrace.to("DBG_MYMODULE");
+ * FBTrace.sysout("mymodule.initialiaze");
  */
 tracer.to = function(option)
 {
+    // Automatically create corresponding DBG_ + <option> preference so, it appears
+    // in the FBTrace Console window and can be checked on/off
+    // Note that FBTrace Console is already initialized and do not refresh if a new
+    // pref is created. So, the option appears after restart.
+    // xxxHonza: FIX ME
+    var value = prefLoaderScope.PrefLoader.getPref(option);
+    if (typeof(value) != "boolean")
+        prefLoaderScope.PrefLoader.setPref(option, false);
+
     return new TraceWrapper(this, option);
 };
 

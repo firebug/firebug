@@ -12,11 +12,13 @@
 }
 
 .fbQuickInfoPin {
+    background: url(chrome://firebug/skin/mac/pin.png) no-repeat;
     width: 13px;
     height: 13px;
 }
 
 .fbQuickInfoClose {
+    background: url(chrome://firebug/skin/mac/close.png) no-repeat;
     width: 13px;
     height: 13px;
 }
@@ -28,7 +30,7 @@
 
 .fbQuickInfoPin.pin,
 .fbQuickInfoPin:active {
-    background: url(chrome://firebug-os/skin/pinned.png) no-repeat;
+    background: url(chrome://firebug/skin/mac/pinned.png) no-repeat;
 }
 
 .fbQuickInfoClose:active {

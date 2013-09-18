@@ -225,8 +225,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     createContextMenuItem: function(doc)
     {
         var item = doc.createElement("menu");
-        item.setAttribute("type", "splitmenu");
         item.setAttribute("iconic", "true");
+        item.setAttribute("label", Locale.$STR("firebug.OpenWith"));
 
         item.addEventListener("command", function(event)
         {
@@ -260,19 +260,22 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             item = item.cloneNode(true);
             item.hidden = false;
             item.removeAttribute("openFromContext");
+
+            item.setAttribute("image", editor.image);
+            item.setAttribute("label", editor.label);
+            item.value = editor.id;
         }
         else
         {
             item = this.createContextMenuItem(doc);
         }
 
-        item.setAttribute("image", editor.image);
-        item.setAttribute("label", editor.label);
-        item.value = editor.id;
-
         popup.appendChild(item);
 
-        this.lastSource={url: url, line: line};
+        this.lastSource = {
+            url: url,
+            line: line
+        };
     },
 
     onContextMenuCommand: function(event)
@@ -565,7 +568,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         return file;
     },
 
-    deleteTemporaryFiles: function()  // TODO call on "shutdown" event to modules
+    // TODO call on "shutdown" event to modules
+    deleteTemporaryFiles: function()
     {
         try
         {
@@ -607,6 +611,7 @@ function fixupFilePath(path)
 }
 
 // object.extend doesn't handle getters
+// xxxHonza: now it does we should fix this.
 Firebug.ExternalEditors.__defineGetter__("pathTransformations",
     lazyLoadUrlMappings.bind(Firebug.ExternalEditors, "pathTransformations"));
 

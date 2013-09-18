@@ -18,7 +18,7 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 
 /**
- * This module is responsible for varisous hacky solutions related to known issues.
+ * This module is responsible for various hacky solutions related to known issues.
  */
 Firebug.KnownIssues = Obj.extend(Firebug.Module,
 /** @lends Firebug.KnownIssues */

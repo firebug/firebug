@@ -4,9 +4,10 @@ define([
     "firebug/lib/trace",
     "firebug/lib/options",
     "firebug/lib/deprecated",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/system",
 ],
-function(FBTrace, Options, Deprecated, Xpcom) {
+function(FBTrace, Options, Deprecated, Xpcom, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -491,10 +492,10 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
 
 Str.lineBreak = function()
 {
-    if (navigator.appVersion.indexOf("Win") != -1)
+    if (System.isWin(window))
         return "\r\n";
 
-    if (navigator.appVersion.indexOf("Mac") != -1)
+    if (System.isMac(window))
         return "\r";
 
     return "\n";

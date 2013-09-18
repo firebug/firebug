@@ -199,19 +199,6 @@ panelTab > panelTabMenu .menuTarget {
     visibility: collapse;
 }
 
-panelTab[selected="true"] > panelTabMenu .menuTarget,
-panelTab:focus > panelTabMenu .menuTarget {
-    background: url(chrome://firebug-os/skin/optionsMenuTarget.png) no-repeat center;
-    width: 11px;
-    height: 10px;
-    vertical-align: middle;
-    visibility: visible;
-}
-
-panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
-    background-image: url(chrome://firebug-os/skin/optionsMenuTargetHover.png);
-}
-
 panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
     direction: rtl;
 }
@@ -363,25 +350,4 @@ panelBarTabList {
 
 .panelBarTabListMenuItem {
     -moz-binding: url("firefox/bindings.xml#panelBarTabListMenuItem");
-}
-
-/*************************************************************************************************/
-/* splitmenu */
-
-menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_moz-menuactive="true"] {
-    background-color: -moz-menuhover;
-    color: -moz-menuhovertext;
-}
-
-.split-menu-right-image {
-    -moz-appearance: menuitem;
-    -moz-box-pack: end;
-}
-
-menu[type=splitmenu] {
-    -moz-binding: url("firefox/bindings.xml#splitmenu");
-    -moz-box-orient: horizontal;
-    -moz-appearance: none !important;
-    color: menutext;
-    background-color: transparent !important;
 }

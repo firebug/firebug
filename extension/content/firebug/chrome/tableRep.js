@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/chrome/reps",
@@ -9,18 +10,25 @@ define([
     "firebug/lib/object",
     "firebug/lib/array",
 ],
-function(Domplate, Locale, FirebugReps, Dom, Css, Obj, Arr) {
+function(FBTrace, Domplate, Locale, FirebugReps, Dom, Css, Obj, Arr) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, DIV, TABLE, THEAD, TR, FOR, TH, TBODY, TD, TAG} = Domplate;
+
+// Tracing
+var Trace = FBTrace.to("DBG_TABLEREP");
+
 // ********************************************************************************************* //
 
-with (Domplate) {
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
     tableClassName: "dataTable",
+
     tag:
         DIV({"class": "dataTableSizer", "tabindex": "-1" },
             TABLE({"class": "$tableClassName", cellspacing: 0, cellpadding: 0, width: "100%",
@@ -109,11 +117,12 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (typeof(obj) != "object")
             return [obj];
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("FirebugReps.Table.getProps", {obj: obj, arr: Arr.cloneArray(obj)});
+        Trace.sysout("FirebugReps.Table.getProps", obj);
 
-        if (obj.length)
+        if (Arr.isArray(obj))
             return Arr.cloneArray(obj);
+        else if (obj instanceof window.Storage)
+            return cloneStorage(obj);
 
         var arr = [];
         for (var p in obj)
@@ -266,7 +275,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
     },
 
     /**
-     * Analyse data and return dynamically created list of columns.
+     * Analyze data and return dynamically created list of columns.
      * @param {Object} data
      */
     getHeaderColumns: function(data)
@@ -332,7 +341,23 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     groupable: false
 });
-};
+
+// ********************************************************************************************* //
+// Helpers
+
+// xxxHonza: almost copy of FirebugReps.Storage.propIterator.
+// Shell we introduce Arr.cloneStorage()?
+function cloneStorage(storage)
+{
+    var obj = [];
+    for (var i = 0, len = storage.length; i < len; i++)
+    {
+        var name = storage.key(i);
+        obj.push(storage.getItem(name));
+    }
+
+    return obj;
+}
 
 // ********************************************************************************************* //
 // Registration

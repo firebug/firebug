@@ -10,6 +10,7 @@ define([
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",
+    "firebug/chrome/panelNotification",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
@@ -18,7 +19,7 @@ define([
     "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options, PanelNotification) {
 
 // ********************************************************************************************* //
 // Constants
@@ -80,13 +81,12 @@ Firebug.ConsoleBase =
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
                 var container = panel.panelNode;
-                var template = Firebug.NetMonitor.NetLimit;
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
                     container.removeChild(container.firstChild.nextSibling);
-                    panel.limit.limitInfo.totalCount++;
-                    template.updateCounter(panel.limit);
+                    panel.limit.config.totalCount++;
+                    PanelNotification.updateCounter(panel.limit);
                 }
                 Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
                 return row;
@@ -213,7 +213,52 @@ Firebug.Console = Obj.extend(ActivableConsole,
 
     initContext: function(context, persistedState)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.initContext");
+
         Firebug.ActivableModule.initContext.apply(this, arguments);
+
+        this.attachConsoleToWindows(context);
+    },
+
+    destroyContext: function(context)
+    {
+        if (context && context.consoleOnDOMWindowCreated)
+        {
+            context.browser.removeEventListener("DOMWindowCreated",
+                context.consoleOnDOMWindowCreated);
+
+            context.consoleOnDOMWindowCreated = null;
+        }
+    },
+
+    /**
+     * Attach the `console` object to the window of the context and its iframes.
+     * Also listen to iframe creations to attach it automatically.
+     *
+     * *Caution*: Designed to be used only in Firebug.Console. Should not be used elsewhere.
+     *
+     * @param {Context} context
+     */
+    attachConsoleToWindows: function(context)
+    {
+        // Attach the Console for the window and its iframes.
+        Win.iterateWindows(context.window, function(win)
+        {
+            Firebug.Console.injector.attachConsoleInjector(context, win);
+        });
+
+        // Listen to DOMWindowCreated for future iframes. Also necessary when Firebug is enabled at
+        // page load.
+        if (!context.consoleOnDOMWindowCreated)
+        {
+            context.consoleOnDOMWindowCreated = function(ev)
+            {
+                if (ev && ev.target)
+                    Firebug.Console.injector.attachConsoleInjector(context, ev.target.defaultView);
+            };
+            context.browser.addEventListener("DOMWindowCreated", context.consoleOnDOMWindowCreated);
+        }
     },
 
     togglePersist: function(context)
@@ -230,14 +275,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
-    },
-
-    watchWindow: function(context, win)
-    {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.watchWindow; " + Win.safeGetWindowLocation(win));
-
-        Firebug.Console.injector.attachConsoleInjector(context, win);
     },
 
     updateOption: function(name, value)

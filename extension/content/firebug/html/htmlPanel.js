@@ -8,6 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/html/htmlLib",
     "firebug/lib/events",
+    "firebug/lib/system",
     "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -29,7 +30,7 @@ define([
     "firebug/html/inspector",
     "firebug/html/layout"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
     Url, CSSModule, CSSInfoTip) {
 
@@ -1292,7 +1293,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.toggleAll(event, node);
 
         // Edit the HTML on Ctrl/Meta+E
-        if (Events.isControl(event) && ch === "e");
+        if (Events.isControl(event) && ch === "e")
             this.editNode(node);
 
         if (!Events.noKeyModifiers(event))
@@ -1898,14 +1899,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     label: Locale.$STRF("html.Edit_Node", [type]),
                     tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
                     nol10n: true,
-                    acceltext: (window.navigator.platform.indexOf("Mac") !== -1 ?
-                        Locale.$STR("VK_META") : Locale.$STR("VK_CONTROL")) + "+E",
+                    acceltext: (Locale.getFormattedKey(window, "accel", "E")),
                     command: Obj.bindFixed(this.editNode, this, node)
                 },
                 {
                     label: "DeleteElement",
                     tooltiptext: "html.Delete_Element",
-                    acceltext: Locale.$STR("VK_DELETE"),
+                    acceltext: Locale.getFormattedKey(window, null, null, "VK_DELETE"),
                     command: Obj.bindFixed(this.deleteNode, this, node),
                     disabled:(node.localName in Css.innerEditableTags)
                 });
@@ -1920,7 +1920,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     {
                         label: "html.label.Expand/Contract_All",
                         tooltiptext: "html.tip.Expand/Contract_All",
-                        acceltext: "*",
+                        acceltext: Locale.getFormattedKey(window, null, "*"),
                         command: Obj.bind(this.toggleAll, this, node)
                     }
                 );

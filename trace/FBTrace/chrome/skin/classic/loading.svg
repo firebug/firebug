@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="16"
+   height="16"
+   id="loading">
+  <g id="loadingIcon">
+    <path
+       d="m 7.2038351,4.8229 c 0,-1.9292 0,-3.8583 0.7959617,-4.8229 0.7959616,0.9646 0.7959616,2.8937 0.7959616,4.8229 z"
+       id="path2985"
+       style="fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 5.7219737,5.6466 c -0.9646,-1.6707 -1.92915,-3.3414 -1.7221269,-4.5747 1.171623,0.4374 2.136173,2.108 3.100773,3.7788 z"
+       id="path2985-1"
+       style="opacity:0.91799999;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="M 4.8503666,7.1008 C 3.1796304,6.1362 1.5089808,5.1716 1.0715935,4 2.3049424,3.793 3.9755921,4.7575 5.6463283,5.7221 z"
+       id="path2985-2"
+       style="opacity:0.83600003;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 4.8227967,8.796 c -1.9292,0 -3.85829995,0 -4.82289995,-0.796 0.9646,-0.796 2.89370005,-0.796 4.82289995,-0.796 z"
+       id="path2985-3"
+       style="opacity:0.75400002;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="M 5.6464149,10.2778 C 3.9756787,11.2424 2.3050291,12.207 1.0716801,11.9999 1.5090674,10.8283 3.179717,9.8638 4.8504532,8.8992 z"
+       id="path2985-22"
+       style="opacity:0.67299996;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 7.1006198,11.1493 c -0.9646,1.6708 -1.92915,3.3414 -3.1007731,3.7788 -0.207023,-1.2333 0.757527,-2.904 1.722127,-4.5747 z"
+       id="path2985-16"
+       style="opacity:0.59100001;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 8.7957584,11.1771 c 0,1.9292 0,3.8583 -0.7959617,4.8229 C 7.2038351,15.0354 7.2038351,13.1063 7.2038351,11.1771 z"
+       id="path2985-8"
+       style="opacity:0.50899999;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 10.27762,10.3534 c 0.9646,1.6707 1.92915,3.3414 1.722127,4.5747 -1.171623,-0.4374 -2.1361733,-2.108 -3.1007733,-3.7788 z"
+       id="path2985-5"
+       style="opacity:0.42699998;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 11.14914,8.8992 c 1.670736,0.9646 3.341386,1.9291 3.778773,3.1008 -1.233349,0.207 -2.903998,-0.7576 -4.574734,-1.7222 z"
+       id="path2985-7"
+       style="opacity:0.34500002;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="m 11.176897,7.204 c 1.9292,0 3.8583,0 4.8229,0.796 -0.9646,0.796 -2.8937,0.796 -4.8229,0.796 z"
+       id="path2985-6"
+       style="opacity:0.26399997;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="M 10.353179,5.7222 C 12.023915,4.7576 13.694564,3.793 14.927913,4.0001 14.490526,5.1717 12.819876,6.1362 11.14914,7.1008 z"
+       id="path2985-18"
+       style="opacity:0.18200001;fill:#000000;fill-opacity:1;stroke:none" />
+    <path
+       d="M 8.8990237,4.8506 C 9.8636237,3.1798 10.828174,1.5092 11.999797,1.0718 12.20682,2.3051 11.24227,3.9758 10.27767,5.6465 z"
+       id="path2985-9"
+       style="opacity:0.1;fill:#000000;fill-opacity:1;stroke:none" />
+    <animateTransform attributeName="transform" begin="0s" dur="0.8s" type="rotate" repeatCount="indefinite"
+       keyTimes="0;0.083;0.167;0.25;0.333;0.417;0.5;0.583;0.667;0.75;0.833;0.917;1"
+       values="0 8 8;30 8 8;60 8 8;90 8 8;120 8 8;150 8 8;180 8 8;210 8 8;240 8 8;270 8 8;300 8 8;330 8 8;360 8 8" calcMode="discrete" />
+  </g>
+</svg>
