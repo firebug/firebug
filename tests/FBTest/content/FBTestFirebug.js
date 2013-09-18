@@ -19,7 +19,7 @@ var Cu = Components.utils;
 
 Cu["import"]("resource://fbtest/EventUtils.js");
 
-//************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
