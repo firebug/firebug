@@ -4,6 +4,7 @@
 /* Firebug CodeMirror Theme */
 
 .cm-s-firebug.CodeMirror {
+    height: 100%;
     font-family: monospace;
     font-size: 11px;
     line-height: 1.2;
