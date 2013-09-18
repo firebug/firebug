@@ -16,11 +16,13 @@ define([
     "firebug/lib/xpcom",
     "firebug/console/errorMessageObj",
     "firebug/chrome/panelNotification",
+    "firebug/debugger/debuggerLib",
+    "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom, ErrorMessageObj, PanelNotification) {
+    Wrapper, Xpcom, ErrorMessageObj, PanelNotification, DebuggerLib, BreakpointStore) {
 
 with (Domplate) {
 
@@ -268,14 +270,6 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
                 Css.setClass(this.panelNode, "hideArguments");
         }
-    },
-
-    shouldBreakOnNext: function()
-    {
-        // xxxHonza: shouldn't the breakOnErrors be context related?
-        // xxxJJB, yes, but we can't support it because we can't yet tell
-        // which window the error is on.
-        return Options.get("breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -1069,11 +1063,78 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Check the packet type, only "exception" is interesting in this case.
         var type = packet.why.type;
         if (type != "exception")
-            return false;
+            return;
+
+        if (!this.shouldBreakOnNext())
+            return;
 
         // Reset the break-on-next-error flag after an exception break happens.
         // xxxHonza: this is how the other BON implementations work, but we could reconsider it.
-        this.context.breakOnErrors = false;
+        // Another problem is that the debugger breaks in every frame by default, which
+        // is avoided by reseting of the flag.
+        this.breakOnNext(false)
+
+        // Get the exception object.
+        var exc = DebuggerLib.getObject(context, packet.why.exception.actor);
+        if (!exc)
+            return;
+
+        Trace.sysout("consolePanel.onDebuggerPaused;", {exc: exc, packet: packet});
+
+        // Convert to known structure, so FirebugReps.ErrorMessage.copyError() works.
+        var error = {
+            message: exc + "",
+            href: exc.fileName,
+            lineNo: exc.lineNumber
+        };
+
+        var lineNo = exc.lineNumber - 1;
+        var url = exc.fileName;
+
+        // Make sure the break notification popup appears.
+        context.breakingCause =
+        {
+            title: Locale.$STR("Break on Error"),
+            message: error.message,
+            copyAction: Obj.bindFixed(FirebugReps.ErrorMessage.copyError,
+                FirebugReps.ErrorMessage, error),
+
+            skipAction: function addSkipperAndGo()
+            {
+                // Create a breakpoint that never hits, but prevents BON for the error.
+                var bp = BreakpointStore.addBreakpoint(url, lineNo);
+                BreakpointStore.disableBreakpoint(url, lineNo);
+
+                Firebug.Debugger.resume(context);
+            },
+        };
+    },
+
+    shouldResumeDebugger: function(context, event, packet)
+    {
+        var type = packet.why.type;
+        if (type != "exception")
+            return false;
+
+        // Get the exception object.
+        var exc = DebuggerLib.getObject(context, packet.why.exception.actor);
+        if (!exc)
+            return false;
+
+        if (BreakpointStore.isBreakpointDisabled(exc.fileName, exc.lineNumber - 1))
+        {
+            Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, disabled BP found.");
+            return true;
+        }
+
+        if (!context.breakingCause)
+        {
+            // This is to avoid repeated break-on-error in every frame when an error happens.
+            Trace.sysout("context.breakingCause; No braking cause resume debugger");
+            return true;
+        }
+
+        return false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
