@@ -42,6 +42,14 @@ function TraceWrapper(tracer, option)
         var method = TraceAPI[i];
         this[method] = createMethodWrapper(method);
     }
+
+    /**
+     * Use to check whether scoped tracer is on/off.
+     */
+    this.__defineGetter__("active", function()
+    {
+        return tracer[option];
+    });
 }
 
 // ********************************************************************************************* //
