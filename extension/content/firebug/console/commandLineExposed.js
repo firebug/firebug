@@ -179,7 +179,6 @@ function createFirebugCommandLine(context, win)
  */
 function registerCommand(name, config)
 {
-    FBTrace.sysout("registerCommand " + name)
     if (commandNames[name] || consoleShortcuts[name] || props[name] || userCommands[name])
     {
         if (FBTrace.DBG_ERRORS)
