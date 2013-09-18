@@ -22,8 +22,7 @@ const Cu = Components.utils;
 
 // List of command line APIs
 var commandNames = ["$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
-    "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-    "traceAll", "untraceAll", "copy"];
+    "values", "traceCalls", "untraceCalls", "traceAll", "untraceAll", "copy"];
 
 // List of shortcuts for some console methods
 var consoleShortcuts = ["dir", "dirxml", "table"];
@@ -37,8 +36,7 @@ var userCommands = Object.create(null);
 // List of command line APIs to auto-complete, kept equal to the concatenation
 // of the above minus trace*.
 var completionList = [
-    "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys",
-    "values", "debug", "undebug", "monitor", "unmonitor", "copy"
+    "$", "$$", "$n", "$x", "cd", "clear", "inspect", "keys", "values", "copy"
 ].concat(consoleShortcuts, props);
 var unsortedCompletionList = true;
 
@@ -181,6 +179,7 @@ function createFirebugCommandLine(context, win)
  */
 function registerCommand(name, config)
 {
+    FBTrace.sysout("registerCommand " + name)
     if (commandNames[name] || consoleShortcuts[name] || props[name] || userCommands[name])
     {
         if (FBTrace.DBG_ERRORS)
