@@ -392,6 +392,11 @@
     padding: 0;
 }
 
+/* Tables should get the entire space of log content area */
+.logRow-table .logContent {
+    padding: 0;
+}
+
 .profileSizer {
     width: 100%;
     padding-bottom: 5px;
