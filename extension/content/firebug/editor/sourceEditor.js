@@ -71,7 +71,7 @@ SourceEditor.DefaultConfig =
     firstLineNumber: 1,
     gutters: [bpGutter],
     fixedGutter: false,
-    readOnly: true,
+    readOnly: "nocursor",
     showCursorWhenSelecting: true,
     undoDepth: 200
 
