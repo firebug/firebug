@@ -28,7 +28,7 @@ Json.parseJSONString = function(jsonString, originURL)
         // of XSSI protection/wrapping and see if that works better.
 
         // Prototype-style secure requests
-        regex = /^\*\/\*-secure-([\s\S]*)\*\/\s*$/;
+        regex = /^\s*\/\*-secure-([\s\S]*)\*\/\s*$/;
         matches = regex.exec(jsonString);
         if (matches)
         {
@@ -109,7 +109,7 @@ function firstNonWs(str)
 function pseudoJsonToJson(json)
 {
     var ret = "";
-    var at = 0, lastch = "", hasMultipleParts = false;
+    var at = 0, lasti = 0, lastch = "", hasMultipleParts = false;
     for (var i = 0, len = json.length; i < len; ++i)
     {
         var ch = json[i];
@@ -157,7 +157,13 @@ function pseudoJsonToJson(json)
             hasMultipleParts = true;
             at = i;
         }
-        else if (lastch === "/")
+        else if (lastch === "," && (ch === "]" || ch === "}"))
+        {
+            // Trailing commas in arrays/objects.
+            ret += json.slice(at, lasti);
+            at = i;
+        }
+        else if (lastch === "/" && lasti === i-1)
         {
             // Some kind of comment; remove it.
             if (ch === "/")
@@ -188,6 +194,7 @@ function pseudoJsonToJson(json)
         }
 
         lastch = ch;
+        lasti = i;
     }
 
     ret += json.slice(at);

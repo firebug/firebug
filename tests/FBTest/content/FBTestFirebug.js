@@ -24,6 +24,12 @@ Cu["import"]("resource://fbtest/EventUtils.js");
 
 var winWatcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
 
+// Must be synchronized with nsICompositionStringSynthesizer.
+const COMPOSITION_ATTR_RAWINPUT              = 0x02;
+const COMPOSITION_ATTR_SELECTEDRAWTEXT       = 0x03;
+const COMPOSITION_ATTR_CONVERTEDTEXT         = 0x04;
+const COMPOSITION_ATTR_SELECTEDCONVERTEDTEXT = 0x05;
+
 // ********************************************************************************************* //
 // Core test APIs (direct access to FBTestApp)
 
@@ -2384,7 +2390,7 @@ this.synthesizeText = function(str, win)
         composition: {
             string: str,
             clauses: [
-                { length: str.length, attr: Ci.nsIDOMWindowUtils.COMPOSITION_ATTR_RAWINPUT }
+                { length: str.length, attr: COMPOSITION_ATTR_RAWINPUT }
             ]
         },
         caret: { start: str.length, length: 0 }

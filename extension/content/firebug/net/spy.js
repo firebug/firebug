@@ -547,7 +547,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         {
             // Use the trace condition here to avoid additional code execution (Url.getFileName)
             // when the tracing is switched off
-            if (FBTrace.DBG_SPY)
+            if (Trace.active)
             {
                 var name = Url.getFileName(spy.request.URI.asciiSpec);
                 var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
@@ -567,7 +567,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
 
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var redirect = isRedirect(request);
         Trace.sysout("spy.getSpyForXHR; NEW spy object (" +
@@ -729,7 +729,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
 
 function onHTTPSpyReadyStateChange(spy, event)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var name = Url.getFileName(spy.request.URI.asciiSpec);
         var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
@@ -750,7 +750,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // See issue 5049
     if (spy.xhrRequest.readyState == 1)
     {
-        if (FBTrace.DBG_SPY)
+        if (Trace.active)
         {
             Trace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
                 "reused, detach" + Http.safeGetRequestName(spy.request) + ", " +
@@ -847,7 +847,7 @@ function callPageHandler(spy, event, originalHandler)
 
 function onHTTPSpyLoad(spy)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         Trace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
             Url.getFileName(spy.href) + ", state: " + spy.xhrRequest.readyState);

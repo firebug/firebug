@@ -663,33 +663,55 @@ function synthesizeText(aEvent, aWindow)
     return;
   }
 
-  var firstClauseLength = aEvent.composition.clauses[0].length;
-  var firstClauseAttr   = aEvent.composition.clauses[0].attr;
-  var secondClauseLength = 0;
-  var secondClauseAttr = 0;
-  var thirdClauseLength = 0;
-  var thirdClauseAttr = 0;
-  if (aEvent.composition.clauses[1]) {
-    secondClauseLength = aEvent.composition.clauses[1].length;
-    secondClauseAttr   = aEvent.composition.clauses[1].attr;
-    if (aEvent.composition.clauses[2]) {
-      thirdClauseLength = aEvent.composition.clauses[2].length;
-      thirdClauseAttr   = aEvent.composition.clauses[2].attr;
+  // nsIDOMWindowUtils::sendTextEvent() got replaced by
+  // nsIDOMWindowUtils::createCompositionStringSynthesizer() (see https://bugzil.la/911951)
+  // This condition can be removed as soon as Firefox 26.0 is the min. supported version
+  if (utils.createCompositionStringSynthesizer)
+  {
+    var compositionString = utils.createCompositionStringSynthesizer();
+    compositionString.setString(aEvent.composition.string);
+    if (aEvent.composition.clauses[0].length) {
+      for (var i = 0; i < aEvent.composition.clauses.length; i++) {
+        compositionString.appendClause(aEvent.composition.clauses[i].length,
+                                       aEvent.composition.clauses[i].attr);
+      }
     }
-  }
 
-  var caretStart = -1;
-  var caretLength = 0;
-  if (aEvent.caret) {
-    caretStart = aEvent.caret.start;
-    caretLength = aEvent.caret.length;
-  }
+    if (aEvent.caret)
+      compositionString.setCaret(aEvent.caret.start, aEvent.caret.length);
 
-  utils.sendTextEvent(aEvent.composition.string,
-                      firstClauseLength, firstClauseAttr,
-                      secondClauseLength, secondClauseAttr,
-                      thirdClauseLength, thirdClauseAttr,
-                      caretStart, caretLength);
+    compositionString.dispatchEvent();
+  }
+  else
+  {
+    var firstClauseLength = aEvent.composition.clauses[0].length;
+    var firstClauseAttr   = aEvent.composition.clauses[0].attr;
+    var secondClauseLength = 0;
+    var secondClauseAttr = 0;
+    var thirdClauseLength = 0;
+    var thirdClauseAttr = 0;
+    if (aEvent.composition.clauses[1]) {
+      secondClauseLength = aEvent.composition.clauses[1].length;
+      secondClauseAttr   = aEvent.composition.clauses[1].attr;
+      if (aEvent.composition.clauses[2]) {
+        thirdClauseLength = aEvent.composition.clauses[2].length;
+        thirdClauseAttr   = aEvent.composition.clauses[2].attr;
+      }
+    }
+
+    var caretStart = -1;
+    var caretLength = 0;
+    if (aEvent.caret) {
+      caretStart = aEvent.caret.start;
+      caretLength = aEvent.caret.length;
+    }
+
+    utils.sendTextEvent(aEvent.composition.string,
+                        firstClauseLength, firstClauseAttr,
+                        secondClauseLength, secondClauseAttr,
+                        thirdClauseLength, thirdClauseAttr,
+                        caretStart, caretLength);
+  }
 }
 
 /**
