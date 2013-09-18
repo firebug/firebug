@@ -13,9 +13,11 @@ define([
     "firebug/lib/system",
     "firebug/lib/xpcom",
     "firebug/lib/object",
+    "firebug/console/console",
     "firebug/editor/editor",
 ],
-function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom, Obj) {
+function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom, Obj, 
+    Console) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -502,8 +504,23 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             // Let's use the default function to handle errors.
             var errorFunctionEval = null;
 
-            Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
-                successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
+            // xxxFlorent: Using evaluateInGlobal doesn't allow to stop execution in the script
+            //             panel. Just use it when having CSP until we migrate to JSD2.
+            //             (see Issue 6551)
+            if (CommandLineInclude.isCSPDoc(context))
+            {
+                if (FBTrace.DBG_COMMANDLINE)
+                {
+                    FBTrace.sysout("CommandLineInclude.evaluateRemoteScript; "+
+                        "document is using CSP. use evaluateInGlobal");
+                }
+                Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
+                    successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
+            }
+            else
+            {
+                Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
+            }
 
             if (successFunction)
                 successFunction(xhr, hasWarnings);
@@ -539,6 +556,30 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         xhr.send(null);
     },
 
+    /**
+     * Hack; Should only be used inside CommandLineInclude.
+     * Test whether the current global is under CSP.
+     *
+     * @param {Context} context
+     *
+     * @return boolean
+     */
+    isCSPDoc: function(context)
+    {
+        // Create a random variable name:
+        var varName = "_" + Math.ceil(Math.random() * 1000000);
+        var varInWindow = "window['" + varName + "']";
+        var codeToEval = varInWindow + " = true;";
+
+        var global = context.getCurrentGlobal();
+        var sandbox = new Components.utils.Sandbox(global);
+
+        context.includePatternToBlock = varInWindow;
+        sandbox.window = global.wrappedJSObject;
+        Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
+        return Components.utils.evalInSandbox(varInWindow, sandbox) !== true;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //
     // Module events:
 
@@ -548,6 +589,23 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         {
             StorageService.removeStorage(storeFilename);
             this.store = null;
+        }
+    },
+
+    /**
+     * Hack; Should only be used inside CommandLineInclude.
+     * Intercept the display of a warning if related to the use of isCSPDoc().
+     *
+     * Event triggered by Firebug.Console.logRow().
+     */
+    onLogRowCreated: function(panel, row, context)
+    {
+        if (row.className.indexOf("warningMessage") !== -1 &&
+            context.includePatternToBlock &&
+            row.textContent.indexOf(context.includePatternToBlock) !== -1)
+        {
+            row.remove();
+            context.includePatternToBlock = "";
         }
     }
 });
@@ -635,6 +693,7 @@ Firebug.registerCommand("include", {
 Firebug.registerRep(CommandLineIncludeRep);
 
 Firebug.registerModule(CommandLineInclude);
+Console.addListener(CommandLineInclude);
 
 return CommandLineInclude;
 
