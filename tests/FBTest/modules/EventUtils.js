@@ -665,6 +665,7 @@ function synthesizeText(aEvent, aWindow)
 
   // nsIDOMWindowUtils::sendTextEvent() got replaced by
   // nsIDOMWindowUtils::createCompositionStringSynthesizer() (see https://bugzil.la/911951)
+  // This condition can be removed as soon as Firefox 26.0 is the min. supported version
   if (utils.createCompositionStringSynthesizer)
   {
     var compositionString = utils.createCompositionStringSynthesizer();
