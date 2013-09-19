@@ -107,6 +107,16 @@
             var columns = ["firstName", "lastName"];
             console.table(family, columns);
         }
+
+        function onExecuteTest10()
+        {
+            console.table(family.mother);
+        }
+
+        function onExecuteTest11()
+        {
+            console.table(table[0]);
+        }
         </script>
     </head>
     <body>
@@ -124,6 +134,8 @@
                 <button id="testButton7" onclick="onExecuteTest7()">Test 7</button>
                 <button id="testButton8" onclick="onExecuteTest8()">Test 8</button>
                 <button id="testButton9" onclick="onExecuteTest9()">Test 9</button>
+                <button id="testButton10" onclick="onExecuteTest10()">Test 10</button>
+                <button id="testButton11" onclick="onExecuteTest11()">Test 11</button>
             </section>
             <section id="description">
                 <h3>Steps to reproduce</h3>
@@ -253,6 +265,57 @@
                         Click the <em>Test 9</em> button above<br/>
                         <span class="ok">
                             A table is shown inside the console looking like the one of step 10.
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 10</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>Object Properties</th><th>Values</th>
+                                    </tr>
+                                    <tr>
+                                        <td>"firstName"</td><td>"Susan"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"lastName"</td><td>"Doyle"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"age"</td><td>32</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"desc"</td><td>"mother"</td>
+                                    </tr>
+                                </table>
+                            </code>
+                        </span>
+                    </li>
+                    <li>
+                        Click the <em>Test 11</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table>
+                                    <tr>
+                                        <th>Object Properties</th>
+                                        <th>Values</th>
+                                    </tr>
+                                    <tr>
+                                        <td>0</td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>3</td>
+                                    </tr>
+                                </table>
+                            </code>
                         </span>
                     </li>
                 </ol>
