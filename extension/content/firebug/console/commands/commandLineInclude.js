@@ -13,9 +13,11 @@ define([
     "firebug/lib/system",
     "firebug/lib/xpcom",
     "firebug/lib/object",
+    "firebug/chrome/tableRep",
     "firebug/editor/editor",
 ],
-function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom, Obj) {
+function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
+    Obj, TableRep) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -59,7 +61,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
 
     tag:
         FirebugReps.OBJECTBOX({_repObject: "$object"},
-            FirebugReps.Table.tag
+            TableRep.tag
         ),
 
     inspectable: false,
@@ -72,7 +74,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         if (object.cons === DomplateTag)
             return object;
         else
-            return FirebugReps.Table.getValueTag(object);
+            return TableRep.getValueTag(object);
     },
 
     getUrlTag: function(href, aliasName)

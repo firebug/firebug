@@ -12,12 +12,14 @@ define([
 ],
 function(Obj, Locale, Str, Domplate, Dom, Css, Events, CookieUtils) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const panelName = "cookies";
+var panelName = "cookies";
+
+var {domplate, DIV, INPUT, SPAN} = Domplate;
 
 // ********************************************************************************************* //
 // Implementation
@@ -404,4 +406,4 @@ Firebug.registerRep(Breakpoints.BreakpointTemplate);
 return Breakpoints;
 
 // ********************************************************************************************* //
-}});
+});

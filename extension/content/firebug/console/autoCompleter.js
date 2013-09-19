@@ -17,20 +17,22 @@ define([
 function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector,
     CommandLineExposed, Editor) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
-const kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
+var kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
                    "typeof", "void", "yield"];
-const kwAll = ["break", "case", "catch", "const", "continue", "debugger",
+var kwAll = ["break", "case", "catch", "const", "continue", "debugger",
   "default", "delete", "do", "else", "false", "finally", "for", "function",
   "get", "if", "in", "instanceof", "let", "new", "null", "return", "set",
   "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while",
   "with", "yield"];
-const reOpenBracket = /[\[\(\{]/;
-const reCloseBracket = /[\]\)\}]/;
-const reJSChar = /[a-zA-Z0-9$_]/;
-const reLiteralExpr = /^[ "0-9,]*$/;
+var reOpenBracket = /[\[\(\{]/;
+var reCloseBracket = /[\]\)\}]/;
+var reJSChar = /[a-zA-Z0-9$_]/;
+var reLiteralExpr = /^[ "0-9,]*$/;
 
 var measureCache = {};
 
@@ -1010,7 +1012,6 @@ Firebug.JSEditor = function()
 {
 };
 
-with (Domplate) {
 Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     setupCompleter: function(completionBox, options)
@@ -1059,7 +1060,6 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         Firebug.Editor.update();
     }
 });
-}
 
 function EditorJSAutoCompleter(box, completionBox, options)
 {
@@ -2352,11 +2352,12 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
         if (indexCompletion)
         {
             // If we are doing index-completions, add "] to everything.
-            function convertQuotes(x)
+            var convertQuotes = function(x)
             {
                 x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
                 return x + out.indexQuoteType + "]";
             }
+
             out.completions = out.completions.map(convertQuotes);
             out.hiddenCompletions = out.hiddenCompletions.map(convertQuotes);
         }

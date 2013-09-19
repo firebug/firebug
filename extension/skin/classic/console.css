@@ -392,6 +392,11 @@
     padding: 0;
 }
 
+/* Tables should get the entire space of log content area */
+.logRow-table .logContent {
+    padding: 0;
+}
+
 .profileSizer {
     width: 100%;
     padding-bottom: 5px;
@@ -738,7 +743,7 @@
     white-space: pre-wrap;
 }
 
-/*****************************************************************************************/
+/*************************************************************************************************/
 
 .logRow-log .objectBox-array.hasTwisty {
     padding-left: 18px;
@@ -753,7 +758,12 @@
     color: DarkGreen;
 }
 
-/*****************************************************************************************/
+.objectBox-array .arrayLeftBracket,
+.objectBox-array .arrayRightBracket {
+    color: black;
+}
+
+/*************************************************************************************************/
 
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {

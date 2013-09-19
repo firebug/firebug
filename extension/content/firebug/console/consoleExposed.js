@@ -12,9 +12,10 @@ define([
     "firebug/console/console",
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
+    "firebug/chrome/tableRep",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options,
-    DebuggerLib) {
+    DebuggerLib, TableRep) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -244,7 +245,7 @@ function createFirebugConsole(context, win)
 
     console.table = function(data, columns)
     {
-        FirebugReps.Table.log(data, columns, context);
+        TableRep.log(data, columns, context);
         return Console.getDefaultReturnValue();
     };
 

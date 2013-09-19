@@ -44,6 +44,10 @@ var contexts = [];
 
 var redirectionLimit = Options.getPref("network.http", "redirection-limit");
 
+// Tracing
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_SPY");
+
 // ********************************************************************************************* //
 // Spy Module
 
@@ -83,8 +87,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, context.window);
 
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.initContext " + contexts.length + " ", context.getName());
+        Trace.sysout("spy.initContext " + contexts.length + " ", context.getName());
     },
 
     destroyContext: function(context)
@@ -92,9 +95,9 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         // For any spies that are in progress, remove our listeners so that they don't leak
         this.detachObserver(context, null);
 
-        if (FBTrace.DBG_SPY && context.spies && context.spies.length)
+        if (context.spies && context.spies.length)
         {
-            FBTrace.sysout("spy.destroyContext; ERROR There are spies in progress ("
+            Trace.sysout("spy.destroyContext; ERROR There are spies in progress ("
                 + context.spies.length + ") " + context.getName());
         }
 
@@ -109,8 +112,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
         SpyHttpActivityObserver.cleanUp(context.window);
 
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.destroyContext " + contexts.length + " ", context.getName());
+        Trace.sysout("spy.destroyContext " + contexts.length + " ", context.getName());
     },
 
     watchWindow: function(context, win)
@@ -121,8 +123,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
     unwatchWindow: function(context, win)
     {
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.unwatchWindow; " + (context ? context.getName() : "no context"));
+        Trace.sysout("spy.unwatchWindow; " + (context ? context.getName() : "no context"));
 
         try
         {
@@ -199,8 +200,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
         contexts.push({context: context, win: win});
 
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.attachObserver (HTTP) " + contexts.length + " ", context.getName());
+        Trace.sysout("spy.attachObserver (HTTP) " + contexts.length + " ", context.getName());
     },
 
     detachObserver: function(context, win)
@@ -214,16 +214,16 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
                 contexts.splice(i, 1);
 
-                // If no context is using spy, remvove the (only one) HTTP observer.
+                // If no context is using spy, remove the (only one) HTTP observer.
                 if (contexts.length == 0)
                 {
                     HttpRequestObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
                     SpyHttpActivityObserver.unregisterObserver();
                 }
 
-                if (FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.detachObserver (HTTP) " + contexts.length + " ",
-                        context.getName());
+                Trace.sysout("spy.detachObserver (HTTP) " + contexts.length + " ",
+                    context.getName());
+
                 return;
             }
         }
@@ -252,9 +252,8 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         {
             if (exc.name == "NS_NOINTERFACE")
             {
-                if (FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.getXHR; Request is not nsIXMLHttpRequest: " +
-                        Http.safeGetRequestName(request));
+                Trace.sysout("spy.getXHR; Request is not nsIXMLHttpRequest: " +
+                    Http.safeGetRequestName(request));
             }
         }
         finally
@@ -298,8 +297,7 @@ var SpyHttpObserver =
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.SpyHttpObserver EXCEPTION", exc);
+            TraceError.sysout("spy.SpyHttpObserver EXCEPTION", exc);
         }
     },
 
@@ -344,8 +342,7 @@ var SpyHttpObserver =
         spy.method = method;
         spy.href = url;
 
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.requestStarted; " + spy.href);
+        Trace.sysout("spy.requestStarted; " + spy.href);
 
         // Get "body" for POST and PUT requests. It will be displayed in
         // appropriate tab of the XHR.
@@ -398,8 +395,7 @@ var SpyHttpObserver =
             }
             catch (exc)
             {
-                if (FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.requestStopped " + spy.href + ", status access FAILED", exc);
+                TraceError.sysout("spy.requestStopped " + spy.href + ", status access ERROR", exc);
             }
         }
 
@@ -418,12 +414,9 @@ var SpyHttpObserver =
         if (!spy.onLoad && spy.context.spies)
             Arr.remove(spy.context.spies, spy);
 
-        if (FBTrace.DBG_SPY)
-        {
-            FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
-                spy.responseTime + "ms, spy.responseText: " +
-                (spy.reponseText ? spy.responseText.length : 0) + " bytes");
-        }
+        Trace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
+            spy.responseTime + "ms, spy.responseText: " +
+            (spy.reponseText ? spy.responseText.length : 0) + " bytes");
     }
 };
 
@@ -482,9 +475,8 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
 
         if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
         {
-            if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity REQUEST_HEADER " +
-                    Http.safeGetRequestName(request));
+            Trace.sysout("spy.observeXHRActivity REQUEST_HEADER " +
+                Http.safeGetRequestName(request));
 
             this.activeRequests.push(request);
             this.activeRequests.push(win);
@@ -494,9 +486,8 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
         }
         else if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
         {
-            if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " +
-                    Http.safeGetRequestName(request));
+            Trace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " +
+                Http.safeGetRequestName(request));
 
             var index = this.activeRequests.indexOf(request);
             this.activeRequests.splice(index, 2);
@@ -541,11 +532,8 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
 
     if (!context.spies)
     {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("spy.getSpyForXHR; ERROR no spies array " +
-                Http.safeGetRequestName(request));
-        }
+        Trace.sysout("spy.getSpyForXHR; ERROR no spies array " +
+            Http.safeGetRequestName(request));
         return;
     }
 
@@ -557,12 +545,15 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
         spy = context.spies[i];
         if (spy.request == request)
         {
-            if (FBTrace.DBG_SPY)
+            // Use the trace condition here to avoid additional code execution (Url.getFileName)
+            // when the tracing is switched off
+            if (Trace.active)
             {
                 var name = Url.getFileName(spy.request.URI.asciiSpec);
                 var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
-                FBTrace.sysout("spy.getSpyForXHR; FOUND spy object " + name + ", " + origName);
+                Trace.sysout("spy.getSpyForXHR; FOUND spy object " + name + ", " + origName);
             }
+
             return spy;
         }
     }
@@ -576,10 +567,10 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
 
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var redirect = isRedirect(request);
-        FBTrace.sysout("spy.getSpyForXHR; NEW spy object (" +
+        Trace.sysout("spy.getSpyForXHR; NEW spy object (" +
             (redirect ? "redirected XHR" : "new XHR") + ") for: " +
             Url.getFileName(name) + ", " + Url.getFileName(origName));
     }
@@ -663,8 +654,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             this.xhrRequest.addEventListener("abort", this.onAbort, false);
         }
 
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
+        Trace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
     },
 
     detach: function(force)
@@ -686,11 +676,8 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         if (!force && this.transactionStarted && !this.transactionClosed)
             return;
 
-        if (FBTrace.DBG_SPY)
-        {
-            FBTrace.sysout("spy.detach; " + Http.safeGetRequestName(this.request) + ", " +
-                Url.getFileName(this.href));
-        }
+        Trace.sysout("spy.detach; " + Http.safeGetRequestName(this.request) + ", " +
+            Url.getFileName(this.href));
 
         // Remove itself from the list of active spies.
         Arr.remove(this.context.spies, this);
@@ -728,8 +715,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     // Cache listener
     onStopRequest: function(context, request, responseText)
     {
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.onStopRequest: " + Http.safeGetRequestName(request));
+        Trace.sysout("spy.onStopRequest: " + Http.safeGetRequestName(request));
 
         if (!responseText)
             return;
@@ -743,12 +729,12 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
 
 function onHTTPSpyReadyStateChange(spy, event)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
         var name = Url.getFileName(spy.request.URI.asciiSpec);
         var origName = Url.getFileName(spy.request.originalURI.asciiSpec);
 
-        FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
+        Trace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
             " (multipart: " + spy.xhrRequest.multipart + ") " + name + ", " + origName);
     }
 
@@ -764,9 +750,9 @@ function onHTTPSpyReadyStateChange(spy, event)
     // See issue 5049
     if (spy.xhrRequest.readyState == 1)
     {
-        if (FBTrace.DBG_SPY)
+        if (Trace.active)
         {
-            FBTrace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
+            Trace.sysout("spy.onHTTPSpyReadyStateChange; ready state == 1, XHR probably being " +
                 "reused, detach" + Http.safeGetRequestName(spy.request) + ", " +
                 Url.getFileName(spy.href));
         }
@@ -841,15 +827,13 @@ function callPageHandler(spy, event, originalHandler)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
+        TraceError.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION " + exc, [exc, event]);
 
         var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
         if (xpcError)
         {
             // TODO attach trace
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
+            TraceError.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
 
             // Make sure the exception is displayed in both Firefox & Firebug console.
             throw new Error(xpcError.message, xpcError.href, xpcError.lineNo);
@@ -863,9 +847,9 @@ function callPageHandler(spy, event, originalHandler)
 
 function onHTTPSpyLoad(spy)
 {
-    if (FBTrace.DBG_SPY)
+    if (Trace.active)
     {
-        FBTrace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
+        Trace.sysout("spy.onHTTPSpyLoad: " + Http.safeGetRequestName(spy.request) + ", " +
             Url.getFileName(spy.href) + ", state: " + spy.xhrRequest.readyState);
     }
 
@@ -892,8 +876,7 @@ function onHTTPSpyLoad(spy)
 
 function onHTTPSpyError(spy)
 {
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyError; " + spy.href);
+    Trace.sysout("spy.onHTTPSpyError; " + spy.href);
 
     spy.detach(false);
     spy.loaded = true;
@@ -904,8 +887,7 @@ function onHTTPSpyError(spy)
 
 function onHTTPSpyAbort(spy)
 {
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href);
+    Trace.sysout("spy.onHTTPSpyAbort: " + spy.href);
 
     spy.detach(false);
     spy.loaded = true;
@@ -1071,8 +1053,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             if (!context.window)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("spy.resend; ERROR no context");
+                TraceError.sysout("spy.resend; ERROR no context");
                 return;
             }
 
@@ -1093,8 +1074,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.resend; EXCEPTION " + err, err);
+            TraceError.sysout("spy.resend; EXCEPTION " + err, err);
         }
     },
 
@@ -1339,11 +1319,8 @@ function getResponseHeaders(spy)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_SPY || FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("spy.getResponseHeaders; EXCEPTION " +
-                Http.safeGetRequestName(spy.request), exc);
-        }
+        TraceError.sysout("spy.getResponseHeaders; EXCEPTION " +
+            Http.safeGetRequestName(spy.request), exc);
     }
 
     return headers;

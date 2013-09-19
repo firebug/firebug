@@ -388,7 +388,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         // The proper instance of Firebug.chrome object (different for detached Firebug and
         // accessible as Firebug.chrome property) must be used for the context object.
         // (the global context object Firebug.currentContext is also different for
-        // detached firebug).
+        // detached Firebug).
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
