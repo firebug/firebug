@@ -126,30 +126,48 @@ function getMutationObserversForTarget(context, target)
 {
     var result = [];
 
-    // xxxHonza: avoid exception in preceding Fx23 versions (we can remove at some point).
+    // xxxHonza: avoid exception in preceding Firefox 23 versions (we can remove at some point).
     if (typeof(target.getBoundMutationObservers) !== "function")
         return undefined;
 
     var global = context.getCurrentGlobal();
-    var observers = target.getBoundMutationObservers();
-    for (var i=0; i<observers.length; i++)
+
+    // Iterate all parent nodes and look for observers that are watching
+    // also children nodes (subtree == true)
+    var element = target;
+    while (element)
     {
-        var observer = observers[i];
-        var infos = observer.getObservingInfo();
-        for (var j=0; j<infos.length; j++)
+        // Get all mutation observers registered for specified element.
+        var observers = element.getBoundMutationObservers();
+        for (var i=0; i<observers.length; i++)
         {
-            var info = infos[j];
-            result.push(Wrapper.cloneIntoContentScope(global, {
-                attributeOldValue: info.attributeOldValue,
-                attributes: info.attributes,
-                characterData: info.characterData,
-                characterDataOldValue: info.characterDataOldValue,
-                childList: info.childList,
-                subtree: info.subtree,
-                observedNode: info.observedNode,
-                mutationCallback: observer.mutationCallback,
-            }));
+            var observer = observers[i];
+            var infos = observer.getObservingInfo();
+            for (var j=0; j<infos.length; j++)
+            {
+                var info = infos[j];
+
+                // Get only observers that are registered for:
+                // a) the original target
+                // b) a parent element with subtree == true.
+                if (!info.subtree && element != target)
+                    continue;
+
+                // OK, insert the observer into the result array.
+                result.push(Wrapper.cloneIntoContentScope(global, {
+                    attributeOldValue: info.attributeOldValue,
+                    attributes: info.attributes,
+                    characterData: info.characterData,
+                    characterDataOldValue: info.characterDataOldValue,
+                    childList: info.childList,
+                    subtree: info.subtree,
+                    observedNode: info.observedNode,
+                    mutationCallback: observer.mutationCallback,
+                }));
+            }
         }
+
+        element = element.parentNode;
     }
 
     return result;
