@@ -568,16 +568,18 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
     {
         // Create a random variable name:
         var varName = "_" + Math.ceil(Math.random() * 1000000);
-        var varInWindow = "window['" + varName + "']";
-        var codeToEval = varInWindow + " = true;";
+        var codeToEval = "window['" + varName + "']" + " = true;";
 
         var global = context.getCurrentGlobal();
-        var sandbox = new Components.utils.Sandbox(global);
 
-        context.includePatternToBlock = varInWindow;
-        sandbox.window = global.wrappedJSObject;
+        context.includePatternToBlock = codeToEval;
         Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
-        return Components.utils.evalInSandbox(varInWindow, sandbox) !== true;
+        var ret = global.wrappedJSObject[varName] !== true;
+
+        if (ret)
+            delete global.wrappedJSObject[varName];
+
+        return ret;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //
@@ -604,7 +606,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             context.includePatternToBlock &&
             row.textContent.indexOf(context.includePatternToBlock) !== -1)
         {
-            row.remove();
+            row.parentNode.removeChild(row);
             context.includePatternToBlock = "";
         }
     }
