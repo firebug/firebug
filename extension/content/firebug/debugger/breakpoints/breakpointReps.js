@@ -18,16 +18,18 @@ define([
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink, Css, Dom,
     Breakpoint, BreakpointStore, Errors, FunctionMonitor) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, FOR, H1, SPAN, TAG, INPUT} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_BP");
 
 // ********************************************************************************************* //
-// Breakpoint Reps
+// Breakpoint Templates
 
 Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 {
@@ -270,7 +272,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             panel.noRefresh = false;
         }
     }
-})};
+});
 
 // ********************************************************************************************* //
 // Registration

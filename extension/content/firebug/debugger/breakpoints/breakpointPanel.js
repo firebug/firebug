@@ -1,8 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/chrome/reps",
     "firebug/lib/locale",
@@ -14,8 +14,10 @@ define([
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/lib/url",
 ],
-function(Obj, Firebug, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
+function(Firebug, Obj, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
     SourceFileRenamer, Breakpoint, BreakpointStore, Url) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -101,10 +103,6 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var errorBreakpoints = extracted.errorBreakpoints;
         var monitors = extracted.monitors;
 
-        Trace.sysout("breakpointPanel.refresh; extracted " +
-            breakpoints.length + ", " + errorBreakpoints.length + ", " + monitors.length,
-            [breakpoints, errorBreakpoints, monitors]);
-
         function sortBreakpoints(a, b)
         {
             if (a.href == b.href)
@@ -117,23 +115,25 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         errorBreakpoints.sort(sortBreakpoints);
         monitors.sort(sortBreakpoints);
 
-        Trace.sysout("breakpointPanel.refresh; sorted " + breakpoints.length + ", " + 
-            errorBreakpoints.length + ", " + monitors.length,
-            [breakpoints, errorBreakpoints, monitors]);
-
         var groups = [];
 
         if (breakpoints.length)
+        {
             groups.push({name: "breakpoints", title: Locale.$STR("Breakpoints"),
                 breakpoints: breakpoints});
+        }
 
         if (errorBreakpoints.length)
+        {
             groups.push({name: "errorBreakpoints", title: Locale.$STR("ErrorBreakpoints"),
                 breakpoints: errorBreakpoints});
+        }
 
         if (monitors.length)
+        {
             groups.push({name: "monitors", title: Locale.$STR("LoggedFunctions"),
                 breakpoints: monitors});
+        }
 
         Firebug.connection.dispatch("getBreakpoints", [this.context, groups]);
 
@@ -160,7 +160,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         Events.dispatch(this.fbListeners, "onBreakRowsRefreshed", [this, this.panelNode]);
     },
 
-    // xxxHonza: this function is also responsible for setting the bp name
+    // xxxHonza: this function is also responsible for setting the breakpoint name
     // it should be done just once and probably somewhere else.
     extractBreakpoints: function(context)
     {
@@ -170,45 +170,26 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
 
         var self = this;
 
-        // xxxHonza: usage of soureceFile.getLine() should be asynchronous
-
         for (var url in context.compilationUnits)
         {
             var unit = context.compilationUnits[url];
+            var sourceFile = unit.sourceFile;
 
             BreakpointStore.enumerateBreakpoints(url, function(bp)
             {
-                var line = bp.lineNo;
-                var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = unit.sourceFile.getLine(line);
-
-                bp.setName(name);
-                bp.setSourceLine(sourceLine);
-
+                self.getSourceLine(bp, unit.sourceFile);
                 breakpoints.push(bp);
             });
 
             BreakpointStore.enumerateErrorBreakpoints(url, function(bp)
             {
-                var line = bp.lineNo;
-                var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = unit.sourceFile.getLine(line);
-
-                bp.setName(name);
-                bp.setSourceLine(sourceLine);
-
+                self.getSourceLine(bp, sourceFile);
                 errorBreakpoints.push(bp);
             });
 
             BreakpointStore.enumerateMonitors(url, function(bp)
             {
-                var line = bp.lineNo;
-                var name = StackFrame.guessFunctionName(url, line + 1, unit.sourceFile);
-                var sourceLine = unit.sourceFile.getLine(line);
-
-                bp.setName(name);
-                bp.setSourceLine(sourceLine);
-
+                self.getSourceLine(bp, sourceFile);
                 monitors.push(bp);
             });
         }
@@ -223,6 +204,52 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Source
+
+    getSourceLine: function(bp, sourceFile)
+    {
+        var self = this;
+        var line = bp.lineNo;
+
+        // Getting source might be asynchronous in case the source is not yet
+        // fetched from the server side.
+        sourceFile.getLine(line, function(sourceLine)
+        {
+            var name = StackFrame.guessFunctionName(bp.href, line + 1, sourceFile);
+
+            bp.setName(name);
+            bp.setSourceLine(sourceLine);
+
+            // Update UI
+            self.updateBreakpointRow(bp);
+        });
+    },
+
+    updateBreakpointRow: function(bp)
+    {
+        var rows = this.panelNode.getElementsByClassName("breakpointRow");
+
+        // Iterate over all displayed breakpoints (rows) and update the one
+        // passed into this method.
+        for (var i = 0; i < rows.length; i++)
+        {
+            var row = rows[i];
+            var repObject = Firebug.getRepObject(row);
+            if (repObject != bp)
+                continue;
+
+            // Re-render the breakpoint row. Not to forget that we need to dynamically
+            // find the proper breakpoint template. Some breakpoint are using custom
+            // templates for rendering in the list.
+            var parentNode = row.parentNode;
+            var rep = Firebug.getRep(bp, this.context);
+            var newRow = rep.tag.append({bp: bp}, parentNode);
+            parentNode.replaceChild(newRow, row);
+            break;
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Options
 
     getOptionsMenuItems: function()
@@ -234,11 +261,11 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
         var disabledCount = 0;
         var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
 
-        for (var i=0; i<checkBoxes.length; i++)
+        for (var i = 0; i < checkBoxes.length; i++)
         {
-            ++bpCount;
+            bpCount++;
             if (!checkBoxes[i].checked)
-                ++disabledCount;
+                disabledCount++;
         }
 
         if (disabledCount)
@@ -283,7 +310,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     enableAllBreakpoints: function(context, status)
     {
         var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
-        for (var i=0; i<checkBoxes.length; i++)
+        for (var i = 0; i < checkBoxes.length; i++)
         {
             var box = checkBoxes[i];
             if (box.checked != status)
