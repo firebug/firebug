@@ -11,12 +11,20 @@ define([
 ],
 function(Firebug, FBTrace, Http, Dom, Css, Wrapper, Arr) {
 
+"use strict";
+
+// ********************************************************************************************* //
+// Resources
+
+// CodeMirror: http://codemirror.net/
+
 // ********************************************************************************************* //
 // Constants
 
 var Cu = Components.utils;
 
-// CodeMirror files. These scripts are dynamically included into panel.html.
+// CodeMirror files. These scripts are dynamically included into panel.html
+// Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
@@ -109,6 +117,11 @@ SourceEditor.Events =
  * @object This object represents a wrapper for CodeMirror editor. The rest of Firebug
  * should access all CodeMirror features through this object and so, e.g. make it easy to
  * switch to another editor in the future.
+ *
+ * Note that CodeMirror instances are running within Firebug UI (panel.html) that has
+ * restricted (content) privileges. All objects passed into CM APIs (such as rectangles,
+ * coordinates, positions, etc.) must be properly exposed to the content. You should usually
+ * utilize {@Wrapper.cloneIntoContentScope} method for this purpose.
  */
 SourceEditor.prototype =
 /** @lends SourceEditor */
@@ -156,8 +169,8 @@ SourceEditor.prototype =
         }
 
         // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
-        // debugging is easier. Should not be part of the distribution.
-        //view.FBTrace = ExposedFBTrace;
+        // debugging is easier. Should *not* be part of the distribution.
+        // view.FBTrace = ExposedFBTrace;
 
         var self = this;
 
@@ -165,6 +178,7 @@ SourceEditor.prototype =
         this.editorObject = view.CodeMirror(function(view)
         {
             Trace.sysout("sourceEditor.onEditorCreate;");
+
             parentNode.appendChild(view);
             self.view = view;
         }, newConfig);
@@ -257,6 +271,8 @@ SourceEditor.prototype =
     addEventListener: function(type, handler)
     {
         Trace.sysout("sourceEditor.addEventListener; " + type);
+
+        var editorNode;
 
         if (isBuiltInEvent(type))
         {
@@ -370,7 +386,7 @@ SourceEditor.prototype =
 
             if (supportedEvent)
             {
-                editorNode = this.editorObject.getWrapperElement();
+                var editorNode = this.editorObject.getWrapperElement();
                 editorNode.removeEventListener(type, handler, false);
             }
         }
@@ -614,16 +630,18 @@ SourceEditor.prototype =
 
     scrollToLine: function(line, options)
     {
+        line = line || 0;
         options = options || {};
 
         // The pos object is passed into CodeMirror that is running within
         // a content scope (restricted privileges, in panel.html).
         var pos = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+        var coords = this.editorObject.charCoords(pos, "local");
 
-        if (options.scrollTo == "top")
+        // If direct scroll (pixel) position is specified use it.
+        if (options.scrollTop)
         {
-            // Scroll so, the specified line is displayed at the top of the editor.
-            this.editorObject.scrollIntoView(pos);
+            this.editorObject.scrollTo(null, options.scrollTop);
         }
         else
         {
@@ -633,7 +651,6 @@ SourceEditor.prototype =
             // Do not include h-scrollbar in editor height (even if CM docs says getScrollInfo
             // returns the visible area minus scrollbars, it doesn't seem to work).
             var editorHeight = scrollInfo.clientHeight - hScrollBar.offsetHeight;
-            var coords = this.editorObject.charCoords(pos, "local");
             var top = coords.top;
             var bottom = coords.bottom;
             var lineHeight = this.editorObject.defaultTextHeight();
@@ -659,13 +676,15 @@ SourceEditor.prototype =
 
     getTopIndex: function()
     {
-        var rect = this.editorObject.getWrapperElement().getBoundingClientRect();
-        return this.editorObject.coordsChar(rect).line;
+        var scrollInfo = this.getScrollInfo();
+        scrollInfo = Wrapper.cloneIntoContentScope(this.view, scrollInfo);
+        var coords = this.editorObject.coordsChar(scrollInfo, "local");
+        return coords.line;
     },
 
     setTopIndex: function(line)
     {
-        var coords = {line: line, ch: 0};
+        var coords = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
 

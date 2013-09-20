@@ -32,8 +32,12 @@ function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, Compila
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
     BreakNotification, CommandLine, DebuggerLib) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_SCRIPTPANEL");
@@ -90,12 +94,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     destroy: function(state)
     {
-        // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
+        // We want the location (compilationUnit) to persist, not the selection (e.g. stackFrame).
         this.selection = null;
-
-        // Remember data for Script panel restore.
-        state.location = this.location;
-        state.scrollTop = this.scriptView.getScrollTop();
 
         Trace.sysout("scriptPanel.destroy; " + state.scrollTop + ", " + state.location, state);
 
@@ -121,9 +121,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var active = !ScriptPanelWarning.showWarning(this);
 
         Trace.sysout("scriptPanel.show; active: " + active, {
-            state: state,
-            location: this.location,
-            selection: this.selection
+            location: state ? state.location : null,
+            scrollTop: state ? state.scrollTop : null,
+            topLine: state ? state.topLine : null,
         });
 
         // Initialize the source view.
@@ -133,10 +133,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (active && state && state.location)
         {
-            // Create source link used to restore script view location. Specified source line
-            // should be displayed at the top (as the first line).
-            var sourceLink = new SourceLink(state.location.getURL(), state.scrollTop, "js");
-            sourceLink.options.scrollTo = "top";
+            // Create source link used to restore script view location. In this specific
+            // case scroll (pixel) position is used ('scrollTop' option set), so the
+            // location is accurate (not rounded to lines).
+            var sourceLink = new SourceLink(state.location.getURL(), state.topLine, "js");
+            sourceLink.options.scrollTop = state.scrollTop;
 
             // Causes the Script panel to show the proper location.
             // Do not highlight the line (second argument true), we just want
@@ -173,7 +174,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         state.location = this.location;
-        state.scrollTop = this.scriptView.getScrollTop();
+        state.topLine = this.scriptView.getScrollTop();
+        state.scrollTop = this.scriptView.getScrollInfo().top;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -321,11 +323,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.scriptView.setDebugLocation(-1);
     },
 
-    setDebugLocation: function(line)
-    {
-        this.scriptView.setDebugLocation(line - 1);
-    },
-
     setDebugLocation: function(lineNo)
     {
         this.scriptView.setDebugLocation(lineNo);
@@ -466,9 +463,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 options.debugLocation = true;
 
             // If the location object is SourceLink automatically scroll to the
-            // specified line.
-            if (self.location && self.location.line)
+            // specified line. Otherwise make sure to reset the scroll position
+            // to the top since new script is probably just being displayed.
+            if (self.location instanceof SourceLink)
                 self.scrollToLine(self.location.line, options);
+            else
+                self.scrollToLine(0);
         }
 
         compilationUnit.getSourceLines(-1, -1, callback);
@@ -1326,7 +1326,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 // ********************************************************************************************* //
 // Breakpoint InfoTip Template
 
-with (Domplate) {
 var BreakpointInfoTip = domplate(Firebug.Rep,
 {
     tag:
@@ -1336,7 +1335,7 @@ var BreakpointInfoTip = domplate(Firebug.Rep,
     {
         this.tag.replace({expr: expr}, parentNode, this);
     }
-})};
+});
 
 // ********************************************************************************************* //
 
