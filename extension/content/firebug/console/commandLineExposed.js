@@ -16,6 +16,8 @@ function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
 // Constants
 
 const Cu = Components.utils;
+var Trace = FBTrace.to("DBG_COMMANDLINE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -74,7 +76,7 @@ function createFirebugCommandLine(context, win)
         return copyCommandLine(commandLine, dglobal);
 
     // The commandLine object.
-    commandLine = dglobal.makeDebuggeeValue(Object.create(null));
+    commandLine = Object.create(null);
 
     var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
     // The command line API instance.
@@ -181,11 +183,8 @@ function registerCommand(name, config)
 {
     if (commandNames[name] || consoleShortcuts[name] || props[name] || userCommands[name])
     {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("firebug.registerCommand; ERROR This command is already " +
-                "registered: " + name);
-        }
+        TraceError.sysout("firebug.registerCommand; ERROR This command is already " +
+            "registered: " + name);
 
         return false;
     }
@@ -205,11 +204,8 @@ function unregisterCommand(name)
 {
     if (!userCommands[name])
     {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("firebug.unregisterCommand; ERROR This command is not " +
-                "registered: " + name);
-        }
+        TraceError.sysout("firebug.unregisterCommand; ERROR This command is not " +
+            "registered: " + name);
 
         return false;
     }
@@ -267,12 +263,17 @@ function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, opti
  */
 function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError, options)
 {
+    // xxxFlorent: For now, force to not have the bindings 
+    // 	   (some issue in having bindings with frame.evalWithBindings)
+    options.noCmdLineAPI = true;
+
+
     var evalMethod = options.noCmdLineAPI ?
                      frame.eval :
                      frame.evalWithBindings;
 
     var args = [frame, evalMethod];
-    args.push.apply(args, arguments);
+    args = args.concat([].slice.call(arguments, 1));
     executeInWindowContext(win, evaluate, args);
 }
 
@@ -300,7 +301,10 @@ function evaluate(subject, evalMethod, context, win, expr, origExpr, onSuccess, 
     var bindings = undefined;
 
     if (!options.noCmdLineAPI)
+    {
         bindings = getCommandLineBindings(context, win, dglobal, contentView);
+        Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
+    }
 
     resObj = evalMethod.call(subject, expr, bindings);
 

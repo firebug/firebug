@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+/*jshint noempty:false, esnext:true, curly:false, unused:false */
+/*global FBTrace:true, Components:true, define:true */
 
 define([
     "firebug/lib/trace",
@@ -405,6 +407,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     getCurrentFrameKeys: function(context)
     {
+        TraceError.sysout("Debugger.getCurrentFrameKeys; unimplemented => return empty array");
+        return [];
     },
 
     getFrameKeys: function(frame, names)
