@@ -303,7 +303,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("WatchPanel.setWatchValue", {row: row, value: value});
 
         var rowIndex = this.getWatchRowIndex(row);
-        this.watches[rowIndex] = value;
+        this.watches[rowIndex] = new WatchExpression(value);
         this.rebuild(true);
     },
 
