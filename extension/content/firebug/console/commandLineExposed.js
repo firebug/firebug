@@ -174,7 +174,7 @@ function createFirebugCommandLine(context, win)
  * Registers a command.
  *
  * @param {string} name The name of the command
- * @param {object} config The configuration. See some examples in commandLineHelp.js 
+ * @param {object} config The configuration. See some examples in commandLineHelp.js
  *      and commandLineInclude.js
  */
 function registerCommand(name, config)
@@ -222,8 +222,8 @@ function unregisterCommand(name)
 }
 
 /**
- * Evaluates an expression in the thread of the webpage, so the Firebug UI is not frozen
- * when the expression calls a function which will be paused.
+ * Evaluates an expression in the global scope, and in the thread of the webpage,
+ * so the Firebug UI is not frozen when the expression calls a function which will be paused.
  *
  *
  * @param {object} context
@@ -236,10 +236,46 @@ function unregisterCommand(name)
  *
  * @see CommandLine.evaluate
  */
-function evaluateInPageContext(context, win)
+function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, options)
 {
-    executeInWindowContext(win, evaluate, arguments);
+    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var evalMethod = options.noCmdLineAPI ?
+                     dglobal.evalInGlobal :
+                     dglobal.evalInGlobalWithBindings;
+
+    var args = [dglobal, evalMethod];
+    args.push.apply(args, arguments);
+
+    executeInWindowContext(win, evaluate, args);
 }
+
+/**
+ * Evaluates an expression in the scope of a frame, and in the thread of the webpage,
+ * so the Firebug UI is not frozen when the expression calls a function which will be paused.
+ *
+ *
+ * @param {Debugger.Frame} frame The frame in which the expression is evaluated
+ * @param {object} context
+ * @param {Window} win
+ * @param {string} expr The expression (transformed if needed)
+ * @param {string} origExpr The expression as typed by the user
+ * @param {function} onSuccess The function to trigger in case of success
+ * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
+ *
+ * @see CommandLine.evaluate
+ */
+function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError, options)
+{
+    var evalMethod = options.noCmdLineAPI ?
+                     frame.eval :
+                     frame.evalWithBindings;
+
+    var args = [frame, evalMethod];
+    args.push.apply(args, arguments);
+    executeInWindowContext(win, evaluate, args);
+}
+
 
 /**
  * Evaluates an expression.
@@ -252,7 +288,7 @@ function evaluateInPageContext(context, win)
  * @param {function} onError The function to trigger in case of exception
  * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
+function evaluate(subject, evalMethod, context, win, expr, origExpr, onSuccess, onError, options)
 {
     if (!options)
         options = {};
@@ -261,18 +297,12 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     var contentView = Wrapper.getContentView(win);
     var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
+    var bindings = undefined;
 
     if (!options.noCmdLineAPI)
-    {
-        var bindings = getCommandLineBindings(context, win, dglobal, contentView);
+        bindings = getCommandLineBindings(context, win, dglobal, contentView);
 
-        resObj = dglobal.evalInGlobalWithBindings(expr, bindings);
-    }
-    else
-    {
-        resObj = dglobal.evalInGlobal(expr);
-    }
-
+    resObj = evalMethod.call(subject, expr, bindings);
 
     var unwrap = function(obj)
     {
@@ -517,7 +547,8 @@ Firebug.CommandLineExposed =
     userCommands: userCommands,
     registerCommand: registerCommand,
     unregisterCommand: unregisterCommand,
-    evaluate: evaluateInPageContext,
+    evaluate: evaluateInGlobal,
+    evaluateInFrame: evaluateInFrame,
     getAutoCompletionList: getAutoCompletionList,
 };
 
