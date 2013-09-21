@@ -88,7 +88,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row]);
+                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel, row, context]);
                 return row;
             }
         }
