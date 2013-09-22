@@ -15,9 +15,10 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/console/errorMessageObj",
     "firebug/console/commands/profiler",
+    "firebug/chrome/tableRep",
 ],
 function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, StackTrace,
-    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler) {
+    Errors, Debug, Console, Options, DebuggerLib, ErrorMessageObj, Profiler, TableRep) {
 
 // Note: since we are using .caller and .arguments for stack walking, we can not use strict mode.
 //"use strict";
@@ -245,7 +246,7 @@ function createFirebugConsole(context, win)
 
     console.table = function(data, columns)
     {
-        FirebugReps.Table.log(data, columns, context);
+        TableRep.log(data, columns, context);
         return Console.getDefaultReturnValue();
     };
 

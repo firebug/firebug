@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/xpcom",
@@ -10,10 +11,16 @@ define([
     "firebug/lib/http",
     "firebug/net/netUtils"
 ],
-function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, PRE} = Domplate;
+
+var Trace = FBTrace.to("DBG_XMLVIEWER");
 
 // List of XML related content types.
 var xmlContentTypes =
@@ -34,7 +41,7 @@ var xmlContentTypes =
 
 /**
  * @module Implements viewer for XML based network responses. In order to create a new
- * tab wihin network request detail, a listener is registered into
+ * tab within network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
 Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
@@ -55,12 +62,11 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Check response's content-type and if it's a Xml, create a new tab with XML preview.
+     * Check response's content-type and if it's a XML, create a new tab with XML preview.
      */
     initTabBody: function(infoBox, file)
     {
-        if (FBTrace.DBG_XMLVIEWER)
-            FBTrace.sysout("xmlviewer.initTabBody", infoBox);
+        Trace.sysout("xmlviewer.initTabBody", infoBox);
 
         // If the response is XML let's display a pretty preview.
         if (this.isXML(Http.safeGetContentType(file.request)))
@@ -68,8 +74,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
                 Locale.$STR("xmlviewer.tab.XML"));
 
-            if (FBTrace.DBG_XMLVIEWER)
-                FBTrace.sysout("xmlviewer.initTabBody; XML response available");
+            Trace.sysout("xmlviewer.initTabBody; XML response available");
         }
     },
 
@@ -113,10 +118,9 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
             return;
         }
 
-        if (FBTrace.DBG_XMLVIEWER)
-            FBTrace.sysout("xmlviewer.updateTabBody; XML response parsed", doc);
+        Trace.sysout("xmlviewer.updateTabBody; XML response parsed", doc);
 
-        // Override getHidden in these templates. The parsed XML documen is
+        // Override getHidden in these templates. The parsed XML document is
         // hidden, but we want to display it using 'visible' styling.
         var templates = [
             Firebug.HTMLPanel.CompleteElement,
@@ -150,7 +154,6 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
  * @domplate Represents a template for displaying XML parser errors. Used by
  * <code>Firebug.XMLViewerModel</code>.
  */
-with (Domplate) {
 Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 {
     tag:
@@ -178,7 +181,6 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
         return parts.join("\n");
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration

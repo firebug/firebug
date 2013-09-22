@@ -20,7 +20,12 @@ define([
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
     ToggleBranch, Arr, System) {
 
+"use strict";
+
 // ********************************************************************************************* //
+// Constants
+
+var {domplate, SPAN, DIV} = Domplate;
 
 // List of JSON content types.
 var contentTypes =
@@ -168,7 +173,6 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.JSONViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -217,13 +221,12 @@ Firebug.JSONViewerModel.Preview = domplate(
             body.jsonTree = new JSONTreePlate();
 
         var input = {file: file, sorted: Firebug.sortJsonPreview};
-        parentNode = this.bodyTag.replace(input, body, this);
+        var parentNode = this.bodyTag.replace(input, body, this);
         parentNode = parentNode.getElementsByClassName("jsonPreviewBody").item(0);
 
         body.jsonTree.render(file.jsonObject, parentNode, context);
     }
 });
-};
 
 // ********************************************************************************************* //
 

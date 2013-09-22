@@ -23,49 +23,32 @@ define([
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
     Options, Str, Persist, CSSModule, CSSInfoTip, LoadHandler) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cu = Components.utils;
+var Cu = Components.utils;
 
-const statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBestMatch"];
+var statusClasses = ["cssUnmatched", "cssParentMatch", "cssOverridden", "cssBestMatch"];
 
-// xxxHonza: shell we move this mess to lib?
+var {domplate, FOR, TAG, DIV, H1, SPAN, TABLE, TBODY, TR, TD} = Domplate;
+
+//********************************************************************************************* //
+//Module Implementation
+
 try
 {
-    // Firefox <= 22
-    // xxxHonza: broken by: https://bugzilla.mozilla.org/show_bug.cgi?id=855914
-    var scope = {};
-    Cu.import("resource:///modules/devtools/CssLogic.jsm", scope);
-    var CssLogic = scope.CssLogic;
+    // Firefox 24
+    // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
+    var scope = {}
+    Cu.import("resource://gre/modules/devtools/Loader.jsm", scope);
+    var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
 }
-catch (err)
+catch (e)
 {
-    try
-    {
-        // Firefox 23
-        var scope = {}
-        Cu.import("resource:///modules/devtools/gDevTools.jsm", scope);
-        var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
-    }
-    catch (err)
-    {
-        try
-        {
-            // Firefox 24
-            // waiting for: https://bugzilla.mozilla.org/show_bug.cgi?id=867595
-            var scope = {}
-            Cu.import("resource://gre/modules/devtools/Loader.jsm", scope);
-            var {CssLogic} = scope.devtools.require("devtools/styleinspector/css-logic");
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available! " + e, e);
-        }
-    }
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("cssComputedPanel: EXCEPTION CssLogic is not available! " + e, e);
 }
 
 // ********************************************************************************************* //
@@ -155,8 +138,8 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
             var line = selector.ruleLine;
             var selectorDef = selector.selector;
             // Dev tools API starting from FF 26.0 renamed the "_cssRule" property to "cssRule"
-            // (see issue 6609)  
-            // TODO: This check can be removed as soon as FF 26.0 is the minimum supported version 
+            // (see issue 6609)
+            // TODO: This check can be removed as soon as FF 26.0 is the minimum supported version
             var rule = selectorDef.cssRule ?
                 selectorDef.cssRule.domRule : selectorDef._cssRule._domRule;
 
@@ -908,4 +891,4 @@ Firebug.registerPanel(CSSComputedPanel);
 return CSSComputedPanel;
 
 // ********************************************************************************************* //
-}});
+});

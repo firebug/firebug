@@ -18,8 +18,11 @@ function runTest()
             var text3 = "firstNamelastNameagedesc\"Susan\"\"Doyle\"32\"mother\"\"John\"\"Doyle\"33\"father\"\"Lily\"\"Doyle\"5undefined\"Mike\"\"Doyle\"8undefined";
             var table3 = {cols: 4, rows: 4, content: text3};
 
-            var table4 = {cols: 1, rows: 3, content: FW.FBL.$STR("firebug.reps.table.ObjectProperties") +
-                "\"propA\"\"propB\"\"propC\""};
+            var text4 = FW.FBL.$STR("firebug.reps.table.ObjectProperties") +
+                FW.FBL.$STR("firebug.reps.table.ObjectValues") +
+                "\"a\"\"propA\"\"b\"\"propB\"\"c\"\"propC\""
+            var table4 = {cols: 2, rows: 3, content: text4};
+
             var table5 = table3;
             var table6 = {cols: 2, rows: 3, content: "12233445"};
             var table7 = {cols: 2, rows: 3, content: "2nd3rd233445"};
@@ -40,6 +43,14 @@ function runTest()
             tasks.push(executeTest, "testButton7", doc, null, [table7]);
             tasks.push(executeTest, "testButton8", doc, null, [table8]);
             tasks.push(executeTest, "testButton9", doc, null, [table9]);
+
+            var text10 = "Object PropertiesValues\"firstName\"\"Susan\"\"lastName\"\"Doyle\"\"age\"32\"desc\"\"mother\"";
+            var table10 = {cols: 2, rows: 4, content: text10};
+            tasks.push(executeTest, "testButton10", doc, null, [table10]);
+
+            var text11 = "Object PropertiesValues011223";
+            var table11 = {cols: 2, rows: 3, content: text11};
+            tasks.push(executeTest, "testButton11", doc, null, [table11]);
 
             tasks.run(function() {
                 FBTest.testDone("console.table.DONE");

@@ -12,11 +12,13 @@ define([
 ],
 function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -63,63 +65,60 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
         Dom.eraseNode(tooltip);
 
-        with (BrowserOverlayLib)
+        tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "version",
+            value: Locale.$STR("Firebug") + " " + Firebug.getVersion()
+        }));
+
+        var status = BrowserOverlayLib.$el(doc, "hbox");
+        tooltip.appendChild(status);
+
+        var suspended = Firebug.getSuspended();
+        status.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "status",
+            value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
+                Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
+        }));
+
+        if (suspended)
+            return;
+
+        status.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "placement",
+            value: "(" + Locale.$STR(Firebug.getPlacement()) + ")"
+        }));
+
+        if (Firebug.allPagesActivation == "on")
         {
-            tooltip.appendChild($label(doc, {
-                "class": "version",
-                value: "Firebug " + Firebug.getVersion()
+            tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "alwaysOn",
+                value: Locale.$STR("enablement.on") + " " +
+                    Locale.$STR("enablement.for_all_pages")
+            }));
+        }
+
+        // Panel enablement status info
+        tooltip.appendChild(BrowserOverlayLib.$label(doc, {
+            "class": "enablement",
+            value: Locale.$STR("enablement.Panel_activation_status")
+        }));
+
+        var statuses = this.getEnablementStatus();
+        for (var i=0; i<statuses.length; i++)
+        {
+            var status = statuses[i];
+            var parent = BrowserOverlayLib.$el(doc, "hbox");
+            tooltip.appendChild(parent);
+
+            parent.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "panelName " + status.status,
+                value: status.name + ":"
             }));
 
-            var status = $el(doc, "hbox");
-            tooltip.appendChild(status);
-
-            var suspended = Firebug.getSuspended();
-            status.appendChild($label(doc, {
-                "class": "status",
-                value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
-                    Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
+            parent.appendChild(BrowserOverlayLib.$label(doc, {
+                "class": "panelStatus " + status.status,
+                value: status.statusLabel
             }));
-
-            if (suspended)
-                return;
-
-            status.appendChild($label(doc, {
-                "class": "placement",
-                value: "(" + Locale.$STR(Firebug.getPlacement()) + ")"
-            }));
-
-            if (Firebug.allPagesActivation == "on")
-            {
-                tooltip.appendChild($label(doc, {
-                    "class": "alwaysOn",
-                    value: Locale.$STR("enablement.on") + " " +
-                        Locale.$STR("enablement.for_all_pages")
-                }));
-            }
-
-            // Panel enablement status info
-            tooltip.appendChild($label(doc, {
-                "class": "enablement",
-                value: Locale.$STR("enablement.Panel_activation_status")
-            }));
-
-            var statuses = this.getEnablementStatus();
-            for (var i=0; i<statuses.length; i++)
-            {
-                var status = statuses[i];
-                var parent = $el(doc, "hbox");
-                tooltip.appendChild(parent);
-
-                parent.appendChild($label(doc, {
-                    "class": "panelName " + status.status,
-                    value: status.name + ":"
-                }));
-
-                parent.appendChild($label(doc, {
-                    "class": "panelStatus " + status.status,
-                    value: status.statusLabel
-                }));
-            }
         }
     },
 
