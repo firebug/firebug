@@ -53,7 +53,7 @@ var unsortedCompletionList = true;
  * @param {Object} context
  * @param {Object} win
  */
-function createFirebugCommandLine(context, win)
+function createFirebugCommandLine(context, win, dglobal)
 {
     var contentView = Wrapper.getContentView(win);
     if (!contentView)
@@ -65,13 +65,13 @@ function createFirebugCommandLine(context, win)
     }
 
     // The debuggee global.
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    dglobal = dglobal || DebuggerLib.getDebuggeeGlobal(context, win);
 
     if (!context.commandLineCache)
         context.commandLineCache = new WeakMap();
     var commandLineCache = context.commandLineCache;
 
-    var commandLine = commandLineCache.get(win.document);
+    var commandLine = commandLineCache.get(dglobal);
     if (commandLine)
         return copyCommandLine(commandLine, dglobal);
 
@@ -163,7 +163,7 @@ function createFirebugCommandLine(context, win)
             commandLine[name] = createCommandHandler(command);
     }
 
-    commandLineCache.set(win.document, commandLine);
+    commandLineCache.set(dglobal, commandLine);
 
     // Return a copy so the original one is preserved from changes.
     return copyCommandLine(commandLine, dglobal);
@@ -263,11 +263,6 @@ function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, opti
  */
 function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError, options)
 {
-    // xxxFlorent: For now, force to not have the bindings 
-    // 	   (some issue in having bindings with frame.evalWithBindings)
-    options.noCmdLineAPI = true;
-
-
     var evalMethod = options.noCmdLineAPI ?
                      frame.eval :
                      frame.evalWithBindings;
@@ -296,9 +291,11 @@ function evaluate(subject, evalMethod, context, win, expr, origExpr, onSuccess, 
 
     var result;
     var contentView = Wrapper.getContentView(win);
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var dglobal = getDebuggeeGlobalForSubject(subject, context, win);
     var resObj;
     var bindings = undefined;
+
+    context.baseWindow = context.baseWindow || context.window;
 
     if (!options.noCmdLineAPI)
     {
@@ -496,6 +493,18 @@ function removeConflictingNames(commandLine, context, contentView)
     }
 }
 
+function getDebuggeeGlobalForSubject(subject, context, win)
+{
+    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    // Global evaluation.
+    if (subject === dglobal)
+        return subject;
+    // Frame.
+    if (Object.prototype.toString.call(subject) === "[object Frame]")
+        return subject.actor.threadActor.globalDebugObject;
+    throw "Unexpected subject for getDebuggeeGlobalForSubject (commandLineExposed.js)";
+}
+
 /**
  * Executes a function in another window execution context.
  *
@@ -531,7 +540,7 @@ function getAutoCompletionList()
 
 function getCommandLineBindings(context, win, dglobal, contentView)
 {
-    var commandLine = createFirebugCommandLine(context, win);
+    var commandLine = createFirebugCommandLine(context, win, dglobal);
 
     updateVars(commandLine, dglobal, context);
     removeConflictingNames(commandLine, context, contentView);

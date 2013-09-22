@@ -156,7 +156,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             return;
         }
 
-        context.baseWindow = context.baseWindow || context.window;
         var onSuccess, onError;
 
         if (successConsoleFunction)
