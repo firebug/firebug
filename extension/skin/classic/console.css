@@ -758,11 +758,6 @@
     color: DarkGreen;
 }
 
-.objectBox-array .arrayLeftBracket,
-.objectBox-array .arrayRightBracket {
-    color: black;
-}
-
 /*************************************************************************************************/
 
 .logRow-spy,
