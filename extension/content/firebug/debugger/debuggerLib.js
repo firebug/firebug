@@ -18,7 +18,7 @@ var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 // Debuggees
-var dglobalWeakMap = new WeakMap();
+var dGlobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
@@ -36,11 +36,11 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  *
  * @param obj {Debugger.Object} The debuggee object to unwrap
  * @param global {Window} The unwrapped global (window)
- * @param dglobal {Debugger.Object} The debuggee global object
+ * @param dGlobal {Debugger.Object} The debuggee global object
  *
  * @return {object} the unwrapped object
  */
-DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
+DebuggerLib.unwrapDebuggeeValue = function(obj, global, dGlobal)
 {
     // If not a debuggee object, return it immediately.
     if (typeof obj !== "object" || obj === null)
@@ -49,14 +49,14 @@ DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
     if (obj.unsafeDereference)
         return Wrapper.unwrapObject(obj.unsafeDereference());
 
-    if (!global || !dglobal)
+    if (!global || !dGlobal)
     {
         TraceError.sysout("debuggerClientModule.getObject; You need patch from bug 837723");
         return;
     }
 
     // Define a new property to get the debuggee value.
-    dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
+    dGlobal.defineProperty("_firebugUnwrappedDebuggerObject", {
         value: obj,
         writable: true,
         configurable: true
@@ -78,8 +78,8 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
-    var dglobal = dglobalWeakMap.get(global.document);
-    if (!dglobal)
+    var dGlobal = dGlobalWeakMap.get(global.document);
+    if (!dGlobal)
     {
         var dbg = getInactiveDebuggerForContext(context);
         if (!dbg)
@@ -89,14 +89,14 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         // As a workaround, we unwrap the global object.
         // TODO see what cause that behavior, why, and if there are no other add-ons in that case.
         var contentView = Wrapper.getContentView(global);
-        dglobal = dbg.addDebuggee(contentView);
+        dGlobal = dbg.addDebuggee(contentView);
         dbg.removeDebuggee(contentView);
-        dglobalWeakMap.set(global.document, dglobal);
+        dGlobalWeakMap.set(global.document, dGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
-            FBTrace.sysout("new debuggee global instance created", dglobal);
+            FBTrace.sysout("new debuggee global instance created", dGlobal);
     }
-    return dglobal;
+    return dGlobal;
 };
 
 /**

@@ -53,7 +53,7 @@ var unsortedCompletionList = true;
  * @param {Object} context
  * @param {Object} win
  */
-function createFirebugCommandLine(context, win, dglobal)
+function createFirebugCommandLine(context, win, dGlobal)
 {
     var contentView = Wrapper.getContentView(win);
     if (!contentView)
@@ -65,15 +65,15 @@ function createFirebugCommandLine(context, win, dglobal)
     }
 
     // The debuggee global.
-    dglobal = dglobal || DebuggerLib.getDebuggeeGlobal(context, win);
+    dGlobal = dGlobal || DebuggerLib.getDebuggeeGlobal(context, win);
 
     if (!context.commandLineCache)
         context.commandLineCache = new WeakMap();
     var commandLineCache = context.commandLineCache;
 
-    var commandLine = commandLineCache.get(dglobal);
+    var commandLine = commandLineCache.get(dGlobal);
     if (commandLine)
-        return copyCommandLine(commandLine, dglobal);
+        return copyCommandLine(commandLine, dGlobal);
 
     // The commandLine object.
     commandLine = Object.create(null);
@@ -96,7 +96,7 @@ function createFirebugCommandLine(context, win, dglobal)
                 throw new Error(ex.message, ex.fileName, ex.lineNumber);
             }
         };
-        return dglobal.makeDebuggeeValue(wrappedCommand);
+        return dGlobal.makeDebuggeeValue(wrappedCommand);
     }
 
     function createVariableHandler(handler, config)
@@ -108,7 +108,7 @@ function createFirebugCommandLine(context, win, dglobal)
         if (config.isCallableGetter === true)
             debuggeeObj = function(){ return object.handle(); };
 
-        object = dglobal.makeDebuggeeValue(debuggeeObj);
+        object = dGlobal.makeDebuggeeValue(debuggeeObj);
         object.handle = function()
         {
             try
@@ -163,10 +163,10 @@ function createFirebugCommandLine(context, win, dglobal)
             commandLine[name] = createCommandHandler(command);
     }
 
-    commandLineCache.set(dglobal, commandLine);
+    commandLineCache.set(dGlobal, commandLine);
 
     // Return a copy so the original one is preserved from changes.
-    return copyCommandLine(commandLine, dglobal);
+    return copyCommandLine(commandLine, dGlobal);
 }
 
 // ********************************************************************************************* //
@@ -234,12 +234,12 @@ function unregisterCommand(name)
  */
 function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, options)
 {
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var dGlobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var evalMethod = options.noCmdLineAPI ?
-                     dglobal.evalInGlobal :
-                     dglobal.evalInGlobalWithBindings;
+                     dGlobal.evalInGlobal :
+                     dGlobal.evalInGlobalWithBindings;
 
-    var args = [dglobal, evalMethod, dglobal];
+    var args = [dGlobal, evalMethod, dGlobal];
     args.push.apply(args, arguments);
 
     executeInWindowContext(win, evaluate, args);
@@ -267,8 +267,8 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
                      frame.eval :
                      frame.evalWithBindings;
 
-    var dglobal = DebuggerLib.getDebuggeeGlobalForFrame(frame);
-    var args = [frame, evalMethod, dglobal];
+    var dGlobal = DebuggerLib.getDebuggeeGlobalForFrame(frame);
+    var args = [frame, evalMethod, dGlobal];
     args = args.concat([].slice.call(arguments, 1));
     executeInWindowContext(win, evaluate, args);
 }
@@ -278,9 +278,9 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
  * Evaluates an expression.
  *
  * @param {Debugger.Object or Debugger.Frame} subject The object used to evaluate the expression
- *                                                    (can be dglobal)
+ *                                                    (can be dGlobal)
  * @param {Function} evalMethod The method used to evaluate the expression
- * @param {Debugger.Object} dglobal The Debuggee Global related to subject
+ * @param {Debugger.Object} dGlobal The Debuggee Global related to subject
  * @param {object} context
  * @param {Window} win
  * @param {string} expr The expression (transformed if needed)
@@ -289,7 +289,7 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
  * @param {function} onError The function to trigger in case of exception
  * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, onSuccess, onError,
+function evaluate(subject, evalMethod, dGlobal, context, win, expr, origExpr, onSuccess, onError,
     options)
 {
     if (!options)
@@ -302,7 +302,7 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
 
     if (!options.noCmdLineAPI)
     {
-        bindings = getCommandLineBindings(context, win, dglobal, contentView);
+        bindings = getCommandLineBindings(context, win, dGlobal, contentView);
         Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
     }
 
@@ -310,7 +310,7 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
 
     var unwrap = function(obj)
     {
-        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dglobal);
+        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dGlobal);
     };
 
     // In case of abnormal termination, as if by the "slow script" dialog box,
@@ -438,7 +438,7 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Helpers (not accessible from web content)
 
-function copyCommandLine(commandLine, dglobal)
+function copyCommandLine(commandLine, dGlobal)
 {
     var copy = Object.create(null);
     for (var name in commandLine)
@@ -465,13 +465,13 @@ function correctStackTrace(splitStack)
     return true;
 }
 
-function updateVars(commandLine, dglobal, context)
+function updateVars(commandLine, dGlobal, context)
 {
     var htmlPanel = context.getPanel("html", true);
     var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
 
     for (var prop in vars)
-        commandLine[prop] = dglobal.makeDebuggeeValue(vars[prop]);
+        commandLine[prop] = dGlobal.makeDebuggeeValue(vars[prop]);
 
     // Iterate all registered commands and pick those which represents a 'variable'.
     // These needs to be available as variables within the Command Line namespace.
@@ -481,7 +481,7 @@ function updateVars(commandLine, dglobal, context)
         if (cmd.variable)
         {
             var value = cmd.handler.call(null, context);
-            commandLine[prop] = dglobal.makeDebuggeeValue(value);
+            commandLine[prop] = dGlobal.makeDebuggeeValue(value);
         }
     }
 }
@@ -529,11 +529,11 @@ function getAutoCompletionList()
     return completionList;
 }
 
-function getCommandLineBindings(context, win, dglobal, contentView)
+function getCommandLineBindings(context, win, dGlobal, contentView)
 {
-    var commandLine = createFirebugCommandLine(context, win, dglobal);
+    var commandLine = createFirebugCommandLine(context, win, dGlobal);
 
-    updateVars(commandLine, dglobal, context);
+    updateVars(commandLine, dGlobal, context);
     removeConflictingNames(commandLine, context, contentView);
 
     return commandLine;
