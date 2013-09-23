@@ -239,7 +239,7 @@ function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, opti
                      dglobal.evalInGlobal :
                      dglobal.evalInGlobalWithBindings;
 
-    var args = [dglobal, evalMethod];
+    var args = [dglobal, evalMethod, dglobal];
     args.push.apply(args, arguments);
 
     executeInWindowContext(win, evaluate, args);
@@ -267,7 +267,8 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
                      frame.eval :
                      frame.evalWithBindings;
 
-    var args = [frame, evalMethod];
+    var dglobal = DebuggerLib.getDebuggeeGlobalForFrame(frame);
+    var args = [frame, evalMethod, dglobal];
     args = args.concat([].slice.call(arguments, 1));
     executeInWindowContext(win, evaluate, args);
 }
@@ -276,6 +277,10 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
 /**
  * Evaluates an expression.
  *
+ * @param {Debugger.Object or Debugger.Frame} subject The object used to evaluate the expression
+ *                                                    (can be dglobal)
+ * @param {Function} evalMethod The method used to evaluate the expression
+ * @param {Debugger.Object} dglobal The Debuggee Global related to subject
  * @param {object} context
  * @param {Window} win
  * @param {string} expr The expression (transformed if needed)
@@ -284,18 +289,16 @@ function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError
  * @param {function} onError The function to trigger in case of exception
  * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(subject, evalMethod, context, win, expr, origExpr, onSuccess, onError, options)
+function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, onSuccess, onError,
+    options)
 {
     if (!options)
         options = {};
 
     var result;
     var contentView = Wrapper.getContentView(win);
-    var dglobal = getDebuggeeGlobalForSubject(subject, context, win);
     var resObj;
     var bindings = undefined;
-
-    context.baseWindow = context.baseWindow || context.window;
 
     if (!options.noCmdLineAPI)
     {
@@ -437,7 +440,7 @@ function evaluate(subject, evalMethod, context, win, expr, origExpr, onSuccess, 
 
 function copyCommandLine(commandLine, dglobal)
 {
-    var copy = dglobal.makeDebuggeeValue(Object.create(null));
+    var copy = Object.create(null);
     for (var name in commandLine)
         copy[name] = commandLine[name];
     return copy;
@@ -491,18 +494,6 @@ function removeConflictingNames(commandLine, context, contentView)
         if (name in contentView)
             delete commandLine[name];
     }
-}
-
-function getDebuggeeGlobalForSubject(subject, context, win)
-{
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
-    // Global evaluation.
-    if (subject === dglobal)
-        return subject;
-    // Frame.
-    if (Object.prototype.toString.call(subject) === "[object Frame]")
-        return subject.actor.threadActor.globalDebugObject;
-    throw "Unexpected subject for getDebuggeeGlobalForSubject (commandLineExposed.js)";
 }
 
 /**

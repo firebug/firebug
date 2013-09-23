@@ -170,6 +170,18 @@ DebuggerLib.getThreadActor = function(browser)
     }
 }
 
+/**
+ * Returns the debuggee global associated with the passed frame.
+ *
+ * @param {Debugger.Frame} frame
+ *
+ * @return {Debugger.Object} The debuggee global
+ */
+DebuggerLib.getDebuggeeGlobalForFrame = function(frame)
+{
+    return frame.actor.threadActor.globalDebugObject;
+}
+
 // ********************************************************************************************* //
 // Stack Frames
 
