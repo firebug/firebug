@@ -48,7 +48,11 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     else
         this.sourceCache = new Firebug.SourceCache(this);
 
-    this.global = win;  // used by chromebug
+    // Used by chromebug.
+    this.global = win; 
+
+    // Initialize context.baseWindow here (modified then by the cd() command).
+    this.baseWindow = win;
 
     // -- Back end support --
     this.sourceFileMap = {};  // backend
