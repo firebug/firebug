@@ -67,11 +67,7 @@ function createFirebugCommandLine(context, win, dglobal)
     // The debuggee global.
     dglobal = dglobal || DebuggerLib.getDebuggeeGlobal(context, win);
 
-    if (!context.commandLineCache)
-        context.commandLineCache = new WeakMap();
-    var commandLineCache = context.commandLineCache;
-
-    var commandLine = commandLineCache.get(dglobal);
+    var commandLine = dglobal.cachedCommandLine;
     if (commandLine)
         return copyCommandLine(commandLine, dglobal);
 
@@ -163,7 +159,7 @@ function createFirebugCommandLine(context, win, dglobal)
             commandLine[name] = createCommandHandler(command);
     }
 
-    commandLineCache.set(dglobal, commandLine);
+    dglobal.cachedCommandLine = commandLine;
 
     // Return a copy so the original one is preserved from changes.
     return copyCommandLine(commandLine, dglobal);
