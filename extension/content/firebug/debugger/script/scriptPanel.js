@@ -120,7 +120,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var active = !ScriptPanelWarning.showWarning(this);
 
-        Trace.sysout("scriptPanel.show; active: " + active, {
+        Trace.sysout("scriptPanel.show; active: " + active + ", " + this.context.getName(), {
             location: state ? state.location : null,
             scrollTop: state ? state.scrollTop : null,
             topLine: state ? state.topLine : null,
@@ -129,7 +129,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Initialize the source view.
         // xxxHonza: from some reason the script is not visible the first time
         // Firebug is opened if this is done in scriptPanel.initialize.
-        this.scriptView.initialize(this.panelNode);
+        // Do not initialize the script view if the panel is not active (e.g. the debugger
+        // is stopped in another tab), it would be asynchronously displayed over the
+        // displayed warning message.
+        if (active)
+            this.scriptView.initialize(this.panelNode);
 
         if (active && state && state.location)
         {
@@ -158,10 +162,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
         this.showToolbarButtons("fbLocationList", active);
+        this.showToolbarButtons("fbToolbar", active);
 
         // Additional debugger panels are visible only, if debugger is active.
         this.panelSplitter.collapsed = !active;
         this.sidePanelDeck.collapsed = !active;
+
+        this.syncCommands(this.context);
     },
 
     hide: function(state)
@@ -175,8 +182,12 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         state.location = this.location;
-        state.topLine = this.scriptView.getScrollTop();
-        state.scrollTop = this.scriptView.getScrollInfo().top;
+
+        if (this.scriptView.initialized)
+        {
+            state.topLine = this.scriptView.getScrollTop();
+            state.scrollTop = this.scriptView.getScrollInfo().top;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -641,6 +652,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // As Editor scrolls(not panel itself) with long scripts, we need to set
         // scrollTop manually to show the editor properly(at the right y coord).
+        // getScrollInfo() can return null if the underlying editor is not
+        // initialized, but it should never happen at this moment.
         this.scrollTop = this.scriptView.getScrollInfo().top;
 
         Firebug.Editor.startEditing(target, condition, null, null, this);
@@ -1004,12 +1017,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     syncCommands: function(context)
     {
-        Trace.sysout("debugger.syncCommands; " + context.getName());
+        Trace.sysout("scriptPanel.syncCommands; stopped: " + context.stopped +
+            ", " + context.getName());
 
         var chrome = Firebug.chrome;
         if (!chrome)
         {
-            TraceError.sysout("debugger.syncCommand, context with no chrome: " +
+            TraceError.sysout("scriptPanel.syncCommand, context with no chrome: " +
                 context.getCurrentGlobal());
 
             return;

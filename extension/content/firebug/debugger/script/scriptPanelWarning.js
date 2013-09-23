@@ -207,24 +207,23 @@ var ScriptPanelWarning =
         // xxxHonza: the following flags are probably obsolete
         // context.jsDebuggerCalledUs
         // Firebug.jsDebuggerOn
-        // context.activitySuspended
 
         // Fill the panel node with a warning if needed
         var location = panel.getDefaultLocation();
         var jsEnabled = Options.getPref("javascript", "enabled");
+        var activitySuspended = this.isActivitySuspended();
 
         Trace.sysout("scriptPanelWarning.showWarning; " + panel.context.getName(), {
             jsDebuggerOn: Firebug.jsDebuggerOn,
             jsDebuggerCalledUs: panel.context.jsDebuggerCalledUs,
             jsEnabled: jsEnabled,
             location: location,
-            activitySuspended: panel.context.activitySuspended,
+            activitySuspended: activitySuspended,
             stopped: panel.context.stopped,
             allScriptsWereFiltered: panel.context.allScriptsWereFiltered
         });
 
         var currentURI = Firefox.getCurrentURI();
-        var activitySuspended = this.isActivitySuspended();
         if (activitySuspended && !panel.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as

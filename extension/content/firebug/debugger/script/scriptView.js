@@ -453,6 +453,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     scrollToLine: function(line, options)
     {
+        if (!this.initialized)
+            return;
+
         options = options || {};
 
         // Convert to index based.
@@ -468,6 +471,9 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
     getScrollInfo: function()
     {
+        if (!this.initialized)
+            return;
+
         return this.editor.getScrollInfo();
     },
 
@@ -475,7 +481,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         Trace.sysout("scriptView.highlightLine; " + lineIndex);
 
-        this.editor.highlightLine(lineIndex);
+        if (this.initialized)
+            this.editor.highlightLine(lineIndex);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
