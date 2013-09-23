@@ -67,8 +67,10 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             return true;
 
         // if about:blank gets through, issue 1483 fails
-        if (Firebug.filterSystemURLs && Url.isSystemURL(url))
-            return false;
+        // xxxHonza: The following condition is the cause of issue 5632
+        // Note that removing the condition doesn't cause issue 1481 to fail anymore.
+        //if (Firebug.filterSystemURLs && Url.isSystemURL(url))
+        //    return false;
 
         if (userCommands)
             return true;
