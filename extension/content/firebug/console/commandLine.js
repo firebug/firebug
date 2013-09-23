@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-/*jshint forin:false, noempty:false, esnext:true, es5:true, curly:false */
+/*jshint forin:false, noempty:false, esnext:true, curly:false */
 /*global FBTrace:true, Components:true, define:true, KeyEvent:true */
 
 define([
@@ -20,13 +20,15 @@ define([
     "firebug/console/commandLineExposed",
     "firebug/console/closureInspector",
     "firebug/console/commandLineAPI",
+    "firebug/debugger/debuggerLib",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory",
     "firebug/console/commands/commandLineHelp",
     "firebug/console/commands/commandLineInclude",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
-    Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI) {
+    Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI,
+    DebuggerLib) {
 
 "use strict";
 
@@ -59,9 +61,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
      * @param {Context} context The Firebug context.
      * @param {*} [thisValue] Deprecated. Set it to null or undefined.
      * @param {Window} [targetWindow] The window in which the expression is evaluated.
-     * @param {function} [successConsoleFunction] The callback function in case of 
+     * @param {function} [successConsoleFunction] The callback function in case of
      *      evaluation without errors.
-     * @param {function} [exceptionFunction] The callback function in case of 
+     * @param {function} [exceptionFunction] The callback function in case of
      *      evaluation with errors.
      * @param {object} [options] The options with the following properties:
      *      - noStateChange: if set to true, do not update the DOM and HTML panels. (default=false)
@@ -99,7 +101,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             else if (Firebug.Debugger.hasValidStack(context))
             {
                 this.evaluateInDebugFrame(newExpr, context, thisValue, targetWindow,
-                    successConsoleFunction, exceptionFunction, expr);
+                    successConsoleFunction, exceptionFunction, expr, options);
             }
             else
             {
@@ -132,9 +134,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
      * @param {Context} context The Firebug context.
      * @param {*} [thisValue] Deprecated. Set it to null or undefined.
      * @param {Window} [targetWindow] The window in which the expression is evaluated.
-     * @param {function} [successConsoleFunction] The callback function in case of 
+     * @param {function} [successConsoleFunction] The callback function in case of
      *      evaluation without errors.
-     * @param {function} [exceptionFunction] The callback function in case of 
+     * @param {function} [exceptionFunction] The callback function in case of
      *      evaluation with errors.
      * @param {string} [origExpr] The original expression before it has been transformed
      *          (mainly used by ClosureInspector). If not set, origExpr=expr.
@@ -154,7 +156,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             return;
         }
 
-        context.baseWindow = context.baseWindow || context.window;
         var onSuccess, onError;
 
         if (successConsoleFunction)
@@ -171,7 +172,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                     return;
 
                 successConsoleFunction(result, context);
-            }
+            };
         }
 
         if (!exceptionFunction)
@@ -179,7 +180,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             exceptionFunction = function(result, context)
             {
                 Firebug.Console.logFormatted([result], context, "error", true);
-            }
+            };
         }
 
         onError = function(result)
@@ -198,31 +199,24 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     },
 
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,
-        successConsoleFunction, exceptionFunction)
+        successConsoleFunction, exceptionFunction, origExpr, options)
     {
-        var result = null;
-        if (!context.commandLineAPI)
-            context.commandLineAPI = CommandLineAPI.getCommandLineAPI(context);
 
-        var htmlPanel = context.getPanel("html", true);
-        var scope = {
-            api       : context.commandLineAPI,
-            vars      : htmlPanel ? htmlPanel.getInspectorVars() : null,
-            thisValue : thisValue
-        };
+        var win = targetWindow || context.getCurrentGlobal();
+        options = options || {};
 
-        try
-        {
-            result = Firebug.Debugger.evaluate(expr, context, scope);
+        // xxxFlorent: TODO factorize this code with Firebug.Debugger.evaluate
+        var currentFrame = context.currentFrame;
+        if (!currentFrame)
+            return;
 
-            successConsoleFunction(result, context);
-        }
-        catch (e)
-        {
-            exceptionFunction(e, context);
-        }
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        var frameActor = currentFrame.getActor();
+        var frame = threadActor._requestFrame(frameActor);
 
-        return result;
+        origExpr = origExpr || expr;
+        CommandLineExposed.evaluateInFrame(frame, context, win, expr, origExpr, 
+            successConsoleFunction, exceptionFunction, options);
     },
 
     evaluateInWebPage: function(expr, context, targetWindow)
@@ -431,7 +425,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     // xxxsz: setMultiLine should just be called when switching between Command Line
     // and Command Editor
     // xxxHonza: it is called for me when switching between the Command Line and
-    // Command Editor 
+    // Command Editor
     setMultiLine: function(multiLine, chrome, saveMultiLine)
     {
         var context = Firebug.currentContext;

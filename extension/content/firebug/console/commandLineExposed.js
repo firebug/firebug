@@ -16,6 +16,8 @@ function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
 // Constants
 
 const Cu = Components.utils;
+var Trace = FBTrace.to("DBG_COMMANDLINE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -51,7 +53,7 @@ var unsortedCompletionList = true;
  * @param {Object} context
  * @param {Object} win
  */
-function createFirebugCommandLine(context, win)
+function createFirebugCommandLine(context, win, dglobal)
 {
     var contentView = Wrapper.getContentView(win);
     if (!contentView)
@@ -63,18 +65,18 @@ function createFirebugCommandLine(context, win)
     }
 
     // The debuggee global.
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    dglobal = dglobal || DebuggerLib.getDebuggeeGlobal(context, win);
 
     if (!context.commandLineCache)
         context.commandLineCache = new WeakMap();
     var commandLineCache = context.commandLineCache;
 
-    var commandLine = commandLineCache.get(win.document);
+    var commandLine = commandLineCache.get(dglobal);
     if (commandLine)
         return copyCommandLine(commandLine, dglobal);
 
     // The commandLine object.
-    commandLine = dglobal.makeDebuggeeValue(Object.create(null));
+    commandLine = Object.create(null);
 
     var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
     // The command line API instance.
@@ -161,7 +163,7 @@ function createFirebugCommandLine(context, win)
             commandLine[name] = createCommandHandler(command);
     }
 
-    commandLineCache.set(win.document, commandLine);
+    commandLineCache.set(dglobal, commandLine);
 
     // Return a copy so the original one is preserved from changes.
     return copyCommandLine(commandLine, dglobal);
@@ -174,18 +176,15 @@ function createFirebugCommandLine(context, win)
  * Registers a command.
  *
  * @param {string} name The name of the command
- * @param {object} config The configuration. See some examples in commandLineHelp.js 
+ * @param {object} config The configuration. See some examples in commandLineHelp.js
  *      and commandLineInclude.js
  */
 function registerCommand(name, config)
 {
     if (commandNames[name] || consoleShortcuts[name] || props[name] || userCommands[name])
     {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("firebug.registerCommand; ERROR This command is already " +
-                "registered: " + name);
-        }
+        TraceError.sysout("firebug.registerCommand; ERROR This command is already " +
+            "registered: " + name);
 
         return false;
     }
@@ -205,11 +204,8 @@ function unregisterCommand(name)
 {
     if (!userCommands[name])
     {
-        if (FBTrace.DBG_ERRORS)
-        {
-            FBTrace.sysout("firebug.unregisterCommand; ERROR This command is not " +
-                "registered: " + name);
-        }
+        TraceError.sysout("firebug.unregisterCommand; ERROR This command is not " +
+            "registered: " + name);
 
         return false;
     }
@@ -222,8 +218,8 @@ function unregisterCommand(name)
 }
 
 /**
- * Evaluates an expression in the thread of the webpage, so the Firebug UI is not frozen
- * when the expression calls a function which will be paused.
+ * Evaluates an expression in the global scope, and in the thread of the webpage,
+ * so the Firebug UI is not frozen when the expression calls a function which will be paused.
  *
  *
  * @param {object} context
@@ -236,14 +232,55 @@ function unregisterCommand(name)
  *
  * @see CommandLine.evaluate
  */
-function evaluateInPageContext(context, win)
+function evaluateInGlobal(context, win, expr, origExpr, onSuccess, onError, options)
 {
-    executeInWindowContext(win, evaluate, arguments);
+    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+    var evalMethod = options.noCmdLineAPI ?
+                     dglobal.evalInGlobal :
+                     dglobal.evalInGlobalWithBindings;
+
+    var args = [dglobal, evalMethod, dglobal];
+    args.push.apply(args, arguments);
+
+    executeInWindowContext(win, evaluate, args);
 }
+
+/**
+ * Evaluates an expression in the scope of a frame, and in the thread of the webpage,
+ * so the Firebug UI is not frozen when the expression calls a function which will be paused.
+ *
+ *
+ * @param {Debugger.Frame} frame The frame in which the expression is evaluated
+ * @param {object} context
+ * @param {Window} win
+ * @param {string} expr The expression (transformed if needed)
+ * @param {string} origExpr The expression as typed by the user
+ * @param {function} onSuccess The function to trigger in case of success
+ * @param {function} onError The function to trigger in case of exception
+ * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
+ *
+ * @see CommandLine.evaluate
+ */
+function evaluateInFrame(frame, context, win, expr, origExpr, onSuccess, onError, options)
+{
+    var evalMethod = options.noCmdLineAPI ?
+                     frame.eval :
+                     frame.evalWithBindings;
+
+    var dglobal = DebuggerLib.getDebuggeeGlobalForFrame(frame);
+    var args = [frame, evalMethod, dglobal];
+    args = args.concat([].slice.call(arguments, 1));
+    executeInWindowContext(win, evaluate, args);
+}
+
 
 /**
  * Evaluates an expression.
  *
+ * @param {Debugger.Object or Debugger.Frame} subject The object used to evaluate the expression
+ *                                                    (can be dglobal)
+ * @param {Function} evalMethod The method used to evaluate the expression
+ * @param {Debugger.Object} dglobal The Debuggee Global related to subject
  * @param {object} context
  * @param {Window} win
  * @param {string} expr The expression (transformed if needed)
@@ -252,27 +289,24 @@ function evaluateInPageContext(context, win)
  * @param {function} onError The function to trigger in case of exception
  * @param {object} [options] The options (see CommandLine.evaluateInGlobal for the details)
  */
-function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
+function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, onSuccess, onError,
+    options)
 {
     if (!options)
         options = {};
 
     var result;
     var contentView = Wrapper.getContentView(win);
-    var dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
     var resObj;
+    var bindings = undefined;
 
     if (!options.noCmdLineAPI)
     {
-        var bindings = getCommandLineBindings(context, win, dglobal, contentView);
-
-        resObj = dglobal.evalInGlobalWithBindings(expr, bindings);
-    }
-    else
-    {
-        resObj = dglobal.evalInGlobal(expr);
+        bindings = getCommandLineBindings(context, win, dglobal, contentView);
+        Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
     }
 
+    resObj = evalMethod.call(subject, expr, bindings);
 
     var unwrap = function(obj)
     {
@@ -318,7 +352,7 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 
 function copyCommandLine(commandLine, dglobal)
 {
-    var copy = dglobal.makeDebuggeeValue(Object.create(null));
+    var copy = Object.create(null);
     for (var name in commandLine)
         copy[name] = commandLine[name];
     return copy;
@@ -502,7 +536,7 @@ function getAutoCompletionList()
 
 function getCommandLineBindings(context, win, dglobal, contentView)
 {
-    var commandLine = createFirebugCommandLine(context, win);
+    var commandLine = createFirebugCommandLine(context, win, dglobal);
 
     updateVars(commandLine, dglobal, context);
     removeConflictingNames(commandLine, context, contentView);
@@ -522,7 +556,8 @@ Firebug.CommandLineExposed =
     userCommands: userCommands,
     registerCommand: registerCommand,
     unregisterCommand: unregisterCommand,
-    evaluate: evaluateInPageContext,
+    evaluate: evaluateInGlobal,
+    evaluateInFrame: evaluateInFrame,
     getAutoCompletionList: getAutoCompletionList,
 };
 
