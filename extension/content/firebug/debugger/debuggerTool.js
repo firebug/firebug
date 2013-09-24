@@ -47,7 +47,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    attach: function()
+    attach: function(reload)
     {
         Trace.sysout("debuggerTool.attach; context ID: " + this.context.getId());
 
@@ -57,8 +57,13 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // displayed in the Script panel).
         this.updateScriptFiles();
 
-        // Initialize break on exception flag.
-        this.breakOnExceptions(Options.get("breakOnExceptions"));
+        // Initialize break on exception feature. This must be done only once when the thread
+        // client is created not when page reload happens. Note that the same instance of the
+        // thread client is used even if the page is reloaded. Otherwise it causes issue 6797
+        // Since ThreadClient.pauseOnException is calling interrupt+resume if the thread
+        // is not paused.
+        if (!reload)
+            this.breakOnExceptions(Options.get("breakOnExceptions"));
     },
 
     detach: function()
@@ -123,7 +128,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     detachListeners: function()
     {
-        // Bail out if listeners are already dettached.
+        // Bail out if listeners are already detached.
         if (!this._onPause)
             return;
 
@@ -378,6 +383,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     stepOver: function(callback)
     {
+        Trace.sysout("debuggerTool.stepOver");
+
         // The callback must be passed into the stepping functions, otherwise there is
         // an exception.
         return this.context.activeThread.stepOver(function()
@@ -389,6 +396,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     stepInto: function(callback)
     {
+        Trace.sysout("debuggerTool.stepInto");
+
         return this.context.activeThread.stepIn(function()
         {
             if (callback)
@@ -398,6 +407,8 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     stepOut: function(callback)
     {
+        Trace.sysout("debuggerTool.stepOut");
+
         return this.context.activeThread.stepOut(function()
         {
             if (callback)
@@ -494,11 +505,15 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break On Exceptions
 
-    breakOnExceptions: function(flag)
+    breakOnExceptions: function(pause)
     {
-        return this.context.activeThread.pauseOnExceptions(flag, function(response)
+        var ignore = Options.get("ignoreCaughtExceptions");
+
+        Trace.sysout("debuggerTool.breakOnExceptions; " + pause + ", " + ignore);
+
+        return this.context.activeThread.pauseOnExceptions(pause, ignore, function(response)
         {
-            Trace.sysout("debuggerTool.breakOnExceptions; Set to " + flag, response);
+            Trace.sysout("debuggerTool.breakOnExceptions; response received: ", response);
         });
     },
 });

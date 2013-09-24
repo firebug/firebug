@@ -406,7 +406,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         if (!bpMarker)
         {
-            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!");
+            TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!", bp);
             return;
         }
 

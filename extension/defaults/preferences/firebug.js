@@ -104,6 +104,7 @@ pref("extensions.firebug.replaceTabs", 4);
 pref("extensions.firebug.filterSystemURLs", true);
 pref("extensions.firebug.maxScriptLineLength", 10000);
 pref("extensions.firebug.breakOnExceptions", false);
+pref("extensions.firebug.ignoreCaughtExceptions", false);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

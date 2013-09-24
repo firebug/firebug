@@ -1149,6 +1149,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     breakOnNext: function(breaking)
     {
+        Trace.sysout("consolePanel.breakOnNext;");
+
         this.context.breakOnErrors = breaking;
 
         // Set the flag on the server.

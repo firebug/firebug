@@ -126,8 +126,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         context.clientCache = new ClientCache(DebuggerClientModule.client, context);
 
         // Attach tools
-        context.getTool("debugger").attach();
-        context.getTool("breakpoint").attach();
+        context.getTool("debugger").attach(reload);
+        context.getTool("breakpoint").attach(reload);
     },
 
     onThreadDetached: function(context)

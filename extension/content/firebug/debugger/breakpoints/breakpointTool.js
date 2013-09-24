@@ -46,7 +46,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    attach: function()
+    attach: function(reload)
     {
         Trace.sysout("breakpointTool.attach; context ID: " + this.context.getId());
 
