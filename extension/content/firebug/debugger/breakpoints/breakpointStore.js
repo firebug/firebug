@@ -425,7 +425,6 @@ var BreakpointStore = Obj.extend(Firebug.Module,
     disableBreakpoint: function(url, lineNo)
     {
         var bp = this.findBreakpoint(url, lineNo);
-		
         if (!bp || bp.disabled)
             return;
 

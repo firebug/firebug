@@ -950,7 +950,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var hasBreakpoint = BreakpointStore.hasBreakpoint(currentUrl, line);
         if (!hasBreakpoint)
             BreakpointStore.addBreakpoint(currentUrl, line);
-		
+
         var isDisabled = BreakpointStore.isBreakpointDisabled(currentUrl, line);
         if (isDisabled)
             BreakpointStore.enableBreakpoint(currentUrl, line);
