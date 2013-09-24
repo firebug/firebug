@@ -10,12 +10,14 @@ define([
     "firebug/lib/locale",
 ],
 function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
+
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cu = Components.utils;
+var Cu = Components.utils;
+
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
@@ -313,9 +315,8 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
     // do not print anything in the console.
     if (!resObj)
     {
-        if (FBTrace.DBG_ERROR)
-            FBTrace.sysout("CommandLineExposed.evaluate; something went wrong when evaluating this"+
-                " expression: "+expr);
+        TraceError.sysout("CommandLineExposed.evaluate; something went wrong when " +
+            "evaluating this expression: " + expr);
         return;
     }
 
@@ -343,7 +344,7 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
     executeInWindowContext(window, onSuccess, [result, context]);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ********************************************************************************************* //
 // Helpers (not accessible from web content)
 
 function copyCommandLine(commandLine, dglobal)
