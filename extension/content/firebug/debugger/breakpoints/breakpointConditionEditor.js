@@ -10,7 +10,13 @@ define([
     "firebug/lib/string",
 ],
 function(Obj, Firebug, Domplate, Locale, Css, Dom, Str) {
-with (Domplate) {
+
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, DIV, INPUT} = Domplate;
 
 // ********************************************************************************************* //
 // Condition Editor
@@ -42,6 +48,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
         var options = {
             tabWarnings: true
         };
+
         this.setupCompleter(completionBox, options);
     },
 
@@ -60,7 +67,7 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
         setTimeout(Obj.bindFixed(function()
         {
             var offset = Dom.getClientOffset(sourceLine);
-            
+
             var bottom = offset.y + sourceLine.offsetHeight;
 
             var y = bottom - this.box.offsetHeight;
@@ -108,4 +115,4 @@ ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 return ConditionEditor;
 
 // ********************************************************************************************* //
-}});
+});
