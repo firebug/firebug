@@ -123,21 +123,9 @@ Wrapper.cloneIntoContentScope = function(global, obj)
 
 Wrapper.ignoreVars =
 {
-    // We are forced to ignore Java-related variables, because
-    // trying to access them causes browser freeze
-    "sun": 1,
-    "Packages": 1,
-    "JavaArray": 1,
-    "JavaMember": 1,
-    "JavaObject": 1,
-    "JavaClass": 1,
-    "JavaPackage": 1,
-
     // internal firebug things XXXjjb todo we should privatize these
     "_firebug": 1,
-    "_firebugUnwrappedDebuggerObject": 1,
     "__fb_scopedVars": 1,
-    "_FirebugCommandLine": 1,
 };
 
 Wrapper.shouldIgnore = function(name)

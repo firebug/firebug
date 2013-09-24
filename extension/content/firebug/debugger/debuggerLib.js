@@ -13,8 +13,6 @@ function(FBTrace, Wrapper) {
 // ********************************************************************************************* //
 // Constants
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 // Debuggees
@@ -40,30 +38,13 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  *
  * @return {object} the unwrapped object
  */
-DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
+DebuggerLib.unwrapDebuggeeValue = function(obj)
 {
     // If not a debuggee object, return it immediately.
     if (typeof obj !== "object" || obj === null)
         return obj;
 
-    if (obj.unsafeDereference)
-        return Wrapper.unwrapObject(obj.unsafeDereference());
-
-    if (!global || !dglobal)
-    {
-        TraceError.sysout("debuggerClientModule.getObject; You need patch from bug 837723");
-        return;
-    }
-
-    // Define a new property to get the debuggee value.
-    dglobal.defineProperty("_firebugUnwrappedDebuggerObject", {
-        value: obj,
-        writable: true,
-        configurable: true
-    });
-
-    // Get the debuggee value using the property through the unwrapped global object.
-    return global._firebugUnwrappedDebuggerObject;
+    return Wrapper.unwrapObject(obj.unsafeDereference());
 };
 
 /**

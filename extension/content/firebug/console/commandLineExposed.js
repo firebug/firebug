@@ -306,11 +306,6 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
 
     resObj = evalMethod.call(subject, expr, bindings);
 
-    var unwrap = function(obj)
-    {
-        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dglobal);
-    };
-
     // In case of abnormal termination, as if by the "slow script" dialog box,
     // do not print anything in the console.
     if (!resObj)
@@ -322,7 +317,7 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
 
     if (resObj.hasOwnProperty("return"))
     {
-        result = unwrap(resObj.return);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.return);
         if (resObj.return && resObj.return.handle)
         {
             resObj.return.handle();
@@ -332,11 +327,11 @@ function evaluate(subject, evalMethod, dglobal, context, win, expr, origExpr, on
     }
     else if (resObj.hasOwnProperty("yield"))
     {
-        result = unwrap(resObj.yield);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.yield);
     }
     else if (resObj.hasOwnProperty("throw"))
     {
-        var exc = unwrap(resObj.throw);
+        var exc = DebuggerLib.unwrapDebuggeeValue(resObj.throw);
         handleException(exc, origExpr, context, onError);
         return;
     }
