@@ -11,6 +11,8 @@ define([
 ],
 function(Obj, Firebug, Locale, Url, TabWatcher, Annotations, Firefox) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -66,14 +68,18 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        // if about:blank gets through, issue 1483 fails
-        if (Firebug.filterSystemURLs && Url.isSystemURL(url))
-            return false;
+        // This condition has been introduced to disable Firebug for about:blank
+        // which caused issue 1483 to fail. However, there are cases when users
+        // want to inspect even system pages (such as about:blank) and don't want
+        // Firebug UI to be automatically hidden (see issue 5632).
+        // Since issue 1483 doesn't fail anymore, the condition is removed.
+        //if (Firebug.filterSystemURLs && Url.isSystemURL(url))
+        //    return false;
 
         if (userCommands)
             return true;
 
-        // document.open on a firebugged page
+        // document.open on a Firebugged page
         if (browser && browser.showFirebug && url.substr(0, 8) === "wyciwyg:")
             return true;
 
