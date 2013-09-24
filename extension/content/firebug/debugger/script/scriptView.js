@@ -1,8 +1,5 @@
 /* See license.txt for terms of usage */
 
-// ********************************************************************************************* //
-// Module
-
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
@@ -15,6 +12,8 @@ define([
     "firebug/editor/sourceEditor",
 ],
 function(FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
