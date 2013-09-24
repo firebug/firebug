@@ -150,9 +150,9 @@ var ClosureInspector =
 
         // Create a view of the object as seen from its own global - 'environment'
         // will not be accessible otherwise.
-        var dglobal = DebuggerLib.getDebuggeeGlobal(context, objGlobal);
+        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, objGlobal);
 
-        var dobj = dglobal.makeDebuggeeValue(obj);
+        var dobj = dbgGlobal.makeDebuggeeValue(obj);
 
         if (typeof obj === "object")
             dobj = this.getFunctionFromObject(dobj);
@@ -202,10 +202,10 @@ var ClosureInspector =
 
     getClosureWrapper: function(obj, win, context)
     {
-        var env, dglobal;
+        var env, dbgGlobal;
         env = this.getEnvironmentForObject(win, obj, context);
 
-        dglobal = DebuggerLib.getDebuggeeGlobal(context, win);
+        dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, win);
 
         // Return a wrapper for its scoped variables.
         var self = this;
@@ -250,7 +250,7 @@ var ClosureInspector =
 
                 set: function(value)
                 {
-                    var dvalue = dglobal.makeDebuggeeValue(value);
+                    var dvalue = dbgGlobal.makeDebuggeeValue(value);
                     var scope = env.find(name);
                     if (!scope)
                         throw new Error("can't create new closure variable");

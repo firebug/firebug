@@ -363,8 +363,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             var result;
 
-            var dGlobal = DebuggerLib.getDebuggeeGlobal(context);
-            scope = dGlobal.makeDebuggeeValue(scope);
+            var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
+            scope = dbgGlobal.makeDebuggeeValue(scope);
 
             if (scope)
                 result = frame.evalWithBindings(js, scope);

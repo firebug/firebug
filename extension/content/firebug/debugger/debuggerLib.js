@@ -16,7 +16,7 @@ function(FBTrace, Wrapper) {
 var Cu = Components.utils;
 
 // Debuggees
-var dglobalWeakMap = new WeakMap();
+var dbgGlobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
@@ -34,7 +34,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  *
  * @param obj {Debugger.Object} The debuggee object to unwrap
  * @param global {Window} The unwrapped global (window)
- * @param dglobal {Debugger.Object} The debuggee global object
+ * @param dbgGlobal {Debugger.Object} The debuggee global object
  *
  * @return {object} the unwrapped object
  */
@@ -59,8 +59,8 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
-    var dglobal = dglobalWeakMap.get(global.document);
-    if (!dglobal)
+    var dbgGlobal = dbgGlobalWeakMap.get(global.document);
+    if (!dbgGlobal)
     {
         var dbg = getInactiveDebuggerForContext(context);
         if (!dbg)
@@ -70,14 +70,14 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         // As a workaround, we unwrap the global object.
         // TODO see what cause that behavior, why, and if there are no other add-ons in that case.
         var contentView = Wrapper.getContentView(global);
-        dglobal = dbg.addDebuggee(contentView);
+        dbgGlobal = dbg.addDebuggee(contentView);
         dbg.removeDebuggee(contentView);
-        dglobalWeakMap.set(global.document, dglobal);
+        dbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
-            FBTrace.sysout("new debuggee global instance created", dglobal);
+            FBTrace.sysout("new debuggee global instance created", dbgGlobal);
     }
-    return dglobal;
+    return dbgGlobal;
 };
 
 /**
@@ -291,8 +291,8 @@ DebuggerLib.breakNow = function(context)
     // the event the debugger breaks on - comes from top level window (or vice versa).
     // For now there are not known problems, but we might want to use the second
     // argument of the getDebuggeeGlobal() and pass explicit global object.
-    var dGlobal = this.getDebuggeeGlobal(context);
-    return dGlobal.evalInGlobal("debugger");
+    var dbgGlobal = this.getDebuggeeGlobal(context);
+    return dbgGlobal.evalInGlobal("debugger");
 }
 
 // xxxHonza: shell we merge with getInactiveDebuggerForContext?
