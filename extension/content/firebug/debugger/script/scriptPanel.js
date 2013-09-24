@@ -946,7 +946,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     toggleDisableBreakpoint: function(line)
     {
         var currentUrl = this.getCurrentURL();
-        // create breakpoint if it doesn't exit
+        // create breakpoint if it doesn't exist
         var hasBreakpoint = BreakpointStore.hasBreakpoint(currentUrl, line);
         if (!hasBreakpoint)
             BreakpointStore.addBreakpoint(currentUrl, line);
