@@ -3,20 +3,18 @@
 /*global Firebug:true, FBTrace:true, Components:true, define:true */
 
 define([
-    "firebug/lib/wrapper",
-    "firebug/debugger/debuggerLib",
     "firebug/lib/object",
-    "firebug/console/commandLineAPI",
+    "firebug/lib/wrapper",
     "firebug/lib/locale",
+    "firebug/debugger/debuggerLib",
+    "firebug/console/commandLineAPI",
 ],
-function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
+function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
-
-var Cu = Components.utils;
 
 var Trace = FBTrace.to("DBG_COMMANDLINE");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -188,8 +186,11 @@ function registerCommand(name, config)
     }
 
     userCommands[name] = config;
-    completionList.push(name);
-    unsortedCompletionList = true;
+    if (!config.hidden)
+    {
+        completionList.push(name);
+        unsortedCompletionList = true;
+    }
     return true;
 }
 

@@ -247,6 +247,9 @@ var CommandLineHelp = domplate(
             var config = CommandLineExposed.userCommands[name];
             var prop = config.getter || config.variable;
 
+            if (config.hidden)
+                continue;
+
             commands.push({
                 name: name,
                 desc: config.description,

@@ -1799,7 +1799,7 @@ function propertiesToHide(expr, obj)
         );
 
         // Hide ourselves.
-        ret.push("_firebug", "__fb_scopedVars");
+        ret.push("_firebug");
     }
 
     // Old and ugly.
@@ -2398,7 +2398,6 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
                     out.completions.push({type: CompletionType.API, name: name});
             });
         }
-
     }
     catch (exc)
     {

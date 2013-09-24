@@ -7,11 +7,9 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/wrapper",
     "firebug/debugger/debuggerLib",
-    "firebug/console/commandLineExposed",
 ],
-function(Firebug, Wrapper, DebuggerLib, CommandLineExposed) {
+function(Firebug, DebuggerLib) {
 "use strict";
 
 // ********************************************************************************************* //
@@ -22,6 +20,9 @@ const Cu = Components.utils;
 const ScopeProxy = function() {};
 const OptimizedAway = Object.create(null);
 Object.freeze(OptimizedAway);
+
+// Note: this is also hard-coded elsewhere.
+var closureHelperName = "__fb_scopedVars";
 
 // ********************************************************************************************* //
 
@@ -376,46 +377,32 @@ var ClosureInspector =
         if (Firebug.JSAutoCompleter.transformScopeExpr)
             return expr;
 
-        // Note: this is also hard-coded elsewhere.
-        var fname = "__fb_scopedVars";
+        var newExpr = Firebug.JSAutoCompleter.transformScopeOperator(expr, closureHelperName);
 
-        var newExpr = Firebug.JSAutoCompleter.transformScopeOperator(expr, fname);
-        if (expr === newExpr)
-            return expr;
-
-        if (FBTrace.DBG_COMMANDLINE)
+        if (expr !== newExpr && FBTrace.DBG_COMMANDLINE)
         {
             FBTrace.sysout("ClosureInspector; transforming expression: `" +
                     expr + "` -> `" + newExpr + "`");
         }
 
-        // Stick the helper function for .%-expressions on the window object.
-        // This really belongs on the command line object, but that doesn't
-        // work when stopped in the debugger (issue 5321, which depends on
-        // integrating JSD2) and we really need this to work there.
-        // To avoid leaking capabilities into arbitrary web pages, this is
-        // only injected when needed.
-        try
-        {
-            var self = this;
-            Object.defineProperty(Wrapper.getContentView(win), fname, {
-                value: function(obj)
-                {
-                    return self.getClosureWrapper(obj, win, context);
-                },
-                writable: true,
-                configurable: true
-            });
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("ClosureInspector; failed to inject " + fname, exc);
-        }
-
         return newExpr;
+    },
+
+    onExecuteClosureHelperCommand: function(context, args)
+    {
+        var obj = args[0];
+        var win = context.getCurrentGlobal();
+        return this.getClosureWrapper(obj, win, context);
     }
 };
+
+// ********************************************************************************************* //
+// Registration
+
+Firebug.registerCommand(closureHelperName, {
+    handler: ClosureInspector.onExecuteClosureHelperCommand.bind(ClosureInspector),
+    hidden: true
+});
 
 Firebug.ClosureInspector = ClosureInspector;
 return ClosureInspector;
