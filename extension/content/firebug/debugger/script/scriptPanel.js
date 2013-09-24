@@ -945,11 +945,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     toggleDisableBreakpoint: function(line)
     {
-        var isDisabled = BreakpointStore.isBreakpointDisabled(this.getCurrentURL(), line);
+        var currentUrl = this.getCurrentURL();
+        // create breakpoint if it doesn't exist
+        var hasBreakpoint = BreakpointStore.hasBreakpoint(currentUrl, line);
+        if (!hasBreakpoint)
+            BreakpointStore.addBreakpoint(currentUrl, line);
+
+        var isDisabled = BreakpointStore.isBreakpointDisabled(currentUrl, line);
         if (isDisabled)
-            BreakpointStore.enableBreakpoint(this.getCurrentURL(), line);
+            BreakpointStore.enableBreakpoint(currentUrl, line);
         else
-            BreakpointStore.disableBreakpoint(this.getCurrentURL(), line);
+            BreakpointStore.disableBreakpoint(currentUrl, line);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
