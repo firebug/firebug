@@ -671,7 +671,7 @@ window.Firebug =
         return CommandLineExposed.registerCommand(name, config);
     },
 
-    unregistereCommand: function(name)
+    unregisterCommand: function(name)
     {
         return CommandLineExposed.unregisterCommand(name);
     },
