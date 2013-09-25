@@ -70,7 +70,6 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
             return;
 
         var type = Object.prototype.toString.call(object);
-        FBTrace.sysout("log " + type);
 
         var cache = context ? context.getEventListenersCache : null;
         if (!cache)
