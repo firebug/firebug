@@ -159,9 +159,9 @@ SourceFile.getSourceFileByUrl = function(context, url)
 
 SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
-    var dwin = DebuggerLib.getDebuggeeGlobal(context);
-    var dfn = dwin.makeDebuggeeValue(fn);
-    return dfn.script;
+    var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
+    var dbgFn = dbgGlobal.makeDebuggeeValue(fn);
+    return dbgFn.script;
 };
 
 SourceFile.findSourceForFunction = function(fn, context)

@@ -69,7 +69,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
 
     var commandLine = dbgGlobal.cachedCommandLine;
     if (commandLine)
-        return copyCommandLine(commandLine, dbgGlobal);
+        return copyCommandLine(commandLine);
 
     // The commandLine object.
     commandLine = Object.create(null);
@@ -97,15 +97,15 @@ function createFirebugCommandLine(context, win, dbgGlobal)
 
     function createVariableHandler(handler, config)
     {
-        var debuggeeObj = {}, object;
+        var debuggeeObj = {}, dbgObject;
 
         // Callable getters are commands whose syntax are both `command` and `command()`.
         // The help command has this syntax for example.
         if (config.isCallableGetter === true)
-            debuggeeObj = function(){ return object.handle(); };
+            debuggeeObj = function(){ return dbgObject.handle(); };
 
-        object = dbgGlobal.makeDebuggeeValue(debuggeeObj);
-        object.handle = function()
+        dbgObject = dbgGlobal.makeDebuggeeValue(debuggeeObj);
+        dbgObject.handle = function()
         {
             try
             {
@@ -116,7 +116,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
                 throw new Error(ex.message, ex.fileName, ex.lineNumber);
             }
         };
-        return object;
+        return dbgObject;
     }
 
     function createUserCommandHandler(config)
@@ -162,7 +162,7 @@ function createFirebugCommandLine(context, win, dbgGlobal)
     dbgGlobal.cachedCommandLine = commandLine;
 
     // Return a copy so the original one is preserved from changes.
-    return copyCommandLine(commandLine, dbgGlobal);
+    return copyCommandLine(commandLine);
 }
 
 // ********************************************************************************************* //
@@ -343,7 +343,7 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
 // ********************************************************************************************* //
 // Helpers (not accessible from web content)
 
-function copyCommandLine(commandLine, dbgGlobal)
+function copyCommandLine(commandLine)
 {
     var copy = Object.create(null);
     for (var name in commandLine)

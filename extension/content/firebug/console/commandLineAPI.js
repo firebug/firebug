@@ -10,6 +10,7 @@ define([
     "firebug/lib/wrapper",
 ],
 function(Xpath, Arr, Locale, System, Wrapper) {
+
 "use strict";
 
 // ********************************************************************************************* //

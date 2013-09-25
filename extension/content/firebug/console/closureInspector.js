@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false */
-/*global FBTrace:true, Components:true, Proxy:true, define:true */
+/*jshint esnext:true, curly:false */
+/*global FBTrace:1, Components:1, Proxy:1, define:1 */
 
 // A note on terminology: here a "closure"/"environment" is generally thought
 // of as a container of "scopes".
@@ -10,6 +10,7 @@ define([
     "firebug/debugger/debuggerLib",
 ],
 function(Firebug, DebuggerLib) {
+
 "use strict";
 
 // ********************************************************************************************* //
@@ -63,9 +64,9 @@ var ClosureInspector =
         return obj === OptimizedAway;
     },
 
-    isSimple: function(dobj)
+    isSimple: function(dbgObj)
     {
-        return (typeof dobj !== "object" || dobj === OptimizedAway);
+        return (typeof dbgObj !== "object" || dbgObj === OptimizedAway);
     },
 
     isScopeInteresting: function(scope)
@@ -73,12 +74,12 @@ var ClosureInspector =
         return !!scope.parent;
     },
 
-    getFunctionFromObject: function(obj)
+    getFunctionFromObject: function(dbgObj)
     {
         var first = true;
-        while (obj)
+        while (dbgObj)
         {
-            var names = obj.getOwnPropertyNames(), pd;
+            var names = dbgObj.getOwnPropertyNames(), pd;
 
             // "constructor" is boring, use it last
             var ind = names.indexOf("constructor");
@@ -94,16 +95,16 @@ var ClosureInspector =
                 // enumerable property of the prototype (or "constructor"),
                 // that is a function with some scope (i.e., it is interpreted,
                 // JSScript-backed, and without optimized-away scope) shares
-                // this scope with 'obj'.
+                // this scope with 'dbgObj'.
                 // (Since, in the current implementation, Firefox seems to give
                 // all functions in a particular scope (except self-contained
                 // ones) the same environment, the first is as good as any,
-                // and it's probably near the definition of 'obj').
+                // and it's probably near the definition of 'dbgObj').
 
                 var name = names[i];
                 try
                 {
-                    pd = obj.getOwnPropertyDescriptor(name);
+                    pd = dbgObj.getOwnPropertyDescriptor(name);
                 }
                 catch (e)
                 {
@@ -127,7 +128,7 @@ var ClosureInspector =
             if (!first)
                 break;
             first = false;
-            obj = obj.proto;
+            dbgObj = dbgObj.proto;
         }
 
         // None found. :(
@@ -153,15 +154,15 @@ var ClosureInspector =
         // will not be accessible otherwise.
         var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, objGlobal);
 
-        var dobj = dbgGlobal.makeDebuggeeValue(obj);
+        var dbgObj = dbgGlobal.makeDebuggeeValue(obj);
 
         if (typeof obj === "object")
-            dobj = this.getFunctionFromObject(dobj);
+            dbgObj = this.getFunctionFromObject(dbgObj);
 
-        if (!dobj || !dobj.environment || !this.isScopeInteresting(dobj.environment))
+        if (!dbgObj || !dbgObj.environment || !this.isScopeInteresting(dbgObj.environment))
             throw new Error("missing closure");
 
-        return dobj.environment;
+        return dbgObj.environment;
     },
 
     getClosureVariablesList: function(obj, context)
@@ -236,10 +237,10 @@ var ClosureInspector =
                         var scope = env.find(name);
                         if (!scope)
                             return undefined;
-                        var dval = self.getVariableOrOptimizedAway(scope, name);
-                        if (self.isSimple(dval))
-                            return dval;
-                        return DebuggerLib.unwrapDebuggeeValue(dval);
+                        var dbgValue = self.getVariableOrOptimizedAway(scope, name);
+                        if (self.isSimple(dbgValue))
+                            return dbgValue;
+                        return DebuggerLib.unwrapDebuggeeValue(dbgValue);
                     }
                     catch (exc)
                     {
@@ -251,18 +252,18 @@ var ClosureInspector =
 
                 set: function(value)
                 {
-                    var dvalue = dbgGlobal.makeDebuggeeValue(value);
+                    var dbgValue = dbgGlobal.makeDebuggeeValue(value);
                     var scope = env.find(name);
                     if (!scope)
                         throw new Error("can't create new closure variable");
                     if (self.getVariableOrOptimizedAway(scope, name) === OptimizedAway)
                         throw new Error("can't set optimized-away closure variable");
-                    scope.setVariable(name, dvalue);
+                    scope.setVariable(name, dbgValue);
                 }
             };
         };
         handler.getPropertyDescriptor = handler.getOwnPropertyDescriptor;
-        handler.delete = function(name)
+        handler.delete = function()
         {
             throw new Error("can't delete closure variable");
         };
@@ -289,7 +290,7 @@ var ClosureInspector =
             return;
         }
 
-        var dwin = DebuggerLib.getDebuggeeGlobal(context, win);
+        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, win);
 
         var scopeDataHolder = Object.create(ScopeProxy.prototype);
         scopeDataHolder.scope = scope;
@@ -327,16 +328,16 @@ var ClosureInspector =
             {
                 if (!this.has(name))
                     return;
-                var dval = self.getVariableOrOptimizedAway(scope, name);
+                var dbgValue = self.getVariableOrOptimizedAway(scope, name);
                 return {
                     get: function() {
-                        if (self.isSimple(dval))
-                            return dval;
-                        return DebuggerLib.unwrapDebuggeeValue(dval);
+                        if (self.isSimple(dbgValue))
+                            return dbgValue;
+                        return DebuggerLib.unwrapDebuggeeValue(dbgValue);
                     },
-                    set: (dval === OptimizedAway ? undefined : function(value) {
-                        dval = dwin.makeDebuggeeValue(value);
-                        scope.setVariable(name, dval);
+                    set: (dbgValue === OptimizedAway ? undefined : function(value) {
+                        dbgValue = dbgGlobal.makeDebuggeeValue(value);
+                        scope.setVariable(name, dbgValue);
                     }),
                     enumerable: true,
                     configurable: false
@@ -371,7 +372,7 @@ var ClosureInspector =
         return Object.getPrototypeOf(obj).scope;
     },
 
-    extendLanguageSyntax: function(expr, win, context)
+    extendLanguageSyntax: function(expr)
     {
         // Temporary FireClosure compatibility.
         if (Firebug.JSAutoCompleter.transformScopeExpr)

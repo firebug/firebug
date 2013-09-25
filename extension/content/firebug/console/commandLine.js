@@ -79,7 +79,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         // if `options` is a boolean, its value is meant to be `noStateChange`.
         if (typeof options === "boolean")
             options = {noStateChange: options};
-        else if (options == undefined)
+        else if (options == null)
             options = {};
 
         targetWindow = targetWindow || context.getCurrentGlobal();
@@ -91,7 +91,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
             var newExpr = expr;
             if (!options.noCmdLineAPI)
-                newExpr = ClosureInspector.extendLanguageSyntax(expr, targetWindow, context);
+                newExpr = ClosureInspector.extendLanguageSyntax(expr);
 
             if (this.isSandbox(context))
             {
