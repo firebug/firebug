@@ -26,6 +26,8 @@ function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events, Domplate, Console, Ta
 
 var {domplate, SPAN, TAG} = Domplate;
 
+var TraceError = FBTrace.to("DBG_ERRORS");
+
 // ********************************************************************************************* //
 // Command Implementation
 
@@ -58,8 +60,7 @@ function onExecuteCommand(context, args)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getEventListeners FAILS to create content view" + exc, exc);
+        TraceError.sysout("getEventListeners FAILS to create content view " + exc, exc);
     }
 
     return undefined;
@@ -78,9 +79,7 @@ function getEventListenersForTarget(context, target)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("getEventListenersForTarget threw an exception", exc);
-
+        TraceError.sysout("getEventListenersForTarget threw an EXCEPTION " + exc, exc);
         return undefined;
     }
 
@@ -112,8 +111,7 @@ function getEventListenersForTarget(context, target)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getEventListeners FAILS to create content view" + exc, exc);
+        TraceError.sysout("getEventListeners FAILS to create content view " + exc, exc);
     }
 
     return undefined;
@@ -210,6 +208,7 @@ function consoleLog(context, target, listeners, observers)
         TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
             "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
             "mutationCallback"], context);
+
         Console.closeGroup(context, true);
     }
 }
