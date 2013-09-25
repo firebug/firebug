@@ -4,6 +4,7 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
@@ -11,8 +12,10 @@ define([
     "firebug/lib/domplate",
     "firebug/console/console",
     "firebug/chrome/tableRep",
+    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events, Domplate, Console, TableRep) {
+function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console,
+    TableRep, DebuggerLib) {
 
 "use strict";
 
@@ -24,9 +27,65 @@ function(Firebug, FBTrace, Locale, Wrapper, Xpcom, Events, Domplate, Console, Ta
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, SPAN, TAG} = Domplate;
+var Cu = Components.utils;
+var {domplate, SPAN, TAG, DIV} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
+
+// ********************************************************************************************* //
+// Module
+
+/**
+ * @module The modules registers a console listeners that logs a pretty-printed
+ * information about listeners and mutation observers for specific target.
+ * The pretty-print log is made only for getEventListeners() return value, so
+ * if the method is used within an expression it's just the result of the expression
+ * what is logged.
+ */
+var GetEventListenersModule = Obj.extend(Firebug.Module,
+/** @lends GetEventListenersModule */
+{
+    dispatchName: "getEventListenersModule",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    initialize: function(prefDomain, prefNames)
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        Console.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        Console.removeListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Console Listener
+
+    log: function(context, object, className, sourceLink)
+    {
+        if (!context || !object)
+            return;
+
+        var type = Object.prototype.toString.call(object);
+        FBTrace.sysout("log " + type);
+
+        var cache = context ? context.getEventListenersCache : null;
+        if (!cache)
+            return false;
+
+        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
+        var dbgObj = dbgGlobal.makeDebuggeeValue(object);
+        if (!dbgObj)
+            return;
+
+        var object = cache.get(dbgObj);
+        if (object)
+            consoleLog(context, object.target, object.listeners, object.observers);
+    },
+});
 
 // ********************************************************************************************* //
 // Command Implementation
@@ -54,7 +113,17 @@ function onExecuteCommand(context, args)
         var global = context.getCurrentGlobal();
         var objects = Wrapper.cloneIntoContentScope(global, result);
 
-        consoleLog(context, target, listeners, observers);
+        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, global);
+        var dbgObj = dbgGlobal.makeDebuggeeValue(objects);
+
+        if (!context.getEventListenersCache)
+            context.getEventListenersCache = new WeakMap();
+
+        context.getEventListenersCache.set(dbgObj, {
+            target: target,
+            listeners: listeners,
+            observers: observers
+        });
 
         return objects;
     }
@@ -180,9 +249,6 @@ function consoleLog(context, target, listeners, observers)
         target: target,
     };
 
-    // xxxHonza: the function displayed in the Console panel doesn't
-    // navigate to the Script panel. 
-
     // xxxHonza: fix me, this is the second time we get the listeners.
     listeners = Events.getEventListenersForTarget(target);
     if (listeners && listeners.length > 0)
@@ -240,6 +306,8 @@ var GroupCaption = domplate(
 
 // ********************************************************************************************* //
 // Registration
+
+Firebug.registerModule(GetEventListenersModule);
 
 Firebug.registerCommand("getEventListeners", {
     helpUrl: "https://getfirebug.com/wiki/index.php/getEventListeners",
