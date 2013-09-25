@@ -101,6 +101,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
+        this.filterMatchSet = [];
+
         if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
             this.insertLogLimit(this.context);
 

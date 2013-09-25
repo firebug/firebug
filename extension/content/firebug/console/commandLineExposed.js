@@ -123,7 +123,7 @@ function createFirebugCommandLine(context, win)
         return object;
     }
 
-    function createUserCommandHandler(config, name)
+    function createUserCommandHandler(config)
     {
         return function()
         {
@@ -276,11 +276,6 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     }
 
 
-    var unwrap = function(obj)
-    {
-        return DebuggerLib.unwrapDebuggeeValue(obj, contentView, dglobal);
-    };
-
     // In case of abnormal termination, as if by the "slow script" dialog box,
     // do not print anything in the console.
     if (!resObj)
@@ -293,7 +288,7 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
 
     if (resObj.hasOwnProperty("return"))
     {
-        result = unwrap(resObj.return);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.return);
         if (resObj.return && resObj.return.handle)
         {
             resObj.return.handle();
@@ -303,100 +298,12 @@ function evaluate(context, win, expr, origExpr, onSuccess, onError, options)
     }
     else if (resObj.hasOwnProperty("yield"))
     {
-        result = unwrap(resObj.yield);
+        result = DebuggerLib.unwrapDebuggeeValue(resObj.yield);
     }
     else if (resObj.hasOwnProperty("throw"))
     {
-        // Change source and line number of exceptions from commandline code
-        // create new error since properties of nsIXPCException are not modifiable.
-        // Example of code raising nsIXPCException: `alert({toString: function(){ throw "blah"; }})`
-
-        // xxxFlorent: FIXME: we can't get the right stack trace with this example:
-        //     function a(){
-        //          throw new Error("error");
-        //     }
-        //     <ENTER>
-        //     a();
-        //     <ENTER>
-        var exc = unwrap(resObj.throw);
-
-        if (exc === null || exc === undefined)
-            return;
-
-        if (typeof exc !== "object")
-        {
-            exc = new Error(exc, null, null);
-            exc.fileName = exc.lineNumber = exc.stack = null;
-        }
-
-        var shouldModify = false, isXPCException = false;
-        var fileName = exc.filename || exc.fileName || "";
-        var isInternalError = fileName.lastIndexOf("chrome://", 0) === 0;
-        var lineNumber = null;
-        var stack = null;
-        var splitStack;
-        var isFileNameMasked = DebuggerLib.isFrameLocationEval(fileName);
-        if (isInternalError || isFileNameMasked)
-        {
-            shouldModify = true;
-            isXPCException = (exc.filename !== undefined);
-
-            // Lie and show the pre-transformed expression instead.
-            fileName = "data:,/* " + Locale.$STR("commandline.errorSourceHeader") + " */"+
-                encodeURIComponent("\n"+origExpr);
-
-            if (isInternalError && typeof exc.stack === "string")
-            {
-                splitStack = exc.stack.split("\n");
-                var correctionSucceeded = correctStackTrace(splitStack);
-                if (correctionSucceeded)
-                {
-                    // correct the line number so we take into account the comment prepended above
-                    lineNumber = findLineNumberInExceptionStack(splitStack) + 1;
-
-                    // correct the first trace
-                    splitStack.splice(0, 1, "@" + fileName + ":" + lineNumber);
-                    stack = splitStack.join("\n");
-                }
-                else
-                    shouldModify = false;
-            }
-            else
-            {
-                // correct the line number so we take into account the comment prepended above
-                lineNumber = exc.lineNumber + 1;
-            }
-        }
-
-        result = new Error();
-
-        if (shouldModify)
-        {
-            result.stack = stack;
-            result.source = origExpr;
-            result.message = exc.message;
-            result.lineNumber = lineNumber;
-            result.fileName = fileName;
-
-            // The error message can also contain post-transform details about the
-            // source, but it's harder to lie about. Make it prettier, at least.
-            if (typeof result.message === "string")
-                result.message = result.message.replace(/__fb_scopedVars\(/g, "<get closure>(");
-
-            if (!isXPCException)
-                result.name = exc.name;
-        }
-        else
-        {
-            Obj.getPropertyNames(exc).forEach(function(prop)
-            {
-                result[prop] = exc[prop];
-            });
-            result.stack = exc.stack;
-            result.source = exc.source;
-        }
-
-        executeInWindowContext(window, onError, [result, context]);
+        var exc = DebuggerLib.unwrapDebuggeeValue(resObj.throw);
+        handleException(exc, origExpr, context, onError);
         return;
     }
 
@@ -462,6 +369,99 @@ function removeConflictingNames(commandLine, context, contentView)
         if (name in contentView)
             delete commandLine[name];
     }
+}
+
+function handleException(exc, origExpr, context, onError)
+{
+    // Change source and line number of exceptions from commandline code
+    // create new error since properties of nsIXPCException are not modifiable.
+    // Example of code raising nsIXPCException: `alert({toString: function(){ throw "blah"; }})`
+
+    // xxxFlorent: FIXME: we can't get the right stack trace with this example:
+    //     function a(){
+    //          throw new Error("error");
+    //     }
+    //     <ENTER>
+    //     a();
+    //     <ENTER>
+
+    if (exc === null || exc === undefined)
+        return;
+
+    if (typeof exc !== "object")
+    {
+        exc = new Error(exc, null, null);
+        exc.fileName = exc.lineNumber = exc.stack = null;
+    }
+
+    var shouldModify = false, isXPCException = false;
+    var fileName = exc.filename || exc.fileName || "";
+    var isInternalError = fileName.lastIndexOf("chrome://", 0) === 0;
+    var lineNumber = null;
+    var stack = null;
+    var splitStack;
+    var isFileNameMasked = DebuggerLib.isFrameLocationEval(fileName);
+    if (isInternalError || isFileNameMasked)
+    {
+        shouldModify = true;
+        isXPCException = (exc.filename !== undefined);
+
+        // Lie and show the pre-transformed expression instead.
+        fileName = "data:,/* " + Locale.$STR("commandline.errorSourceHeader") + " */"+
+            encodeURIComponent("\n"+origExpr);
+
+        if (isInternalError && typeof exc.stack === "string")
+        {
+            splitStack = exc.stack.split("\n");
+            var correctionSucceeded = correctStackTrace(splitStack);
+            if (correctionSucceeded)
+            {
+                // correct the line number so we take into account the comment prepended above
+                lineNumber = findLineNumberInExceptionStack(splitStack) + 1;
+
+                // correct the first trace
+                splitStack.splice(0, 1, "@" + fileName + ":" + lineNumber);
+                stack = splitStack.join("\n");
+            }
+            else
+                shouldModify = false;
+        }
+        else
+        {
+            // correct the line number so we take into account the comment prepended above
+            lineNumber = exc.lineNumber + 1;
+        }
+    }
+
+    var result = new Error();
+
+    if (shouldModify)
+    {
+        result.stack = stack;
+        result.source = origExpr;
+        result.message = exc.message;
+        result.lineNumber = lineNumber;
+        result.fileName = fileName;
+
+        // The error message can also contain post-transform details about the
+        // source, but it's harder to lie about. Make it prettier, at least.
+        if (typeof result.message === "string")
+            result.message = result.message.replace(/__fb_scopedVars\(/g, "<get closure>(");
+
+        if (!isXPCException)
+            result.name = exc.name;
+    }
+    else
+    {
+        Obj.getPropertyNames(exc).forEach(function(prop)
+        {
+            result[prop] = exc[prop];
+        });
+        result.stack = exc.stack;
+        result.source = exc.source;
+    }
+
+    executeInWindowContext(window, onError, [result, context]);
 }
 
 /**
