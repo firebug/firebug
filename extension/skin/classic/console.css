@@ -946,3 +946,11 @@
 .logRow-eventListenersDetails .logRow-table .logContent {
     padding: 0;
 }
+
+.logRow-eventListenersDetails .logRow {
+    text-decoration: none !important;
+}
+
+.logRow-eventListenersDetails .eventListenersCaption:hover {
+    text-decoration: underline;
+}

@@ -27,7 +27,6 @@ function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Consol
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
 var {domplate, SPAN, TAG, DIV} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -68,8 +67,6 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
     {
         if (!context || !object)
             return;
-
-        var type = Object.prototype.toString.call(object);
 
         var cache = context ? context.getEventListenersCache : null;
         if (!cache)
