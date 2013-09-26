@@ -12,17 +12,16 @@ define([
     "firebug/lib/domplate",
     "firebug/console/console",
     "firebug/chrome/tableRep",
-    "firebug/debugger/debuggerLib",
 ],
-function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console,
-    TableRep, DebuggerLib) {
+function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console, TableRep) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Resources
 
-// https://bugzilla.mozilla.org/show_bug.cgi?id=912874
+// Bug 912874 - New API to enumerate mutation observers
+// Bug 448602 - Have a way to enumerate event listeners
 
 // ********************************************************************************************* //
 // Constants
@@ -32,14 +31,14 @@ var {domplate, SPAN, TAG, DIV} = Domplate;
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
-// Module
+// Module Implementation
 
 /**
  * @module The modules registers a console listeners that logs a pretty-printed
  * information about listeners and mutation observers for specific target.
  * The pretty-print log is made only for getEventListeners() return value, so
- * if the method is used within an expression it's just the result of the expression
- * what is logged.
+ * if the method is used within an expression it's always just the result of the expression
+ * which is logged.
  */
 var GetEventListenersModule = Obj.extend(Firebug.Module,
 /** @lends GetEventListenersModule */
@@ -68,18 +67,24 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
         if (!context || !object)
             return;
 
-        var cache = context ? context.getEventListenersCache : null;
+        // The log we are waiting for must be Object type.
+        if (typeof(object) != "object")
+            return;
+
+        var cache = context.getEventListenersCache;
         if (!cache)
             return false;
 
-        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
-        var dbgObj = dbgGlobal.makeDebuggeeValue(object);
-        if (!dbgObj)
-            return;
+        // Objects keys in the cache-map are using wrappers, so don't forget to
+        // wrap it before lookup.
+        object = Wrapper.wrapObject(object);
 
-        var object = cache.get(dbgObj);
-        if (object)
-            consoleLog(context, object.target, object.listeners, object.observers);
+        // If the currently logged object is stored within the cache-map, we are dealing
+        // with a return value of getEventListeners() command. In such case append
+        // additional pretty-printed info into the Console panel.
+        var logInfo = cache.get(object);
+        if (logInfo)
+            consoleLog(context, logInfo.target, logInfo.listeners, logInfo.observers);
     },
 });
 
@@ -106,16 +111,22 @@ function onExecuteCommand(context, args)
         if (observers && observers.length > 0)
             result["MutationObservers"] = observers;
 
+        // Make sure the result structure with listeners and observers is properly
+        // cloned into the content scope.
         var global = context.getCurrentGlobal();
         var objects = Wrapper.cloneIntoContentScope(global, result);
-
-        var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context, global);
-        var dbgObj = dbgGlobal.makeDebuggeeValue(objects);
 
         if (!context.getEventListenersCache)
             context.getEventListenersCache = new WeakMap();
 
-        context.getEventListenersCache.set(dbgObj, {
+        // The logged object doesn't have any specific type since returned from
+        // Wrapper.cloneIntoContentScope, which is based on Cu.createObjectIn.
+        // (using specific types will be able as soon as bug 914970 is fixed)
+        // So, store the result logged-object into a weak-map, which will be used
+        // later (within 'log' event handler) to figure out whether additional
+        // pretty-printed logs should be appended in to the Console.
+        // See {@GetEventListenersModule} above.
+        context.getEventListenersCache.set(objects, {
             target: target,
             listeners: listeners,
             observers: observers
@@ -239,6 +250,10 @@ function getMutationObserversForTarget(context, target)
 // ********************************************************************************************* //
 // Console Logging
 
+/**
+ * Append pretty-printed information about listeners and mutation observers (for a target)
+ * into the Console panel.
+ */
 function consoleLog(context, target, listeners, observers)
 {
     var input = {
@@ -254,7 +269,6 @@ function consoleLog(context, target, listeners, observers)
         var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
-        // xxxHonza: tableRep should have a 'render' method with parent-node passed in.
         TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
         Console.closeGroup(context, true);
     }
@@ -266,7 +280,6 @@ function consoleLog(context, target, listeners, observers)
         row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
-        // xxxHonza: column labels localization?
         TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
             "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
             "mutationCallback"], context);
