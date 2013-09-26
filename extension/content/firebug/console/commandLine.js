@@ -146,77 +146,39 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     evaluateInGlobal: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction, origExpr, options)
     {
-        var win = targetWindow || context.getCurrentGlobal();
-        options = options || {};
+        // Setting the execution context type.
+        var args = ["global"];
+        // Append arguments of this function.
+        args.push.apply(args, arguments);
 
-        if (!win)
-        {
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.evaluateInGlobal: no targetWindow!");
-            return;
-        }
-
-        var onSuccess, onError;
-
-        if (successConsoleFunction)
-        {
-            onSuccess = function(result)
-            {
-                if (FBTrace.DBG_COMMANDLINE)
-                {
-                    FBTrace.sysout("commandLine.evaluateInGlobal; the evaluation succeeded "+
-                        "and returned: "+ result, result);
-                }
-
-                if (Console.isDefaultReturnValue(result))
-                    return;
-
-                successConsoleFunction(result, context);
-            };
-        }
-
-        if (!exceptionFunction)
-        {
-            exceptionFunction = function(result, context)
-            {
-                Firebug.Console.logFormatted([result], context, "error", true);
-            };
-        }
-
-        onError = function(result)
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-            {
-                FBTrace.sysout("commandLine.evaluateInGlobal; the evaluation threw "+
-                    "an exception:" + result, result);
-            }
-
-            exceptionFunction(result, context, "errorMessage");
-        };
-
-        origExpr = origExpr || expr;
-        CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError, options);
+        return evaluateExpression.apply(null, args);
     },
 
+    /**
+     * Evaluates an expression in the current frame.
+     *
+     * @param {string} expr The expression.
+     * @param {Context} context The Firebug context.
+     * @param {*} [thisValue] Deprecated. Set it to null or undefined.
+     * @param {Window} [targetWindow] The window in which the expression is evaluated.
+     * @param {function} [successConsoleFunction] The callback function in case of
+     *      evaluation without errors.
+     * @param {function} [exceptionFunction] The callback function in case of
+     *      evaluation with errors.
+     * @param {string} [origExpr] The original expression before it has been transformed
+     *          (mainly used by ClosureInspector). If not set, origExpr=expr.
+     * @param {object} [options] The options with the following properties:
+     *      - noCmdLineAPI: if set to true, do not evaluate with the Firebug commands. (default=false)
+     */
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,
         successConsoleFunction, exceptionFunction, origExpr, options)
     {
+        // Setting the execution context type.
+        var args = ["frame"];
+        // Append arguments of this function.
+        args.push.apply(args, arguments);
 
-        var win = targetWindow || context.getCurrentGlobal();
-        options = options || {};
-
-        // xxxFlorent: TODO factorize this code with Firebug.Debugger.evaluate
-        var currentFrame = context.currentFrame;
-        if (!currentFrame)
-            return;
-
-        var threadActor = DebuggerLib.getThreadActor(context.browser);
-        var frameActor = currentFrame.getActor();
-        var frame = threadActor._requestFrame(frameActor);
-
-        origExpr = origExpr || expr;
-        CommandLineExposed.evaluateInFrame(frame, context, win, expr, origExpr, 
-            successConsoleFunction, exceptionFunction, options);
+        return evaluateExpression.apply(null, args);
     },
 
     evaluateInWebPage: function(expr, context, targetWindow)
@@ -773,6 +735,83 @@ var getNoScript = function()
     };
     return noscript;
 };
+
+function evaluateExpression(execContextType, expr, context, thisValue, targetWindow,
+        successConsoleFunction, exceptionFunction, origExpr, options)
+{
+    var win = targetWindow || context.getCurrentGlobal();
+    options = options || {};
+
+    if (!win)
+    {
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.evaluateExpression: no targetWindow!");
+        return;
+    }
+
+    var onSuccess, onError;
+
+    if (successConsoleFunction)
+    {
+        onSuccess = function(result)
+        {
+            if (FBTrace.DBG_COMMANDLINE)
+            {
+                FBTrace.sysout("commandLine.evaluateExpression; the evaluation succeeded "+
+                    "and returned: "+ result, result);
+            }
+
+            if (Console.isDefaultReturnValue(result))
+                return;
+
+            successConsoleFunction(result, context);
+        };
+    }
+
+    if (!exceptionFunction)
+    {
+        exceptionFunction = function(result, context)
+        {
+            Firebug.Console.logFormatted([result], context, "error", true);
+        };
+    }
+
+    onError = function(result)
+    {
+        if (FBTrace.DBG_COMMANDLINE)
+        {
+            FBTrace.sysout("commandLine.evaluateExpression; the evaluation threw "+
+                "an exception:" + result, result);
+        }
+
+        exceptionFunction(result, context, "errorMessage");
+    };
+
+    origExpr = origExpr || expr;
+
+    if (execContextType === "frame")
+    {
+        // xxxFlorent: TODO factorize this code with Firebug.Debugger.evaluate
+        var currentFrame = context.currentFrame;
+        if (!currentFrame)
+            return;
+
+        var threadActor = DebuggerLib.getThreadActor(context.browser);
+        var frameActor = currentFrame.getActor();
+        var frame = threadActor._requestFrame(frameActor);
+
+        CommandLineExposed.evaluateInFrame(frame, context, win, expr, origExpr,
+            onSuccess, onError, options);
+    }
+    else if (execContextType === "global")
+    {
+        CommandLineExposed.evaluate(context, win, expr, origExpr, onSuccess, onError, options);
+    }
+    else
+    {
+        throw "CommandLineExposed.evaluateExpression; Invalid value for execContextType";
+    }
+}
 
 // ********************************************************************************************* //
 // Registration
