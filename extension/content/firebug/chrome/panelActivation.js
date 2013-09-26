@@ -18,11 +18,13 @@ function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
-const prefs = Xpcom.CCSV("@mozilla.org/preferences-service;1", "nsIPrefBranch");
-const prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+var prefs = Xpcom.CCSV("@mozilla.org/preferences-service;1", "nsIPrefBranch");
+var prompts = Xpcom.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+
+var {domplate, DIV, H1, SPAN, P, A} = Domplate;
 
 // ********************************************************************************************* //
 // Panel Activation Implementation
@@ -77,7 +79,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     activatePanelTypes: function(panelTypes)
     {
-        for (var i=0; i<panelTypes.length; i++)
+        for (var i = 0; i < panelTypes.length; i++)
         {
             var panelType = panelTypes[i];
             if (!this.isPanelActivable(panelType))
@@ -90,7 +92,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     deactivatePanelTypes: function(panelTypes)
     {
-        for (var i=0; i<panelTypes.length; i++)
+        for (var i = 0; i < panelTypes.length; i++)
         {
             var panelType = panelTypes[i];
             if (!this.isPanelActivable(panelType))
@@ -136,7 +138,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     enableAllPanels: function()
     {
-        for (var i = 0; i < Firebug.panelTypes.length; ++i)
+        for (var i = 0; i < Firebug.panelTypes.length; i++)
         {
             var panelType = Firebug.panelTypes[i];
             this.setPanelState(panelType, true);
@@ -145,7 +147,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     disableAllPanels: function()
     {
-        for (var i = 0; i < Firebug.panelTypes.length; ++i)
+        for (var i = 0; i < Firebug.panelTypes.length; i++)
         {
             var panelType = Firebug.panelTypes[i];
             this.setPanelState(panelType, false);
@@ -306,13 +308,11 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 });
 
 // ********************************************************************************************* //
+// Disabled Panel Box
 
 /**
  * @domplate This template renders default content for disabled panels.
  */
-
-var {domplate, DIV, H1, SPAN, P, A} = Domplate;
-
 Firebug.DisabledPanelBox = domplate(Firebug.Rep,
 /** @lends Firebug.DisabledPanelBox */
 {
@@ -373,6 +373,10 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var parentNode = this.getParentNode(browser);
         this.tag.replace(args, parentNode, this);
         parentNode.removeAttribute("collapsed");
+
+        // Dispatch an event to UI listeners, so the box can be customized.
+        Firebug.dispatch(Firebug.uiListeners, "showDisabledPanelBox",
+            [panelName, parentNode]);
     },
 
     /**
