@@ -12,6 +12,8 @@ define([
 ],
 function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -25,15 +27,26 @@ try
 {
     // Introduced in Firefox 8
     Cu["import"]("resource:///modules/source-editor.jsm");
-
-    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
-    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
-    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
 }
 catch (err)
 {
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
+    try
+    {
+        // URL changed in Firefox 27
+        Cu["import"]("resource:///modules/devtools/sourceeditor/source-editor.jsm");
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
+    }
+}
+
+if (typeof(SourceEditor) != "undefined")
+{
+    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
+    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
+    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
 }
 
 // ********************************************************************************************* //
