@@ -109,7 +109,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         this.editor.focus();
 
         if (this.defaultSource)
-            this.showSource(this.defaultSource);
+            this.showSource(this.defaultSource.source, this.defaultSource.type);
 
         if (this.defaultLine > 0)
             this.scrollToLine(this.defaultLine, this.defaultOptions);
@@ -158,7 +158,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
     {
         if (!this.initialized)
         {
-            this.defaultSource = source;
+            this.defaultSource = {source: source, type: type};
             return;
         }
 

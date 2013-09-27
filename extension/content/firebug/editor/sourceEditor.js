@@ -3,13 +3,14 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/http",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/wrapper",
     "firebug/lib/array",
 ],
-function(Firebug, FBTrace, Http, Dom, Css, Wrapper, Arr) {
+function(Firebug, FBTrace, Obj, Http, Dom, Css, Wrapper, Arr) {
 
 "use strict";
 
@@ -134,6 +135,11 @@ SourceEditor.prototype =
         var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
 
+        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
+        // debugging is easier. Should *not* be part of the distribution.
+        //var view = Wrapper.getContentView(doc.defaultView);
+        //view.FBTrace = ExposedFBTrace;
+
         this.loadScripts(doc, onInit);
     },
 
@@ -167,10 +173,6 @@ SourceEditor.prototype =
             var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
             Object.defineProperty(newConfig, prop, genPropDesc(value));
         }
-
-        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
-        // debugging is easier. Should *not* be part of the distribution.
-        // view.FBTrace = ExposedFBTrace;
 
         var self = this;
 
@@ -221,48 +223,29 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.loadScripts;");
 
-        var scripts = [];
+        var loader = this;
 
-        var onScriptLoad = function(event)
-        {
-            Arr.remove(scripts, event.target);
+        //xxxHonza: Support for CM debugging. If <script> tags are inserted with
+        // properly set 'src' attribute, stack traces produced by Firebug tracing
+        // console are correct. But it's asynchronous causing the Script panel UI
+        // to blink so, we don't need it for production. In any case the following
+        // script loader object can be used for that.
+        //loader = new ScriptLoader(callback);
 
-            if (!scripts.length)
-                callback();
-        };
+        loader.addScript(doc, "cm", codeMirrorSrc);
+        loader.addScript(doc, "cm-js", jsModeSrc);
+        loader.addScript(doc, "cm-xml", xmlModeSrc);
+        loader.addScript(doc, "cm-css", cssModeSrc);
+        loader.addScript(doc, "cm-htmlmixed", htmlMixedModeSrc);
 
-        function addScript(doc, id, url)
-        {
-            Dom.addScript(doc, id, Http.getResource(url));
-            return;
-
-            //xxxHonza: The rest is for CM debugging. If <script> tags are inserted with
-            // properly set 'src' attribute, stack traces produced by Firebug tracing
-            // console are correct. But it's asynchronous causing the Script panel UI
-            // to blink so, we don't need it for production.
-            var script = doc.getElementById(id);
-            if (script)
-                return script;
-
-            script = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
-            scripts.push(script);
-            script.onload = onScriptLoad;
-
-            script.setAttribute("type", "text/javascript");
-            script.setAttribute("id", id);
-            script.setAttribute("src", url);
-
-            doc.documentElement.appendChild(script);
-        }
-
-        addScript(doc, "cm", codeMirrorSrc);
-        addScript(doc, "cm-js", jsModeSrc);
-        addScript(doc, "cm-xml", xmlModeSrc);
-        addScript(doc, "cm-css", cssModeSrc);
-        addScript(doc, "cm-htmlmixed", htmlMixedModeSrc);
-
-        if (!scripts.length)
+        if (loader == this)
             callback();
+    },
+
+    addScript: function(doc, id, url)
+    {
+        // Synchronous injecting of CM source into Firebug UI (panel.html).
+        Dom.addScript(doc, id, Http.getResource(url));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -397,9 +380,12 @@ SourceEditor.prototype =
 
     setText: function(text, type)
     {
-        Trace.sysout("sourceEditor.setText: " + type, text);
+        Trace.sysout("sourceEditor.setText: " + type + " " + text, text);
 
-        var mode = "htmlmixed";
+        // xxxHonza: the default 'mixedmode' mode should be set only if the text
+        // is actually a markup (first letter == '<'?). Note that applying mixed mode
+        // on plain JS doesn't work (no color syntax at all).
+        var mode = "mixedmode";
         switch (type)
         {
             case "js":
@@ -407,6 +393,9 @@ SourceEditor.prototype =
             break;
             case "css":
                 mode = "css";
+            break;
+            case "xml":
+                mode = "xml";
             break;
         }
 
@@ -926,8 +915,13 @@ function getEventObject(type, eventArg)
 }
 
 // ********************************************************************************************* //
-// Support for Debugging
+// Support for Debugging - Tracing
 
+/**
+ * Expose FBTrace to the Firebug UI (panel.html). This help to debug problems
+ * with CodeMirror, since tracing lines can be directly inserted into CM code.
+ * See also {@SourceEditor.init} where the exposure happens.
+ */
 var ExposedFBTrace =
 {
     sysout: function(msg, obj)
@@ -940,6 +934,62 @@ var ExposedFBTrace =
         sysout: "r"
     }
 };
+
+// ********************************************************************************************* //
+// Support for Debugging - Async script loader
+
+function ScriptLoader(callback)
+{
+    this.callback = callback;
+
+    this.waiting = [];
+    this.scripts = [];
+}
+
+ScriptLoader.prototype =
+{
+    addScript: function(doc, id, url)
+    {
+        if (this.scripts.length > 0)
+        {
+            this.waiting.push(Arr.cloneArray(arguments));
+            return;
+        }
+
+        // xxxHonza: the callback should be executed, otherwise it fails in case
+        // where only some scripts are already presented (should not happen in
+        // our case, but it would make this object more generic).
+        var script = doc.getElementById(id);
+        if (script)
+            return script;
+
+        script = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+        script.onload = this.onScriptLoaded.bind(this);
+
+        this.scripts.push(script);
+
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("id", id);
+        script.setAttribute("src", url);
+
+        doc.documentElement.appendChild(script);
+    },
+
+    onScriptLoaded: function(event)
+    {
+        Arr.remove(this.scripts, event.target);
+
+        if (this.waiting.length > 0)
+        {
+            var args = this.waiting.shift();
+            this.addScript.apply(this, args);
+            return;
+        }
+
+        if (!this.scripts.length)
+            this.callback();
+    }
+}
 
 // ********************************************************************************************* //
 // Registration
