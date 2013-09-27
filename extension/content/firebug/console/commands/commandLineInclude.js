@@ -605,7 +605,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
      */
     onLogRowCreated: function(panel, row, context)
     {
-        if (row.className.indexOf("warningMessage") !== -1 &&
+        if (row && row.className.indexOf("warningMessage") !== -1 &&
             context.includePatternToBlock &&
             row.textContent.indexOf(context.includePatternToBlock) !== -1)
         {
