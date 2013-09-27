@@ -907,6 +907,7 @@
 
 /************************************************************************************************/
 /* include() command */
+
 .tableCommandLineInclude td {
     height: 17px;
 }
@@ -930,4 +931,11 @@
 .tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 
+}
+
+/*************************************************************************************************/
+/* Description Box */
+
+.descriptionBox B {
+    font-weight: bold;
 }
