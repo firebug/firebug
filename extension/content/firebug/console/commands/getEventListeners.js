@@ -216,10 +216,10 @@ function getMutationObserversForTarget(context, target)
         for (var i=0; i<observers.length; i++)
         {
             var observer = observers[i];
-            var infos = observer.getObservingInfo();
-            for (var j=0; j<infos.length; j++)
+            var observingInfo = observer.getObservingInfo();
+            for (var j=0; j<observingInfo.length; j++)
             {
-                var info = infos[j];
+                var info = observingInfo[j];
 
                 // Get only observers that are registered for:
                 // a) the original target
@@ -281,7 +281,7 @@ function consoleLog(context, target, listeners, observers)
             GroupCaption, true, null, true);
 
         TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
-            "characterData", "characterDataOldValue", "childList", "subtree", "observedNode",
+            "characterDataOldValue", "childList", "subtree", "observedNode",
             "mutationCallback"], context);
 
         Console.closeGroup(context, true);
