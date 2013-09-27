@@ -385,7 +385,7 @@ SourceEditor.prototype =
         // xxxHonza: the default 'mixedmode' mode should be set only if the text
         // is actually a markup (first letter == '<'?). Note that applying mixed mode
         // on plain JS doesn't work (no color syntax at all).
-        var mode = "mixedmode";
+        var mode = "htmlmixed";
         switch (type)
         {
             case "js":
