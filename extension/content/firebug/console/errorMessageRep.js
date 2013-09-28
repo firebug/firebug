@@ -395,7 +395,7 @@ var ErrorMessage = domplate(Firebug.Rep,
 
     inspectObject: function(error, context)
     {
-        var sourceLink = error.getSourceLink();
+        var sourceLink = this.getSourceLink(error);
         FirebugReps.SourceLink.inspectObject(sourceLink, context);
     },
 
