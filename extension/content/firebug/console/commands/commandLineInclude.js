@@ -14,11 +14,10 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/chrome/tableRep",
-    "firebug/console/console",
     "firebug/editor/editor",
 ],
 function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
-    Obj, TableRep, Console) {
+    Obj, TableRep) {
 with (Domplate) {
 
 // ********************************************************************************************* //
@@ -109,7 +108,7 @@ var CommandLineIncludeRep = domplate(FirebugReps.Table,
         if (keys.length === 0)
         {
             var msg = Locale.$STR("commandline.include.noDefinedAlias");
-            Firebug.Console._log(msg, context, null, FirebugReps.Hint);
+            Firebug.Console.log(msg, context, null, FirebugReps.Hint);
             return returnValue;
         }
 
@@ -336,17 +335,17 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         {
             var store = this.getStore();
             store.setItem(newAlias, url);
-            this._log("aliasCreated", [newAlias], [context, "info"]);
+            this.log("aliasCreated", [newAlias], [context, "info"]);
         }
 
         if (!hasWarnings)
-            this._log("includeSuccess", [filename], [context, "info", true]);
+            this.log("includeSuccess", [filename], [context, "info", true]);
     },
 
     onError: function(context, url, loadingMsgRow)
     {
         this.clearLoadingMessage(loadingMsgRow);
-        this._log("loadFail", [url], [context, "error"]);
+        this.log("loadFail", [url], [context, "error"]);
     },
 
     clearLoadingMessage: function(loadingMsgRow)
@@ -384,9 +383,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         return this.store;
     },
 
-    // xxxFlorent: Prefix with underscore until we fix Issue 6806
-    //             since we're listening to Firebug.Console events.
-    _log: function(localeStr, localeArgs, logArgs, noAutoPrefix)
+    log: function(localeStr, localeArgs, logArgs, noAutoPrefix)
     {
         var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include."+localeStr);
 
@@ -412,13 +409,13 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         // checking arguments:
         if ((newAlias !== undefined && typeof newAlias !== "string") || newAlias === "")
         {
-            this._log("invalidAliasArgumentType", [], [context, "error"]);
+            this.log("invalidAliasArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
         if (url !== null && typeof url !== "string" || !url && !newAlias)
         {
-            this._log("invalidUrlArgumentType", [], [context, "error"]);
+            this.log("invalidUrlArgumentType", [], [context, "error"]);
             return returnValue;
         }
 
@@ -427,13 +424,13 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
 
         if ((urlIsAlias && url.length > 30) || (newAlias && newAlias.length > 30))
         {
-            this._log("tooLongAliasName", [newAlias || url], [context, "error"]);
+            this.log("tooLongAliasName", [newAlias || url], [context, "error"]);
             return returnValue;
         }
 
         if (newAlias !== undefined && reNotAlias.test(newAlias))
         {
-            this._log("invalidAliasName", [newAlias], [context, "error"]);
+            this.log("invalidAliasName", [newAlias], [context, "error"]);
             return returnValue;
         }
 
@@ -444,7 +441,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             url = store.getItem(aliasName);
             if (url === undefined)
             {
-                this._log("aliasNotFound", [aliasName], [context, "error"]);
+                this.log("aliasNotFound", [aliasName], [context, "error"]);
                 return returnValue;
             }
         }
@@ -455,15 +452,15 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             var store = this.getStore();
             if (store.getItem(newAlias) === undefined)
             {
-                this._log("aliasNotFound", [newAlias], [context, "error"]);
+                this.log("aliasNotFound", [newAlias], [context, "error"]);
                 return returnValue;
             }
 
             store.removeItem(newAlias);
-            this._log("aliasRemoved", [newAlias], [context, "info"]);
+            this.log("aliasRemoved", [newAlias], [context, "info"]);
             return returnValue;
         }
-        var loadingMsgRow = this._log("Loading", [], [context, "loading", true], true);
+        var loadingMsgRow = this.log("Loading", [], [context, "loading", true], true);
         var onSuccess = this.onSuccess.bind(this, newAlias, context, loadingMsgRow);
         var onError = Obj.bindFixed(this.onError, this, context, url, loadingMsgRow);
         this.evaluateRemoteScript(url, context, onSuccess, onError, loadingMsgRow);
@@ -497,7 +494,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             // test if the content is an HTML file, which is the most current after a mistake
             if (!isValidJS(codeToEval))
             {
-                CommandLineInclude._log("invalidSyntax", [], [context, "warn"]);
+                CommandLineInclude.log("invalidSyntax", [], [context, "warn"]);
                 CommandLineInclude.clearLoadingMessage(loadingMsgRow);
                 hasWarnings = true;
             }
@@ -506,25 +503,8 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             var successFunctionEval = function() { };
             // Let's use the default function to handle errors.
             var errorFunctionEval = null;
-
-            // xxxFlorent: Using evaluateInGlobal doesn't allow to stop execution in the script
-            //             panel. Just use it when having CSP until we migrate to JSD2.
-            //             (see Issue 6551)
-            if (CommandLineInclude.isCSPDoc(context))
-            {
-                if (FBTrace.DBG_COMMANDLINE)
-                {
-                    FBTrace.sysout("CommandLineInclude.evaluateRemoteScript; "+
-                        "document is using CSP. use evaluateInGlobal");
-                }
-                var options = {noCmdLineAPI: true, exprInScriptPanel: true};
-                Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
-                    successFunctionEval, errorFunctionEval, undefined, options);
-            }
-            else
-            {
-                Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
-            }
+            Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
+                successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
 
             if (successFunction)
                 successFunction(xhr, hasWarnings);
@@ -544,7 +524,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             this.clearLoadingMessage(loadingMsgRow);
             if (ex.name === "NS_ERROR_UNKNOWN_PROTOCOL")
             {
-                this._log("invalidRequestProtocol", [], [context, "error"]);
+                this.log("invalidRequestProtocol", [], [context, "error"]);
                 return;
             }
             throw ex;
@@ -552,38 +532,12 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
 
         if (acceptedSchemes.indexOf(xhr.channel.URI.scheme) === -1)
         {
-            this._log("invalidRequestProtocol", [], [context, "error"]);
+            this.log("invalidRequestProtocol", [], [context, "error"]);
             this.clearLoadingMessage(loadingMsgRow);
             return;
         }
 
         xhr.send(null);
-    },
-
-    /**
-     * Hack; Should only be used inside CommandLineInclude.
-     * Test whether the current global is under CSP.
-     *
-     * @param {Context} context
-     *
-     * @return boolean
-     */
-    isCSPDoc: function(context)
-    {
-        // Create a random variable name:
-        var varName = "_" + Math.ceil(Math.random() * 1000000);
-        var codeToEval = "window['" + varName + "']" + " = true;";
-
-        var global = context.getCurrentGlobal();
-
-        context.includePatternToBlock = codeToEval;
-        Firebug.CommandLine.evaluateInWebPage(codeToEval, context);
-        var ret = global.wrappedJSObject[varName] !== true;
-
-        if (ret)
-            delete global.wrappedJSObject[varName];
-
-        return ret;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  //
@@ -595,23 +549,6 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
         {
             StorageService.removeStorage(storeFilename);
             this.store = null;
-        }
-    },
-
-    /**
-     * Hack; Should only be used inside CommandLineInclude.
-     * Intercept the display of a warning if related to the use of isCSPDoc().
-     *
-     * Event triggered by Firebug.Console.logRow().
-     */
-    onLogRowCreated: function(panel, row, context)
-    {
-        if (row && row.className.indexOf("warningMessage") !== -1 &&
-            context.includePatternToBlock &&
-            row.textContent.indexOf(context.includePatternToBlock) !== -1)
-        {
-            row.parentNode.removeChild(row);
-            context.includePatternToBlock = "";
         }
     }
 });
@@ -699,7 +636,6 @@ Firebug.registerCommand("include", {
 Firebug.registerRep(CommandLineIncludeRep);
 
 Firebug.registerModule(CommandLineInclude);
-Console.addListener(CommandLineInclude);
 
 return CommandLineInclude;
 
