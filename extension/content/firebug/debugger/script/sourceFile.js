@@ -23,8 +23,13 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
 
 /**
  * SourceFile one for every compilation unit.
+ *
+ * @param {Context} context
+ * @param {Actor} actor
+ * @param {string} href The link to the source
+ * @param {string} [source] The source if already provided
  */
-function SourceFile(context, actor, href)
+function SourceFile(context, actor, href, source)
 {
     this.context = context;
     this.actor = actor;
@@ -33,6 +38,9 @@ function SourceFile(context, actor, href)
     // xxxHonza: remove
     this.compilation_unit_type = "remote-script";
     this.callbacks = [];
+
+    if (source)
+        this.setSource(source);
 }
 
 SourceFile.prototype =
@@ -129,11 +137,16 @@ SourceFile.prototype =
             return;
         }
 
+        this.setSource(response.source);
+    },
+
+    setSource: function(source)
+    {
         // Convert all line delimiters to the unix style. The source editor
         // (in the Script panel) also uses unix style and so we can compare
         // if specific text is already set in the editor.
         // See {@ScriptView.showSource}
-        var source = response.source.replace(/\r\n/gm, "\n");
+        source = source.replace(/\r\n/gm, "\n");
 
         this.loaded = true;
         this.inProgress = false;
@@ -145,7 +158,8 @@ SourceFile.prototype =
 
         // Fire also global notification.
         Events.dispatch(Firebug.modules, "onSourceLoaded", [this]);
-    }
+    },
+
 }
 
 // ********************************************************************************************* //

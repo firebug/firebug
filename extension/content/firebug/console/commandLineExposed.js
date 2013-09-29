@@ -7,9 +7,10 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/locale",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/script/sourceFile",
     "firebug/console/commandLineAPI",
 ],
-function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
+function(Obj, Wrapper, Locale, DebuggerLib, SourceFile, CommandLineAPI) {
 
 "use strict";
 
@@ -297,15 +298,29 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
     var result;
     var contentView = Wrapper.getContentView(win);
     var resObj;
-    var bindings = undefined;
+    var evalMethodOptions = {}
+    var evalMethodArgs = [expr, evalMethodOptions];
+    var url;
 
     if (!options.noCmdLineAPI)
     {
-        bindings = getCommandLineBindings(context, win, dbgGlobal, contentView);
+        var bindings = getCommandLineBindings(context, win, dbgGlobal, contentView);
+        // Insert bindings at the second position of evalMethodArgs.
+        evalMethodArgs.splice(1, 0, bindings);
         Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
     }
 
-    resObj = evalMethod.call(subject, expr, bindings);
+    if (options.exprInScriptPanel)
+    {
+        url = options.urlForExpr || getUrlForEval(context, expr);
+        evalMethodOptions["url"] = url;
+        Trace.sysout("CommandLineExposed.evaluate; options.url: "+url);
+    }
+
+    resObj = evalMethod.apply(subject, evalMethodArgs);
+
+    if (options.exprInScriptPanel)
+        addSourceFileForExpr(context, expr, url);
 
     // In case of abnormal termination, as if by the "slow script" dialog box,
     // do not print anything in the console.
@@ -349,6 +364,28 @@ function copyCommandLine(commandLine)
     for (var name in commandLine)
         copy[name] = commandLine[name];
     return copy;
+}
+
+function getUrlForEval(context, expr)
+{
+    // If sourceURL is provided in the expression, just return the given URL.
+    var sourceURL = DebuggerLib.getSourceUrlFromExpr(expr);
+    if (sourceURL)
+        return sourceURL;
+
+    if (!context.evalCount)
+        context.evalCount = 1;
+    else
+        context.evalCount++;
+
+    return "evaluated expressions/" + context.evalCount;
+}
+
+function addSourceFileForExpr(context, expr, href)
+{
+    // xxxFlorent: What will actor (second argument) be used for? Will it be required?
+    var sourceFile = new SourceFile(context, null, href, expr);
+    context.addSourceFile(sourceFile);
 }
 
 function findLineNumberInExceptionStack(splitStack)

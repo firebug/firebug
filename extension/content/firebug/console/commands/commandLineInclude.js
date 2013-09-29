@@ -517,8 +517,9 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
                     FBTrace.sysout("CommandLineInclude.evaluateRemoteScript; "+
                         "document is using CSP. use evaluateInGlobal");
                 }
+                var options = {noCmdLineAPI: true, exprInScriptPanel: true};
                 Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
-                    successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
+                    successFunctionEval, errorFunctionEval, undefined, options);
             }
             else
             {

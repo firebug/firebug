@@ -347,6 +347,24 @@ function addNewDebuggee(dbg, win, global)
 }
 
 // ********************************************************************************************* //
+// Miscellaneous
+
+/**
+ * Extract the URL from the sourceURL directive in an expression.
+ * See http://www.softwareishard.com/blog/firebug/firebug-tip-label-dynamic-scripts-with-sourceurl-directive/
+ *
+ * @param {string} expr The expression
+ *
+ * @return {string} The URL extracted from the sourceURL directive, or null if the latter was not
+ *                  found.
+ */
+DebuggerLib.getSourceUrlFromExpr = function(expr)
+{
+    var match = expr.match( /\/\/[@#]\ssourceURL=\s*(\S+?)\s*$/m );
+    return match ? match[1] : null;
+}
+
+// ********************************************************************************************* //
 // Local helpers
 
 /**

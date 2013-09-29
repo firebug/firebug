@@ -286,8 +286,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             logResult.apply(this, arguments);
         }
 
-        // Finally, let's evaluate the use expression!
-        this.evaluate(expr, context, null, null, successHandler, exceptionHandler);
+        var options = {exprInScriptPanel: true};
+        // Finally, let's evaluate the used expression!
+        this.evaluate(expr, context, null, null, successHandler, exceptionHandler, options);
 
         if (noscript && noScriptURI)
             noscript.setJSEnabled(noScriptURI, false);
