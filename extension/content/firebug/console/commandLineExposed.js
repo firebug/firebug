@@ -379,7 +379,6 @@ function getUrlForEval(context, expr)
     else
         context.evalCount++;
 
-    // xxxFlorent: maybe a timestamp rather than a counter?
     return Url.generateUrlForEvalExpr(context.evalCount);
 }
 
@@ -445,14 +444,6 @@ function handleException(exc, origExpr, context, onError)
     // Change source and line number of exceptions from commandline code
     // create new error since properties of nsIXPCException are not modifiable.
     // Example of code raising nsIXPCException: `alert({toString: function(){ throw "blah"; }})`
-
-    // xxxFlorent: FIXME: we can't get the right stack trace with this example:
-    //     function a(){
-    //          throw new Error("error");
-    //     }
-    //     <ENTER>
-    //     a();
-    //     <ENTER>
 
     if (exc === null || exc === undefined)
         return;

@@ -51,7 +51,7 @@ Url.splitURLBase = function(url)
 {
     if (Url.isDataURL(url))
         return Url.splitDataURL(url);
-    if (url && url.lastIndexOf(Url.baseEvalExprURL, 0) === 0)
+    if (url && url.startsWith(Url.baseEvalExprURL))
         return Url.splitEvalExprURL(url);
     return Url.splitURLTrue(url);
 };
