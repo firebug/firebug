@@ -410,6 +410,11 @@ Url.normalizeURL = function(url)  // this gets called a lot, any performance imp
 {
     if (!url)
         return "";
+
+    // Don't normalize url for evaluated expressions.
+    if (url.startsWith(Url.baseEvalExprURL))
+        return url;
+
     // Replace one or more characters that are not forward-slash followed by /.., by space.
     if (url.length < 255) // guard against monsters.
     {

@@ -316,12 +316,12 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
         url = options.urlForExpr || getUrlForEval(context, expr);
         evalMethodOptions["url"] = url;
         Trace.sysout("CommandLineExposed.evaluate; options.url: "+url);
+        // Add the source file before running the expression for issue 5432.
+        // To make "break on all error" work, the source file should exist before the evaluation.
+        addSourceFileForExpr(context, expr, url);
     }
 
     resObj = evalMethod.apply(subject, evalMethodArgs);
-
-    if (options.exprInScriptPanel)
-        addSourceFileForExpr(context, expr, url);
 
     // In case of abnormal termination, as if by the "slow script" dialog box,
     // do not print anything in the console.
