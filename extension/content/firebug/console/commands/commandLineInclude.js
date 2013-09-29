@@ -503,8 +503,9 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
             var successFunctionEval = function() { };
             // Let's use the default function to handle errors.
             var errorFunctionEval = null;
+            var options = {noCmdLineAPI: true, exprInScriptPanel: true, urlForExpr: absoluteURL};
             Firebug.CommandLine.evaluateInGlobal(codeToEval, context, undefined, undefined,
-                successFunctionEval, errorFunctionEval, undefined, {noCmdLineAPI: true});
+                successFunctionEval, errorFunctionEval, undefined, options);
 
             if (successFunction)
                 successFunction(xhr, hasWarnings);
