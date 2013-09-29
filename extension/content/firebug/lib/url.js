@@ -29,6 +29,10 @@ Url.reChrome = /chrome:\/\/([^\/]*)\//;
 Url.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 
 // ************************************************************************************************
+// Constants
+Url.baseEvalExprURL = "evaluated expressions";
+
+// ************************************************************************************************
 // URLs
 
 Url.getFileName = function(url)
@@ -47,6 +51,8 @@ Url.splitURLBase = function(url)
 {
     if (Url.isDataURL(url))
         return Url.splitDataURL(url);
+    if (url && url.lastIndexOf(Url.baseEvalExprURL, 0) === 0)
+        return Url.splitEvalExprURL(url);
     return Url.splitURLTrue(url);
 };
 
@@ -100,6 +106,22 @@ Url.splitDataURL = function(url)
     }
 
     return props;
+};
+
+Url.splitEvalExprURL = function(url)
+{
+    if (!url || !url.lastIndexOf(Url.baseEvalExprURL, 0) === 0)
+        return false;
+
+    return {
+        name: url.slice(Url.baseEvalExprURL.length + 1),
+        path: Url.baseEvalExprURL,
+    };
+};
+
+Url.generateUrlForEvalExpr = function(counter)
+{
+    return Url.baseEvalExprURL + "/" + "expression #" + counter;
 };
 
 const reSplitFile = /(.*?):\/{2,3}([^\/]*)(.*?)([^\/]*?)($|\?.*)/;

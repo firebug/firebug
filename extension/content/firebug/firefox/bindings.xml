@@ -1275,6 +1275,15 @@
 
             groupNames.sort();
 
+            // Place the evaluated expressions at the bottom of the list of the scripts.
+            var Url = Firebug.require("firebug/lib/url");
+            var indexOfEvalExpr = groupNames.indexOf(Url.baseEvalExprURL);
+            if (indexOfEvalExpr !== -1)
+            {
+                var path = groupNames.splice(indexOfEvalExpr, 1);
+                groupNames.push(path);
+            }
+
             for (var i = 0; i < groupNames.length; ++i)
             {
                 var path = groupNames[i];

@@ -6,11 +6,12 @@ define([
     "firebug/lib/object",
     "firebug/lib/wrapper",
     "firebug/lib/locale",
+    "firebug/lib/url",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/script/sourceFile",
     "firebug/console/commandLineAPI",
 ],
-function(Obj, Wrapper, Locale, DebuggerLib, SourceFile, CommandLineAPI) {
+function(Obj, Wrapper, Locale, Url, DebuggerLib, SourceFile, CommandLineAPI) {
 
 "use strict";
 
@@ -378,7 +379,8 @@ function getUrlForEval(context, expr)
     else
         context.evalCount++;
 
-    return "evaluated expressions/" + context.evalCount;
+    // xxxFlorent: maybe a timestamp rather than a counter?
+    return Url.generateUrlForEvalExpr(context.evalCount);
 }
 
 function addSourceFileForExpr(context, expr, href)
