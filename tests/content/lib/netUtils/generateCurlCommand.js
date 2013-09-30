@@ -26,7 +26,6 @@ function runTest()
 
             tasks.run(function ()
             {
-                FBTest.cleanUpTestTabs();
                 FBTest.testDone("generateCurlCommand.DONE");
             });
         });

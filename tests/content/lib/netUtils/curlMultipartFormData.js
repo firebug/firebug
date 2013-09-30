@@ -29,7 +29,7 @@ function runTest()
     {
         FBTest.enableNetPanel(function(win)
         {
-            panel = FW.Firebug.chrome.selectPanel("net");
+            panel = FBTest.selectPanel("net");
             panel.clear();
 
             var doc = win.document;
@@ -64,7 +64,6 @@ function onLoadResponseAndCompare()
 
     FBTest.compare(EXPECTED_RESULT, result, "Should be a valid multipart/form-data request");
 
-    FBTest.cleanUpTestTabs();
     FBTest.testDone("curlMultiPartFormData.DONE");
 }
 
