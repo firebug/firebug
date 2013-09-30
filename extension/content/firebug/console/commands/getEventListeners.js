@@ -22,6 +22,7 @@ function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Consol
 
 // Bug 912874 - New API to enumerate mutation observers
 // Bug 448602 - Have a way to enumerate event listeners
+// Issue 6740: Display registered MutationObservers for an element
 
 // ********************************************************************************************* //
 // Constants
@@ -30,15 +31,26 @@ var {domplate, SPAN, TAG, DIV} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 
+var mutationObservers = "MutationObservers";
+var parents = "Parents";
+
 // ********************************************************************************************* //
 // Module Implementation
 
 /**
  * @module The modules registers a console listeners that logs a pretty-printed
- * information about listeners and mutation observers for specific target.
- * The pretty-print log is made only for getEventListeners() return value, so
- * if the method is used within an expression it's always just the result of the expression
- * which is logged.
+ * information about listeners and mutation observers for a target element.
+ *
+ * The log lists listeners/observers registered for the target element as well as those
+ * registered for parent elements.
+ *
+ * The pretty-print log is made only for getEventListeners() return value. So, if the method
+ * is used within an expression where the return value is e.g. a particular
+ * listener, the pretty-print log is not created.
+ *
+ * Examples:
+ * > getEventListeners(target);             // pretty print log is created.
+ * > getEventListeners(target).click[0];    // pretty print log is not created.
  */
 var GetEventListenersModule = Obj.extend(Firebug.Module,
 /** @lends GetEventListenersModule */
@@ -76,11 +88,12 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
             return false;
 
         // Objects keys in the cache-map are using wrappers, so don't forget to
-        // wrap it before lookup.
+        // wrap it before lookup. The map is initialized within onExecuteCommand
+        // where the Console log object is created (and exposed to the content).
         object = Wrapper.wrapObject(object);
 
         // If the currently logged object is stored within the cache-map, we are dealing
-        // with a return value of getEventListeners() command. In such case append
+        // with a return value of getEventListeners() command. In such case we can append
         // additional pretty-printed info into the Console panel.
         var logInfo = cache.get(object);
         if (logInfo)
@@ -91,6 +104,10 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Command Implementation
 
+/**
+ * This function is executed by the framework when getEventListener() is executed
+ * on the command line. The first argument must be reference to the target element.
+ */
 function onExecuteCommand(context, args)
 {
     var target = args[0];
@@ -101,15 +118,27 @@ function onExecuteCommand(context, args)
     {
         var result = {};
 
-        // Get event listeners.
-        var listeners = getEventListenersForTarget(context, target);
-        if (listeners)
-            result = listeners;
+        // Get event listeners and construct the result log-object.
+        var listeners = getEventListeners(context, target);
+        var map = getListenerMap(context, listeners.targetListeners);
+        if (map)
+            result = map;
+
+        result[parents] = getListenerMap(context, listeners.parentListeners);
 
         // Append also mutation observers into the result (if there are any).
-        var observers = getMutationObserversForTarget(context, target);
-        if (observers && observers.length > 0)
-            result["MutationObservers"] = observers;
+        var observers = getMutationObservers(context, target);
+        if (observers.targetObservers && observers.targetObservers.length > 0)
+            result[mutationObservers] = observers.targetObservers;
+
+        if (observers.parentObservers && observers.parentObservers.length > 0)
+        {
+            if (!result[mutationObservers])
+                result[mutationObservers] = [];
+
+            var array = result[mutationObservers];
+            array[parents] = observers.parentObservers;
+        }
 
         // Make sure the result structure with listeners and observers is properly
         // cloned into the content scope.
@@ -145,103 +174,168 @@ function onExecuteCommand(context, args)
 // ********************************************************************************************* //
 // Event Listeners
 
-function getEventListenersForTarget(context, target)
+/**
+ * Get sorted list of listeners registered for the target and list of listeners
+ * registered for all ancestor elements.
+ */
+function getEventListeners(context, target)
 {
-    var listeners;
+    var targetListeners;
+    var parentListeners = [];
 
-    try
+    // Iterate also all parent nodes and look for listeners that can be
+    // executed during bubble phase.
+    var element = target;
+    while (element)
     {
-        listeners = Events.getEventListenersForTarget(target);
-    }
-    catch (exc)
-    {
-        TraceError.sysout("getEventListenersForTarget threw an EXCEPTION " + exc, exc);
-        return undefined;
+        try
+        {
+            var listeners = Events.getEventListenersForTarget(element);
+
+            // Listeners coming from parent elements are stored into
+            // parentListeners array.
+            if (!targetListeners)
+                targetListeners = listeners
+            else
+                parentListeners.push.apply(parentListeners, listeners);
+        }
+        catch (exc)
+        {
+            TraceError.sysout("getEventListenersForTarget threw an EXCEPTION " + exc, exc);
+            return undefined;
+        }
+
+        element = element.parentNode;
     }
 
-    // Sort listeners by type in alphabetical order, so they show up as such
-    // in the returned object.
-    listeners.sort(function(a, b)
+    function sort(a, b)
     {
         if (a.type === b.type)
             return 0;
         return (a.type < b.type ? -1 : 1);
-    });
+    }
+
+    // Sort listeners by type in alphabetical order, so they show up as such
+    // in the returned object.
+    targetListeners.sort(sort);
+    parentListeners.sort(sort);
+
+    return {
+        targetListeners: targetListeners,
+        parentListeners: parentListeners
+    }
+}
+
+/**
+ * Transform simple array of listeners into a structure that is directly logged
+ * into the Console panel. Note that this result log can be further inspected by the user
+ * within the DOM panel.
+ */
+function getListenerMap(context, listeners)
+{
+    if (!listeners)
+        return undefined;
 
     try
     {
+        var map = {};
         var global = context.getCurrentGlobal();
-        var result = {};
-        for (let li of listeners)
-        {
-            if (!result[li.type])
-                result[li.type] = [];
 
-            result[li.type].push(Wrapper.cloneIntoContentScope(global, {
+        for (var i = 0; i < listeners.length; i++)
+        {
+            var li = listeners[i];
+            if (!map[li.type])
+                map[li.type] = [];
+
+            map[li.type].push(Wrapper.cloneIntoContentScope(global, {
                 listener: li.func,
-                useCapture: li.capturing
+                useCapture: li.capturing,
+                target: li.target,
             }));
         }
 
-        return result;
+        return map;
     }
     catch (exc)
     {
         TraceError.sysout("getEventListeners FAILS to create content view " + exc, exc);
     }
-
-    return undefined;
 }
 
 // ********************************************************************************************* //
 // Mutation Observers
 
-function getMutationObserversForTarget(context, target)
+/**
+ * Get list of mutation observers registered for given target as well as list of observers
+ * registered for parent elements. Observers registered for parent elements must have
+ * 'subtree' flag set to 'true' to be included in the result list. 
+ */
+function getMutationObservers(context, target)
 {
-    var result = [];
-
-    // xxxHonza: avoid exception in preceding Firefox 23 versions (we can remove at some point).
-    if (typeof(target.getBoundMutationObservers) !== "function")
-        return undefined;
-
     var global = context.getCurrentGlobal();
+
+    var targetObservers;
+    var parentObservers = [];
 
     // Iterate all parent nodes and look for observers that are watching
     // also children nodes (subtree == true)
     var element = target;
     while (element)
     {
-        // Get all mutation observers registered for specified element.
-        var observers = element.getBoundMutationObservers();
-        for (var i=0; i<observers.length; i++)
-        {
-            var observer = observers[i];
-            var observingInfo = observer.getObservingInfo();
-            for (var j=0; j<observingInfo.length; j++)
-            {
-                var info = observingInfo[j];
+        var parent = targetObservers;
+        var result = getMutationObserversForTarget(context, element, parent);
 
-                // Get only observers that are registered for:
-                // a) the original target
-                // b) a parent element with subtree == true.
-                if (!info.subtree && element != target)
-                    continue;
-
-                // OK, insert the observer into the result array.
-                result.push(Wrapper.cloneIntoContentScope(global, {
-                    attributeOldValue: info.attributeOldValue,
-                    attributes: info.attributes,
-                    characterData: info.characterData,
-                    characterDataOldValue: info.characterDataOldValue,
-                    childList: info.childList,
-                    subtree: info.subtree,
-                    observedNode: info.observedNode,
-                    mutationCallback: observer.mutationCallback,
-                }));
-            }
-        }
+        if (!parent)
+            targetObservers = result;
+        else
+            parentObservers.push.apply(parentObservers, result);
 
         element = element.parentNode;
+    }
+
+    return {
+        targetObservers: targetObservers,
+        parentObservers: parentObservers
+    }
+}
+
+/**
+ * Get list of observers registered for specific target.
+ */
+function getMutationObserversForTarget(context, target, parent)
+{
+    var result = [];
+    var global = context.getCurrentGlobal();
+
+    // Get all mutation observers registered for given element.
+    // getBoundMutationObservers() API has been introduced in Firefox 23
+    var observers = target.getBoundMutationObservers();
+    for (var i=0; i<observers.length; i++)
+    {
+        var observer = observers[i];
+        var observingInfo = observer.getObservingInfo();
+        for (var j=0; j<observingInfo.length; j++)
+        {
+            var info = observingInfo[j];
+
+            // Get only observers that are registered for:
+            // a) the original target
+            // b) a parent element with subtree == true.
+            if (parent && !info.subtree)
+                continue;
+
+            // OK, insert the observer into the result array.
+            result.push(Wrapper.cloneIntoContentScope(global, {
+                attributeOldValue: info.attributeOldValue,
+                attributes: info.attributes,
+                characterData: info.characterData,
+                characterDataOldValue: info.characterDataOldValue,
+                childList: info.childList,
+                subtree: info.subtree,
+                observedNode: info.observedNode,
+                mutationCallback: observer.mutationCallback,
+            }));
+        }
     }
 
     return result;
@@ -254,14 +348,18 @@ function getMutationObserversForTarget(context, target)
  * Append pretty-printed information about listeners and mutation observers (for a target)
  * into the Console panel.
  */
-function consoleLog(context, target, listeners, observers)
+function consoleLog(context, target, listenersObj, observersObj)
 {
     var input = {
         target: target,
     };
 
-    // xxxHonza: fix me, this is the second time we get the listeners.
-    listeners = Events.getEventListenersForTarget(target);
+    // Display listeners registered for the target as well as any possible
+    // listeners registered for parent elements.
+    var listeners = [];
+    listeners.push.apply(listeners, listenersObj.targetListeners);
+    listeners.push.apply(listeners, listenersObj.parentListeners);
+
     if (listeners && listeners.length > 0)
     {
         // Group for event listeners list
@@ -269,9 +367,15 @@ function consoleLog(context, target, listeners, observers)
         var row = Console.openCollapsedGroup(input, context, "eventListenersDetails",
             GroupCaption, true, null, true);
 
-        TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func"], context);
+        TableRep.log(listeners, ["type", "capturing", "allowsUntrusted", "func", "target"], context);
         Console.closeGroup(context, true);
     }
+
+    // Similarly as for listeners, the observers list is computed for those observers
+    // registered for the target as well as those registered for any ancestor.
+    var observers = [];
+    observers.push.apply(observers, observersObj.targetObservers);
+    observers.push.apply(observers, observersObj.parentObservers);
 
     if (observers && observers.length > 0)
     {
@@ -281,8 +385,8 @@ function consoleLog(context, target, listeners, observers)
             GroupCaption, true, null, true);
 
         TableRep.log(observers, ["attributeOldValue", "attributes", "characterData",
-            "characterDataOldValue", "childList", "subtree", "observedNode",
-            "mutationCallback"], context);
+            "characterDataOldValue", "childList", "subtree", "mutationCallback",
+            "observedNode"], context);
 
         Console.closeGroup(context, true);
     }

@@ -516,27 +516,31 @@ Events.getEventListenersForTarget = function(target)
 {
     var listeners = elService.getListenerInfoFor(target, {});
     var ret = [];
-    for (var i = 0; i < listeners.length; ++i)
+    for (var i = 0; i < listeners.length; i++)
     {
         var rawListener = listeners[i];
         var listener = {
             type: rawListener.type,
             func: rawListener.listenerObject,
             capturing: rawListener.capturing,
-            allowsUntrusted: rawListener.allowsUntrusted
+            allowsUntrusted: rawListener.allowsUntrusted,
+            target: target,
         };
 
         // Skip chrome event listeners.
         if (!listener.func || rawListener.inSystemEventGroup)
             continue;
+
         var funcGlobal = Cu.getGlobalForObject(listener.func);
         if (!(funcGlobal instanceof Window))
             continue;
+
         if (funcGlobal.document.nodePrincipal.subsumes(document.nodePrincipal))
             continue;
 
         ret.push(listener);
     }
+
     return ret;
 };
 
