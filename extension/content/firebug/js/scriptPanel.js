@@ -735,6 +735,23 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         Css.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
+        this.initializeNotificationBox();
+
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
+        Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
+        Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
+        Events.addEventListener(this.panelNode, "scroll", this.onScroll, true);
+
+        Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
+    },
+
+    initializeNotificationBox: function()
+    {
+        var box = this.panelNode.getElementsByClassName("panelNotificationBox");
+        if (box.length > 0)
+            return;
+
         var prefName = Options.prefDomain + ".cache.responseLimit";
         var config = {
             message: Locale.$STR("script.SourceLimited"),
@@ -745,14 +762,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // Render panel notification box (hidden by default).
         this.notificationBox = PanelNotification.render(this.panelNode, config);
         Css.setClass(this.notificationBox, "panelNotificationBox collapsed");
-
-        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
-        Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
-        Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
-        Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
-        Events.addEventListener(this.panelNode, "scroll", this.onScroll, true);
-
-        Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -857,9 +866,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             return;
 
         var active = !this.showWarning();
-
         if (active)
         {
+            // The box might have been removed by the warning message.
+            this.initializeNotificationBox();
+
             Events.addEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
             Events.addEventListener(this.resizeEventTarget, "resize", this.onResize, true);
 
