@@ -551,6 +551,7 @@ var NetUtils =
     generateCurlCommand: function(file, addCompressedArgument)
     {
         var command = ["curl"];
+        var ignoredHeaders = {};
         var inferredMethod = "GET";
 
         function escapeCharacter(x)
@@ -588,6 +589,7 @@ var NetUtils =
         var data = [];
         var postText = NetUtils.getPostText(file, this.context, true);
         var isURLEncodedRequest = NetUtils.isURLEncodedRequest(file, this.context);
+        var isMultipartRequest = NetUtils.isMultiPartRequest(file, this.context);
 
         if (postText && isURLEncodedRequest || file.method == "PUT")
         {
@@ -597,13 +599,17 @@ var NetUtils =
             data.push("--data");
             data.push(escape(params));
 
+            // Ignore content length as cURL will resolve this
+            ignoredHeaders["Content-Length"] = true;
+
             inferredMethod = "POST";
         }
-        else if (postText && NetUtils.isMultiPartRequest(file, this.context))
+        else if (postText && isMultipartRequest)
         {
             data.push("--data-binary");
-            data.push(escape(postText));
+            data.push(escape(this.removeBinaryDataFromMultipartPostText(postText)));
 
+            ignoredHeaders["Content-Length"] = true;
             inferredMethod = "POST";
         }
 
@@ -618,6 +624,7 @@ var NetUtils =
         }
 
         // Add request headers
+        // fixme: for multipart request, content-type should be omitted
         var requestHeaders = file.requestHeaders;
         var postRequestHeaders = Http.getHeadersFromPostText(file.request, postText);
         var headers = requestHeaders.concat(postRequestHeaders);
@@ -625,10 +632,7 @@ var NetUtils =
         {
             var header = headers[i];
 
-            // Firefox and cURL creates the optional Content-Length header for POST and
-            // PUT requests. Omit adding this header as it is preferred to use the
-            // Content-Length cURL creates.
-            if (header.name.toLowerCase() == "content-length")
+            if (header.name in ignoredHeaders)
                 continue;
 
             command.push("-H");
@@ -643,7 +647,51 @@ var NetUtils =
             command.push("--compressed");
 
         return command.join(" ");
+    },
+
+    removeBinaryDataFromMultipartPostText: function (postText)
+    {
+        var textWithoutBinaryData = "";
+
+        var boundaryRe = /^--.+/gm;
+
+        var boundaryString = boundaryRe.exec(postText)[0];
+
+        var parts = postText.split(boundaryRe);
+
+        var part;
+        var contentDispositionLine;
+
+        for (var i = 0; i<parts.length; i++)
+        {
+            part = parts[i];
+
+            // The second line in a part holds the content disposition form-data
+            contentDispositionLine = part.split("\r\n")[1];
+
+            if (/^Content-Disposition: form-data/im.test(contentDispositionLine))
+            {
+                // filename= tells us that the form data is file input type
+                if (/filename=/im.test(contentDispositionLine))
+                {
+                    // For file input parts
+                    // Remove binary data. Only the Content-Disposition and Content-Type lines
+                    // should remain.
+                    textWithoutBinaryData += boundaryString
+                        + part.match(/[\r\n]+Content-Disposition.+$[\r\n]+Content-Type.+$[\r\n]+/im).toString();
+                }
+                else
+                {
+                    textWithoutBinaryData += boundaryString + part;
+                }
+            }
+        }
+
+        textWithoutBinaryData += boundaryString + "--\r\n";
+
+        return textWithoutBinaryData;
     }
+
 };
 
 // ********************************************************************************************* //
