@@ -11,8 +11,11 @@ define([
     "firebug/lib/locale",
     "firebug/chrome/reps",
     "firebug/chrome/window",
+    "firebug/chrome/panelActivation",
+    "firebug/lib/events",
 ],
-function(Firebug, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps, Win) {
+function(Firebug, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps, Win,
+    PanelActivation, Events) {
 
 "use strict";
 
@@ -22,15 +25,48 @@ function(Firebug, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, Firebug
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var {domplate, DIV, P} = Domplate;
+var {domplate, SPAN, P, DIV, BUTTON, TABLE, TR, TD, TBODY} = Domplate;
+
+var slowJSDBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
 
 // ********************************************************************************************* //
-// Domplate Templates
+// Domplate
 
 var slowJsdTag =
     P({"class": "slowJsdMessage disabledPanelDescription",
         style: "margin: 15px 0 15px 0; color: green"}
     );
+
+var slowJsdRep = domplate(Firebug.Rep,
+{
+    className: "text",
+
+    tag:
+        FirebugReps.OBJECTBOX(
+            TABLE({"style": "color: green"},
+                TBODY(
+                    TR(
+                        TD({"valign": "middle"},
+                            SPAN({"class": "slowJSD"})
+                        ),
+                        TD({"valign": "middle", "style": "white-space: nowrap;"},
+                            BUTTON({onclick: "$onClick"}, "Got It")
+                        )
+                    )
+                )
+            )
+        ),
+
+    onClick: function(event)
+    {
+        Options.set("showSlowJSDMessage", false);
+
+        var row = Dom.getAncestorByClass(event.target, "logRow");
+        row.parentNode.removeChild(row);
+
+        Events.cancelEvent(event);
+    }
+});
 
 // ********************************************************************************************* //
 
@@ -51,13 +87,50 @@ var KnownIssues = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         Firebug.registerUIListener(this);
+        PanelActivation.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
-
         Firebug.unregisterUIListener(this);
+        PanelActivation.removeListener(this);
+
+        Firebug.Module.shutdown.apply(this, arguments);
+    },
+
+    initContext: function(context)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+
+        // Initialize default value.
+        context.showSlowJSDMessage = Options.get("showSlowJSDMessage");
+
+        this.showSlowJSDMessage(context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    showSlowJSDMessage: function(context)
+    {
+        if (!context.showSlowJSDMessage)
+            return;
+
+        var consolePanel = context.getPanel("console");
+        if (!consolePanel)
+            return;
+
+        var row = Firebug.Console.log({}, context, "warn", slowJsdRep, true);
+
+        var parentNode = row.getElementsByClassName("slowJSD")[0];
+        FirebugReps.Description.render(Locale.$STR("knownissues.message.slowJSD"),
+            parentNode, Obj.bindFixed(Win.openNewTab, Win, slowJSDBugUrl));
+
+        context.showSlowJSDMessage = false;
+    },
+
+    onGotIt: function()
+    {
+        FBTrace.sysout("got it ", arguments)
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,10 +147,17 @@ var KnownIssues = Obj.extend(Firebug.Module,
         var box = parentNode.getElementsByClassName("disabledPanelDescription")[0];
         var message = slowJsdTag.insertAfter({}, box);
 
-        var url = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
         FirebugReps.Description.render(Locale.$STR("knownissues.message.slowJSD"),
-            message, Obj.bindFixed(Win.openNewTab, Win, url));
+            message, Obj.bindFixed(Win.openNewTab, Win, slowJSDBugUrl));
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // PanelActivation Listener
+
+    activationChanged: function(panelType, enable)
+    {
+        this.showSlowJSDMessage(Firebug.currentContext);
+    }
 });
 
 // ********************************************************************************************* //
