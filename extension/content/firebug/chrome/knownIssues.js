@@ -13,9 +13,10 @@ define([
     "firebug/chrome/window",
     "firebug/chrome/panelActivation",
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
 function(Firebug, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps, Win,
-    PanelActivation, Events) {
+    PanelActivation, Events, Css) {
 
 "use strict";
 
@@ -50,7 +51,9 @@ var slowJsdRep = domplate(Firebug.Rep,
                             SPAN({"class": "slowJSD"})
                         ),
                         TD({"valign": "middle", "style": "white-space: nowrap;"},
-                            BUTTON({onclick: "$onClick"}, "Got It")
+                            BUTTON({onclick: "$onClick"},
+                                Locale.$STR("knownissues.message.slowJSD.GotIt")
+                            )
                         )
                     )
                 )
@@ -112,25 +115,30 @@ var KnownIssues = Obj.extend(Firebug.Module,
 
     showSlowJSDMessage: function(context)
     {
+        // Do not display twice for this context
         if (!context.showSlowJSDMessage)
             return;
 
+        // The message is displayed only if the Console panel is enabled.
         var consolePanel = context.getPanel("console");
         if (!consolePanel)
             return;
 
+        // The message is displayed only if the Script panel is enabled.
+        var scriptPanel = context.getPanel("script");
+        if (!scriptPanel)
+            return;
+
         var row = Firebug.Console.log({}, context, "warn", slowJsdRep, true);
+
+        // xxxHonza: couldn't we have vertical centering (50%) for all ".logRow" elements?
+        row.setAttribute("style", "background-position: 4px 50%;")
 
         var parentNode = row.getElementsByClassName("slowJSD")[0];
         FirebugReps.Description.render(Locale.$STR("knownissues.message.slowJSD"),
             parentNode, Obj.bindFixed(Win.openNewTab, Win, slowJSDBugUrl));
 
         context.showSlowJSDMessage = false;
-    },
-
-    onGotIt: function()
-    {
-        FBTrace.sysout("got it ", arguments)
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
