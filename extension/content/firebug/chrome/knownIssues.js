@@ -120,13 +120,11 @@ var KnownIssues = Obj.extend(Firebug.Module,
             return;
 
         // The message is displayed only if the Console panel is enabled.
-        var consolePanel = context.getPanel("console");
-        if (!consolePanel)
+        if (!PanelActivation.isPanelEnabled(Firebug.getPanelType("console")))
             return;
 
         // The message is displayed only if the Script panel is enabled.
-        var scriptPanel = context.getPanel("script");
-        if (!scriptPanel)
+        if (!PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
             return;
 
         var row = Firebug.Console.log({}, context, "warn", slowJsdRep, true);
