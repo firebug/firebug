@@ -44,7 +44,7 @@ var slowJsdRep = domplate(Firebug.Rep,
 
     tag:
         FirebugReps.OBJECTBOX(
-            TABLE({"style": "color: green"},
+            TABLE(
                 TBODY(
                     TR(
                         TD({"valign": "middle"},
