@@ -44,7 +44,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        prefs.addObserver(Firebug.Options.getPrefDomain(), this, false);
+        prefs.addObserver(Options.getPrefDomain(), this, false);
         Firebug.connection.addListener(this);
     },
 
@@ -61,7 +61,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        prefs.removeObserver(Firebug.Options.getPrefDomain(), this, false);
+        prefs.removeObserver(Options.getPrefDomain(), this, false);
         Firebug.connection.removeListener(this);
     },
 
@@ -190,11 +190,12 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
         try
         {
             var panelName = parts[2];
-            var enable = Firebug.Options.get(panelName + ".enableSites");
-
-            var panelType = Firebug.getPanelType(panelName, enable);
+            var panelType = Firebug.getPanelType(panelName);
             if (panelType)
+            {
+                var enable = Options.get(panelName + ".enableSites");
                 this.onActivationChanged(panelType, enable);
+            }
         }
         catch (e)
         {
@@ -281,7 +282,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
             Firebug.allPagesActivation = "none";
         }
 
-        Firebug.Options.set("allPagesActivation", Firebug.allPagesActivation);
+        Options.set("allPagesActivation", Firebug.allPagesActivation);
         this.updateAllPagesActivation();
     },
 
