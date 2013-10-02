@@ -205,9 +205,16 @@ function getEventListeners(context, target, includeParents)
             // Listeners coming from parent elements are stored into
             // parentListeners array.
             if (!targetListeners)
-                targetListeners = listeners
+            {
+                targetListeners = listeners;
+            }
             else
-                parentListeners.push.apply(parentListeners, listeners);
+            {
+                parentListeners.push.apply(parentListeners, listeners.filter(function(listener)
+                {
+                    return Events.eventTypeBubblesToDocument(listener.type);
+                }));
+            }
         }
         catch (exc)
         {
@@ -219,7 +226,31 @@ function getEventListeners(context, target, includeParents)
         if (!includeParents)
             break;
 
-        element = element.parentNode;
+        // Use 'parentElement' so, document isn't included as a parent. The document
+        // object is special case handled below.
+        element = element.parentElement;
+    }
+
+    // Special case for document object.
+    var doc = target.ownerDocument;
+    if (doc && includeParents && target != doc)
+    {
+        var listeners = Events.getEventListenersForTarget(doc);
+        parentListeners.push.apply(parentListeners, listeners.filter(function(listener)
+        {
+            return Events.eventTypeBubblesToDocument(listener.type);
+        }));
+    }
+
+    // Special case for window object.
+    var win = doc && doc.defaultView;
+    if (win && includeParents && target != win)
+    {
+        var listeners = Events.getEventListenersForTarget(win);
+        parentListeners.push.apply(parentListeners, listeners.filter(function(listener)
+        {
+            return Events.eventTypeBubblesToDocument(listener.type);
+        }));
     }
 
     function sort(a, b)
@@ -325,8 +356,13 @@ function getMutationObserversForTarget(context, target, parent)
     var result = [];
     var global = context.getCurrentGlobal();
 
-    // Get all mutation observers registered for given element.
     // getBoundMutationObservers() API has been introduced in Firefox 23
+    // Also |window| that can be passed as an event target doeesn't implement
+    // the method.
+    if (typeof(target.getBoundMutationObservers) != "function")
+        return result;
+
+    // Get all mutation observers registered for given target.
     var observers = target.getBoundMutationObservers();
     for (var i=0; i<observers.length; i++)
     {
