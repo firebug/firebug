@@ -111,6 +111,8 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
 function onExecuteCommand(context, args)
 {
     var target = args[0];
+    var noParents = args[1] || false;
+
     if (typeof target !== "object" || target === null)
         return undefined;
 
@@ -119,18 +121,22 @@ function onExecuteCommand(context, args)
         var result = {};
 
         // Get event listeners and construct the result log-object.
-        var listeners = getEventListeners(context, target);
+        var listeners = getEventListeners(context, target, !noParents);
         var map = getListenerMap(context, listeners.targetListeners);
         if (map)
             result = map;
 
-        result[parents] = getListenerMap(context, listeners.parentListeners);
+        // parentListeners array is empty in case of noParents == true.
+        map = getListenerMap(context, listeners.parentListeners);
+        if (map)
+            result[parents] = map;
 
         // Append also mutation observers into the result (if there are any).
-        var observers = getMutationObservers(context, target);
+        var observers = getMutationObservers(context, target, !noParents);
         if (observers.targetObservers && observers.targetObservers.length > 0)
             result[mutationObservers] = observers.targetObservers;
 
+        // parentObservers array is empty in case of noParents == true.
         if (observers.parentObservers && observers.parentObservers.length > 0)
         {
             if (!result[mutationObservers])
@@ -176,9 +182,13 @@ function onExecuteCommand(context, args)
 
 /**
  * Get sorted list of listeners registered for the target and list of listeners
- * registered for all ancestor elements.
+ * registered for all ancestor elements (if required).
+ *
+ * @param context {TabContext} The current Firebug context.
+ * @param target {Object} The event target for which listeners should be returned.
+ * @param includeParents {Boolean} True if parent listeners should also be returned.
  */
-function getEventListeners(context, target)
+function getEventListeners(context, target, includeParents)
 {
     var targetListeners;
     var parentListeners = [];
@@ -204,6 +214,10 @@ function getEventListeners(context, target)
             TraceError.sysout("getEventListenersForTarget threw an EXCEPTION " + exc, exc);
             return undefined;
         }
+
+        // Break the loop if we don't need listeners for element ancestors.
+        if (!includeParents)
+            break;
 
         element = element.parentNode;
     }
@@ -233,7 +247,7 @@ function getEventListeners(context, target)
  */
 function getListenerMap(context, listeners)
 {
-    if (!listeners)
+    if (!listeners || !listeners.length)
         return undefined;
 
     try
@@ -267,10 +281,10 @@ function getListenerMap(context, listeners)
 
 /**
  * Get list of mutation observers registered for given target as well as list of observers
- * registered for parent elements. Observers registered for parent elements must have
- * 'subtree' flag set to 'true' to be included in the result list. 
+ * registered for parent elements (if required). Observers registered for parent elements
+ * must have 'subtree' flag set to 'true' to be included in the result list.
  */
-function getMutationObservers(context, target)
+function getMutationObservers(context, target, includeParents)
 {
     var global = context.getCurrentGlobal();
 
@@ -289,6 +303,10 @@ function getMutationObservers(context, target)
             targetObservers = result;
         else
             parentObservers.push.apply(parentObservers, result);
+
+        // Break the loop if observers registered for target ancestors aren't required.
+        if (!includeParents)
+            break;
 
         element = element.parentNode;
     }
