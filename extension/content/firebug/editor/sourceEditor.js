@@ -80,8 +80,16 @@ SourceEditor.DefaultConfig =
     firstLineNumber: 1,
     gutters: [bpGutter],
     fixedGutter: false,
-    readOnly: "nocursor",
-    showCursorWhenSelecting: true,
+
+    // Do not use "nocursor" to hide the cursor otherwise Ctrl+C doesn't work (see issue 6819)
+    readOnly: true,
+
+    // Hide the cursor setting its height and blink rate to zero (see issue 6794)
+    // cursorBlinkRate doesn't have to be actually zero, but safes one time interval.
+    cursorBlinkRate: 0,
+    cursorHeight: 0,
+
+    showCursorWhenSelecting: false,
     undoDepth: 200
 
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
