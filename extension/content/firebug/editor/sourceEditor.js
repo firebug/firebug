@@ -81,14 +81,6 @@ SourceEditor.DefaultConfig =
     gutters: [bpGutter],
     fixedGutter: false,
 
-    // Do not use "nocursor" to hide the cursor otherwise Ctrl+C doesn't work (see issue 6819)
-    readOnly: true,
-
-    // Hide the cursor setting its height and blink rate to zero (see issue 6794)
-    // cursorBlinkRate doesn't have to be actually zero, but safes one time interval.
-    cursorBlinkRate: 0,
-    cursorHeight: 0,
-
     showCursorWhenSelecting: false,
     undoDepth: 200
 
@@ -97,6 +89,16 @@ SourceEditor.DefaultConfig =
     // Just switch to the CSS panel and back to reproduce the problem.
     // autofocus: true
 };
+
+SourceEditor.ReadOnlyConfig = Obj.extend(SourceEditor.DefaultConfig, {
+    // Do not use "nocursor" to hide the cursor otherwise Ctrl+C doesn't work (see issue 6819)
+    readOnly: true,
+
+    // Hide the cursor setting its height and blink rate to zero (see issue 6794)
+    // cursorBlinkRate doesn't have to be actually zero, but safes one time interval.
+    cursorBlinkRate: 0,
+    cursorHeight: 0
+});
 
 SourceEditor.Events =
 {
@@ -178,8 +180,20 @@ SourceEditor.prototype =
         // Compute properties of the final newConfig object.
         for (var prop in SourceEditor.DefaultConfig)
         {
-            var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-            Object.defineProperty(newConfig, prop, genPropDesc(value));
+            if (SourceEditor.DefaultConfig.hasOwnProperty(prop))
+            {
+                var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
+                Object.defineProperty(newConfig, prop, genPropDesc(value));
+            }
+        }
+
+        for (var prop in config)
+        {
+            if (!newConfig[prop] && config.hasOwnProperty(prop))
+            {
+                var value = config[prop];
+                Object.defineProperty(newConfig, prop, genPropDesc(value));
+            }
         }
 
         var self = this;

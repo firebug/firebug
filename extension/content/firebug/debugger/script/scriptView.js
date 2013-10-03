@@ -74,7 +74,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Initialize source editor.
         this.editor = new SourceEditor();
-        this.editor.init(parentNode, SourceEditor.DefaultConfig, this.onEditorLoad.bind(this));
+        this.editor.init(parentNode, SourceEditor.ReadOnlyConfig, this.onEditorLoad.bind(this));
     },
 
     onEditorLoad: function()
