@@ -463,7 +463,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            var type = Url.getFileExtension(sourceLink.href);
+            var type = sourceLink.type || Url.getFileExtension(sourceLink.href);
             self.scriptView.showSource(lines.join(""), type);
 
             var options = sourceLink.getOptions();
