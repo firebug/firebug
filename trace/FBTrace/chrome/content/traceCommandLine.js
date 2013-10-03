@@ -16,7 +16,10 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-Cu["import"]("resource:///modules/source-editor.jsm");
+// xxxFlorent: The module doesn't exist anymore. Ideas?
+var SourceEditor;
+/*var devtools = Cu.import("resource://gre/modules/devtools/Loader.jsm", {}).devtools;
+var SourceEditor = devtools.require("devtools/sourceeditor/editor");*/
 Cu["import"]("resource://fbtrace/storageService.js");
 
 // ********************************************************************************************* //
@@ -28,7 +31,7 @@ var TraceCommandLine =
 
     onLoad: function(event)
     {
-        if (this.editor)
+        if (this.editor || !SourceEditor)
             return;
 
         this.editor = new SourceEditor();
