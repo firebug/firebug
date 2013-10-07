@@ -805,7 +805,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // This could be changed if we decide to have a context menu displayed for
         // right-click on a breakpoint (in the column bar) instead of the condition-editor.
         // See issue 4378
-        var content = Dom.getAncestorByClass(target, "CodeMirror");
+        // xxxFlorent: The breakpoint-zones are part of the CodeMirror DIV
+        //             Rather check whether the target is a textarea.
+        var content = target.tagName === "TEXTAREA";
         if (!content)
             return;
 
