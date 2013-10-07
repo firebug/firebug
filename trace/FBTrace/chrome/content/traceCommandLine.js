@@ -16,16 +16,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-var SourceEditor;
-try
-{
-    // SourceEditor is set with this importation.
-    SourceEditor = Cu.import("resource:///modules/devtools/sourceeditor/source-editor.jsm").SourceEditor;
-}
-catch(ex)
-{
-    dump("Error while getting the source editor: " + ex + "\n");
-}
+Cu["import"]("resource:///modules/source-editor.jsm");
 Cu["import"]("resource://fbtrace/storageService.js");
 
 // ********************************************************************************************* //
@@ -37,7 +28,7 @@ var TraceCommandLine =
 
     onLoad: function(event)
     {
-        if (this.editor || !SourceEditor)
+        if (this.editor)
             return;
 
         this.editor = new SourceEditor();
