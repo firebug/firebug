@@ -116,7 +116,7 @@ var KnownIssues = Obj.extend(Firebug.Module,
     showSlowJSDMessage: function(context)
     {
         // Do not display twice for this context
-        if (!context.showSlowJSDMessage)
+        if (!context || !context.showSlowJSDMessage)
             return;
 
         // The message is displayed only if the Console panel is enabled.
