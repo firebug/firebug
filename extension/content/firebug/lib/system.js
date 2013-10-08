@@ -13,6 +13,7 @@ function(FBTrace, Arr, Debug, Xpcom) {
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
+var Cu = Components.utils;
 
 var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
@@ -179,6 +180,37 @@ System.checkFirebugVersion = function(expectedVersion)
     var versionChecker = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1",
         "nsIVersionComparator");
     return versionChecker.compare(version, expectedVersion);
+};
+
+// ********************************************************************************************* //
+// JS Modules
+
+/**
+ * Allows importing a JS module (Firefox platform) and specify alternative locations
+ * to keep backward compatibility in case when the module location changes.
+ * It helps Firebug to support multiple Firefox versions.
+ *
+ * @param {Array} locations List of URLs to try when importing the module.
+ * @returns Scope of the imported module or an empty scope if module wasn't successfully loaded.
+ */
+System.importModule = function(locations)
+{
+    for (var i=0; i<locations.length; i++)
+    {
+        try
+        {
+            var moduleUrl = locations[i];
+            var scope = {};
+            Cu["import"](moduleUrl, scope);
+            return scope;
+        }
+        catch (err)
+        {
+        }
+    }
+
+    // Module wasn't loaded return an empty scope.
+    return {};
 };
 
 // ********************************************************************************************* //

@@ -9,8 +9,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/lib/system",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, System) {
 
 "use strict";
 
@@ -23,30 +24,16 @@ var MODE_JAVASCRIPT = "js";
 var CONTEXT_MENU = "";
 var TEXT_CHANGED = "";
 
-try
-{
-    // Introduced in Firefox 8
-    Cu["import"]("resource:///modules/source-editor.jsm");
-}
-catch (err)
-{
-    try
-    {
-        // URL changed in Firefox 27
-        Cu["import"]("resource:///modules/devtools/sourceeditor/source-editor.jsm");
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
-    }
-}
+// URL of source-editor.jsm changed in Firefox 27 (introduced in Firefox 8).
+var sourceEditorScope = System.importModule([
+    "resource:///modules/source-editor.jsm",
+    "resource:///modules/devtools/sourceeditor/source-editor.jsm"]);
 
-if (typeof(SourceEditor) != "undefined")
+if (typeof(sourceEditorScope.SourceEditor) != "undefined")
 {
-    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
-    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
-    TEXT_CHANGED = SourceEditor.EVENTS.TEXT_CHANGED;
+    MODE_JAVASCRIPT = sourceEditorScope.SourceEditor.MODES.JAVASCRIPT;
+    CONTEXT_MENU = sourceEditorScope.SourceEditor.EVENTS.CONTEXT_MENU;
+    TEXT_CHANGED = sourceEditorScope.SourceEditor.EVENTS.TEXT_CHANGED;
 }
 
 // ********************************************************************************************* //
@@ -69,8 +56,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         // support zooming. So, the TextEditor (based on textarea) can be used
         // by setting extensions.firebug.enableOrion pref to false.
         // See issue 5678
-        if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
-            this.editor = new SourceEditor();
+        if (typeof(sourceEditorScope.SourceEditor) != "undefined" && Options.get("enableOrion"))
+            this.editor = new sourceEditorScope.SourceEditor();
         else
             this.editor = new TextEditor();
 
@@ -278,7 +265,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor || !this.editor._view)
             return;
 
-        if (typeof(SourceEditor) != "undefined")
+        if (typeof(sourceEditorScope.SourceEditor) != "undefined")
         {
             // See issue 5488
             // var doc = this.editor._view._frame.contentDocument;
