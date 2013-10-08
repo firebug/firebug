@@ -6,16 +6,20 @@ define([
     "firebug/lib/xpcom"
 ],
 function(FBTrace, Xpcom) {
+
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const Cu = Components.utils;
+var Cu = Components.utils;
+
 var elService = Xpcom.CCSV("@mozilla.org/eventlistenerservice;1", "nsIEventListenerService");
-var Events = {};
 
 // ********************************************************************************************* //
+// Implementation
+
+var Events = {};
 
 Events.dispatch = function(listeners, name, args)
 {
@@ -318,18 +322,6 @@ const eventTypes =
         "DOMFocusOut"
     ],
 
-    // xxxHonza: As Simon says, XUL events must die!
-    /*xul: [
-        "popupshowing",
-        "popupshown",
-        "popuphiding",
-        "popuphidden",
-        "close",
-        "command",
-        "broadcast",
-        "commandupdate"
-    ],*/
-
     clipboard: [
         "cut",
         "copy",
@@ -421,6 +413,87 @@ Events.detachFamilyListeners = function(family, object, listener)
     var types = eventTypes[family];
     for (var i = 0; i < types.length; ++i)
         object.removeEventListener(types[i], listener, false);
+};
+
+// Table of non-bubbling event types. It's mostly okay if this gets slightly out
+// of date - most event types that don't bubble are only listened to on child
+// nodes, and therefore won't incorrectly appear in any UI.
+var nonBubbling = {
+    abort: 1,
+    begin: 1,
+    beginEvent: 1,
+    blur: 1,
+    canplay: 1,
+    canplaythrough: 1,
+    durationchange: 1,
+    emptied: 1,
+    end: 1,
+    ended: 1,
+    endEvent: 1,
+    error: 1,
+    focus: 1,
+    invalid: 1,
+    load: 1,
+    loadeddata: 1,
+    loadedmetadata: 1,
+    loadend: 1,
+    loadstart: 1,
+    mouseenter: 1,
+    mouseleave: 1,
+    pagehide: 1,
+    pageshow: 1,
+    pause: 1,
+    play: 1,
+    playing: 1,
+    progress: 1,
+    ratechange: 1,
+    readystatechange: 1,
+    repeat: 1,
+    repeatEvent: 1,
+    scroll: 1,
+    seeked: 1,
+    seeking: 1,
+    select: 1,
+    show: 1,
+    stalled: 1,
+    suspend: 1,
+    SVGLoad: 1,
+    SVGUnload: 1,
+    timeupdate: 1,
+    volumechange: 1,
+    waiting: 1,
+};
+
+// Return true if a type of DOM event bubbles.
+Events.eventTypeBubbles = function(type)
+{
+    // N.B.: Technically "scroll" is a special case here, since it only bubbles
+    // from document to window. But since we are only interested in elements we
+    // can ignore that.
+    return !nonBubbling.hasOwnProperty(type);
+};
+
+// Regex for event types that bubble from elements to document and window.
+// It's okay if this gets slightly out of date - it would only imply that some
+// event types in the event panel aren't listed on the nodes but as part of
+// "document" or "window" instead.
+var reBubblesToDocument = new RegExp("^(" +
+    "animation(start|end|iteration)|" +
+    "transitionend|" +
+    "click|dblclick|wheel|mouse(down|up|move)|" +
+    "composition(start|end|update)|" +
+    "keydown|keypress|keyup|input|contextmenu|" +
+    "DOM(AttrModified|NodeRemoved|NodeRemovedFromDocument|SubtreeModified|" +
+        "CharacterDataModified|NodeInserted|NodeInsertedIntoDocument)|" +
+    "drag(|end|enter|leave|over|start)|" +
+    "drop|copy|cut|paste|" +
+    "touch(cancel|enter|leave|move|start)" +
+")$");
+
+// Return true iff a type of event can bubble up from nodes to document and window.
+Events.eventTypeBubblesToDocument = function(type)
+{
+    return reBubblesToDocument.test(type);
 };
 
 // ********************************************************************************************* //
@@ -516,27 +589,31 @@ Events.getEventListenersForTarget = function(target)
 {
     var listeners = elService.getListenerInfoFor(target, {});
     var ret = [];
-    for (var i = 0; i < listeners.length; ++i)
+    for (var i = 0; i < listeners.length; i++)
     {
         var rawListener = listeners[i];
         var listener = {
             type: rawListener.type,
             func: rawListener.listenerObject,
             capturing: rawListener.capturing,
-            allowsUntrusted: rawListener.allowsUntrusted
+            allowsUntrusted: rawListener.allowsUntrusted,
+            target: target,
         };
 
         // Skip chrome event listeners.
         if (!listener.func || rawListener.inSystemEventGroup)
             continue;
+
         var funcGlobal = Cu.getGlobalForObject(listener.func);
         if (!(funcGlobal instanceof Window))
             continue;
+
         if (funcGlobal.document.nodePrincipal.subsumes(document.nodePrincipal))
             continue;
 
         ret.push(listener);
     }
+
     return ret;
 };
 

@@ -30,6 +30,8 @@
 .logGroupBody {
     display: none;
     margin-left: 16px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     border-left: 1px solid #D7D7D7;
     border-top: 1px solid #D7D7D7;
     background: #FFFFFF;
@@ -907,6 +909,7 @@
 
 /************************************************************************************************/
 /* include() command */
+
 .tableCommandLineInclude td {
     height: 17px;
 }
@@ -930,4 +933,30 @@
 .tableCommandLineInclude td:last-child {
     width: 75%;
     padding-right: 0 !important; 
+}
+
+/************************************************************************************************/
+/* getEventListeners() command */
+
+.logRow-eventListenersDetails .logGroup {
+    background: none;
+    background-color: rgb(244, 244, 244) !important;
+}
+
+.logRow-eventListenersDetails .logRow-table .logContent {
+    padding: 0;
+}
+
+.logRow-eventListenersDetails .logRow {
+    text-decoration: none !important;
+}
+
+.logRow-eventListenersDetails .eventListenersCaption:hover {
+    text-decoration: underline;
+
+/*************************************************************************************************/
+/* Description Box */
+
+.descriptionBox B {
+    font-weight: bold;
 }

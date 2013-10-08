@@ -126,6 +126,8 @@ var TableRep = domplate(Firebug.Rep,
             cols.push(value);
         }
 
+        Trace.sysout("tableRep.getColumns", {cols: cols, row: row});
+
         return cols;
     },
 

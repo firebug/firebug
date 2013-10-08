@@ -9,7 +9,8 @@ define([
     "firebug/lib/array",
 ],
 function(Firebug, Domplate, Locale, Css, Str, Arr) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -21,7 +22,7 @@ const reSelectorChar = /[-_0-9a-zA-Z]/;
 
 function SelectorEditor() {}
 
-SelectorEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
 {
     getAutoCompleteRange: function(value, offset)
     {
@@ -249,4 +250,4 @@ SelectorEditor.stripCompletedParens = function(list, postExpr)
 return SelectorEditor;
 
 // ********************************************************************************************* //
-}});
+});
