@@ -809,7 +809,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // right-click on a breakpoint (in the column bar) instead of the condition-editor.
         // See issue 4378
         var isCodeTarget = (target.tagName === "TEXTAREA" &&
-            Dom.getAncestorByClass("CodeMirror", target));
+            Dom.getAncestorByClass(target, "CodeMirror"));
 
         if (!isCodeTarget)
             return;
