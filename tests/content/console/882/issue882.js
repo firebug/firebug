@@ -13,7 +13,7 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 var panel = FBTest.getSelectedPanel();
-                var rows = panel.panelNode.getElementsByClassName("logRow");
+                var rows = panel.panelNode.getElementsByClassName("logRow-info");
 
                 var expected = [
                 {
