@@ -953,4 +953,10 @@
 
 .logRow-eventListenersDetails .eventListenersCaption:hover {
     text-decoration: underline;
+
+/*************************************************************************************************/
+/* Description Box */
+
+.descriptionBox B {
+    font-weight: bold;
 }
