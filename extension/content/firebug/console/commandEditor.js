@@ -26,8 +26,8 @@ var TEXT_CHANGED = "";
 
 // URL of source-editor.jsm changed in Firefox 27 (introduced in Firefox 8).
 var sourceEditorScope = System.importModule([
-    "resource:///modules/source-editor.jsm",
-    "resource:///modules/devtools/sourceeditor/source-editor.jsm"]);
+    "resource:///modules/devtools/sourceeditor/source-editor.jsm",
+    "resource:///modules/source-editor.jsm"]);
 
 if (typeof(sourceEditorScope.SourceEditor) != "undefined")
 {
