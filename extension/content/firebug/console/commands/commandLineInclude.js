@@ -56,7 +56,7 @@ var defaultAliases = {
 // ********************************************************************************************* //
 // Implementation
 
-var CommandLineIncludeRep = domplate(TableRep, 
+var CommandLineIncludeRep = domplate(TableRep,
 {
     tableClassName: "tableCommandLineInclude dataTable",
 
@@ -134,7 +134,7 @@ var CommandLineIncludeRep = domplate(TableRep,
         ];
 
         var input = new CommandLineIncludeObject();
-        CommandLineInclude._log(arrayToDisplay, columns, context, input);
+        this.log(arrayToDisplay, columns, context, input);
         return returnValue;
     },
 
