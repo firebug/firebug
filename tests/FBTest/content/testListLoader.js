@@ -220,9 +220,7 @@ var TestListLoader =
     {
         // Some CSS from Firebug namespace.
         // xxxHonza: there should be no dependency on Firebug's CSS styles.
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/dom.css"));
         Css.addStyleSheet(doc, Css.createStyleSheet(doc, "resource://firebugui/panel.css"));
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/console.css"));
 
         // Append specific FBTest CSS.
         var styles = ["testConsole.css", "testList.css", "testResult.css", "tabView.css"];
