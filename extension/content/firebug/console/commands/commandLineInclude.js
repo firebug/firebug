@@ -56,7 +56,7 @@ var defaultAliases = {
 // ********************************************************************************************* //
 // Implementation
 
-var CommandLineIncludeRep = domplate(FirebugReps.Table,
+var CommandLineIncludeRep = domplate(TableRep, 
 {
     tableClassName: "tableCommandLineInclude dataTable",
 
