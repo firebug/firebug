@@ -245,7 +245,7 @@ function createFirebugConsole(context, win)
 
     console.table = function(data, columns)
     {
-        TableRep.log(data, columns, context);
+        TableRep.log(data, columns, context, undefined, {"showIndex": true});
         return Console.getDefaultReturnValue();
     };
 

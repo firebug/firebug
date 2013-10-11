@@ -252,14 +252,27 @@ var TableRep = domplate(Firebug.Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Console logging
 
-    log: function(data, cols, context, object)
+    log: function(data, cols, context, object, options)
     {
         // No arguments passed into console.table method, bail out for now,
         // but some error message could be displayed in the future.
         if (!data)
             return;
 
+        options = options || {};
+
         var columns = this.computeColumns(data, cols);
+
+        if (options.showIndex && columns.length)
+        {
+            columns.unshift({
+                property: "(index)",
+                label: "(index)",
+                alphaValue: false
+            });
+            for (var i = 0; i < data.length; i++)
+                data[i]["(index)"] = i;
+        }
 
         // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
