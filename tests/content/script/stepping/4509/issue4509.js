@@ -12,7 +12,10 @@ function runTest()
         var tasks = new FBTest.TaskList();
         tasks.push(testViaContextMenu);
         tasks.push(testViaCtrlClick);
-        tasks.push(testViaMiddleClick);
+
+        // xxxHonza: sending middle click event breaks the test-harness.
+        // All the following test from script/watch group fails 
+        //tasks.push(testViaMiddleClick);
 
         tasks.run(function()
         {
@@ -34,7 +37,6 @@ function testViaContextMenu(callback)
         // asynchronously and we could miss the break.
         FBTest.waitForBreakInDebugger(null, 12, false, function(row)
         {
-            FBTest.progress("2");
             verifyResults(row, callback);
         });
 
