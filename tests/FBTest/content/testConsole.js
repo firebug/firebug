@@ -259,10 +259,31 @@ FBTestApp.TestConsole =
     updateTestCount: function(groups)
     {
         var count = 0;
+        var disabledTests = 0;
         for (var i=0; groups && i<groups.length; i++)
-            count += groups[i].tests.length;
+        {
+            var group = groups[i];
+            for (var j=0; j<group.tests.length; j++)
+            {
+                var test = group.tests[j];
+                if (test.disabled)
+                    disabledTests++;
+                else
+                    count++;
+            }
+        }
 
         Firebug.chrome.$("testCount").value = count;
+
+        if (disabledTests > 0)
+        {
+            Firebug.chrome.$("disabledTestCount").value = "(" +
+                Locale.$STR("fbtest.DisabledTests") + ": " + disabledTests + ")";
+        }
+        else
+        {
+            Firebug.chrome.$("disabledTestCount").value = "";
+        }
     },
 
     setAndLoadTestList: function()

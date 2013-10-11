@@ -89,6 +89,10 @@
     cursor:pointer;
 }
 
+.testLink A {
+    color: inherit;
+}
+
 .testLink:hover {
     text-decoration:underline;
 }
