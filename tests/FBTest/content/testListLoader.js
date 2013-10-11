@@ -206,6 +206,10 @@ var TestListLoader =
             realTest.driverBaseURI = driverBaseURI;
             realTest.testCasePath = testCasePath;
             realTest.testIncludes = testIncludes;
+            realTest.disabled = test.disabled ? true : false;
+
+            if (test.disabled)
+                realTest.tooltip = test.disabled;
 
             group.tests.push(realTest);
         }
