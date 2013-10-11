@@ -48,7 +48,9 @@ function runTest()
 
                     // Check the Console panel
                     var panelNode = FBTest.selectPanel("console").panelNode;
-                    var log = panelNode.querySelector(".objectBox.objectBox-text");
+                    var selector = ".logRow.logRow-log .objectBox.objectBox-text";
+                    var log = panelNode.querySelector(selector);
+
                     FBTest.compare("init", (log ? log.textContent : ""),
                         "there must be one log in the console.");
 
