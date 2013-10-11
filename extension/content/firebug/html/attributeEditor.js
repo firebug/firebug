@@ -2,7 +2,6 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/domplate",
     "firebug/lib/events",
@@ -10,7 +9,7 @@ define([
     "firebug/editor/inlineEditor",
     "firebug/html/htmlReps",
 ],
-function(Firebug, Css, Dom, Domplate, Events, Xml, InlineEditor, HTMLReps) {
+function(Firebug, Dom, Domplate, Events, Xml, InlineEditor, HTMLReps) {
 
 // ********************************************************************************************* //
 // AttributeEditor
@@ -28,49 +27,78 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
         if (!element)
             return;
 
-        if (Css.hasClass(target, "nodeName"))
-        {
-            // For HTML elements, make the attribute name into lower case to match
-            // what it gets normalized to by the browser - otherwise we will be
-            // fooled into thinking that an extra attribute has appeared (issue 6996).
-            if (Xml.isElementHTML(element))
-                value = value.toLowerCase();
+        // For HTML elements, make the attribute name into lower case to match
+        // what it gets normalized to by the browser - otherwise we will be
+        // fooled into thinking that an extra attribute has appeared (issue 6996).
+        if (target.classList.contains("nodeName") && Xml.isElementHTML(element))
+            value = value.toLowerCase();
 
-            if (value != previousValue)
+        target.textContent = value;
+
+        // Note: attribute name changes are saved in endEditing, to prevent overwriting
+        // existing attributes.
+
+        if (target.classList.contains("nodeValue") && value !== previousValue)
+        {
+            var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
+            element.setAttribute(attrName, value);
+
+            var panel = Firebug.getElementPanel(target);
+            Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
+        }
+    },
+
+    beginEditing: function(target, value)
+    {
+        this.initialValue = value;
+    },
+
+    endEditing: function(target, value, cancel)
+    {
+        var previousValue = this.initialValue;
+        delete this.initialValue;
+
+        if (!cancel && value !== previousValue &&
+            target.classList.contains("nodeName"))
+        {
+            // Save changed attribute names here instead of in saveEdit, because otherwise
+            // unrelated properties might get discarded.
+            var element = Firebug.getRepObject(target);
+            if (!element)
+                return;
+
+            if (previousValue)
+            {
                 element.removeAttribute(previousValue);
+            }
 
             if (value)
             {
                 var attrValue = Dom.getNextByClass(target, "nodeValue").textContent;
                 element.setAttribute(value, attrValue);
             }
-            else
-            {
-                element.removeAttribute(value);
-            }
-        }
-        else if (Css.hasClass(target, "nodeValue"))
-        {
-            var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
-            element.setAttribute(attrName, value);
+
+            var panel = Firebug.getElementPanel(target);
+            Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
         }
 
-        target.textContent = value;
+        // Remove group unless it is valid for it to be empty.
+        return !this.emptyIsValid(target);
+    },
 
-        var panel = Firebug.getElementPanel(target);
-        Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
-
-        //this.panel.markChange();
+    emptyIsValid: function(target)
+    {
+        return target.classList.contains("nodeValue");
     },
 
     advanceToNext: function(target, charCode)
     {
-        if (charCode == 61 /* '=' */ && Css.hasClass(target, "nodeName"))
+        if (charCode == 61 /* '=' */ && target.classList.contains("nodeName"))
         {
             return true;
         }
         else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) &&
-            Css.hasClass(target, "nodeValue"))
+            target.classList.contains("nodeValue"))
         {
             var nonRestrictiveAttributes =
             [
@@ -112,6 +140,31 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
         }
     },
 
+    getAutoCompleteList: function(preExpr, expr, postExpr, range, cycle, context, out)
+    {
+        var target = this.target;
+        var element = Firebug.getRepObject(target);
+        if (!element)
+            return;
+
+        var nodeType = Xml.getElementSimpleType(element);
+        var tagName = element.localName;
+        if (target.classList.contains("nodeName"))
+        {
+            var list = Xml.getAttributesForTagName(nodeType, tagName);
+            var initialValue = this.initialValue;
+            return list.filter(function(name)
+            {
+                return (name === initialValue || !element.hasAttribute(name));
+            });
+        }
+        else if (target.classList.contains("nodeValue"))
+        {
+            var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
+            return Xml.getValuesForAttribute(nodeType, tagName, attrName);
+        }
+    },
+
     insertNewRow: function(target, insertWhere)
     {
         var emptyAttr = {name: "", value: ""};
@@ -129,7 +182,7 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
         {
             // If object that was clicked to edit was
             // attribute value, not attribute name.
-            if (Css.hasClass(target, "nodeValue"))
+            if (target.classList.contains("nodeValue"))
             {
                 var attributeName = Dom.getPreviousByClass(target, "nodeName").textContent;
                 return element.getAttribute(attributeName);

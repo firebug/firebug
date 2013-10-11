@@ -110,8 +110,9 @@ Firebug.Editor = Obj.extend(Module,
         if (!currentTarget)
             return;
 
+        var value = currentEditor.getValue();
         Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose", [currentPanel,
-            currentTarget, !originalValue]);
+            currentTarget, !value]);
 
         this.stopEditing();
     },
@@ -292,10 +293,11 @@ Firebug.Editor = Obj.extend(Module,
             return;
 
         var value = currentEditor.getValue();
+        var skipEmptyGroup = (!value && currentGroup && !currentEditor.emptyIsValid(currentTarget));
         var nextEditable = currentTarget;
         do
         {
-            nextEditable = !value && currentGroup
+            nextEditable = skipEmptyGroup
                 ? getNextOutsider(nextEditable, currentGroup)
                 : Dom.getNextByClass(nextEditable, "editable");
         }
@@ -310,10 +312,11 @@ Firebug.Editor = Obj.extend(Module,
             return;
 
         var value = currentEditor.getValue();
+        var skipEmptyGroup = (!value && currentGroup && !currentEditor.emptyIsValid(currentTarget));
         var prevEditable = currentTarget;
         do
         {
-            prevEditable = !value && currentGroup
+            prevEditable = skipEmptyGroup
                 ? getPreviousOutsider(prevEditable, currentGroup)
                 : Dom.getPreviousByClass(prevEditable, "editable");
         }
