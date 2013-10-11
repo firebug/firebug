@@ -29,13 +29,16 @@ function testViaContextMenu(callback)
         var sourceRow = row.nextSibling.nextSibling.
             getElementsByClassName("sourceRowText").item(0);
 
-        FBTest.executeContextMenuCommand(sourceRow, {id: "contextMenuRunUntil"}, function()
+        // Register break-listener before executing the context menu
+        // command. The callback for executeContextMenuCommand is called
+        // asynchronously and we could miss the break.
+        FBTest.waitForBreakInDebugger(null, 12, false, function(row)
         {
-            FBTest.waitForBreakInDebugger(null, 12, false, function(row)
-            {
-                verifyResults(row, callback);
-            });
+            FBTest.progress("2");
+            verifyResults(row, callback);
         });
+
+        FBTest.executeContextMenuCommand(sourceRow, {id: "contextMenuRunUntil"});
     });
 
     FBTest.reload();
