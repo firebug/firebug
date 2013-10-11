@@ -2679,8 +2679,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
+        // xxxHonza: do not pause the debugger (see issue 6086).
+
         // can be called multiple times.
-        var paused = FBS.pause(this.debuggerName);
+        //var paused = FBS.pause(this.debuggerName);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2690,8 +2692,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Firebug is activated on another tab.
         // The start-button should somehow reflect that JSD can be still active (even if
         // Firebug is suspended for the current tab).
-        if (!paused)  // then we failed to suspend, undo
-            return true;
+        //if (!paused)  // then we failed to suspend, undo
+        //    return true;
 
         return false;
     },
@@ -2701,7 +2703,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        var unpaused = FBS.unPause();
+        //var unpaused = FBS.unPause();
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
