@@ -111,7 +111,7 @@ FBTestApp.TestConsole =
     {
         try
         {
-            // xxxHonza: initialization would deserve to be done throug a dispatched event.
+            // xxxHonza: initialization would deserve to be done through a dispatched event.
             FBTestApp.TestWindowLoader.initialize();
 
             // Display the current version.
@@ -299,7 +299,7 @@ FBTestApp.TestConsole =
         this.appendToHistory("", this.testCasePath, this.driverBaseURI);
 
         // xxxHonza: this is a workaround, the test-case server isn't stored into the
-        // preferences in shutdown when the Firefox is restared by "Restart Firefox"
+        // preferences in shutdown when the Firefox is restarted by "Restart Firefox"
         // button in the FBTrace console.
         Firebug.setPref(FBTestApp.prefDomain, "defaultTestCaseServer", this.testCasePath);
 
