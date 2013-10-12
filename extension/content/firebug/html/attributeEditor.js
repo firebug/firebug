@@ -165,6 +165,13 @@ AttributeEditor.prototype = Domplate.domplate(InlineEditor.prototype,
         }
     },
 
+    autoCompleteAdjustSelection: function(value, offset)
+    {
+        if (offset >= 2 && value.substr(offset-2, 2) === "()")
+            return offset-1;
+        return offset;
+    },
+
     insertNewRow: function(target, insertWhere)
     {
         var emptyAttr = {name: "", value: ""};
