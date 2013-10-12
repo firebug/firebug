@@ -56,7 +56,11 @@ Firebug.Editor = Obj.extend(Module,
 
     startEditing: function(target, value, editor, selectionData)
     {
-        this.stopEditing();
+        // If target and currentTarget have the same group, make sure not to
+        // remove that group when editing stops.
+        var nextGroup = Dom.getAncestorByClass(target, "editGroup");
+        var sameGroup = (nextGroup === currentGroup);
+        this.stopEditing(false, sameGroup);
 
         if (target.classList.contains("insertBefore") || target.classList.contains("insertAfter"))
             return;
@@ -79,7 +83,7 @@ Firebug.Editor = Obj.extend(Module,
         invalidEditor = false;
         currentTarget = target;
         currentPanel = panel;
-        currentGroup = Dom.getAncestorByClass(target, "editGroup");
+        currentGroup = nextGroup;
 
         currentPanel.editing = true;
 
@@ -117,7 +121,7 @@ Firebug.Editor = Obj.extend(Module,
         this.stopEditing();
     },
 
-    stopEditing: function(cancel)
+    stopEditing: function(cancel, noRemoveEmpty)
     {
         if (!currentTarget)
             return;
@@ -175,7 +179,7 @@ Firebug.Editor = Obj.extend(Module,
                 if (removeGroup && !originalValue && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
-            else if (!value)
+            else if (!value && !noRemoveEmpty)
             {
                 this.saveEditAndNotifyListeners(currentTarget, "", previousValue);
 
@@ -292,6 +296,8 @@ Firebug.Editor = Obj.extend(Module,
         if (!currentTarget)
             return;
 
+        // If the value is empty, then jumping to a dependent editor doesn't
+        // make sense, so we instead skip out of the group.
         var value = currentEditor.getValue();
         var skipEmptyGroup = (!value && currentGroup && !currentEditor.emptyIsValid(currentTarget));
         var nextEditable = currentTarget;
@@ -311,14 +317,10 @@ Firebug.Editor = Obj.extend(Module,
         if (!currentTarget)
             return;
 
-        var value = currentEditor.getValue();
-        var skipEmptyGroup = (!value && currentGroup && !currentEditor.emptyIsValid(currentTarget));
         var prevEditable = currentTarget;
         do
         {
-            prevEditable = skipEmptyGroup
-                ? getPreviousOutsider(prevEditable, currentGroup)
-                : Dom.getPreviousByClass(prevEditable, "editable");
+            prevEditable = Dom.getPreviousByClass(prevEditable, "editable");
         }
         while (prevEditable && !prevEditable.offsetHeight);
 
@@ -863,11 +865,6 @@ function isGroupInsert(next, group)
 function getNextOutsider(element, group)
 {
     return getOutsider(element, group, Obj.bind(Dom.getNextByClass, Dom, "editable"));
-}
-
-function getPreviousOutsider(element, group)
-{
-    return getOutsider(element, group, Obj.bind(Dom.getPreviousByClass, Dom, "editable"));
 }
 
 function insertTab()
