@@ -1131,7 +1131,7 @@ Css.cssInfo.html =
 
 Css.cssInfo.svg =
 {
-    "alignment-baseline": ["svgAlignmentBaseline"],
+    "alignment-baseline": ["alignmentBaseline"],
     "baseline-shift": ["baselineShift"],
     "clip": ["auto", "length"],
     "clip-path": ["url()", "none"],
