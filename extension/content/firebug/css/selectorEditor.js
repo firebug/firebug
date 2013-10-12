@@ -2,14 +2,15 @@
 
 define([
     "firebug/firebug",
-    "firebug/lib/domplate",
-    "firebug/lib/css",
-    "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/lib/css",
+    "firebug/lib/domplate",
+    "firebug/lib/string",
     "firebug/chrome/window",
     "firebug/editor/inlineEditor",
+    "firebug/css/autoCompleter",
 ],
-function(Firebug, Domplate, Css, Str, Arr, Win, InlineEditor) {
+function(Firebug, Arr, Css, Domplate, Str, Win, InlineEditor, CSSAutoCompleter) {
 
 "use strict";
 
@@ -183,7 +184,7 @@ SelectorEditor.prototype = Domplate.domplate(InlineEditor.prototype,
                 ":before"
             );
 
-            ret.push.apply(ret, SelectorEditor.stripCompletedParens(Css.pseudoClasses, postExpr));
+            ret.push.apply(ret, CSSAutoCompleter.stripCompletedParens(Css.pseudoClasses, postExpr));
         }
 
         if (includePseudoElements && hasAnyElements)
@@ -242,23 +243,6 @@ SelectorEditor.prototype = Domplate.domplate(InlineEditor.prototype,
     }
 });
 
-
-// Transform completions so that they don't add additional parentheses when
-// ones already exist.
-SelectorEditor.stripCompletedParens = function(list, postExpr)
-{
-    var c = postExpr.charAt(0), rem = 0;
-    if (c === "(")
-        rem = 2;
-    else if (c === ")")
-        rem = 1;
-    else
-        return list;
-    return list.map(function(cl)
-    {
-        return (cl.slice(-2) === "()" ? cl.slice(0, -rem) : cl);
-    });
-};
 
 // ********************************************************************************************* //
 // Registration

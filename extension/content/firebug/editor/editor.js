@@ -539,7 +539,7 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
         lastIndex = null;
     };
 
-    this.acceptCompletion = function(textBox)
+    this.acceptCompletion = function(textBox, adjustData)
     {
         if (!adjustSelectionOnAccept)
             return false;
@@ -550,10 +550,11 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator, getNewPropS
         if (!candidates || value !== lastValue || offset !== lastOffset || offset >= offsetEnd)
             return false;
 
-        var ind = adjustSelectionOnAccept(value, offsetEnd);
+        var ind = adjustSelectionOnAccept(value, offsetEnd, adjustData);
         if (ind === null)
             return false;
 
+        Firebug.Editor.update();
         textBox.setSelectionRange(ind, ind);
         return true;
     };

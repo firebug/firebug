@@ -1,20 +1,16 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/xpcom",
-    "firebug/lib/events",
-    "firebug/lib/url",
     "firebug/lib/css",
-    "firebug/chrome/window",
-    "firebug/lib/xml",
+    "firebug/lib/events",
+    "firebug/lib/object",
     "firebug/lib/options",
-    "firebug/lib/array",
+    "firebug/lib/xpcom",
+    "firebug/chrome/module",
     "firebug/editor/editorSelector"
 ],
-function(Module, Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr, EditorSelector) {
+function(Firebug, Css, Events, Obj, Options, Xpcom, Module, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
