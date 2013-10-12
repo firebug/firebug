@@ -511,7 +511,7 @@ tagAttributesMap.svg.feFuncB.type =
 
 (function()
 {
-    // Add attributes values en masse where specifying them for each
+    // Add some attributes values en masse where specifying them for each
     // tag name would have been annoying.
     var commonAttributes = {
         "transform": ["matrix()", "translate()", "scale()", "rotate()", "skewX()", "skewY()"],
@@ -539,6 +539,28 @@ tagAttributesMap.svg.feFuncB.type =
 commonAttributes.svg = [];
 commonAttributesMap.svg = {};
 
+var presentationalSVG =
+{
+    a: 1, altGlyph: 1, animate: 1, animateColor: 1, circle: 1, clipPath: 1,
+    defs: 1, ellipse: 1, feBlend: 1, feColorMatrix: 1, feComponentTransfer: 1,
+    feComposite: 1, feConvolveMatrix: 1, feDiffuseLighting: 1,
+    feDisplacementMap: 1, feFlood: 1, feGaussianBlur: 1, feImage: 1, feMerge: 1,
+    feMorphology: 1, feOffset: 1, feSpecularLighting: 1, feTile: 1,
+    feTurbulence: 1, filter: 1, font: 1, foreignObject: 1, g: 1, glyph: 1,
+    glyphRef: 1, image: 1, line: 1, linearGradient: 1, marker: 1, mask: 1,
+    "missing-glyph": 1, path: 1, pattern: 1, polygon: 1, polyline: 1,
+    radialGradient: 1, rect: 1, stop: 1, svg: 1, "switch": 1, symbol: 1, text: 1,
+    textPath: 1, tref: 1, tspan: 1, use: 1
+};
+
+Xml.isPresentationalSVG = function(nodeType, tagName)
+{
+    return (nodeType === "svg" && presentationalSVG.hasOwnProperty(tagName));
+};
+
+// Note: Xml.getPresentationalSVGProperties gets injected from lib/css,
+// because we can't have dependency cycles.
+
 Xml.getAttributesForTagName = function(nodeType, tagName)
 {
     if (!tagAttributes.hasOwnProperty(nodeType))
@@ -548,6 +570,12 @@ Xml.getAttributesForTagName = function(nodeType, tagName)
     if (tagAttributes[nodeType].hasOwnProperty(tagName))
         ret = ret.concat(tagAttributes[nodeType][tagName]);
     ret = ret.concat(commonAttributes[nodeType]);
+    if (Xml.isPresentationalSVG(nodeType, tagName) &&
+        Xml.getPresentationalSVGProperties)
+    {
+        var presentational = Xml.getPresentationalSVGProperties();
+        ret = ret.concat(Object.keys(presentational));
+    }
     return ret;
 };
 
@@ -562,6 +590,13 @@ Xml.getValuesForAttribute = function(nodeType, tagName, attribute)
         tagAttributesMap[nodeType][tagName].hasOwnProperty(attribute))
     {
         return tagAttributesMap[nodeType][tagName][attribute] || [];
+    }
+    if (Xml.isPresentationalSVG(nodeType, tagName) &&
+        Xml.getPresentationalSVGProperties)
+    {
+        var presentational = Xml.getPresentationalSVGProperties();
+        if (presentational.hasOwnProperty(attribute))
+            return presentational[attribute];
     }
     return [];
 };
