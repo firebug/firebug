@@ -168,6 +168,26 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* xxxFlorent: I think we should emphasize the completion value in some ways.
+ * xxxFlorent: Maybe rather emphasize with a red blinking border (like DOMInspector)?
+ */
+
+/* Emphasize the completion value. */
+.memberRow.completionValue {
+    animation: emphasizeCompletion 2s ease;
+    /*background-color:orange;*/
+}
+
+@keyframes emphasizeCompletion {
+    from {
+        background-color: orange;
+    }
+    to {
+        background-color: inherit;
+    }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .watchEditCell {
     padding: 2px 18px;
