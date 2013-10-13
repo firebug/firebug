@@ -535,7 +535,36 @@ tagAttributesMap.svg.feFuncB.type =
             }
         }
     }
+
+    // Remove attributes unimplemented in Firefox, going by the commented-out lines in:
+    // http://dxr.mozilla.org/mozilla-central/source/content/base/src/nsTreeSanitizer.cpp
+    // (Up to date as of Firefox 27, but it doesn't seem to change much.)
+    var unimplementedAttributes = {
+        "accent-height": 1, "alphabetic": 1, "arabic-form": 1, "ascent": 1,
+        "baseProfile": 1, "bbox": 1, "cap-height": 1, "contentScriptType": 1,
+        "contentStyleType": 1, "descent": 1, "g1": 1, "g2": 1, "glyph-name": 1,
+        "glyphRef": 1, "horiz-adv-x": 1, "horiz-origin-x": 1, "horiz-origin-y": 1,
+        "ideographic": 1, "k": 1, "lengthAdjust": 1, "local": 1, "mathematical": 1,
+        "origin": 1, "overline-position": 1, "overline-thickness": 1, "panose-1": 1,
+        "stemh": 1, "stemv": 1, "strikethrough-position": 1,
+        "strikethrough-thickness": 1, "textLength": 1, "u1": 1, "u2": 1,
+        "underline-position": 1, "underline-thickness": 1, "unicode": 1,
+        "unicode-range": 1, "units-per-em": 1, "v-alphabetic": 1, "v-hanging": 1,
+        "v-ideographic": 1, "v-mathematical": 1, "vert-adv-y": 1, "vert-origin-x": 1,
+        "vert-origin-y": 1, "widths": 1, "writing-mode": 1, "x-height": 1
+    };
+    for (var tagName in tagAttributes.svg)
+    {
+        tagAttributes.svg[tagName] = tagAttributes.svg[tagName].filter(function(attribute)
+        {
+            if (!unimplementedAttributes.hasOwnProperty(attribute))
+                return true;
+            delete tagAttributesMap.svg[tagName][attribute];
+            return false;
+        });
+    }
 })();
+
 commonAttributes.svg = [];
 commonAttributesMap.svg = {};
 
