@@ -281,6 +281,54 @@ DebuggerLib.isExecutableLine = function(context, location)
 }
 
 // ********************************************************************************************* //
+// Scopes (+ this + completion value)
+
+/**
+ * If the debugger is stopped and has reached the resume limit (return / yield / exception),
+ * return the completion keys and value of it. Otherwise, return null.
+ *
+ * The object returned has this form: {key: <key>, value: <completion value>}
+ *
+ * If the debugger has reached a return statement, <key> is "$return".
+ * If an exception has been raised, <key> is "$exception".
+ *
+ * @param {object} context
+ *
+ * @return {object}
+ */
+DebuggerLib.getCompletionObject = function(context)
+{
+    if (!context.stopped || !context.currentPacket || !context.currentPacket.why)
+        return null;
+
+    var frameFinished = context.currentPacket.why.frameFinished;
+    if (!frameFinished)
+        return null;
+
+    var key = null;
+    var value = null;
+
+    if ("return" in frameFinished)
+    {
+        key = "$return";
+        value = frameFinished.return;
+    }
+    else if ("throw" in frameFinished)
+    {
+        key = "$exception";
+        value = frameFinished.throw;
+    }
+
+    if (typeof value === "object")
+        value = context.clientCache.getObject(value);
+
+    return {
+        key: key,
+        value: value,
+    };
+};
+
+// ********************************************************************************************* //
 // Debugger
 
 DebuggerLib.breakNow = function(context)

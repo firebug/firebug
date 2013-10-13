@@ -24,6 +24,7 @@ define([
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/debugger/breakpoints/breakpointGroup",
+    "firebug/console/commandLine",
     "firebug/editor/sourceEditor",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
@@ -33,7 +34,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, BreakpointGroup, SourceEditor) {
+    Url, CSSModule, CSSInfoTip, BreakpointGroup, CommandLine, SourceEditor) {
 
 with (Domplate) {
 
@@ -1420,6 +1421,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         Firebug.Panel.initialize.apply(this, arguments);
         Firebug.CSSModule.addListener(this);
+        CommandLine.addListener(this);
     },
 
     destroy: function(state)
@@ -2004,13 +2006,31 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
     },
 
-    getInspectorVars: function()
+    /**
+     * Returns the inspector variables ($0, $1, ... $5).
+     *
+     * @param {object} [vars] If provided, extends the |vars| object with the inspector variables.
+     *                        Otherwise, the function returns a new object with the variables.
+     *
+     * @return {object} An object, whose keys are the variable name and the values 
+     *                  the variable values.
+     */
+    getInspectorVars: function(vars)
     {
-        var vars = {};
+        vars = vars || {};
         for (var i=0; i<this.inspectorHistory.length; i++)
             vars["$"+i] = this.inspectorHistory[i] || null;
 
         return vars;
+    },
+
+    /**
+     * Used by CommandLineExposed to extend the evaluation binding variables.
+     */
+    extendCommandLineVars: function(vars)
+    {
+        // Extending the inspector variables to the Command Line Bindings.
+        this.getInspectorVars(vars);
     },
 
     setEntityDisplay: function(event, type)

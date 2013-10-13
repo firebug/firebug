@@ -6,10 +6,11 @@ define([
     "firebug/lib/object",
     "firebug/lib/wrapper",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/debugger/debuggerLib",
     "firebug/console/commandLineAPI",
 ],
-function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
+function(Obj, Wrapper, Locale, Events, DebuggerLib, CommandLineAPI) {
 
 "use strict";
 
@@ -301,7 +302,7 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
 
     if (!options.noCmdLineAPI)
     {
-        bindings = getCommandLineBindings(context, win, dbgGlobal, contentView);
+        bindings = getCommandLineBindings(context, win, dbgGlobal, contentView, subject, expr);
         Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
     }
 
@@ -370,13 +371,24 @@ function correctStackTrace(splitStack)
     return true;
 }
 
-function updateVars(commandLine, dbgGlobal, context)
+function updateVars(commandLine, dbgGlobal, context, subject, expr)
 {
-    var htmlPanel = context.getPanel("html", true);
-    var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
+    var vars = {};
+    // xxxFlorent: TODO document extendCommandLineVars
+    Events.dispatch(Firebug.CommandLine.fbListeners, "extendCommandLineVars",
+        [vars, context, subject, expr]);
 
     for (var prop in vars)
-        commandLine[prop] = dbgGlobal.makeDebuggeeValue(vars[prop]);
+    {
+        if (vars.hasOwnProperty(prop))
+        {
+            // We may receive variables that already are debuggee values.
+            if (vars[prop] && vars[prop].global === dbgGlobal)
+                commandLine[prop] = vars[prop];
+            else
+                commandLine[prop] = dbgGlobal.makeDebuggeeValue(vars[prop]);
+        }
+    }
 
     // Iterate all registered commands and pick those which represents a 'variable'.
     // These needs to be available as variables within the Command Line namespace.
@@ -527,11 +539,11 @@ function getAutoCompletionList()
     return completionList;
 }
 
-function getCommandLineBindings(context, win, dbgGlobal, contentView)
+function getCommandLineBindings(context, win, dbgGlobal, contentView, subject, expr)
 {
     var commandLine = createFirebugCommandLine(context, win, dbgGlobal);
 
-    updateVars(commandLine, dbgGlobal, context);
+    updateVars(commandLine, dbgGlobal, context, subject, expr);
     removeConflictingNames(commandLine, context, contentView);
 
     return commandLine;

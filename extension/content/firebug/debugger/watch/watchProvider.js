@@ -6,11 +6,12 @@ define([
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
+    "firebug/debugger/clients/objectClient",
     "firebug/dom/domMemberProvider",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
+function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, ObjectClient, DOMMemberProvider,
     DebuggerLib, WatchExpression) {
 
 // ********************************************************************************************* //
@@ -103,6 +104,8 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         stackFrame.scopes = [];
 
         var cache = stackFrame.context.clientCache;
+
+        this.appendCompletionValueInScope(stackFrame, cache);
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.
@@ -198,6 +201,32 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
             return null;
 
         return DebuggerLib.getObject(this.panel.context, actor);
+    },
+
+    /**
+     * Adds the completion value ($exception or $return) if it exists to the scopes
+     * listed in the watch panel (even if it is not a scope).
+     *
+     * @param {object} stackFrame
+     * @param {object} cache
+     */
+    appendCompletionValueInScope: function(stackFrame, cache)
+    {
+        var completionObj = DebuggerLib.getCompletionObject(stackFrame.context);
+        if (!completionObj || !completionObj.key)
+            return;
+        var completionScope;
+
+        // If completionObj.value is a number, a string, or a boolean, they are standalone grips
+        // (i.e. the grip is the value itself). We need to create a ObjectClient object of them.
+        if (["number", "string", "boolean"].indexOf(typeof completionObj.value) !== -1)
+            completionScope = new ObjectClient(completionObj.value, cache);
+        else
+            completionScope = completionObj.value;
+
+        completionScope.name = completionObj.key;
+        completionScope.isCompletionValue = true;
+        stackFrame.scopes.push(completionScope);
     },
 });
 

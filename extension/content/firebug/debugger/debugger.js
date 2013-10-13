@@ -74,6 +74,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
             Locale.$STRF("firebug.labelWithShortcut",
                 [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+
+        Firebug.CommandLine.addListener(this);
     },
 
     shutdown: function()
@@ -521,6 +523,22 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     removeListener: function(listener)
     {
         Firebug.connection.removeListener(listener);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Event Handlers for Firebug Modules.
+
+    extendCommandLineVars: function(vars, context)
+    {
+        var completionObj = DebuggerLib.getCompletionObject(context);
+        if (!completionObj || !completionObj.key)
+            return;
+
+        var value = completionObj.value;
+        if (typeof value.getValue === "function")
+            value = value.getValue();
+
+        vars[completionObj.key] = value;
     },
 });
 

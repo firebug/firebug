@@ -44,7 +44,7 @@ DomTree.prototype = domplate(
         ),
 
     rowTag:
-        TR({"class": "memberRow $member.open $member.type\\Row",
+        TR({"class": "memberRow $member.open $member.type\\Row $member|getExtraClasses",
             $hasChildren: "$member|hasChildren", _domObject: "$member",
             _repObject: "$member", level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
@@ -118,6 +118,13 @@ DomTree.prototype = domplate(
     getSizerRowTag: function()
     {
         return this.sizerRowTag;
+    },
+
+    getExtraClasses: function(member)
+    {
+        if (member.value && member.value.isCompletionValue)
+            return "completionValue";
+        return "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -239,6 +246,9 @@ DomTree.prototype = domplate(
 
                 // Domplate inheritance doesn't work properly so, let's store back reference.
                 member.tree = this;
+
+                // Make members read-only if they are completion values.
+                member.readOnly = member.value && member.value.isCompletionValue;
                 members.push(member);
             }
         }
