@@ -267,7 +267,7 @@ var TableRep = domplate(Firebug.Rep,
         {
             columns.unshift({
                 property: "(index)",
-                label: "(index)",
+                label: Locale.$STR("firebug.reps.table.Index"),
                 alphaValue: false
             });
             for (var i = 0; i < data.length; i++)
