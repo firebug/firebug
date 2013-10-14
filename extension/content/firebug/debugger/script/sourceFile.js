@@ -25,7 +25,7 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * SourceFile one for every compilation unit.
  *
  * @param {Context} context
- * @param {Actor} actor
+ * @param {Actor} actor The Actor treating the source (note: can be omitted if source is provided).
  * @param {string} href The link to the source
  * @param {string} [source] The source if already provided
  */
@@ -97,12 +97,16 @@ SourceFile.prototype =
 
     loadScriptLines: function(callback)
     {
+        // If the source is already provided, call immediately the callback.
+        // Otherwise, check that the actor is set (required to call 
+        //  `this.context.activeThread.source(this)`).
         if (this.loaded)
         {
             callback(this.lines);
             return this.lines;
         }
-
+        else if (!this.actor)
+            throw new Error("Can't load the script without any actor.");
         // Remember the callback. There can be more callbacks if the script is
         // being loaded and more clients want it.
         this.callbacks.push(callback);
@@ -119,6 +123,7 @@ SourceFile.prototype =
         this.inProgress = true;
 
         // This is the only place where source is loaded for specific URL.
+        // Note: this requires that an actor has been passed to the constructor.
         var sourceClient = this.context.activeThread.source(this);
         sourceClient.source(this.onSourceLoaded.bind(this));
     },
