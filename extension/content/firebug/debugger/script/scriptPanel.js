@@ -463,7 +463,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            var type = Url.getFileExtension(sourceLink.href);
+            var type = sourceLink.type || Url.getFileExtension(sourceLink.href);
             self.scriptView.showSource(lines.join(""), type);
 
             var options = sourceLink.getOptions();
@@ -801,12 +801,17 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         var items = [];
 
-        // The target must be within the right DIV (CodeMirror).
+        // The target must be the textarea used by CodeMirror (thus we're sure that the right-click
+        // targeted the code and not the breakpoints area). If the right-click targeted the
+        // breakpoints area, we hide the context menu and show instead the condition editor.
+        //
         // This could be changed if we decide to have a context menu displayed for
         // right-click on a breakpoint (in the column bar) instead of the condition-editor.
         // See issue 4378
-        var content = Dom.getAncestorByClass(target, "CodeMirror");
-        if (!content)
+        var isCodeTarget = (target.tagName === "TEXTAREA" &&
+            Dom.getAncestorByClass(target, "CodeMirror"));
+
+        if (!isCodeTarget)
             return;
 
         var lineNo = this.scriptView.getLineIndex(target);

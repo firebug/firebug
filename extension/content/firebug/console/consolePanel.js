@@ -257,15 +257,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     updateOption: function(name, value)
     {
-        if (name == "consoleFilterTypes")
-        {
-            Firebug.Console.syncFilterButtons(Firebug.chrome);
-            Firebug.connection.eachContext(function syncFilters(context)
-            {
-                Firebug.Console.onToggleFilter(context, value);
-            });
-        }
-        else if (name == "showStackFrameArguments")
+        if (name == "showStackFrameArguments")
         {
             if (value)
                 Css.removeClass(this.panelNode, "hideArguments");
