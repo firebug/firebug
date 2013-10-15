@@ -8,8 +8,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
+    "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr) {
+function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
 
 "use strict";
 
@@ -125,6 +126,8 @@ var TableRep = domplate(Firebug.Rep,
 
             cols.push(value);
         }
+
+        Trace.sysout("tableRep.getColumns", {cols: cols, row: row});
 
         return cols;
     },
@@ -439,6 +442,9 @@ function getObjectProps(obj)
 
 // ********************************************************************************************* //
 // Registration
+
+// Backward compatibility.
+FirebugReps.Table = TableRep;
 
 return TableRep;
 

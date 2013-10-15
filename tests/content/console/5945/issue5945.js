@@ -15,7 +15,7 @@ function runTest()
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
                 var panel = FBTest.getSelectedPanel();
-                var rows = panel.panelNode.getElementsByClassName("logRow");
+                var rows = panel.panelNode.getElementsByClassName("logRow-warningMessage");
 
                 // The exact column number is not tested since it can differ
                 // for some unknown reason. Sounds like Firefox bug, but we

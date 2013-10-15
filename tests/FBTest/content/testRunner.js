@@ -59,7 +59,7 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
         FBTestApp.TestConsole.updatePaths();
 
         // Update history
-        // xxxHonza: all related components should be registerd as listeners.
+        // xxxHonza: all related components should be registered as listeners.
         FBTestApp.TestConsole.appendToHistory(null,
             FBTestApp.TestConsole.testCasePath,
             FBTestApp.TestConsole.driverBaseURI);
@@ -225,7 +225,7 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
             FBTrace.sysout("fbtest.TestRunner.CANCELED");
 
         // Test is done so, clear the break-timeout.
-        // xxxHonza: all related components should be registerd as listeners.
+        // xxxHonza: all related components should be registered as listeners.
         FBTestApp.TestRunner.cleanUp();
 
         // If there are tests in the queue, execute them.
@@ -429,7 +429,7 @@ FBTestApp.TestRunner = Obj.extend(new Firebug.Listener(),
         return Firebug.getPref(FBTestApp.prefDomain, "testTimeout");
     },
 
-    /*
+    /**
      * Called by the 'load' event handler set in the onStateChange for nsIProgressListener
      */
     onLoadTestFrame: function(event, test)

@@ -297,6 +297,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     runUntil: function(context, compilationUnit, lineNo)
     {
+        context.getTool("debugger").runUntil(compilationUnit, lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
