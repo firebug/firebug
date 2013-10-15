@@ -22,9 +22,9 @@ function runTest()
                     // Fire the event handler asynchronously so items have a chance to be appended.
                     setTimeout(function()
                     {
-                        var menuItem;
-                        for each (menuItem in contextMenu.children)
+                        for (var i=0; i<contextMenu.children.length; i++)
                         {
+                            var menuItem = contextMenu.children[i];
                             if (menuItem.label == menuItemLabel)
                                 break;
                         }

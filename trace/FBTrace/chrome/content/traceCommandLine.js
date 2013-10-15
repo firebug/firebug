@@ -6,8 +6,9 @@ define([
     "fbtrace/lib/object",
     "fbtrace/lib/window",
     "fbtrace/lib/menu",
+    "fbtrace/lib/system",
 ],
-function(FBTrace, Dom, Obj, Win, Menu) {
+function(FBTrace, Dom, Obj, Win, Menu, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,7 +17,10 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-Cu["import"]("resource:///modules/source-editor.jsm");
+var sourceEditorScope = System.importModule([
+    "resource:///modules/source-editor.jsm",
+    "resource:///modules/devtools/sourceeditor/source-editor.jsm"]);
+
 Cu["import"]("resource://fbtrace/storageService.js");
 
 // ********************************************************************************************* //
@@ -31,13 +35,13 @@ var TraceCommandLine =
         if (this.editor)
             return;
 
-        this.editor = new SourceEditor();
+        this.editor = new sourceEditorScope.SourceEditor();
 
         // Load previous command line content.
         var commandLineIntro = this.loadContent();
 
         var config = {
-            mode: SourceEditor.MODES.JAVASCRIPT,
+            mode: sourceEditorScope.SourceEditor.MODES.JAVASCRIPT,
             showLineNumbers: true,
             initialText: commandLineIntro,
         };

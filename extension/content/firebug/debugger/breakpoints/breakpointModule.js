@@ -61,8 +61,10 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable");
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
+        {
+            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable " + breakable +
                 " in " + panel.context.getName());
+        }
 
         // Toggle button's state.
         breakable = (breakable == "true" ? "false" : "true");
@@ -73,11 +75,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var enabled = (breakable == "true" ? false : true);
         panel.breakOnNext(enabled);
 
-        // Make sure the correct tooltip (coming from the current panel) is used.
-        this.updateBreakOnNextTooltips(panel);
-
-        // Light up the tab whenever break on next is selected
-        this.updatePanelTab(panel, enabled);
+        this.updatePanelState(panel);
 
         return enabled;
     },
@@ -95,7 +93,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
 
     updatePanelState: function(panel)
     {
-        if (!panel)  // there is no selectedPanel?
+        // there is no selectedPanel?
+        if (!panel)
             return;
 
         var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
@@ -171,6 +170,10 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         // which means already active (throbbing).
         var breakable = armed ? "false" : "true";
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "breakable", breakable);
+
+        // Set the button as 'checked', so it has visual border (see issue 6567).
+        var checked = armed ? "true" : "false";
+        Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleBreakOn", "checked", checked);
     },
 
     updatePanelTab: function(panel, armed)

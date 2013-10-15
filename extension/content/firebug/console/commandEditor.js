@@ -11,24 +11,15 @@ define([
     "firebug/lib/options",
     "firebug/editor/sourceEditor",
 ],
-function (Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
+function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var CONTEXT_MENU = "";
-var TEXT_CHANGED = "";
-
-try
-{
-    CONTEXT_MENU = SourceEditor.Events.contextMenu;
-    TEXT_CHANGED = SourceEditor.Events.textChange;
-}
-catch (err)
-{
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
-}
+var CONTEXT_MENU = SourceEditor.Events.contextMenu;
+var TEXT_CHANGED = SourceEditor.Events.textChange;
 
 // ********************************************************************************************* //
 // Command Editor

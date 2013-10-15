@@ -1623,9 +1623,10 @@ var NetPanelSearch = function(panel, rowFinder)
             Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Response");
 
             // Before the search is started, the new content must be properly
-            // layouted within the page. The layout is executed by reading
+            // re-layouted within the page. The layout is executed by reading
             // the following property.
-            // xxxHonza: This workaround can be removed as soon as #488427 is fixed.
+            // xxxHonza: Force layout to be executed (workaround)
+            // This workaround can be removed as soon as #488427 is fixed.
             doc.body.offsetWidth;
         }
     },

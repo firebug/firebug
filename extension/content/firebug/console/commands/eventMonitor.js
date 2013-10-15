@@ -370,9 +370,9 @@ var EventLogRep = domplate(FirebugReps.Event,
     copyEventTag:
         SPAN(
             FirebugReps.OBJECTLINK("$object|summarizeEvent"),
-            SPAN("&nbsp"),
+            SPAN("&nbsp;"),
             SPAN("&#187;"),
-            SPAN("&nbsp"),
+            SPAN("&nbsp;"),
             TAG("$object|getTargetTag", {object: "$object|getTarget"})
         ),
 

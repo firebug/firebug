@@ -206,6 +206,10 @@ var TestListLoader =
             realTest.driverBaseURI = driverBaseURI;
             realTest.testCasePath = testCasePath;
             realTest.testIncludes = testIncludes;
+            realTest.disabled = test.disabled ? true : false;
+
+            if (test.disabled)
+                realTest.tooltip = test.disabled;
 
             group.tests.push(realTest);
         }
@@ -219,9 +223,8 @@ var TestListLoader =
     addStyleSheets: function(doc)
     {
         // Some CSS from Firebug namespace.
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/dom.css"));
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug-os/skin/panel.css"));
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://firebug/skin/console.css"));
+        // xxxHonza: there should be no dependency on Firebug's CSS styles.
+        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "resource://firebugui/panel.css"));
 
         // Append specific FBTest CSS.
         var styles = ["testConsole.css", "testList.css", "testResult.css", "tabView.css"];
