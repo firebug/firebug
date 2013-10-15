@@ -393,6 +393,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             return this.location.getURL();
     },
 
+    getCompilationUnit: function()
+    {
+        if (this.location instanceof CompilationUnit)
+            return this.location;
+
+        if (this.location instanceof SourceLink)
+            return this.context.getCompilationUnit(this.location.href);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends ActivablePanel
 
@@ -861,7 +870,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (this.context.stopped)
         {
+            var compilationUnit = this.getCompilationUnit();
             var debuggr = this;
+
             items.push(
                 "-",
                 // xxxHonza: TODO
@@ -899,15 +910,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     id: "contextMenuStepOut",
                     command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
                     acceltext: "Shift+F11"
-                }
-                //xxxHonza: TODO
-                /*{
+                },
+                {
                     label: "firebug.RunUntil",
                     tooltiptext: "script.tip.Run_Until",
                     id: "contextMenuRunUntil",
                     command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo)
-                }*/
+                }
             )
         }
 
@@ -1068,27 +1078,27 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     rerun: function(context)
     {
-        this.tool.rerun(context);
+        this.tool.rerun();
     },
 
     resume: function(context)
     {
-        this.tool.resume(context);
+        this.tool.resume();
     },
 
     stepOver: function(context)
     {
-        this.tool.stepOver(context);
+        this.tool.stepOver();
     },
 
     stepInto: function(context)
     {
-        this.tool.stepInto(context);
+        this.tool.stepInto();
     },
 
     stepOut: function(context)
     {
-        this.tool.stepOut(context);
+        this.tool.stepOut();
     },
 
     runUntil: function(context, compilationUnit, lineNo)

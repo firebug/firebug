@@ -65,6 +65,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         Trace.sysout("scriptView.initialize; " + parentNode);
 
+        //xxxHonza: do we need this? this.onContextMenuListener = this.onContextMenu.bind(this);
         this.onBreakpointChangeListener = this.onBreakpointChange.bind(this);
         this.onMouseMoveListener = this.onMouseMove.bind(this);
         this.onMouseOutListener = this.onMouseOut.bind(this);
