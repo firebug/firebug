@@ -25,7 +25,8 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * SourceFile one for every compilation unit.
  *
  * @param {Context} context
- * @param {Actor} actor The Actor treating the source (note: can be omitted if source is provided).
+ * @param {Actor} actor The Actor treating the source (note: can be omitted if the `source`
+ *                      parameter is passed).
  * @param {string} href The link to the source
  * @param {string} [source] The source if already provided
  */
@@ -106,7 +107,9 @@ SourceFile.prototype =
             return this.lines;
         }
         else if (!this.actor)
+        {
             throw new Error("Can't load the script without any actor.");
+        }
         // Remember the callback. There can be more callbacks if the script is
         // being loaded and more clients want it.
         this.callbacks.push(callback);
