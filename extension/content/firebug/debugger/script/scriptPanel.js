@@ -143,6 +143,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             var sourceLink = new SourceLink(state.location.getURL(), state.topLine, "js");
             sourceLink.options.scrollTop = state.scrollTop;
 
+            // We don't want to highlight the top line when the content of the Script panel
+            // is just restored and scrolled to the right line.
+            sourceLink.options.highlight = false;
+
             // Causes the Script panel to show the proper location.
             // Do not highlight the line (second argument true), we just want
             // to restore the position.
@@ -230,21 +234,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_PANELS)
+        if (Trace.active)
         {
-            FBTrace.sysout("script updateSelection object:" + object + " of type " +
+            Trace.sysout("scriptPanel.updateSelection; object:" + object + " of type " +
                 typeof(object), object);
 
             if (object instanceof CompilationUnit)
-                FBTrace.sysout("script updateSelection this.navigate(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.navigate(object)", object);
             else if (object instanceof SourceLink)
-                FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
-                FBTrace.sysout("script updateSelection this.showFunction(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showFunction(object)", object);
             else if (object instanceof StackFrame)
-                FBTrace.sysout("script updateSelection this.showStackFrame(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showStackFrame(object)", object);
             else
-                FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showStackFrame(null)", object);
         }
 
         if (object instanceof CompilationUnit)
@@ -274,8 +278,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         else
         {
             // Want to avoid the Script panel if possible
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("no sourcelink for function");
+            TraceError.sysout("no sourcelink for function");
         }
     },
 

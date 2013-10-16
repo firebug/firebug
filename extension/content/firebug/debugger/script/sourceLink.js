@@ -17,7 +17,13 @@ function SourceLink(url, line, type, object, instance, col)
     this.type = type;
     this.object = object;
     this.col = col;
-    this.options = {};
+
+    // The target line is always highlighted by default. This can be switched off
+    // by setting 'highlight' to false (e.g. used by the Script panel when restoring
+    // the vertical scroll-bar).
+    this.options = {
+        highlight: true
+    };
 };
 
 SourceLink.prototype =

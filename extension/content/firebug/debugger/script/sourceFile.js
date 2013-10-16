@@ -173,13 +173,10 @@ SourceFile.findSourceForFunction = function(fn, context)
 SourceFile.toSourceLink = function(script, context)
 {
     var sourceLink = new SourceLink(script.url, script.startLine, "js");
-
-    // Make sure the target line is highlighted.
-    sourceLink.options.highlight = true;
     return sourceLink;
 };
 
-//xxxHonza: Back comp, do we need this?
+//xxxHonza: Back compatibility, do we need this?
 SourceFile.getSourceLinkForScript = SourceFile.toSourceLink;
 
 // ********************************************************************************************* //
