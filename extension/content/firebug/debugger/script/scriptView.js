@@ -463,6 +463,8 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
 
         this.editor.scrollToLine(line, options);
 
+        Trace.sysout("scriptView.scrollToLine; " + line, options);
+
         if (options.debugLocation)
             this.editor.setDebugLocation(line);
         else if (options.highlight)

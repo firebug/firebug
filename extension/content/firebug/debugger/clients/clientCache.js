@@ -42,11 +42,24 @@ ClientCache.prototype =
         this.signatures = {};
     },
 
+    /**
+     * Return a client object (i.e. instance of {@ObjectClient}) according to the
+     * grip (handle) passed into the function.
+     *
+     * The grip can be:
+     * 1) Real grip that has its own actor (ID).
+     * 2) Primitive value e.g. a number, null, undefined, an empty string, boolean.
+     */
     getObject: function(grip)
     {
+        // If the grip is actually a primitive value, which is evaluated to 'false'
+        // (can be number zero, boolean false, an empty string), return the value
+        // directly to keep the type.
         if (!grip)
-            return null;
+            return grip;
 
+        // Null and undefined values has it's own type, so return predefined grip.
+        // Or again, directly the passed value.
         if (!grip.actor)
         {
             if (grip.type == "null")
@@ -54,7 +67,7 @@ ClientCache.prototype =
             else if (grip.type == "undefined")
                 return gripUndefined;
 
-            // Can be a primitive value (e.g. string).
+            // Can be a primitive value evaluated to 'true' (e.g. a string, boolean true, etc.).
             return grip;
         }
 

@@ -61,6 +61,10 @@ ObjectActor.prototype.grip = function()
         {
             // Calling getOwnPropertyDescriptor on wrapped native prototypes is not allowed.
             FBTrace.sysout("objectActor.grip; EXCEPTION " + e, e);
+
+            // xxxHonza: if there is an error (e.g. the object doesn't exist on the
+            // server side), there might be an infinite loop asking again for the
+            // same object, getting error, etc.
         }
     }
 

@@ -86,7 +86,7 @@ ObjectClient.prototype =
             result = false;
 
         // It looks like the object has children, but we'll see for sure as soon
-        // as its children are actualy fetched from the server.
+        // as its children are actually fetched from the server.
         return result;
     },
 
@@ -164,9 +164,9 @@ ObjectClient.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Properties
 
-    createProperty: function(name, packet)
+    createProperty: function(name, desc)
     {
-        return new ObjectClient.Property(name, packet, this.cache);
+        return new ObjectClient.Property(name, desc, this.cache);
     },
 
     parseProperties: function(props)

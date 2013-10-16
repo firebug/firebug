@@ -7,6 +7,11 @@ define([
 function (FBTrace, StackFrame) {
 
 // ********************************************************************************************* //
+// Constants
+
+var Trace = FBTrace.to("DBG_STACK");
+
+// ********************************************************************************************* //
 // StackTrace Implementation
 
 function StackTrace(frames)
@@ -19,8 +24,8 @@ StackTrace.prototype =
     toString: function()
     {
         var trace = "<top>\n";
-        for (var i = 0; i < this.frames.length; i++)
-            trace += "[" + i + "]"+ this.frames[i]+"\n";
+        for (var i=0; i<this.frames.length; i++)
+            trace += "[" + i + "]" + this.frames[i] + "\n";
         trace += "<bottom>\n";
         return trace;
     },
@@ -36,14 +41,13 @@ StackTrace.prototype =
         for (var i = 0; i < this.frames.length; i++)
             this.frames[i].destroy();
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("lib.StackTrace destroy " + this.uid);
+        Trace.sysout("stackTrace.destroy; " + this.uid);
     },
 
     toSourceLink: function()
     {
         if (this.frames.length > 0)
-            return this.frames[0];
+            return this.frames[0].toSourceLink();
     }
 };
 
@@ -69,18 +73,20 @@ StackTrace.buildStackTrace = function(context, frames)
 
 StackTrace.parseToStackTrace = function(stack, context)
 {
-     var lines = stack.split('\n');
+     var lines = stack.split("\n");
      var trace = new StackTrace();
-     for (var i = 0; i < lines.length; i++)
+
+     for (var i=0; i<lines.length; i++)
      {
          var frame = StackFrame.parseToStackFrame(lines[i],context);
 
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+         Trace.sysout("StackTrace.parseToStackTrace; i " + i + " line:" + lines[i] +
+            "->frame: " + frame, frame);
 
          if (frame)
              trace.frames.push(frame);
      }
+
      return trace;
 };
 
