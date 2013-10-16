@@ -13,6 +13,13 @@ define([
 function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
     DebuggerLib, WatchExpression) {
 
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var Trace = FBTrace.to("DBG_WATCHPROVIDER");
+
 // ********************************************************************************************* //
 // Watch Panel Provider
 
@@ -29,7 +36,8 @@ function WatchProvider(panel)
  * debugger is resumed global scope (usually a window) is displayed.
  *
  * The Watch panel provider uses two ways to get data:
- * 1) Asynchronously over the RDP (e.g. frames, user-expr eval results, function scope, etc.),
+ * 1) Asynchronously over the RDP (e.g. frames, user-expressions evaluated results,
+ *      function scope, etc.),
  * 2) Synchronously through direct access to the server side (JS objects).
  *
  * xxxHonza: add #2) This is a hack that allows Firebug to adopt JSD2 faster. It should be
@@ -133,6 +141,8 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     getMembers: function(object, level)
     {
+        Trace.sysout("watchProvider.getMembers; level: " + level, object);
+
         // The default watch panel input is used when the debugger is resumed.
         if (object instanceof WatchProvider.DefaultWatchPanelInput)
             return null;
