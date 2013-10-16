@@ -531,15 +531,15 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     extendCommandLineVars: function(vars, context)
     {
-        var completionObj = DebuggerLib.getCompletionObject(context);
-        if (!completionObj || !completionObj.key)
+        var resumeLimitObj = DebuggerLib.getResumeLimitObject(context);
+        if (!resumeLimitObj || !resumeLimitObj.key)
             return;
 
-        var value = completionObj.value;
+        var value = resumeLimitObj.value;
         if (typeof value.getValue === "function")
             value = value.getValue();
 
-        vars[completionObj.key] = value;
+        vars[resumeLimitObj.key] = value;
     },
 });
 

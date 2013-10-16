@@ -105,7 +105,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         var cache = stackFrame.context.clientCache;
 
-        this.appendCompletionValueInScope(stackFrame, cache);
+        this.appendResumeLimitValueInScope(stackFrame, cache);
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.
@@ -210,23 +210,24 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
      * @param {object} stackFrame
      * @param {object} cache
      */
-    appendCompletionValueInScope: function(stackFrame, cache)
+    appendResumeLimitValueInScope: function(stackFrame, cache)
     {
-        var completionObj = DebuggerLib.getCompletionObject(stackFrame.context);
-        if (!completionObj || !completionObj.key)
+        var resumeLimitObj = DebuggerLib.getResumeLimitObject(stackFrame.context);
+        if (!resumeLimitObj || !resumeLimitObj.key)
             return;
-        var completionScope;
 
-        // If completionObj.value is a number, a string, or a boolean, they are standalone grips
+        var resumeLimitScope;
+
+        // If resumeLimitObj.value is a number, a string, or a boolean, they are standalone grips
         // (i.e. the grip is the value itself). We need to create a ObjectClient object of them.
-        if (["number", "string", "boolean"].indexOf(typeof completionObj.value) !== -1)
-            completionScope = new ObjectClient(completionObj.value, cache);
+        if (["number", "string", "boolean"].indexOf(typeof resumeLimitObj.value) !== -1)
+            resumeLimitScope = new ObjectClient(resumeLimitObj.value, cache);
         else
-            completionScope = completionObj.value;
+            resumeLimitScope = resumeLimitObj.value;
 
-        completionScope.name = completionObj.key;
-        completionScope.isCompletionValue = true;
-        stackFrame.scopes.push(completionScope);
+        resumeLimitScope.name = resumeLimitObj.key;
+        resumeLimitScope.isresumeLimitValue = true;
+        stackFrame.scopes.push(resumeLimitScope);
     },
 });
 
