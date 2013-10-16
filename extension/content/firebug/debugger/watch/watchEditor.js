@@ -9,10 +9,13 @@ define([
     "firebug/lib/css",
 ],
 function(Obj, Firebug, Domplate, Events, Dom, Css) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, INPUT} = Domplate;
 
 // ********************************************************************************************* //
 // Local Helpers
@@ -66,5 +69,5 @@ WatchEditor.prototype = domplate(Firebug.JSEditor.prototype,
 return WatchEditor;
 
 // ********************************************************************************************* //
-}});
+});
 
