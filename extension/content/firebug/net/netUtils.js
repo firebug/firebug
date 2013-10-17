@@ -402,6 +402,11 @@ var NetUtils =
         return file.category = mimeCategoryMap[mimeType];
     },
 
+    getCategory: function(mimeType)
+    {
+        return mimeCategoryMap[mimeType];
+    },
+
     getPageTitle: function(context)
     {
         var title = context.getTitle();

@@ -134,7 +134,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         var tool = context.getTool("breakpoint");
         tool.setBreakpoints(bps, function()
         {
-            // Some breakpoint could have been auto-corrected so, save all now.
+            // Some breakpoints could have been auto-corrected so, save all now.
             self.save();
         });
     },

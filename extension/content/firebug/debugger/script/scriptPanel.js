@@ -26,11 +26,12 @@ define([
     "firebug/debugger/script/breakNotification",
     "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
+    "firebug/net/netUtils",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib) {
+    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
 
@@ -475,12 +476,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            var type = Url.getFileExtension(sourceLink.href);
+            // Get proper category of the target source file. This is needed by
+            // the underlying source view that picking the right highlighting mode
+            // for the source text (see issue 6866).
+            // 1) First get the source file
+            // 2) Get it's content type that should be set at this moment. If not set
+            //     it's guessed according to the file extension.
+            // 3) Get the type/category from the content type.
+            var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
+            var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
+            var category = NetUtils.getCategory(mimeType);
 
-            // xxxHonza: see issue 6866
-            //var type = sourceLink.type || Url.getFileExtension(sourceLink.href);
-
-            self.scriptView.showSource(lines.join(""), type);
+            // Display the source.
+            self.scriptView.showSource(lines.join(""), category);
 
             var options = sourceLink.getOptions();
 
