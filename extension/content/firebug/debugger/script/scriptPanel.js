@@ -93,6 +93,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.context.getTool("breakpoint").addListener(this);
+
+        // Register as a listener for 'updateSidePanels' event. 
+        Firebug.registerUIListener(this);
     },
 
     destroy: function(state)
@@ -108,6 +111,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         this.context.getTool("breakpoint").removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -195,6 +200,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             state.topLine = this.scriptView.getScrollTop();
             state.scrollTop = this.scriptView.getScrollInfo().top;
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Show Stack Frames
+
+    updateSidePanels: function(panel)
+    {
+        if (!panel || panel.name != "script")
+            return;
+
+        // Update visibility of the side panels. The side panels could have been displayed
+        // by the logic within FirebugChrome.syncSidePanels();
+        // xxxHonza: the panel content doesn't have to be rendered in this case.
+        var active = !ScriptPanelWarning.showWarning(this);
+        this.panelSplitter.collapsed = !active;
+        this.sidePanelDeck.collapsed = !active;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
