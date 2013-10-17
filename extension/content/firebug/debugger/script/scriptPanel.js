@@ -358,7 +358,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnits.length)
             return null;
 
-        return compilationUnits[0];
+        // Mark the default link as 'no highlight'. We don't want to highlight
+        // the first line when a default file is automatically displayed in
+        // the Script panel.
+        var sourceLink = new SourceLink(compilationUnits[0].getURL(), null, "js");
+        sourceLink.options.highlight = false;
+
+        return sourceLink;
     },
 
     getObjectLocation: function(compilationUnit)
