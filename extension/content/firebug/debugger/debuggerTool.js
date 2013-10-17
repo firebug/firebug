@@ -196,12 +196,18 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        // xxxHonza: Ignore inner script for now
+        // xxxHonza: Ignore inner scripts for now
         if (this.context.sourceFileMap[script.url])
+        {
+            Trace.sysout("debuggerTool.addScript; A script ignored: " + script.url, script);
             return;
+        }
 
-        // Create a source file and append it into the context.
-        var sourceFile = new SourceFile(this.context, script.actor, script.url);
+        // Create a source file and append it into the context. This is the only
+        // place where an instance of {@SourceFile} is created.
+        var sourceFile = new SourceFile(this.context, script.actor, script.url,
+            script.isBlackBoxed);
+
         this.context.addSourceFile(sourceFile);
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen

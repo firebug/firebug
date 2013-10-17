@@ -26,11 +26,14 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * on the back end). The instance is created by {@DebuggerTool} every time a "newSource"
  * or the initial "sources" packet is received.
  */
-function SourceFile(context, actor, href)
+function SourceFile(context, actor, href, isBlackBoxed)
 {
     this.context = context;
     this.actor = actor;
     this.href = href;
+
+    // xxxHonza: this field should be utilized by issue 4885.
+    this.isBlackBoxed = isBlackBoxed;
 
     // The content type is set when 'source' packet is received (see onSourceLoaded).
     this.contentType = null;
