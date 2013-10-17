@@ -26,11 +26,12 @@ define([
     "firebug/debugger/script/breakNotification",
     "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
+    "firebug/net/netUtils",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib) {
+    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
 
@@ -73,6 +74,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     initialize: function(context, doc)
     {
+        Trace.sysout("scriptPanel.initialize; " + context.getName());
+
         BasePanel.initialize.apply(this, arguments);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
@@ -90,6 +93,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.context.getTool("breakpoint").addListener(this);
+
+        // Register as a listener for 'updateSidePanels' event. 
+        Firebug.registerUIListener(this);
     },
 
     destroy: function(state)
@@ -105,6 +111,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         this.context.getTool("breakpoint").removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -142,6 +150,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // location is accurate (not rounded to lines).
             var sourceLink = new SourceLink(state.location.getURL(), state.topLine, "js");
             sourceLink.options.scrollTop = state.scrollTop;
+
+            // We don't want to highlight the top line when the content of the Script panel
+            // is just restored and scrolled to the right line.
+            sourceLink.options.highlight = false;
 
             // Causes the Script panel to show the proper location.
             // Do not highlight the line (second argument true), we just want
@@ -193,6 +205,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Show Stack Frames
 
+    updateSidePanels: function(panel)
+    {
+        if (!panel || panel.name != "script")
+            return;
+
+        // Update visibility of the side panels. The side panels could have been displayed
+        // by the logic within FirebugChrome.syncSidePanels();
+        // xxxHonza: the panel content doesn't have to be rendered in this case.
+        var active = !ScriptPanelWarning.showWarning(this);
+        this.panelSplitter.collapsed = !active;
+        this.sidePanelDeck.collapsed = !active;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Show Stack Frames
+
     showStackFrame: function(frame)
     {
         if (this.context.stopped)
@@ -230,21 +258,21 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_PANELS)
+        if (Trace.active)
         {
-            FBTrace.sysout("script updateSelection object:" + object + " of type " +
+            Trace.sysout("scriptPanel.updateSelection; object:" + object + " of type " +
                 typeof(object), object);
 
             if (object instanceof CompilationUnit)
-                FBTrace.sysout("script updateSelection this.navigate(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.navigate(object)", object);
             else if (object instanceof SourceLink)
-                FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
-                FBTrace.sysout("script updateSelection this.showFunction(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showFunction(object)", object);
             else if (object instanceof StackFrame)
-                FBTrace.sysout("script updateSelection this.showStackFrame(object)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showStackFrame(object)", object);
             else
-                FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
+                Trace.sysout("scriptPanel.updateSelection; this.showStackFrame(null)", object);
         }
 
         if (object instanceof CompilationUnit)
@@ -274,8 +302,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         else
         {
             // Want to avoid the Script panel if possible
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("no sourcelink for function");
+            TraceError.sysout("no sourcelink for function");
         }
     },
 
@@ -354,7 +381,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnits.length)
             return null;
 
-        return compilationUnits[0];
+        // Mark the default link as 'no highlight'. We don't want to highlight
+        // the first line when a default file is automatically displayed in
+        // the Script panel.
+        var sourceLink = new SourceLink(compilationUnits[0].getURL(), null, "js");
+        sourceLink.options.highlight = false;
+
+        return sourceLink;
     },
 
     getObjectLocation: function(compilationUnit)
@@ -391,6 +424,15 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (this.location instanceof SourceLink)
             return this.location.getURL();
+    },
+
+    getCompilationUnit: function()
+    {
+        if (this.location instanceof CompilationUnit)
+            return this.location;
+
+        if (this.location instanceof SourceLink)
+            return this.context.getCompilationUnit(this.location.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -463,8 +505,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            var type = sourceLink.type || Url.getFileExtension(sourceLink.href);
-            self.scriptView.showSource(lines.join(""), type);
+            // Get proper category of the target source file. This is needed by
+            // the underlying source view that picking the right highlighting mode
+            // for the source text (see issue 6866).
+            // 1) First get the source file
+            // 2) Get it's content type that should be set at this moment. If not set
+            //     it's guessed according to the file extension.
+            // 3) Get the type/category from the content type.
+            var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
+            var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
+            var category = NetUtils.getCategory(mimeType);
+
+            // Display the source.
+            self.scriptView.showSource(lines.join(""), category);
 
             var options = sourceLink.getOptions();
 
@@ -861,7 +914,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         if (this.context.stopped)
         {
+            var compilationUnit = this.getCompilationUnit();
             var debuggr = this;
+
             items.push(
                 "-",
                 // xxxHonza: TODO
@@ -899,15 +954,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                     id: "contextMenuStepOut",
                     command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
                     acceltext: "Shift+F11"
-                }
-                //xxxHonza: TODO
-                /*{
+                },
+                {
                     label: "firebug.RunUntil",
                     tooltiptext: "script.tip.Run_Until",
                     id: "contextMenuRunUntil",
                     command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo)
-                }*/
+                }
             )
         }
 
@@ -1068,27 +1122,27 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     rerun: function(context)
     {
-        this.tool.rerun(context);
+        this.tool.rerun();
     },
 
     resume: function(context)
     {
-        this.tool.resume(context);
+        this.tool.resume();
     },
 
     stepOver: function(context)
     {
-        this.tool.stepOver(context);
+        this.tool.stepOver();
     },
 
     stepInto: function(context)
     {
-        this.tool.stepInto(context);
+        this.tool.stepInto();
     },
 
     stepOut: function(context)
     {
-        this.tool.stepOut(context);
+        this.tool.stepOut();
     },
 
     runUntil: function(context, compilationUnit, lineNo)
@@ -1192,6 +1246,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     newScript: function(sourceFile)
     {
+        // This event can be missed since the newScript packet can be send
+        // before the ScriptPanel is initialized and adds itself to the DebuggerTool
+        // as a listener.
+
         Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.

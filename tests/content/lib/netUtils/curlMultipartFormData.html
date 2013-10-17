@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>Copy as cURL: test multipart/form-data (issue 6817)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>Copy as cURL: test multipart/form-data (issue 6817)</h1>
+
+<p>
+    Test that the "Copy as cURL" menu item in the Net panel generates the proper cURL command string
+    for multipart/form-data POST requests<br/>
+    <i>Thomas Andersen, thomas@mr-andersen.no</i>
+</p>
+
+<form action="./server.php" enctype="multipart/form-data" method="post" target="upload-target">
+    <div>
+        <label for="user-param">Param: </label>
+        <input type="text" name="user-param" value="1234567" id="user-param"/>
+        <label for="user-file-input">File: </label>
+        <input type="file" name="user-file-input" id="user-file-input"/>
+        <input type="submit" value="Submit" id="user-submit-button"/>
+    </div>
+</form>
+<p>
+    <iframe id="upload-target" name="upload-target" src="#" style="width:500px;height:70px;border:1px solid #000;"></iframe>
+</p>
+
+<ol>
+    <li>Open Firebug and select the Net panel</li>
+    <li>Select a file in the file input on this page</li>
+    <li>Click submit</li>
+    <li>Right click on the new entry in the Net panel and execute <i>Copy as cURL</i></li>
+</ol>
+<p>
+    The clipboard data should contain a curl command with the -data-binary argument.
+    The argument should contain the multipart/form-data payload without binary data.
+    It should be possible to use the command together with the uploaded file to simulate a file
+    upload.
+</p>
+
+</body>
+</html>

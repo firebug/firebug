@@ -25,29 +25,37 @@ function runTest()
 
             // Copy & Paste
             CookieRow.onCopy(originalCookie);
-            CookieRow.onPaste(null);
 
-            // Check the new cookie
-            var newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
-            FBTest.ok(newCookie, "There must be 'CopyPasteCookie-1'.");
-            if (!originalCookie || !newCookie)
-                return FBTest.testDone();
+            // Expected clipboard value
+            var clipboardValue = "CopyPasteCookie=Test+Cookie+Value; expires=Wed, " +
+                "14 Aug 2019 10:25:57 GMT; path=/dir; domain=legoas";
 
-            FBTest.compare(originalCookie.value, newCookie.value, "The value must be the same.");
-            FBTest.compare(originalCookie.isDomain, newCookie.isDomain, "The isDomain must be the same.");
-            FBTest.compare(originalCookie.host, newCookie.host, "The host must be the same.");
-            FBTest.compare(originalCookie.path, newCookie.path, "The path must be the same.");
-            FBTest.compare(originalCookie.isSecure, newCookie.isSecure, "The isSecure must be the same.");
-            FBTest.compare(originalCookie.expires, newCookie.expires, "The expires must be the same.");
-            FBTest.compare(originalCookie.isHttpOnly, newCookie.isHttpOnly, "The isHttpOnly must be the same.");
-            FBTest.compare(originalCookie.rawValue, newCookie.rawValue, "The rawValue must be the same.");
+            FBTest.waitForClipboard(clipboardValue, function()
+            {
+                CookieRow.onPaste(null);
 
-            // Delete the cookie
-            CookieRow.onRemove(newCookie);
-            newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
-            FBTest.ok(!newCookie, "There must not be 'CopyPasteCookie-1'.");
+                // Check the new cookie
+                var newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
+                FBTest.ok(newCookie, "There must be 'CopyPasteCookie-1'.");
+                if (!originalCookie || !newCookie)
+                    return FBTest.testDone();
 
-            return FBTest.testDone("cookies.general.cookieClipboard.DONE");
+                FBTest.compare(originalCookie.value, newCookie.value, "The value must be the same.");
+                FBTest.compare(originalCookie.isDomain, newCookie.isDomain, "The isDomain must be the same.");
+                FBTest.compare(originalCookie.host, newCookie.host, "The host must be the same.");
+                FBTest.compare(originalCookie.path, newCookie.path, "The path must be the same.");
+                FBTest.compare(originalCookie.isSecure, newCookie.isSecure, "The isSecure must be the same.");
+                FBTest.compare(originalCookie.expires, newCookie.expires, "The expires must be the same.");
+                FBTest.compare(originalCookie.isHttpOnly, newCookie.isHttpOnly, "The isHttpOnly must be the same.");
+                FBTest.compare(originalCookie.rawValue, newCookie.rawValue, "The rawValue must be the same.");
+
+                // Delete the cookie
+                CookieRow.onRemove(newCookie);
+                newCookie = FBTestFireCookie.getCookieByName(panelNode, "CopyPasteCookie-1");
+                FBTest.ok(!newCookie, "There must not be 'CopyPasteCookie-1'.");
+
+                return FBTest.testDone("cookies.general.cookieClipboard.DONE");
+            });
         });
     });
 };

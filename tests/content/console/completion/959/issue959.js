@@ -41,7 +41,7 @@ function runTest()
             {
                 // Add one shown property - if the popup shows there must have been
                 // another one before.
-                // (N.B., in the case expr = "''.toLocaleU" the eval doesn't
+                // (N.B., in the case expr = "''.fontco" the eval doesn't
                 // work, but this is okay because the correct property is set
                 // on String.prototype just before.)
                 win.wrappedJSObject.eval(expr + "2 = 0");
@@ -66,8 +66,8 @@ function runTest()
             tasks.push(testWithPopup, "obj3.t", "oString", false);
             tasks.push(testWithPopup, "false.he", "llo", true);
 
-            tasks.push(testHidden, "String.prototype.toLocaleU");
-            tasks.push(testHidden, "''.toLocaleU");
+            tasks.push(testHidden, "String.prototype.fontco");
+            tasks.push(testHidden, "''.fontco");
             tasks.push(testHidden, "propertyis");
             tasks.push(testHidden, "document.body.__lo");
             tasks.push(testHidden, "alert.arg");

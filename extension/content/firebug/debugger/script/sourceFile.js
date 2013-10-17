@@ -28,13 +28,24 @@ var Trace = FBTrace.to("DBG_SOURCEFILE");
  * @param {Actor} actor The Actor treating the source (note: can be omitted if the `source`
  *                      parameter is passed).
  * @param {string} href The link to the source
+ * @param {boolean} isBlackBoxed
  * @param {string} [source] The source if already provided
+ *
+ * SourceFile instance is created for every compilation unit (i.e. a script created
+ * on the back end). The instance is created by {@DebuggerTool} every time a "newSource"
+ * or the initial "sources" packet is received.
  */
-function SourceFile(context, actor, href, source)
+function SourceFile(context, actor, href, isBlackBoxed, source)
 {
     this.context = context;
     this.actor = actor;
     this.href = href;
+
+    // xxxHonza: this field should be utilized by issue 4885.
+    this.isBlackBoxed = isBlackBoxed;
+
+    // The content type is set when 'source' packet is received (see onSourceLoaded).
+    this.contentType = null;
 
     // xxxHonza: remove
     this.compilation_unit_type = "remote-script";
@@ -45,6 +56,7 @@ function SourceFile(context, actor, href, source)
 }
 
 SourceFile.prototype =
+/** @lends SourceFile */
 {
     getURL: function()
     {
@@ -125,7 +137,7 @@ SourceFile.prototype =
 
         this.inProgress = true;
 
-        // This is the only place where source is loaded for specific URL.
+        // This is the only place where source (the text) is loaded for specific URL.
         // Note: this requires that an actor has been passed to the constructor.
         var sourceClient = this.context.activeThread.source(this);
         sourceClient.source(this.onSourceLoaded.bind(this));
@@ -159,6 +171,7 @@ SourceFile.prototype =
         this.loaded = true;
         this.inProgress = false;
         this.lines = Str.splitLines(source);
+        this.contentType = response.contentType;
 
         // Notify all callbacks.
         for (var i=0; i<this.callbacks.length; i++)
@@ -195,13 +208,10 @@ SourceFile.findSourceForFunction = function(fn, context)
 SourceFile.toSourceLink = function(script, context)
 {
     var sourceLink = new SourceLink(script.url, script.startLine, "js");
-
-    // Make sure the target line is highlighted.
-    sourceLink.options.highlight = true;
     return sourceLink;
 };
 
-//xxxHonza: Back comp, do we need this?
+//xxxHonza: Back compatibility, do we need this?
 SourceFile.getSourceLinkForScript = SourceFile.toSourceLink;
 
 // ********************************************************************************************* //

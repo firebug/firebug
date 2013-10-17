@@ -45,7 +45,9 @@ var TestList = domplate(
                 ),
                 TD({"class": "testListCol testUri", onclick: "$onRunTest"},
                     SPAN({"class": "testLink"},
-                        SPAN("$test.uri")
+                        A({title: "$test|getTestTooltip"},
+                            "$test.uri"
+                        )
                     )
                 ),
                 TD({"class": "testListCol testIcon"},
@@ -75,6 +77,11 @@ var TestList = domplate(
     isTodo: function(test)
     {
         return test.category == "fails";
+    },
+
+    getTestTooltip: function(test)
+    {
+        return test.tooltip;
     },
 
     isDisabled: function(test)

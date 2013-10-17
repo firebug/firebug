@@ -55,7 +55,7 @@ var defaultAliases = {
 // ********************************************************************************************* //
 // Implementation
 
-var CommandLineIncludeRep = domplate(FirebugReps.Table,
+var CommandLineIncludeRep = domplate(TableRep,
 {
     tableClassName: "tableCommandLineInclude dataTable",
 
@@ -385,8 +385,7 @@ var CommandLineInclude = Obj.extend(Firebug.Module,
 
     log: function(localeStr, localeArgs, logArgs, noAutoPrefix)
     {
-        var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include."+localeStr);
-
+        var prefixedLocaleStr = (noAutoPrefix ? localeStr : "commandline.include." + localeStr);
         var msg = Locale.$STRF(prefixedLocaleStr, localeArgs);
         logArgs.unshift([msg]);
         return Firebug.Console.logFormatted.apply(Firebug.Console, logArgs);

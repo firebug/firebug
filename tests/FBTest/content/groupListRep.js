@@ -14,7 +14,8 @@ define([
     "fbtest/testListRep",
 ],
 function(FBTrace, Domplate, Obj, Str, Dom, Events, Css, Locale, Arr, System, TestList) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -22,6 +23,8 @@ with (Domplate) {
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
+
+var {domplate, TABLE, TBODY, TD, TR, SPAN} = Domplate;
 
 // ********************************************************************************************* //
 // Test List Domplate repository.
@@ -277,4 +280,4 @@ Firebug.registerRep(FBTestApp.GroupList);
 return FBTestApp.GroupList;
 
 // ********************************************************************************************* //
-}});
+});

@@ -14,9 +14,10 @@ define([
     "firebug/debugger/script/sourceFile",
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/breakpoints/breakpointStore",
 ],
 function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
-    DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib) {
+    DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -178,7 +179,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // This is because 'newScript' listener is registered in 'DebuggerClient' not
         // in 'ThreadClient'.
         if (this.context.activeThread.actor != response.from)
+        {
+            Trace.sysout("debuggerTool.newScript; coming from different thread");
             return;
+        }
 
         this.addScript(response.source);
     },
@@ -188,7 +192,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // Ignore scripts generated from 'clientEvaluate' packets. These scripts are
         // created e.g. as the user is evaluating expressions in the watch window.
         if (DebuggerLib.isFrameLocationEval(script.url))
+        {
+            Trace.sysout("debuggerTool.addScript; A script ignored " + script.type);
             return;
+        }
 
         if (!this.context.sourceFileMap)
         {
@@ -196,13 +203,25 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
-        // xxxHonza: Ignore inner script for now
+        // xxxHonza: Ignore inner scripts for now
         if (this.context.sourceFileMap[script.url])
+        {
+            Trace.sysout("debuggerTool.addScript; A script ignored: " + script.url, script);
             return;
+        }
 
-        // Create a source file and append it into the context.
-        var sourceFile = new SourceFile(this.context, script.actor, script.url);
+        // Create a source file and append it into the context. This is the only
+        // place where an instance of {@SourceFile} is created.
+        var sourceFile = new SourceFile(this.context, script.actor, script.url,
+            script.isBlackBoxed);
+
         this.context.addSourceFile(sourceFile);
+
+        // xxxHonza: workaround for issue 6870, should be removed
+        // as soon as the platform is fixed.
+        var bps = BreakpointStore.getBreakpoints(sourceFile.href);
+        var tool = this.context.getTool("breakpoint");
+        tool.setBreakpoints(bps);
 
         // Notify listeners (e.g. the Script panel) to updated itself. It can happen
         // that the Script panel has been empty until now and need to display a script.
@@ -308,10 +327,10 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Execute registered 'clientEvaluated' callback.
         // This must be done after "onStartDebugging" is dispatched to the Script panel, which
-        // is updating selection of the Watch panel and could potentially start Watch expr
+        // is updating selection of the Watch panel and could potentially start Watch expression
         // evaluation again (since evalInProgress would be false i.e. done).
         // xxxHonza: still bad architecture, the eval() method should have a simple callback
-        // even if the action is spreaded over resume-pause roundtrip.
+        // even if the action is spread over resume-pause round-trip.
         if (type == "clientEvaluated" && this.context.evalCallback)
         {
             this.context.evalCallback(this.context, event, packet);

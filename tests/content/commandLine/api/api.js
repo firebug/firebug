@@ -18,7 +18,7 @@ function runTest()
             tasks.push(executeAndVerify, "$(\"#test1\")", "<div\u00A0id=\"test1\">",
                 "a", "objectLink objectLink-element");
 
-            tasks.push(executeAndVerify, "$$(\".a.c\")", "[div.a, div.a]",
+            tasks.push(executeAndVerify, "$$(\".a.c\")", "[div.a.b.c.d, div.a.c]",
                 "span", "objectBox objectBox-array");
 
             tasks.push(executeAndVerify, "$x(\"html/body/span/div[1]\")", "[div.test]",
@@ -37,7 +37,9 @@ function runTest()
             tasks.push(executeAndVerify, "values(b)", "[7, \"a\"]",
                 "span", "objectBox objectBox-array");
 
-            tasks.push(executeAndVerify, "table(a)", FW.FBL.$STR("firebug.reps.table.ObjectProperties") + "10",
+            tasks.push(executeAndVerify, "table(a)",
+                FW.FBL.$STR("firebug.reps.table.ObjectProperties") +
+                FW.FBL.$STR("firebug.reps.table.ObjectValues") + "\"a\"10",
                 "div", "logRow logRow-table");
 
             // $$ must return a real array so, eg map() can be applied.

@@ -126,10 +126,8 @@ var Profiler = Obj.extend(Firebug.Module,
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
 
-        if (FBS.profiling)
+        if (context.profiling)
             return;
-
-        FBS.startProfiling();
 
         var originalTitle = title;
         var isCustomMessage = !!title;
