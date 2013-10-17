@@ -509,7 +509,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // the underlying source view that picking the right highlighting mode
             // for the source text (see issue 6866).
             // 1) First get the source file
-            // 2) Get it's content type that should be set at this moment. If not set
+            // 2) Get its content type that should be set at this moment. If not set
             //     it's guessed according to the file extension.
             // 3) Get the type/category from the content type.
             var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
