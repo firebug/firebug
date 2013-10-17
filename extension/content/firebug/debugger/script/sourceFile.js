@@ -52,7 +52,7 @@ function SourceFile(context, actor, href, isBlackBoxed, source)
     this.callbacks = [];
 
     if (source)
-        this.setSource(source);
+        this.setSource(source, "application/javascript");
 }
 
 SourceFile.prototype =
@@ -157,10 +157,10 @@ SourceFile.prototype =
             return;
         }
 
-        this.setSource(response.source);
+        this.setSource(response.source, response.contentType);
     },
 
-    setSource: function(source)
+    setSource: function(source, contentType)
     {
         // Convert all line delimiters to the unix style. The source editor
         // (in the Script panel) also uses unix style and so we can compare
@@ -171,7 +171,7 @@ SourceFile.prototype =
         this.loaded = true;
         this.inProgress = false;
         this.lines = Str.splitLines(source);
-        this.contentType = response.contentType;
+        this.contentType = contentType;
 
         // Notify all callbacks.
         for (var i=0; i<this.callbacks.length; i++)
