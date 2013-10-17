@@ -385,7 +385,7 @@ function getUrlForEval(context, expr)
 function addSourceFileForExpr(context, expr, href)
 {
     // xxxFlorent: What will actor (second argument) be used for? Will it be required?
-    var sourceFile = new SourceFile(context, null, href, expr);
+    var sourceFile = new SourceFile(context, null, href, false, expr);
     context.addSourceFile(sourceFile);
 }
 
