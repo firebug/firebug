@@ -74,6 +74,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     initialize: function(context, doc)
     {
+        Trace.sysout("scriptPanel.initialize; " + context.getName());
+
         BasePanel.initialize.apply(this, arguments);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
@@ -1223,6 +1225,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     newScript: function(sourceFile)
     {
+        // This event can be missed since the newScript packet can be send
+        // before the ScriptPanel is initialized and adds itself to the DebuggerTool
+        // as a listener.
+
         Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.
