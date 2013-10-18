@@ -17,10 +17,10 @@ define([
 function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher,
     FirebugReps, Win, Firefox) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TR, H1, P} = Domplate;
 
 var TraceError = FBTrace.to("DBG_ERRORS");
 var Trace = FBTrace.to("DBG_SCRIPTPANELWARNING");
@@ -287,4 +287,4 @@ var ScriptPanelWarning =
 return ScriptPanelWarning;
 
 // ********************************************************************************************* //
-}});
+});
