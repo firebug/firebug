@@ -843,7 +843,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
-    onContextMenu: function(event, items)
+    /**
+     * The method handles 'onEditorContextMenu' fired by {@ScriptView}.
+     */
+    onEditorContextMenu: function(event, items)
     {
         var target = event.target;
         var menuItems = this.getContextMenuItems(null, target);

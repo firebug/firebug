@@ -196,7 +196,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var commandDispatcher = browserWindow.document.commandDispatcher;
 
         var items = [];
-        this.dispatch("onContextMenu", [event, items]);
+        this.dispatch("onEditorContextMenu", [event, items]);
 
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);
