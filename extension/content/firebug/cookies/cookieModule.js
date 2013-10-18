@@ -40,10 +40,10 @@ function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Ev
     CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
     TraceListener, TraceModule, Firefox, BreakpointGroup, Win, Url) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TR, P, UL, A, BUTTON} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1437,4 +1437,4 @@ Firebug.registerActivableModule(Firebug.CookieModule);
 return Firebug.CookieModule;
 
 // ********************************************************************************************* //
-}});
+});

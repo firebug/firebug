@@ -24,10 +24,10 @@ define([
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
     Wrapper, Xpcom, ErrorMessageObj, PanelNotification, DebuggerLib, BreakpointStore) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
@@ -1211,4 +1211,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-}});
+});

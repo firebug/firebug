@@ -19,10 +19,10 @@ define([
 function(FBTrace, Obj, Arr, Url, Str, Locale, Firebug, Domplate, StackFrame, FirebugReps,
     SourceLink, Css, Options, Dom) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -226,4 +226,4 @@ Firebug.registerRep(StackFrameRep);
 return StackFrameRep;
 
 // ********************************************************************************************* //
-}});
+});

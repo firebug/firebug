@@ -11,10 +11,11 @@ define([
     "firebug/debugger/stack/stackFrameRep",
 ],
 function(Obj, Arr, Str, Locale, Firebug, Domplate, StackTrace, StackFrameRep) {
-with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, TR} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -70,4 +71,4 @@ Firebug.registerRep(StackTraceRep);
 return StackTraceRep;
 
 // ********************************************************************************************* //
-}});
+});
