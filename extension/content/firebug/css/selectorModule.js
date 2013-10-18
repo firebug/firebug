@@ -31,7 +31,7 @@ var CSSSelectorsModule = Obj.extend(Firebug.Module,
 
     onContextMenu: function(items, object, target, context, panel, popup)
     {
-        if (panel.name != "stylesheet")
+        if (!panel || panel.name != "stylesheet")
             return;
 
         var cssRule = Dom.getAncestorByClass(target, "cssRule");

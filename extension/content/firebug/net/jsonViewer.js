@@ -64,7 +64,7 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
 
     onContextMenu: function(items, object, target, context, panel, popup)
     {
-        if (panel.name != "net" && panel.name != "console")
+        if (!panel || (panel.name != "net" && panel.name != "console"))
             return;
 
         var memberLabel = Dom.getAncestorByClass(target, "memberLabel");

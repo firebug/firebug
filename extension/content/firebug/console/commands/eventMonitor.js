@@ -196,7 +196,7 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
     onContextMenu: function(items, object, target, context, panel, popup)
     {
-        if (panel.name != "html")
+        if (!panel || panel.name != "html")
             return items;
 
         var before = popup.querySelector("#fbScrollIntoView");

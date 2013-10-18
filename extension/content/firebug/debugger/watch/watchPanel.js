@@ -563,7 +563,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (this.context != context)
             return;
 
-        if (panel.name != "dom" && panel.name != "watches")
+        if (!panel || (panel.name != "dom" && panel.name != "watches"))
             return;
 
         var row = Dom.getAncestorByClass(target, "memberRow");
