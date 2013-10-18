@@ -35,10 +35,10 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
     Url, CSSModule, CSSInfoTip, BreakpointGroup, SourceEditor) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, A, IMG, INPUT, TEXTAREA} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -3198,4 +3198,4 @@ Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 return Firebug.HTMLModule;
 
 // ********************************************************************************************* //
-}});
+});

@@ -43,10 +43,10 @@ function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, ConditionEditor, TimeInfoTip,
     PanelNotification) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, TR, P, UL, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1721,4 +1721,4 @@ Firebug.registerPanel(NetPanel);
 return Firebug.NetMonitor;
 
 // ********************************************************************************************* //
-}});
+});
