@@ -35,10 +35,10 @@ define([
 function(Obj, Firebug, Firefox, Domplate, Locale, Events, Options, Url, Css, Dom, Win, Search, Str,
     Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress, Http) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, CODE, PRE, A, IFRAME} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1881,4 +1881,4 @@ Firebug.registerRep(Firebug.NetMonitor.NetRequestTable);
 return Firebug.NetMonitor.NetRequestTable;
 
 // ********************************************************************************************* //
-}});
+});

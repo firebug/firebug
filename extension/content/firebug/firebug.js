@@ -30,6 +30,8 @@ function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, TAG, TR, P, UL, LI, A} = Domplate;
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -2555,7 +2557,6 @@ Firebug.MeasureBox =
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.Rep = domplate(
 {
     className: "",
@@ -2689,7 +2690,6 @@ Firebug.Rep = domplate(
         return n == 1 ? "" : "s";
     }
 });
-};
 
 // ********************************************************************************************* //
 

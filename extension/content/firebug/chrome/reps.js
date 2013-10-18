@@ -33,10 +33,10 @@ function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, W
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, PRE, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -3015,4 +3015,4 @@ Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
-}});
+});

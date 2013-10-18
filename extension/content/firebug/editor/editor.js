@@ -18,6 +18,8 @@ function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, DIV, SPAN, P, A, INPUT} = Domplate;
+
 const saveTimeout = 400;
 const hugeChangeAmount = 100;
 const largeChangeAmount = 10;
@@ -572,7 +574,6 @@ Firebug.InlineEditor = function(doc)
     this.initializeInline(doc);
 };
 
-with (Domplate) {
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
     enterOnBlur: true,
@@ -1076,7 +1077,6 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Dom.scrollIntoCenterView(this.box, null, true);
     }
 });
-};
 
 // ********************************************************************************************* //
 // Autocompletion

@@ -21,6 +21,8 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, 
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -287,7 +289,6 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.Profiler.ProfileTable = domplate(
 {
     tag:
@@ -532,8 +533,6 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });
-
-} // END Domplate
 
 // ********************************************************************************************* //
 
