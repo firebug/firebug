@@ -188,7 +188,7 @@ function onFrames(aRequest)
     var count = aRequest.count;
 
     // Find the starting frame...
-    var frame = this._youngestFrame;
+    var frame = this.youngestFrame;
     var i = 0;
     while (frame && (i < start))
     {

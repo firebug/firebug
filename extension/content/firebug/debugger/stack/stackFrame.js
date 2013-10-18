@@ -24,7 +24,10 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
-    this.fn = functionName || "(anonymous)";
+
+    // xxxHonza: the way how the function name is computed is hacky. What about displayName?
+    var fileName = sourceFile.href ? Url.getFileName(sourceFile.href) : null;
+    this.fn = functionName || fileName || "(anonymous)";
     this.context = context;
 
     // the newest frame in the stack containing 'this' frame

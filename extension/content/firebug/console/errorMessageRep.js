@@ -166,18 +166,11 @@ var ErrorMessage = domplate(Firebug.Rep,
         if (error.sourceLoading)
             return "";
 
-        var async = false;
-
-        // The source needs to be fetched asynchronously the first time, but if it's
-        // already available its being returned synchronously.
-        var source = error.getSourceLine(function(source)
-        {
-            if (async)
-                Events.dispatch(Firebug.modules, "onUpdateErrorObject", [error]);
-        });
-
-        async = true;
-
+        // The source needs to be fetched asynchronously the first time (return value undefined),
+        // but if it's already available its being returned synchronously.
+        // The UI will be updated upon "onSourceLoaded" event in case when the source needs
+        // to be fetched from the server, see {@ErrorMessageUpdater}.
+        var source = error.getSourceLine();
         if (source && noCrop)
         {
             return source;
@@ -496,6 +489,17 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module Events
+
+    onSourceLoaded: function(sourceFile)
+    {
+        // A new source has been fetched from the server. Let's update existing
+        // error logs to make sure they display a source line where the error
+        // occurred.
+        Events.dispatch(Firebug.modules, "onUpdateErrorObject", [sourceFile]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Error Breakpoint Update
 
     /**
@@ -542,13 +546,13 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Error Source Update
 
-    onUpdateErrorObject: function(errorObject)
+    onUpdateErrorObject: function(sourceFile)
     {
         Trace.sysout("errorMessageRep.onUpdateErrorObject;", errorObject);
 
         // Get all error-logs in the Console and update the one related to
         // the error-object passed into this method.
-        var context = errorObject.context;
+        var context = sourceFile.context;
         var panel = context.getPanel("console");
 
         // The Console panel can be disabled.
@@ -560,7 +564,9 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
         {
             var row = rows[i];
             var log = row.getElementsByClassName("objectBox-errorMessage")[0];
-            if (Firebug.getRepObject(log) == errorObject)
+            var errorObject = Firebug.getRepObject(log);
+
+            if (sourceFile.href == errorObject.href)
             {
                 var rep = Firebug.getRep(errorObject, context);
                 var content = row.getElementsByClassName("logContent")[0];
@@ -568,7 +574,6 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
                 // Render content again. The group counter is preserved since it's
                 // located outside of the replaced area.
                 ErrorMessage.tag.replace({object: errorObject}, content, ErrorMessage);
-                break;
             }
         }
     },
