@@ -26,13 +26,15 @@ function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Cs
     StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
     DOMBasePanel, ErrorCopy) {
 
-with (Domplate) {
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
 
 var Trace = FBTrace.to("DBG_WATCH");
 var TraceError = FBTrace.to("DBG_ERRORS");
+
+var {domplate, DIV, IMG} = Domplate;
 
 // ********************************************************************************************* //
 // Domplate
@@ -704,4 +706,4 @@ Firebug.registerPanel(WatchPanel);
 return WatchPanel;
 
 // ********************************************************************************************* //
-}});
+});
