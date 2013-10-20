@@ -66,7 +66,7 @@ var TableRep = domplate(Firebug.Rep,
                 TBODY({"class": "dataTableTbody", "role": "presentation"},
                     FOR("row", "$object.data|getRows",
                         TR({"class": "focusRow dataTableRow subFocusRow", "role": "row"},
-                            FOR("column", "$row|getColumns",
+                            FOR("column", "$row,$object.indexes|getColumns",
                                 TD({"class": "a11yFocus dataTableCell", "role": "gridcell"},
                                     TAG("$column|getValueTag", {object: "$column"})
                                 )
@@ -91,7 +91,7 @@ var TableRep = domplate(Firebug.Rep,
         return props;
     },
 
-    getColumns: function(row)
+    getColumns: function(row, indexes)
     {
         if (typeof(row) != "object")
             return [row];
@@ -110,6 +110,10 @@ var TableRep = domplate(Firebug.Rep,
             if (typeof prop == "undefined")
             {
                 value = row;
+            }
+            else if (prop === "__fb_table_index")
+            {
+                value = indexes.shift();
             }
             else if (typeof row[prop] == "undefined")
             {
@@ -263,9 +267,6 @@ var TableRep = domplate(Firebug.Rep,
 
         var columns = this.computeColumns(data, cols, options.showIndex);
 
-        if (columns[0].property === "(index)")
-            this.populateIndexColumn(data);
-
         // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
         var prevValue = Firebug.stringCropLength;
@@ -278,6 +279,8 @@ var TableRep = domplate(Firebug.Rep,
             var obj = object || {};
             obj.data = data;
             obj.columns = columns;
+            if (columns[0].property === "__fb_table_index")
+                obj.indexes = this.getIndexes(data);
 
             var row = Firebug.Console.log(obj, context, "table", this, true);
 
@@ -327,18 +330,21 @@ var TableRep = domplate(Firebug.Rep,
         return columns;
     },
 
-    populateIndexColumn: function(data)
+    getIndexes: function(data)
     {
+        var indexes = [];
         if (Arr.isArrayLike(data))
         {
             for (var i = 0; i < data.length; i++)
-                data[i]["(index)"] = i;
+                indexes.push(i);
         }
         else
         {
             for (var p in data)
-                data[p]["(index)"] = p;
+                indexes.push(p);
         }
+
+        return indexes;
     },
 
     prependIndexColumn: function(columns, isAlphaValue)
@@ -346,7 +352,7 @@ var TableRep = domplate(Firebug.Rep,
         if (columns.length)
         {
             columns.unshift({
-                property: "(index)",
+                property: "__fb_table_index",
                 label: Locale.$STR("firebug.reps.table.Index"),
                 alphaValue: isAlphaValue,
             });
