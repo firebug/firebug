@@ -261,18 +261,10 @@ var TableRep = domplate(Firebug.Rep,
 
         options = options || {};
 
-        var columns = this.computeColumns(data, cols);
+        var columns = this.computeColumns(data, cols, options.showIndex);
 
-        if (options.showIndex && columns.length)
-        {
-            columns.unshift({
-                property: "(index)",
-                label: Locale.$STR("firebug.reps.table.Index"),
-                alphaValue: false
-            });
-            for (var i = 0; i < data.length; i++)
-                data[i]["(index)"] = i;
-        }
+        if (columns[0].property === "(index)")
+            this.populateIndexColumn(data);
 
         // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
@@ -306,7 +298,7 @@ var TableRep = domplate(Firebug.Rep,
         }
     },
 
-    computeColumns: function(data, cols)
+    computeColumns: function(data, cols, showIndex)
     {
         // Get header info from passed argument (can be null).
         var columns = [];
@@ -323,19 +315,47 @@ var TableRep = domplate(Firebug.Rep,
             });
         }
 
+        if (showIndex)
+            this.prependIndexColumn(columns, false);
+
         // Generate header info from the data dynamically.
         if (!columns.length)
-            columns = this.getHeaderColumns(data);
+            columns = this.getHeaderColumns(data, showIndex);
 
         Trace.sysout("tableRep.computeColumns; columns:", columns);
 
         return columns;
     },
 
+    populateIndexColumn: function(data)
+    {
+        if (Arr.isArrayLike(data))
+        {
+            for (var i = 0; i < data.length; i++)
+                data[i]["(index)"] = i;
+        }
+        else
+        {
+            for (var p in data)
+                data[p]["(index)"] = p;
+        }
+    },
+
+    prependIndexColumn: function(columns, isAlphaValue)
+    {
+        if (columns.length)
+        {
+            columns.unshift({
+                property: "(index)",
+                label: Locale.$STR("firebug.reps.table.Index"),
+                alphaValue: isAlphaValue,
+            });
+        }
+    },
+
     getFirstRow: function(data)
     {
         // Get the first row in the object.
-        var firstRow = null;
         for (var p in data)
             return data[p];
     },
@@ -354,7 +374,7 @@ var TableRep = domplate(Firebug.Rep,
      * Analyze data and return dynamically created list of columns.
      * @param {Object} data
      */
-    getHeaderColumns: function(data)
+    getHeaderColumns: function(data, showIndex)
     {
         var firstRow = this.getFirstRow(data);
 
@@ -384,6 +404,10 @@ var TableRep = domplate(Firebug.Rep,
                 alphaValue: (typeof(value) != "number")
             });
         }
+
+        // Prepend the "(index)" column.
+        if (showIndex)
+            this.prependIndexColumn(header, true);
 
         return header;
     },
