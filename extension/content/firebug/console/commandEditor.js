@@ -52,7 +52,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         var config =
         {
             mode: "javascript",
-            lineNumbers: false,
+            lineNumbers: true,
             readOnly: false,
             gutters: []
         };
