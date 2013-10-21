@@ -1401,6 +1401,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     name: "html",
     searchable: true,
+    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
     breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),

@@ -289,9 +289,16 @@ Firebug.Search = Obj.extend(Firebug.Module,
             return;
 
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var panelType = Firebug.getPanelType(panel.name);
-        var title = Firebug.getPanelTitle(panelType);
-        searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        if (panel.searchPlaceholder)
+        {
+            searchBox.placeholder = Locale.$STR(panel.searchPlaceholder);
+        }
+        else
+        {
+            var panelType = Firebug.getPanelType(panel.name);
+            var title = Firebug.getPanelTitle(panelType);
+            searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
