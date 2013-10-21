@@ -7,45 +7,26 @@ function runTest()
         FBTest.openFirebug();
         FBTest.selectPanel("html");
 
-        var testSuite = [];
-
-        // Test 1: 'testing', forward, case insensitive
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("testing", false, false, function(counter)
-            {
-                FBTest.compare(10, counter, "There must be precise number " +
-                     "of occurences (10) actual: " + counter);
-                callback();
-            });
-        });
-
-        // Test 2: 'testing', forward, case sensitive
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("testing", false, true, function(counter)
-            {
-                FBTest.compare(4, counter, "There must be precise number " +
-                    "of occurences (4) actual: " + counter);
-                callback();
-            });
-        });
-
-        // Test 3: 'Testing', forward, case insensitive.
-        testSuite.push(function(callback)
-        {
-            executeSearchTest("Testing", false, false, function(counter)
-            {
-                FBTest.compare(5, counter, "There must be precise number " +
-                    "of occurences (5) actual: " + counter);
-                callback();
-            });
-        });
-
-        FBTest.runTestSuite(testSuite, function()
+        var tasks = new FBTest.TaskList();
+        tasks.push(searchTest, "testing", false, 10);
+        tasks.push(searchTest, "testing", true, 5);
+        tasks.push(searchTest, "Testing", false, 6);
+        tasks.push(searchTest, "ol li", false, 8);
+        tasks.push(searchTest, "/html/body", true, 2);
+        tasks.run(function()
         {
             FBTest.testDone("issue6454.DONE");
         });
+    });
+}
+
+function searchTest(callback, text, caseSensitive, expectedMatches)
+{
+    executeSearchTest(text, false, caseSensitive, function(counter)
+    {
+        FBTest.compare(expectedMatches, counter, "There must be " + expectedMatches +
+            " matches when searching for \"" + text + "\"");
+        callback();
     });
 }
 
