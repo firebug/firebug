@@ -342,6 +342,16 @@ Search.ReversibleRegExp = function(regex, flags)
         }
         return ret;
     };
+
+    this.fakeMatch = function(text, reverse, caseSensitive)
+    {
+        var ret = [text];
+        ret.index = 0;
+        ret.input = text;
+        ret.reverse = reverse;
+        ret.caseSensitive = caseSensitive;
+        return ret;
+    };
 };
 
 return Search;

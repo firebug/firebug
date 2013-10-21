@@ -1733,6 +1733,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
+    shouldIgnoreIntermediateSearchFailure: function(value)
+    {
+        // An extension of the search text could still be a valid selector,
+        // so don't signal an error.
+        return true;
+    },
+
     getSearchOptionsMenuItems: function()
     {
         return [
