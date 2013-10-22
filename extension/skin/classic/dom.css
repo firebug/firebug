@@ -175,7 +175,7 @@
 
 @keyframes emphasizeResumeLimit {
     from {
-        background-color: orange;
+        background-color: #C4F4FF;
     }
     to {
         background-color: inherit;
