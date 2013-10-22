@@ -52,15 +52,16 @@ ClientCache.prototype =
      */
     getObject: function(grip)
     {
+        // xxxFlorent: shouldn't be true anymore soon (having to test)...
         // If the grip is actually a primitive value, which is evaluated to 'false'
         // (can be number zero, boolean false, an empty string), return the value
         // directly to keep the type.
-        if (!grip)
+        if (grip == null)
             return grip;
 
         // Null and undefined values has it's own type, so return predefined grip.
         // Or again, directly the passed value.
-        if (!grip.actor)
+        if (typeof grip === "object" && !grip.actor)
         {
             if (grip.type == "null")
                 return gripNull;
@@ -71,12 +72,20 @@ ClientCache.prototype =
             return grip;
         }
 
-        var object = this.clients[grip.actor];
-        if (object)
-            return object;
+        var object;
+
+        if (typeof grip === "object")
+        {
+            object = this.clients[grip.actor];
+            if (object)
+                return object;
+        }
 
         object = ClientFactory.createClientObject(grip, this);
-        this.clients[grip.actor] = object;
+
+        // We don't cache primitive grips.
+        if (typeof grip === "object")
+            this.clients[grip.actor] = object;
 
         return object;
     },

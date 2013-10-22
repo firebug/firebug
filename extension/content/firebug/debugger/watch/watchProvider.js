@@ -228,15 +228,14 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         var resumeLimitScope;
 
-        // If resumeLimitObj.value is a number, a string, or a boolean, they are standalone grips
-        // (i.e. the grip is the value itself). We need to create a ObjectClient object of them.
-        if (["number", "string", "boolean"].indexOf(typeof resumeLimitObj.value) !== -1)
-            resumeLimitScope = new ObjectClient(resumeLimitObj.value, cache);
-        else
-            resumeLimitScope = resumeLimitObj.value;
+        resumeLimitScope = cache.getObject(resumeLimitObj.value);
 
         resumeLimitScope.name = resumeLimitObj.key;
-        resumeLimitScope.isresumeLimitValue = true;
+        resumeLimitScope.isResumeLimitValue = true;
+
+        Trace.sysout("WatchProvider.appendResumeLimitValueInScope; resumeLimitScope",
+            resumeLimitScope);
+
         stackFrame.scopes.push(resumeLimitScope);
     },
 });

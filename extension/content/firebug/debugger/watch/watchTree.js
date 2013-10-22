@@ -62,7 +62,7 @@ WatchTree.prototype = domplate(BaseTree,
         TR(
             TD({colspan: 2})
         ),
- 
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getWatchNewRowTag: function(show)
@@ -90,6 +90,8 @@ WatchTree.prototype = domplate(BaseTree,
             return "scopes";
         else if (object instanceof WatchExpression)
             return "watch";
+        else if (object && object.isResumeLimitValue)
+            return "resumeLimit";
 
         return BaseTree.getType.apply(this, arguments);
     },
@@ -143,6 +145,10 @@ WatchTree.prototype = domplate(BaseTree,
                 // Only primitive types can be edited.
                 var value = panel.provider.getValue(member.value);
                 if (typeof(value) == "object")
+                    return;
+
+                // Don't edit completion values.
+                if (object.isResumeLimitValue)
                     return;
 
                 if (typeof(value) == "boolean")

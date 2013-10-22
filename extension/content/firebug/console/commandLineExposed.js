@@ -375,6 +375,9 @@ function updateVars(commandLine, dbgGlobal, context, subject, expr)
 {
     var vars = {};
     // xxxFlorent: TODO document extendCommandLineVars
+    // xxxFlorent: Firebug.CommandLine should not be access direcly. We should rather
+    //      make CommandLineExposed a EventSource and dispatch through its listeners. But we need
+    //      to make firebug/firebug.js independant of firebug/console/commandLineExposed.js.
     Events.dispatch(Firebug.CommandLine.fbListeners, "extendCommandLineVars",
         [vars, context, subject, expr]);
 
