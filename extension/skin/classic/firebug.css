@@ -170,7 +170,7 @@
 
 .fbsearch-icon {
     cursor: default!important;
-    background: url(chrome://firebug/skin/search.png) no-repeat 0 0;
+    background: url(chrome://firebug/skin/search.png) no-repeat 0 center;
     width: 16px;
     height: 16px;
 }
@@ -185,11 +185,11 @@
 }
 
 .fbsearch-textbox[active-search="true"] > .fbsearch-icon:hover {
-    background-position: 0 -16px;
+    background-image: url(chrome://firebug/skin/searchCloseHovered.png);
 }
 
 .fbsearch-textbox[active-search="true"] > .fbsearch-icon:active {
-    background-position: 0 -32px;
+    background-image: url(chrome://firebug/skin/searchCloseActive.png);
 }
 
 #fbSearchOptionsPanel {
