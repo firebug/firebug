@@ -11,7 +11,16 @@ define([
     "firebug/lib/trace",
 ],
 function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, FBTrace) {
-with (Domplate) {
+
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, TR, TD, TABLE, TBODY, FOR, TAG, SPAN} = Domplate;
+
+var Trace = FBTrace.to("DBG_DOMTREE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Tree Implementation
@@ -44,7 +53,7 @@ DomTree.prototype = domplate(
         ),
 
     rowTag:
-        TR({"class": "memberRow $member.open $member.type\\Row $member|getExtraClasses",
+        TR({"class": "memberRow $member.open $member.type\\Row",
             $hasChildren: "$member|hasChildren", _domObject: "$member",
             _repObject: "$member", level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
@@ -120,13 +129,6 @@ DomTree.prototype = domplate(
         return this.sizerRowTag;
     },
 
-    getExtraClasses: function(member)
-    {
-        if (member.value && member.value.isCompletionValue)
-            return "completionValue";
-        return "";
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Event Handlers
 
@@ -183,6 +185,9 @@ DomTree.prototype = domplate(
 
             // Get children object for the next level.
             var members = this.getMembers(member.value, level + 1);
+
+            Trace.sysout("DomTree.toggleRow; level: " + level + ", members: " +
+                (members ? members.length : "null"), members);
 
             // Insert rows if they are immediately available. Otherwise set a spinner
             // and wait for the update.
@@ -246,9 +251,6 @@ DomTree.prototype = domplate(
 
                 // Domplate inheritance doesn't work properly so, let's store back reference.
                 member.tree = this;
-
-                // Make members read-only if they are completion values.
-                member.readOnly = member.value && member.value.isCompletionValue;
                 members.push(member);
             }
         }
@@ -278,8 +280,7 @@ DomTree.prototype = domplate(
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domTree.fetchChildren; EXCEPTION " + e, e);
+            TraceError.sysout("domTree.fetchChildren; EXCEPTION " + e, e);
 
             return children;
         }
@@ -344,8 +345,7 @@ DomTree.prototype = domplate(
             }
             catch (e)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("domTree.getObjectProperties; EXCEPTION " + e, e);
+                TraceError.sysout("domTree.getObjectProperties; EXCEPTION " + e, e);
             }
         }
     },
@@ -385,11 +385,7 @@ DomTree.prototype = domplate(
         var self = this;
         var promise = promise.then(function onThen(value)
         {
-            if (FBTrace.DBG_DOMTREE)
-            {
-                FBTrace.sysout("domTree.onThen; sync: " + sync,
-                    {value: value, object: object});
-            }
+            Trace.sysout("domTree.onThen; sync: " + sync, {value: value, object: object});
 
             if (sync)
                 result = value;
@@ -399,7 +395,7 @@ DomTree.prototype = domplate(
         },
         function onError(err)
         {
-            FBTrace.sysout("domTree.onResolvePromise; ERROR " + err, err);
+            TraceError.sysout("domTree.onResolvePromise; ERROR " + err, err);
         });
 
         sync = false;
@@ -439,8 +435,7 @@ DomTree.prototype = domplate(
         var row = this.getRow(object);
         if (!row)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domTree.expandObject; ERROR no such object", object);
+            TraceError.sysout("domTree.expandObject; ERROR no such object", object);
             return;
         }
 
@@ -462,14 +457,13 @@ DomTree.prototype = domplate(
         }
         catch (e)
         {
-            FBTrace.sysout("domTree.updateObject; EXCEPTION " + e, e);
+            TraceError.sysout("domTree.updateObject; EXCEPTION " + e, e);
         }
     },
 
     doUpdateObject: function(object)
     {
-        if (FBTrace.DBG_DOMTREE)
-            FBTrace.sysout("domTree.updateObject;", object);
+        Trace.sysout("domTree.updateObject;", object);
 
         var row = this.getRow(object);
 
@@ -485,7 +479,7 @@ DomTree.prototype = domplate(
         // Root will always bail out.
         if (!row)
         {
-            FBTrace.sysout("domTree.updateObject; This object can't be updated", object);
+            Trace.sysout("domTree.updateObject; This object can't be updated", object);
             return;
         }
 
@@ -536,5 +530,5 @@ DomTree.isPromise = isPromise;
 return DomTree;
 
 // ********************************************************************************************* //
-}});
+});
 
