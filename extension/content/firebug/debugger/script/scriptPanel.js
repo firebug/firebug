@@ -547,6 +547,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         return this.scriptView.search(text, reverse);
     },
 
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+                "search.tip.Multiple_Files"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
+        ];
+    },
+
     onNavigateToNextDocument: function(scanDoc, reverse)
     {
         return this.navigateToNextDocument(scanDoc, reverse);
