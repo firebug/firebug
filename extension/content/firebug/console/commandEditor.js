@@ -55,7 +55,6 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             lineNumbers: true,
             readOnly: false,
             gutters: [],
-            resetSelectionOnContextMenu: false,
         };
 
         // Custom shortcuts for source editor

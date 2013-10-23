@@ -84,6 +84,8 @@ SourceEditor.DefaultConfig =
     showCursorWhenSelecting: false,
     undoDepth: 200
 
+    resetSelectionOnContextMenu: false,
+
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
     // There is one-line editor created at the bottom of the Script panel.
     // Just switch to the CSS panel and back to reproduce the problem.
