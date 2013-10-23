@@ -82,7 +82,7 @@ SourceEditor.DefaultConfig =
     fixedGutter: false,
 
     showCursorWhenSelecting: false,
-    undoDepth: 200
+    undoDepth: 200,
 
     resetSelectionOnContextMenu: false,
 
