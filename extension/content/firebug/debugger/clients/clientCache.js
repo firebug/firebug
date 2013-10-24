@@ -15,6 +15,7 @@ function (FBTrace, Firebug, Obj, Promise, ObjectClient, ClientFactory) {
 
 var gripNull = new ObjectClient({type: "null"});
 var gripUndefined = new ObjectClient({type: "undefined"});
+var gripNaN = new ObjectClient({type: "NaN"});
 
 // ********************************************************************************************* //
 // ClientCache
@@ -66,6 +67,8 @@ ClientCache.prototype =
                 return gripNull;
             else if (grip.type == "undefined")
                 return gripUndefined;
+            else if (grip.type == "NaN")
+                return gripNaN;
 
             // Can be a primitive value evaluated to 'true' (e.g. a string, boolean true, etc.).
             return grip;
