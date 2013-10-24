@@ -125,6 +125,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.Console.addListener(this);
+
+        Firebug.registerUIListener(this);
     },
 
     destroy: function(state)
@@ -151,6 +153,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.context.getTool("debugger").removeListener(this);
 
         Firebug.Console.removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
@@ -1148,6 +1152,23 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Set the flag on the server.
         var tool = this.context.getTool("debugger");
         tool.breakOnExceptions(breaking);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // UI Listener
+
+    updateSidePanels: function(panel)
+    {
+        if (!panel || panel.name != "console")
+            return;
+
+        // Custom update of the side panel box visibility.
+        // The logic in {@FirebugChrome.syncSidePanels} hides the side box (fbPanelBar2)
+        // if there is no selected panel. But in case of the Console (main) panel the
+        // fbPanelBar2.selectedSide panel is null even if the {@CommandEditor} is active.
+        // This is because {@CommandEditor} is not implemented as an instance of {@Firebug.Panel}
+        // So, make sure to display it now.
+        this.showCommandLine(true);
     },
 });
 
