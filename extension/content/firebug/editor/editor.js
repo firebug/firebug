@@ -1010,7 +1010,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             var clR = this.expander.getClientRects(),
                 wasWrapped = this.wrapped, inputWidth = Infinity;
 
-            if(clR.length == 1)
+            if (clR.length <= 1)
             {
                 this.wrapped = false;
             }
@@ -1031,12 +1031,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 if (clR[2].width > 50)
                     inputWidth = clR[1].width;
             }
-            else if(clR.length > 3)
+            else if (clR.length > 3)
             {
                 this.wrapped = true;
             }
 
-            if(this.wrapped)
+            if (this.wrapped)
             {
                 var fixupL = clR[1].left - clR[0].left;
                     fixupT = clR[1].top - clR[0].top;
@@ -1054,15 +1054,14 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 if (extraWidth)
                     charWidth *= extraWidth;
 
-                var inputWidth = approxTextWidth + charWidth;
+                inputWidth = approxTextWidth + charWidth;
             }
-
 
             var container = currentPanel.panelNode;
             var maxWidth = container.clientWidth - this.targetOffset.x - fixupL +
                 container.scrollLeft-6;
 
-            if(inputWidth > maxWidth)
+            if (inputWidth > maxWidth)
                 inputWidth = maxWidth;
 
             if (forceAll || initial || this.wrapped != wasWrapped)
