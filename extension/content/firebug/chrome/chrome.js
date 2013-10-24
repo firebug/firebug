@@ -2127,7 +2127,8 @@ function onPanelMouseUp(event)
                 var unselectedRange = event.target.ownerDocument.createRange();
                 var selectedRange = selection.getRangeAt(0);
                 var referenceElement = editable || event.target;
-                unselectedRange.setStart(referenceElement.firstElementChild || referenceElement, 0);
+                unselectedRange.setStart(referenceElement.firstElementChild ||
+                    referenceElement, 0);
                 unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
                 if (selectedRange.collapsed)
