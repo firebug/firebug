@@ -29,7 +29,7 @@ Firebug.DOMPanel = function()
 
 Firebug.DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
 Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
-/** lends Firebug.DOMPanel */
+/** @lends Firebug.DOMPanel */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
