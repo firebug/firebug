@@ -574,7 +574,8 @@ SourceEditor.prototype =
 
     setDebugLocation: function(line)
     {
-        Trace.sysout("sourceEditor.setDebugLocation; line: " + line);
+        Trace.sysout("sourceEditor.setDebugLocation; line: " + line +
+            ", this.debugLocation: " + this.debugLocation);
 
         if (this.debugLocation == line)
             return;
@@ -582,13 +583,16 @@ SourceEditor.prototype =
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(this.debugLocation);
-            this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
+            if (handle)
+            {
+                this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
 
-            // Remove debug location marker (we are reusing breakpoints gutter for it).
-            var marker = this.getGutterMarker(bpGutter, this.debugLocation);
-            if (marker && marker.className == "debugLocation")
-                this.removeGutterMarker(bpGutter, this.debugLocation);
+                // Remove debug location marker (we are reusing breakpoints gutter for it).
+                var marker = this.getGutterMarker(bpGutter, this.debugLocation);
+                if (marker && marker.className == "debugLocation")
+                    this.removeGutterMarker(bpGutter, this.debugLocation);
+            }
         }
 
         this.debugLocation = line;
@@ -596,18 +600,21 @@ SourceEditor.prototype =
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(line);
-            this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.addLineClass(handle, "background", BACK_CLASS);
-
-            // Debug location marker is using breakpoints gutter and so, create the marker
-            // only if there is no breakpoint marker already. This 'gutter reuse' allows to
-            // place the debug location icon over a breakpoint icon and save some space.
-            var marker = this.getGutterMarker(bpGutter, line);
-            if (!marker)
+            if (handle)
             {
-                var marker = this.getGutterElement().ownerDocument.createElement("div");
-                marker.className = "debugLocation";
-                this.editorObject.setGutterMarker(line, bpGutter, marker);
+                this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.addLineClass(handle, "background", BACK_CLASS);
+
+                // Debug location marker is using breakpoints gutter and so, create the marker
+                // only if there is no breakpoint marker already. This 'gutter reuse' allows to
+                // place the debug location icon over a breakpoint icon and save some space.
+                var marker = this.getGutterMarker(bpGutter, line);
+                if (!marker)
+                {
+                    var marker = this.getGutterElement().ownerDocument.createElement("div");
+                    marker.className = "debugLocation";
+                    this.editorObject.setGutterMarker(line, bpGutter, marker);
+                }
             }
         }
     },
