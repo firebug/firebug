@@ -134,6 +134,20 @@ StackFrame.prototype =
     {
         return this.nativeFrame.actor;
     },
+
+    /**
+     * Compare two StackFrame instances and returns true if their actor is the same.
+     * (Used in bindings.xml in getObjectItem())
+     *
+     * @param {StackFrame} other The other object to compare with.
+     * @return {boolean} true if their actor is the same.
+     */
+    equals: function(other)
+    {
+        // Note: do not compare directly with their nativeFrame => they are not always equal.
+        return other.nativeFrame && this.nativeFrame &&
+            other.nativeFrame.actor === this.nativeFrame.actor;
+    }
 };
 
 // ********************************************************************************************* //
