@@ -141,7 +141,7 @@ Firebug.StartButton = Obj.extend(Module,
         }
         else
         {
-            if (firebugButton)
+            if (errorBadge)
             {
                 errorBadge.removeAttribute("showErrors");
 

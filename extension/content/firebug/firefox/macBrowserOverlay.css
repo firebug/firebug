@@ -1,4 +1,4 @@
-#firebug-button .badge > .label {
+#firebug-error-label {
     -moz-box-sizing: border-box;
     visibility: hidden;
     font-size: 9px;
@@ -14,16 +14,16 @@
 }
 
 /* Slightly different positions of the badge for individual toolbars */
-#nav-bar #firebug-button .badge {
+#nav-bar #firebug-error-badge {
     margin: -5px -10px 0 -8px;
 }
 
-#fbContentSplitter{
+#fbContentSplitter {
     border-color: threedShadow !important;
     background-color: #FFFFFF;
 }
 
-#fbContentSplitter[dir=reverse]{
+#fbContentSplitter[dir=reverse] {
     transform: scale(-1, -1);
 }
 
