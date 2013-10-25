@@ -135,6 +135,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
                 var errorLabel = Firefox.getElementById("firebug-error-label");
                 errorBadge.setAttribute("showErrors", "true");
                 errorLabel.setAttribute("value", errorCount);
+                errorLabel.setAttribute("tooltiptext", Locale.$STRP("plural.startbutton.tip.errors", [errorCount]))
             }
         }
         else
