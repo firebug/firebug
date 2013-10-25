@@ -2137,7 +2137,7 @@ function onPanelMouseUp(event)
                         Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
-                    if (distance > 3 || referenceElement === event.target)
+                    if (distance > 3 || Css.hasClass(event.target, "inlineExpander"))
                     {
                         selectionData =
                         {
