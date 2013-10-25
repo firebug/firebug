@@ -69,8 +69,7 @@ var BrowserToolbar =
                     [
                         $el(doc, "label", {
                             id: "firebug-error-label",
-                            value: 0,
-                            tooltiptext: "3 errors"
+                            value: 0
                         })
                     ]
                 ),
