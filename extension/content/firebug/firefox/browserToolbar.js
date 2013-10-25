@@ -32,6 +32,7 @@ var BrowserToolbar =
             label: "firebug.Inspect",
             tooltiptext: "firebug.InspectElement",
             observes: "cmd_firebug_toggleInspecting",
+            firebugRootNode: true,
             // Needed for the 'Customize Toolbar' dialog
             style: "list-style-image: url(chrome://firebug/skin/inspect.png); " +
                 "-moz-image-region: rect(0, 16px, 16px, 0);"
@@ -56,12 +57,16 @@ var BrowserToolbar =
             ])
         ]);
 
-        $toolbarItem(doc, "firebug-badged-button", {title: "firebug.Firebug"},
+        $toolbarItem(doc, "firebug-badged-button", {
+                title: "firebug.Firebug",
+                firebugRootNode: true
+            },
             [
                 $el(doc, "stack",{
                         id: "firebug-error-badge",
                         onclick: "Firebug.toggleBar(true, 'console');"
-                    }, [
+                    },
+                    [
                         $el(doc, "label", {
                             id: "firebug-error-label",
                             value: 0,
@@ -70,7 +75,9 @@ var BrowserToolbar =
                     ]
                 ),
                 // TODO: why contextmenu doesn't work without cloning
-                $toolbarButton(doc, "firebug-button", {
+                $el(doc, "toolbarbutton", {
+                    id: "firebug-button",
+                    class: "toolbarbutton-1",
                     label: "firebug.Firebug",
                     tooltip: "firebug-buttonTooltip",
                     type: "menu-button",
