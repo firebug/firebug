@@ -56,18 +56,31 @@ var BrowserToolbar =
             ])
         ]);
 
-        // TODO: why contextmenu doesn't work without cloning
-        $toolbarButton(doc, "firebug-button", {
-            label: "firebug.Firebug",
-            tooltip: "firebug-buttonTooltip",
-            type: "menu-button",
-            command: "cmd_firebug_toggleFirebug",
-            contextmenu: "fbStatusContextMenu",
-            observes: "firebugStatus",
-            // Needed for the 'Customize Toolbar' dialog
-            style: "list-style-image: url(chrome://firebug/skin/firebug16.png); " +
-                "-moz-image-region: rect(0, 16px, 16px, 0);"
-        }, [$(doc, "fbStatusContextMenu").cloneNode(true)]);
+        $toolbarItem(doc, "firebug-badged-button", {},
+            [
+                $el(doc, "stack", {id: "firebug-error-badge"},
+                    [
+                        $el(doc, "label", {
+                            id: "firebug-error-label",
+                            value: 0,
+                            tooltiptext: "3 errors"
+                        })
+                    ]
+                ),
+                // TODO: why contextmenu doesn't work without cloning
+                $toolbarButton(doc, "firebug-button", {
+                    label: "firebug.Firebug",
+                    tooltip: "firebug-buttonTooltip",
+                    type: "menu-button",
+                    command: "cmd_firebug_toggleFirebug",
+                    contextmenu: "fbStatusContextMenu",
+                    observes: "firebugStatus",
+                    // Needed for the 'Customize Toolbar' dialog
+                    style: "list-style-image: url(chrome://firebug/skin/firebug16.png); " +
+                        "-moz-image-region: rect(0, 16px, 16px, 0);"
+                }, [$(doc, "fbStatusContextMenu").cloneNode(true)])
+            ]
+        );
     },
 
     customizeToolbar: function(doc)
