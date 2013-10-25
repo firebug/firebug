@@ -135,6 +135,9 @@ SourceEditor.Events =
  * restricted (content) privileges. All objects passed into CM APIs (such as rectangles,
  * coordinates, positions, etc.) must be properly exposed to the content. You should usually
  * utilize {@Wrapper.cloneIntoContentScope} method for this purpose.
+ *
+ * Use {@ScriptLoader} implemented at the bottom of this file if you want to use FBTrace
+ * API from within CodeMirror files. See {@SourceEditor.loadScripts} for more details.
  */
 SourceEditor.prototype =
 /** @lends SourceEditor */
@@ -146,11 +149,6 @@ SourceEditor.prototype =
     {
         var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
-
-        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
-        // debugging is easier. Should *not* be part of the distribution.
-        //var view = Wrapper.getContentView(doc.defaultView);
-        //view.FBTrace = ExposedFBTrace;
 
         this.loadScripts(doc, onInit);
     },
@@ -249,12 +247,13 @@ SourceEditor.prototype =
 
         var loader = this;
 
-        //xxxHonza: Support for CM debugging. If <script> tags are inserted with
+        // Support for CM debugging. If <script> tags are inserted with
         // properly set 'src' attribute, stack traces produced by Firebug tracing
         // console are correct. But it's asynchronous causing the Script panel UI
-        // to blink so, we don't need it for production. In any case the following
-        // script loader object can be used for that.
-        //loader = new ScriptLoader(callback);
+        // to blink so, we don't need it for production. The following loader
+        // also injects FBTracei into panel.html, so it can be used within codemirror.js
+        // Just uncomment the following line:
+        //loader = new ScriptLoader(doc, callback);
 
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
@@ -969,15 +968,24 @@ var ExposedFBTrace =
 // ********************************************************************************************* //
 // Support for Debugging - Async script loader
 
-function ScriptLoader(callback)
+function ScriptLoader(doc, callback)
 {
     this.callback = callback;
 
     this.waiting = [];
     this.scripts = [];
+
+    // Expose FBTrace into the panel.html (and codemirror.js), so
+    // debugging is easier. Should *not* be part of the distribution.
+    var view = Wrapper.getContentView(doc.defaultView);
+    view.FBTrace = ExposedFBTrace;
 }
 
+/**
+ * Helper object for tracing from within the CM files.
+ */
 ScriptLoader.prototype =
+/** @lends SourceEditor */
 {
     addScript: function(doc, id, url)
     {
