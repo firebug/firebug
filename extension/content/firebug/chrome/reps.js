@@ -1373,7 +1373,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var clipboardContent = System.getStringDataFromClipboard();
         var isEltRoot = (elt === elt.ownerDocument.documentElement);
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
             type = "HTML";
         else if (Xml.isElementMathML(elt))
             type = "MathML";
@@ -1391,7 +1391,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             command: Obj.bindFixed(this.copyHTML, this, elt)
         });
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
         {
             items.push(
             {

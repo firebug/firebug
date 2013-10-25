@@ -292,15 +292,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     startEditingNode: function(node, box, editor, type)
     {
-        switch (type)
-        {
-            case "html":
-            case "xhtml":
-                this.startEditingHTMLNode(node, box, editor);
-                break;
-            default:
-                this.startEditingXMLNode(node, box, editor);
-        }
+        if (type === "html" || type === "xhtml")
+            this.startEditingHTMLNode(node, box, editor);
+        else
+            this.startEditingXMLNode(node, box, editor);
     },
 
     startEditingXMLNode: function(node, box, editor)
@@ -1891,7 +1886,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 var type;
 
-                if (Xml.isElementHTML(node) || Xml.isElementXHTML(node))
+                if (Xml.isElementHTMLOrXHTML(node))
                     type = "HTML";
                 else if (Xml.isElementMathML(node))
                     type = "MathML";
@@ -2700,7 +2695,7 @@ Firebug.HTMLPanel.Editors = {
 
 function getEmptyElementTag(node)
 {
-    var isXhtml= Xml.isElementXHTML(node);
+    var isXhtml = Xml.isElementXHTML(node);
     if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else

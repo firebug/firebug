@@ -558,7 +558,7 @@ var HTMLLib =
      */
     isSourceElement: function(element)
     {
-        if (!Xml.isElementHTML(element) && !Xml.isElementXHTML(element))
+        if (!Xml.isElementHTMLOrXHTML(element))
             return false;
 
         var tag = element.localName ? element.localName.toLowerCase() : "";
