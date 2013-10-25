@@ -128,24 +128,26 @@ Firebug.StartButton = Obj.extend(Module,
 
     showCount: function(errorCount)
     {
-        var firebugButton = Firefox.getElementById("firebug-button");
+        var errorBadge = Firefox.getElementById("firebug-error-badge");
         if (errorCount && Firebug.showErrorCount)
         {
-            if (firebugButton)
+            if (errorBadge)
             {
-                firebugButton.setAttribute("showErrors", "true");
-                firebugButton.setAttribute("errorCount", errorCount);
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorBadge.setAttribute("showErrors", "true");
+                errorLabel.setAttribute("value", errorCount);
             }
         }
         else
         {
             if (firebugButton)
             {
-                firebugButton.removeAttribute("showErrors");
+                errorBadge.removeAttribute("showErrors");
 
                 // Use '0', so the horizontal space for the number is still allocated.
                 // The button will cause re-layout if there are more than 9 errors.
-                firebugButton.setAttribute("errorCount", "0");
+                var errorLabel = Firefox.getElementById("firebug-error-label");
+                errorLabel.setAttribute("value", "0");
             }
         }
     },
