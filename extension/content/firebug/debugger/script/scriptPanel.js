@@ -773,8 +773,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointAdded; origin line: " +
             bp.params.originLineNo, bp);
 
-        // Update the UI, remove the temporary(loading) bp icon.
-        if (bp.params.originLineNo)
+        // Update the UI, remove the temporary(loading) bp icon. Note that the
+        // original line can be zero.
+        if (typeof(bp.params.originLineNo) != "undefined")
             this.scriptView.removeBreakpoint({lineNo: bp.params.originLineNo});
         else
             this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
