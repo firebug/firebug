@@ -411,6 +411,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             return;
         }
 
+        Trace.sysout("scriptView.updateBreakpoint; (" + bp.lineNo + ") disabled: " +
+            bp.disabled + ", condition: " + bp.condition + ", prev className: " +
+            bpMarker.className, bp);
+
         bpMarker.className = "breakpoint";
 
         if (bp.disabled)

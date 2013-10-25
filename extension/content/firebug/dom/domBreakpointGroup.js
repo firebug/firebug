@@ -22,8 +22,11 @@ function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Pe
 
 var {domplate, TAG, DIV, SPAN, TR, P, A, INPUT} = Domplate;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // Breakpoint Group
@@ -38,6 +41,8 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
     name: "domBreakpoints",
     title: Locale.$STR("dom.label.DOM Breakpoints"),
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     addBreakpoint: function(object, propName, panel, row)
     {
         var path = panel.getPropertyPath(row);
@@ -48,8 +53,8 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
             path.pop();
 
         var objectPath = path.join("");
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.addBreakpoint; " + objectPath, path);
+
+        Trace.sysout("dom.addBreakpoint; " + objectPath, path);
 
         var bp = new Breakpoint(object, propName, objectPath, panel.context);
         if (bp.watchProperty());
@@ -73,7 +78,9 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
         return bp.object == object && bp.propName == propName;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Persistence
+
     load: function(context)
     {
         var panelState = Persist.getPersistedState(context, "dom");
@@ -89,13 +96,11 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
                 bp.context = context;
                 bp.watchProperty();
 
-                if (FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
+                Trace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
             }
             catch (err)
             {
-                if (FBTrace.DBG_ERROR || FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
+                TraceError.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
             }
         });
     },
@@ -127,17 +132,18 @@ Breakpoint.prototype =
 {
     watchProperty: function()
     {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.watch; property: " + this.propName);
-
         if (!this.object)
             return;
+
+        Trace.sysout("dom.watch; property: " + this.propName, this.object);
 
         try
         {
             var self = this;
             this.object.watch(this.propName, function handler(prop, oldval, newval)
             {
+                Trace.sysout("domBreakpointGroup.watch; property: " + this.propName);
+
                 // XXXjjb Beware: in playing with this feature I hit too much recursion
                 // multiple times with console.log
                 // TODO Do something cute in the UI with the error bubble thing
@@ -157,8 +163,7 @@ Breakpoint.prototype =
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("dom.watch; object FAILS " + exc, exc);
+            TraceError.sysout("dom.watch; object FAILS " + exc, exc);
             return false;
         }
 
@@ -167,11 +172,10 @@ Breakpoint.prototype =
 
     unwatchProperty: function()
     {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.unwatch; property: " + this.propName, this.object);
-
         if (!this.object)
             return;
+
+        TraceError.sysout("dom.unwatch; property: " + this.propName, this.object);
 
         try
         {
@@ -179,8 +183,7 @@ Breakpoint.prototype =
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("dom.unwatch; object FAILS " + exc, exc);
+            TraceError.sysout("dom.unwatch; object FAILS " + exc, exc);
         }
     }
 };
