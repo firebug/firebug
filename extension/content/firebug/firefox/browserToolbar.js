@@ -58,8 +58,10 @@ var BrowserToolbar =
 
         $toolbarItem(doc, "firebug-badged-button", {},
             [
-                $el(doc, "stack", {id: "firebug-error-badge"},
-                    [
+                $el(doc, "stack",{
+                        id: "firebug-error-badge",
+                        onclick: "Firebug.toggleBar(true, 'console');"
+                    }, [
                         $el(doc, "label", {
                             id: "firebug-error-label",
                             value: 0,
