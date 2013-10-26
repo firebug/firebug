@@ -171,6 +171,7 @@
 /* Emphasize the completion value. */
 .memberRow.resumeLimitRow {
     animation: emphasizeResumeLimit 2s ease;
+    font-weight: bold;
 }
 
 @keyframes emphasizeResumeLimit {

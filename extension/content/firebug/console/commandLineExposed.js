@@ -6,11 +6,10 @@ define([
     "firebug/lib/object",
     "firebug/lib/wrapper",
     "firebug/lib/locale",
-    "firebug/lib/events",
     "firebug/debugger/debuggerLib",
     "firebug/console/commandLineAPI",
 ],
-function(Obj, Wrapper, Locale, Events, DebuggerLib, CommandLineAPI) {
+function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 
 "use strict";
 
@@ -302,7 +301,7 @@ function evaluate(subject, evalMethod, dbgGlobal, context, win, expr, origExpr, 
 
     if (!options.noCmdLineAPI)
     {
-        bindings = getCommandLineBindings(context, win, dbgGlobal, contentView, subject, expr);
+        bindings = getCommandLineBindings(context, win, dbgGlobal, contentView);
         Trace.sysout("CommandLineExposed.evaluate; evaluate with bindings", bindings);
     }
 
@@ -371,27 +370,13 @@ function correctStackTrace(splitStack)
     return true;
 }
 
-function updateVars(commandLine, dbgGlobal, context, subject, expr)
+function updateVars(commandLine, dbgGlobal, context)
 {
-    var vars = {};
-    // xxxFlorent: TODO document extendCommandLineVars
-    // xxxFlorent: Firebug.CommandLine should not be access direcly. We should rather
-    //      make CommandLineExposed a EventSource and dispatch through its listeners. But we need
-    //      to make firebug/firebug.js independant of firebug/console/commandLineExposed.js.
-    Events.dispatch(Firebug.CommandLine.fbListeners, "extendCommandLineVars",
-        [vars, context, subject, expr]);
+    var htmlPanel = context.getPanel("html", true);
+    var vars = htmlPanel ? htmlPanel.getInspectorVars() : null;
 
     for (var prop in vars)
-    {
-        if (vars.hasOwnProperty(prop))
-        {
-            // We may receive variables that already are debuggee values.
-            if (vars[prop] && vars[prop].global === dbgGlobal)
-                commandLine[prop] = vars[prop];
-            else
-                commandLine[prop] = dbgGlobal.makeDebuggeeValue(vars[prop]);
-        }
-    }
+        commandLine[prop] = dbgGlobal.makeDebuggeeValue(vars[prop]);
 
     // Iterate all registered commands and pick those which represents a 'variable'.
     // These needs to be available as variables within the Command Line namespace.
@@ -542,11 +527,11 @@ function getAutoCompletionList()
     return completionList;
 }
 
-function getCommandLineBindings(context, win, dbgGlobal, contentView, subject, expr)
+function getCommandLineBindings(context, win, dbgGlobal, contentView)
 {
     var commandLine = createFirebugCommandLine(context, win, dbgGlobal);
 
-    updateVars(commandLine, dbgGlobal, context, subject, expr);
+    updateVars(commandLine, dbgGlobal, context);
     removeConflictingNames(commandLine, context, contentView);
 
     return commandLine;
