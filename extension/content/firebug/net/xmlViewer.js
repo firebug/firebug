@@ -45,7 +45,7 @@ var xmlContentTypes =
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
 Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
-/** lends Firebug.XMLViewerModel */
+/** @lends Firebug.XMLViewerModel */
 {
     dispatchName: "xmlViewer",
 

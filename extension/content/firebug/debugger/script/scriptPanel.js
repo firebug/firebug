@@ -26,11 +26,12 @@ define([
     "firebug/debugger/script/breakNotification",
     "firebug/console/commandLine",
     "firebug/debugger/debuggerLib",
+    "firebug/net/netUtils",
 ],
 function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
     StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
     BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
-    BreakNotification, CommandLine, DebuggerLib) {
+    BreakNotification, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
 
@@ -73,6 +74,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     initialize: function(context, doc)
     {
+        Trace.sysout("scriptPanel.initialize; " + context.getName());
+
         BasePanel.initialize.apply(this, arguments);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
@@ -90,6 +93,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.context.getTool("breakpoint").addListener(this);
+
+        // Register as a listener for 'updateSidePanels' event. 
+        Firebug.registerUIListener(this);
     },
 
     destroy: function(state)
@@ -105,6 +111,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         this.tool.removeListener(this);
 
         this.context.getTool("breakpoint").removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -192,6 +200,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             state.topLine = this.scriptView.getScrollTop();
             state.scrollTop = this.scriptView.getScrollInfo().top;
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Show Stack Frames
+
+    updateSidePanels: function(panel)
+    {
+        if (!panel || panel.name != "script")
+            return;
+
+        // Update visibility of the side panels. The side panels could have been displayed
+        // by the logic within FirebugChrome.syncSidePanels();
+        // xxxHonza: the panel content doesn't have to be rendered in this case.
+        var active = !ScriptPanelWarning.showWarning(this);
+        this.panelSplitter.collapsed = !active;
+        this.sidePanelDeck.collapsed = !active;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -357,7 +381,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         if (!compilationUnits.length)
             return null;
 
-        return compilationUnits[0];
+        // Mark the default link as 'no highlight'. We don't want to highlight
+        // the first line when a default file is automatically displayed in
+        // the Script panel.
+        var sourceLink = new SourceLink(compilationUnits[0].getURL(), null, "js");
+        sourceLink.options.highlight = false;
+
+        return sourceLink;
     },
 
     getObjectLocation: function(compilationUnit)
@@ -475,12 +505,19 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             Trace.sysout("scriptPanel.showSource; callback " + sourceLink, sourceLink);
 
-            var type = Url.getFileExtension(sourceLink.href);
+            // Get proper category of the target source file. This is needed by
+            // the underlying source view that picking the right highlighting mode
+            // for the source text (see issue 6866).
+            // 1) First get the source file
+            // 2) Get its content type that should be set at this moment. If not set
+            //     it's guessed according to the file extension.
+            // 3) Get the type/category from the content type.
+            var sourceFile = SourceFile.getSourceFileByUrl(self.context, sourceLink.href);
+            var mimeType = NetUtils.getMimeType(sourceFile.contentType, sourceFile.href);
+            var category = NetUtils.getCategory(mimeType);
 
-            // xxxHonza: see issue 6866
-            //var type = sourceLink.type || Url.getFileExtension(sourceLink.href);
-
-            self.scriptView.showSource(lines.join(""), type);
+            // Display the source.
+            self.scriptView.showSource(lines.join(""), category);
 
             var options = sourceLink.getOptions();
 
@@ -508,6 +545,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     search: function(text, reverse)
     {
         return this.scriptView.search(text, reverse);
+    },
+
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+                "search.tip.Multiple_Files"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
+        ];
     },
 
     onNavigateToNextDocument: function(scanDoc, reverse)
@@ -724,8 +773,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.onBreakpointAdded; origin line: " +
             bp.params.originLineNo, bp);
 
-        // Update the UI, remove the temporary(loading) bp icon.
-        if (bp.params.originLineNo)
+        // Update the UI, remove the temporary(loading) bp icon. Note that the
+        // original line can be zero.
+        if (typeof(bp.params.originLineNo) != "undefined")
             this.scriptView.removeBreakpoint({lineNo: bp.params.originLineNo});
         else
             this.scriptView.removeBreakpoint({lineNo: bp.lineNo});
@@ -806,7 +856,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context Menu
 
-    onContextMenu: function(event, items)
+    /**
+     * The method handles 'onEditorContextMenu' fired by {@ScriptView}.
+     */
+    onEditorContextMenu: function(event, items)
     {
         var target = event.target;
         var menuItems = this.getContextMenuItems(null, target);
@@ -1209,6 +1262,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     newScript: function(sourceFile)
     {
+        // This event can be missed since the newScript packet can be send
+        // before the ScriptPanel is initialized and adds itself to the DebuggerTool
+        // as a listener.
+
         Trace.sysout("scriptPanel.newScript; " + sourceFile.href, sourceFile);
 
         // New script has been appended, update the default location if necessary.

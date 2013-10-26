@@ -82,7 +82,9 @@ SourceEditor.DefaultConfig =
     fixedGutter: false,
 
     showCursorWhenSelecting: false,
-    undoDepth: 200
+    undoDepth: 200,
+
+    resetSelectionOnContextMenu: false,
 
     // xxxHonza: this is weird, when this props is set the editor is displayed twice.
     // There is one-line editor created at the bottom of the Script panel.
@@ -133,6 +135,9 @@ SourceEditor.Events =
  * restricted (content) privileges. All objects passed into CM APIs (such as rectangles,
  * coordinates, positions, etc.) must be properly exposed to the content. You should usually
  * utilize {@Wrapper.cloneIntoContentScope} method for this purpose.
+ *
+ * Use {@ScriptLoader} implemented at the bottom of this file if you want to use FBTrace
+ * API from within CodeMirror files. See {@SourceEditor.loadScripts} for more details.
  */
 SourceEditor.prototype =
 /** @lends SourceEditor */
@@ -144,11 +149,6 @@ SourceEditor.prototype =
     {
         var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
-
-        // xxxHonza: Expose FBTrace into the panel.html (and codemirror.js), so
-        // debugging is easier. Should *not* be part of the distribution.
-        //var view = Wrapper.getContentView(doc.defaultView);
-        //view.FBTrace = ExposedFBTrace;
 
         this.loadScripts(doc, onInit);
     },
@@ -247,12 +247,13 @@ SourceEditor.prototype =
 
         var loader = this;
 
-        //xxxHonza: Support for CM debugging. If <script> tags are inserted with
+        // Support for CM debugging. If <script> tags are inserted with
         // properly set 'src' attribute, stack traces produced by Firebug tracing
         // console are correct. But it's asynchronous causing the Script panel UI
-        // to blink so, we don't need it for production. In any case the following
-        // script loader object can be used for that.
-        //loader = new ScriptLoader(callback);
+        // to blink so, we don't need it for production. The following loader
+        // also injects FBTracei into panel.html, so it can be used within codemirror.js
+        // Just uncomment the following line:
+        //loader = new ScriptLoader(doc, callback);
 
         loader.addScript(doc, "cm", codeMirrorSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
@@ -572,7 +573,8 @@ SourceEditor.prototype =
 
     setDebugLocation: function(line)
     {
-        Trace.sysout("sourceEditor.setDebugLocation; line: " + line);
+        Trace.sysout("sourceEditor.setDebugLocation; line: " + line +
+            ", this.debugLocation: " + this.debugLocation);
 
         if (this.debugLocation == line)
             return;
@@ -580,13 +582,16 @@ SourceEditor.prototype =
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(this.debugLocation);
-            this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
+            if (handle)
+            {
+                this.editorObject.removeLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.removeLineClass(handle, "background", BACK_CLASS);
 
-            // Remove debug location marker (we are reusing breakpoints gutter for it).
-            var marker = this.getGutterMarker(bpGutter, this.debugLocation);
-            if (marker && marker.className == "debugLocation")
-                this.removeGutterMarker(bpGutter, this.debugLocation);
+                // Remove debug location marker (we are reusing breakpoints gutter for it).
+                var marker = this.getGutterMarker(bpGutter, this.debugLocation);
+                if (marker && marker.className == "debugLocation")
+                    this.removeGutterMarker(bpGutter, this.debugLocation);
+            }
         }
 
         this.debugLocation = line;
@@ -594,18 +599,21 @@ SourceEditor.prototype =
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(line);
-            this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
-            this.editorObject.addLineClass(handle, "background", BACK_CLASS);
-
-            // Debug location marker is using breakpoints gutter and so, create the marker
-            // only if there is no breakpoint marker already. This 'gutter reuse' allows to
-            // place the debug location icon over a breakpoint icon and save some space.
-            var marker = this.getGutterMarker(bpGutter, line);
-            if (!marker)
+            if (handle)
             {
-                var marker = this.getGutterElement().ownerDocument.createElement("div");
-                marker.className = "debugLocation";
-                this.editorObject.setGutterMarker(line, bpGutter, marker);
+                this.editorObject.addLineClass(handle, "wrap", WRAP_CLASS);
+                this.editorObject.addLineClass(handle, "background", BACK_CLASS);
+
+                // Debug location marker is using breakpoints gutter and so, create the marker
+                // only if there is no breakpoint marker already. This 'gutter reuse' allows to
+                // place the debug location icon over a breakpoint icon and save some space.
+                var marker = this.getGutterMarker(bpGutter, line);
+                if (!marker)
+                {
+                    var marker = this.getGutterElement().ownerDocument.createElement("div");
+                    marker.className = "debugLocation";
+                    this.editorObject.setGutterMarker(line, bpGutter, marker);
+                }
             }
         }
     },
@@ -960,15 +968,24 @@ var ExposedFBTrace =
 // ********************************************************************************************* //
 // Support for Debugging - Async script loader
 
-function ScriptLoader(callback)
+function ScriptLoader(doc, callback)
 {
     this.callback = callback;
 
     this.waiting = [];
     this.scripts = [];
+
+    // Expose FBTrace into the panel.html (and codemirror.js), so
+    // debugging is easier. Should *not* be part of the distribution.
+    var view = Wrapper.getContentView(doc.defaultView);
+    view.FBTrace = ExposedFBTrace;
 }
 
+/**
+ * Helper object for tracing from within the CM files.
+ */
 ScriptLoader.prototype =
+/** @lends SourceEditor */
 {
     addScript: function(doc, id, url)
     {

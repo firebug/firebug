@@ -196,6 +196,8 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             this.showStackTrace(object);
         else if (object instanceof StackFrame)
             this.showStackFrame(object);
+        else
+            this.showStackTrace(null);
     },
 
     showStackFrame: function(frame)

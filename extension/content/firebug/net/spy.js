@@ -33,6 +33,8 @@ function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, Stack
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -920,7 +922,6 @@ function onHTTPSpyAbort(spy)
  * @domplate Represents a template for XHRs logged in the Console panel. The body of the
  * log (displayed when expanded) is rendered using {@link Firebug.NetMonitor.NetInfoBody}.
  */
-with (Domplate) {
 Firebug.Spy.XHR = domplate(Firebug.Rep,
 /** @lends Firebug.Spy.XHR */
 {
@@ -1158,7 +1159,6 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         return items;
     }
 });
-};
 
 // ********************************************************************************************* //
 

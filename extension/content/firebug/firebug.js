@@ -32,6 +32,8 @@ function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, TAG, TR, P, UL, LI, A} = Domplate;
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -1556,6 +1558,14 @@ Firebug.Listener.prototype =
         if (!this.fbListeners)
             this.fbListeners = [];
 
+        // Do not register if the listener is already registered.
+        if (this.fbListeners.indexOf(listener) != -1)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.Listener.addListener; ERROR listener already registered.");
+            return;
+        }
+
         this.fbListeners.push(listener);
     },
 
@@ -2615,7 +2625,6 @@ Firebug.MeasureBox =
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.Rep = domplate(
 {
     className: "",
@@ -2749,7 +2758,6 @@ Firebug.Rep = domplate(
         return n == 1 ? "" : "s";
     }
 });
-};
 
 // ********************************************************************************************* //
 

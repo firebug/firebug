@@ -16,10 +16,10 @@ define([
 function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale, ScopeClient,
     WatchExpression) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, TD, TR, TABLE, TBODY} = Domplate;
 
 var Trace = FBTrace.to("DBG_WATCH");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -168,5 +168,4 @@ WatchTree.prototype = domplate(BaseTree,
 return WatchTree;
 
 // ********************************************************************************************* //
-}});
-
+});

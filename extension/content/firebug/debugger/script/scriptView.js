@@ -196,7 +196,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
         var commandDispatcher = browserWindow.document.commandDispatcher;
 
         var items = [];
-        this.dispatch("onContextMenu", [event, items]);
+        this.dispatch("onEditorContextMenu", [event, items]);
 
         for (var i=0; i<items.length; i++)
             Menu.createMenuItem(popup, items[i]);
@@ -410,6 +410,10 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             TraceError.sysout("scriptView.updateBreakpoint; ERROR bpMarker is null!", bp);
             return;
         }
+
+        Trace.sysout("scriptView.updateBreakpoint; (" + bp.lineNo + ") disabled: " +
+            bp.disabled + ", condition: " + bp.condition + ", prev className: " +
+            bpMarker.className, bp);
 
         bpMarker.className = "breakpoint";
 

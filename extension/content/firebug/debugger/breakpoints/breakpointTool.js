@@ -67,7 +67,7 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
 
     onAddBreakpoint: function(bp)
     {
-        Trace.sysout("breakpointTool.onAddBreakpoint;", bp);
+        Trace.sysout("breakpointTool.onAddBreakpoint; (" + bp.lineNo + ")", bp);
 
         var self = this;
         this.setBreakpoint(bp.href, bp.lineNo, function(response, bpClient)
@@ -79,16 +79,19 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
             var currentLine = bpClient.location.line - 1;
             if (bp.lineNo != currentLine)
             {
+                // The breakpoint line is going to be corrected, let's check if there isn't
+                // an existing breakpoint at the new line (see issue: 6253). This must be
+                // done before the correction.
+                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
+
                 // bpClient deals with 1-based line numbers. Firebug uses 0-based
-                // line numbers (indexes)
+                // line numbers (indexes). Let's fix the line.
                 bp.params.originLineNo = bp.lineNo;
                 bp.lineNo = currentLine;
 
-                // The breakpoint line has been corrected, let's check if there isn't
-                // an existing breakpoint at the new line (see issue: 6253).
-                // If an existing breakpoint is found we need to remove the newly created one.
+                // If an existing breakpoint has been found we need to remove the newly
+                // created one to avoid duplicities (two breakpoints at the same line).
                 // Do not fire an event when removing, it's just client side thing.
-                var dupBp = BreakpointStore.findBreakpoint(bp.href, bp.lineNo);
                 if (dupBp)
                 {
                     BreakpointStore.removeBreakpointInternal(dupBp.href, dupBp.lineNo);
@@ -185,6 +188,8 @@ BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
                 url: url,
                 line: lineNumber + 1
             };
+
+            Trace.sysout("breakpointTool.doSetBreakpoint; (" + lineNumber + ")", location);
 
             // Send RDP packet to set a breakpoint on the server side. The callback will be
             // executed as soon as we receive a response.

@@ -99,7 +99,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
  * @template
  */
 Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
-/** lends Firebug.Breakpoint.BreakpointRep */
+/** @lends Firebug.Breakpoint.BreakpointRep */
 {
     inspectable: false,
 

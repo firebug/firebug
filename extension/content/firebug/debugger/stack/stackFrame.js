@@ -24,7 +24,10 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
-    this.fn = functionName || "(anonymous)";
+
+    // xxxHonza: the way how the function name is computed is hacky. What about displayName?
+    var fileName = sourceFile.href ? Url.getFileName(sourceFile.href) : null;
+    this.fn = functionName || fileName || "(anonymous)";
     this.context = context;
 
     // the newest frame in the stack containing 'this' frame
@@ -131,6 +134,20 @@ StackFrame.prototype =
     {
         return this.nativeFrame.actor;
     },
+
+    /**
+     * Compare two StackFrame instances and returns true if their actor is the same.
+     * (Used in bindings.xml in getObjectItem())
+     *
+     * @param {StackFrame} other The other object to compare with.
+     * @return {boolean} true if their actor is the same.
+     */
+    equals: function(other)
+    {
+        // Note: do not compare directly with their nativeFrame => they are not always equal.
+        return other.nativeFrame && this.nativeFrame &&
+            other.nativeFrame.actor === this.nativeFrame.actor;
+    }
 };
 
 // ********************************************************************************************* //

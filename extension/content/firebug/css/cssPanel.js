@@ -37,10 +37,10 @@ function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, C
     Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
     SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, SourceEditor) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, A, TEXTAREA} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -3235,4 +3235,4 @@ Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 return Firebug.CSSStyleSheetPanel;
 
 // ********************************************************************************************* //
-}});
+});

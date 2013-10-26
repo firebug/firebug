@@ -41,10 +41,6 @@
     padding-bottom: 30px;
     z-index: 3;
 }
-.cm-s-firebug .CodeMirror-linenumber {
-    padding-left: 8px !important;
-    padding-right: 20px !important;
-}
 
 /*************************************************************************************************/
 /* Color Syntax */

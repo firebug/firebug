@@ -16,7 +16,10 @@ define([
 function(FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist, CSSSelectorsModule,
     SelectorEditor) {
 
-with (Domplate) {
+// ********************************************************************************************* //
+// Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, H1, P, A, BR, INPUT} = Domplate;
 
 // ********************************************************************************************* //
 // CSS Computed panel (HTML side panel)
@@ -461,4 +464,4 @@ Firebug.registerPanel(CSSSelectorsPanel);
 return CSSSelectorsPanel;
 
 // ********************************************************************************************* //
-}});
+});

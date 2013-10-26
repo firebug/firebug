@@ -13,10 +13,13 @@ define([
     "firebug/lib/promise",
 ],
 function(Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch, Promise) {
-with (Domplate) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate} = Domplate;
 
 var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -37,7 +40,7 @@ function DomBaseTree()
  * @domplate This tree widget is derived from basic {@DomTree} and appends logic such as:
  * 1) Long string expansion
  * 2) State persistence
- * 3) Asynchronous population (so, the UI doesn't freeze when an item is exapanded and
+ * 3) Asynchronous population (so, the UI doesn't freeze when an item is expanded and
  *    there is a lot of children)
  */
 var BaseTree = DomTree.prototype;
@@ -182,7 +185,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             return;
         }
 
-        // Owerwrite the default child items expanding/collapsing and implement
+        // Overwrite the default child items expanding/collapsing and implement
         // asynchronous logic (so the UI doesn't freeze if there is huge amount
         // of items).
         if (Css.hasClass(row, "opened"))
@@ -202,7 +205,10 @@ DomBaseTree.prototype = domplate(BaseTree,
             // Get children object for the next level.
             var members = this.getMembers(member.value, level + 1);
 
-            // Insert rows if they are immediatelly available. Otherwise set a spinner
+            Trace.sysout("DomBaseTree.toggleRow; level: " + level + ", members: " +
+                (members ? members.length : "null"), members);
+
+            // Insert rows if they are immediately available. Otherwise set a spinner
             // and wait for the update.
             if (members && members.length)
             {
@@ -218,44 +224,45 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     expandRowAsync: function(row, members)
     {
-        var loop = this.loop;
         var lastRow = row;
-
         var delay = 0;
         var setSize = members.length;
         var rowCount = 1;
-
         var deferred = Promise.defer();
+
+        function insertSlice(slice, isLast)
+        {
+            if (lastRow.parentNode)
+            {
+                var result = this.loop.insertRows({members: slice}, lastRow);
+                lastRow = result[1];
+
+                // xxxHonza: for a11y
+                // Events.dispatch(DOMModule.fbListeners, "onMemberRowSliceAdded",
+                //    [null, result, rowCount, setSize]);
+
+                rowCount += insertSliceSize;
+            }
+
+            if (isLast)
+            {
+                delete row.insertTimeout;
+                deferred.resolve(lastRow);
+            }
+        };
 
         // xxxHonza: the logic should be improved
         // The while loop generates bunch if timeouts in advance and if the row is
-        // collapsed before it's fully expanded they are not necessary.
+        // collapsed before it's fully expanded they are not necessary. Members (slices)
+        // should be appended step by step, so there is always just one timeout in the air.
         while (members.length)
         {
             var slice = members.splice(0, insertSliceSize);
             var isLast = !members.length;
 
-            setTimeout(function()
-            {
-                if (lastRow.parentNode)
-                {
-                    var result = loop.insertRows({members: slice}, lastRow);
-                    lastRow = result[1];
-
-                    //xxxHonza: for a11y
-                    //Events.dispatch(DOMModule.fbListeners, "onMemberRowSliceAdded",
-                    //    [null, result, rowCount, setSize]);
-
-                    rowCount += insertSliceSize;
-                }
-
-                if (isLast)
-                {
-                    delete row.insertTimeout;
-                    deferred.resolve(lastRow);
-                }
-
-            }, delay);
+            // xxxHonza: it would be a bit safer to use context.setTimeout, so the
+            // any active timeout is cleared if the page is suddenly refreshed.
+            setTimeout(insertSlice.bind(this, slice, isLast), delay);
 
             delay += insertInterval;
         }
@@ -323,5 +330,5 @@ DomBaseTree.prototype = domplate(BaseTree,
 return DomBaseTree;
 
 // ********************************************************************************************* //
-}});
+});
 

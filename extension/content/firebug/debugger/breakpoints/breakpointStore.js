@@ -134,7 +134,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
         var tool = context.getTool("breakpoint");
         tool.setBreakpoints(bps, function()
         {
-            // Some breakpoint could have been auto-corrected so, save all now.
+            // Some breakpoints could have been auto-corrected so, save all now.
             self.save();
         });
     },
@@ -232,7 +232,14 @@ var BreakpointStore = Obj.extend(Firebug.Module,
             cleanBPs.push(cleanBP);
         }
 
-        this.storage.setItem(url, cleanBPs);
+        // Make sure to remove the item (i.e. url) from the storage entirely.
+        // so there are no empty keys (urls with no breakpoints). That would
+        // cause the breakpoints.json file to grow even if breakpoints are
+        // removed.
+        if (cleanBPs.length)
+            this.storage.setItem(url, cleanBPs);
+        else
+            this.storage.removeItem(url);
 
         Trace.sysout("breakpointStore.save;", this.storage);
     },

@@ -51,6 +51,8 @@ ObjectClient.prototype =
                 return null;
             case "undefined":
                 return;
+            case "NaN":
+                return NaN;
         }
 
         // Break RDP and get the remote object directly

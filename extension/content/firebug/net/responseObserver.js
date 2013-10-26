@@ -27,7 +27,7 @@ var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
  * channel. See Firebug.TabCacheModel.onExamineResponse method.
  */
 function ChannelListener(win, request, listener)
-/** lends ChannelListener */
+/** @lends ChannelListener */
 {
     this.window = win;
     this.request = request;

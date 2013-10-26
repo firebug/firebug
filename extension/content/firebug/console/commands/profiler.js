@@ -22,6 +22,8 @@ function(Obj, FBTrace, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, Sta
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
+
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
@@ -306,7 +308,6 @@ var Profiler = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // Domplate Templates
 
-with (Domplate) {
 Profiler.ProfileTable = domplate(
 {
     tag:
@@ -551,8 +552,6 @@ Profiler.ProfileCall = domplate(Firebug.Rep,
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });
-
-} // END Domplate
 
 // ********************************************************************************************* //
 

@@ -37,7 +37,7 @@ var contentTypes =
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
 Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
-/** lends Firebug.SVGViewerModel */
+/** @lends Firebug.SVGViewerModel */
 {
     dispatchName: "svgViewer",
 

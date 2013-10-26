@@ -22,7 +22,7 @@ function DOMSidePanel()
 }
 
 DOMSidePanel.prototype = Obj.extend(DOMBasePanel.prototype,
-/** lends Firebug.DOMPanel */
+/** @lends Firebug.DOMPanel */
 {
     name: "domSide",
     parentPanel: "html",

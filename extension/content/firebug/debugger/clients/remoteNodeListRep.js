@@ -10,12 +10,11 @@ define([
     "firebug/debugger/clients/objectClient",
 ],
 function (FBTrace, Arr, RDP, Promise, FirebugReps, Domplate, ObjectClient) {
-with (Domplate) {
 
 // ********************************************************************************************* //
 // RemoteNodeListRep
 
-var RemoteNodeListRep = domplate(FirebugReps.ArrayLikeObject,
+var RemoteNodeListRep = Domplate.domplate(FirebugReps.ArrayLikeObject,
 {
     getTitle: function(obj, context)
     {
@@ -51,4 +50,4 @@ Firebug.registerRep(RemoteNodeListRep)
 return RemoteNodeListRep;
 
 // ********************************************************************************************* //
-}});
+});
