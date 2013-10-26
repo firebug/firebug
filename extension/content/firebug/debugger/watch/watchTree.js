@@ -148,7 +148,7 @@ WatchTree.prototype = domplate(BaseTree,
                     return;
 
                 // Don't edit completion values.
-                if (object.isResumeLimitValue)
+                if (member.type === "resumeLimit")
                     return;
 
                 if (typeof(value) == "boolean")
