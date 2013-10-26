@@ -18,8 +18,8 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-// Debugees
-var dglobalWeakMap = new WeakMap();
+// Debuggees
+var dbgGlobalWeakMap = new WeakMap();
 
 // Module object
 var DebuggerLib = {};
@@ -28,13 +28,12 @@ var DebuggerLib = {};
 // Implementation
 
 /**
- * Unwraps the value of a debuggee object.
+ * Unwraps the value of a debuggee object. Primitive values are also allowed
+ * and are let through unharmed.
  *
- * @param obj {Debugger.Object} The debuggee object to unwrap
- * @param global {Window} The unwrapped global (window)
- * @param dglobal {Debugger.Object} The debuggee global object
+ * @param obj {Debugger.Object} The debuggee object to unwrap, or a primitive
  *
- * @return {object} the unwrapped object
+ * @return {object} the unwrapped object, or the same primitive
  */
 DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
 {
@@ -59,8 +58,8 @@ DebuggerLib.unwrapDebuggeeValue = function(obj, global, dglobal)
 /**
  * Gets or creates the debuggee global for the given global object
  *
- * @param {Window} global The global object
  * @param {*} context The Firebug context
+ * @param {Window} global The global object
  *
  * @return {Debuggee Window} The debuggee global
  */
@@ -68,8 +67,8 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 {
     global = global || context.getCurrentGlobal();
 
-    var dglobal = dglobalWeakMap.get(global.document);
-    if (!dglobal)
+    var dbgGlobal = dbgGlobalWeakMap.get(global.document);
+    if (!dbgGlobal)
     {
         var dbg = getInactiveDebuggerForContext(context);
         if (!dbg)
@@ -79,14 +78,21 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         //   As a workaround, we unwrap the global object.
         //   TODO see what cause that behaviour, why, and if there are no other addons in that case.
         var contentView = Wrapper.getContentView(global);
-        dglobal = dbg.addDebuggee(contentView);
-        dbg.removeDebuggee(contentView);
-        dglobalWeakMap.set(global.document, dglobal);
+        if (dbg.makeGlobalObjectReference)
+        {
+            dbgGlobal = dbg.makeGlobalObjectReference(contentView);
+        }
+        else
+        {
+            dbgGlobal = dbg.addDebuggee(contentView);
+            dbg.removeDebuggee(contentView);
+        }
+        dbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)
-            FBTrace.sysout("new debuggee global instance created", dglobal);
+            FBTrace.sysout("new debuggee global instance created", dbgGlobal);
     }
-    return dglobal;
+    return dbgGlobal;
 };
 
 /**
