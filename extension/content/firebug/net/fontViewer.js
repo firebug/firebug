@@ -15,10 +15,11 @@ define([
     "firebug/lib/url",
     "firebug/lib/http",
     "firebug/net/netUtils",
+    "firebug/lib/wrapper",
     "firebug/lib/options"
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,
-    NetUtils, Options) {
+    NetUtils, Wrapper, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -676,7 +677,8 @@ Firebug.FontViewerModel.Preview = domplate(
      */
     render: function(body, file, context)
     {
-        var fontObject = file.fontObject;
+        var global = context.getCurrentGlobal();
+        var fontObject = Wrapper.cloneIntoContentScope(global, file.fontObject);
         if (!fontObject)
             return;
 
