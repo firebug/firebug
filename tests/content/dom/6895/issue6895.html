@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 6895: Only select the string without quotes when editing a string property</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+
+    <script>
+        var testString = "Test text";
+    </script>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=6895">Issue 6895</a>:
+        Only select the string without quotes when editing a string property</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open firebug</li>
+            <li>Switch to the DOM panel</li>
+            <li>Double click the member value cell of <code>testString</code></li>
+        </ol>
+        <h3>Expected result</h3>
+        <ul>
+            <li>Only the string within the double quotes should be selected</li>
+        </ul>
+    </section>
+    <footer>
+        Thomas Andersen, &lt;thomas@mr-andersen.no&gt;
+    </footer>
+</div>
+</body>
+</html>
