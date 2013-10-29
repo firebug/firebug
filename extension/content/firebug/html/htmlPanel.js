@@ -24,7 +24,7 @@ define([
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/debugger/breakpoints/breakpointGroup",
-    "firebug/editor/sourceEditor",
+    "firebug/html/htmlEditor",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
@@ -33,7 +33,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, BreakpointGroup, SourceEditor) {
+    Url, CSSModule, CSSInfoTip, BreakpointGroup, HTMLEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -2530,177 +2530,11 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 });
 
 // ********************************************************************************************* //
-// HTMLEditor
-
-function HTMLEditor(doc)
-{
-    this.box = this.tag.replace({}, doc, this);
-
-    this.onHTMLEditorTextChangeListener = this.onHTMLEditorTextChange.bind(this);
-
-    var config = {
-        mode: "htmlmixed",
-        readOnly: false,
-        gutters: []
-    };
-    // Initialize the source editor.
-    this.editor = new SourceEditor();
-    this.editor.init(this.box, config, this.onHTMLEditorInitialize.bind(this));
-}
-
-HTMLEditor.prototype = domplate(Firebug.BaseEditor,
-{
-    multiLine: true,
-
-    tabNavigation: false,
-
-    arrowCompletion:false,
-
-    tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onHTMLEditorInitialize: function()
-    {
-        this.editor.addEventListener(SourceEditor.Events.textChange,
-            this.onHTMLEditorTextChangeListener);
-    },
-
-    getValue: function()
-    {
-        return this.editor.getText();
-    },
-
-    setValue: function(value)
-    {
-        return this.editor.setText(value, "htmlmixed");
-    },
-
-    show: function(target, panel, value, textSize)
-    {
-        this.target = target;
-        this.panel = panel;
-        var el = target.repObject;
-        if (this.innerEditMode)
-        {
-            this.editingParent = el;
-        }
-        else
-        {
-            this.editingRange = el.ownerDocument.createRange();
-            this.editingRange.selectNode(el);
-            this.originalLocalName = el.localName;
-        }
-
-        // Append The editor to the Div(box);
-        this.panel.panelNode.appendChild(this.box);
-        this.editor.setText(value, "htmlmixed");
-
-        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
-        command.setAttribute("checked", true);
-    },
-
-    hide: function()
-    {
-        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
-        command.setAttribute("checked", false);
-
-        this.panel.panelNode.removeChild(this.box);
-
-        delete this.editingParent;
-        delete this.editingRange;
-        delete this.originalLocalName;
-        delete this.target;
-        delete this.panel;
-    },
-
-    getNewSelection: function(fragment)
-    {
-        // Get a new element to select in the HTML panel. An element with the
-        // same localName is preferred, or just any element. If there is none,
-        // we choose the parent instead.
-        var found = null;
-        var nodes = fragment.childNodes;
-        for (var i = 0; i < nodes.length; ++i)
-        {
-            var n = nodes[i];
-            if (n.nodeType === Node.ELEMENT_NODE)
-            {
-                if (n.localName === this.originalLocalName)
-                    return n;
-                if (!found)
-                    found = n;
-            }
-        }
-        if (found)
-            return found;
-        return this.editingRange.startContainer;
-    },
-
-    saveEdit: function(target, value, previousValue)
-    {
-        if (this.innerEditMode)
-        {
-            try
-            {
-                // xxxHonza: Catch "can't access dead object" exception.
-                this.editingParent.innerHTML = value;
-            }
-            catch (e)
-            {
-                FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
-            }
-        }
-        else
-        {
-            try
-            {
-                var range = this.editingRange;
-                var fragment = range.createContextualFragment(value);
-                var sel = this.getNewSelection(fragment);
-
-                var cnl = fragment.childNodes.length;
-                range.deleteContents();
-                range.insertNode(fragment);
-                var sc = range.startContainer, so = range.startOffset;
-                range.setEnd(sc, so + cnl);
-
-                this.panel.select(sel, false, true);
-
-                // Clear and update the status path, to make sure it doesn't
-                // show elements no longer in the DOM.
-                Firebug.chrome.clearStatusPath();
-                Firebug.chrome.syncStatusPath();
-            }
-            catch (e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("HTMLEditor.saveEdit; EXCEPTION " + e, e);
-            }
-        }
-    },
-
-    endEditing: function()
-    {
-        //this.panel.markChange();
-        this.panel.setEditEnableState(true);
-        return true;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onHTMLEditorTextChange: function()
-    {
-        Firebug.Editor.update();
-    }
-});
-
-// ********************************************************************************************* //
 // Editors
 
 Firebug.HTMLPanel.Editors = {
-    html : HTMLEditor,
-    Attribute : AttributeEditor,
+    html: HTMLEditor,
+    Attribute: AttributeEditor,
     TextNode: TextNodeEditor,
     TextData: TextDataEditor
 };

@@ -147,6 +147,8 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onContextMenu: function(event)
     {
+        Events.cancelEvent(event);
+
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
