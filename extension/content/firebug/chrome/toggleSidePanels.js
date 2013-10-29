@@ -2,13 +2,14 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/lib/dom",
     "firebug/lib/options",
     "firebug/lib/css",
 ],
-function(Firebug, Obj, FBTrace, Dom, Options, Css) {
+function(Firebug, Module, Obj, FBTrace, Dom, Options, Css) {
 
 // ********************************************************************************************* //
 // Constants
@@ -32,7 +33,7 @@ function(Firebug, Obj, FBTrace, Dom, Options, Css) {
  * Side panels visibility is updated upon 'updateSidePanels' event fired to all
  * UI listeners by Firebug chrome object.
  */
-var ToggleSidePanels = Obj.extend(Firebug.Module,
+var ToggleSidePanels = Obj.extend(Module,
 /** @lends ToggleSidePanels */
 {
     dispatchName: "ToggleSidePanels",
@@ -42,7 +43,7 @@ var ToggleSidePanels = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         // Register as a listener for 'updateSidePanels' event. 
         Firebug.registerUIListener(this);
@@ -55,7 +56,7 @@ var ToggleSidePanels = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         Firebug.unregisterUIListener(this);
     },

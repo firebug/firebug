@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/eventSource",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -17,7 +18,7 @@ define([
     "firebug/trace/traceModule",
     "firebug/chrome/tabContext",
 ],
-function(Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
+function(EventSource, Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
     Str, Arr, Debug, TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
@@ -62,7 +63,7 @@ var showContextTimeout = 200;
  * responsible for creation of a context object that contains meta-data about currently
  * debugged page.
  */
-Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
+Firebug.TabWatcher = Obj.extend(new EventSource(),
 /** @lends Firebug.TabWatcher */
 {
     // Store contexts where they can be accessed externally

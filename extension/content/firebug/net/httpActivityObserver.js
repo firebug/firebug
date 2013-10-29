@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/trace",
@@ -9,7 +10,7 @@ define([
     "firebug/net/netProgress",
     "firebug/net/netUtils"
 ],
-function(Xpcom, Obj, FBTrace, Http, Win, NetProgress, NetUtils) {
+function(Module, Xpcom, Obj, FBTrace, Http, Win, NetProgress, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
@@ -301,7 +302,7 @@ function getActivitySubtypeDescription(a)
 // ********************************************************************************************* //
 
 // https://bugzilla.mozilla.org/show_bug.cgi?id=669730
-var HttpActivityObserverModule = Obj.extend(Firebug.Module,
+var HttpActivityObserverModule = Obj.extend(Module,
 {
     dispatchName: "HttpActivityObserverModule",
 

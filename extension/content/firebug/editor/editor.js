@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -14,7 +15,8 @@ define([
     "firebug/trace/debug",
     "firebug/chrome/measureBox",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug, MeasureBox) {
+function(Module, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug,
+    MeasureBox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -48,7 +50,7 @@ var ignoreNextInput = false;
 
 // ********************************************************************************************* //
 
-Firebug.Editor = Obj.extend(Firebug.Module,
+Firebug.Editor = Obj.extend(Module,
 {
     supportsStopEvent: true,
 
@@ -468,7 +470,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         this.onResize = Obj.bindFixed(this.onResize, this);
         this.onBlur = Obj.bind(this.onBlur, this);
 
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
     },
 
     disable: function()

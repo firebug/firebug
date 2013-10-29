@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -21,7 +22,7 @@ define([
     "firebug/lib/events",
     "firebug/console/errors",
 ],
-function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
+function(ActivableModule, Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
     Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events) {
 
 // ********************************************************************************************* //
@@ -66,7 +67,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 
 // ************************************************************************************************
 
-Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
+Firebug.Debugger = Obj.extend(ActivableModule,
 {
     dispatchName: "debugger",
     fbs: FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
@@ -2359,14 +2360,14 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         this.onFunctionCall = Obj.bind(this.onFunctionCall, this);
 
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
     },
 
     shutdown: function()
     {
         //Firebug.connection.unregisterTool(this.asTool);
 
-        Firebug.ActivableModule.destroy.apply(this, arguments);
+        ActivableModule.destroy.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2416,7 +2417,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
         this.obeyPrefs();
         this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // TODO move to script.js
         this.filterMenuUpdate();
@@ -2440,7 +2441,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         context.jsDebuggerCalledUs = false;
 
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
     },
 
     showContext: function(browser, context)
@@ -2548,7 +2549,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        ActivableModule.destroyContext.apply(this, arguments);
 
         if (context.stopped)
         {

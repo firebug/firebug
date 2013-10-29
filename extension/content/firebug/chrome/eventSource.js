@@ -19,10 +19,10 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // Implementation
 
 /**
- * Support for listeners registration. This object is also extended by Firebug.Module,
+ * Support for listeners registration. This object is also extended by Module,
  * so all modules supports listening automatically. Note that an array of listeners is
  * created for each instance of a module within the initialize method. Thus all derived
- * module classes must ensure that the Firebug.Module.initialize method is called for the
+ * module classes must ensure that the Module.initialize method is called for the
  * super class.
  */
 function EventSource()

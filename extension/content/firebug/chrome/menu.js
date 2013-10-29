@@ -194,7 +194,7 @@ Menu.createMenuSeparator = function(popup, item, before)
 
 /**
  * Create an option menu item definition. This method is usually used in methods like:
- * {@link Firebug.Panel.getOptionsMenuItems} or {@link Firebug.Panel.getContextMenuItems}.
+ * {@link Panel.getOptionsMenuItems} or {@link Panel.getContextMenuItems}.
  *
  * @param {String} label Name of the string from *.properties file.
  * @param {String} option Name of the associated option.

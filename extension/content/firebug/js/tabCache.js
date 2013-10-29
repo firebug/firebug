@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
@@ -18,8 +19,8 @@ define([
     "firebug/lib/options",
     "firebug/js/sourceCache"
 ],
-function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener, Options) {
+function(ActivableModule, Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale,
+    Events, Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -84,7 +85,7 @@ var contentTypes =
  * observer, so that HTTP communication can be intercepted and all incoming data stored
  * within a cache.
  */
-Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
+Firebug.TabCacheModel = Obj.extend(ActivableModule,
 {
     dispatchName: "tabCache",
     contentTypes: contentTypes,
@@ -92,7 +93,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         this.traceListener = new TraceListener("tabCache.", "DBG_CACHE", false);
         TraceModule.addListener(this.traceListener);
@@ -100,7 +101,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
 
     initializeUI: function(owner)
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.initializeUI;");

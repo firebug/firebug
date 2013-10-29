@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -32,9 +34,9 @@ define([
     "firebug/html/inspector",
     "firebug/html/layout"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
-    SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, Module, Panel) {
+function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
+    SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu, Url, CSSModule,
+    CSSInfoTip, Module, Panel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -59,7 +61,7 @@ Firebug.HTMLModule = Obj.extend(Module,
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.connection.addListener(this.DebuggerListener);
     },
 
@@ -1415,7 +1417,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onKeyPress = this.onKeyPress.bind(this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
         Firebug.CSSModule.addListener(this);
     },
 
@@ -1423,7 +1425,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         Persist.persistObjects(this, state);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
 
         delete this.embeddedBrowserParents;
         delete this.embeddedBrowserDocument;
@@ -1447,7 +1449,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -1464,7 +1466,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.ioBox;
         }
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -2990,7 +2992,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.type = type;
 };
 
-Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
+Firebug.HTMLModule.BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 

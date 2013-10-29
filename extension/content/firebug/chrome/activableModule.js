@@ -87,7 +87,7 @@ var ActivableModule = Obj.extend(Module,
     },
 
     /**
-     * This method is called if an observer (e.g. {@link Firebug.Panel}) is added or removed.
+     * This method is called if an observer (e.g. {@link Panel}) is added or removed.
      * The module should decide about activation/deactivation upon existence of at least one
      * observer.
      */

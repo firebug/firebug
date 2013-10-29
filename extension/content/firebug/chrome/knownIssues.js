@@ -2,6 +2,8 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/options",
@@ -15,8 +17,8 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
 ],
-function(Firebug, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps, Win,
-    PanelActivation, Events, Css) {
+function(Firebug, Module, Rep, FBTrace, Obj, Options, Dom, Firefox, Domplate, Locale, FirebugReps,
+    Win, PanelActivation, Events, Css) {
 
 "use strict";
 
@@ -38,7 +40,7 @@ var slowJsdTag =
         style: "margin: 15px 0 15px 0; color: green"}
     );
 
-var slowJsdRep = domplate(Firebug.Rep,
+var slowJsdRep = domplate(Rep,
 {
     className: "text",
 
@@ -77,7 +79,7 @@ var slowJsdRep = domplate(Firebug.Rep,
  * This module is responsible for various hacks and workarounds related
  * to known platform issues.
  */
-var KnownIssues = Obj.extend(Firebug.Module,
+var KnownIssues = Obj.extend(Module,
 /** @lends KnownIssues */
 {
     dispatchName: "knownIssues",
@@ -87,7 +89,7 @@ var KnownIssues = Obj.extend(Firebug.Module,
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         Firebug.registerUIListener(this);
         PanelActivation.addListener(this);
@@ -98,12 +100,12 @@ var KnownIssues = Obj.extend(Firebug.Module,
         Firebug.unregisterUIListener(this);
         PanelActivation.removeListener(this);
 
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     initContext: function(context)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
 
         // Initialize default value.
         context.showSlowJSDMessage = Options.get("showSlowJSDMessage");

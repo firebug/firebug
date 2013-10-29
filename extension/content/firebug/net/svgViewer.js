@@ -2,6 +2,9 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/activableModule",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -11,7 +14,8 @@ define([
     "firebug/lib/http",
     "firebug/net/netUtils"
 ],
-function(Firebug, FBTrace, Obj, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
+function(Firebug, ActivableModule, Module, Rep, FBTrace, Obj, Domplate, Locale, Xpcom, Css, Http,
+    NetUtils) {
 
 "use strict";
 
@@ -36,20 +40,20 @@ var contentTypes =
  * tab within network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
+Firebug.SVGViewerModel = Obj.extend(Module,
 /** lends Firebug.SVGViewerModel */
 {
     dispatchName: "svgViewer",
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
         Firebug.NetMonitor.NetInfoBody.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        ActivableModule.shutdown.apply(this, arguments);
         Firebug.NetMonitor.NetInfoBody.removeListener(this);
     },
 
@@ -146,7 +150,7 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
  * @domplate Represents a template for displaying SVG parser errors. Used by
  * <code>Firebug.SVGViewerModel</code>.
  */
-Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
+Firebug.SVGViewerModel.ParseError = domplate(Rep,
 {
     tag:
         DIV({"class": "svgInfoError"},

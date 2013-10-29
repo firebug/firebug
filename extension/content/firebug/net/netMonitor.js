@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -20,9 +21,9 @@ define([
     "firebug/trace/traceModule",
     "firebug/chrome/activableModule",
 ],
-function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events, Locale,
-    TraceListener, TraceModule, ActivableModule) {
+function(ActivableModule, Obj, Firebug, Firefox, Options, Win, Str, Persist,
+    NetHttpActivityObserver, HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger,
+    Events, Locale, TraceListener, TraceModule, ActivableModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -47,7 +48,7 @@ var contentLoad = NetProgress.prototype.contentLoad;
 
 /**
  * @module Represents a module object for the Net panel. This object is derived
- * from <code>Firebug.ActivableModule</code> in order to support activation (enable/disable).
+ * from {@link ActivableModule} in order to support activation (enable/disable).
  * This allows to avoid (performance) expensive features if the functionality is not necessary
  * for the user.
  */
@@ -63,7 +64,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         this.traceNetListener = new TraceListener("net.", "DBG_NET", true);
         this.traceActivityListener = new TraceListener("activityObserver.",
@@ -79,7 +80,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     initializeUI: function()
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
 
         // Initialize max limit for logged requests.
         Firebug.NetMonitor.updateMaxLimit();
@@ -105,7 +106,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     shutdown: function()
     {
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        ActivableModule.shutdown.apply(this, arguments);
 
         TraceModule.removeListener(this.traceNetListener);
         TraceModule.removeListener(this.traceActivityListener);
@@ -117,7 +118,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     initContext: function(context, persistedState)
     {
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.initContext for: " + context.getName());
@@ -180,7 +181,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     showContext: function(browser, context)
     {
-        Firebug.ActivableModule.showContext.apply(this, arguments);
+        ActivableModule.showContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.showContext; " + (context ? context.getName() : "NULL") +
@@ -212,7 +213,7 @@ Firebug.NetMonitor = Obj.extend(ActivableModule,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        ActivableModule.destroyContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.destroyContext for: " +

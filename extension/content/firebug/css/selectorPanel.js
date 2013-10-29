@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -13,8 +15,8 @@ define([
     "firebug/css/selectorModule",
     "firebug/css/selectorEditor"
 ],
-function(FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist, CSSSelectorsModule,
-    SelectorEditor) {
+function(Panel, Rep, FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist,
+    CSSSelectorsModule, SelectorEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -26,7 +28,7 @@ var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, H1, P, A, BR, INPUT} =
 
 function CSSSelectorsPanel() {}
 
-CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
+CSSSelectorsPanel.prototype = Obj.extend(Panel,
 {
     template: domplate(
     {
@@ -178,7 +180,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         this.onClick = Obj.bind(this.onClick, this);
         this.onMutationObserve = this.onMutationObserve.bind(this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -189,19 +191,19 @@ CSSSelectorsPanel.prototype = Obj.extend(Firebug.Panel,
         state.groups = this.groups;
         Persist.persistObjects(this, state);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
     {
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
 
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
     },
 
     destroyNode: function()
     {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
 
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
     },
@@ -436,7 +438,7 @@ CSSSelectorsPanelEditor.prototype = domplate(SelectorEditor.prototype,
 
 // ********************************************************************************************* //
 
-var WarningTemplate = domplate(Firebug.Rep,
+var WarningTemplate = domplate(Rep,
 {
     noSelectionTag:
         DIV({"class": "selectorWarning noSelection"},

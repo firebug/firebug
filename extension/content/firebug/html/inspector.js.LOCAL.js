@@ -3,7 +3,6 @@
 define([
     "firebug/firebug",
     "firebug/lib/trace",
-    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/wrapper",
@@ -12,11 +11,12 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/system",
+    "firebug/chrome/module",
     "firebug/chrome/window",
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
-function(Firebug, FBTrace, Module, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Win,
+function(Firebug, FBTrace, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Module, Win,
     HighlighterCache, QuickInfoBox) {
 
 "use strict";
@@ -683,7 +683,7 @@ Firebug.Inspector = Obj.extend(Module,
      */
     initialize: function()
     {
-        Module.initialize.apply(this, arguments);
+        Firebug.Module.initialize.apply(this, arguments);
 
         this.onInspectingResizeWindow = Obj.bind(this.onInspectingResizeWindow, this);
         this.onInspectingScroll = Obj.bind(this.onInspectingScroll, this);
@@ -706,7 +706,7 @@ Firebug.Inspector = Obj.extend(Module,
 
     shutdown: function()
     {
-        Module.shutdown.apply(this, arguments);
+        Firebug.Module.shutdown.apply(this, arguments);
 
         var panelBar1 = Firebug.chrome.$("fbPanelBar1");
         Events.removeEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);
