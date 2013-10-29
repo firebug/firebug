@@ -21,6 +21,7 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netProgress",
     "firebug/lib/http",
+    "firebug/chrome/rep",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -33,7 +34,7 @@ define([
     "firebug/net/netMonitor"
 ],
 function(Obj, Firebug, Firefox, Domplate, Locale, Events, Options, Url, Css, Dom, Win, Search, Str,
-    Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress, Http) {
+    Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress, Http, Rep) {
 
 // ********************************************************************************************* //
 // Constants
@@ -55,7 +56,7 @@ const reSplitIP = /^(\d+)\.(\d+)\.(\d+)\.(\d+):(\d+)$/;
 /**
  * @domplate Represents a template that is used to render basic content of the net panel.
  */
-Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(),
+Firebug.NetMonitor.NetRequestTable = domplate(Rep, new Firebug.Listener(),
 {
     inspectable: false,
 
@@ -404,7 +405,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 /**
  * @domplate Represents a template that is used to render net panel entries.
  */
-Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(),
+Firebug.NetMonitor.NetRequestEntry = domplate(Rep, new Firebug.Listener(),
 {
     fileTag:
         FOR("file", "$files",
@@ -733,7 +734,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
 // ********************************************************************************************* //
 
-Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
+Firebug.NetMonitor.NetPage = domplate(Rep,
 {
     separatorTag:
         TR({"class": "netRow netPageSeparatorRow"},
@@ -1284,7 +1285,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
  * @domplate Represents posted data within request info (the info, which is visible when
  * a request entry is expanded. This template renders content of the Post tab.
  */
-Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(),
+Firebug.NetMonitor.NetInfoPostData = domplate(Rep, new Firebug.Listener(),
 {
     // application/x-www-form-urlencoded
     paramsTable:
@@ -1585,7 +1586,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
  * @domplate Used within the Net panel to display raw source of request and response headers
  * as well as pretty-formatted summary of these headers.
  */
-Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener(),
+Firebug.NetMonitor.NetInfoHeaders = domplate(Rep, new Firebug.Listener(),
 {
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
@@ -1770,7 +1771,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 /**
  * @domplate Represents a template for a pupup tip with detailed size info.
  */
-Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
+Firebug.NetMonitor.SizeInfoTip = domplate(Rep,
 {
     tag:
         TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip", role:"presentation"},
@@ -1849,7 +1850,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Firebug.NetMonitor.ResponseSizeLimit = domplate(Firebug.Rep,
+Firebug.NetMonitor.ResponseSizeLimit = domplate(Rep,
 {
     tag:
         DIV({"class": "netInfoResponseSizeLimit"},

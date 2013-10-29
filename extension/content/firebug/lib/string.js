@@ -9,6 +9,8 @@ define([
 ],
 function(FBTrace, Options, Deprecated, Xpcom, System) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 

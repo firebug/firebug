@@ -12,8 +12,9 @@ define([
     "firebug/lib/array",
     "firebug/chrome/menu",
     "firebug/trace/debug",
+    "firebug/chrome/measureBox",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug, MeasureBox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -489,7 +490,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // BaseEditor
 
-Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
+Firebug.BaseEditor = Obj.extend(MeasureBox,
 {
     getInitialValue: function(target, value)
     {

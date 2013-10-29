@@ -28,10 +28,11 @@ define([
     "arch/compilationunit",
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
+    "firebug/chrome/rep",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation, Rep) {
 
 // ********************************************************************************************* //
 // Constants
@@ -75,6 +76,7 @@ var OBJECTLINK = FirebugReps.OBJECTLINK =
 
 // ********************************************************************************************* //
 
+// xxxHonza: all occurrences of 'Firebug.Rep' should be replaced by 'Rep' (imported module)
 FirebugReps.Undefined = domplate(Firebug.Rep,
 {
     tag: OBJECTBOX("undefined"),

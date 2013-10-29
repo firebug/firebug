@@ -23,6 +23,8 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
+    "firebug/chrome/module",
+    "firebug/chrome/panel",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
@@ -32,7 +34,7 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip) {
+    Url, CSSModule, CSSInfoTip, Module, Panel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -51,7 +53,7 @@ var KeyEvent = window.KeyEvent;
 
 // ********************************************************************************************* //
 
-Firebug.HTMLModule = Obj.extend(Firebug.Module,
+Firebug.HTMLModule = Obj.extend(Module,
 {
     dispatchName: "htmlModule",
 
@@ -63,13 +65,13 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
         context.mutationBreakpoints = new MutationBreakpointGroup(context);
     },
 
@@ -80,7 +82,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
+        Module.destroyContext.apply(this, arguments);
 
         context.mutationBreakpoints.store(context);
     },
@@ -104,7 +106,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = Obj.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = Obj.extend(Panel, HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {

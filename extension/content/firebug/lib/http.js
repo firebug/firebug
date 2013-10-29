@@ -9,6 +9,8 @@ define([
 ],
 function(Xpcom, FBTrace, Deprecated, StackFrame, Str) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
