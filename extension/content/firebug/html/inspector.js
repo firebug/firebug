@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -17,7 +18,7 @@ define([
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
+function(Module, Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
     Win, System, HighlighterCache, QuickInfoBox) {
 
 // ********************************************************************************************* //
@@ -39,7 +40,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = Obj.extend(Firebug.Module,
+Firebug.Inspector = Obj.extend(Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -682,7 +683,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.onInspectingResizeWindow = Obj.bind(this.onInspectingResizeWindow, this);
         this.onInspectingScroll = Obj.bind(this.onInspectingScroll, this);
@@ -705,7 +706,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         var panelBar1 = Firebug.chrome.$("fbPanelBar1");
         Events.removeEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);

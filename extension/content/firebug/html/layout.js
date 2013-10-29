@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/panel",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -14,7 +15,7 @@ define([
     "firebug/editor/editor",
     "firebug/chrome/measureBox",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Xml, Menu,
+function(Firebug, Panel, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Xml, Menu,
     Editor, MeasureBox) {
 
 "use strict"
@@ -33,7 +34,7 @@ var {domplate, DIV, SPAN} = Domplate;
  * The layout data editing is done through {@LayoutEditor} object.
  */
 function LayoutPanel() {}
-LayoutPanel.prototype = Obj.extend(Firebug.Panel,
+LayoutPanel.prototype = Obj.extend(Panel,
 /** @lends LayoutPanel */
 {
     name: "layout",
@@ -267,7 +268,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
         this.onAfterPaint = Obj.bindFixed(this.onMozAfterPaint, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -275,7 +276,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -283,7 +284,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)

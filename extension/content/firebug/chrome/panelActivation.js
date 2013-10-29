@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -11,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/options",
 ],
-function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
+function(Module, Rep, Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
 
 "use strict";
 
@@ -32,10 +34,10 @@ var {domplate, DIV, H1, SPAN, P, A} = Domplate;
 /**
  * @module Implements Panel activation logic. A Firebug panel can support activation in order
  * to avoid performance penalties in cases when panel's features are not necessary at the moment.
- * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
- * module from {@link Firebug.ActivableModule}
+ * Such panel must be derived from {@link ActivablePanel} and appropriate activable
+ * module from {@link ActivableModule}
  */
-Firebug.PanelActivation = Obj.extend(Firebug.Module,
+Firebug.PanelActivation = Obj.extend(Module,
 /** @lends Firebug.PanelActivation */
 {
     dispatchName: "panelActivation",
@@ -119,7 +121,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
             return true;
 
         // Panel "class" object is used to decide whether a panel is disabled
-        // or not (i.e.: isEnabled is a static method of Firebug.Panel)
+        // or not (i.e.: isEnabled is a static method of Panel)
         return panelType ? panelType.prototype.isEnabled() : false;
     },
 
@@ -314,7 +316,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 /**
  * @domplate This template renders default content for disabled panels.
  */
-Firebug.DisabledPanelBox = domplate(Firebug.Rep,
+Firebug.DisabledPanelBox = domplate(Rep,
 /** @lends Firebug.DisabledPanelBox */
 {
     tag:

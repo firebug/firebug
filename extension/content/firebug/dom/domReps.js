@@ -4,6 +4,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
@@ -16,8 +17,8 @@ define([
     "firebug/dom/domModule",
     "firebug/dom/domMemberProvider",
 ],
-function(Firebug, Domplate, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
-    DOMModule, DOMMemberProvider) {
+function(Firebug, Rep, Domplate, FirebugReps, Locale, Events, Options, Dom, Css, Str,
+    ToggleBranch, DOMModule, DOMMemberProvider) {
 
 "use strict";
 
@@ -48,7 +49,7 @@ var SizerRow =
         TD({width: "70%"})
     );
 
-var DirTablePlate = domplate(Firebug.Rep,
+var DirTablePlate = domplate(Rep,
 {
     memberRowTag:
         TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
@@ -123,7 +124,7 @@ var DirTablePlate = domplate(Firebug.Rep,
             name: Locale.$STR("firebug.dom.noChildren2"),
             type: "string",
             rowClass: "memberRow-string",
-            tag: Firebug.Rep.tag,
+            tag: Rep.tag,
             prefix: ""
         }];
     },

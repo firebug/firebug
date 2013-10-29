@@ -2,6 +2,9 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/activableModule",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -11,7 +14,8 @@ define([
     "firebug/lib/http",
     "firebug/net/netUtils"
 ],
-function(Firebug, FBTrace, Obj, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
+function(Firebug, ActivableModule, Module, Rep, FBTrace, Obj, Domplate, Locale, Xpcom, Css, Http,
+    NetUtils) {
 
 "use strict";
 
@@ -44,20 +48,20 @@ var xmlContentTypes =
  * tab within network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
+Firebug.XMLViewerModel = Obj.extend(Module,
 /** lends Firebug.XMLViewerModel */
 {
     dispatchName: "xmlViewer",
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
         Firebug.NetMonitor.NetInfoBody.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        ActivableModule.shutdown.apply(this, arguments);
         Firebug.NetMonitor.NetInfoBody.removeListener(this);
     },
 
@@ -154,7 +158,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
  * @domplate Represents a template for displaying XML parser errors. Used by
  * <code>Firebug.XMLViewerModel</code>.
  */
-Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
+Firebug.XMLViewerModel.ParseError = domplate(Rep,
 {
     tag:
         DIV({"class": "xmlInfoError"},

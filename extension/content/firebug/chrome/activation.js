@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/locale",
@@ -9,7 +10,7 @@ define([
     "firebug/chrome/annotations",
     "firebug/chrome/firefox",
 ],
-function(Obj, Firebug, Locale, Url, TabWatcher, Annotations, Firefox) {
+function(Module, Obj, Firebug, Locale, Url, TabWatcher, Annotations, Firefox) {
 
 "use strict";
 
@@ -38,14 +39,14 @@ const Ci = Components.interfaces;
  *    This logic has higher priority over the URL annotations.
  *    If "off" options is selected, all existing URL annotations are removed.
  */
-Firebug.Activation = Obj.extend(Firebug.Module,
+Firebug.Activation = Obj.extend(Module,
 {
     dispatchName: "activation",
 
     // called once
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         TabWatcher.initializeUI();
         TabWatcher.addListener(this);
@@ -53,7 +54,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         TabWatcher.removeListener(this);
     },

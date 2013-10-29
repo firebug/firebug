@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
@@ -11,7 +12,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/system",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, System) {
+function(Module, Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, System) {
 
 "use strict";
 
@@ -39,7 +40,7 @@ if (typeof(sourceEditorScope.SourceEditor) != "undefined")
 // ********************************************************************************************* //
 // Command Editor
 
-Firebug.CommandEditor = Obj.extend(Firebug.Module,
+Firebug.CommandEditor = Obj.extend(Module,
 {
     dispatchName: "commandEditor",
 
@@ -47,7 +48,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         if (this.editor)
             return;

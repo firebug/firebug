@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/css",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/options"
 ],
-function(Obj, Firebug, Css, Search, System, Str, Locale, Options) {
+function(Module, Obj, Firebug, Css, Search, System, Str, Locale, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,7 +30,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = Obj.extend(Firebug.Module,
+Firebug.Search = Obj.extend(Module,
 {
     dispatchName: "search",
 

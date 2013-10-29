@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/reps",
@@ -11,7 +12,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/string"
 ],
-function(Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str) {
+function(Module, Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -56,7 +57,7 @@ const wm = Xpcom.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMedia
 
 // ********************************************************************************************* //
 
-var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
+var Errors = Firebug.Errors = Obj.extend(Module,
 {
     dispatchName: "errors",
 
@@ -68,7 +69,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         // Make sure the error observer is removed.
         this.stopObserving();
 
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     initContext: function(context)

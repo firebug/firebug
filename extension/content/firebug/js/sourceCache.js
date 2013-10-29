@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/eventSource",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
@@ -8,7 +9,7 @@ define([
     "firebug/lib/http",
     "firebug/lib/string"
 ],
-function(Obj, Firebug, Xpcom, Url, Http, Str) {
+function(EventSource, Obj, Firebug, Xpcom, Url, Http, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,7 +41,7 @@ Firebug.SourceCache = function(context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
+Firebug.SourceCache.prototype = Obj.extend(new EventSource(),
 {
     isCached: function(url)
     {
