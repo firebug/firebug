@@ -845,7 +845,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                     editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
-            Firebug.Editor.startEditing(row, editValue);
+            var selectionData = null;
+            if (type === "string")
+                selectionData = {start: 1, end: editValue.length-1};
+
+            Firebug.Editor.startEditing(row, editValue, null, selectionData);
         }
     },
 

@@ -208,7 +208,7 @@ Xml.getElementXML = function(element)
                     continue;
                 }
 
-                xml.push(' ', attr.nodeName, '="', Str.escapeForElementAttribute(attr.nodeValue),'"');
+                xml.push(' ', attr.nodeName, '="', Str.escapeForElementAttribute(attr.value),'"');
             }
 
             if (elt.firstChild)
