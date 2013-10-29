@@ -238,15 +238,21 @@ Browser.prototype.closeContext = function(context, userCommands)
 
         delete browser.showFirebug;
 
+        var result = false;
         var shouldDispatch = TabWatcher.unwatchTopWindow(browser.contentWindow);
-
         if (shouldDispatch)
         {
             // TODO remove
             Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, null]);
-            return true;
+            result = true;
         }
-        return false;
+
+        // Firebug is closing, clean up the persisted content. The persisted state should
+        // not be used after re-activating Firebug (see also issue issue 6901, breakpoint
+        // client objects need to be recreated).
+        delete browser.persistedState;
+
+        return result;
     }
 };
 
