@@ -29,10 +29,11 @@ define([
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
     "firebug/chrome/rep",
+    "firebug/html/inspector",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation, Rep) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation, Rep, Inspector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -733,7 +734,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         target.removeAttribute("title");
 
         // Highlight multiple elements on the page.
-        Firebug.Inspector.highlightObject(arr, context);
+        Inspector.highlightObject(arr, context);
     },
 
     isArray: function(obj)
@@ -1325,7 +1326,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         if (this.ignoreTarget(target))
             return;
-        Firebug.Inspector.highlightObject(object, context);
+
+        Inspector.highlightObject(object, context);
     },
 
     persistObject: function(elt, context)

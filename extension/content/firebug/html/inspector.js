@@ -1,24 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/firefox",
-    "firebug/chrome/reps",
-    "firebug/lib/locale",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/array",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
-    "firebug/chrome/window",
     "firebug/lib/system",
+    "firebug/chrome/module",
+    "firebug/chrome/window",
     "firebug/html/highlighterCache",
     "firebug/html/quickInfoBox",
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Arr, Css, Dom, Xml,
-    Win, System, HighlighterCache, QuickInfoBox) {
+function(Firebug, FBTrace, Obj, Events, Wrapper, Arr, Css, Dom, Xml, System, Module, Win,
+    HighlighterCache, QuickInfoBox) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -39,7 +40,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = Obj.extend(Firebug.Module,
+Firebug.Inspector = Obj.extend(Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -1390,6 +1391,19 @@ BoxModelHighlighter.prototype =
 
     getNodes: function(context, isMulti)
     {
+        function create(className, name)
+        {
+            var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            hideElementFromInspection(div);
+
+            if (className !== CustomizableBox)
+                div.className = className + name;
+            else
+                div.className = className;
+
+            return div;
+        }
+
         if (context.window)
         {
             var doc = context.window.document;
@@ -1411,20 +1425,7 @@ BoxModelHighlighter.prototype =
             var CustomizableBox = "firebugResetStyles firebugLayoutBox";
             var Line = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutLine firebugLayoutLine";
 
-            function create(className, name)
-            {
-                var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                hideElementFromInspection(div);
-
-                if (className !== CustomizableBox)
-                    div.className = className + name;
-                else
-                    div.className = className;
-
-                return div;
-            }
-
-            nodes =
+            var nodes =
             {
                 parent: create(Box, "Parent"),
                 rulerH: create(Ruler, "H"),

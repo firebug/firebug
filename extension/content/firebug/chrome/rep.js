@@ -6,8 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/domplate",
+    "firebug/html/inspector",
 ],
-function(Firebug, FBTrace, Locale, Str, Domplate, Rep) {
+function(Firebug, FBTrace, Locale, Str, Domplate, Inspector) {
 
 "use strict";
 
@@ -35,14 +36,12 @@ var Rep = Domplate.domplate(
     {
         var realObject = this.getRealObject(object, context);
         if (realObject)
-            Firebug.Inspector.highlightObject(realObject, context);
+            Inspector.highlightObject(realObject, context);
     },
 
     unhighlightObject: function(object, context)
     {
-        // Including 'firebug/html/inspector' directly causes cycle dependency
-        // through 'firebug/chrome/reps'.
-        Firebug.Inspector.highlightObject(null);
+        Inspector.highlightObject(null);
     },
 
     inspectObject: function(object, context)
