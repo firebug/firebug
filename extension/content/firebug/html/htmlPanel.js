@@ -23,6 +23,8 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
+    "firebug/chrome/module",
+    "firebug/chrome/panel",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
@@ -32,12 +34,12 @@ define([
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip) {
-
-with (Domplate) {
+    Url, CSSModule, CSSInfoTip, Module, Panel) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, A, IMG, INPUT, TEXTAREA} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -51,7 +53,7 @@ var KeyEvent = window.KeyEvent;
 
 // ********************************************************************************************* //
 
-Firebug.HTMLModule = Obj.extend(Firebug.Module,
+Firebug.HTMLModule = Obj.extend(Module,
 {
     dispatchName: "htmlModule",
 
@@ -63,13 +65,13 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
         context.mutationBreakpoints = new MutationBreakpointGroup(context);
     },
 
@@ -80,7 +82,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
+        Module.destroyContext.apply(this, arguments);
 
         context.mutationBreakpoints.store(context);
     },
@@ -104,7 +106,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = Obj.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = Obj.extend(Panel, HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {
@@ -292,15 +294,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     startEditingNode: function(node, box, editor, type)
     {
-        switch (type)
-        {
-            case "html":
-            case "xhtml":
-                this.startEditingHTMLNode(node, box, editor);
-                break;
-            default:
-                this.startEditingXMLNode(node, box, editor);
-        }
+        if (type === "html" || type === "xhtml")
+            this.startEditingHTMLNode(node, box, editor);
+        else
+            this.startEditingXMLNode(node, box, editor);
     },
 
     startEditingXMLNode: function(node, box, editor)
@@ -1401,6 +1398,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     name: "html",
     searchable: true,
+    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
     breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
@@ -1733,6 +1731,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
+    shouldIgnoreIntermediateSearchFailure: function(value)
+    {
+        // An extension of the search text could still be a valid selector,
+        // so don't signal an error.
+        return true;
+    },
+
     getSearchOptionsMenuItems: function()
     {
         return [
@@ -1883,7 +1888,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 var type;
 
-                if (Xml.isElementHTML(node) || Xml.isElementXHTML(node))
+                if (Xml.isElementHTMLOrXHTML(node))
                     type = "HTML";
                 else if (Xml.isElementMathML(node))
                     type = "MathML";
@@ -2692,7 +2697,7 @@ Firebug.HTMLPanel.Editors = {
 
 function getEmptyElementTag(node)
 {
-    var isXhtml= Xml.isElementXHTML(node);
+    var isXhtml = Xml.isElementXHTML(node);
     if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else
@@ -3180,4 +3185,4 @@ Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 return Firebug.HTMLModule;
 
 // ********************************************************************************************* //
-}});
+});

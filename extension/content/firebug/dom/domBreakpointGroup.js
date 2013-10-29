@@ -15,10 +15,10 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, TAG, DIV, SPAN, TR, P, A, INPUT} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -306,5 +306,4 @@ Firebug.registerRep(BreakpointRep);
 return DOMBreakpointGroup;
 
 // ********************************************************************************************* //
-}});
-
+});

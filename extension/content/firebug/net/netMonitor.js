@@ -17,11 +17,12 @@ define([
     "firebug/lib/events",
     "firebug/lib/locale",
     "firebug/trace/traceListener",
-    "firebug/trace/traceModule"
+    "firebug/trace/traceModule",
+    "firebug/chrome/activableModule",
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
     HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events, Locale,
-    TraceListener, TraceModule) {
+    TraceListener, TraceModule, ActivableModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -50,7 +51,7 @@ var contentLoad = NetProgress.prototype.contentLoad;
  * This allows to avoid (performance) expensive features if the functionality is not necessary
  * for the user.
  */
-Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
+Firebug.NetMonitor = Obj.extend(ActivableModule,
 /** @lends Firebug.NetMonitor */
 {
     dispatchName: "netMonitor",

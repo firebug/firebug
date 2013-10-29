@@ -17,6 +17,8 @@ function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
 // ********************************************************************************************* //
 // Constants
 
+var {domplate, DIV, SPAN, TR, P, A, INPUT} = Domplate;
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
@@ -137,7 +139,6 @@ Breakpoint.prototype =
 // ********************************************************************************************* //
 // Breakpoint UI
 
-with (Domplate) {
 var BreakpointRep = domplate(Firebug.Rep,
 {
     inspectable: false,
@@ -240,7 +241,6 @@ var BreakpointRep = domplate(Firebug.Rep,
         return object instanceof Breakpoint;
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration

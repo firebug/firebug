@@ -9,10 +9,11 @@ define([
     "firebug/lib/dom",
 ],
 function(Firebug, Domplate, Locale, Str, NetUtils, Dom) {
-with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -257,4 +258,4 @@ function calculatePos(time, elapsed)
 return TimeInfoTip;
 
 // ********************************************************************************************* //
-}});
+});

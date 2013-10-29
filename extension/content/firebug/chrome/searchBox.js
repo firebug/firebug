@@ -143,6 +143,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         if (immediate)
         {
             var found = panel.search(value, reverse);
+            panel.searchText = value;
             if (!found && value)
                this.onNotFound();
 
@@ -157,8 +158,6 @@ Firebug.Search = Obj.extend(Firebug.Module,
                 Css.removeClass(panelNode, "searching");
             }
 
-            panel.searchText = value;
-
             return found;
         }
         else
@@ -168,8 +167,12 @@ Firebug.Search = Obj.extend(Firebug.Module,
             panelNode.searchTimeout = setTimeout(function()
             {
                 var found = panel.search(value, reverse);
+                panel.searchText = value;
                 if (!found && value)
-                    Firebug.Search.onNotFound(value);
+                {
+                    var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
+                    sBox.onNotFound(shouldIgnore && shouldIgnore.call(panel, value));
+                }
 
                 if (value)
                 {
@@ -182,7 +185,6 @@ Firebug.Search = Obj.extend(Firebug.Module,
                     Css.removeClass(panelNode, "searching");
                 }
 
-                panel.searchText = value;
                 searchBox.status = (found ? "found" : "notfound");
                 sBox.setPlaceholder();
 
@@ -193,10 +195,15 @@ Firebug.Search = Obj.extend(Firebug.Module,
         }
     },
 
-    onNotFound: function()
+    onNotFound: function(ignore)
     {
         if (this.status != "notfound")
+            this.searchHasBeeped = false;
+        if (!ignore && !this.searchHasBeeped)
+        {
             System.beep();
+            this.searchHasBeeped = true;
+        }
     },
 
     isCaseSensitive: function(text)
@@ -282,9 +289,16 @@ Firebug.Search = Obj.extend(Firebug.Module,
             return;
 
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        var panelType = Firebug.getPanelType(panel.name);
-        var title = Firebug.getPanelTitle(panelType);
-        searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        if (panel.searchPlaceholder)
+        {
+            searchBox.placeholder = Locale.$STR(panel.searchPlaceholder);
+        }
+        else
+        {
+            var panelType = Firebug.getPanelType(panel.name);
+            var title = Firebug.getPanelTitle(panelType);
+            searchBox.placeholder = Locale.$STRF("search.Placeholder", [title]);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -28,10 +28,10 @@ function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Ev
     BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
     CookiePermissions, EditCookie, CookieClipboard) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, P, LI, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1443,5 +1443,4 @@ Firebug.registerRep(
 return CookieReps;
 
 // ********************************************************************************************* //
-}});
-
+});

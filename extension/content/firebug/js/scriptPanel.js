@@ -636,8 +636,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         var scrollingElement = event.target;
         this.reView(scrollingElement);
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.placeholder = Locale.$STR("Use hash plus number to go to line");
     },
 
     onKeyPress: function(event)
@@ -665,6 +663,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     name: "script",
     searchable: true,
+    searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
     order: 40,

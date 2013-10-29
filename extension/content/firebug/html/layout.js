@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -11,8 +12,10 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/menu",
     "firebug/editor/editor",
+    "firebug/chrome/measureBox",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Xml, Menu,
+    Editor, MeasureBox) {
 
 "use strict"
 
@@ -469,17 +472,18 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     getMaxCharWidth: function(args, node)
     {
-        Firebug.MeasureBox.startMeasuring(node);
+        MeasureBox.startMeasuring(node);
+
         var maxWidth = Math.max(
-            Firebug.MeasureBox.measureText(args.marginLeft + "").width,
-            Firebug.MeasureBox.measureText(args.marginRight + "").width,
-            Firebug.MeasureBox.measureText(args.borderLeft + "").width,
-            Firebug.MeasureBox.measureText(args.borderRight + "").width,
-            Firebug.MeasureBox.measureText(args.paddingLeft + "").width,
-            Firebug.MeasureBox.measureText(args.paddingRight + "").width
+            MeasureBox.measureText(args.marginLeft + "").width,
+            MeasureBox.measureText(args.marginRight + "").width,
+            MeasureBox.measureText(args.borderLeft + "").width,
+            MeasureBox.measureText(args.borderRight + "").width,
+            MeasureBox.measureText(args.paddingLeft + "").width,
+            MeasureBox.measureText(args.paddingRight + "").width
         );
 
-        Firebug.MeasureBox.stopMeasuring();
+        MeasureBox.stopMeasuring();
         return maxWidth;
     },
 

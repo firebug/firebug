@@ -25,6 +25,7 @@ define([
     "firebug/css/cssReps",
     "firebug/net/timeInfoTip",
     "firebug/chrome/panelNotification",
+    "firebug/chrome/activablePanel",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -41,12 +42,12 @@ define([
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
     Arr, System, Menu, NetUtils, NetProgress, CSSInfoTip, TimeInfoTip,
-    PanelNotification) {
-
-with (Domplate) {
+    PanelNotification, ActivablePanel) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, TR, P, UL, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -61,12 +62,12 @@ var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 
 /**
  * @panel Represents a Firebug panel that displays info about HTTP activity associated with
- * the current page. This class is derived from <code>Firebug.ActivablePanel</code> in order
+ * the current page. This class is derived from {@ActivablePanel} in order
  * to support activation (enable/disable). This allows to avoid (performance) expensive
  * features if the functionality is not necessary for the user.
  */
 function NetPanel() {}
-NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
+NetPanel.prototype = Obj.extend(ActivablePanel,
 /** @lends NetPanel */
 {
     name: panelName,
@@ -87,7 +88,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.queue = [];
         this.onContextMenu = Obj.bind(this.onContextMenu, this);
 
-        Firebug.ActivablePanel.initialize.apply(this, arguments);
+        ActivablePanel.initialize.apply(this, arguments);
 
         // Listen for set filters, so the panel is properly updated when needed
         Firebug.NetMonitor.addListener(this);
@@ -96,7 +97,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     destroy: function(state)
     {
         Firebug.NetMonitor.removeListener(this);
-        Firebug.ActivablePanel.destroy.apply(this, arguments);
+
+        ActivablePanel.destroy.apply(this, arguments);
     },
 
     initializeNode : function()
@@ -107,7 +109,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         Events.addEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
 
-        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
+        ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode : function()
@@ -115,7 +117,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Events.removeEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
         Events.removeEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
 
-        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+        ActivablePanel.destroyNode.apply(this, arguments);
     },
 
     loadPersistedContent: function(state)
@@ -186,7 +188,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     savePersistedContent: function(state)
     {
-        Firebug.ActivablePanel.savePersistedContent.apply(this, arguments);
+        ActivablePanel.savePersistedContent.apply(this, arguments);
 
         state.pageTitle = NetUtils.getPageTitle(this.context);
     },
@@ -284,7 +286,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (header)
             return NetRequestTable;
 
-        return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
+        return ActivablePanel.getPopupObject.apply(this, arguments);
     },
 
     supportsObject: function(object, type)
@@ -1721,4 +1723,4 @@ Firebug.registerPanel(NetPanel);
 return Firebug.NetMonitor;
 
 // ********************************************************************************************* //
-}});
+});

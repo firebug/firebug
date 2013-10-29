@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
 ],
 function(Wrapper, DebuggerLib, Obj, CommandLineAPI, Locale) {
+
 "use strict";
 
 // ********************************************************************************************* //

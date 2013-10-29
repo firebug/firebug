@@ -21,6 +21,9 @@ function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Font
     NetUtils, Options) {
 
 // ********************************************************************************************* //
+// Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TD, TR, TABLE, TBODY, P, UL, LI, PRE, A, STYLE} = Domplate;
 
 // List of font content types
 var contentTypes =
@@ -157,7 +160,6 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.FontViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -693,7 +695,6 @@ Firebug.FontViewerModel.Preview = domplate(
             this.insertMetaDataFormatted(body, fontObject.metadata);
     }
 });
-};
 
 // ********************************************************************************************* //
 // Registration

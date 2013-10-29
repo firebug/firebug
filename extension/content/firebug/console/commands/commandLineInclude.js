@@ -19,10 +19,11 @@ define([
 ],
 function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
     Obj, TableRep, Console) {
-with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, SPAN, TR, P, LI, A, BUTTON} = Domplate;
 
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -702,4 +703,4 @@ Console.addListener(CommandLineInclude);
 return CommandLineInclude;
 
 // ********************************************************************************************* //
-}});
+});

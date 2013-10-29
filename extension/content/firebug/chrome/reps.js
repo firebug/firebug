@@ -28,15 +28,16 @@ define([
     "arch/compilationunit",
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
+    "firebug/chrome/rep",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
-
-with (Domplate) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation, Rep) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, PRE, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -75,6 +76,7 @@ var OBJECTLINK = FirebugReps.OBJECTLINK =
 
 // ********************************************************************************************* //
 
+// xxxHonza: all occurrences of 'Firebug.Rep' should be replaced by 'Rep' (imported module)
 FirebugReps.Undefined = domplate(Firebug.Rep,
 {
     tag: OBJECTBOX("undefined"),
@@ -1373,7 +1375,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var clipboardContent = System.getStringDataFromClipboard();
         var isEltRoot = (elt === elt.ownerDocument.documentElement);
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
             type = "HTML";
         else if (Xml.isElementMathML(elt))
             type = "MathML";
@@ -1391,7 +1393,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             command: Obj.bindFixed(this.copyHTML, this, elt)
         });
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
         {
             items.push(
             {
@@ -3015,4 +3017,4 @@ Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
-}});
+});
