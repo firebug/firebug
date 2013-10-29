@@ -2,7 +2,14 @@
 
 /**
  * Firebug module can depend only on modules that don't use the 'Firebug' namespace.
+ * So, mainly only on library modules from 'firebug/lib/*'
+ *
  * So, be careful before you create a new dependency.
+ *
+ * xxxHonza: dependency the following modules should be removed:
+ *     "firebug/chrome/firefox"
+ *     "firebug/chrome/chrome"
+ *     "firebug/trace/traceListener"
  */
 define([
     "firebug/lib/lib",
@@ -17,10 +24,9 @@ define([
     "firebug/lib/array",
     "firebug/lib/http",
     "firebug/trace/traceListener",
-    "firebug/console/commandLineExposed",
 ],
 function(FBL, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, Css, Arr, Http,
-    TraceListener, CommandLineExposed) {
+    TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -636,6 +642,8 @@ window.Firebug =
 
     registerTracePrefix: function(prefix, type, removePrefix, styleURI)
     {
+        // xxxHonza: we should fire an event to avoid dependency on
+        // TraceModule and TraceListener
         var listener = Firebug.TraceModule.getListenerByPrefix(prefix);
         if (listener && FBTrace.DBG_ERRORS)
         {
@@ -657,12 +665,16 @@ window.Firebug =
 
     registerCommand: function(name, config)
     {
-        return CommandLineExposed.registerCommand(name, config);
+        // xxxHonza: we should fire an event to avoid dependency on CommandLineExposed module.
+        // Fix as soon as issue 6855 is done
+        return Firebug.CommandLineExposed.registerCommand(name, config);
     },
 
     unregisterCommand: function(name)
     {
-        return CommandLineExposed.unregisterCommand(name);
+        // xxxHonza: we should fire an event to avoid dependency on CommandLineExposed module.
+        // Fix as soon as issue 6855 is done
+        return Firebug.CommandLineExposed.unregisterCommand(name);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
