@@ -1244,6 +1244,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 delete this.selectedSourceBox.breakCauseBox;
             }*/
 
+            this.selection = null;
             this.syncCommands(this.context);
             this.syncListeners(this.context);
             this.showNoStackFrame();
