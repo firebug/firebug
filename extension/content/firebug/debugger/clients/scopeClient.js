@@ -17,6 +17,7 @@ function ScopeClient(grip, cache)
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
+    this.error = null;
 }
 
 ScopeClient.prototype = Obj.descend(new ObjectClient(),
