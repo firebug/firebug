@@ -383,7 +383,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             self.onEvalWatches(result);
         }
 
-        // Eval through the debuggerTool.
+        // Evaluate through the debuggerTool.
         this.context.evalInProgress = true;
         this.tool.eval(this.context.currentFrame, expression, onEvaluated);
     },
@@ -398,7 +398,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // xxxHonza: the entire logic related to eval result, should be refactored
+        // xxxHonza: the entire logic related to evaluate result, should be refactored
         // xxxHonza: see also ScriptPanel.onPopulateInfoTip()
         // The cache and grip objects should do most of the work automatically.
         // This method should be much simpler.
@@ -410,7 +410,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             // array with results and we want to iterate it).
             var results = gripObj.getValue();
 
-            // The number of results shuld be the same as the number of user expressions
+            // The number of results should be the same as the number of user expressions
             // in the panel.
             // xxxHonza: we should freeze the UI during the evaluation on the server side.
             if (results.length != self.watches.length)
@@ -614,6 +614,34 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         });
 
         return items;
+    },
+
+    /**
+     * getPopupObject is executed when Firebug's context menu is showing.
+     * The purpose of the method is returning clicked object, which is used for inspect actions.
+     * See {@FirebugChrome.onContextShowing} for more details.
+     */
+    getPopupObject: function(target)
+    {
+        Trace.sysout("watchPanel.getPopupObject; target:", target);
+
+        // Right clicking on watch panel label doesn't produce "Inspect in..." options.
+        // (returning undefined from this method avoids these options).
+        var memberLabel = Dom.getAncestorByClass(target, "memberLabelCell");
+        if (memberLabel)
+            return;
+
+        // Right clicking on a template with associated object (repObject)
+        // allows to inspect the object. This is the default behavior.
+        var repObject = BasePanel.getPopupObject.apply(this, arguments);
+        if (repObject)
+            return this.getObjectView(repObject);
+
+        // Some members displayed in the panel can be for client objects e.g. the scope
+        // list (i.e. JSD2 environments sent over RDP).
+        var row = Dom.getAncestorByClass(target, "memberRow");
+        if (row)
+            return this.getRealRowObject(row);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
