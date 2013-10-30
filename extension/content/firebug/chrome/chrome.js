@@ -1529,8 +1529,16 @@ var FirebugChrome =
 
         if (FBTrace.DBG_MENU)
         {
-            FBTrace.sysout("chrome.onContextShowing object:"+object+", rep: "+rep+
-                ", realObject: "+realObject+", realRep:"+realRep);
+            FBTrace.sysout("chrome.onContextShowing;", {
+                object: object,
+                rep: rep,
+                realObject: realObject,
+                realRep: realRep,
+                target: target,
+                chromeDoc: target.ownerDocument == document,
+                contextMenuObject: this.contextMenuObject,
+                panel: panel,
+            });
         }
 
         // 1. Add the custom menu items from the realRep

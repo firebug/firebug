@@ -177,9 +177,6 @@ Menu.createMenuSeparator = function(popup, item, before)
     if (!popup.firstChild)
         return;
 
-    if (FBTrace.DBG_MENU)
-        FBTrace.sysout("createMenuSeparator", {popup: popup, item: item, before: before});
-
     var menuItem = popup.ownerDocument.createElement("menuseparator");
     if (typeof item == "object" && item.id)
         menuItem.setAttribute("id", item.id);
