@@ -1996,8 +1996,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
             object = this.getDefaultSelection();
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+
-                object+((object==this.selection)?"==":"!=")+this.selection);
+        {
+            FBTrace.sysout("firebug.select; " + this.name + " forceUpdate: " + forceUpdate +
+                " " + object + ((object == this.selection) ? " == " : " != ") + this.selection,
+                this.selection);
+        }
 
         if (forceUpdate || object != this.selection)
         {

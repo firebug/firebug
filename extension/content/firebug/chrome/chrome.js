@@ -2043,8 +2043,10 @@ function onSelectedSidePanel(event)
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectedSidePanel name=" +
-            (sidePanel ? sidePanel.name : "undefined"));
+    {
+        var name = (sidePanel ? sidePanel.name : "undefined");
+        FBTrace.sysout("chrome.onSelectedSidePanel; name: " + name, sidePanel);
+    }
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)

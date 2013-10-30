@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/lib/trace",
     "firebug/chrome/firefox",
-    "firebug/firebug",
     "firebug/dom/toggleBranch",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -22,7 +22,7 @@ define([
     "firebug/dom/domBasePanel",
     "firebug/console/errorCopy",
 ],
-function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, Menu,
+function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Css, Arr, Menu,
     StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
     DOMBasePanel, ErrorCopy) {
 
@@ -72,6 +72,9 @@ function WatchPanel()
  * @panel Represents the Watch side panel available in the Script panel. This panel
  * allows variable inspection during debugging. It's possible to inspect existing
  * variables in the scope-chain as well as evaluating user expressions.
+ * 
+ * The panel displays properties of the current scope (usually a window or an iframe)
+ * when the debugger is resumed.
  */
 var BasePanel = DOMBasePanel.prototype;
 WatchPanel.prototype = Obj.extend(BasePanel,
@@ -152,8 +155,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     updateSelection: function(frame)
     {
-        // this method is called while the debugger has halted JS,
-        // so failures don't show up in FBS_ERRORS
         try
         {
             this.doUpdateSelection(frame);
@@ -195,11 +196,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Throw out the old state object.
         this.toggles = new ToggleBranch.ToggleBranch();
 
-        // Pre-expand the first top scope.
+        // Auto expand the first top scope.
         var scope = this.tree.provider.getTopScope(frame);
         this.tree.expandObject(scope);
 
-        // Asynchronously eval all user-expressions, but make sure it isn't
+        // Asynchronously evaluate all user-expressions, but make sure it isn't
         // already in-progress (to avoid infinite recursion).
         // xxxHonza: disable for now. Evaluation is done synchronously through
         // 'evalWatchesLocally'. It breaks the RDP, but since it's synchronous
@@ -243,14 +244,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Render the watch panel tree.
         this.tree.replace(this.panelNode, input);
 
-        // Pre-expand the global scope item.
+        // Auto expand the global scope item.
         var scope = this.context.getCurrentGlobal();
         this.tree.expandObject(scope);
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
         // TODO: Set the direction at the <body> to allow correct formatting of all relevant parts.
-        // This requires more adjustments related for rtl user agents.
+        // This requires more adjustments related for RTL user agents.
         var mainFrame = Firefox.getElementById("fbMainFrame");
         var cs = mainFrame.ownerDocument.defaultView.getComputedStyle(mainFrame);
         var watchRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
@@ -473,10 +474,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(context, event, packet)
     {
+        Trace.sysout("watchPanel.onStartDebugging;");
     },
 
     onStopDebugging: function(context, event, packet)
     {
+        Trace.sysout("watchPanel.onStopDebugging;");
+
         // Save state of the Watch panel for the next pause.
         this.tree.saveState(this.toggles);
 
