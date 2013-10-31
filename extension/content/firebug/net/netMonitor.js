@@ -18,12 +18,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/locale",
     "firebug/trace/traceListener",
-    "firebug/trace/traceModule",
-    "firebug/chrome/activableModule",
+    "firebug/trace/traceModule"
 ],
 function(ActivableModule, Obj, Firebug, Firefox, Options, Win, Str, Persist,
     NetHttpActivityObserver, HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger,
-    Events, Locale, TraceListener, TraceModule, ActivableModule) {
+    Events, Locale, TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants

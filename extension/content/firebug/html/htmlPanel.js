@@ -26,7 +26,6 @@ define([
     "firebug/css/cssModule",
     "firebug/css/cssReps",
     "firebug/chrome/module",
-    "firebug/chrome/panel",
     "firebug/js/breakpoint",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
@@ -36,7 +35,7 @@ define([
 ],
 function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu, Url, CSSModule,
-    CSSInfoTip, Module, Panel) {
+    CSSInfoTip, Module) {
 
 // ********************************************************************************************* //
 // Constants
