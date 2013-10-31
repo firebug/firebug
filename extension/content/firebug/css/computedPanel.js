@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -20,7 +21,7 @@ define([
     "firebug/css/cssReps",
     "firebug/css/loadHandler",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
+function(Panel, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Url, Arr, SourceLink, Menu,
     Options, Str, Persist, CSSModule, CSSInfoTip, LoadHandler) {
 
 "use strict";
@@ -56,7 +57,7 @@ catch (e)
 
 function CSSComputedPanel() {}
 
-CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
+CSSComputedPanel.prototype = Obj.extend(Panel,
 {
     template: domplate(
     {
@@ -407,7 +408,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         this.onClick = Obj.bind(this.onClick, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -420,21 +421,21 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
 
         Firebug.CSSModule.removeListener(this);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
     {
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -690,7 +691,7 @@ CSSComputedPanel.prototype = Obj.extend(Firebug.Panel,
     onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
     {
         // Force update, this causes updateSelection to be called.
-        // See {@link Firebug.Panel.select}
+        // See {@link Panel.select}
         this.selection = null;
     },
 

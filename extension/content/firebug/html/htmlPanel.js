@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -23,6 +25,7 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
+    "firebug/chrome/module",
     "firebug/debugger/breakpoints/breakpointGroup",
     "firebug/html/htmlEditor",
     "firebug/editor/editor",
@@ -31,9 +34,9 @@ define([
     "firebug/html/inspector",
     "firebug/html/layout"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
+function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, BreakpointGroup, HTMLEditor) {
+    Url, CSSModule, CSSInfoTip, Module, BreakpointGroup, HTMLEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -52,25 +55,25 @@ var KeyEvent = window.KeyEvent;
 
 // ********************************************************************************************* //
 
-Firebug.HTMLModule = Obj.extend(Firebug.Module,
+Firebug.HTMLModule = Obj.extend(Module,
 {
     dispatchName: "htmlModule",
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.connection.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
         context.mutationBreakpoints = new MutationBreakpointGroup(context);
     },
 
@@ -81,7 +84,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
+        Module.destroyContext.apply(this, arguments);
 
         context.mutationBreakpoints.store(context);
     },
@@ -105,7 +108,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = Obj.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = Obj.extend(Panel, HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {
@@ -293,15 +296,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     startEditingNode: function(node, box, editor, type)
     {
-        switch (type)
-        {
-            case "html":
-            case "xhtml":
-                this.startEditingHTMLNode(node, box, editor);
-                break;
-            default:
-                this.startEditingXMLNode(node, box, editor);
-        }
+        if (type === "html" || type === "xhtml")
+            this.startEditingHTMLNode(node, box, editor);
+        else
+            this.startEditingXMLNode(node, box, editor);
     },
 
     startEditingXMLNode: function(node, box, editor)
@@ -1402,6 +1400,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     name: "html",
     searchable: true,
+    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
     breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
@@ -1418,7 +1417,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onKeyPress = this.onKeyPress.bind(this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
         Firebug.CSSModule.addListener(this);
     },
 
@@ -1426,7 +1425,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         Persist.persistObjects(this, state);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
 
         delete this.embeddedBrowserParents;
         delete this.embeddedBrowserDocument;
@@ -1450,7 +1449,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -1467,7 +1466,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.ioBox;
         }
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -1734,6 +1733,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
+    shouldIgnoreIntermediateSearchFailure: function(value)
+    {
+        // An extension of the search text could still be a valid selector,
+        // so don't signal an error.
+        return true;
+    },
+
     getSearchOptionsMenuItems: function()
     {
         return [
@@ -1884,7 +1890,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 var type;
 
-                if (Xml.isElementHTML(node) || Xml.isElementXHTML(node))
+                if (Xml.isElementHTMLOrXHTML(node))
                     type = "HTML";
                 else if (Xml.isElementMathML(node))
                     type = "MathML";
@@ -2544,7 +2550,7 @@ Firebug.HTMLPanel.Editors = {
 
 function getEmptyElementTag(node)
 {
-    var isXhtml= Xml.isElementXHTML(node);
+    var isXhtml = Xml.isElementXHTML(node);
     if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else
@@ -2837,7 +2843,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.type = type;
 };
 
-Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
+Firebug.HTMLModule.BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 

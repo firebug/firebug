@@ -11,7 +11,9 @@ define([
     "firebug/lib/domplate",
     "firebug/debugger/script/scriptView",
     "arch/compilationunit",
+    "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
+    "firebug/chrome/rep",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/script/sourceFile",
@@ -28,9 +30,9 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/net/netUtils",
 ],
-function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
+function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit,
+    ActivablePanel, Menu, Rep, StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore,
+    Persist, BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
     BreakNotification, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
@@ -51,7 +53,7 @@ var Trace = FBTrace.to("DBG_SCRIPTPANEL");
  * This panel is using JSD2 API for debugging.
  */
 function ScriptPanel() {}
-var BasePanel = Firebug.ActivablePanel;
+var BasePanel = ActivablePanel;
 ScriptPanel.prototype = Obj.extend(BasePanel,
 /** @lends ScriptPanel */
 {
@@ -1433,7 +1435,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 // ********************************************************************************************* //
 // Breakpoint InfoTip Template
 
-var BreakpointInfoTip = domplate(Firebug.Rep,
+var BreakpointInfoTip = domplate(Rep,
 {
     tag:
         DIV("$expr"),

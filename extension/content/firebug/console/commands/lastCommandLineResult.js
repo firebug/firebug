@@ -2,18 +2,19 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/console/console",
     "firebug/console/commandLine",
     "firebug/lib/locale",
     "firebug/lib/object",
 ],
-function(Firebug, FBTrace, Console, CommandLine, Locale, Obj) {
+function(Firebug, Module, FBTrace, Console, CommandLine, Locale, Obj) {
 
 // ********************************************************************************************* //
 // CommandLine Listener
 
-var LastCommandLineResult = Obj.extend(Firebug.Module,
+var LastCommandLineResult = Obj.extend(Module,
 {
     dispatchName: "LastCommandLineResult",
 
@@ -22,14 +23,14 @@ var LastCommandLineResult = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         CommandLine.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         CommandLine.removeListener(this);
     },

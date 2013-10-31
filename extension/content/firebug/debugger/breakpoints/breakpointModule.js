@@ -4,6 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/firebug",
+    "firebug/chrome/panelActivation",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -13,7 +14,7 @@ define([
     "firebug/editor/editor",
     "firebug/console/autoCompleter",
 ],
-function(Obj, FBTrace, Firebug, Locale, Events, Dom, Arr, Menu, BreakpointStore) {
+function(Obj, FBTrace, Firebug, PanelActivation, Locale, Events, Dom, Arr, Menu, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -182,7 +183,7 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
             return;
 
         // If the script panels is disabled, BON can't be active.
-        if (!Firebug.PanelActivation.isPanelEnabled("script"))
+        if (!PanelActivation.isPanelEnabled("script"))
             armed = false;
 
         var panelBar = Firebug.chrome.$("fbPanelBar1");

@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/events",
 ],
-function(FBTrace, Obj, Arr, Events) {
+function(Module, FBTrace, Obj, Arr, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -32,7 +33,7 @@ catch (err)
  * xxxHonza: as soon as Fx 22 is the min for Firebug most of the methods can be removed.
  * The most important one will be the isPrivateBrowsing
  */
-var Privacy = Obj.extend(Firebug.Module,
+var Privacy = Obj.extend(Module,
 {
     initialize: function()
     {

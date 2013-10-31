@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/console/commandLine",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/events",
 ],
-function(Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
+function(Module, Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -21,14 +22,14 @@ function(Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
+Firebug.CommandLine.Popup = Obj.extend(Module,
 {
     dispatchName: "commandLinePopup",
     lastFocused : null,
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         this.setPopupBrowserStyle(Firebug.chrome);
 
@@ -45,7 +46,7 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     initContext: function(context)
     {
-        Firebug.Module.showContext.apply(this, arguments);
+        Module.showContext.apply(this, arguments);
 
         var show = Firebug.Options.get("alwaysShowCommandLine");
         if (show && !this.isVisible())

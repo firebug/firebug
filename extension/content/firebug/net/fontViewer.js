@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -17,8 +18,8 @@ define([
     "firebug/net/netUtils",
     "firebug/lib/options"
 ],
-function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,
-    NetUtils, Options) {
+function(Module, Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url,
+    Http, NetUtils, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -42,7 +43,7 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.FontViewerModel = Obj.extend(Firebug.Module,
+Firebug.FontViewerModel = Obj.extend(Module,
 {
     dispatchName: "fontViewer",
     contentTypes: contentTypes,

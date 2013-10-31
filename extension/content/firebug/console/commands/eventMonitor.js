@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/trace",
@@ -11,14 +12,14 @@ define([
     "firebug/chrome/reps",
     "firebug/chrome/menu",
 ],
-function(Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
+function(Module, Obj, Firebug, FBTrace, Events, Locale, Dom, Domplate, FirebugReps, Menu) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // EventMonitor Module
 
-var EventMonitor = Obj.extend(Firebug.Module,
+var EventMonitor = Obj.extend(Module,
 {
     dispatchName: "eventMonitor",
 
@@ -27,14 +28,14 @@ var EventMonitor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.registerUIListener(this);
     },
 
     shutdown: function()
     {
         Firebug.unregisterUIListener(this);
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     destroyContext: function(context, persistedState)

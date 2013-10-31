@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Dom, FBTrace) {
+function(Module, Obj, Firebug, Domplate, Locale, Events, Dom, FBTrace) {
 
 "use strict";
 
@@ -22,7 +23,7 @@ const infoTipMargin = 10;
 
 var {domplate, DIV} = Domplate;
 
-Firebug.InfoTip = Obj.extend(Firebug.Module,
+Firebug.InfoTip = Obj.extend(Module,
 {
     dispatchName: "infoTip",
 

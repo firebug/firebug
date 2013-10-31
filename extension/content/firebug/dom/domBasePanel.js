@@ -24,6 +24,7 @@ define([
     "firebug/dom/domMemberProvider",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
+    "firebug/chrome/panel",
     "firebug/editor/editor",
     "firebug/debugger/breakpoints/breakpointModule",
     "firebug/chrome/searchBox",
@@ -32,7 +33,7 @@ define([
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps) {
+    DOMMemberProvider, DOMEditor, DOMReps, Panel) {
 
 "use strict";
 
@@ -51,7 +52,7 @@ Firebug.DOMBasePanel = function()
 }
 
 Firebug.DOMBasePanel.ToolboxPlate = DOMReps.ToolboxPlate;
-Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 /** @lends Firebug.DOMBasePanel */
 {
     tag: DOMReps.DirTablePlate.tableTag,
@@ -68,17 +69,17 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         this.pathIndex = -1;
         this.toggles = new ToggleBranch.ToggleBranch();
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(node)
     {
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -100,7 +101,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.destroy; state:", state);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     show: function(state)
@@ -847,7 +848,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     editValue = "this." + getRowName(row); // XXX "this." doesn't actually work
             }
 
-            Firebug.Editor.startEditing(row, editValue);
+            var selectionData = null;
+            if (type === "string")
+                selectionData = {start: 1, end: editValue.length-1};
+
+            Firebug.Editor.startEditing(row, editValue, null, selectionData);
         }
     },
 

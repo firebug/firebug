@@ -11,6 +11,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/options",
     "firebug/chrome/panelNotification",
+    "firebug/chrome/activableModule",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
@@ -19,7 +20,8 @@ define([
     "firebug/console/commands/eventMonitor",
     "firebug/console/performanceTiming",
 ],
-function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options, PanelNotification) {
+function(Obj, Firebug, Firefox, Events, Locale, Win, Search, Xml, Options,
+    PanelNotification, ActivableModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -155,7 +157,7 @@ Firebug.ConsoleBase =
  * @module Represents module for the Console panel. Responsible e.g. for handling
  * user actions related to Console panel filter.
  */
-var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = Obj.extend(ActivableModule, Firebug.ConsoleBase);
 Firebug.Console = Obj.extend(ActivableConsole,
 /** @lends Firebug.Console */
 {
@@ -182,7 +184,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         // Initialize log limit.
         this.updateMaxLimit();
 
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
     },
@@ -208,7 +210,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     shutdown: function()
     {
         Firebug.connection.removeListener(this);
-        Firebug.ActivableModule.shutdown.apply(this, arguments);
+        ActivableModule.shutdown.apply(this, arguments);
     },
 
     initContext: function(context, persistedState)
@@ -216,7 +218,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.initContext");
 
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
 
         this.attachConsoleToWindows(context);
     },
@@ -274,7 +276,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         Firebug.chrome.setGlobalAttribute("cmd_firebug_clearConsole", "disabled", !context);
 
-        Firebug.ActivableModule.showContext.apply(this, arguments);
+        ActivableModule.showContext.apply(this, arguments);
     },
 
     updateOption: function(name, value)

@@ -3,11 +3,12 @@
 define([
     "firebug/lib/trace",
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/remoting/debuggerClientModule",
     "firebug/debugger/breakpoints/breakpoint",
 ],
-function(FBTrace, Firebug, Obj, DebuggerClientModule, Breakpoint) {
+function(FBTrace, Firebug, Module, Obj, DebuggerClientModule, Breakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -41,7 +42,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  *    when stored into breakpoints.json so, the file contains numbers expected
  *    by the user.
  */
-var BreakpointStore = Obj.extend(Firebug.Module,
+var BreakpointStore = Obj.extend(Module,
 /** @lends BreakpointStore */
 {
     dispatchName: "BreakpointStore",
@@ -62,7 +63,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         // Restore breakpoints from a file. This should be done only if it's necessary
         // (i.e. when the Debugger tool is actually activated.
@@ -74,7 +75,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         // BreakpointStore object must be registered as a {@DebuggerClientModule} listener
         // after {@DebuggerTool} otherwise breakpoint initialization doesn't work
@@ -87,7 +88,7 @@ var BreakpointStore = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         DebuggerClientModule.removeListener(this);
 
