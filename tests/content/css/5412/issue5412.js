@@ -12,23 +12,28 @@ function runTest()
         FBTest.openFirebug();
         var panel = FBTest.selectPanel("stylesheet");
 
-        FBTest.selectPanelLocationByName(panel, "issue5412.html");
-
-        var selectors = panel.panelNode.getElementsByClassName("cssSelector");
-        if (!FBTest.compare(1, selectors.length, "There must be one CSS selector"))
+        var editor = null;
+        function selectLocation(callback, url, originalSelector)
         {
-            done();
-            return;
-        }
+            FBTest.selectPanelLocationByName(panel, url);
 
-        FBTest.synthesizeMouse(selectors.item(0));
-        var editor = panel.panelNode.querySelector(".textEditorInner");
-        if (!FBTest.ok(editor, "Editor must be available now"))
-        {
-            done();
-            return;
+            var selectors = panel.panelNode.getElementsByClassName("cssSelector");
+            if (!FBTest.compare(1, selectors.length, "There must be one CSS selector"))
+            {
+                done();
+                return;
+            }
+
+            FBTest.synthesizeMouse(selectors.item(0));
+            editor = panel.panelNode.querySelector(".textEditorInner");
+            if (!FBTest.ok(editor, "Editor must be available now"))
+            {
+                done();
+                return;
+            }
+            FBTest.compare(originalSelector, editor.value, "The editor must contain the original value");
+            callback();
         }
-        FBTest.compare("#element1", editor.value, "The editor must contain the original value");
 
         function test(callback, input, output)
         {
@@ -40,6 +45,7 @@ function runTest()
         }
 
         var tasks = new FBTest.TaskList();
+        tasks.push(selectLocation, "issue5412.html", "#element1");
         tasks.push(test, "#", "#content");
         tasks.push(test, ".", ".a");
         tasks.push(test, "s", "span");
@@ -56,6 +62,9 @@ function runTest()
         tasks.push(test, ".a[data-test=test].", ".a[data-test=test].second");
         tasks.push(test, ":", ":hover");
         tasks.push(test, "a:hover::a", "a:hover::after");
+        tasks.push(test, "#frameel", "#frameel");
+        tasks.push(selectLocation, "frame.html", "div");
+        tasks.push(test, "#frameel", "#frameelement");
 
         tasks.run(function() {
             FBTest.synthesizeKey("VK_ESCAPE", null, win);
