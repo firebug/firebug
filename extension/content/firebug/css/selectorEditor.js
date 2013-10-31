@@ -7,8 +7,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/chrome/window",
 ],
-function(Firebug, Domplate, Locale, Css, Str, Arr) {
+function(Firebug, Domplate, Locale, Css, Str, Arr, Win) {
 
 "use strict";
 
@@ -24,6 +25,9 @@ function SelectorEditor() {}
 
 SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
 {
+    // 'null' means every document in the context.
+    doc: null,
+
     getAutoCompleteRange: function(value, offset)
     {
         // Find the word part of an identifier.
@@ -87,8 +91,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             includeTagNames = false;
 
         var ret = [];
-
-        if (includeTagNames || includeIds || includeClasses)
+        var traverseDom = function(doc)
         {
             // Traverse the DOM to get the used ids/classes/tag names that
             // are relevant as continuations.
@@ -96,7 +99,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             // actually used hides annoying things like 'b'/'i' when they
             // are not used, and works in other contexts than HTML.)
             // This isn't actually that bad, performance-wise.
-            var doc = context.window.document, els;
+            var els = null;
             if (preExpr && " >+~".indexOf(preExpr.slice(-1)) === -1)
             {
                 try
@@ -132,7 +135,6 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
                     if (e.id)
                         ids.push(e.id);
                 });
-                ids = Arr.sortUnique(ids);
                 ret.push.apply(ret, ids.map(function(cl)
                 {
                     return "#" + cl;
@@ -151,11 +153,25 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
                         classes.push.apply(classes, e.classList);
                     }
                 });
-                classes = Arr.sortUnique(classes);
                 ret.push.apply(ret, classes.map(function(cl)
                 {
                     return "." + cl;
                 }));
+            }
+        };
+
+        if (includeTagNames || includeIds || includeClasses)
+        {
+            if (this.doc)
+            {
+                traverseDom(this.doc);
+            }
+            else
+            {
+                Win.iterateWindows(context.window, function(win)
+                {
+                    traverseDom(win.document);
+                });
             }
         }
 
@@ -208,7 +224,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
         if (ret.indexOf(":hover") !== -1)
             out.suggestion = ":hover";
 
-        return ret.sort();
+        return Arr.sortUnique(ret);
     },
 
     getAutoCompletePropSeparator: function(range, expr, prefixOf)
