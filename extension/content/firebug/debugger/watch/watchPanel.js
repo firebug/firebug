@@ -72,9 +72,13 @@ function WatchPanel()
  * @panel Represents the Watch side panel available in the Script panel. This panel
  * allows variable inspection during debugging. It's possible to inspect existing
  * variables in the scope-chain as well as evaluating user expressions.
- * 
+ *
+ * The content of this panel is synchronized with the {@ScriptPanel} through
+ * {@FirebugChrome.select} method. This panel is using the current {@StackFrame}
+ * as the selection when debugger is paused.
+ *
  * The panel displays properties of the current scope (usually a window or an iframe)
- * when the debugger is resumed.
+ * when the debugger is resumed - the selection is the global object in such case.
  */
 var BasePanel = DOMBasePanel.prototype;
 WatchPanel.prototype = Obj.extend(BasePanel,
@@ -148,9 +152,22 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             this.watches = state.watches;
     },
 
+    /**
+     * Executed by the user from within the Panel options menu of through
+     * the panel context menu.
+     */
     refresh: function()
     {
-        this.rebuild(true);
+        Trace.sysout("watchPanel.refresh;");
+
+        // Refresh frames (if they are currently displayed) since some bindings (arguments,
+        // local variables) could have changed (e.g. through evaluations on the command line).
+        // The panel will rebuild asynchronously.
+        // If a default global scope is displayed just rebuild now.
+        if (this.selection instanceof StackFrame)
+            this.tool.refreshFrames();
+        else
+            this.rebuild(true);
     },
 
     updateSelection: function(frame)
@@ -167,7 +184,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     doUpdateSelection: function(frame)
     {
-        Trace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
+        Trace.sysout("watchPanel.doUpdateSelection; frame: " + frame, frame);
 
         // When the debugger is resumed, properties of the current global (top level
         // window or an iframe) and user watch expressions are displayed.
@@ -485,10 +502,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.tree.saveState(this.toggles);
 
         // Debugger is resumed so, don't forget to remove the stopped frame.
-        this.selection = null;
+        this.selection = this.getDefaultSelection();
 
         // Update the panel content.
-        this.showEmptyMembers();
+        this.updateSelection(this.selection);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

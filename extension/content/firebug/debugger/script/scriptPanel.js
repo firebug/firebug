@@ -456,8 +456,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     framesadded: function(stackTrace)
     {
+        Trace.sysout("scriptPanel.framesadded;", stackTrace);
+
         // Invoke breadcrumbs update.
         Firebug.chrome.syncStatusPath();
+
+        // This is how the selected side panel is synchronized (e.g. the Watch panel).
+        Firebug.chrome.select(this.context.currentFrame, "script");
     },
 
     framescleared: function()
@@ -1212,9 +1217,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
 
-            // This is how the Watch panel is synchronized.
-            Firebug.chrome.select(this.context.currentFrame, "script", null, true);
-            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
+            // This is how the selected side panel is synchronized (e.g. the Watch panel).
+            Firebug.chrome.select(this.context.currentFrame, "script");
+
+            // issue 3463 and 4213
+            Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();
             //this.updateSelection(this.context.currentFrame);
 
@@ -1237,12 +1244,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         try
         {
             var chrome = Firebug.chrome;
-
-            /*if (this.selectedSourceBox && this.selectedSourceBox.breakCauseBox)
-            {
-                this.selectedSourceBox.breakCauseBox.hide();
-                delete this.selectedSourceBox.breakCauseBox;
-            }*/
 
             this.selection = null;
             this.syncCommands(this.context);
@@ -1352,7 +1353,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             },
             function failed(result, context)
             {
-                Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
+                // We are mostly not interested in this evaluation error. It just polutes
+                // the tracing console.
+                // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
 
                 self.infoTipExpr = "";
             }

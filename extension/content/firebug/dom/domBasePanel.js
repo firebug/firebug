@@ -385,7 +385,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             Menu.optionMenu("ShowEnumerableProperties",
                 "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
             "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true),
+            {label: "Refresh", command: Obj.bindFixed(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"}
         ];
     },
@@ -499,7 +499,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             {
                 label: "Refresh",
                 tooltiptext: "panel.tip.Refresh",
-                command: Obj.bindFixed(this.rebuild, this, true)
+                command: Obj.bindFixed(this.rebuild, this)
             }
         );
 
