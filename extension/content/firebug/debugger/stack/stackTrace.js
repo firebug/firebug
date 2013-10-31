@@ -48,6 +48,12 @@ StackTrace.prototype =
     {
         if (this.frames.length > 0)
             return this.frames[0].toSourceLink();
+    },
+
+    getTopFrame: function()
+    {
+        if (this.frames.length > 0)
+            return this.frames[0];
     }
 };
 

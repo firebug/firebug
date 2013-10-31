@@ -39,7 +39,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * Panel location is an instance of StackTrace object.
  * Panel selection is an instance of StackFrame object.
  *
- * The content of this panel is synced with ThreadClient's stack frame cache using
+ * The content of this panel is synchronized with ThreadClient's stack frame cache using
  * 'framesadded' and 'framescleared' events. These events are re-sent from {@DebuggerTool},
  * which is registered ThreadClient's listener. 
  */
