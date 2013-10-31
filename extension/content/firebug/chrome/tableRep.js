@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/locale",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/array",
     "firebug/chrome/reps",
 ],
-function(Firebug, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
+function(Firebug, Rep, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
 
 "use strict";
 
@@ -36,7 +37,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * used within other panels too. Various complex as well as simple generic objects and arrays
  * are supported.
  */
-var TableRep = domplate(Firebug.Rep,
+var TableRep = domplate(Rep,
 /** @lends TableRep */
 {
     className: "table",

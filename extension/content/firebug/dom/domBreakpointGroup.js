@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -14,7 +15,7 @@ define([
     "firebug/lib/persist",
     "firebug/debugger/breakpoints/breakpointGroup",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
+function(Rep, Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
     BreakpointGroup) {
 
 // ********************************************************************************************* //
@@ -190,7 +191,7 @@ Breakpoint.prototype =
 
 // ********************************************************************************************* //
 
-var BreakpointRep = domplate(Firebug.Rep,
+var BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 

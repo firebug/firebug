@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -138,6 +142,7 @@ function isPrimitive(obj)
 }
 
 // ********************************************************************************************* //
+// Registration
 
 return Wrapper;
 

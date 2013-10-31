@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/rep",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -24,8 +25,8 @@ define([
     "firebug/cookies/editCookie",
     "firebug/cookies/cookieClipboard",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr, System,
-    BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
+function(Rep, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
+    System, BaseObserver, MenuUtils, CookieUtils, Cookie, Breakpoints, CookieEvents,
     CookiePermissions, EditCookie, CookieClipboard) {
 
 // ********************************************************************************************* //
@@ -50,7 +51,7 @@ var CookieReps = {};
 /**
  * @domplate Basic template for Cookies panel UI.
  */
-CookieReps.Rep = domplate(Firebug.Rep,
+CookieReps.Rep = domplate(Rep,
 {
     getContextMenuItems: function(cookie, target, context)
     {
@@ -975,7 +976,7 @@ CookieReps.CookieCleared = domplate(CookieReps.Rep,
 });
 
 
-CookieReps.SizeInfoTip = domplate(Firebug.Rep,
+CookieReps.SizeInfoTip = domplate(Rep,
 {
     tag:
         TABLE({"class": "sizeInfoTip", "id": "cookiesSizeInfoTip", role:"presentation"},

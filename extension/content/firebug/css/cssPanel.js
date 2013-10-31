@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -33,8 +34,8 @@ define([
     "firebug/chrome/searchBox",
     "firebug/css/cssPanelMutationObserver",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom, Win,
-    Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
+function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
+    Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
     SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, SourceEditor) {
 
 // ********************************************************************************************* //
@@ -357,7 +358,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
  * See more: https://getfirebug.com/wiki/index.php/CSS_Panel
  */
 Firebug.CSSStyleSheetPanel = function() {};
-Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 /** @lends Firebug.CSSStyleSheetPanel */
 {
     name: "stylesheet",
@@ -391,7 +392,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.onMouseUp = Obj.bind(this.onMouseUp, this);
         this.onClick = Obj.bind(this.onClick, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
 
         // Create an updater for asynchronous update (watching embedded iframe loads).
         var callback = this.updateDefaultLocation.bind(this);
@@ -409,7 +410,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.updater)
             this.updater.destroy();
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -418,7 +419,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Events.addEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -427,7 +428,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Events.removeEventListener(this.panelNode, "mouseup", this.onMouseUp, false);
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)

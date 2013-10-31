@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/firebug",
@@ -16,8 +18,8 @@ define([
     "firebug/lib/string",
     "firebug/console/profilerEngine",
 ],
-function(Obj, FBTrace, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
-    Css, Dom, Str, ProfilerEngine) {
+function(Module, Rep, Obj, FBTrace, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
+    StackFrame, Events, Css, Dom, Str, ProfilerEngine) {
 
 // ********************************************************************************************* //
 // Constants
@@ -34,7 +36,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Profiler
 
-var Profiler = Obj.extend(Firebug.Module,
+var Profiler = Obj.extend(Module,
 {
     dispatchName: "profiler",
 
@@ -460,7 +462,7 @@ Profiler.ProfileTable = domplate(
 
 // ********************************************************************************************* //
 
-Profiler.ProfileCaption = domplate(Firebug.Rep,
+Profiler.ProfileCaption = domplate(Rep,
 {
     tag:
         SPAN({"class": "profileTitle", "role": "status"},
@@ -476,7 +478,7 @@ Profiler.ProfileCaption = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Profiler.ProfileCall = domplate(Firebug.Rep,
+Profiler.ProfileCall = domplate(Rep,
 {
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},

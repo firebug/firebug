@@ -5,6 +5,8 @@ define([
 ],
 function(FBTrace) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -80,23 +82,23 @@ Persist.restoreSelection = function(panel, panelState)
     if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
 
-    if (needRetry)
+    function overrideDefaultWithPersistedSelection()
     {
-        function overrideDefaultWithPersistedSelection()
+        if (panel.selection == panel.getDefaultSelection() && panelState.persistedSelection)
         {
-            if (panel.selection == panel.getDefaultSelection() && panelState.persistedSelection)
-            {
-                var selection = panelState.persistedSelection(panel.context);
-                if (selection)
-                    panel.select(selection);
-            }
-
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+
-                    " panel.location: "+panel.location+" panel.selection: "+panel.selection+
-                    " panelState:", panelState);
+            var selection = panelState.persistedSelection(panel.context);
+            if (selection)
+                panel.select(selection);
         }
 
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+
+                " panel.location: "+panel.location+" panel.selection: "+panel.selection+
+                " panelState:", panelState);
+    }
+
+    if (needRetry)
+    {
         // If we couldn't restore the selection, wait a bit and try again
         panel.context.setTimeout(overrideDefaultWithPersistedSelection,
             overrideDefaultsWithPersistedValuesTimeout);

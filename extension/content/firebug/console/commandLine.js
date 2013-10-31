@@ -3,6 +3,7 @@
 /*global FBTrace:true, Components:true, define:true, KeyEvent:true */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/reps",
@@ -26,7 +27,7 @@ define([
     "firebug/console/commands/commandLineHelp",
     "firebug/console/commands/commandLineInclude",
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
+function(Module, Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
     Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI,
     DebuggerLib) {
 
@@ -45,7 +46,7 @@ const commandPrefix = ">>> ";
 /**
  * @module
  */
-Firebug.CommandLine = Obj.extend(Firebug.Module,
+Firebug.CommandLine = Obj.extend(Module,
 /** @lends Firebug.CommandLine */
 {
     dispatchName: "commandLine",
@@ -468,7 +469,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();

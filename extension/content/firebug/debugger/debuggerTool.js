@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/eventSource",
     "firebug/lib/trace",
     "firebug/lib/array",
     "firebug/lib/tool",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
 ],
-function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
+function (Obj, Firebug, EventSource, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
     DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib) {
 
 // ********************************************************************************************* //
@@ -39,7 +40,7 @@ function DebuggerTool(context)
  *
  * xxxHonza: It should be derived from Tool base class.
  */
-DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
+DebuggerTool.prototype = Obj.extend(new EventSource(),
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",

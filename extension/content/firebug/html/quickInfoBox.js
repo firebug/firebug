@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/chrome/firefox",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -11,7 +12,7 @@ define([
     "firebug/lib/object",
     "firebug/lib/css"
 ],
-function(Firebug, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
+function(Firebug, Module, Firefox, Locale, Events, Dom, Options, Domplate, Obj, Css) {
 
 "use strict"
 
@@ -69,7 +70,7 @@ var rowTag =
  * Displays the most important DOM properties and computed CSS styles for the currently
  * inspected element. It can be freely positioned at the monitor via drag & drop.
  */
-var QuickInfoBox = Obj.extend(Firebug.Module,
+var QuickInfoBox = Obj.extend(Module,
 /** @lends QuickInfoBox */
 {
     boxEnabled: undefined,
@@ -84,7 +85,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.qiPanel = Firebug.chrome.$("fbQuickInfoPanel");
 
@@ -105,7 +106,7 @@ var QuickInfoBox = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         var frame = this.getContentFrame();
         Events.removeEventListener(frame, "load", this.onContentLoadedListener, true);

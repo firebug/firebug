@@ -1,11 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/chrome/privacy",
 ],
-function(FBTrace, Obj, Privacy) {
+function(Module, FBTrace, Obj, Privacy) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,7 +23,7 @@ var dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIPr
  * @class Represents an internal Firebug annotation service. This service is used to
  * annotate sites with an info whether Firebug should be activated for them or not.
  */
-var Annotations = Obj.extend(Firebug.Module,
+var Annotations = Obj.extend(Module,
 {
     annotations: [],
 

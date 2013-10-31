@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/options",
     "firebug/firefox/browserOverlayLib",
 ],
-function(Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
+function(Module, Obj, Firebug, Firefox, Locale, Events, Dom, Options, BrowserOverlayLib) {
 
 "use strict";
 
@@ -32,14 +33,14 @@ var Ci = Components.interfaces;
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = Obj.extend(Firebug.Module,
+Firebug.StartButton = Obj.extend(Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",
 
     initializeUI: function()
     {
-        Firebug.Module.initializeUI.apply(this, arguments);
+        Module.initializeUI.apply(this, arguments);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("StartButton.initializeUI;");

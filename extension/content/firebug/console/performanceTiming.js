@@ -2,6 +2,8 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/object",
@@ -12,7 +14,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/css",
 ],
-function(Firebug, FBTrace, Domplate, Obj, Locale, Dom, Events, Str, Wrapper, Css) {
+function(Firebug, Module, Rep, FBTrace, Domplate, Obj, Locale, Dom, Events, Str, Wrapper, Css) {
 
 "use strict";
 
@@ -57,17 +59,17 @@ var {domplate, TABLE, THEAD, TH, TBODY, TR, TD, DIV, SPAN, FOR} = Domplate;
 // ********************************************************************************************* //
 // Module
 
-var PerformanceTimingModule = Obj.extend(Firebug.Module,
+var PerformanceTimingModule = Obj.extend(Module,
 {
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.Console.addListener(ConsoleListener);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.Console.removeListener(ConsoleListener);
     },
 });
@@ -78,7 +80,7 @@ var PerformanceTimingModule = Obj.extend(Firebug.Module,
 /**
  * This template is used to render the timing waterfall graph.
  */
-var PerformanceTimingRep = domplate(Firebug.Rep,
+var PerformanceTimingRep = domplate(Rep,
 /** @lends PerformanceTimingRep */
 {
     className: "perfTiming",
@@ -154,7 +156,7 @@ var PerformanceTimingRep = domplate(Firebug.Rep,
  * Hovering mouse over the waterfall graph shows an infotip. This template is responsible
  * for rendering its content.
  */
-var PerfInfoTip = domplate(Firebug.Rep,
+var PerfInfoTip = domplate(Rep,
 /** @lends PerfInfoTip */
 {
     tableTag:
