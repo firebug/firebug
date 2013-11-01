@@ -100,11 +100,12 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             // are not used, and works in other contexts than HTML.)
             // This isn't actually that bad, performance-wise.
             var els = null;
-            if (preExpr && " >+~".indexOf(preExpr.slice(-1)) === -1)
+            if (preExpr)
             {
                 try
                 {
-                    var preSelector = preExpr.split(",").reverse()[0];
+                    var hasCombinator = (" >+~".indexOf(preExpr.slice(-1)) !== -1);
+                    var preSelector = preExpr.split(",").reverse()[0] + (hasCombinator ? "*" : "");
                     els = doc.querySelectorAll(preSelector);
                 }
                 catch (exc)
