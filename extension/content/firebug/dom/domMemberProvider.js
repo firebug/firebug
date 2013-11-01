@@ -4,19 +4,22 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
     "firebug/lib/wrapper",
     "firebug/lib/dom",
-    "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/console/closureInspector",
     "firebug/chrome/reps",
 ],
-function(Firebug, Obj, Arr, Wrapper, Dom, FBTrace, Locale, ClosureInspector, FirebugReps) {
+function(Firebug, FBTrace, Obj, Arr, Wrapper, Dom, Locale, ClosureInspector, FirebugReps) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Member Provider
@@ -356,6 +359,7 @@ DOMMemberProvider.prototype =
 
             var breakpoints = this.context.dom.breakpoints;
             var bp = breakpoints.findBreakpoint(object, name);
+
             if (bp)
             {
                 member.breakpoint = true;

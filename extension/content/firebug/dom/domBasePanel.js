@@ -394,7 +394,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     getContextMenuItems: function(object, target)
     {
-        Trace.sysout("dom.getContextMenuItems;", object);
+        Trace.sysout("dom.getContextMenuItems; " + object, object);
 
         var row = Dom.getAncestorByClass(target, "memberRow");
 
@@ -483,13 +483,16 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
             if (!isDomMemeber && member && member.breakable)
             {
+                var bps = this.context.dom.breakpoints;
+                var hasBreakpoint = bps.findBreakpoint(rowObject, rowName);
+
                 items.push(
                     "-",
                     {
                         label: "dom.label.breakOnPropertyChange",
                         tooltiptext: "dom.tip.Break_On_Property_Change",
                         type: "checkbox",
-                        checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
+                        checked: hasBreakpoint,
                         command: Obj.bindFixed(this.breakOnProperty, this, row)
                     }
                 );
@@ -530,6 +533,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     rebuild: function(update, scrollTop)
     {
+        Trace.sysout("domBasePanel.rebuild; " + this.selection, this.selection);
+
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
         var members = this.getMembers(this.selection, 0);
@@ -981,6 +986,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             return;
 
         // Create new or remove an existing breakpoint.
+        // xxxHonza: This action can be executed from within the DOM side panel
+        // in which case we need to ensure that the breakpoint column in the DOM
+        // main panel is properly updated.
         var breakpoints = this.context.dom.breakpoints;
         var bp = breakpoints.findBreakpoint(object, name);
         if (bp)
