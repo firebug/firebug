@@ -211,7 +211,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var items = this.getContextMenuItems();
+        var items = this.editor.getContextMenuItems();
         Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)

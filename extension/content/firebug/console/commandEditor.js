@@ -153,25 +153,13 @@ Firebug.CommandEditor = Obj.extend(Module,
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var items = Firebug.CommandEditor.getContextMenuItems();
+        var items = Firebug.CommandEditor.editor.getContextMenuItems();
         Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
             return;
 
         popup.openPopupAtScreen(event.screenX, event.screenY, true);
-    },
-
-    getContextMenuItems: function()
-    {
-        var items = [];
-        items.push({label: Locale.$STR("Cut"), commandID: "cmd_cut"});
-        items.push({label: Locale.$STR("Copy"), commandID: "cmd_copy"});
-        items.push({label: Locale.$STR("Paste"), commandID: "cmd_paste"});
-        items.push({label: Locale.$STR("Delete"), commandID: "cmd_delete"});
-        items.push("-");
-        items.push({label: Locale.$STR("SelectAll"), commandID: "cmd_selectAll"});
-        return items;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
