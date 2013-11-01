@@ -1017,7 +1017,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.toggleBreakpoint; " + line);
 
         var hasBreakpoint = BreakpointStore.hasBreakpoint(this.getCurrentURL(), line);
-        if (hasBreakpoint)
+        if (hasBreakpoint) {
             BreakpointStore.removeBreakpoint(this.getCurrentURL(), line);
             if (this.scriptView.editor.debugLocation == line) 
                 this.scriptView.setDebugLocation(line);
