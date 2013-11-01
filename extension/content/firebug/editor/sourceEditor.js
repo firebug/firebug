@@ -576,9 +576,6 @@ SourceEditor.prototype =
         Trace.sysout("sourceEditor.setDebugLocation; line: " + line +
             ", this.debugLocation: " + this.debugLocation);
 
-        if (this.debugLocation == line)
-            return;
-
         if (this.debugLocation != -1)
         {
             var handle = this.editorObject.getLineHandle(this.debugLocation);

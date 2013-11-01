@@ -806,6 +806,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         // Remove breakpoint from the UI.
         this.scriptView.removeBreakpoint(bp);
+        if (this.scriptView.editor.debugLocation == bp.lineNo)
+            this.scriptView.setDebugLocation(bp.lineNo);
     },
 
     onBreakpointEnabled: function(context, bp, bpClient)
@@ -1017,6 +1019,9 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var hasBreakpoint = BreakpointStore.hasBreakpoint(this.getCurrentURL(), line);
         if (hasBreakpoint)
             BreakpointStore.removeBreakpoint(this.getCurrentURL(), line);
+            if (this.scriptView.editor.debugLocation == line) 
+                this.scriptView.setDebugLocation(line);
+        }
         else
             this.scriptView.initializeBreakpoint(line);
     },

@@ -524,7 +524,7 @@ ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
             else if (Events.isShiftClick(e))
                 this.dispatch("disableBreakpoint", [event.lineNo, e]);
             else
-                this.toggleBreakpoint(event.lineNo);
+                this.dispatch("toggleBreakpoint", [event.lineNo, e]);
         }
     },
 
