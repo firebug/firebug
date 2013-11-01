@@ -1956,7 +1956,8 @@ function propChainBuildComplete(out, context, tempExpr, result)
             {
                 done(result);
             },
-            function failed(result, context) { }
+            function failed(result, context) {},
+            {noStateChange: true}
         );
     }
     else
@@ -2153,7 +2154,8 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     propChainBuildComplete(out, context, tempExpr, result);
                 }
             },
-            function failed(result, context) { }
+            function failed(result, context) {},
+            {noStateChange: true}
         );
     }
 }
