@@ -476,15 +476,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
         // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
         // However, the built-in actor doesn't support .% syntax.
-        // Do not forget to pass |noStateChange == true| into the evaluate() method, to make sure
-        // the watch panel is not updated by evaluation in the command line. It would cause
-        // infinite loop. See {@CommandLine.evaluate} for more details.
+        // Pass |noStateChange == true| to avoid infinite loops.
         for (var i=0; i<this.watches.length; i++)
         {
             var watch = this.watches[i];
 
             CommandLine.evaluate(watch.expr, this.context, null, null,
-                onSuccess.bind(this, watch), onFailure.bind(this, watch), true);
+                onSuccess.bind(this, watch), onFailure.bind(this, watch),
+                {noStateChange: true});
         }
     },
 

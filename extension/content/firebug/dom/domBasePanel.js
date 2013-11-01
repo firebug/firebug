@@ -934,14 +934,14 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         if (object && !(object instanceof StackFrame) && !(typeof(object) === "function"))
         {
             CommandLine.evaluate(value, this.context, object, this.context.getCurrentGlobal(),
-                success, failure, true);
+                success, failure, {noStateChange: true});
         }
         else if (this.context.stopped)
         {
             try
             {
                 CommandLine.evaluate(name + "=" + value, this.context, null,
-                    null, null, null, true);
+                    null, null, null, {noStateChange: true});
             }
             catch (exc)
             {

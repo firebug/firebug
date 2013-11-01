@@ -1362,10 +1362,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         }
 
         // If the evaluate fails, then we report an error and don't show the infotip.
-        // The last parameter - noStateChange is set to true, so panels are not updated.
-        // It should not be necessary when evaluating an expression for a tooltip.
         CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
-            success, failure, true);
+            success, failure, {noStateChange: true});
 
         return (this.infoTipExpr == expr);
     },
