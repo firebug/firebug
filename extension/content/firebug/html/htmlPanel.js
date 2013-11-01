@@ -24,6 +24,7 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/url",
     "firebug/css/cssModule",
+    "firebug/css/selectorEditor",
     "firebug/css/cssReps",
     "firebug/chrome/module",
     "firebug/js/breakpoint",
@@ -35,7 +36,7 @@ define([
 ],
 function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu, Url, CSSModule,
-    CSSInfoTip, Module) {
+    CSSSelectorEditor, CSSInfoTip, Module) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1734,9 +1735,24 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     shouldIgnoreIntermediateSearchFailure: function(value)
     {
-        // An extension of the search text could still be a valid selector,
-        // so don't signal an error.
-        return true;
+        // Ignore failures for values that, according to the auto-completion system,
+        // can be extended into valid selectors, or that are obviously incomplete
+        // selectors.
+        var editor = new CSSSelectorEditor();
+        var range = editor.getAutoCompleteRange(value, value.length);
+        var preExpr = value.slice(0, range.start);
+        var expr = value.slice(range.start);
+
+        if (preExpr.lastIndexOf("[") > preExpr.lastIndexOf("]"))
+            return true;
+        if (preExpr.lastIndexOf("(") > preExpr.lastIndexOf(")"))
+            return true;
+
+        var list = editor.getAutoCompleteList(preExpr, expr, "", range, false, this.context, {});
+        return list && list.some(function(x)
+        {
+            return x.startsWith(expr);
+        });
     },
 
     getSearchOptionsMenuItems: function()

@@ -8,6 +8,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/chrome/window",
+    "firebug/editor/editor",
 ],
 function(Firebug, Domplate, Locale, Css, Str, Arr, Win) {
 
