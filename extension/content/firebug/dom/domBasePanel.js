@@ -394,7 +394,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     getContextMenuItems: function(object, target)
     {
-        Trace.sysout("dom.getContextMenuItems; " + object, object);
+        Trace.sysout("dom.getContextMenuItems;");
 
         var row = Dom.getAncestorByClass(target, "memberRow");
 
