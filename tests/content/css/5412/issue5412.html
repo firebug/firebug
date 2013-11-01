@@ -44,8 +44,8 @@
                     <li>"#element1." <span class="ok">&rArr; "#element1.element1"</span></li>
                     <li>"#element1#" <span class="ok">&rArr; "#element1#"</span></li>
                     <li>".element1." <span class="ok">&rArr; ".element1."</span></li>
-                    <li>"section &gt; h" <span class="ok">&rArr; "section &gt; h1"</span></li>
-                    <li>"section&gt;h" <span class="ok">&rArr; "section&gt;h1"</span></li>
+                    <li>"section &gt; h" <span class="ok">&rArr; "section &gt; h3"</span></li>
+                    <li>"section&gt;h" <span class="ok">&rArr; "section&gt;h3"</span></li>
                     <li>"#element1 .a." <span class="ok">&rArr; "#element1 .a.second"</span></li>
                     <li>"span, #element1 .a." <span class="ok">&rArr; "span, #element1 .a.second"</span></li>
                     <li>".a[" <span class="ok">&rArr; ".a["</span></li>
@@ -53,6 +53,14 @@
                     <li>".a[data-test=test]." <span class="ok">&rArr; ".a[data-test=test].second"</span></li>
                     <li>":" <span class="ok">&rArr; ":hover"</span></li>
                     <li>"a:hover::a" <span class="ok">&rArr; "a:hover::after"</span></li>
+                    <li>".second + ." <span class="ok">&rArr; ".second + .b"</span></li>
+                    <li>".second ~ ." <span class="ok">&rArr; ".second ~ .b"</span></li>
+                    <li>".second + #" <span class="ok">&rArr; ".second + #"</span></li>
+                    <li>".second ~ #" <span class="ok">&rArr; ".second ~ #"</span></li>
+                    <li>".second #" <span class="ok">&rArr; ".second #"</span></li>
+                    <li>".second &gt; #con" <span class="ok">&rArr; ".second &gt; #con"</span></li>
+                    <li>"* #con" <span class="ok">&rArr; "* #content"</span></li>
+                    <li>"* &gt; #con" <span class="ok">&rArr; "* &gt; #content"</span></li>
                     <li>"#frameel" <span class="ok">&rArr; "#frameel"</span></li>
                     </ul>
                     </li>

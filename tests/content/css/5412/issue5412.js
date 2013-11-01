@@ -53,8 +53,8 @@ function runTest()
         tasks.push(test, "#element1.", "#element1.element1");
         tasks.push(test, "#element1#", "#element1#");
         tasks.push(test, ".element1.", ".element1.");
-        tasks.push(test, "section > h", "section > h1");
-        tasks.push(test, "section>h", "section>h1");
+        tasks.push(test, "section > h", "section > h3");
+        tasks.push(test, "section>h", "section>h3");
         tasks.push(test, "#element1 .a.", "#element1 .a.second");
         tasks.push(test, "span, #element1 .a.", "span, #element1 .a.second");
         tasks.push(test, ".a[", ".a[");
@@ -62,6 +62,14 @@ function runTest()
         tasks.push(test, ".a[data-test=test].", ".a[data-test=test].second");
         tasks.push(test, ":", ":hover");
         tasks.push(test, "a:hover::a", "a:hover::after");
+        tasks.push(test, ".second + .", ".second + .b");
+        tasks.push(test, ".second ~ .", ".second ~ .b");
+        tasks.push(test, ".second + #", ".second + #");
+        tasks.push(test, ".second ~ #", ".second ~ #");
+        tasks.push(test, ".second #", ".second #");
+        tasks.push(test, ".second > #", ".second > #");
+        tasks.push(test, "* #con", "* #content");
+        tasks.push(test, "* > #con", "* > #content");
         tasks.push(test, "#frameel", "#frameel");
         tasks.push(selectLocation, "frame.html", "div");
         tasks.push(test, "#frameel", "#frameelement");
