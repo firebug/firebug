@@ -369,7 +369,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this.context.currentTrace = trace;
 
         // Might be already set from within paused() method. It's only null if the current
-        // frames have been refreshed through refreshFrames();
+        // frames have been refreshed through cleanScopes();
         if (!this.context.currentFrame)
         {
             var frame = trace.getTopFrame();
@@ -392,7 +392,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this.dispatch("framescleared");
     },
 
-    refreshFrames: function()
+    cleanScopes: function()
     {
         if (this.context.activeThread)
         {

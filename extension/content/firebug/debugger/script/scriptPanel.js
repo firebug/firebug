@@ -1330,38 +1330,42 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // If the evaluate fails, then we report an error and don't show the infotip
+        function success(result, context)
+        {
+            var rep = Firebug.getRep(result, context);
+            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+            tag.replace({object: result}, infoTip);
+
+            // If the menu is never displayed, the contextMenuObject is not reset
+            // (back to null) and is reused at the next time the user opens the
+            // context menu, which is wrong.
+            // This line was appended when fixing:
+            // http://code.google.com/p/fbug/issues/detail?id=1700
+            // The object should be returned by getPopupObject(),
+            // that is called when the context menu is showing.
+            // The problem is, that the "onContextShowing" event doesn't have the
+            // rangeParent field set and so it isn't possible to get the
+            // expression under the cursor (see getExpressionAt).
+            //Firebug.chrome.contextMenuObject = result;
+
+            self.infoTipExpr = expr;
+        }
+
+        function failure(result, context)
+        {
+            // We are mostly not interested in this evaluation error. It just polutes
+            // the tracing console.
+            // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
+
+            self.infoTipExpr = "";
+        }
+
+        // If the evaluate fails, then we report an error and don't show the infotip.
+        // The last parameter - noStateChange is set to true, so panels are not updated.
+        // It should not be necessary when evaluating an expression for a tooltip.
         CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
-            function success(result, context)
-            {
-                var rep = Firebug.getRep(result, context);
-                var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-                tag.replace({object: result}, infoTip);
-
-                // If the menu is never displayed, the contextMenuObject is not reset
-                // (back to null) and is reused at the next time the user opens the
-                // context menu, which is wrong.
-                // This line was appended when fixing:
-                // http://code.google.com/p/fbug/issues/detail?id=1700
-                // The object should be returned by getPopupObject(),
-                // that is called when the context menu is showing.
-                // The problem is, that the "onContextShowing" event doesn't have the
-                // rangeParent field set and so it isn't possible to get the
-                // expression under the cursor (see getExpressionAt).
-                //Firebug.chrome.contextMenuObject = result;
-
-                self.infoTipExpr = expr;
-            },
-            function failed(result, context)
-            {
-                // We are mostly not interested in this evaluation error. It just polutes
-                // the tracing console.
-                // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
-
-                self.infoTipExpr = "";
-            }
-        );
+            success, failure, true);
 
         return (this.infoTipExpr == expr);
     },

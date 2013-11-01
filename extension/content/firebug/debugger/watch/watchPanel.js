@@ -125,8 +125,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.destroy.apply(this, arguments);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     initializeNode: function(oldPanelNode)
     {
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
@@ -145,13 +143,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.destroyNode.apply(this, arguments);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     show: function(state)
     {
         if (state && state.watches)
             this.watches = state.watches;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Content
 
     /**
      * Executed by the user from within the Panel options menu of through
@@ -166,9 +165,16 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // The panel will rebuild asynchronously.
         // If a default global scope is displayed just rebuild now.
         if (this.selection instanceof StackFrame)
-            this.tool.refreshFrames();
+            this.tool.cleanScopes();
         else
             this.rebuild(true);
+    },
+
+    rebuild: function()
+    {
+        Trace.sysout("WatchPanel.rebuild", this.selection);
+
+        this.updateSelection(this.selection);
     },
 
     updateSelection: function(frame)
@@ -227,25 +233,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         //    this.evalWatches();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Content 
-
-    showMembers: function(members, update, scrollTop)
-    {
-    },
-
-    refreshMember: function(member, value)
-    {
-        this.tree.updateMember(member, value);
-    },
-
-    rebuild: function()
-    {
-        Trace.sysout("WatchPanel.rebuild", this.selection);
-
-        this.updateSelection(this.selection);
-    },
-
     showEmptyMembers: function()
     {
         Trace.sysout("watchPanel.showEmptyMembers;");
@@ -274,6 +261,17 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var cs = mainFrame.ownerDocument.defaultView.getComputedStyle(mainFrame);
         var watchRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         watchRow.style.direction = cs.direction;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    showMembers: function(members, update, scrollTop)
+    {
+    },
+
+    refreshMember: function(member, value)
+    {
+        this.tree.updateMember(member, value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
