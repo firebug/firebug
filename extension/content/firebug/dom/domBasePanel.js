@@ -533,7 +533,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     rebuild: function(update, scrollTop)
     {
-        Trace.sysout("domBasePanel.rebuild; " + this.selection, this.selection);
+        Trace.sysout("domBasePanel.rebuild;");
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
