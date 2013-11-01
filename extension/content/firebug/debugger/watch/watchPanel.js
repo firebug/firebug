@@ -21,10 +21,11 @@ define([
     "firebug/debugger/watch/watchExpression",
     "firebug/dom/domBasePanel",
     "firebug/console/errorCopy",
+    "firebug/console/commandLine",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Css, Arr, Menu,
     StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
-    DOMBasePanel, ErrorCopy) {
+    DOMBasePanel, ErrorCopy, CommandLine) {
 
 "use strict";
 
@@ -473,15 +474,18 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             //this.tree.updateObject(watch);
         }
 
-        // Iterate over all user expressions and evaluate them using {@Firebug.CommandLine} API
+        // Iterate over all user expressions and evaluate them using {@CommandLine} API
         // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
         // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
         // However, the built-in actor doesn't support .% syntax.
+        // Do not forget to pass |noStateChange == true| into the evaluate() method, to make sure
+        // the watch panel is not updated by evaluation in the command line. It would cause
+        // infinite loop. See {@CommandLine.evaluate} for more details.
         for (var i=0; i<this.watches.length; i++)
         {
             var watch = this.watches[i];
 
-            Firebug.CommandLine.evaluate(watch.expr, this.context, null, null,
+            CommandLine.evaluate(watch.expr, this.context, null, null,
                 onSuccess.bind(this, watch), onFailure.bind(this, watch), true);
         }
     },
