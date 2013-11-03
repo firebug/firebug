@@ -52,7 +52,10 @@
                     <li>".a[t" <span class="ok">&rArr; ".a[t"</span></li>
                     <li>".a[data-test=test]." <span class="ok">&rArr; ".a[data-test=test].second"</span></li>
                     <li>":" <span class="ok">&rArr; ":hover"</span></li>
-                    <li>"a:hover::a" <span class="ok">&rArr; "a:hover::after"</span></li>
+                    <li>"a::a" <span class="ok">&rArr; "a::after"</span></li>
+                    <li>"a::after:h" <span class="ok">&rArr; "a::after:h"</span></li>
+                    <li>"a:first-child::a" <span class="ok">&rArr; "a:first-child::after"</span></li>
+                    <li>"invalid]syntax:h" <span class="ok">&rArr; "invalid]syntax:h"</span></li>
                     <li>".second + ." <span class="ok">&rArr; ".second + .b"</span></li>
                     <li>".second ~ ." <span class="ok">&rArr; ".second ~ .b"</span></li>
                     <li>".second + #" <span class="ok">&rArr; ".second + #"</span></li>

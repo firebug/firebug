@@ -61,7 +61,10 @@ function runTest()
         tasks.push(test, ".a[t", ".a[t");
         tasks.push(test, ".a[data-test=test].", ".a[data-test=test].second");
         tasks.push(test, ":", ":hover");
-        tasks.push(test, "a:hover::a", "a:hover::after");
+        tasks.push(test, "a::a", "a::after");
+        tasks.push(test, "a::after:h", "a::after:h");
+        tasks.push(test, "a:first-child::a", "a:first-child::after");
+        tasks.push(test, "invalid]syntax:h", "invalid]syntax:h");
         tasks.push(test, ".second + .", ".second + .b");
         tasks.push(test, ".second ~ .", ".second ~ .b");
         tasks.push(test, ".second + #", ".second + #");
