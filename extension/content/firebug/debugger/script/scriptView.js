@@ -136,7 +136,9 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.onMouseOutListener);
         this.editor.removeEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
-        this.editor.removeEventListener(SourceEditor.Events.mouseOut,
+        this.editor.removeEventListener(SourceEditor.Events.mouseUp,
+            this.onMouseUpListener);
+        this.editor.removeEventListener(SourceEditor.Events.viewportChange,
             this.onViewportChangeListener);
 
         try
