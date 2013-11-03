@@ -72,6 +72,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
         this.onMouseUpListener = this.onEditorMouseUp.bind(this);
+        this.onKeyDownListener = this.onKeyDown.bind(this);
         this.onViewportChangeListener = this.onViewportChange.bind(this);
 
         // Initialize source editor.
@@ -94,6 +95,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.onMouseMoveListener);
         this.editor.addEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.addEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
 
         // Hook gutter clicks
         this.editor.addEventListener(SourceEditor.Events.gutterClick,
@@ -134,6 +137,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.onMouseMoveListener);
         this.editor.removeEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.removeEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
         this.editor.removeEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
         this.editor.removeEventListener(SourceEditor.Events.mouseUp,
@@ -531,11 +536,18 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         }
     },
 
-    onEditorMouseUp: function (event)
+    onEditorMouseUp: function(event)
     {
         Trace.sysout("scripView.onEditorMouseUp;", event);
 
         this.dispatch("onEditorMouseUp", [event]);
+    },
+
+    onKeyDown: function(event)
+    {
+        Trace.sysout("scripView.onKeyDown;", event);
+
+        this.dispatch("onEditorKeyDown", [event]);
     },
 
     onViewportChange: function(event)
