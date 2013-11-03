@@ -6,6 +6,8 @@ define([
 ],
 function(FBTrace, Options) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -340,6 +342,16 @@ Search.ReversibleRegExp = function(regex, flags)
             ret.reverse = reverse;
             ret.caseSensitive = caseSensitive;
         }
+        return ret;
+    };
+
+    this.fakeMatch = function(text, reverse, caseSensitive)
+    {
+        var ret = [text];
+        ret.index = 0;
+        ret.input = text;
+        ret.reverse = reverse;
+        ret.caseSensitive = caseSensitive;
         return ret;
     };
 };

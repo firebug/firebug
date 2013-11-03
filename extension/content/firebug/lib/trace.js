@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+],
+function() {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants
@@ -53,6 +57,7 @@ function TraceWrapper(tracer, option)
 }
 
 // ********************************************************************************************* //
+// Scoped Logging
 
 var tracer = fbTraceScope.FBTrace;
 
@@ -77,6 +82,9 @@ tracer.to = function(option)
 
     return new TraceWrapper(this, option);
 };
+
+// ********************************************************************************************* //
+// Registration
 
 return tracer;
 

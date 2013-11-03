@@ -28,15 +28,17 @@ define([
     "arch/compilationunit",
     "firebug/net/netUtils",
     "firebug/chrome/panelActivation",
+    "firebug/chrome/rep",
+    "firebug/html/inspector",
 ],
 function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation) {
-
-with (Domplate) {
+    ClosureInspector, Menu, CompilationUnit, NetUtils, PanelActivation, Rep, Inspector) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, P, UL, LI, PRE, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -75,7 +77,7 @@ var OBJECTLINK = FirebugReps.OBJECTLINK =
 
 // ********************************************************************************************* //
 
-FirebugReps.Undefined = domplate(Firebug.Rep,
+FirebugReps.Undefined = domplate(Rep,
 {
     tag: OBJECTBOX("undefined"),
 
@@ -91,7 +93,7 @@ FirebugReps.Undefined = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Null = domplate(Firebug.Rep,
+FirebugReps.Null = domplate(Rep,
 {
     tag: OBJECTBOX("null"),
 
@@ -107,7 +109,7 @@ FirebugReps.Null = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Hint = domplate(Firebug.Rep,
+FirebugReps.Hint = domplate(Rep,
 {
     tag: OBJECTBOX("$object"),
 
@@ -118,7 +120,7 @@ FirebugReps.Hint = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Nada = domplate(Firebug.Rep,
+FirebugReps.Nada = domplate(Rep,
 {
     tag: SPAN(""),
 
@@ -129,7 +131,7 @@ FirebugReps.Nada = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Number = domplate(Firebug.Rep,
+FirebugReps.Number = domplate(Rep,
 {
     tag: OBJECTBOX({"_repObject": "$object"}, "$object"),
     tinyTag: OBJECTBOX("$object"),
@@ -152,7 +154,7 @@ FirebugReps.Number = domplate(Firebug.Rep,
 // (See issues 3816, 6130.)
 // XXX: This would look much nicer with support for IF in domplate.
 var reSpecialWhitespace = /  |[\t\n]/;
-FirebugReps.SpecialWhitespaceString = domplate(Firebug.Rep,
+FirebugReps.SpecialWhitespaceString = domplate(Rep,
 {
     tag: PREOBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
 
@@ -169,7 +171,7 @@ FirebugReps.SpecialWhitespaceString = domplate(Firebug.Rep,
     }
 });
 
-FirebugReps.String = domplate(Firebug.Rep,
+FirebugReps.String = domplate(Rep,
 {
     tag: OBJECTBOX({"_repObject": "$object"}, "&quot;$object&quot;"),
 
@@ -188,7 +190,7 @@ FirebugReps.String = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.XML = domplate(Firebug.Rep,
+FirebugReps.XML = domplate(Rep,
 {
     tag: OBJECTBOX("$object|asString"),
 
@@ -216,7 +218,7 @@ FirebugReps.XML = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Text = domplate(Firebug.Rep,
+FirebugReps.Text = domplate(Rep,
 {
     tag: OBJECTBOX("$object"),
 
@@ -237,21 +239,21 @@ FirebugReps.Text = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Caption = domplate(Firebug.Rep,
+FirebugReps.Caption = domplate(Rep,
 {
     tag: SPAN({"class": "caption"}, "$object")
 });
 
 // ********************************************************************************************* //
 
-FirebugReps.Warning = domplate(Firebug.Rep,
+FirebugReps.Warning = domplate(Rep,
 {
     tag: DIV({"class": "warning focusRow", role: "listitem"}, "$object|STR")
 });
 
 // ********************************************************************************************* //
 
-FirebugReps.Func = domplate(Firebug.Rep,
+FirebugReps.Func = domplate(Rep,
 {
     tag:
         OBJECTLINK("$object|summarizeFunction"),
@@ -361,7 +363,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Obj = domplate(Firebug.Rep,
+FirebugReps.Obj = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -535,7 +537,7 @@ FirebugReps.ReferenceObj = function(target)
 /**
  * Rep for cycle reference in an array.
  */
-FirebugReps.Reference = domplate(Firebug.Rep,
+FirebugReps.Reference = domplate(Rep,
 {
     tag:
         OBJECTLINK({_repObject: "$object"},
@@ -731,7 +733,7 @@ FirebugReps.ArrBase = domplate(FirebugReps.Obj,
         target.removeAttribute("title");
 
         // Highlight multiple elements on the page.
-        Firebug.Inspector.highlightObject(arr, context);
+        Inspector.highlightObject(arr, context);
     },
 
     isArray: function(obj)
@@ -856,7 +858,7 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
 // ********************************************************************************************* //
 
-FirebugReps.Property = domplate(Firebug.Rep,
+FirebugReps.Property = domplate(Rep,
 {
     supportsObject: function(object, type)
     {
@@ -931,7 +933,7 @@ function instanceOf(object, Klass)
 
 // ********************************************************************************************* //
 
-FirebugReps.Element = domplate(Firebug.Rep,
+FirebugReps.Element = domplate(Rep,
 {
     className: "element",
 
@@ -1323,7 +1325,8 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         if (this.ignoreTarget(target))
             return;
-        Firebug.Inspector.highlightObject(object, context);
+
+        Inspector.highlightObject(object, context);
     },
 
     persistObject: function(elt, context)
@@ -1373,7 +1376,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var clipboardContent = System.getStringDataFromClipboard();
         var isEltRoot = (elt === elt.ownerDocument.documentElement);
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
             type = "HTML";
         else if (Xml.isElementMathML(elt))
             type = "MathML";
@@ -1391,7 +1394,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             command: Obj.bindFixed(this.copyHTML, this, elt)
         });
 
-        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        if (Xml.isElementHTMLOrXHTML(elt))
         {
             items.push(
             {
@@ -1508,7 +1511,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.TextNode = domplate(Firebug.Rep,
+FirebugReps.TextNode = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -1550,7 +1553,7 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.RegExp = domplate(Firebug.Rep,
+FirebugReps.RegExp = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -1586,7 +1589,7 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Document = domplate(Firebug.Rep,
+FirebugReps.Document = domplate(Rep,
 {
     tag:
         OBJECTLINK("Document ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
@@ -1634,7 +1637,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.StyleSheet = domplate(Firebug.Rep,
+FirebugReps.StyleSheet = domplate(Rep,
 {
     tag:
         OBJECTLINK("StyleSheet ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
@@ -1716,7 +1719,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.CSSRule = domplate(Firebug.Rep,
+FirebugReps.CSSRule = domplate(Rep,
 {
     tag:
         OBJECTLINK("$object|getType ", SPAN({"class": "objectPropValue"}, "$object|getDescription")),
@@ -1853,7 +1856,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Window = domplate(Firebug.Rep,
+FirebugReps.Window = domplate(Rep,
 {
     tag:
         OBJECTLINK("$object|getWindowTitle ",
@@ -1924,7 +1927,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Event = domplate(Firebug.Rep,
+FirebugReps.Event = domplate(Rep,
 {
     className: "event",
 
@@ -1973,7 +1976,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.SourceLink = domplate(Firebug.Rep,
+FirebugReps.SourceLink = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -2204,7 +2207,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
 // ********************************************************************************************* //
 
 // XXXjjb Since the repObject is fn the stack does not have correct line numbers
-FirebugReps.StackFrame = domplate(Firebug.Rep,
+FirebugReps.StackFrame = domplate(Rep,
 {
     tag:
         OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
@@ -2397,7 +2400,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.StackTrace = domplate(Firebug.Rep,
+FirebugReps.StackTrace = domplate(Rep,
 {
     tag:
         DIV({role : "group", "aria-label" : Locale.$STR("aria.labels.stack trace")},
@@ -2441,7 +2444,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 // ********************************************************************************************* //
 
 // xxxsz: Is this code still in use?
-FirebugReps.Assert = domplate(Firebug.Rep,
+FirebugReps.Assert = domplate(Rep,
 {
     tag:
         DIV(
@@ -2485,7 +2488,7 @@ FirebugReps.Assert = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.SourceText = domplate(Firebug.Rep,
+FirebugReps.SourceText = domplate(Rep,
 {
     tag:
         DIV(
@@ -2523,7 +2526,7 @@ FirebugReps.SourceText = domplate(Firebug.Rep,
 
 //********************************************************************************************** //
 
-FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
+FirebugReps.nsIDOMHistory = domplate(Rep,
 {
     tag:
         OBJECTBOX({onclick: "$showHistory", _repObject: "$object"},
@@ -2568,7 +2571,7 @@ FirebugReps.nsIDOMHistory = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.ApplicationCache = domplate(Firebug.Rep,
+FirebugReps.ApplicationCache = domplate(Rep,
 {
     tag:
         OBJECTLINK("$object|summarizeCache"),
@@ -2598,7 +2601,7 @@ FirebugReps.ApplicationCache = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Storage = domplate(Firebug.Rep,
+FirebugReps.Storage = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -2723,7 +2726,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
 
 // ********************************************************************************************* //
 
-FirebugReps.Description = domplate(Firebug.Rep,
+FirebugReps.Description = domplate(Rep,
 {
     className: "Description",
 
@@ -2768,7 +2771,7 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Attr = domplate(Firebug.Rep,
+FirebugReps.Attr = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -2801,7 +2804,7 @@ FirebugReps.Attr = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.Date = domplate(Firebug.Rep,
+FirebugReps.Date = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -2828,7 +2831,7 @@ FirebugReps.Date = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
+FirebugReps.NamedNodeMap = domplate(Rep,
 {
     tag:
         OBJECTLINK(
@@ -2922,7 +2925,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
 //********************************************************************************************** //
 
-FirebugReps.ClosureScope = domplate(Firebug.Rep,
+FirebugReps.ClosureScope = domplate(Rep,
 {
     tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
 
@@ -2953,7 +2956,7 @@ FirebugReps.ClosureScope = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.OptimizedAway = domplate(Firebug.Rep,
+FirebugReps.OptimizedAway = domplate(Rep,
 {
     tag: OBJECTBOX({_repObject: "$object"}, "$object|getTitle"),
 
@@ -3015,4 +3018,4 @@ Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
-}});
+});

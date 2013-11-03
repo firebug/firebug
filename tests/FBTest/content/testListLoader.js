@@ -222,11 +222,7 @@ var TestListLoader =
 
     addStyleSheets: function(doc)
     {
-        // Some CSS from Firebug namespace.
-        // xxxHonza: there should be no dependency on Firebug's CSS styles.
-        Css.addStyleSheet(doc, Css.createStyleSheet(doc, "resource://firebugui/panel.css"));
-
-        // Append specific FBTest CSS.
+        // Append specific FBTest CSS. There should be no dependencies on Firebug's CSS.
         var styles = ["testConsole.css", "testList.css", "testResult.css", "tabView.css"];
         for (var i=0; i<styles.length; i++)
             Css.addStyleSheet(doc, Css.createStyleSheet(doc, "chrome://fbtest/skin/" + styles[i]));

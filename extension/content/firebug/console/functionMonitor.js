@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -11,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/url",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) {
+function(Module, Rep, FBTrace, Obj, Domplate, Reps, StackFrame, Events, Css, Dom, Url) {
 
 "use strict";
 
@@ -23,7 +25,7 @@ var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 // ********************************************************************************************* //
 // Function Monitor
 
-var FunctionMonitor = Obj.extend(Firebug.Module,
+var FunctionMonitor = Obj.extend(Module,
 {
     dispatchName: "functionMonitor",
 
@@ -32,14 +34,14 @@ var FunctionMonitor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.connection.addListener(this);
     },
 
     shutdown: function()
     {
         Firebug.connection.removeListener(this);
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,7 +84,7 @@ function FunctionLog(frame, stackTrace)
 // ********************************************************************************************* //
 // Function Monitor Rep
 
-var FunctionMonitorRep = domplate(Firebug.Rep,
+var FunctionMonitorRep = domplate(Rep,
 {
     className: "functionCall",
 

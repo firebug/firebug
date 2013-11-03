@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -15,11 +17,13 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame, Events,
-    Css, Dom, Str, FBS) {
+function(Module, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, StackFrame,
+    Events, Css, Dom, Str, FBS) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, TAG, DIV, SPAN, TD, TR, TH, TABLE, THEAD, TBODY, P, UL, LI, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -27,7 +31,7 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // Profiler
 
-Firebug.Profiler = Obj.extend(Firebug.Module,
+Firebug.Profiler = Obj.extend(Module,
 {
     dispatchName: "profiler",
 
@@ -287,7 +291,6 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 
-with (Domplate) {
 Firebug.Profiler.ProfileTable = domplate(
 {
     tag:
@@ -440,7 +443,7 @@ Firebug.Profiler.ProfileTable = domplate(
 
 // ********************************************************************************************* //
 
-Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
+Firebug.Profiler.ProfileCaption = domplate(Rep,
 {
     tag:
         SPAN({"class": "profileTitle", "role": "status"},
@@ -456,7 +459,7 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
+Firebug.Profiler.ProfileCall = domplate(Rep,
 {
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
@@ -532,8 +535,6 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });
-
-} // END Domplate
 
 // ********************************************************************************************* //
 

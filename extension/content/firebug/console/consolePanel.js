@@ -13,16 +13,17 @@ define([
     "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/chrome/panelNotification",
+    "firebug/chrome/activablePanel",
     "firebug/console/commands/profiler",
     "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    PanelNotification) {
-
-with (Domplate) {
+    PanelNotification, ActivablePanel) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, TD, TR, TABLE, TBODY, P, A} = Domplate;
 
 var reAllowedCss = /^(-moz-)?(background|border|color|font|line|margin|padding|text)/;
 
@@ -52,7 +53,7 @@ const logTypes =
 
 Firebug.ConsolePanel = function () {};
 
-Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
+Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
 {
     template: domplate(
     {
@@ -99,7 +100,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     initialize: function()
     {
-        Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
+        ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
         this.filterMatchSet = [];
 
@@ -131,12 +132,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 this.wasScrolledToBottom + ", " + this.context.getName());
 
         Firebug.Console.removeListener(this);
-        Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
+        ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
     initializeNode: function()
     {
-        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
+        ActivablePanel.initializeNode.apply(this, arguments);
 
         this.onScroller = Obj.bind(this.onScroll, this);
         Events.addEventListener(this.panelNode, "scroll", this.onScroller, true);
@@ -148,7 +149,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     destroyNode: function()
     {
-        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+        ActivablePanel.destroyNode.apply(this, arguments);
 
         if (this.onScroller)
             Events.removeEventListener(this.panelNode, "scroll", this.onScroller, true);
@@ -1087,4 +1088,4 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 return Firebug.ConsolePanel;
 
 // ********************************************************************************************* //
-}});
+});

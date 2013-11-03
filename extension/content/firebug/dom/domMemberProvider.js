@@ -173,7 +173,8 @@ DOMMemberProvider.prototype =
                     {
                         add("dom", domConstants);
                     }
-                    else if (Dom.isInlineEventHandler(name))
+                    else if (val === null && object instanceof EventTarget &&
+                        Dom.isInlineEventHandler(name))
                     {
                         add("user", domHandlers);
                     }

@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/firefox",
@@ -30,9 +31,9 @@ define([
     "firebug/js/sourceBox",
     "firebug/js/watchPanel",
 ],
-function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
-    Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords, PanelNotification, Options) {
+function (Rep, Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
+    Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist, System, Menu,
+    Debug, Keywords, PanelNotification, Options) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -636,8 +637,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         var scrollingElement = event.target;
         this.reView(scrollingElement);
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.placeholder = Locale.$STR("Use hash plus number to go to line");
     },
 
     onKeyPress: function(event)
@@ -665,6 +664,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     name: "script",
     searchable: true,
+    searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
     order: 40,
@@ -1870,7 +1870,7 @@ with (Domplate) {
 /**
  * @domplate Displays various warning messages within the Script panel.
  */
-Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
+Firebug.ScriptPanel.WarningRep = domplate(Rep,
 {
     tag:
         DIV({"class": "disabledPanelBox"},
@@ -2016,7 +2016,7 @@ var WarningRep = Firebug.ScriptPanel.WarningRep;
 
 // ********************************************************************************************* //
 
-Firebug.ScriptPanel.BreakpointInfoTip = domplate(Firebug.Rep,
+Firebug.ScriptPanel.BreakpointInfoTip = domplate(Rep,
 {
     tag:
         DIV("$expr"),

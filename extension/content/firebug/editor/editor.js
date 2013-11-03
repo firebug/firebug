@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -12,11 +13,15 @@ define([
     "firebug/lib/array",
     "firebug/chrome/menu",
     "firebug/trace/debug",
+    "firebug/chrome/measureBox",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
+function(Module, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug,
+    MeasureBox) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN, P, A, INPUT} = Domplate;
 
 const saveTimeout = 400;
 const hugeChangeAmount = 100;
@@ -45,7 +50,7 @@ var ignoreNextInput = false;
 
 // ********************************************************************************************* //
 
-Firebug.Editor = Obj.extend(Firebug.Module,
+Firebug.Editor = Obj.extend(Module,
 {
     supportsStopEvent: true,
 
@@ -153,7 +158,16 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         // the editor instance is reused (see also 3280, 3332).
         currentEditor.setValue("");
 
-        var removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
+        var removeGroup = true;
+        try
+        {
+            removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("editor.endEditing FAILS " + exc, exc);
+        }
 
         try
         {
@@ -465,7 +479,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         this.onResize = Obj.bindFixed(this.onResize, this);
         this.onBlur = Obj.bind(this.onBlur, this);
 
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
     },
 
     disable: function()
@@ -487,7 +501,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 // ********************************************************************************************* //
 // BaseEditor
 
-Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
+Firebug.BaseEditor = Obj.extend(MeasureBox,
 {
     getInitialValue: function(target, value)
     {
@@ -572,7 +586,6 @@ Firebug.InlineEditor = function(doc)
     this.initializeInline(doc);
 };
 
-with (Domplate) {
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
     enterOnBlur: true,
@@ -1009,7 +1022,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             var clR = this.expander.getClientRects(),
                 wasWrapped = this.wrapped, inputWidth = Infinity;
 
-            if(clR.length == 1)
+            if (clR.length <= 1)
             {
                 this.wrapped = false;
             }
@@ -1030,12 +1043,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 if (clR[2].width > 50)
                     inputWidth = clR[1].width;
             }
-            else if(clR.length > 3)
+            else if (clR.length > 3)
             {
                 this.wrapped = true;
             }
 
-            if(this.wrapped)
+            if (this.wrapped)
             {
                 var fixupL = clR[1].left - clR[0].left;
                     fixupT = clR[1].top - clR[0].top;
@@ -1053,15 +1066,14 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 if (extraWidth)
                     charWidth *= extraWidth;
 
-                var inputWidth = approxTextWidth + charWidth;
+                inputWidth = approxTextWidth + charWidth;
             }
-
 
             var container = currentPanel.panelNode;
             var maxWidth = container.clientWidth - this.targetOffset.x - fixupL +
                 container.scrollLeft-6;
 
-            if(inputWidth > maxWidth)
+            if (inputWidth > maxWidth)
                 inputWidth = maxWidth;
 
             if (forceAll || initial || this.wrapped != wasWrapped)
@@ -1076,7 +1088,6 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Dom.scrollIntoCenterView(this.box, null, true);
     }
 });
-};
 
 // ********************************************************************************************* //
 // Autocompletion

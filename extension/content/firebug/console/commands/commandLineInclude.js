@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/chrome/reps",
     "firebug/lib/domplate",
     "firebug/lib/locale",
@@ -17,12 +18,13 @@ define([
     "firebug/console/console",
     "firebug/editor/editor",
 ],
-function(FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
+function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
     Obj, TableRep, Console) {
-with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, SPAN, TR, P, LI, A, BUTTON} = Domplate;
 
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -323,7 +325,7 @@ function CommandLineIncludeObject()
 
 // ********************************************************************************************* //
 
-var CommandLineInclude = Obj.extend(Firebug.Module,
+var CommandLineInclude = Obj.extend(Module,
 {
     onSuccess: function(newAlias, context, loadingMsgRow, xhr, hasWarnings)
     {
@@ -702,4 +704,4 @@ Console.addListener(CommandLineInclude);
 return CommandLineInclude;
 
 // ********************************************************************************************* //
-}});
+});

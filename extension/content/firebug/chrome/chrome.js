@@ -2126,7 +2126,9 @@ function onPanelMouseUp(event)
                 var selectionData;
                 var unselectedRange = event.target.ownerDocument.createRange();
                 var selectedRange = selection.getRangeAt(0);
-                unselectedRange.setStart(editable.firstElementChild || editable, 0);
+                var referenceElement = editable || event.target;
+                unselectedRange.setStart(referenceElement.firstElementChild ||
+                    referenceElement, 0);
                 unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
                 if (selectedRange.collapsed)
@@ -2135,7 +2137,7 @@ function onPanelMouseUp(event)
                         Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
-                    if (distance > 3)
+                    if (distance > 3 || Css.hasClass(event.target, "inlineExpander"))
                     {
                         selectionData =
                         {

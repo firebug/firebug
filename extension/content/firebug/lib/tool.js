@@ -4,7 +4,10 @@ define([
 ],
 function() {
 
+"use strict";
+
 // ********************************************************************************************* //
+// Implementation
 
 var FirebugTool = function(name)
 {
@@ -27,7 +30,9 @@ FirebugTool.prototype =
         this.active = !!active;
     }
 };
+
 // ********************************************************************************************* //
+// Registration
 
 return FirebugTool;
 

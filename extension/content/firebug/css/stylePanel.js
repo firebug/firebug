@@ -27,10 +27,10 @@ function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Ur
     SourceLink, Dom, Css, Xpath, Str, Fonts, Options, CSSModule, CSSStyleSheetPanel, Menu,
     LoadHandler) {
 
-with (Domplate) {
-
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, FOR, TAG, DIV, SPAN, TR, H1, P, UL, A} = Domplate;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -972,4 +972,4 @@ Firebug.registerPanel(CSSStylePanel);
 return CSSStylePanel;
 
 // ********************************************************************************************* //
-}});
+});

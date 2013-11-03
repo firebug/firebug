@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/reps",
@@ -14,7 +15,7 @@ define([
     "firebug/lib/options",
     "firebug/chrome/menu"
 ],
-function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
+function(Panel, Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Options, Menu) {
 
 // ********************************************************************************************* //
@@ -32,7 +33,7 @@ const Ci = Components.interfaces;
  * panel.
  */
 Firebug.CallstackPanel = function() {};
-Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = Obj.extend(Panel,
 /** @lends Firebug.CallstackPanel */
 {
     name: "callstack",
@@ -43,7 +44,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     initialize: function(context, doc)
     {
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
 
         Firebug.connection.addListener(this);
     },
@@ -52,7 +53,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     {
         Firebug.connection.removeListener(this);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
