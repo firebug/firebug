@@ -67,7 +67,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
-    order: 45,
+    order: 40,
 
     // Will appear in detached Firebug Remote XUL window.
     remotable: true,
