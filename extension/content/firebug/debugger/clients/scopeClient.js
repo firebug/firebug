@@ -9,6 +9,13 @@ define([
 ],
 function (FBTrace, Obj, Str, Locale, ObjectClient) {
 
+"use strict";
+
+// ********************************************************************************************* //
+// Constants
+
+var Trace = FBTrace.to("DBG_SCOPECLIENT");
+
 // ********************************************************************************************* //
 // Scope
 
@@ -17,6 +24,7 @@ function ScopeClient(grip, cache)
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
+    this.error = null;
 }
 
 ScopeClient.prototype = Obj.descend(new ObjectClient(),
@@ -117,6 +125,11 @@ ScopeClient.prototype = Obj.descend(new ObjectClient(),
             for (var name in arg)
                 result.push(this.createProperty(name, arg[name], this.cache));
         }
+
+        Trace.sysout("scopeClient.parseArguments; ", {
+            grip: this.grip,
+            result: result,
+        });
 
         return result;
     }

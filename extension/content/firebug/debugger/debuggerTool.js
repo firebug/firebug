@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/eventSource",
     "firebug/lib/trace",
     "firebug/lib/array",
     "firebug/lib/tool",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/options",
     "firebug/debugger/debuggerLib",
 ],
-function (Obj, Firebug, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
+function (Obj, Firebug, EventSource, FBTrace, Arr, Tool, CompilationUnit, StackFrame, StackTrace,
     DebuggerClientModule, ClientCache, SourceFile, Options, DebuggerLib) {
 
 // ********************************************************************************************* //
@@ -39,7 +40,7 @@ function DebuggerTool(context)
  *
  * xxxHonza: It should be derived from Tool base class.
  */
-DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
+DebuggerTool.prototype = Obj.extend(new EventSource(),
 /** @lends DebuggerTool */
 {
     dispatchName: "DebuggerTool",
@@ -307,7 +308,7 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
 
         // Asynchronously initializes ThreadClient's stack frame cache. If you want to
         // sync with the cache handle 'framesadded' and 'framescleared' events.
-        // This is done after we know that the debugger is going to pause now.
+        // This is done after we know that the debugger is paused.
         this.context.activeThread.fillFrames(50);
 
         // Panels are created when first used by the user, but in this case we need to break
@@ -361,9 +362,20 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         // Get frames from ThreadClient's stack-frame cache and build stack trace object,
         // which is stored in the context.
         var frames = this.context.activeThread.cachedFrames;
+
         Trace.sysout("debuggerTool.framesadded; frames: ", frames);
 
-        this.context.currentTrace = StackTrace.buildStackTrace(this.context, frames);
+        var trace = StackTrace.buildStackTrace(this.context, frames);
+        this.context.currentTrace = trace;
+
+        // Might be already set from within paused() method. It's only null if the current
+        // frames have been refreshed through cleanScopes();
+        if (!this.context.currentFrame)
+        {
+            var frame = trace.getTopFrame();
+            this.context.stoppedFrame = frame;
+            this.context.currentFrame = frame;
+        }
 
         // Now notify all listeners, for example the {@CallstackPanel} panel to sync the UI.
         this.dispatch("framesadded", [this.context.currentTrace]);
@@ -374,8 +386,19 @@ DebuggerTool.prototype = Obj.extend(new Firebug.EventSource(),
         Trace.sysout("debuggerTool.framescleared; ", arguments);
 
         this.context.currentTrace = null;
+        this.context.stoppedFrame = null;
+        this.context.currentFrame = null;
 
         this.dispatch("framescleared");
+    },
+
+    cleanScopes: function()
+    {
+        if (this.context.activeThread)
+        {
+            this.context.activeThread._clearFrames();
+            this.context.activeThread.fillFrames(50);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

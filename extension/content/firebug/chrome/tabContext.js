@@ -8,9 +8,10 @@ define([
     "firebug/lib/url",
     "firebug/chrome/window",
     "firebug/lib/css",
+    "firebug/lib/wrapper",
     "firebug/chrome/plugin",
 ],
-function(Obj, Arr, CompilationUnit, Events, Url, Win, Css) {
+function(Obj, Arr, CompilationUnit, Events, Url, Win, Css, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -227,7 +228,8 @@ Firebug.TabContext.prototype =
 
     getCurrentGlobal: function()
     {
-        return this.stoppedGlobal || this.baseWindow || this.window;
+        var global = this.stoppedGlobal || this.baseWindow || this.window;
+        return Wrapper.getContentView(global);
     },
 
     destroy: function(state)
@@ -439,6 +441,9 @@ Firebug.TabContext.prototype =
     {
         if (!this.invalidPanels)
             this.invalidPanels = {};
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("tabContext.invalidatePanels; " + Arr.cloneArray(arguments).toString());
 
         for (var i = 0; i < arguments.length; ++i)
         {

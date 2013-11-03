@@ -52,7 +52,7 @@ function BrowserOverlay(win)
 
 BrowserOverlay.prototype =
 {
-    // When Firebug is disabled or unistalled this elements must be removed from
+    // When Firebug is disabled or uninstalled this elements must be removed from
     // chrome UI (XUL).
     nodesToRemove: [],
 

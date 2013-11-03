@@ -10,11 +10,12 @@ define([
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/chrome/tabWatcher",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/chrome/window",
     "firebug/chrome/firefox",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher,
+function(Firebug, FBTrace, Obj, Domplate, Options, Dom, Url, Locale, TabWatcher, Rep,
     FirebugReps, Win, Firefox) {
 
 // ********************************************************************************************* //
@@ -31,7 +32,7 @@ var Trace = FBTrace.to("DBG_SCRIPTPANELWARNING");
 /**
  * @domplate Displays various warning messages within the Script panel.
  */
-var WarningRep = domplate(Firebug.Rep,
+var WarningRep = domplate(Rep,
 /** @lends WarningRep */
 {
     tag:

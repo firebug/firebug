@@ -6,6 +6,8 @@ define([
 ],
 function(FBTrace, Str) {
 
+"use strict";
+
 // ********************************************************************************************* //
 // Constants
 
@@ -14,7 +16,7 @@ var Cc = Components.classes;
 
 var Xml = {};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // HTML and XML Serialization
 
 Xml.getElementType = function(node)
@@ -49,6 +51,11 @@ var isElementHTML = Xml.isElementHTML = function(node)
 var isElementXHTML = Xml.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
+};
+
+var isElementHTMLOrXHTML = Xml.isElementHTMLOrXHTML = function(node)
+{
+    return node.namespaceURI == "http://www.w3.org/1999/xhtml";
 };
 
 var isElementMathML = Xml.isElementMathML = function(node)
@@ -201,7 +208,7 @@ Xml.getElementXML = function(element)
                     continue;
                 }
 
-                xml.push(' ', attr.nodeName, '="', Str.escapeForElementAttribute(attr.nodeValue),'"');
+                xml.push(' ', attr.nodeName, '="', Str.escapeForElementAttribute(attr.value),'"');
             }
 
             if (elt.firstChild)
@@ -289,7 +296,7 @@ Xml.isVisible = function(elt)
 
     try
     {
-        return (!isElementHTML(elt) && !isElementXHTML(elt)) ||
+        return !isElementHTMLOrXHTML(elt) ||
             elt.offsetWidth > 0 ||
             elt.offsetHeight > 0 ||
             elt.localName in invisibleTags;
@@ -341,6 +348,7 @@ var invisibleTags = Xml.invisibleTags =
 };
 
 // ********************************************************************************************* //
+// Registration
 
 return Xml;
 

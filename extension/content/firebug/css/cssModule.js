@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
@@ -13,7 +14,7 @@ define([
     "firebug/lib/array",
     "firebug/editor/editorSelector"
 ],
-function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr, EditorSelector) {
+function(Module, Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml, Options, Arr, EditorSelector) {
 
 // ********************************************************************************************* //
 // Constants
@@ -28,7 +29,7 @@ const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 // ********************************************************************************************* //
 // CSS Module
 
-Firebug.CSSModule = Obj.extend(Firebug.Module, Firebug.EditorSelector,
+Firebug.CSSModule = Obj.extend(Module, Firebug.EditorSelector,
 {
     dispatchName: "cssModule",
 

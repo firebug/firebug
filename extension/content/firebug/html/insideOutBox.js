@@ -232,21 +232,14 @@ Firebug.InsideOutBox.prototype =
             {
                 if (exceptions && child.repObject)
                 {
-                    var shouldBeExpanded = true;
                     var localName = child.repObject.localName;
-                    localName = localName ? localName.toLowerCase() : "";
+                    localName = localName && localName.toLowerCase();
 
-                    for (var i=0; i<exceptions.length; i++)
+                    if (exceptions.indexOf(localName) !== -1 &&
+                        Xml.isElementHTMLOrXHTML(child.repObject))
                     {
-                        if (localName == exceptions[i] &&
-                            (Xml.isElementHTML(child.repObject) || Xml.isElementXHTML(child.repObject)))
-                        {
-                            shouldBeExpanded = false;
-                            break;
-                        }
-                    }
-                    if (!shouldBeExpanded)
                         continue;
+                    }
                 }
 
                 if (Css.hasClass(child, "containerNodeBox"))

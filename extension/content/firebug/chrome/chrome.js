@@ -1529,8 +1529,16 @@ var FirebugChrome =
 
         if (FBTrace.DBG_MENU)
         {
-            FBTrace.sysout("chrome.onContextShowing object:"+object+", rep: "+rep+
-                ", realObject: "+realObject+", realRep:"+realRep);
+            FBTrace.sysout("chrome.onContextShowing;", {
+                object: object,
+                rep: rep,
+                realObject: realObject,
+                realRep: realRep,
+                target: target,
+                chromeDoc: target.ownerDocument == document,
+                contextMenuObject: this.contextMenuObject,
+                panel: panel,
+            });
         }
 
         // 1. Add the custom menu items from the realRep
@@ -2035,8 +2043,10 @@ function onSelectedSidePanel(event)
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectedSidePanel name=" +
-            (sidePanel ? sidePanel.name : "undefined"));
+    {
+        var name = (sidePanel ? sidePanel.name : "undefined");
+        FBTrace.sysout("chrome.onSelectedSidePanel; name: " + name, sidePanel);
+    }
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)
@@ -2131,7 +2141,9 @@ function onPanelMouseUp(event)
                 var selectionData;
                 var unselectedRange = event.target.ownerDocument.createRange();
                 var selectedRange = selection.getRangeAt(0);
-                unselectedRange.setStart(editable.firstElementChild || editable, 0);
+                var referenceElement = editable || event.target;
+                unselectedRange.setStart(referenceElement.firstElementChild ||
+                    referenceElement, 0);
                 unselectedRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
 
                 if (selectedRange.collapsed)
@@ -2140,7 +2152,7 @@ function onPanelMouseUp(event)
                         Math.abs(event.screenY - lastMouseDownPosition.y);
 
                     // If mouse has moved far enough, set selection at that point
-                    if (distance > 3)
+                    if (distance > 3 || Css.hasClass(event.target, "inlineExpander"))
                     {
                         selectionData =
                         {

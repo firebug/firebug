@@ -204,9 +204,11 @@ DomBaseTree.prototype = domplate(BaseTree,
 
             // Get children object for the next level.
             var members = this.getMembers(member.value, level + 1);
+            var isPromise = DomTree.isPromise(members);
 
             Trace.sysout("DomBaseTree.toggleRow; level: " + level + ", members: " +
-                (members ? members.length : "null"), members);
+                (members && members.length ? members.length : (isPromise ?
+                "(promise)" : "null")) + ", ", members);
 
             // Insert rows if they are immediately available. Otherwise set a spinner
             // and wait for the update.
@@ -214,7 +216,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             {
                 return this.expandRowAsync(row, members);
             }
-            else if (DomTree.isPromise(members))
+            else if (isPromise)
             {
                 Css.setClass(row, "spinning");
                 return members;

@@ -1,11 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/dom/domBreakpointGroup",
 ],
-function(Obj, Firebug, DOMBreakpointGroup) {
+function(Module, Obj, Firebug, DOMBreakpointGroup) {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,13 +17,13 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // DOM Module
 
-Firebug.DOMModule = Obj.extend(Firebug.Module,
+Firebug.DOMModule = Obj.extend(Module,
 {
     dispatchName: "domModule",
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         if (Firebug.Debugger)
             Firebug.connection.addListener(this.DebuggerListener);
@@ -30,7 +31,7 @@ Firebug.DOMModule = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         if (Firebug.Debugger)
             Firebug.connection.removeListener(this.DebuggerListener);

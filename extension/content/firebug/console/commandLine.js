@@ -3,6 +3,7 @@
 /*global FBTrace:true, Components:true, define:true, KeyEvent:true */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/reps",
@@ -26,7 +27,7 @@ define([
     "firebug/console/commands/commandLineHelp",
     "firebug/console/commands/commandLineInclude",
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
+function(Module, Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
     Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI,
     DebuggerLib) {
 
@@ -35,9 +36,9 @@ function(Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, Syst
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
+var Cc = Components.classes;
 
-const commandPrefix = ">>> ";
+var commandPrefix = ">>> ";
 
 // ********************************************************************************************* //
 // Command Line
@@ -45,8 +46,8 @@ const commandPrefix = ">>> ";
 /**
  * @module
  */
-Firebug.CommandLine = Obj.extend(Firebug.Module,
-/** @lends Firebug.CommandLine */
+var CommandLine = Obj.extend(Module,
+/** @lends CommandLine */
 {
     dispatchName: "commandLine",
 
@@ -110,7 +111,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             }
 
             if (!options.noStateChange)
-                context.invalidatePanels("dom", "html");
+                context.invalidatePanels("dom", "html", "watches");
         }
         catch (exc)
         {
@@ -468,7 +469,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.setAutoCompleter();
         this.commandHistory = new Firebug.CommandHistory();
@@ -640,13 +641,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
                 if (!event.metaKey && !event.shiftKey)
                 {
-                    Firebug.CommandLine.enter(Firebug.currentContext);
+                    CommandLine.enter(Firebug.currentContext);
                     this.commandHistory.hide();
                     return true;
                 }
                 else if(!event.metaKey && event.shiftKey)
                 {
-                    Firebug.CommandLine.enterInspect(Firebug.currentContext);
+                    CommandLine.enterInspect(Firebug.currentContext);
                     this.commandHistory.hide();
                     return true;
                 }
@@ -664,7 +665,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
             case KeyEvent.DOM_VK_ESCAPE:
                 event.preventDefault();
-                if (Firebug.CommandLine.cancel(Firebug.currentContext))
+                if (CommandLine.cancel(Firebug.currentContext))
                     Events.cancelEvent(event);
                 this.commandHistory.hide();
                 return true;
@@ -694,7 +695,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     isInOtherPanel: function(context)
     {
         // Command line on other panels is never multiline.
-        var visible = Firebug.CommandLine.Popup.isVisible();
+        var visible = CommandLine.Popup.isVisible();
         return visible && context.panelName !== "console";
     },
 
@@ -816,9 +817,12 @@ function evaluateExpression(execContextType, expr, context, thisValue, targetWin
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.CommandLine);
+Firebug.registerModule(CommandLine);
 
-return Firebug.CommandLine;
+// xxxHonza: backward compatibility.
+Firebug.CommandLine = CommandLine;
+
+return CommandLine;
 
 // ********************************************************************************************* //
 });

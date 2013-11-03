@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -14,7 +15,7 @@ define([
     "firebug/console/console",
     "firebug/chrome/infotip",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {
+function(Module, Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {
 
 // ************************************************************************************************
 // Constants
@@ -26,13 +27,13 @@ var KeyEvent = window.KeyEvent;
 // ************************************************************************************************
 // Module Management
 
-Firebug.A11yModel = Obj.extend(Firebug.Module,
+Firebug.A11yModel = Obj.extend(Module,
 {
     dispatchName: "a11y",
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         this.handleTabBarFocus = Obj.bind(this.handleTabBarFocus, this);
         this.handleTabBarBlur = Obj.bind(this.handleTabBarBlur, this);
@@ -71,7 +72,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         Firebug.Console.removeListener(this);
         Firebug.DOMModule.removeListener(this);
 
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     initializeUI: function()

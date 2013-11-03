@@ -75,7 +75,7 @@ WatchTree.prototype = domplate(BaseTree,
     getType: function(object)
     {
         // xxxHonza: this must be done through a decorator that can be also reused
-        // in the DOM panel (applying types like: userFunction, dom Function, domClass, etc.)
+        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
 
         if (object && Obj.isFunction(object.getType))
         {

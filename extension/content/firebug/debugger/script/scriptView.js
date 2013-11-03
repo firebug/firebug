@@ -6,12 +6,13 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/events",
+    "firebug/chrome/eventSource",
     "firebug/chrome/menu",
     "firebug/chrome/infotip",
     "firebug/chrome/firefox",
     "firebug/editor/sourceEditor",
 ],
-function(FBTrace, Obj, Dom, Css, Events, Menu, InfoTip, Firefox, SourceEditor) {
+function(FBTrace, Obj, Dom, Css, Events, EventSource, Menu, InfoTip, Firefox, SourceEditor) {
 
 "use strict";
 
@@ -43,7 +44,7 @@ function ScriptView()
  * tests (could be within the lib group) that are checking every new Orion version.
  *
  */
-ScriptView.prototype = Obj.extend(new Firebug.EventSource(),
+ScriptView.prototype = Obj.extend(new EventSource(),
 /** @lends ScriptView */
 {
     dispatchName: "ScriptView",

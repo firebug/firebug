@@ -11,7 +11,9 @@ define([
     "firebug/lib/domplate",
     "firebug/debugger/script/scriptView",
     "arch/compilationunit",
+    "firebug/chrome/activablePanel",
     "firebug/chrome/menu",
+    "firebug/chrome/rep",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/script/sourceLink",
     "firebug/debugger/script/sourceFile",
@@ -28,9 +30,9 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/net/netUtils",
 ],
-function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit, Menu,
-    StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore, Persist,
-    BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
+function (Obj, Locale, Events, Dom, Arr, Css, Url, Domplate, ScriptView, CompilationUnit,
+    ActivablePanel, Menu, Rep, StackFrame, SourceLink, SourceFile, Breakpoint, BreakpointStore,
+    Persist, BreakpointConditionEditor, Keywords, System, Editor, ScriptPanelWarning,
     BreakNotification, CommandLine, DebuggerLib, NetUtils) {
 
 "use strict";
@@ -51,7 +53,7 @@ var Trace = FBTrace.to("DBG_SCRIPTPANEL");
  * This panel is using JSD2 API for debugging.
  */
 function ScriptPanel() {}
-var BasePanel = Firebug.ActivablePanel;
+var BasePanel = ActivablePanel;
 ScriptPanel.prototype = Obj.extend(BasePanel,
 /** @lends ScriptPanel */
 {
@@ -456,8 +458,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     framesadded: function(stackTrace)
     {
+        Trace.sysout("scriptPanel.framesadded;", stackTrace);
+
         // Invoke breadcrumbs update.
         Firebug.chrome.syncStatusPath();
+
+        // This is how the selected side panel is synchronized (e.g. the Watch panel).
+        Firebug.chrome.select(this.context.currentFrame, "script");
     },
 
     framescleared: function()
@@ -1217,9 +1224,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
 
-            // This is how the Watch panel is synchronized.
-            Firebug.chrome.select(this.context.currentFrame, "script", null, true);
-            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
+            // This is how the selected side panel is synchronized (e.g. the Watch panel).
+            Firebug.chrome.select(this.context.currentFrame, "script");
+
+            // issue 3463 and 4213
+            Firebug.chrome.syncPanel("script");
             Firebug.chrome.focus();
             //this.updateSelection(this.context.currentFrame);
 
@@ -1243,12 +1252,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         {
             var chrome = Firebug.chrome;
 
-            /*if (this.selectedSourceBox && this.selectedSourceBox.breakCauseBox)
-            {
-                this.selectedSourceBox.breakCauseBox.hide();
-                delete this.selectedSourceBox.breakCauseBox;
-            }*/
-
+            this.selection = null;
             this.syncCommands(this.context);
             this.syncListeners(this.context);
             this.showNoStackFrame();
@@ -1331,36 +1335,40 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // If the evaluate fails, then we report an error and don't show the infotip
+        function success(result, context)
+        {
+            var rep = Firebug.getRep(result, context);
+            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+            tag.replace({object: result}, infoTip);
+
+            // If the menu is never displayed, the contextMenuObject is not reset
+            // (back to null) and is reused at the next time the user opens the
+            // context menu, which is wrong.
+            // This line was appended when fixing:
+            // http://code.google.com/p/fbug/issues/detail?id=1700
+            // The object should be returned by getPopupObject(),
+            // that is called when the context menu is showing.
+            // The problem is, that the "onContextShowing" event doesn't have the
+            // rangeParent field set and so it isn't possible to get the
+            // expression under the cursor (see getExpressionAt).
+            //Firebug.chrome.contextMenuObject = result;
+
+            self.infoTipExpr = expr;
+        }
+
+        function failure(result, context)
+        {
+            // We are mostly not interested in this evaluation error. It just polutes
+            // the tracing console.
+            // Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
+
+            self.infoTipExpr = "";
+        }
+
+        // If the evaluate fails, then we report an error and don't show the infotip.
         CommandLine.evaluate(expr, this.context, null, this.context.getCurrentGlobal(),
-            function success(result, context)
-            {
-                var rep = Firebug.getRep(result, context);
-                var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-                tag.replace({object: result}, infoTip);
-
-                // If the menu is never displayed, the contextMenuObject is not reset
-                // (back to null) and is reused at the next time the user opens the
-                // context menu, which is wrong.
-                // This line was appended when fixing:
-                // http://code.google.com/p/fbug/issues/detail?id=1700
-                // The object should be returned by getPopupObject(),
-                // that is called when the context menu is showing.
-                // The problem is, that the "onContextShowing" event doesn't have the
-                // rangeParent field set and so it isn't possible to get the
-                // expression under the cursor (see getExpressionAt).
-                //Firebug.chrome.contextMenuObject = result;
-
-                self.infoTipExpr = expr;
-            },
-            function failed(result, context)
-            {
-                Trace.sysout("scriptPanel.populateInfoTip; ERROR " + result, result);
-
-                self.infoTipExpr = "";
-            }
-        );
+            success, failure, {noStateChange: true});
 
         return (this.infoTipExpr == expr);
     },
@@ -1434,7 +1442,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 // ********************************************************************************************* //
 // Breakpoint InfoTip Template
 
-var BreakpointInfoTip = domplate(Firebug.Rep,
+var BreakpointInfoTip = domplate(Rep,
 {
     tag:
         DIV("$expr"),

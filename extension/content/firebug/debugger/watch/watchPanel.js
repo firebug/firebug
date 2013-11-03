@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/lib/trace",
     "firebug/chrome/firefox",
-    "firebug/firebug",
     "firebug/dom/toggleBranch",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -21,10 +21,11 @@ define([
     "firebug/debugger/watch/watchExpression",
     "firebug/dom/domBasePanel",
     "firebug/console/errorCopy",
+    "firebug/console/commandLine",
 ],
-function(Obj, Domplate, FBTrace, Firefox, Firebug, ToggleBranch, Events, Dom, Css, Arr, Menu,
+function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Css, Arr, Menu,
     StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
-    DOMBasePanel, ErrorCopy) {
+    DOMBasePanel, ErrorCopy, CommandLine) {
 
 "use strict";
 
@@ -72,6 +73,13 @@ function WatchPanel()
  * @panel Represents the Watch side panel available in the Script panel. This panel
  * allows variable inspection during debugging. It's possible to inspect existing
  * variables in the scope-chain as well as evaluating user expressions.
+ *
+ * The content of this panel is synchronized with the {@ScriptPanel} through
+ * {@FirebugChrome.select} method. This panel is using the current {@StackFrame}
+ * as the selection when debugger is paused.
+ *
+ * The panel displays properties of the current scope (usually a window or an iframe)
+ * when the debugger is resumed - the selection is the global object in such case.
  */
 var BasePanel = DOMBasePanel.prototype;
 WatchPanel.prototype = Obj.extend(BasePanel,
@@ -117,8 +125,6 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.destroy.apply(this, arguments);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     initializeNode: function(oldPanelNode)
     {
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
@@ -137,23 +143,42 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         BasePanel.destroyNode.apply(this, arguments);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
     show: function(state)
     {
         if (state && state.watches)
             this.watches = state.watches;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Content
+
+    /**
+     * Executed by the user from within the Panel options menu of through
+     * the panel context menu.
+     */
     refresh: function()
     {
-        this.rebuild(true);
+        Trace.sysout("watchPanel.refresh;");
+
+        // Refresh frames (if they are currently displayed) since some bindings (arguments,
+        // local variables) could have changed (e.g. through evaluations on the command line).
+        // The panel will rebuild asynchronously.
+        // If a default global scope is displayed just rebuild now.
+        if (this.selection instanceof StackFrame)
+            this.tool.cleanScopes();
+        else
+            this.rebuild(true);
+    },
+
+    rebuild: function()
+    {
+        Trace.sysout("WatchPanel.rebuild", this.selection);
+
+        this.updateSelection(this.selection);
     },
 
     updateSelection: function(frame)
     {
-        // this method is called while the debugger has halted JS,
-        // so failures don't show up in FBS_ERRORS
         try
         {
             this.doUpdateSelection(frame);
@@ -166,7 +191,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     doUpdateSelection: function(frame)
     {
-        Trace.sysout("WatchPanel.doUpdateSelection; frame: " + frame, frame);
+        Trace.sysout("watchPanel.doUpdateSelection; frame: " + frame, frame);
 
         // When the debugger is resumed, properties of the current global (top level
         // window or an iframe) and user watch expressions are displayed.
@@ -195,36 +220,17 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Throw out the old state object.
         this.toggles = new ToggleBranch.ToggleBranch();
 
-        // Pre-expand the first top scope.
+        // Auto expand the first top scope.
         var scope = this.tree.provider.getTopScope(frame);
         this.tree.expandObject(scope);
 
-        // Asynchronously eval all user-expressions, but make sure it isn't
+        // Asynchronously evaluate all user-expressions, but make sure it isn't
         // already in-progress (to avoid infinite recursion).
         // xxxHonza: disable for now. Evaluation is done synchronously through
         // 'evalWatchesLocally'. It breaks the RDP, but since it's synchronous
         // The watch panel doesn't flash so much, which improves a lot the UX.
         //if (!this.context.evalInProgress)
         //    this.evalWatches();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Content 
-
-    showMembers: function(members, update, scrollTop)
-    {
-    },
-
-    refreshMember: function(member, value)
-    {
-        this.tree.updateMember(member, value);
-    },
-
-    rebuild: function()
-    {
-        Trace.sysout("WatchPanel.rebuild", this.selection);
-
-        this.updateSelection(this.selection);
     },
 
     showEmptyMembers: function()
@@ -243,18 +249,29 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Render the watch panel tree.
         this.tree.replace(this.panelNode, input);
 
-        // Pre-expand the global scope item.
+        // Auto expand the global scope item.
         var scope = this.context.getCurrentGlobal();
         this.tree.expandObject(scope);
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
         // TODO: Set the direction at the <body> to allow correct formatting of all relevant parts.
-        // This requires more adjustments related for rtl user agents.
+        // This requires more adjustments related for RTL user agents.
         var mainFrame = Firefox.getElementById("fbMainFrame");
         var cs = mainFrame.ownerDocument.defaultView.getComputedStyle(mainFrame);
         var watchRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         watchRow.style.direction = cs.direction;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    showMembers: function(members, update, scrollTop)
+    {
+    },
+
+    refreshMember: function(member, value)
+    {
+        this.tree.updateMember(member, value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -383,7 +400,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             self.onEvalWatches(result);
         }
 
-        // Eval through the debuggerTool.
+        // Evaluate through the debuggerTool.
         this.context.evalInProgress = true;
         this.tool.eval(this.context.currentFrame, expression, onEvaluated);
     },
@@ -398,7 +415,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         var self = this;
 
-        // xxxHonza: the entire logic related to eval result, should be refactored
+        // xxxHonza: the entire logic related to evaluate result, should be refactored
         // xxxHonza: see also ScriptPanel.onPopulateInfoTip()
         // The cache and grip objects should do most of the work automatically.
         // This method should be much simpler.
@@ -410,7 +427,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             // array with results and we want to iterate it).
             var results = gripObj.getValue();
 
-            // The number of results shuld be the same as the number of user expressions
+            // The number of results should be the same as the number of user expressions
             // in the panel.
             // xxxHonza: we should freeze the UI during the evaluation on the server side.
             if (results.length != self.watches.length)
@@ -455,16 +472,18 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             //this.tree.updateObject(watch);
         }
 
-        // Iterate over all user expressions and evaluate them using {@Firebug.CommandLine} API
+        // Iterate over all user expressions and evaluate them using {@CommandLine} API
         // Future implementation should used RDP and perhaps built-in WebConsoleActor, see:
         // https://developer.mozilla.org/en-US/docs/Tools/Web_Console/remoting
         // However, the built-in actor doesn't support .% syntax.
+        // Pass |noStateChange == true| to avoid infinite loops.
         for (var i=0; i<this.watches.length; i++)
         {
             var watch = this.watches[i];
 
-            Firebug.CommandLine.evaluate(watch.expr, this.context, null, null,
-                onSuccess.bind(this, watch), onFailure.bind(this, watch), true);
+            CommandLine.evaluate(watch.expr, this.context, null, null,
+                onSuccess.bind(this, watch), onFailure.bind(this, watch),
+                {noStateChange: true});
         }
     },
 
@@ -473,18 +492,21 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     onStartDebugging: function(context, event, packet)
     {
+        Trace.sysout("watchPanel.onStartDebugging;");
     },
 
     onStopDebugging: function(context, event, packet)
     {
+        Trace.sysout("watchPanel.onStopDebugging;");
+
         // Save state of the Watch panel for the next pause.
         this.tree.saveState(this.toggles);
 
         // Debugger is resumed so, don't forget to remove the stopped frame.
-        this.selection = null;
+        this.selection = this.getDefaultSelection();
 
         // Update the panel content.
-        this.showEmptyMembers();
+        this.updateSelection(this.selection);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -614,6 +636,34 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         });
 
         return items;
+    },
+
+    /**
+     * getPopupObject is executed when Firebug's context menu is showing.
+     * The purpose of the method is returning clicked object, which is used for inspect actions.
+     * See {@FirebugChrome.onContextShowing} for more details.
+     */
+    getPopupObject: function(target)
+    {
+        Trace.sysout("watchPanel.getPopupObject; target:", target);
+
+        // Right clicking on watch panel label doesn't produce "Inspect in..." options.
+        // (returning undefined from this method avoids these options).
+        var memberLabel = Dom.getAncestorByClass(target, "memberLabelCell");
+        if (memberLabel)
+            return;
+
+        // Right clicking on a template with associated object (repObject)
+        // allows to inspect the object. This is the default behavior.
+        var repObject = BasePanel.getPopupObject.apply(this, arguments);
+        if (repObject)
+            return this.getObjectView(repObject);
+
+        // Some members displayed in the panel can be for client objects e.g. the scope
+        // list (i.e. JSD2 environments sent over RDP).
+        var row = Dom.getAncestorByClass(target, "memberRow");
+        if (row)
+            return this.getRealRowObject(row);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

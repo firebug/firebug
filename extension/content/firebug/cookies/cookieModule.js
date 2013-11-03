@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/activableModule",
+    "firebug/chrome/rep",
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -35,10 +37,10 @@ define([
     "firebug/lib/url",
     "firebug/cookies/legacy",
 ],
-function(Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http, Css, Events, Arr,
-    BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints, CookieObserver,
-    CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions, EditCookie,
-    TraceListener, TraceModule, Firefox, BreakpointGroup, Win, Url) {
+function(ActivableModule, Rep, Xpcom, Obj, Locale, Domplate, Dom, Options, Persist, Str, Http,
+    Css, Events, Arr, BaseObserver, MenuUtils, CookieReps, CookieUtils, Cookier, Breakpoints,
+    CookieObserver, CookieClipboard, TabWatcher, HttpObserver, System, Cookie, CookiePermissions,
+    EditCookie, TraceListener, TraceModule, Firefox, BreakpointGroup, Win, Url) {
 
 // ********************************************************************************************* //
 // Constants
@@ -88,7 +90,7 @@ Firebug.registerStylesheet("chrome://firebug/skin/cookies/cookies.css");
  * to control activity of Firebug panels in order to avoid (performance) expensive
  * features.
  */
-Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
+Firebug.CookieModule = Obj.extend(ActivableModule,
 /** @lends Firebug.CookieModule */
 {
     contexts: contexts,
@@ -115,7 +117,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
         this.panelName = panelName;
         this.description = Locale.$STR("cookies.modulemanager.description");
 
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+        ActivableModule.initialize.apply(this, arguments);
 
         var permTooltip = Firebug.chrome.$("fcPermTooltip");
         permTooltip.fcEnabled = true;
@@ -158,7 +160,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        ActivableModule.initializeUI.apply(this, arguments);
 
         // Append the styleesheet to a new console popup panel introduced in Firebug 1.6
         this.addStyleSheet(null);
@@ -325,10 +327,10 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
         // The base class must be called after the context for Cookies panel is
         // properly initialized. The panel can be created inside this function
-        // (within Firebug.ActivableModule.enablePanel), which can result in
+        // (within ActivableModule.enablePanel), which can result in
         // calling CookiePanel.initialize method. This method directly calls
         // CookiePanel.refresh, which needs the context.cookies object ready.
-        Firebug.ActivableModule.initContext.apply(this, arguments);
+        ActivableModule.initContext.apply(this, arguments);
 
         // Unregister all observers if the panel is disabled.
         if (!this.isEnabled(context))
@@ -337,7 +339,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
 
     destroyContext: function(context)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        ActivableModule.destroyContext.apply(this, arguments);
 
         if (!context.cookies)
         {
@@ -561,7 +563,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
      */
     isEnabled: function(context)
     {
-        return Firebug.ActivableModule.isEnabled.apply(this, arguments);
+        return ActivableModule.isEnabled.apply(this, arguments);
     },
 
     /**
@@ -640,7 +642,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
             return Locale.$STRF("cookies.HostEnable", [host]);
         }
 
-        return Firebug.ActivableModule.getMenuLabel.apply(this, arguments);
+        return ActivableModule.getMenuLabel.apply(this, arguments);
     },
 
     // xxxHonza: This method is overriden just to provide translated strings from
@@ -1160,7 +1162,7 @@ Firebug.CookieModule = Obj.extend(Firebug.ActivableModule,
  * @domplate Represents domplate template for cookie body that is displayed if
  * a cookie entry in the cookie list is expanded.
  */
-Firebug.CookieModule.NetInfoBody = domplate(Firebug.Rep,
+Firebug.CookieModule.NetInfoBody = domplate(Rep,
 /** @lends Firebug.CookieModule.NetInfoBody */
 {
     tag:

@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
@@ -11,7 +12,7 @@ define([
     "firebug/lib/options",
     "firebug/editor/sourceEditor",
 ],
-function(Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
+function(Module, Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
 
 "use strict";
 
@@ -24,7 +25,7 @@ var TEXT_CHANGED = SourceEditor.Events.textChange;
 // ********************************************************************************************* //
 // Command Editor
 
-Firebug.CommandEditor = Obj.extend(Firebug.Module,
+Firebug.CommandEditor = Obj.extend(Module,
 {
     dispatchName: "commandEditor",
 
@@ -32,7 +33,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         if (this.editor)
             return;
@@ -147,28 +148,18 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
 
     onContextMenu: function(event)
     {
+        Events.cancelEvent(event);
+
         var popup = document.getElementById("fbCommandEditorPopup");
         Dom.eraseNode(popup);
 
-        var items = Firebug.CommandEditor.getContextMenuItems();
+        var items = Firebug.CommandEditor.editor.getContextMenuItems();
         Menu.createMenuItems(popup, items);
 
         if (!popup.childNodes.length)
             return;
 
         popup.openPopupAtScreen(event.screenX, event.screenY, true);
-    },
-
-    getContextMenuItems: function()
-    {
-        var items = [];
-        items.push({label: Locale.$STR("Cut"), commandID: "cmd_cut"});
-        items.push({label: Locale.$STR("Copy"), commandID: "cmd_copy"});
-        items.push({label: Locale.$STR("Paste"), commandID: "cmd_paste"});
-        items.push({label: Locale.$STR("Delete"), commandID: "cmd_delete"});
-        items.push("-");
-        items.push({label: Locale.$STR("SelectAll"), commandID: "cmd_selectAll"});
-        return items;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
