@@ -442,6 +442,11 @@ SourceEditor.prototype =
         return this.editorObject.getValue().replace(/\n/g, "").length;
     },
 
+    getLineCount: function()
+    {
+        return this.getDocument().lineCount();
+    },
+
     getSelectedText: function()
     {
         return this.editorObject.getSelection();

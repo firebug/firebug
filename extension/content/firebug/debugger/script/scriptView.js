@@ -220,6 +220,22 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
     search: function(text, reverse)
     {
+        // Check if the search is for a line number.
+        var m = /^[^\\]?#(\d*)$/.exec(text);
+        if (m)
+        {
+            // Don't beep if only a # has been typed.
+            if (!m[1])
+                return true;
+
+            var lineNo = +m[1];
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            {
+                this.scrollToLine(lineNo, {highlight: true});
+                return true;
+            }
+        }
+
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {

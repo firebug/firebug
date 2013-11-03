@@ -64,6 +64,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     name: "script",
     searchable: true,
+    searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
     order: 45,
@@ -646,6 +647,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     onEditorKeyDown: function(event)
     {
+        if (event.keyCode === KeyEvent.DOM_VK_L && Events.isControl(event))
+        {
+            var searchBox = Firebug.chrome.$("fbSearchBox");
+            searchBox.focus();
+            searchBox.value = "#";
+            Events.cancelEvent(event);
+        }
         if (event.keyCode === KeyEvent.DOM_VK_W && Events.isAlt(event))
         {
             this.addSelectionWatch();
