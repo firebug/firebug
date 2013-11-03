@@ -52,6 +52,15 @@ function runTest()
             var table11 = {cols: 2, rows: 3, content: text11};
             tasks.push(executeTest, "testButton11", doc, null, [table11]);
 
+            var resTest12 = doc.getElementById("resTest12");
+            var text12 = resTest12.textContent.replace(/\s/g, "");
+            var table12 = {
+                cols: resTest12.querySelectorAll("th").length,
+                rows: resTest12.rows.length - 1,
+                content: text12
+            };
+            tasks.push(executeTest, "testButton12", doc, null, [table12]);
+
             tasks.run(function() {
                 FBTest.testDone("console.table.DONE");
             });

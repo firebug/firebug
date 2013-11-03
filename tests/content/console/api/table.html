@@ -117,6 +117,11 @@
         {
             console.table(table[0]);
         }
+
+        function onExecuteTest12()
+        {
+            console.table(family, ["firstName", "(index)", "lastName", "(index)"]);
+        }
         </script>
     </head>
     <body>
@@ -136,6 +141,7 @@
                 <button id="testButton9" onclick="onExecuteTest9()">Test 9</button>
                 <button id="testButton10" onclick="onExecuteTest10()">Test 10</button>
                 <button id="testButton11" onclick="onExecuteTest11()">Test 11</button>
+                <button id="testButton12" onclick="onExecuteTest12()">Test 12</button>
             </section>
             <section id="description">
                 <h3>Steps to reproduce</h3>
@@ -313,6 +319,31 @@
                                     <tr>
                                         <td>2</td>
                                         <td>3</td>
+                                    </tr>
+                                </table>
+                            </code>
+                        </span>
+                    </li>
+                     <li>
+                        Click the <em>Test 12</em> button above<br/>
+                        <span class="ok">
+                            A table is shown inside the console looking like this:
+                            <code>
+                                <table id="resTest12">
+                                    <tr>
+                                        <th>firstName</th><th>(index)</th><th>lastName</th><th>(index)</th>
+                                    </tr>
+                                    <tr>
+                                        <td>"Susan"</td><td>"mother"</td><td>"Doyle"</td><td>"mother"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"John"</td><td>"father"</td><td>"Doyle"</td><td>"father"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Lily"</td><td>"daughter"</td><td>"Doyle"</td><td>"daughter"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>"Mike"</td><td>"son"</td><td>"Doyle"</td><td>"son"</td>
                                     </tr>
                                 </table>
                             </code>
