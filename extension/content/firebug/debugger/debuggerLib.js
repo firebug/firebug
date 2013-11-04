@@ -289,8 +289,8 @@ DebuggerLib.isExecutableLine = function(context, location)
  *
  * The object returned has this form: {key: <key>, value: <resume limit value>}
  *
- * If the debugger has reached a return statement, <key> is "<return>".
- * If an exception has been raised, <key> is "<exception>".
+ * If the debugger has reached a return statement, <key> is "return".
+ * If an exception has been raised, <key> is "exception".
  *
  * @param {object} context
  *
@@ -310,12 +310,12 @@ DebuggerLib.getResumeLimitObject = function(context)
 
     if ("return" in frameFinished)
     {
-        key = "<return>";
+        key = "return";
         value = frameFinished.return;
     }
     else if ("throw" in frameFinished)
     {
-        key = "<exception>";
+        key = "exception";
         value = frameFinished.throw;
     }
 

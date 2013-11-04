@@ -3,6 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/locale",
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
@@ -11,8 +12,8 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, ObjectClient, DOMMemberProvider,
-    DebuggerLib, WatchExpression) {
+function (FBTrace, Obj, Locale, ClientProvider, StackFrame, ScopeClient, ObjectClient, 
+    DOMMemberProvider, DebuggerLib, WatchExpression) {
 
 "use strict";
 
@@ -230,7 +231,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         resumeLimitScope = cache.getObject(resumeLimitObj.value);
 
-        resumeLimitScope.name = resumeLimitObj.key;
+        resumeLimitScope.name = Locale.$STR("watch.resumeLimit." + resumeLimitObj.key);
         resumeLimitScope.isResumeLimitValue = true;
 
         Trace.sysout("WatchProvider.appendResumeLimitValueInScope; resumeLimitScope",
