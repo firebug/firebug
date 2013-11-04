@@ -268,7 +268,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
                 // XXX This is wrong with closures, but I haven't noticed anything
                 // break and I don't know how to fix, so let's just leave it...
-                for (var i=0; i<newPath.length; i++)
+                for (var i = 0; i < newPath.length; i++)
                 {
                     var name = newPath[i];
                     object = value;
