@@ -1,25 +1,29 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/chrome/module",
     "firebug/dom/domBreakpointGroup",
 ],
-function(Module, Obj, Firebug, DOMBreakpointGroup) {
+function(Firebug, FBTrace, Obj, Module, DOMBreakpointGroup) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Module
 
-Firebug.DOMModule = Obj.extend(Module,
+var DOMModule = Obj.extend(Module,
 {
     dispatchName: "domModule",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function(prefDomain, prefNames)
     {
@@ -36,6 +40,9 @@ Firebug.DOMModule = Obj.extend(Module,
         if (Firebug.Debugger)
             Firebug.connection.removeListener(this.DebuggerListener);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context
 
     initContext: function(context, persistedState)
     {
@@ -55,11 +62,34 @@ Firebug.DOMModule = Obj.extend(Module,
 
         context.dom.breakpoints.store(context);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DOM Breakpoints
+
+    toggleBreakpoint: function(context, object, name)
+    {
+        var breakpoints = context.dom.breakpoints;
+        var bp = breakpoints.findBreakpoint(object, name);
+
+        Trace.sysout("domModule.toggleBreakpoint; " + name, object);
+
+        // Add new or remove an existing breakpoint.
+        if (bp)
+        {
+            breakpoints.removeBreakpoint(object, name);
+            this.dispatch("onDomBreakpointRemoved", [context, object, name]);
+        }
+        else
+        {
+            breakpoints.addBreakpoint(object, name, context);
+            this.dispatch("onDomBreakpointAdded", [context, object, name]);
+        }
+    }
 });
 
 // ********************************************************************************************* //
 
-Firebug.DOMModule.DebuggerListener =
+DOMModule.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
@@ -71,9 +101,12 @@ Firebug.DOMModule.DebuggerListener =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.DOMModule);
+Firebug.registerModule(DOMModule);
 
-return Firebug.DOMModule;
+// xxxHonza: backward compatibility
+Firebug.DOMModule = DOMModule;
+
+return DOMModule;
 
 // ********************************************************************************************* //
 });

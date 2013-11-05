@@ -317,8 +317,10 @@ DomBaseTree.prototype = domplate(BaseTree,
     getRowName: function(row)
     {
         var member = row.repObject;
-        var name = this.provider.getId(member.value);
+        if (!member)
+            return "";
 
+        var name = this.provider.getId(member.value);
         if (!name)
             name = member.name;
 
