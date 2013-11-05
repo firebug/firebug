@@ -231,7 +231,7 @@ Firebug.TabContext.prototype =
      * iframe. In case where the debugger is currently paused it can be the global of the
      * current execution context, but 'stoppedGlobal' is not used at the moment.
      *
-     * The return object should be unwrapped by default. We might want to append
+     * The return object should be wrapped by default. We might want to append
      * an argument 'unwrap' that auto-unwraps the return value in the future, but
      * it should be discussed since unwrapping is an action that should be rather rare.
      */
