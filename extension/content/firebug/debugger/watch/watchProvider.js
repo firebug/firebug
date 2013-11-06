@@ -7,13 +7,12 @@ define([
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
-    "firebug/debugger/clients/objectClient",
     "firebug/dom/domMemberProvider",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, Locale, ClientProvider, StackFrame, ScopeClient, ObjectClient, 
-    DOMMemberProvider, DebuggerLib, WatchExpression) {
+function (FBTrace, Obj, Locale, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider, 
+    DebuggerLib, WatchExpression) {
 
 "use strict";
 
