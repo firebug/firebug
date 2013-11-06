@@ -27,7 +27,6 @@ pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.stringCropLength", 50);
 pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
-pref("extensions.firebug.enableOrion", true);
 pref("extensions.firebug.clearAnnotationsConfirmation", true);
 
 // Remoting
