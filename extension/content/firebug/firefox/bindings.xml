@@ -1574,7 +1574,6 @@
                     "searchBox");
                 Firebug.Search.status = searchBox.value == "" || val || "notfound";
                 searchBox.setAttribute("status", Firebug.Search.status);
-                searchBox.placeholder = "";
             ]]></xbl:setter>
         </property>
 
@@ -1792,7 +1791,7 @@
 
                 if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
                     return;
-                if (event.keyCode ==  KeyEvent.DOM_VK_UP || event.keyCode ==  KeyEvent.DOM_VK_DOWN)
+                if (event.keyCode == KeyEvent.DOM_VK_UP || event.keyCode == KeyEvent.DOM_VK_DOWN)
                 {
                     var goingDown = (event.keyCode == KeyEvent.DOM_VK_DOWN);
                     var optionsPopup = document.getElementById("fbSearchOptionsPanel");
@@ -1869,7 +1868,7 @@
                     Firebug.Search.setPlaceholder();
                 }
             }
-            else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
+            else if (event.keyCode == KeyEvent.DOM_VK_RETURN)
             {
                 if (FBL.isShift(event))
                     this.searchPrev();

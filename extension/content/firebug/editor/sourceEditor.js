@@ -120,7 +120,8 @@ SourceEditor.Events =
     mouseMove: "mousemove",
     mouseOut: "mouseout",
     mouseOver: "mouseover",
-    mouseUp: "mouseup"
+    mouseUp: "mouseup",
+    keyDown: "keydown"
 };
 
 // ********************************************************************************************* //
@@ -147,10 +148,9 @@ SourceEditor.prototype =
 
     init: function(parentNode, config, callback)
     {
-        var doc = parentNode.ownerDocument;
         var onInit = this.onInit.bind(this, parentNode, config, callback);
 
-        this.loadScripts(doc, onInit);
+        this.loadScripts(parentNode.ownerDocument, onInit);
     },
 
     onInit: function(parentNode, config, callback)
@@ -442,6 +442,11 @@ SourceEditor.prototype =
         return this.editorObject.getValue().replace(/\n/g, "").length;
     },
 
+    getLineCount: function()
+    {
+        return this.getDocument().lineCount();
+    },
+
     getSelectedText: function()
     {
         return this.editorObject.getSelection();
@@ -545,6 +550,39 @@ SourceEditor.prototype =
     getDocument: function()
     {
         return this.editorObject.getDoc();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Commands
+
+    getContextMenuItems: function()
+    {
+        var items = [];
+        items.push({label: "Cut", command: Obj.bind(this.onCommand, this, "cmd_cut")});
+        items.push({label: "Copy", command: Obj.bind(this.onCommand, this, "cmd_copy")});
+        items.push({label: "Paste", command: Obj.bind(this.onCommand, this, "cmd_paste")});
+        items.push({label: "Delete", command: Obj.bind(this.onCommand, this, "cmd_delete")});
+        items.push("-");
+        items.push({label: "SelectAll", command: Obj.bind(this.onCommand, this, "cmd_selectAll")});
+        return items;
+    },
+
+    onCommand: function(event, cmd)
+    {
+        Trace.sysout("sourceEditor.onCommand; " + cmd)
+
+        var map = {
+            "cmd_selectAll": "selectAll",
+            "cmd_undo": "undo",
+            "cmd_redo": "redo",
+            "cmd_delete": "delCharAfter",
+        };
+
+        if (map[cmd])
+            return this.editorObject.execCommand(map[cmd]);
+
+        // Default command dispatch.
+        Firebug.BaseEditor.onCommand(event, cmd);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -837,16 +875,6 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getLineFromEvent: function(e)
-    {
-        var pos = {
-            left: event.pageX,
-            top: event.pageY - 60 //xxxHonza: why the top is not zero but 60 in the event?
-        };
-
-        return this.editorObject.coordsChar(pos);
-    },
 
     getLineIndex: function(target)
     {

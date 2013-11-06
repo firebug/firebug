@@ -45,7 +45,12 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
     this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
 };
 
+/**
+ * This object represents JavaScript execution frame. Instance of this object are usually
+ * created when the debugger pauses JS execution.
+ */
 StackFrame.prototype =
+/** @lends StackFrame */
 {
     getURL: function()
     {

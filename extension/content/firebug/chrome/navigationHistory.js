@@ -1,13 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/lib/dom",
     "firebug/chrome/menu",
 ],
-function(Obj, Locale, Firebug, Dom, Menu) {
+function(Module, Obj, Locale, Firebug, Dom, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,7 +23,7 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 /**
  * @class Support for back and forward pattern for navigating within Firebug UI (panels).
  */
-Firebug.NavigationHistory = Obj.extend(Firebug.Module,
+Firebug.NavigationHistory = Obj.extend(Module,
 {
     dispatchName: "navigationHistory",
 
@@ -31,7 +32,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
 
     initContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
 
         // Initialize context members.
         context.navigationHistory = [];
@@ -46,7 +47,7 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
+        Module.destroyContext.apply(this, arguments);
 
         if (persistedState)
         {

@@ -6,8 +6,9 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/debugger/clients/objectClient",
+    "firebug/console/errorCopy",
 ],
-function (FBTrace, Obj, Str, Arr, ObjectClient) {
+function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -87,6 +88,15 @@ ClientProvider.prototype =
 
     getValue: function(object)
     {
+        if (object instanceof ObjectClient)
+        {
+            // If the client object couldn't get data from the server, return the error
+            // message (the response) as the value. The UI should be able to deal with the
+            // {@ErrorCopy} object.
+            if (object.error)
+                return new ErrorCopy(object.error.message);
+        }
+
         if (Obj.isFunction(object.getValue))
             return object.getValue();
 

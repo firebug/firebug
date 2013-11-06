@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/trace",
@@ -11,7 +12,7 @@ define([
     "firebug/net/netUtils",
     "firebug/lib/domplate",
 ],
-function(Firebug, Obj, Locale, FBTrace, Dom, Css, NetMonitor, NetUtils, Domplate) {
+function(Firebug, Module, Obj, Locale, FBTrace, Dom, Css, NetMonitor, NetUtils, Domplate) {
 
 "use strict"
 
@@ -50,7 +51,7 @@ var cacheBodyTag =
  * within the Net panel. Note that opening the cache descriptor during the page load can
  * influence the caching logic (see issue 6385).
  */
-var NetCacheReader = Obj.extend(Firebug.Module,
+var NetCacheReader = Obj.extend(Module,
 /** @lends NetCacheReader */
 {
     dispatchName: "netCacheReader",
@@ -63,7 +64,7 @@ var NetCacheReader = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
 
         // Register a listener so, we can create a custom info tab within request info body.
         NetMonitor.NetInfoBody.addListener(this);
@@ -71,7 +72,7 @@ var NetCacheReader = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
 
         NetMonitor.NetInfoBody.removeListener(this);
     },

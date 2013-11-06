@@ -3,11 +3,12 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/eventSource",
     "firebug/lib/trace",
     "firebug/lib/tool",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
-function (Obj, Firebug, FBTrace, Tool, BreakpointStore) {
+function (Obj, Firebug, EventSource, FBTrace, Tool, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -35,7 +36,7 @@ function BreakpointTool(context)
  *
  * xxxHonza: It should be derived from Tool base class.
  */
-BreakpointTool.prototype = Obj.extend(new Firebug.EventSource(),
+BreakpointTool.prototype = Obj.extend(new EventSource(),
 /** @lends BreakpointTool */
 {
     dispatchName: "breakpointTool",

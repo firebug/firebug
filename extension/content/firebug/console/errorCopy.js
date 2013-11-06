@@ -11,13 +11,15 @@ function(FBTrace, FirebugReps) {
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
 // ********************************************************************************************* //
 // ErrorCopy Object Implementation
 
+/**
+ * @object Represents custom error object with an error message. The UI should be able
+ * to deal with the object through {@Exception} template (firebug/console/exceptionRep module)
+ */
 var ErrorCopy = function(message)
+/** @lends ErrorCopy */
 {
     this.message = message;
 }

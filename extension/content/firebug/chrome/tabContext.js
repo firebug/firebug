@@ -8,9 +8,10 @@ define([
     "firebug/lib/url",
     "firebug/chrome/window",
     "firebug/lib/css",
+    "firebug/lib/wrapper",
     "firebug/chrome/plugin",
 ],
-function(Obj, Arr, CompilationUnit, Events, Url, Win, Css) {
+function(Obj, Arr, CompilationUnit, Events, Url, Win, Css, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -225,6 +226,15 @@ Firebug.TabContext.prototype =
         return Firebug.chrome;
     },
 
+    /**
+     * Returns the current global scope. It's usually the current window or an embedded
+     * iframe. In case where the debugger is currently paused it can be the global of the
+     * current execution context, but 'stoppedGlobal' is not used at the moment.
+     *
+     * The return object should be wrapped by default. We might want to append
+     * an argument 'unwrap' that auto-unwraps the return value in the future, but
+     * it should be discussed since unwrapping is an action that should be rather rare.
+     */
     getCurrentGlobal: function()
     {
         return this.stoppedGlobal || this.baseWindow || this.window;
@@ -439,6 +449,9 @@ Firebug.TabContext.prototype =
     {
         if (!this.invalidPanels)
             this.invalidPanels = {};
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("tabContext.invalidatePanels; " + Arr.cloneArray(arguments).toString());
 
         for (var i = 0; i < arguments.length; ++i)
         {

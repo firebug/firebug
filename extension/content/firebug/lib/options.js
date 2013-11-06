@@ -4,7 +4,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/trace"
 ],
-function factoryOptions(Events, FBTrace) {
+function (Events, FBTrace) {
+
+"use strict";
 
 // ********************************************************************************************* //
 // Constants

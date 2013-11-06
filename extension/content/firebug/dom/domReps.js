@@ -4,42 +4,34 @@
 
 define([
     "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
+    "firebug/chrome/rep",
+    "firebug/chrome/reps",
     "firebug/dom/toggleBranch",
     "firebug/dom/domModule",
     "firebug/dom/domMemberProvider",
 ],
-function(Firebug, Domplate, FirebugReps, Locale, Events, Options, Dom, Css, Str, ToggleBranch,
-    DOMModule, DOMMemberProvider) {
+function(Firebug, FBTrace, Domplate, Locale, Events, Options, Dom, Css, Str,
+    Rep, FirebugReps, ToggleBranch, DOMModule, DOMMemberProvider) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-const insertSliceSize = 18;
-const insertInterval = 40;
+var insertSliceSize = 18;
+var insertInterval = 40;
 
 var {domplate, TABLE, TBODY, TR, TD, DIV, SPAN, TAG, FOR} = Domplate;
 
 // ********************************************************************************************* //
-
-var WatchRowTag =
-    TR({"class": "watchNewRow", level: 0},
-        TD({"class": "watchEditCell", colspan: 3},
-            DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
-                "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
-                    Locale.$STR("NewWatch")
-            )
-        )
-    );
 
 var SizerRow =
     TR({role: "presentation"},
@@ -48,7 +40,7 @@ var SizerRow =
         TD({width: "70%"})
     );
 
-var DirTablePlate = domplate(Firebug.Rep,
+var DirTablePlate = domplate(Rep,
 {
     memberRowTag:
         TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
@@ -89,15 +81,6 @@ var DirTablePlate = domplate(Firebug.Rep,
             )
         ),
 
-    watchTag:
-        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
-               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
-            TBODY({role: "presentation"},
-                SizerRow,
-                WatchRowTag
-            )
-        ),
-
     tableTag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
             _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
@@ -123,7 +106,7 @@ var DirTablePlate = domplate(Firebug.Rep,
             name: Locale.$STR("firebug.dom.noChildren2"),
             type: "string",
             rowClass: "memberRow-string",
-            tag: Firebug.Rep.tag,
+            tag: Rep.tag,
             prefix: ""
         }];
     },

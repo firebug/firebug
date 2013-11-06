@@ -4,6 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/trace",
+    "firebug/chrome/panel",
     "firebug/chrome/reps",
     "firebug/lib/events",
     "firebug/lib/wrapper",
@@ -16,8 +17,8 @@ define([
     "firebug/debugger/stack/stackTrace",
     "firebug/lib/options",
 ],
-function(Obj, Firebug, FBTrace, FirebugReps, Events, Wrapper, StackFrame, Css, Arr, Dom, Menu,
-    StackFrameRep, StackTrace, Options) {
+function(Obj, Firebug, FBTrace, Panel, FirebugReps, Events, Wrapper, StackFrame, Css, Arr, Dom,
+    Menu, StackFrameRep, StackTrace, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -39,12 +40,12 @@ var TraceError = FBTrace.to("DBG_ERRORS");
  * Panel location is an instance of StackTrace object.
  * Panel selection is an instance of StackFrame object.
  *
- * The content of this panel is synced with ThreadClient's stack frame cache using
+ * The content of this panel is synchronized with ThreadClient's stack frame cache using
  * 'framesadded' and 'framescleared' events. These events are re-sent from {@DebuggerTool},
  * which is registered ThreadClient's listener. 
  */
 function CallstackPanel() {}
-CallstackPanel.prototype = Obj.extend(Firebug.Panel,
+CallstackPanel.prototype = Obj.extend(Panel,
 /** @lends CallstackPanel */
 {
     dispatchName: "CallstackPanel",
@@ -64,7 +65,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     initialize: function(context, doc)
     {
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
 
         // Listen for frames added/cleared events to sync content of this panel.
         this.tool = this.context.getTool("debugger");
@@ -73,7 +74,7 @@ CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     destroy: function(state)
     {
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
 
         // Unregister all listeners.
         this.tool.removeListener(this);

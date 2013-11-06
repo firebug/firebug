@@ -18,6 +18,7 @@ function ObjectClient(grip, cache)
     this.grip = grip;
     this.cache = cache;
     this.properties = null;
+    this.error = null;
 }
 
 ObjectClient.prototype =
@@ -148,12 +149,28 @@ ObjectClient.prototype =
             {
                 if (response.error)
                 {
+                    // This should rarely happen. It's rather an indication that the UI isn't
+                    // properly refreshed and the client is trying to get an actor that doesn't
+                    // exist on the server side anymore.
+
                     FBTrace.sysout("objectGrip.getPrototypeAndProperties; ERROR " +
-                        response.error + ": " + response.message, response);
-                    return [];
+                        response.error + ": " + response.message, {
+                            response: response,
+                            object: self,
+                    });
+
+                    // Set an error flag and empty list of properties to avoid infinite recursion
+                    // (endless/asynchronous trying to get the properties from the server side).
+                    // The UI is responsible for checking the flag and displaying proper message.
+                    self.error = response;
+                    self.properties = [];
+                }
+                else
+                {
+                    // Parse returned properties.
+                    self.properties = self.parseProperties(response.ownProperties);
                 }
 
-                self.properties = self.parseProperties(response.ownProperties);
                 return self.properties;
             },
             function onError(response)

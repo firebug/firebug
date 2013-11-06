@@ -100,6 +100,8 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         object = this.getLocalObject(object);
         if (object)
             return Obj.hasProperties(object);
+
+        return false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

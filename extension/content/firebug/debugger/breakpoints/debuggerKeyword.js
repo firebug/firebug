@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/debugger/breakpoints/breakpointStore",
 ],
-function(FBTrace, Obj, Locale, BreakpointStore) {
+function(Module, FBTrace, Obj, Locale, BreakpointStore) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,7 +32,7 @@ var Trace = FBTrace.to("DBG_BREAKPOINTS");
  * 2) shouldResumeDebugger: disabled breakpoint has high priority and so it can
  *    be used to prevent the debugger keyword from halting the debugger.
  */
-var DebuggerKeyword = Obj.extend(Firebug.Module,
+var DebuggerKeyword = Obj.extend(Module,
 /** @lends DebuggerKeyword */
 {
     dispatchName: "debuggerKeyword",

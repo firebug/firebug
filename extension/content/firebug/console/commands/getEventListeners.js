@@ -3,6 +3,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
@@ -13,7 +14,8 @@ define([
     "firebug/console/console",
     "firebug/chrome/tableRep",
 ],
-function(Firebug, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console, TableRep) {
+function(Firebug, Module, FBTrace, Obj, Locale, Wrapper, Xpcom, Events, Domplate, Console,
+    TableRep) {
 
 "use strict";
 
@@ -52,7 +54,7 @@ var parents = "Parents";
  * > getEventListeners(target);             // pretty print log is created.
  * > getEventListeners(target).click[0];    // pretty print log is not created.
  */
-var GetEventListenersModule = Obj.extend(Firebug.Module,
+var GetEventListenersModule = Obj.extend(Module,
 /** @lends GetEventListenersModule */
 {
     dispatchName: "getEventListenersModule",
@@ -61,13 +63,13 @@ var GetEventListenersModule = Obj.extend(Firebug.Module,
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Console.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Console.removeListener(this);
     },
 

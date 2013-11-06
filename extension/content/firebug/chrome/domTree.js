@@ -463,8 +463,6 @@ DomTree.prototype = domplate(
 
     doUpdateObject: function(object)
     {
-        Trace.sysout("domTree.updateObject;", object);
-
         var row = this.getRow(object);
 
         // The input.object itself (the root) doesn't have a row.
@@ -492,6 +490,12 @@ DomTree.prototype = domplate(
         var expanded = Css.hasClass(row, "opened");
         if (expanded)
             this.toggleRow(row);
+
+        Trace.sysout("domTree.updateObject;", {
+            object: object,
+            member: member,
+            row: row,
+        });
 
         // Generate new row with new value.
         var rowTag = this.getRowTag();

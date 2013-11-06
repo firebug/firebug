@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/panel",
+    "firebug/chrome/rep",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -23,18 +25,18 @@ define([
     "firebug/lib/url",
     "firebug/css/cssModule",
     "firebug/css/cssReps",
+    "firebug/chrome/module",
     "firebug/debugger/breakpoints/breakpointGroup",
-    "firebug/console/commandLine",
-    "firebug/editor/sourceEditor",
+    "firebug/html/htmlEditor",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
     "firebug/html/layout"
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
+function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
-    Url, CSSModule, CSSInfoTip, BreakpointGroup, CommandLine, SourceEditor) {
+    Url, CSSModule, CSSInfoTip, Module, BreakpointGroup, HTMLEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -53,25 +55,25 @@ var KeyEvent = window.KeyEvent;
 
 // ********************************************************************************************* //
 
-Firebug.HTMLModule = Obj.extend(Firebug.Module,
+Firebug.HTMLModule = Obj.extend(Module,
 {
     dispatchName: "htmlModule",
 
     initialize: function(prefDomain, prefNames)
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         Firebug.connection.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
+        Module.initContext.apply(this, arguments);
         context.mutationBreakpoints = new MutationBreakpointGroup(context);
     },
 
@@ -82,7 +84,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Module.destroyContext.apply(this, arguments);
+        Module.destroyContext.apply(this, arguments);
 
         context.mutationBreakpoints.store(context);
     },
@@ -106,7 +108,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = Obj.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = Obj.extend(Panel, HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {
@@ -294,15 +296,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     startEditingNode: function(node, box, editor, type)
     {
-        switch (type)
-        {
-            case "html":
-            case "xhtml":
-                this.startEditingHTMLNode(node, box, editor);
-                break;
-            default:
-                this.startEditingXMLNode(node, box, editor);
-        }
+        if (type === "html" || type === "xhtml")
+            this.startEditingHTMLNode(node, box, editor);
+        else
+            this.startEditingXMLNode(node, box, editor);
     },
 
     startEditingXMLNode: function(node, box, editor)
@@ -1403,6 +1400,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     name: "html",
     searchable: true,
+    searchPlaceholder: "search.html.Search_by_text_or_CSS_selector",
     breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
@@ -1419,16 +1417,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onKeyPress = this.onKeyPress.bind(this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
         Firebug.CSSModule.addListener(this);
-        CommandLine.addListener(this);
     },
 
     destroy: function(state)
     {
         Persist.persistObjects(this, state);
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
 
         delete this.embeddedBrowserParents;
         delete this.embeddedBrowserDocument;
@@ -1452,7 +1449,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
         Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -1469,7 +1466,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             delete this.ioBox;
         }
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -1736,6 +1733,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return !search.noMatch && (loopAround ? "wraparound" : true);
     },
 
+    shouldIgnoreIntermediateSearchFailure: function(value)
+    {
+        // An extension of the search text could still be a valid selector,
+        // so don't signal an error.
+        return true;
+    },
+
     getSearchOptionsMenuItems: function()
     {
         return [
@@ -1886,7 +1890,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 var type;
 
-                if (Xml.isElementHTML(node) || Xml.isElementXHTML(node))
+                if (Xml.isElementHTMLOrXHTML(node))
                     type = "HTML";
                 else if (Xml.isElementMathML(node))
                     type = "MathML";
@@ -2006,31 +2010,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
     },
 
-    /**
-     * Returns the inspector variables ($0, $1, ... $5).
-     *
-     * @param {object} [vars] If provided, extends the |vars| object with the inspector variables.
-     *                        Otherwise, the function returns a new object with the variables.
-     *
-     * @return {object} An object, whose keys are the variable name and the values 
-     *                  the variable values.
-     */
-    getInspectorVars: function(vars)
+    getInspectorVars: function()
     {
-        vars = vars || {};
+        var vars = {};
         for (var i=0; i<this.inspectorHistory.length; i++)
             vars["$"+i] = this.inspectorHistory[i] || null;
 
         return vars;
-    },
-
-    /**
-     * Used by CommandLineExposed to extend the evaluation binding variables.
-     */
-    extendCommandLineVars: function(vars)
-    {
-        // Extending the inspector variables to the Command Line Bindings.
-        this.getInspectorVars(vars);
     },
 
     setEntityDisplay: function(event, type)
@@ -2550,177 +2536,11 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 });
 
 // ********************************************************************************************* //
-// HTMLEditor
-
-function HTMLEditor(doc)
-{
-    this.box = this.tag.replace({}, doc, this);
-
-    this.onHTMLEditorTextChangeListener = this.onHTMLEditorTextChange.bind(this);
-
-    var config = {
-        mode: "htmlmixed",
-        readOnly: false,
-        gutters: []
-    };
-    // Initialize the source editor.
-    this.editor = new SourceEditor();
-    this.editor.init(this.box, config, this.onHTMLEditorInitialize.bind(this));
-}
-
-HTMLEditor.prototype = domplate(Firebug.BaseEditor,
-{
-    multiLine: true,
-
-    tabNavigation: false,
-
-    arrowCompletion:false,
-
-    tag: DIV({"class": "styleSheetEditor fullPanelEditor"}),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onHTMLEditorInitialize: function()
-    {
-        this.editor.addEventListener(SourceEditor.Events.textChange,
-            this.onHTMLEditorTextChangeListener);
-    },
-
-    getValue: function()
-    {
-        return this.editor.getText();
-    },
-
-    setValue: function(value)
-    {
-        return this.editor.setText(value, "htmlmixed");
-    },
-
-    show: function(target, panel, value, textSize)
-    {
-        this.target = target;
-        this.panel = panel;
-        var el = target.repObject;
-        if (this.innerEditMode)
-        {
-            this.editingParent = el;
-        }
-        else
-        {
-            this.editingRange = el.ownerDocument.createRange();
-            this.editingRange.selectNode(el);
-            this.originalLocalName = el.localName;
-        }
-
-        // Append The editor to the Div(box);
-        this.panel.panelNode.appendChild(this.box);
-        this.editor.setText(value, "htmlmixed");
-
-        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
-        command.setAttribute("checked", true);
-    },
-
-    hide: function()
-    {
-        var command = Firebug.chrome.$("cmd_firebug_toggleHTMLEditing");
-        command.setAttribute("checked", false);
-
-        this.panel.panelNode.removeChild(this.box);
-
-        delete this.editingParent;
-        delete this.editingRange;
-        delete this.originalLocalName;
-        delete this.target;
-        delete this.panel;
-    },
-
-    getNewSelection: function(fragment)
-    {
-        // Get a new element to select in the HTML panel. An element with the
-        // same localName is preferred, or just any element. If there is none,
-        // we choose the parent instead.
-        var found = null;
-        var nodes = fragment.childNodes;
-        for (var i = 0; i < nodes.length; ++i)
-        {
-            var n = nodes[i];
-            if (n.nodeType === Node.ELEMENT_NODE)
-            {
-                if (n.localName === this.originalLocalName)
-                    return n;
-                if (!found)
-                    found = n;
-            }
-        }
-        if (found)
-            return found;
-        return this.editingRange.startContainer;
-    },
-
-    saveEdit: function(target, value, previousValue)
-    {
-        if (this.innerEditMode)
-        {
-            try
-            {
-                // xxxHonza: Catch "can't access dead object" exception.
-                this.editingParent.innerHTML = value;
-            }
-            catch (e)
-            {
-                FBTrace.sysout("htmlPanel.saveEdit; EXCEPTION " + e, e);
-            }
-        }
-        else
-        {
-            try
-            {
-                var range = this.editingRange;
-                var fragment = range.createContextualFragment(value);
-                var sel = this.getNewSelection(fragment);
-
-                var cnl = fragment.childNodes.length;
-                range.deleteContents();
-                range.insertNode(fragment);
-                var sc = range.startContainer, so = range.startOffset;
-                range.setEnd(sc, so + cnl);
-
-                this.panel.select(sel, false, true);
-
-                // Clear and update the status path, to make sure it doesn't
-                // show elements no longer in the DOM.
-                Firebug.chrome.clearStatusPath();
-                Firebug.chrome.syncStatusPath();
-            }
-            catch (e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("HTMLEditor.saveEdit; EXCEPTION " + e, e);
-            }
-        }
-    },
-
-    endEditing: function()
-    {
-        //this.panel.markChange();
-        this.panel.setEditEnableState(true);
-        return true;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onHTMLEditorTextChange: function()
-    {
-        Firebug.Editor.update();
-    }
-});
-
-// ********************************************************************************************* //
 // Editors
 
 Firebug.HTMLPanel.Editors = {
-    html : HTMLEditor,
-    Attribute : AttributeEditor,
+    html: HTMLEditor,
+    Attribute: AttributeEditor,
     TextNode: TextNodeEditor,
     TextData: TextDataEditor
 };
@@ -2730,7 +2550,7 @@ Firebug.HTMLPanel.Editors = {
 
 function getEmptyElementTag(node)
 {
-    var isXhtml= Xml.isElementXHTML(node);
+    var isXhtml = Xml.isElementXHTML(node);
     if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else
@@ -3023,7 +2843,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.type = type;
 };
 
-Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
+Firebug.HTMLModule.BreakpointRep = domplate(Rep,
 {
     inspectable: false,
 

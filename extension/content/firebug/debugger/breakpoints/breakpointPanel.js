@@ -2,6 +2,7 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/panel",
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/chrome/reps",
@@ -14,7 +15,7 @@ define([
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/lib/url",
 ],
-function(Firebug, Obj, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
+function(Firebug, Panel, Obj, FBTrace, FirebugReps, Locale, Events, StackFrame, Persist,
     SourceFileRenamer, Breakpoint, BreakpointStore, Url) {
 
 "use strict";
@@ -35,7 +36,7 @@ function BreakpointPanel()
 /**
  * @panel Represents the Breakpoints side panel available within the Script panel.
  */
-BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
+BreakpointPanel.prototype = Obj.extend(Panel,
 /** @lends BreakpointPanel */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +56,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.groupOpened = [];
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
 
         // Listen to breakpoint changes (add/remove/enable/disable).
         // These events are used to refresh the panel content.
@@ -66,7 +67,7 @@ BreakpointPanel.prototype = Obj.extend(Firebug.Panel,
     {
         state.groupOpened = this.groupOpened;
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Panel.destroy.apply(this, arguments);
 
         this.context.getTool("breakpoint").removeListener(this);
     },

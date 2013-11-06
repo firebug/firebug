@@ -1,8 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/panel",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -11,8 +13,10 @@ define([
     "firebug/lib/xml",
     "firebug/chrome/menu",
     "firebug/editor/editor",
+    "firebug/chrome/measureBox",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
+function(Firebug, Panel, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Xml, Menu,
+    Editor, MeasureBox) {
 
 "use strict"
 
@@ -30,7 +34,7 @@ var {domplate, DIV, SPAN} = Domplate;
  * The layout data editing is done through {@LayoutEditor} object.
  */
 function LayoutPanel() {}
-LayoutPanel.prototype = Obj.extend(Firebug.Panel,
+LayoutPanel.prototype = Obj.extend(Panel,
 /** @lends LayoutPanel */
 {
     name: "layout",
@@ -264,7 +268,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
         this.onAfterPaint = Obj.bindFixed(this.onMozAfterPaint, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Panel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -272,7 +276,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.Panel.initializeNode.apply(this, arguments);
+        Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -280,7 +284,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
         Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -469,17 +473,18 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     getMaxCharWidth: function(args, node)
     {
-        Firebug.MeasureBox.startMeasuring(node);
+        MeasureBox.startMeasuring(node);
+
         var maxWidth = Math.max(
-            Firebug.MeasureBox.measureText(args.marginLeft + "").width,
-            Firebug.MeasureBox.measureText(args.marginRight + "").width,
-            Firebug.MeasureBox.measureText(args.borderLeft + "").width,
-            Firebug.MeasureBox.measureText(args.borderRight + "").width,
-            Firebug.MeasureBox.measureText(args.paddingLeft + "").width,
-            Firebug.MeasureBox.measureText(args.paddingRight + "").width
+            MeasureBox.measureText(args.marginLeft + "").width,
+            MeasureBox.measureText(args.marginRight + "").width,
+            MeasureBox.measureText(args.borderLeft + "").width,
+            MeasureBox.measureText(args.borderRight + "").width,
+            MeasureBox.measureText(args.paddingLeft + "").width,
+            MeasureBox.measureText(args.paddingRight + "").width
         );
 
-        Firebug.MeasureBox.stopMeasuring();
+        MeasureBox.stopMeasuring();
         return maxWidth;
     },
 

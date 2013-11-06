@@ -2,6 +2,8 @@
 
 define([
     "firebug/firebug",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/console/errors",
@@ -19,7 +21,7 @@ define([
     "firebug/lib/events",
     "firebug/chrome/panelActivation",
 ],
-function(Firebug, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
+function(Firebug, Module, Rep, FBTrace, Domplate, Errors, ErrorMessageObj, FirebugReps, Locale, Url, Str,
     SourceLink, Dom, Css, Obj, Menu, System, Events, PanelActivation) {
 
 "use strict"
@@ -42,7 +44,7 @@ var Trace = FBTrace.to("DBG_ERRORLOG");
  * @domplate Domplate template used to represent Error logs in the UI. Registered as Firebug rep.
  * This template is used for {@ErrorMessageObj} instances.
  */
-var ErrorMessage = domplate(Firebug.Rep,
+var ErrorMessage = domplate(Rep,
 /** @lends ErrorMessage */
 {
     className: "errorMessage",
@@ -434,7 +436,7 @@ var ErrorMessage = domplate(Firebug.Rep,
  * 2) Error logs can also display a breakpoint that can be created or removed, which is
  *    also asynchronous.
  */
-var ErrorMessageUpdater = Obj.extend(Firebug.Module,
+var ErrorMessageUpdater = Obj.extend(Module,
 /** @lends ErrorMessageUpdater */
 {
     dispatchName: "ErrorMessageUpdater",
@@ -444,13 +446,13 @@ var ErrorMessageUpdater = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        Firebug.Module.initialize.apply(this, arguments);
+        Module.initialize.apply(this, arguments);
         PanelActivation.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
         PanelActivation.removeListener(this);
     },
 

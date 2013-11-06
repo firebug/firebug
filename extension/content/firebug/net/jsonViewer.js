@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
@@ -17,7 +18,7 @@ define([
     "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
+function(Module, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
     ToggleBranch, Arr, System) {
 
 "use strict";
@@ -45,7 +46,7 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
+Firebug.JSONViewerModel = Obj.extend(Module,
 {
     dispatchName: "jsonViewer",
     contentTypes: contentTypes,

@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
@@ -13,8 +14,8 @@ define([
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale, ScopeClient,
-    WatchExpression) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale,
+    ScopeClient, WatchExpression) {
 
 // ********************************************************************************************* //
 // Constants
@@ -75,7 +76,7 @@ WatchTree.prototype = domplate(BaseTree,
     getType: function(object)
     {
         // xxxHonza: this must be done through a decorator that can be also reused
-        // in the DOM panel (applying types like: userFunction, dom Function, domClass, etc.)
+        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
 
         if (object && Obj.isFunction(object.getType))
         {

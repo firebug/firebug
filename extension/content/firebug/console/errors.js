@@ -1,8 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/chrome/reps",
     "firebug/lib/xpcom",
     "firebug/console/console",
     "firebug/lib/css",
@@ -14,7 +16,7 @@ define([
     "firebug/lib/events",
     "firebug/console/errorStackTraceObserver",
 ],
-function(Obj, Firebug, Xpcom, Console, Css, Win, Arr, Str, BreakpointStore,
+function(Module, Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str, BreakpointStore,
     ErrorMessageObj, Eventsm, ErrorStackTraceObserver) {
 
 // ********************************************************************************************* //
@@ -67,7 +69,7 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 /**
  * @module
  */
-var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
+var Errors = Firebug.Errors = Obj.extend(Module,
 /** @lends Errors */
 {
     dispatchName: "errors",
@@ -85,7 +87,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         // Make sure the error observer is removed.
         this.stopObserving();
 
-        Firebug.Module.shutdown.apply(this, arguments);
+        Module.shutdown.apply(this, arguments);
     },
 
     initContext: function(context)

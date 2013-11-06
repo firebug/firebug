@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/domplate",
@@ -17,8 +19,8 @@ define([
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/debugger/stack/stackTrace",
 ],
-function(FBTrace, Obj, Domplate, Reps, StackFrame, StackFrameRep, SourceFile, Events, Css, Dom,
-    Url, Locale, DebuggerLib, BreakpointStore, StackTrace) {
+function(Module, Rep, FBTrace, Obj, Domplate, Reps, StackFrame, StackFrameRep, SourceFile, Events,
+    Css, Dom, Url, Locale, DebuggerLib, BreakpointStore, StackTrace) {
 
 "use strict";
 
@@ -36,7 +38,7 @@ var {domplate, A, SPAN, FOR, TAG, DIV} = Domplate;
 /**
  * @module The modules implements 'debug', 'undebug', 'monitor' and 'unmonitor' commands.
  */
-var FunctionMonitor = Obj.extend(Firebug.Module,
+var FunctionMonitor = Obj.extend(Module,
 /** @lends FunctionMonitor */
 {
     dispatchName: "functionMonitor",
@@ -189,7 +191,7 @@ function FunctionLog(frame, stackTrace)
 // ********************************************************************************************* //
 // Function Monitor Rep
 
-var FunctionMonitorRep = domplate(Firebug.Rep,
+var FunctionMonitorRep = domplate(Rep,
 {
     className: "functionCall",
 

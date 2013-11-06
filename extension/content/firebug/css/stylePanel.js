@@ -350,7 +350,7 @@ CSSStylePanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             // Helper array for all shorthand properties for the current property.
             prop.computed = {};
 
-            // Get all shorthand propertis.
+            // Get all shorthand properties.
             var dummyStyle = dummyElement.style;
 
             // xxxHonza: Not sure why this happens.
