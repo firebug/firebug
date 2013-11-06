@@ -36,13 +36,8 @@ function ScriptView()
 }
 
 /**
- * ScriptView wraps SourceEditor component that is built on top of Orion editor.
+ * ScriptView wraps SourceEditor component that is built on top of CodeMirror editor.
  * This object is responsible for displaying JS source code in the debugger panel.
- *
- * TODO:
- * 1) Since the {@ScriptView} is using Orion's private API, we should have some
- * tests (could be within the lib group) that are checking every new Orion version.
- *
  */
 ScriptView.prototype = Obj.extend(new EventSource(),
 /** @lends ScriptView */

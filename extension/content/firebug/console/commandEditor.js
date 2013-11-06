@@ -38,16 +38,6 @@ Firebug.CommandEditor = Obj.extend(Module,
         if (this.editor)
             return;
 
-        // The current implementation of the SourceEditor (based on Orion) doesn't
-        // support zooming. So, the TextEditor (based on textarea) can be used
-        // by setting extensions.firebug.enableOrion pref to false.
-        // See issue 5678
-        // xxxFashid:This(Support zooming) should be tested with Codemirror.
-        /*if (typeof(SourceEditor) != "undefined" && Options.get("enableOrion"))
-            this.editor = new SourceEditor();
-        else
-            this.editor = new TextEditor();*/
-
         this.editor = new SourceEditor();
 
         var config =
@@ -248,9 +238,9 @@ Firebug.CommandEditor = Obj.extend(Module,
         if (!this.editor)
             return;
 
-        // The source editor doesn't have to be initialized at this point.
         if (this.editor instanceof SourceEditor)
         {
+            // The source editor doesn't have to be initialized at this point.
             if (!this.editor.isInitialized())
             {
                 if (FBTrace.DBG_ERRORS)
@@ -267,6 +257,7 @@ Firebug.CommandEditor = Obj.extend(Module,
         }
         else
         {
+            // support for TextEditor, not used at the moment
             this.editor.textBox.style.fontSizeAdjust = adjust;
         }
     }
@@ -289,8 +280,8 @@ Firebug.CommandEditor.__defineSetter__("value", function(val)
 // Text Editor
 
 /**
- * A simple <textbox> element is used in environments where the Orion SourceEditor is not
- * available (such as SeaMonkey)
+ * A text editor based on a simple <textbox> element. Not currently used.
+ * TODO get rid of this if CodeMirror works well enough.
  */
 function TextEditor() {}
 TextEditor.prototype =
