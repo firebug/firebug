@@ -64,7 +64,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     {
         DOMModule.removeListener(this);
 
-        Panel.destroy.apply(this, arguments);
+        DOMBasePanel.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
