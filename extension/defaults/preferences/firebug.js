@@ -172,4 +172,4 @@ pref("extensions.firebug.key.shortcut.toggleBreakOn", "accel alt b");
 pref("extensions.firebug.a11y.enable", false);
 
 // Known Issues
-pref("extensions.firebug.showSlowJSDMessage", true);
+pref("extensions.firebug.showSlowJSDMessage2", true);

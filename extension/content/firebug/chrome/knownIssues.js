@@ -49,12 +49,14 @@ var slowJsdRep = domplate(Firebug.Rep,
                     TR(
                         TD({"valign": "middle"},
                             SPAN({"class": "slowJSD"})
-                        ),
+                        )
+
+                        /*, xxxHonza: see issue 6942
                         TD({"valign": "middle", "style": "white-space: nowrap;"},
                             BUTTON({onclick: "$onClick"},
                                 Locale.$STR("knownissues.message.slowJSD.GotIt")
                             )
-                        )
+                        )*/
                     )
                 )
             )
@@ -62,7 +64,7 @@ var slowJsdRep = domplate(Firebug.Rep,
 
     onClick: function(event)
     {
-        Options.set("showSlowJSDMessage", false);
+        Options.set("showSlowJSDMessage2", false);
 
         var row = Dom.getAncestorByClass(event.target, "logRow");
         row.parentNode.removeChild(row);
@@ -106,7 +108,7 @@ var KnownIssues = Obj.extend(Firebug.Module,
         Firebug.Module.initContext.apply(this, arguments);
 
         // Initialize default value.
-        context.showSlowJSDMessage = Options.get("showSlowJSDMessage");
+        context.showSlowJSDMessage = Options.get("showSlowJSDMessage2");
 
         this.showSlowJSDMessage(context);
     },
