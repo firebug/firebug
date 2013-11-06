@@ -876,16 +876,6 @@ SourceEditor.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getLineFromEvent: function(e)
-    {
-        var pos = {
-            left: event.pageX,
-            top: event.pageY - 60 //xxxHonza: why the top is not zero but 60 in the event?
-        };
-
-        return this.editorObject.coordsChar(pos);
-    },
-
     getLineIndex: function(target)
     {
         // xxxHonza: the target provided by 'contextmenu' event is wrong and so,
