@@ -286,22 +286,22 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(Obj.bindFixed(function()
-            {
-                if (match.fullNodeMatch)
-                {
-                    this.selectWholeNode(nodeBox);
-                }
-                else
-                {
-                    var reMatch = match.match;
-                    this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
-                        reMatch.caseSensitive);
-                }
+            // Force a reflow to make sure search highlighting works (issue 6952).
+            nodeBox.offsetWidth;
 
-                Events.dispatch([Firebug.A11yModel], "onHTMLSearchMatchFound",
-                    [panelNode.ownerPanel, match]);
-            }, this));
+            if (match.fullNodeMatch)
+            {
+                this.selectWholeNode(nodeBox);
+            }
+            else
+            {
+                var reMatch = match.match;
+                this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
+                    reMatch.caseSensitive);
+            }
+
+            Events.dispatch([Firebug.A11yModel], "onHTMLSearchMatchFound",
+                [panelNode.ownerPanel, match]);
         };
 
         /**
