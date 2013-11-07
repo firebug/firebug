@@ -804,6 +804,10 @@ SourceEditor.prototype =
         if (handle)
             this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
 
+        // Make sure the debug location marker is not removed together with the breakpoint.
+        if (this.debugLocation == lineNo)
+            this.setDebugLocation(lineNo);
+
         // dispatch event;
         if (this.bpChangingHandlers)
         {
