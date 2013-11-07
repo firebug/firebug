@@ -115,7 +115,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         var cache = stackFrame.context.clientCache;
 
-        this.appendResumeLimitValueInScope(stackFrame, cache);
+        this.appendFrameResultValueInScope(stackFrame, cache);
 
         // Append 'this' as the first scope. This is not a real 'scope',
         // but useful for debugging.
@@ -222,23 +222,23 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
      * @param {object} stackFrame
      * @param {object} cache
      */
-    appendResumeLimitValueInScope: function(stackFrame, cache)
+    appendFrameResultValueInScope: function(stackFrame, cache)
     {
-        var resumeLimitObj = DebuggerLib.getResumeLimitObject(stackFrame.context);
-        if (!resumeLimitObj || !resumeLimitObj.key)
+        var frameResultObj = DebuggerLib.getFrameResultObject(stackFrame.context);
+        if (!frameResultObj || !frameResultObj.type)
             return;
 
-        var resumeLimitScope;
+        var frameResultScope;
 
-        resumeLimitScope = cache.getObject(resumeLimitObj.value);
+        frameResultScope = cache.getObject(frameResultObj.value);
 
-        resumeLimitScope.name = Locale.$STR("watch.resumeLimit." + resumeLimitObj.key);
-        resumeLimitScope.isResumeLimitValue = true;
+        frameResultScope.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
+        frameResultScope.isFrameResultValue = true;
 
-        Trace.sysout("WatchProvider.appendResumeLimitValueInScope; resumeLimitScope",
-            resumeLimitScope);
+        Trace.sysout("WatchProvider.appendFrameResultValueInScope; frameResultScope",
+            frameResultScope);
 
-        stackFrame.scopes.push(resumeLimitScope);
+        stackFrame.scopes.push(frameResultScope);
     },
 });
 

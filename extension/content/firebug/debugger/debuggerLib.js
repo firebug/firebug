@@ -281,22 +281,22 @@ DebuggerLib.isExecutableLine = function(context, location)
 }
 
 // ********************************************************************************************* //
-// Scopes (+ this + resume limit value)
+// Scopes (+ this + frame result value)
 
 /**
- * If the debugger is stopped and has reached the resume limit (return / yield / exception),
- * return the resume limit keys and value of it. Otherwise, return null.
+ * If the debugger is stopped and has reached a return / yield statement or an exception,
+ * return the Frame Result type and value of it. Otherwise, return null.
  *
- * The object returned has this form: {key: <key>, value: <resume limit value>}
+ * The object returned has this form: {type: <type>, value: <frame result value>}
  *
- * If the debugger has reached a return statement, <key> is "return".
- * If an exception has been raised, <key> is "exception".
+ * If the debugger has reached a return statement, <type> is "return".
+ * If an exception has been raised, <type> is "exception".
  *
  * @param {object} context
  *
  * @return {object}
  */
-DebuggerLib.getResumeLimitObject = function(context)
+DebuggerLib.getFrameResultObject = function(context)
 {
     if (!context.stopped || !context.currentPacket || !context.currentPacket.why)
         return null;
@@ -305,17 +305,17 @@ DebuggerLib.getResumeLimitObject = function(context)
     if (!frameFinished)
         return null;
 
-    var key = null;
+    var type = null;
     var value = null;
 
     if ("return" in frameFinished)
     {
-        key = "return";
+        type = "return";
         value = frameFinished.return;
     }
     else if ("throw" in frameFinished)
     {
-        key = "exception";
+        type = "exception";
         value = frameFinished.throw;
     }
 
@@ -323,7 +323,7 @@ DebuggerLib.getResumeLimitObject = function(context)
         value = context.clientCache.getObject(value);
 
     return {
-        key: key,
+        type: type,
         value: value,
     };
 };

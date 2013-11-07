@@ -169,15 +169,15 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Emphasize the completion value. */
-.memberRow.resumeLimitRow {
-    animation: emphasizeResumeLimit 2s ease;
+.memberRow.frameResultValueRow {
+    animation: emphasizeFrameResultValue 2s ease;
 }
 
-.memberRow.resumeLimitRow .memberLabel {
+.memberRow.frameResultValueRow .memberLabel {
     font-weight: bold;
 }
 
-@keyframes emphasizeResumeLimit {
+@keyframes emphasizeFrameResultValue {
     from {
         background-color: #C4F4FF;
     }

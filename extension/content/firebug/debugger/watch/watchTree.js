@@ -91,8 +91,8 @@ WatchTree.prototype = domplate(BaseTree,
             return "scopes";
         else if (object instanceof WatchExpression)
             return "watch";
-        else if (object && object.isResumeLimitValue)
-            return "resumeLimit";
+        else if (object && object.isFrameResultValue)
+            return "frameResultValue";
 
         return BaseTree.getType.apply(this, arguments);
     },
@@ -149,7 +149,7 @@ WatchTree.prototype = domplate(BaseTree,
                     return;
 
                 // Don't edit completion values.
-                if (member.type === "resumeLimit")
+                if (member.type === "frameResultValue")
                     return;
 
                 if (typeof(value) == "boolean")
