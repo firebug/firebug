@@ -120,7 +120,8 @@ SourceEditor.Events =
     mouseMove: "mousemove",
     mouseOut: "mouseout",
     mouseOver: "mouseover",
-    mouseUp: "mouseup"
+    mouseUp: "mouseup",
+    keyDown: "keydown"
 };
 
 // ********************************************************************************************* //
@@ -439,6 +440,11 @@ SourceEditor.prototype =
 
         // The newline characters shouldn't be counted.
         return this.editorObject.getValue().replace(/\n/g, "").length;
+    },
+
+    getLineCount: function()
+    {
+        return this.getDocument().lineCount();
     },
 
     getSelectedText: function()
@@ -870,16 +876,6 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getLineFromEvent: function(e)
-    {
-        var pos = {
-            left: event.pageX,
-            top: event.pageY - 60 //xxxHonza: why the top is not zero but 60 in the event?
-        };
-
-        return this.editorObject.coordsChar(pos);
-    },
 
     getLineIndex: function(target)
     {

@@ -64,9 +64,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     name: "script",
     searchable: true,
+    searchPlaceholder: "Use_hash_plus_number_to_go_to_line",
     breakable: true,
     enableA11y: true,
-    order: 45,
+    order: 40,
 
     // Will appear in detached Firebug Remote XUL window.
     remotable: true,
@@ -644,6 +645,22 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             Editor.stopEditing(false);
     },
 
+    onEditorKeyDown: function(event)
+    {
+        if (event.keyCode === KeyEvent.DOM_VK_L && Events.isControl(event))
+        {
+            var searchBox = Firebug.chrome.$("fbSearchBox");
+            searchBox.focus();
+            searchBox.value = "#";
+            Events.cancelEvent(event);
+        }
+        if (event.keyCode === KeyEvent.DOM_VK_W && Events.isAlt(event))
+        {
+            this.addSelectionWatch();
+            Events.cancelEvent(event);
+        }
+    },
+
     initializeEditBreakpointCondition: function(lineNo)
     {
         Trace.sysout("scriptPanel.initializeEditBreakpointCondition; " + lineNo);
@@ -905,6 +922,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             {
                 label: "AddWatch",
                 tooltiptext: "watch.tip.Add_Watch",
+                acceltext: Locale.getFormattedKey(window, "alt", "W"),
                 command: Obj.bind(this.addSelectionWatch, this)
             });
         }

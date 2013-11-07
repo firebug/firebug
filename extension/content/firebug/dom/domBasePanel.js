@@ -35,7 +35,8 @@ define([
 ],
 function(Firebug, FBTrace, Obj, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps, Panel, CommandLine) {
+    DOMMemberProvider, DOMEditor, DOMReps, Panel, CommandLine, Editor, BreakpointModule,
+    SearchBox, DOMModule, JSAutoCompleter) {
 
 "use strict";
 
@@ -50,7 +51,12 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 
 /**
- * @panel Base class for panels displaying hierarchy of objects.
+ * @panel Base object for panels displaying hierarchy of DOM objects. This object is currently
+ * used as the super object for the following panels:
+ *
+ * {@DOMPanel} - the main DOM panel
+ * {@WatchPanel} - the Watch side panel within the Script panel.
+ * {@DOMSidePanel} - the DOM side panel within the HTML panel.
  */
 Firebug.DOMBasePanel = function()
 {
@@ -64,7 +70,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     dirTablePlate: DOMReps.DirTablePlate,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends Panel
+    // Initialization
 
     initialize: function()
     {
@@ -75,16 +81,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         this.toggles = new ToggleBranch.ToggleBranch();
 
         Panel.initialize.apply(this, arguments);
-    },
-
-    initializeNode: function(node)
-    {
-        Panel.initializeNode.apply(this, arguments);
-    },
-
-    destroyNode: function()
-    {
-        Panel.destroyNode.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -106,6 +102,16 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         Trace.sysout("dom.destroy; state:", state);
 
         Panel.destroy.apply(this, arguments);
+    },
+
+    initializeNode: function(node)
+    {
+        Panel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode: function()
+    {
+        Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)
@@ -268,7 +274,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
                 // XXX This is wrong with closures, but I haven't noticed anything
                 // break and I don't know how to fix, so let's just leave it...
-                for (var i=0; i<newPath.length; i++)
+                for (var i = 0; i < newPath.length; i++)
                 {
                     var name = newPath[i];
                     object = value;
@@ -662,7 +668,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
                 rowCount += DOMReps.insertSliceSize;
 
-                Events.dispatch(Firebug.DOMModule.fbListeners, "onMemberRowSliceAdded",
+                Events.dispatch(DOMModule.fbListeners, "onMemberRowSliceAdded",
                     [panel, result, rowCount, setSize]);
 
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
@@ -966,6 +972,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         this.markChange();
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // DOM Breakpoints
+
     breakOnProperty: function(row)
     {
         var member = row.domObject;
@@ -976,31 +985,17 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         if (!member.breakable)
             return;
 
+        // xxxHonza: this is specific to the Watch panel.
         var name = member.name;
         if (name === "this")
             return;
 
+        // Toggle breakpoint on the clicked row. {@DOMModule} will peform the action
+        // and also fire corresponding event that should be handled by specific
+        // panels to update the UI.
         var object = this.getRowObject(row);
-        object = this.getObjectView(object);
-        if (!object)
-            return;
-
-        // Create new or remove an existing breakpoint.
-        // xxxHonza: This action can be executed from within the DOM side panel
-        // in which case we need to ensure that the breakpoint column in the DOM
-        // main panel is properly updated.
-        var breakpoints = this.context.dom.breakpoints;
-        var bp = breakpoints.findBreakpoint(object, name);
-        if (bp)
-        {
-            row.removeAttribute("breakpoint");
-            breakpoints.removeBreakpoint(object, name);
-        }
-        else
-        {
-            breakpoints.addBreakpoint(object, name, this, row);
-            row.setAttribute("breakpoint", "true");
-        }
+        if (object)
+            DOMModule.toggleBreakpoint(this.context, object, name);
     },
 });
 

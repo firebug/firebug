@@ -3,19 +3,24 @@
 /*global FBTrace:true, XPCNativeWrapper:true, Window:true, define:true */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/search",
+    "firebug/chrome/reps",
     "firebug/dom/domBasePanel",
+    "firebug/dom/domModule",
 ],
-function(Obj, Firebug, FirebugReps, Events, Dom, Css, Search, DOMBasePanel) {
+function(Firebug, FBTrace, Obj, Events, Dom, Css, Search, FirebugReps, DOMBasePanel, DOMModule) {
 
 // ********************************************************************************************* //
 // Constants
+
+var Trace = FBTrace.to("DBG_DOM");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 // DOM Panel
@@ -23,13 +28,13 @@ function(Obj, Firebug, FirebugReps, Events, Dom, Css, Search, DOMBasePanel) {
 /**
  * @panel This object represents a DOM panel in the main Firebug UI.
  */
-Firebug.DOMPanel = function()
+function DOMPanel()
 {
 }
 
-Firebug.DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
-Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
-/** @lends Firebug.DOMPanel */
+DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
+DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
+/** @lends DOMPanel */
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
@@ -50,7 +55,16 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     {
         this.onClick = Obj.bind(this.onClick, this);
 
+        DOMModule.addListener(this);
+
         DOMBasePanel.prototype.initialize.apply(this, arguments);
+    },
+
+    destroy: function(state)
+    {
+        DOMModule.removeListener(this);
+
+        DOMBasePanel.prototype.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -167,14 +181,67 @@ Firebug.DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             }
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoints, DOMModule Listener
+
+    onDomBreakpointAdded: function(context, object, name)
+    {
+        Trace.sysout("domBasePanel.onDomBreakpointAdded; propName: " + name +
+            " (panel: " + this.name + ")", object);
+
+        this.updateBreakpoints(object);
+    },
+
+    onDomBreakpointRemoved: function(context, object, name)
+    {
+        Trace.sysout("domBasePanel.onDomBreakpointRemoved; propName: " + name +
+            " (panel: " + this.name + ")", object);
+
+        this.updateBreakpoints(object);
+    },
+
+    updateBreakpoints: function(object)
+    {
+        // xxxHonza: the update should be smarter if possible. Can we just lookup
+        // for the specific object and update the row directly?
+        // Can we utilize DomTree widget?
+
+        var breakpoints = this.context.dom.breakpoints;
+        var rows = Dom.getElementsByClass(this.panelNode, "memberRow");
+        for (var i = 0; i < rows.length; i++)
+        {
+            var row = rows[i];
+            var member = row.domObject;
+
+            var bp = breakpoints.findBreakpoint(member.object, member.name);
+            if (bp)
+            {
+                row.setAttribute("breakpoint", "true");
+
+                if (!bp.checked)
+                    row.setAttribute("disabledBreakpoint", "true");
+            }
+            else
+            {
+                row.removeAttribute("breakpoint");
+                row.removeAttribute("disabledBreakpoint");
+            }
+        }
+
+        return null;
+    },
 });
 
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.DOMPanel);
+Firebug.registerPanel(DOMPanel);
 
-return Firebug.DOMPanel;
+// xxxHonza: backward compatibility
+Firebug.DOMPanel = DOMPanel;
+
+return DOMPanel;
 
 // ********************************************************************************************* //
 });

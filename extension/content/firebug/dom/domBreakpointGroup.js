@@ -14,9 +14,10 @@ define([
     "firebug/lib/array",
     "firebug/lib/persist",
     "firebug/debugger/breakpoints/breakpointGroup",
+    "firebug/dom/domBreakpoint",
 ],
 function(Rep, Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Css, Str, Arr, Persist,
-    BreakpointGroup) {
+    BreakpointGroup, DOMBreakpoint) {
 
 // ********************************************************************************************* //
 // Constants
@@ -44,20 +45,11 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    addBreakpoint: function(object, propName, panel, row)
+    addBreakpoint: function(object, propName, context)
     {
-        var path = panel.getPropertyPath(row);
-        path.pop();
+        Trace.sysout("dom.addBreakpoint; " + propName, object);
 
-        // We don't want the last dot.
-        if (path.length > 0 && path[path.length-1] == ".")
-            path.pop();
-
-        var objectPath = path.join("");
-
-        Trace.sysout("dom.addBreakpoint; " + objectPath, path);
-
-        var bp = new Breakpoint(object, propName, objectPath, panel.context);
+        var bp = new DOMBreakpoint(object, propName, context);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
@@ -76,7 +68,12 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
     {
         var object = args[0];
         var propName = args[1];
-        return bp.object == object && bp.propName == propName;
+
+        // Make sure to unwrap objects for comparison (see issue 6934).
+        var obj1 = Wrapper.unwrapObject(bp.object);
+        var obj2 = Wrapper.unwrapObject(object);
+
+        return obj1 == obj2 && bp.propName == propName;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -117,77 +114,6 @@ DOMBreakpointGroup.prototype = Obj.extend(new BreakpointGroup(),
         panelState.breakpoints = this.breakpoints;
     },
 });
-
-// ********************************************************************************************* //
-
-function Breakpoint(object, propName, objectPath, context)
-{
-    this.context = context;
-    this.propName = propName;
-    this.objectPath = objectPath;
-    this.object = object;
-    this.checked = true;
-}
-
-Breakpoint.prototype =
-{
-    watchProperty: function()
-    {
-        if (!this.object)
-            return;
-
-        Trace.sysout("dom.watch; property: " + this.propName, this.object);
-
-        try
-        {
-            var self = this;
-            this.object.watch(this.propName, function handler(prop, oldval, newval)
-            {
-                Trace.sysout("domBreakpointGroup.watch; property: " + this.propName);
-
-                // XXXjjb Beware: in playing with this feature I hit too much recursion
-                // multiple times with console.log
-                // TODO Do something cute in the UI with the error bubble thing
-                if (self.checked)
-                {
-                    self.context.breakingCause = {
-                        title: Locale.$STR("dom.Break On Property"),
-                        message: Str.cropString(prop, 200),
-                        prevValue: oldval,
-                        newValue: newval
-                    };
-
-                    Firebug.Breakpoint.breakNow(self.context.getPanel("dom"));
-                }
-                return newval;
-            });
-        }
-        catch (exc)
-        {
-            TraceError.sysout("dom.watch; object FAILS " + exc, exc);
-            return false;
-        }
-
-        return true;
-    },
-
-    unwatchProperty: function()
-    {
-        if (!this.object)
-            return;
-
-        TraceError.sysout("dom.unwatch; property: " + this.propName, this.object);
-
-        try
-        {
-            this.object.unwatch(this.propName);
-        }
-        catch (exc)
-        {
-            TraceError.sysout("dom.unwatch; object FAILS " + exc, exc);
-        }
-    }
-};
 
 // ********************************************************************************************* //
 

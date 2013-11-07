@@ -36,13 +36,8 @@ function ScriptView()
 }
 
 /**
- * ScriptView wraps SourceEditor component that is built on top of Orion editor.
+ * ScriptView wraps SourceEditor component that is built on top of CodeMirror editor.
  * This object is responsible for displaying JS source code in the debugger panel.
- *
- * TODO:
- * 1) Since the {@ScriptView} is using Orion's private API, we should have some
- * tests (could be within the lib group) that are checking every new Orion version.
- *
  */
 ScriptView.prototype = Obj.extend(new EventSource(),
 /** @lends ScriptView */
@@ -72,6 +67,7 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         this.onMouseOutListener = this.onMouseOut.bind(this);
         this.onGutterClickListener = this.onGutterClick.bind(this);
         this.onMouseUpListener = this.onEditorMouseUp.bind(this);
+        this.onKeyDownListener = this.onKeyDown.bind(this);
         this.onViewportChangeListener = this.onViewportChange.bind(this);
 
         // Initialize source editor.
@@ -94,6 +90,8 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.onMouseMoveListener);
         this.editor.addEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.addEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
 
         // Hook gutter clicks
         this.editor.addEventListener(SourceEditor.Events.gutterClick,
@@ -134,9 +132,13 @@ ScriptView.prototype = Obj.extend(new EventSource(),
             this.onMouseMoveListener);
         this.editor.removeEventListener(SourceEditor.Events.mouseOut,
             this.onMouseOutListener);
+        this.editor.removeEventListener(SourceEditor.Events.keyDown,
+            this.onKeyDownListener);
         this.editor.removeEventListener(SourceEditor.Events.gutterClick,
             this.onGutterClickListener);
-        this.editor.removeEventListener(SourceEditor.Events.mouseOut,
+        this.editor.removeEventListener(SourceEditor.Events.mouseUp,
+            this.onMouseUpListener);
+        this.editor.removeEventListener(SourceEditor.Events.viewportChange,
             this.onViewportChangeListener);
 
         try
@@ -213,6 +215,22 @@ ScriptView.prototype = Obj.extend(new EventSource(),
 
     search: function(text, reverse)
     {
+        // Check if the search is for a line number.
+        var m = /^[^\\]?#(\d*)$/.exec(text);
+        if (m)
+        {
+            // Don't beep if only a # has been typed.
+            if (!m[1])
+                return true;
+
+            var lineNo = +m[1];
+            if (!isNaN(lineNo) && 0 < lineNo && lineNo <= this.editor.getLineCount())
+            {
+                this.scrollToLine(lineNo, {highlight: true});
+                return true;
+            }
+        }
+
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {
@@ -529,11 +547,18 @@ ScriptView.prototype = Obj.extend(new EventSource(),
         }
     },
 
-    onEditorMouseUp: function (event)
+    onEditorMouseUp: function(event)
     {
         Trace.sysout("scripView.onEditorMouseUp;", event);
 
         this.dispatch("onEditorMouseUp", [event]);
+    },
+
+    onKeyDown: function(event)
+    {
+        Trace.sysout("scripView.onKeyDown;", event);
+
+        this.dispatch("onEditorKeyDown", [event]);
     },
 
     onViewportChange: function(event)
