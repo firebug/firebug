@@ -104,7 +104,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             }
 
             // If there are active contexts, but not on the current page make a little
-            // not about that
+            // note about that
             if (!Firebug.currentContext && contexts)
             {
                 tooltip.appendChild($label(doc, {
