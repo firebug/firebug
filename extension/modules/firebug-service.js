@@ -915,7 +915,10 @@ var fbs =
     registerPanel: function(panel)
     {
         if (disableJSDTimeout)
+        {
             clearTimeout(disableJSDTimeout);
+            disableJSDTimeout = null;
+        }
 
         panels.push(panel);
 
@@ -952,6 +955,9 @@ var fbs =
         if (!enabledDebugger)
             return;
 
+        if (disableJSDTimeout)
+            clearTimeout(disableJSDTimeout);
+
         // Try to disable JSD after a timeout. If there is just one context
         // active and the associated page is refreshed the context is
         // destroyed and immediately created. We don't want to disable and
@@ -961,6 +967,8 @@ var fbs =
 
     onDisableJSD: function()
     {
+        disableJSDTimeout = null;
+
         var rejections = [];
         dispatch(clients, "onDisableJSDRequested", [rejections]);
 
