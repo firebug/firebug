@@ -74,13 +74,19 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             tooltip.appendChild(status);
 
             var suspended = Firebug.getSuspended();
+            var contexts = Firebug.TabWatcher.contexts.length;
+
+            // The tooltip shows number of active contexts (aka tabs with active Firebug)
+            // for every tab, even for those that don't have Firebug active.
+            // This should help the user to see that there is active Firebug instance(s) in
+            // a background Firefox tab.
             status.appendChild($label(doc, {
                 "class": "status",
-                value: suspended ? Locale.$STR("startbutton.tip.deactivated") :
-                    Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length])
+                value: (contexts == 0) ? Locale.$STR("startbutton.tip.deactivated") :
+                    Locale.$STRP("plural.Total_Firebugs2", [contexts])
             }));
 
-            if (suspended)
+            if (contexts == 0)
                 return;
 
             status.appendChild($label(doc, {
@@ -159,6 +165,8 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         if (!firebugStatus)
             return;
 
+        // xxxHonza: the start button should indicate that Firebug is active
+        // in a background tab (in case its deactivated on the current tab).
         // The start button is colorful only if there is a context
         var active = Firebug.currentContext ? "true" : "false";
         firebugStatus.setAttribute("firebugActive", active);

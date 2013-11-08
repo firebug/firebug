@@ -97,6 +97,7 @@ const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 
 Cu.import("resource://firebug/prefLoader.js");
+Cu.import("resource://gre/modules/Timer.jsm");
 
 var getPref = PrefLoader.getPref;
 
@@ -121,6 +122,10 @@ var clients = [];
 var debuggers = [];
 var netDebuggers = [];
 var scriptListeners = [];
+
+// Issue 6942
+var panels = [];
+var disableJSDTimeout;
 
 var hookFrameCount = 0;
 
@@ -907,6 +912,67 @@ var fbs =
         }
     },
 
+    registerPanel: function(panel)
+    {
+        if (disableJSDTimeout)
+            clearTimeout(disableJSDTimeout);
+
+        panels.push(panel);
+
+        if (FBTrace.DBG_ACTIVATION)
+        {
+            FBTrace.sysout("-- registerPanel; JSD enabled: " + enabledDebugger +
+                ", panels: " + panels.length);
+        }
+
+        if (!enabledDebugger)
+            this.enableDebugger();
+    },
+
+    unregisterPanel: function(panel)
+    {
+        for (var i = 0; i < panels.length; i++)
+        {
+            if (panels[i] == panel)
+            {
+                panels.splice(i, 1);
+                break;
+            }
+        }
+
+        if (FBTrace.DBG_ACTIVATION)
+        {
+            FBTrace.sysout("-- unregisterPanel; panels: " + panels.length +
+                ", enabledDebugger: " + enabledDebugger);
+        }
+
+        if (panels.length > 0)
+            return;
+
+        if (!enabledDebugger)
+            return;
+
+        // Try to disable JSD after a timeout. If there is just one context
+        // active and the associated page is refreshed the context is
+        // destroyed and immediately created. We don't want to disable and
+        // enable in such case.
+        disableJSDTimeout = setTimeout(this.onDisableJSD.bind(this), 1000);
+    },
+
+    onDisableJSD: function()
+    {
+        var rejections = [];
+        dispatch(clients, "onDisableJSDRequested", [rejections]);
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("-- onDisableJSD; rejections: " + rejections.length);
+
+        // If the last panel has been destroyed and there is no other active debugger
+        // in all existing browser windows let's disabled JSD.
+        if (rejections.length == 0)
+            this.disableDebugger();
+    },
+
     // first one in will be last one called. Returns state enabledDebugger
     registerDebugger: function(debuggrWrapper)
     {
@@ -1583,6 +1649,9 @@ var fbs =
 
     enableDebugger: function()
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("FBS.enableDebugger()");
+
         if (waitingForTimer)
         {
             timer.cancel();
@@ -1659,6 +1728,9 @@ var fbs =
 
     onDebuggerActivated: function()
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("FBS.onDebuggerActivated()");
+
         jsd.flags |= DISABLE_OBJECT_TRACE;
 
         if (FBTrace.DBG_ACTIVATION)
@@ -1743,6 +1815,9 @@ var fbs =
 
     disableDebugger: function()
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("FBS.disableDebugger()");
+
         if (!enabledDebugger)
             return;
 
@@ -1775,6 +1850,9 @@ var fbs =
     // must support multiple calls
     pause: function(debuggerName)
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("FBS.pause()");
+
         if (!enabledDebugger || !jsd || !jsd.isOn)
             return "not enabled";
 
@@ -1814,6 +1892,9 @@ var fbs =
 
     unPause: function(force)
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("FBS.unPause()");
+
         if (!jsd)
             return;
 

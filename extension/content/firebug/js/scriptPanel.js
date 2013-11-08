@@ -22,6 +22,7 @@ define([
     "firebug/chrome/menu",
     "firebug/trace/debug",
     "firebug/lib/keywords",
+    "firebug/js/fbs",
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
@@ -30,7 +31,7 @@ define([
 ],
 function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
     Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-    System, Menu, Debug, Keywords) {
+    System, Menu, Debug, Keywords, FBS) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -673,6 +674,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
+        FBS.registerPanel(this);
+
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
@@ -712,6 +715,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         // Make sure listeners are removed.
         this.detachListeners(this.context, Firebug.chrome);
+
+        FBS.unregisterPanel(this);
 
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },

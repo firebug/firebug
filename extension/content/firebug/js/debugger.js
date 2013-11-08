@@ -2364,6 +2364,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("shutdown");
+
+        this.unregisterClient(Firebug.JSDebugClient);
+        FBS.unregisterDebugger(this);
+
         //Firebug.connection.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.destroy.apply(this, arguments);
@@ -2550,7 +2556,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
 
-        if (context.stopped)
+        if (context && context.stopped)
         {
             // the abort will call resume, but the nestedEventLoop would continue the load...
             this.abort(context);
@@ -2558,7 +2564,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         if (persistedState)
         {
-            if (context.dynamicURLhasBP)
+            if (context && context.dynamicURLhasBP)
                 persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
             else
                 delete persistedState.dynamicURLhasBP;
@@ -2576,12 +2582,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var sourceFile = Firebug.SourceFile.getSourceFileByHref(url, context);
         if (sourceFile)
             return new SourceLink.SourceLink(sourceFile.href, 0, "js");
-    },
-
-    shutdown: function()
-    {
-        this.unregisterClient(Firebug.JSDebugClient);
-        FBS.unregisterDebugger(this);
     },
 
     /**
@@ -2685,8 +2685,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         //var paused = FBS.pause(this.debuggerName);
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
+        {
+            FBTrace.sysout("debugger.onSuspendFirebug paused: "+/*paused+*/" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
+        }
 
         // JSD activation is not per browser-tab, so FBS.pause can return 'not-paused' when
         // Firebug is activated on another tab.
@@ -2706,8 +2708,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         //var unpaused = FBS.unPause();
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
+        {
+            FBTrace.sysout("debugger.onResumeFirebug unpaused: "/*+unpaused*/+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2873,9 +2877,9 @@ Firebug.JSDebugClient =
     {
         // A debugger client (an instance of Firebug.JSDebugClient) asked to pause JSD.
         // Note that there is one instance of Firebug.JSDebugClient per browser (XUL) window.
-        // If the debugger is 'on' in this browser window JSD and the request comes from
-        // another window (debugger) JSD should *not* be paused (see issue 4609).
-        // So, reject only if the request comes from another browser window and Firebug
+        // If the debugger is 'on' in this browser window and the request comes from
+        // another browser window (another debugger) JSD should *not* be paused (see issue 4609).
+        // So, reject if the request comes from another browser window and Firebug
         // is resumed in this window.
         if (debuggerName != Firebug.Debugger.debuggerName && !Firebug.getSuspended())
         {
@@ -2892,6 +2896,28 @@ Firebug.JSDebugClient =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejection: " +
                 rejection.length + ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
+    },
+
+    /**
+     * FBS is asking whether we can disable JSD. The question is dispatched to all browser
+     * windows in the current process through registered JSDebugClient instances.
+     *
+     * The XUL window (in the current scope) needs to decide whether it's ok or not.
+     * (see also Issue 6942);
+     */
+    onDisableJSDRequested: function(rejections)
+    {
+        // Do not reject if the debugger (the Script panel) is actually disabled anyway.
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return;
+
+        // Do not reject if there is no active context in this browser window.
+        if (Firebug.TabWatcher.contexts.length == 0)
+            return;
+
+        // JSD can't be disabled at this moment there are contexts i.e. active Script panels
+        // in this browser window.
+        rejections.push(true);
     }
 };
 
