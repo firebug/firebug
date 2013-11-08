@@ -763,9 +763,10 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
     iterateContexts: function(fn)
     {
-        for (var i = 0; i < contexts.length; ++i)
+        var tempContexts = Arr.cloneArray(contexts);
+        for (var i = 0; i < tempContexts.length; i++)
         {
-            var rc = fn(contexts[i]);
+            var rc = fn(tempContexts[i]);
             if (rc)
                 return rc;
         }

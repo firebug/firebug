@@ -10,8 +10,9 @@ define([
     "firebug/lib/url",
     "firebug/lib/dom",
     "firebug/lib/options",
+    "firebug/chrome/window",
 ],
-function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options) {
+function(Obj, Firebug, Firefox, Locale, Domplate, Xpcom, Url, Dom, Options, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -223,7 +224,29 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
     // respond to event
     onClearAnnotations: function()
     {
-        Firebug.closeFirebug(true);  // and we turn off as it now cannot be enabled
+        var currentWin = Firebug.currentContext ? Firebug.currentContext.window : null;
+
+        // Close all contexts (in all browser windows)
+        Win.iterateBrowserWindows("navigator:browser", function(win)
+        {
+            return win.Firebug.TabWatcher.iterateContexts(function(context)
+            {
+                try
+                {
+                    Firebug.connection.closeContext(context);
+                }
+                catch (err)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("panelActivation.onClearAnnotations; EXCEPTION " + err, err);
+                }
+            });
+        });
+
+        if (currentWin)
+            currentWin.focus();
+
+        Firebug.StartButton.resetTooltip();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
