@@ -35,7 +35,7 @@ var slowJSDBugUrl = "https://bugzilla.mozilla.org/show_bug.cgi?id=815603";
 
 var slowJsdTag =
     P({"class": "slowJsdMessage disabledPanelDescription",
-        style: "margin: 15px 0 15px 0; color: green"}
+        style: "margin: 15px 0 15px 0; color: green; font-family: sans-serif"}
     );
 
 var slowJsdRep = domplate(Firebug.Rep,
@@ -48,7 +48,8 @@ var slowJsdRep = domplate(Firebug.Rep,
                 TBODY(
                     TR(
                         TD({"valign": "middle"},
-                            SPAN({"class": "slowJSD"})
+                            SPAN({"class": "slowJSD",
+                                style: "font-family: sans-serif;"})
                         )
 
                         /*, xxxHonza: see issue 6942

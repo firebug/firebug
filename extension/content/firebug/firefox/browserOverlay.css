@@ -19,6 +19,10 @@
     list-style-image: url(chrome://firebug/skin/firebug16Disabled.png) !important;
 }
 
+#firebug-button[firebugActive="background"] {
+    list-style-image: url(chrome://firebug/skin/firebug16EnabledInBackground.png) !important;
+}
+
 #firebug-button[firebugActive="true"] {
     list-style-image: url(chrome://firebug/skin/firebug16.png) !important;
 }
@@ -156,6 +160,10 @@
 }
 
 .firebugButtonTooltip .alwaysOn {
+    color: gray;
+}
+
+.firebugButtonTooltip .activeInBackground {
     color: gray;
 }
 

@@ -103,6 +103,16 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
                 }));
             }
 
+            // If there are active contexts, but not on the current page make a little
+            // not about that
+            if (!Firebug.currentContext && contexts)
+            {
+                tooltip.appendChild($label(doc, {
+                    "class": "activeInBackground",
+                    value: Locale.$STR("enablement.active_in_background")
+                }));
+            }
+
             // Panel enablement status info
             tooltip.appendChild($label(doc, {
                 "class": "enablement",
@@ -165,14 +175,19 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         if (!firebugStatus)
             return;
 
-        // xxxHonza: the start button should indicate that Firebug is active
-        // in a background tab (in case its deactivated on the current tab).
-        // The start button is colorful only if there is a context
-        var active = Firebug.currentContext ? "true" : "false";
+        // The start button is half/colorful if Firebug is active in the background.
+        var contexts = Firebug.TabWatcher.contexts.length;
+        var active = (contexts > 0) ? "background" : "false";
+
+        // The start button is colorful if Firebug is active on the current page.
+        active = Firebug.currentContext ? "true" : active;
         firebugStatus.setAttribute("firebugActive", active);
 
         if (FBTrace.DBG_TOOLTIP)
-            FBTrace.sysout("StartButton.resetTooltip; called: firebug active: " + active);
+        {
+            FBTrace.sysout("StartButton.resetTooltip; active: " + active +
+                ", contexts: " + contexts);
+        }
     },
 
     getEnablementStatus: function()
