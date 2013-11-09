@@ -145,11 +145,11 @@ function JSAutoCompleter(textBox, completionBox, options)
      * Show completions for the current contents of the text box. Either this or
      * hide() must be called when the contents change.
      */
-    this.complete = function(context)
+    this.complete = function(context, force)
     {
         this.revertValue = null;
         var offset = this.textBox.selectionStart;
-        if (this.createCandidates(context, this.textBox.value, offset))
+        if (this.createCandidates(context, this.textBox.value, offset, force))
             this.showCompletions(false);
         else
             this.hide();
@@ -159,7 +159,7 @@ function JSAutoCompleter(textBox, completionBox, options)
      * Update the completion base and create completion candidates for the
      * current value of the text box.
      */
-    this.createCandidates = function(context, value, offset)
+    this.createCandidates = function(context, value, offset, force)
     {
         if (offset !== value.length)
             return false;
@@ -171,7 +171,7 @@ function JSAutoCompleter(textBox, completionBox, options)
         if (svalue === null)
             return false;
 
-        if (killCompletions(svalue, value))
+        if (killCompletions(svalue, value, force))
             return false;
 
         // Find the expression to be completed.
@@ -219,7 +219,7 @@ function JSAutoCompleter(textBox, completionBox, options)
             this.completionBase.forceShowPopup = false;
         }
 
-        this.createCompletions(prop, prevCompletions);
+        this.createCompletions(prop, prevCompletions, force);
         return true;
     };
 
@@ -230,28 +230,27 @@ function JSAutoCompleter(textBox, completionBox, options)
      * for the previous expression (null if none) are used to help with the
      * latter.
      */
-    this.createCompletions = function(prefix, prevCompletions)
+    this.createCompletions = function(prefix, prevCompletions, force)
     {
-        if (!this.completionBase.expr && !prefix)
+        if (!this.completionBase.expr && !prefix && !force)
         {
             // Don't complete "".
             this.completions = null;
             return;
         }
-        if (!this.completionBase.candidates.length && !prefix)
+        if (!this.completionBase.candidates.length && !prefix && !force)
         {
             // Don't complete empty objects -> toString.
             this.completions = null;
             return;
         }
 
-        var mustMatchFirstLetter = (this.completionBase.expr === "");
-        var clist = [
-            this.completionBase.candidates,
-            this.completionBase.hiddenCandidates
-        ], cind = 0;
         var valid = [], ciValid = [];
+        var clist = [this.completionBase.candidates, this.completionBase.hiddenCandidates];
+        var cind = 0;
+
         var lowPrefix = prefix.toLowerCase();
+        var mustMatchFirstLetter = (!this.completionBase.expr && prefix.length > 0);
         while (ciValid.length === 0 && cind < 2)
         {
             var candidates = clist[cind];
@@ -297,7 +296,8 @@ function JSAutoCompleter(textBox, completionBox, options)
             this.completions = {
                 list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix,
-                hidePopup: (cind === 2)
+                hidePopup: (cind === 2),
+                forced: force
             };
             this.completions.index = this.pickDefaultCandidate(prevCompletions);
 
@@ -334,6 +334,9 @@ function JSAutoCompleter(textBox, completionBox, options)
             if (ind !== -1)
                 return ind;
         }
+
+        if (!this.completionBase.expr && !this.completions.prefix)
+            return list.length - 1;
 
         // Special-case certain expressions. (But remember to pick prefix-free
         // candidates; otherwise "validVariable<return>" can auto-complete
@@ -521,11 +524,23 @@ function JSAutoCompleter(textBox, completionBox, options)
             Events.cancelEvent(event);
             return true;
         }
+        else if (event.keyCode === KeyEvent.DOM_VK_BACK_SPACE)
+        {
+            if (this.completions && !this.textBox.value)
+            {
+                this.hide();
+                Events.cancelEvent(event);
+                return true;
+            }
+        }
         else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
         {
             if (this.completions)
             {
-                this.hideForExpression();
+                if (this.completions.forced)
+                    this.hide();
+                else
+                    this.hideForExpression();
                 Events.cancelEvent(event);
                 return true;
             }
@@ -582,9 +597,9 @@ function JSAutoCompleter(textBox, completionBox, options)
         {
             // Close the completion popup on escape in keydown, so that the popup
             // does not close itself and prevent event propagation on keypress.
-            // (Unless the popup is only open due to Ctrl+Space, in which case
-            // that's precisely what we want.)
-            if (!this.forceShowPopup)
+            // (Unless the popup is only open due to Ctrl+Space on a non-empty
+            // command line, in which case that's precisely what we want.)
+            if (!this.forceShowPopup || this.completions.forced)
                 this.closePopup();
         }
         else if (event.keyCode === KeyEvent.DOM_VK_SPACE && Events.isControl(event))
@@ -1069,8 +1084,11 @@ function EditorJSAutoCompleter(box, completionBox, options)
 
     this.destroy = Obj.bindFixed(ac.shutdown, ac);
     this.reset = Obj.bindFixed(ac.reset, ac);
-    this.complete = Obj.bind(ac.complete, ac);
     this.handleKeyPress = Obj.bind(ac.handleKeyPress, ac);
+    this.complete = function(context)
+    {
+        ac.complete(context);
+    };
 }
 
 // ********************************************************************************************* //
@@ -1391,11 +1409,10 @@ function simplifyExpr(expr)
 }
 
 // Check if auto-completion should be killed.
-function killCompletions(expr, origExpr)
+function killCompletions(expr, origExpr, force)
 {
-    // Make sure there is actually something to complete at the end.
     if (expr.length === 0)
-        return true;
+        return !force;
 
     if (reJSChar.test(expr[expr.length-1]) ||
             expr.slice(-1) === "." ||
@@ -1412,7 +1429,7 @@ function killCompletions(expr, origExpr)
             // Array completions - we're fine.
         }
         else {
-            return true;
+            return !force;
         }
     }
 
