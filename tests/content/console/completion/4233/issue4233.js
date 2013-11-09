@@ -100,6 +100,10 @@ function runTest()
                 ["largeArray.leng", true],
                 ["largeArray.j", true],
 
+                ["// + d", false],
+                [" /* / + d", false],
+                ["/**/d", true],
+
                 // currently not handled
                 ["(window).i", false],
                 ["q='';q.s", false]

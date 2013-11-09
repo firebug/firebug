@@ -1213,7 +1213,8 @@ function endingDivIsRegex(expr)
 {
     var kwCont = ["function", "if", "while", "for", "switch", "catch", "with"];
 
-    var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? "{" : expr.charAt(ind));
+    var ind = prevNonWs(expr, expr.length);
+    var ch = (ind === -1 ? "{" : expr.charAt(ind));
     if (reJSChar.test(ch))
     {
         // Test if the previous word is a keyword usable like 'kw <expr>'.
@@ -1332,16 +1333,37 @@ function simplifyExpr(expr)
             }
             else if (ch === "/")
             {
-                var re = endingDivIsRegex(ret);
-                if (re === null)
-                    return null;
-                if (re)
+                if (i + 1 < expr.length && /[\/\*]/.test(expr.charAt(i + 1)))
                 {
-                    inreg = true;
-                    ret += '"';
+                    var singleLineComment = (expr.charAt(i + 1) === "/");
+                    ret += "  ";
+                    i += 2;
+                    var re = singleLineComment ? /^\n/ : /\*\//;
+                    while (i < len && !re.test(expr.substr(i, 2)))
+                    {
+                        ret += " ";
+                        i++;
+                    }
+                    if (!singleLineComment && i < len)
+                    {
+                        ret += "  ";
+                        i += 2;
+                    }
+                    i--;
                 }
                 else
-                    ret += "/";
+                {
+                    var re = endingDivIsRegex(ret);
+                    if (re === null)
+                        return null;
+                    if (re)
+                    {
+                        inreg = true;
+                        ret += '"';
+                    }
+                    else
+                        ret += "/";
+                }
             }
             else
             {
