@@ -23,6 +23,7 @@
                     <span class="a second" data-test="test"></span>
                     <span class="b"></span>
                 </div>
+                <iframe src="frame.html" style="height: 20px; width: 20px; margin-top: 10px;"></iframe>
             </section>
             <section id="description">
                 <h3>Steps to reproduce</h3>
@@ -30,12 +31,12 @@
                     <li>Open Firebug</li>
                     <li>Switch to the <em>CSS</em> panel</li>
                     <li>
-                        Select <em>issue5412.html</em> from the Location Menu</br>
+                        Select <em>issue5412.html</em> from the Location Menu<br>
                         <span class="ok">&rArr; One CSS rule should be listed</span>
                     </li>
                     <li>
                         Open the rule for editing, and enter various things to check completions:
-                    </li>
+                    <ul>
                     <li>"#" <span class="ok">&rArr; "#content"</span></li>
                     <li>"." <span class="ok">&rArr; ".a"</span></li>
                     <li>"s" <span class="ok">&rArr; "span"</span></li>
@@ -43,19 +44,44 @@
                     <li>"#element1." <span class="ok">&rArr; "#element1.element1"</span></li>
                     <li>"#element1#" <span class="ok">&rArr; "#element1#"</span></li>
                     <li>".element1." <span class="ok">&rArr; ".element1."</span></li>
-                    <li>"section &gt; h" <span class="ok">&rArr; "section &gt; h1"</span></li>
-                    <li>"section&gt;h" <span class="ok">&rArr; "section&gt;h1"</span></li>
+                    <li>"section &gt; h" <span class="ok">&rArr; "section &gt; h3"</span></li>
+                    <li>"section&gt;h" <span class="ok">&rArr; "section&gt;h3"</span></li>
                     <li>"#element1 .a." <span class="ok">&rArr; "#element1 .a.second"</span></li>
                     <li>"span, #element1 .a." <span class="ok">&rArr; "span, #element1 .a.second"</span></li>
                     <li>".a[" <span class="ok">&rArr; ".a["</span></li>
                     <li>".a[t" <span class="ok">&rArr; ".a[t"</span></li>
                     <li>".a[data-test=test]." <span class="ok">&rArr; ".a[data-test=test].second"</span></li>
                     <li>":" <span class="ok">&rArr; ":hover"</span></li>
-                    <li>"a:hover::a" <span class="ok">&rArr; "a:hover::after"</span></li>
+                    <li>"a::a" <span class="ok">&rArr; "a::after"</span></li>
+                    <li>"a::after:h" <span class="ok">&rArr; "a::after:h"</span></li>
+                    <li>"a:first-child::a" <span class="ok">&rArr; "a:first-child::after"</span></li>
+                    <li>"invalid]syntax:h" <span class="ok">&rArr; "invalid]syntax:h"</span></li>
+                    <li>".second + ." <span class="ok">&rArr; ".second + .b"</span></li>
+                    <li>".second ~ ." <span class="ok">&rArr; ".second ~ .b"</span></li>
+                    <li>".second + #" <span class="ok">&rArr; ".second + #"</span></li>
+                    <li>".second ~ #" <span class="ok">&rArr; ".second ~ #"</span></li>
+                    <li>".second #" <span class="ok">&rArr; ".second #"</span></li>
+                    <li>".second &gt; #con" <span class="ok">&rArr; ".second &gt; #con"</span></li>
+                    <li>"* #con" <span class="ok">&rArr; "* #content"</span></li>
+                    <li>"* &gt; #con" <span class="ok">&rArr; "* &gt; #content"</span></li>
+                    <li>"#frameel" <span class="ok">&rArr; "#frameel"</span></li>
+                    </ul>
+                    </li>
+                    <li>
+                        Stop editing, and switch to <em>frame.html</em> in the Location Menu<br>
+                        <span class="ok">&rArr; One CSS rule should be listed</span>
+                    </li>
+                    <li>
+                        Open the rule for editing, and enter various things to check completions:
+                    <ul>
+                    <li>"#frameel" <span class="ok">&rArr; "#frameelement"</span></li>
+                    </ul>
+                    </li>
                 </ol>
                 <h3>Expected result</h3>
                 <ul>
                     <li>There should be (context-sensitive) auto-completion for CSS selectors.</li>
+                    <li>Results should be limited to the frame of the stylesheet.</li>
                 </ul>
             </section>
             <footer>Simon Lindholm, simon.lindholm10@gmail.com</footer>

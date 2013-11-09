@@ -159,7 +159,16 @@ Firebug.Editor = Obj.extend(Module,
         // the editor instance is reused (see also 3280, 3332).
         currentEditor.setValue("");
 
-        var removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
+        var removeGroup = true;
+        try
+        {
+            removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("editor.endEditing FAILS " + exc, exc);
+        }
 
         try
         {

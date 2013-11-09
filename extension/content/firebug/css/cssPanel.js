@@ -2790,6 +2790,28 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
             return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
+    beginEditing: function()
+    {
+        if (this.panel.name === "stylesheet" && this.panel.location)
+        {
+            this.doc = Css.getDocumentForStyleSheet(this.panel.location);
+        }
+        else if (this.panel.name === "css" && this.panel.selection)
+        {
+            this.doc = this.panel.selection.ownerDocument;
+        }
+        else
+        {
+            this.doc = this.panel.context.window.document;
+        }
+    },
+
+    endEditing: function()
+    {
+        this.doc = null;
+        return true;
+    },
+
     saveEdit: function(target, value, previousValue)
     {
         var context = this.panel.context;
@@ -2816,10 +2838,9 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 return;
 
             var cssRules = styleSheet.cssRules;
-            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex];
-                ruleIndex++)
-            {
-            }
+            ruleIndex = 0;
+            while (ruleIndex < cssRules.length && searchRule != cssRules[ruleIndex])
+                ruleIndex++;
 
             if (rule)
                 oldRule = searchRule;
@@ -2844,7 +2865,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (this.panel.name !== "css")
                     return;
 
-                var doc = this.panel.selection.ownerDocument.defaultView.document;
+                var doc = this.panel.selection.ownerDocument;
                 styleSheet = CSSModule.getDefaultStyleSheet(doc);
             }
 

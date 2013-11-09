@@ -39,7 +39,7 @@ var measureCache = {};
 // ********************************************************************************************* //
 // JavaScript auto-completion
 
-Firebug.JSAutoCompleter = function(textBox, completionBox, options)
+function JSAutoCompleter(textBox, completionBox, options)
 {
     var popupSize = 40;
 
@@ -145,43 +145,34 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
      * Show completions for the current contents of the text box. Either this or
      * hide() must be called when the contents change.
      */
-    this.complete = function(context)
+    this.complete = function(context, force)
     {
         this.revertValue = null;
-        this.createCandidates(context);
-        this.showCompletions(false);
+        var offset = this.textBox.selectionStart;
+        if (this.createCandidates(context, this.textBox.value, offset, force))
+            this.showCompletions(false);
+        else
+            this.hide();
     };
 
     /**
      * Update the completion base and create completion candidates for the
      * current value of the text box.
      */
-    this.createCandidates = function(context)
+    this.createCandidates = function(context, value, offset, force)
     {
-        var offset = this.textBox.selectionStart;
-        if (offset !== this.textBox.value.length)
-        {
-            this.hide();
-            return;
-        }
-
-        var value = this.textBox.value;
+        if (offset !== value.length)
+            return false;
 
         // Create a simplified expression by redacting contents/normalizing
         // delimiters of strings and regexes, to make parsing easier.
         // Give up if the syntax is too weird.
         var svalue = simplifyExpr(value);
         if (svalue === null)
-        {
-            this.hide();
-            return;
-        }
+            return false;
 
-        if (killCompletions(svalue, value))
-        {
-            this.hide();
-            return;
-        }
+        if (killCompletions(svalue, value, force))
+            return false;
 
         // Find the expression to be completed.
         var parseStart = getExpressionOffset(svalue);
@@ -208,17 +199,28 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         // We only need to calculate a new candidate list if the expression has changed.
         if (preExpr !== this.completionBase.expr || preParsed !== this.completionBase.pre)
         {
+            var evalOptions = {
+                includeCommandLineAPI: options.includeCommandLineAPI,
+                includeCurrentScope: options.includeCurrentScope
+            };
+            if (!preExpr)
+            {
+                // Add names of variables declared previously in the typed code.
+                evalOptions.additionalCompletions = getNewlyDeclaredNames(spreParsed);
+            }
+
             this.completionBase.expr = preExpr;
             this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                preParsed, spreParsed, this.options);
+                preParsed, spreParsed, evalOptions);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
             this.completionBase.forceShowPopup = false;
         }
 
-        this.createCompletions(prop, prevCompletions);
+        this.createCompletions(prop, prevCompletions, force);
+        return true;
     };
 
     /**
@@ -228,28 +230,27 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
      * for the previous expression (null if none) are used to help with the
      * latter.
      */
-    this.createCompletions = function(prefix, prevCompletions)
+    this.createCompletions = function(prefix, prevCompletions, force)
     {
-        if (!this.completionBase.expr && !prefix)
+        if (!this.completionBase.expr && !prefix && !force)
         {
             // Don't complete "".
             this.completions = null;
             return;
         }
-        if (!this.completionBase.candidates.length && !prefix)
+        if (!this.completionBase.candidates.length && !prefix && !force)
         {
             // Don't complete empty objects -> toString.
             this.completions = null;
             return;
         }
 
-        var mustMatchFirstLetter = (this.completionBase.expr === "");
-        var clist = [
-            this.completionBase.candidates,
-            this.completionBase.hiddenCandidates
-        ], cind = 0;
         var valid = [], ciValid = [];
+        var clist = [this.completionBase.candidates, this.completionBase.hiddenCandidates];
+        var cind = 0;
+
         var lowPrefix = prefix.toLowerCase();
+        var mustMatchFirstLetter = (!this.completionBase.expr && prefix.length > 0);
         while (ciValid.length === 0 && cind < 2)
         {
             var candidates = clist[cind];
@@ -295,7 +296,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             this.completions = {
                 list: (hasMatchingCase ? valid : ciValid),
                 prefix: prefix,
-                hidePopup: (cind === 2)
+                hidePopup: (cind === 2),
+                forced: force
             };
             this.completions.index = this.pickDefaultCandidate(prevCompletions);
 
@@ -332,6 +334,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             if (ind !== -1)
                 return ind;
         }
+
+        if (!this.completionBase.expr && !this.completions.prefix)
+            return list.length - 1;
 
         // Special-case certain expressions. (But remember to pick prefix-free
         // candidates; otherwise "validVariable<return>" can auto-complete
@@ -519,11 +524,23 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
             Events.cancelEvent(event);
             return true;
         }
+        else if (event.keyCode === KeyEvent.DOM_VK_BACK_SPACE)
+        {
+            if (this.completions && !this.textBox.value)
+            {
+                this.hide();
+                Events.cancelEvent(event);
+                return true;
+            }
+        }
         else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
         {
             if (this.completions)
             {
-                this.hideForExpression();
+                if (this.completions.forced)
+                    this.hide();
+                else
+                    this.hideForExpression();
                 Events.cancelEvent(event);
                 return true;
             }
@@ -580,9 +597,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         {
             // Close the completion popup on escape in keydown, so that the popup
             // does not close itself and prevent event propagation on keypress.
-            // (Unless the popup is only open due to Ctrl+Space, in which case
-            // that's precisely what we want.)
-            if (!this.forceShowPopup)
+            // (Unless the popup is only open due to Ctrl+Space on a non-empty
+            // command line, in which case that's precisely what we want.)
+            if (!this.forceShowPopup || this.completions.forced)
                 this.closePopup();
         }
         else if (event.keyCode === KeyEvent.DOM_VK_SPACE && Events.isControl(event))
@@ -881,7 +898,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.JSAutoCompleter.closePopup; EXCEPTION " + err, err);
+                FBTrace.sysout("JSAutoCompleter.closePopup; EXCEPTION " + err, err);
         }
     };
 
@@ -960,7 +977,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
  * (This is unrelated to the auto-completer, but autoCompleter.js has so many nice
  * helper functions.)
  */
-Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
+JSAutoCompleter.transformScopeOperator = function(expr, fname)
 {
     var sexpr = simplifyExpr(expr);
     if (!sexpr)
@@ -983,7 +1000,7 @@ Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
         {
             // Substitute "expr.%prop" with "scopeGetter(expr).prop", or, if used
             // in a "new" expression, "(scopeGetter(expr)).prop" (so that the scope
-            // getter isn't used as a constructor). We don't want to use the first
+            // getter isn't used as a constructor). We don't want to use the second
             // thing unconditionally though, because it messes with ASI.
             var newPos = (start === 0 ? -1 : sexpr.lastIndexOf("new", start-1));
             var hasNew = (newPos !== -1 && !/[a-zA-Z0-9_$.]/.test(sexpr.charAt(newPos-1)) &&
@@ -1063,12 +1080,15 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 function EditorJSAutoCompleter(box, completionBox, options)
 {
-    var ac = new Firebug.JSAutoCompleter(box, completionBox, options);
+    var ac = new JSAutoCompleter(box, completionBox, options);
 
     this.destroy = Obj.bindFixed(ac.shutdown, ac);
     this.reset = Obj.bindFixed(ac.reset, ac);
-    this.complete = Obj.bind(ac.complete, ac);
     this.handleKeyPress = Obj.bind(ac.handleKeyPress, ac);
+    this.complete = function(context)
+    {
+        ac.complete(context);
+    };
 }
 
 // ********************************************************************************************* //
@@ -1211,7 +1231,8 @@ function endingDivIsRegex(expr)
 {
     var kwCont = ["function", "if", "while", "for", "switch", "catch", "with"];
 
-    var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? "{" : expr.charAt(ind));
+    var ind = prevNonWs(expr, expr.length);
+    var ch = (ind === -1 ? "{" : expr.charAt(ind));
     if (reJSChar.test(ch))
     {
         // Test if the previous word is a keyword usable like 'kw <expr>'.
@@ -1330,16 +1351,37 @@ function simplifyExpr(expr)
             }
             else if (ch === "/")
             {
-                var re = endingDivIsRegex(ret);
-                if (re === null)
-                    return null;
-                if (re)
+                if (i + 1 < expr.length && /[\/\*]/.test(expr.charAt(i + 1)))
                 {
-                    inreg = true;
-                    ret += '"';
+                    var singleLineComment = (expr.charAt(i + 1) === "/");
+                    ret += "  ";
+                    i += 2;
+                    var re = singleLineComment ? /^\n/ : /\*\//;
+                    while (i < len && !re.test(expr.substr(i, 2)))
+                    {
+                        ret += " ";
+                        i++;
+                    }
+                    if (!singleLineComment && i < len)
+                    {
+                        ret += "  ";
+                        i += 2;
+                    }
+                    i--;
                 }
                 else
-                    ret += "/";
+                {
+                    var re = endingDivIsRegex(ret);
+                    if (re === null)
+                        return null;
+                    if (re)
+                    {
+                        inreg = true;
+                        ret += '"';
+                    }
+                    else
+                        ret += "/";
+                }
             }
             else
             {
@@ -1367,11 +1409,10 @@ function simplifyExpr(expr)
 }
 
 // Check if auto-completion should be killed.
-function killCompletions(expr, origExpr)
+function killCompletions(expr, origExpr, force)
 {
-    // Make sure there is actually something to complete at the end.
     if (expr.length === 0)
-        return true;
+        return !force;
 
     if (reJSChar.test(expr[expr.length-1]) ||
             expr.slice(-1) === "." ||
@@ -1388,7 +1429,7 @@ function killCompletions(expr, origExpr)
             // Array completions - we're fine.
         }
         else {
-            return true;
+            return !force;
         }
     }
 
@@ -1956,7 +1997,8 @@ function propChainBuildComplete(out, context, tempExpr, result)
             {
                 done(result);
             },
-            function failed(result, context) { }
+            function failed(result, context) {},
+            {noStateChange: true}
         );
     }
     else
@@ -2153,7 +2195,8 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     propChainBuildComplete(out, context, tempExpr, result);
                 }
             },
-            function failed(result, context) { }
+            function failed(result, context) {},
+            {noStateChange: true}
         );
     }
 }
@@ -2343,11 +2386,10 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             {
                 setCompletionsFromObject(out, context.global, context);
             }
-
-            // Add names of variables declared previously in the typed code.
-            var previousDeclarations = getNewlyDeclaredNames(spreParsed);
-            out.completions.push.apply(out.completions, previousDeclarations);
         }
+
+        if (options.additionalCompletions)
+            out.completions.push.apply(out.completions, options.additionalCompletions);
 
         if (indexCompletion)
         {
@@ -2432,7 +2474,9 @@ function setCursorToEOL(input)
 // ********************************************************************************************* //
 // Registration
 
-return Firebug.JSAutoCompleter;
+Firebug.JSAutoCompleter = JSAutoCompleter;
+
+return JSAutoCompleter;
 
 // ********************************************************************************************* //
 });
