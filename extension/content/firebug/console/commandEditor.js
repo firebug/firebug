@@ -1,18 +1,21 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/events",
-    "firebug/chrome/menu",
     "firebug/lib/dom",
     "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/menu",
+    "firebug/console/autoCompleter",
     "firebug/editor/sourceEditor",
 ],
-function(Module, Obj, Firebug, Events, Menu, Dom, Locale, Css, Options, SourceEditor) {
+function(Firebug, FBTrace, Obj, Events, Dom, Locale, Css, Options, Module, Menu, AutoCompleter,
+    SourceEditor) {
 
 "use strict";
 
@@ -51,7 +54,9 @@ Firebug.CommandEditor = Obj.extend(Module,
         // Custom shortcuts for source editor
         config.extraKeys = {
             "Ctrl-Enter": this.onExecute.bind(this),
-            "Esc": this.onEscape.bind(this)
+            "Esc": this.onEscape.bind(this),
+            "Ctrl-Space": this.autoComplete.bind(this, true),
+            "Tab": this.onTab.bind(this)
         };
 
         function browserLoaded(event)
@@ -118,6 +123,23 @@ Firebug.CommandEditor = Obj.extend(Module,
         Firebug.CommandLine.update(context);
         Firebug.CommandLine.cancel(context);
         return true;
+    },
+
+    autoComplete: function(allowGlobal)
+    {
+        var context = Firebug.currentContext;
+        var out = {};
+        var hintFunction = AutoCompleter.codeMirrorAutoComplete
+            .bind(null, context, allowGlobal, out);
+        this.editor.autoComplete(hintFunction);
+        return out.attemptedCompletion;
+    },
+
+    onTab: function(event)
+    {
+        if (!this.editor.hasSelection() && this.autoComplete(false))
+            return;
+        this.editor.tab();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

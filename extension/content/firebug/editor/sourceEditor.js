@@ -27,6 +27,7 @@ var Cu = Components.utils;
 // CodeMirror files. These scripts are dynamically included into panel.html
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
+var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
@@ -256,6 +257,7 @@ SourceEditor.prototype =
         //loader = new ScriptLoader(doc, callback);
 
         loader.addScript(doc, "cm", codeMirrorSrc);
+        loader.addScript(doc, "cm-showhint", showHintSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
         loader.addScript(doc, "cm-css", cssModeSrc);
@@ -544,6 +546,11 @@ SourceEditor.prototype =
         };
     },
 
+    hasSelection: function()
+    {
+        return this.getDocument().somethingSelected();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Document Management
 
@@ -583,6 +590,33 @@ SourceEditor.prototype =
 
         // Default command dispatch.
         Firebug.BaseEditor.onCommand(event, cmd);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    autoComplete: function(hintFunction)
+    {
+        var doc = this.view.ownerDocument;
+        var view = Wrapper.getContentView(doc.defaultView);
+        var contentHintFunction = function()
+        {
+            var ret = hintFunction.apply(this, arguments);
+            var clone = Wrapper.cloneIntoContentScope.bind(Wrapper, view);
+            return clone({
+                list: clone(ret.list.map(function(prop)
+                {
+                    return clone(prop);
+                })),
+                from: clone(ret.from),
+                to: clone(ret.to)
+            });
+        };
+        view.CodeMirror.showHint(this.editorObject, contentHintFunction);
+    },
+
+    tab: function()
+    {
+        this.editorObject.execCommand("defaultTab");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

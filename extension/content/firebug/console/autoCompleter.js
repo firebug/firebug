@@ -167,7 +167,7 @@ function JSAutoCompleter(textBox, completionBox, options)
         // Create a simplified expression by redacting contents/normalizing
         // delimiters of strings and regexes, to make parsing easier.
         // Give up if the syntax is too weird.
-        var svalue = simplifyExpr(value);
+        var svalue = simplifyExpr(value, this.options.multiLine);
         if (svalue === null)
             return false;
 
@@ -206,7 +206,9 @@ function JSAutoCompleter(textBox, completionBox, options)
             if (!preExpr)
             {
                 // Add names of variables declared previously in the typed code.
-                evalOptions.additionalCompletions = getNewlyDeclaredNames(spreParsed);
+                evalOptions.additionalCompletions =
+                    this.options.additionalGlobalCompletions ||
+                    getNewlyDeclaredNames(spreParsed);
             }
 
             this.completionBase.expr = preExpr;
@@ -979,7 +981,7 @@ function JSAutoCompleter(textBox, completionBox, options)
  */
 JSAutoCompleter.transformScopeOperator = function(expr, fname)
 {
-    var sexpr = simplifyExpr(expr);
+    var sexpr = simplifyExpr(expr, false);
     if (!sexpr)
         return expr;
     var search = 0;
@@ -1089,6 +1091,71 @@ function EditorJSAutoCompleter(box, completionBox, options)
     {
         ac.complete(context);
     };
+}
+
+// ********************************************************************************************* //
+// CodeMirror auto-completer
+
+function codeMirrorAutoComplete(context, allowGlobal, attemptedCompletionOut, editor)
+{
+    var cur = editor.getCursor(), line = cur.line;
+    var token = editor.getTokenAt(cur);
+    if (["comment", "string", "string-2"].indexOf(token.type) !== -1)
+        return;
+
+    var offset = token.end;
+    var wholeLine = editor.getLine(line);
+    var value = wholeLine.substr(0, offset);
+
+    var options = {
+        includeCommandLineAPI: true,
+        includeCurrentScope: true,
+        multiLine: true,
+        get additionalGlobalCompletions()
+        {
+            var completions = [];
+            var addVars = function(vars)
+            {
+                for (var v = vars; v; v = v.next)
+                    completions.push(v.name);
+            };
+            addVars(token.state.localVars);
+            addVars(token.state.globalVars);
+            for (var c = token.state.context; c && c.vars; c = c.prev)
+                addVars(c.vars);
+            return completions;
+        }
+    };
+    var completer = new JSAutoCompleter(null, null, options);
+    var worked = completer.createCandidates(context, value, value.length, allowGlobal);
+    if (!worked)
+        return;
+
+    attemptedCompletionOut.attemptedCompletion = true;
+    if (!completer.completions)
+        return;
+
+    var applyCompletion = function(cm, data, completion)
+    {
+        completer.completions.index = completion.index;
+        var startOfLine = completer.getCompletionValue();
+        cm.setLine(line, startOfLine + wholeLine.substr(offset));
+        cm.setCursor(line, startOfLine.length);
+    };
+    var cmCompletions = [];
+    var list = completer.completions.list;
+    for (var i = 0; i < list.length; i++)
+    {
+        cmCompletions.push({
+            hint: applyCompletion,
+            text: list[i].name,
+            index: i
+        });
+    }
+
+    var completionIncludesToken = reJSChar.test(token.string.charAt(0));
+    var pos = {line: line, ch: completionIncludesToken ? token.start : token.end};
+    return {list: cmCompletions, from: pos, to: pos};
 }
 
 // ********************************************************************************************* //
@@ -1227,11 +1294,13 @@ function bwFindMatchingParen(expr, from)
  * Check if a '/' at the end of 'expr' would be a regex or a division.
  * May also return null if the expression seems invalid.
  */
-function endingDivIsRegex(expr)
+function endingDivIsRegex(expr, multiLine)
 {
     var kwCont = ["function", "if", "while", "for", "switch", "catch", "with"];
 
     var ind = prevNonWs(expr, expr.length);
+    if (ind === -1 && multiLine)
+        return false;
     var ch = (ind === -1 ? "{" : expr.charAt(ind));
     if (reJSChar.test(ch))
     {
@@ -1246,7 +1315,7 @@ function endingDivIsRegex(expr)
         // We have a regex in the cases 'if (...) /blah/' and 'function name(...) /blah/'.
         ind = bwFindMatchingParen(expr, ind);
         if (ind === -1)
-            return null;
+            return (multiLine ? false : null);
         ind = prevNonWs(expr, ind);
         if (ind === -1)
             return false;
@@ -1290,7 +1359,7 @@ function isCommaProp(expr, start)
     return isValidProperty(prop);
 }
 
-function simplifyExpr(expr)
+function simplifyExpr(expr, multiLine)
 {
     var ret = "", len = expr.length, instr = false, strend, inreg = false, inclass, brackets = [];
 
@@ -1371,7 +1440,7 @@ function simplifyExpr(expr)
                 }
                 else
                 {
-                    var re = endingDivIsRegex(ret);
+                    var re = endingDivIsRegex(ret, multiLine);
                     if (re === null)
                         return null;
                     if (re)
@@ -1387,11 +1456,9 @@ function simplifyExpr(expr)
             {
                 if (reOpenBracket.test(ch))
                     brackets.push(ch);
-                else if (reCloseBracket.test(ch))
+                else if (reCloseBracket.test(ch) && brackets.length)
                 {
                     // Check for mismatched brackets
-                    if (!brackets.length)
-                        return null;
                     var br = brackets.pop();
                     if (br === "(" && ch !== ")")
                         return null;
@@ -2474,6 +2541,7 @@ function setCursorToEOL(input)
 // ********************************************************************************************* //
 // Registration
 
+JSAutoCompleter.codeMirrorAutoComplete = codeMirrorAutoComplete;
 Firebug.JSAutoCompleter = JSAutoCompleter;
 
 return JSAutoCompleter;
