@@ -39,7 +39,7 @@ var measureCache = {};
 // ********************************************************************************************* //
 // JavaScript auto-completion
 
-Firebug.JSAutoCompleter = function(textBox, completionBox, options)
+function JSAutoCompleter(textBox, completionBox, options)
 {
     var popupSize = 40;
 
@@ -148,40 +148,31 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
     this.complete = function(context)
     {
         this.revertValue = null;
-        this.createCandidates(context);
-        this.showCompletions(false);
+        var offset = this.textBox.selectionStart;
+        if (this.createCandidates(context, this.textBox.value, offset))
+            this.showCompletions(false);
+        else
+            this.hide();
     };
 
     /**
      * Update the completion base and create completion candidates for the
      * current value of the text box.
      */
-    this.createCandidates = function(context)
+    this.createCandidates = function(context, value, offset)
     {
-        var offset = this.textBox.selectionStart;
-        if (offset !== this.textBox.value.length)
-        {
-            this.hide();
-            return;
-        }
-
-        var value = this.textBox.value;
+        if (offset !== value.length)
+            return false;
 
         // Create a simplified expression by redacting contents/normalizing
         // delimiters of strings and regexes, to make parsing easier.
         // Give up if the syntax is too weird.
         var svalue = simplifyExpr(value);
         if (svalue === null)
-        {
-            this.hide();
-            return;
-        }
+            return false;
 
         if (killCompletions(svalue, value))
-        {
-            this.hide();
-            return;
-        }
+            return false;
 
         // Find the expression to be completed.
         var parseStart = getExpressionOffset(svalue);
@@ -208,10 +199,20 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         // We only need to calculate a new candidate list if the expression has changed.
         if (preExpr !== this.completionBase.expr || preParsed !== this.completionBase.pre)
         {
+            var evalOptions = {
+                includeCommandLineAPI: options.includeCommandLineAPI,
+                includeCurrentScope: options.includeCurrentScope
+            };
+            if (!preExpr)
+            {
+                // Add names of variables declared previously in the typed code.
+                evalOptions.additionalCompletions = getNewlyDeclaredNames(spreParsed);
+            }
+
             this.completionBase.expr = preExpr;
             this.completionBase.pre = preParsed;
             var ev = autoCompleteEval(context, preExpr, spreExpr,
-                preParsed, spreParsed, this.options);
+                preParsed, spreParsed, evalOptions);
             prevCompletions = null;
             this.completionBase.candidates = ev.completions;
             this.completionBase.hiddenCandidates = ev.hiddenCompletions;
@@ -219,6 +220,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         }
 
         this.createCompletions(prop, prevCompletions);
+        return true;
     };
 
     /**
@@ -881,7 +883,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.JSAutoCompleter.closePopup; EXCEPTION " + err, err);
+                FBTrace.sysout("JSAutoCompleter.closePopup; EXCEPTION " + err, err);
         }
     };
 
@@ -960,7 +962,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, options)
  * (This is unrelated to the auto-completer, but autoCompleter.js has so many nice
  * helper functions.)
  */
-Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
+JSAutoCompleter.transformScopeOperator = function(expr, fname)
 {
     var sexpr = simplifyExpr(expr);
     if (!sexpr)
@@ -983,7 +985,7 @@ Firebug.JSAutoCompleter.transformScopeOperator = function(expr, fname)
         {
             // Substitute "expr.%prop" with "scopeGetter(expr).prop", or, if used
             // in a "new" expression, "(scopeGetter(expr)).prop" (so that the scope
-            // getter isn't used as a constructor). We don't want to use the first
+            // getter isn't used as a constructor). We don't want to use the second
             // thing unconditionally though, because it messes with ASI.
             var newPos = (start === 0 ? -1 : sexpr.lastIndexOf("new", start-1));
             var hasNew = (newPos !== -1 && !/[a-zA-Z0-9_$.]/.test(sexpr.charAt(newPos-1)) &&
@@ -1063,7 +1065,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 function EditorJSAutoCompleter(box, completionBox, options)
 {
-    var ac = new Firebug.JSAutoCompleter(box, completionBox, options);
+    var ac = new JSAutoCompleter(box, completionBox, options);
 
     this.destroy = Obj.bindFixed(ac.shutdown, ac);
     this.reset = Obj.bindFixed(ac.reset, ac);
@@ -2345,11 +2347,10 @@ function autoCompleteEval(context, preExpr, spreExpr, preParsed, spreParsed, opt
             {
                 setCompletionsFromObject(out, context.global, context);
             }
-
-            // Add names of variables declared previously in the typed code.
-            var previousDeclarations = getNewlyDeclaredNames(spreParsed);
-            out.completions.push.apply(out.completions, previousDeclarations);
         }
+
+        if (options.additionalCompletions)
+            out.completions.push.apply(out.completions, options.additionalCompletions);
 
         if (indexCompletion)
         {
@@ -2435,7 +2436,9 @@ function setCursorToEOL(input)
 // ********************************************************************************************* //
 // Registration
 
-return Firebug.JSAutoCompleter;
+Firebug.JSAutoCompleter = JSAutoCompleter;
+
+return JSAutoCompleter;
 
 // ********************************************************************************************* //
 });
