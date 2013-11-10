@@ -3,14 +3,13 @@
 define([
     "firebug/firebug",
     "firebug/lib/domplate",
-    "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/chrome/window",
-    "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
-function(Firebug, Domplate, Locale, Css, Str, Arr, Win) {
+function(Firebug, Domplate, Css, Str, Arr, Win, InlineEditor) {
 
 "use strict";
 
@@ -24,7 +23,7 @@ const reSelectorChar = /[-_0-9a-zA-Z]/;
 
 function SelectorEditor() {}
 
-SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
+SelectorEditor.prototype = Domplate.domplate(InlineEditor.prototype,
 {
     // 'null' means every document in the context.
     doc: null,

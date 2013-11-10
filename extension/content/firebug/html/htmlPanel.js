@@ -27,8 +27,9 @@ define([
     "firebug/css/selectorEditor",
     "firebug/css/cssReps",
     "firebug/chrome/module",
-    "firebug/js/breakpoint",
     "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
+    "firebug/js/breakpoint",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
@@ -36,7 +37,7 @@ define([
 ],
 function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu, Url, CSSModule,
-    CSSSelectorEditor, CSSInfoTip, Module) {
+    CSSSelectorEditor, CSSInfoTip, Module, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -124,7 +125,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     stopEditing: function()
     {
-        Firebug.Editor.stopEditing();
+        Editor.stopEditing();
     },
 
     isEditing: function()
@@ -249,7 +250,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
             var bracketBox = labelBox.querySelector("*> .nodeBracket");
-            Firebug.Editor.insertRow(bracketBox, "before");
+            Editor.insertRow(bracketBox, "before");
         }
     },
 
@@ -263,7 +264,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 var attrValueBox = attrBox.childNodes[3];
                 var value = elt.getAttribute(attrName);
-                Firebug.Editor.startEditing(attrValueBox, value);
+                Editor.startEditing(attrValueBox, value);
             }
         }
     },
@@ -305,7 +306,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     startEditingXMLNode: function(node, box, editor)
     {
         var xml = Xml.getElementXML(node);
-        Firebug.Editor.startEditing(box, xml, editor);
+        Editor.startEditing(box, xml, editor);
     },
 
     startEditingHTMLNode: function(node, box, editor)
@@ -317,7 +318,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         var html = editor.innerEditMode ? node.innerHTML : Xml.getElementHTML(node);
         html = Str.escapeForHtmlEditor(html);
-        Firebug.Editor.startEditing(box, html, editor);
+        Editor.startEditing(box, html, editor);
     },
 
     deleteNode: function(node, dir)
@@ -1243,7 +1244,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         else if (Dom.getAncestorByClass(event.target, "nodeBracket"))
         {
             var bracketBox = Dom.getAncestorByClass(event.target, "nodeBracket");
-            Firebug.Editor.insertRow(bracketBox, "before");
+            Editor.insertRow(bracketBox, "before");
         }
     },
 
@@ -2325,7 +2326,7 @@ function TextDataEditor(doc)
     this.initializeInline(doc);
 }
 
-TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+TextDataEditor.prototype = domplate(InlineEditor.prototype,
 {
     saveEdit: function(target, value, previousValue)
     {
@@ -2354,7 +2355,7 @@ function TextNodeEditor(doc)
     this.initializeInline(doc);
 }
 
-TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+TextNodeEditor.prototype = domplate(InlineEditor.prototype,
 {
     getInitialValue: function(target, value)
     {
@@ -2436,7 +2437,7 @@ function AttributeEditor(doc)
     this.initializeInline(doc);
 }
 
-AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+AttributeEditor.prototype = domplate(InlineEditor.prototype,
 {
     saveEdit: function(target, value, previousValue)
     {
@@ -2695,7 +2696,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 
     onInput: function()
     {
-        Firebug.Editor.update();
+        Editor.update();
     }
 });
 

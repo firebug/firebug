@@ -29,13 +29,13 @@ define([
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
     "firebug/editor/editor",
-    "firebug/editor/editorSelector",
+    "firebug/editor/inlineEditor",
     "firebug/chrome/searchBox",
     "firebug/css/cssPanelMutationObserver",
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
     Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper) {
+    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -573,7 +573,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             : this.location;
 
         this.stylesheetEditor.styleSheet = this.location;
-        Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
+        Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
         //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
         this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
@@ -618,7 +618,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
         else
         {
-            Firebug.Editor.stopEditing();
+            Editor.stopEditing();
         }
     },
 
@@ -1038,7 +1038,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
         }
 
-        Firebug.Editor.insertRowForObject(styleRuleBox);
+        Editor.insertRowForObject(styleRuleBox);
     },
 
     addRelatedRule: function()
@@ -1066,7 +1066,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             ruleBox = this.template.newRuleTag.append({}, container);
 
         var before = ruleBox.getElementsByClassName("insertBefore")[0];
-        Firebug.Editor.insertRow(before, "before");
+        Editor.insertRow(before, "before");
 
         // Auto-fill the selector field with something reasonable, like
         // ".some-class" or "#table td".
@@ -1105,19 +1105,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         this.ruleEditor.setValue(autofill);
         this.ruleEditor.input.select();
-        Firebug.Editor.update(true);
+        Editor.update(true);
     },
 
     editMediaQuery: function(target)
     {
         var row = Dom.getAncestorByClass(target, "cssRule");
         var mediaQueryBox = Dom.getChildByClass(row, "cssMediaQuery");
-        Firebug.Editor.startEditing(mediaQueryBox);
+        Editor.startEditing(mediaQueryBox);
     },
 
     insertPropertyRow: function(row)
     {
-        Firebug.Editor.insertRowForObject(row);
+        Editor.insertRowForObject(row);
     },
 
     insertRule: function(row)
@@ -1132,18 +1132,18 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 this.template.tag.replace({rules: []}, this.panelNode);
 
             location = Dom.getChildByClass(this.panelNode, "cssSheet");
-            Firebug.Editor.insertRowForObject(location);
+            Editor.insertRowForObject(location);
         }
         else
         {
-            Firebug.Editor.insertRow(location, "before");
+            Editor.insertRow(location, "before");
         }
     },
 
     editPropertyRow: function(row)
     {
         var propValueBox = Dom.getChildByClass(row, "cssPropValue");
-        Firebug.Editor.startEditing(propValueBox);
+        Editor.startEditing(propValueBox);
     },
 
     deletePropertyRow: function(row)
@@ -2090,7 +2090,7 @@ function CSSEditor(doc)
     this.initializeInline(doc);
 }
 
-CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+CSSEditor.prototype = domplate(InlineEditor.prototype,
 {
     insertNewRow: function(target, insertWhere)
     {
@@ -2670,7 +2670,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
 
-            return Firebug.InlineEditor.prototype.doIncrementValue
+            return InlineEditor.prototype.doIncrementValue
                 .call(this, value, amt, offset, offsetEnd, info);
         }
 
@@ -3079,7 +3079,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     onInput: function()
     {
-        Firebug.Editor.update();
+        Editor.update();
     },
 
     scrollToLine: function(line, offset)

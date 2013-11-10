@@ -12,10 +12,11 @@ define([
     "firebug/lib/array",
     "firebug/console/closureInspector",
     "firebug/console/commandLineExposed",
-    "firebug/editor/editor"
+    "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector,
-    CommandLineExposed, Editor) {
+    CommandLineExposed, Editor, InlineEditor) {
 
 "use strict";
 
@@ -1029,7 +1030,7 @@ Firebug.JSEditor = function()
 {
 };
 
-Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+Firebug.JSEditor.prototype = domplate(InlineEditor.prototype,
 {
     setupCompleter: function(completionBox, options)
     {
@@ -1044,7 +1045,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     updateLayout: function()
     {
         // Make sure the completion box stays in sync with the input box.
-        Firebug.InlineEditor.prototype.updateLayout.apply(this, arguments);
+        InlineEditor.prototype.updateLayout.apply(this, arguments);
         this.completionBox.style.width = this.input.style.width;
         this.completionBox.style.height = this.input.style.height;
     },
@@ -1052,7 +1053,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     destroy: function()
     {
         this.autoCompleter.destroy();
-        Firebug.InlineEditor.prototype.destroy.call(this);
+        InlineEditor.prototype.destroy.call(this);
     },
 
     onKeyPress: function(event)
@@ -1065,7 +1066,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (event.keyCode === KeyEvent.DOM_VK_TAB ||
             event.keyCode === KeyEvent.DOM_VK_RETURN)
         {
-            Firebug.Editor.stopEditing();
+            Editor.stopEditing();
             Events.cancelEvent(event);
         }
     },
@@ -1074,7 +1075,7 @@ Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     {
         var context = this.panel.context;
         this.getAutoCompleter().complete(context);
-        Firebug.Editor.update();
+        Editor.update();
     }
 });
 

@@ -17,9 +17,10 @@ define([
     "firebug/chrome/tableRep",
     "firebug/console/console",
     "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
 function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Menu, System, Xpcom,
-    Obj, TableRep, Console) {
+    Obj, TableRep, Console, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -169,7 +170,7 @@ var CommandLineIncludeRep = domplate(TableRep,
     startEditing: function(target)
     {
         var editor = this.getEditor(target.ownerDocument);
-        Firebug.Editor.startEditing(target, target.dataset.aliasname, editor);
+        Editor.startEditing(target, target.dataset.aliasname, editor);
     },
 
     editAliasName: function(tr)
@@ -634,10 +635,10 @@ function onCommand(context, args)
 
 function IncludeEditor(doc)
 {
-    Firebug.InlineEditor.call(this, doc);
+    InlineEditor.call(this, doc);
 }
 
-IncludeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+IncludeEditor.prototype = domplate(InlineEditor.prototype,
 {
     endEditing: function(target, value, cancel)
     {
