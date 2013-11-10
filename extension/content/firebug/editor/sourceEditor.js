@@ -158,44 +158,21 @@ SourceEditor.prototype =
     {
         var doc = parentNode.ownerDocument;
 
-        // All properties must be read-only so, they can't be modified in the DOM panel.
-        function genPropDesc(value)
-        {
-            return {
-                enumerable: true,
-                configurable: true,
-                writable: true,
-                value: value
-            };
-        }
-
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
         var view = Wrapper.getContentView(doc.defaultView);
 
         Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
 
+        config = Obj.extend(SourceEditor.DefaultConfig, config);
+
         // The config object passed to the view must be content-accessible.
+        // CodeMirror writes to it, so make sure properties are writable (we
+        // cannot use plain cloneIntoContentScope).
         var newConfig = Cu.createObjectIn(view);
-
-        // Compute properties of the final newConfig object.
-        for (var prop in SourceEditor.DefaultConfig)
-        {
-            if (SourceEditor.DefaultConfig.hasOwnProperty(prop))
-            {
-                var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
-
         for (var prop in config)
-        {
-            if (!newConfig[prop] && config.hasOwnProperty(prop))
-            {
-                var value = config[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
+            newConfig[prop] = Wrapper.cloneIntoContentScope(view, config[prop]);
+        Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
 
