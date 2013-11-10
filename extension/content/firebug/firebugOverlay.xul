@@ -457,7 +457,7 @@
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
                                      type="content"
-                                     src="chrome://firebug/content/console/commandEditor.html"/>
+                                     src="resource://firebugui/commandEditor.html"/>
                             </hbox>
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
