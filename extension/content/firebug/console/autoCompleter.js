@@ -12,10 +12,9 @@ define([
     "firebug/lib/array",
     "firebug/console/closureInspector",
     "firebug/console/commandLineExposed",
-    "firebug/editor/editor"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Wrapper, Dom, Str, Arr, ClosureInspector,
-    CommandLineExposed, Editor) {
+    CommandLineExposed) {
 
 "use strict";
 
@@ -1021,77 +1020,6 @@ JSAutoCompleter.transformScopeOperator = function(expr, fname)
     }
     return expr;
 };
-
-// ********************************************************************************************* //
-
-/**
- * An (abstract) editor with simple JavaScript auto-completion.
- */
-Firebug.JSEditor = function()
-{
-};
-
-Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
-{
-    setupCompleter: function(completionBox, options)
-    {
-        this.tabNavigation = false;
-        this.arrowCompletion = false;
-        this.fixedWidth = true;
-        this.completionBox = completionBox;
-
-        this.autoCompleter = new EditorJSAutoCompleter(this.input, this.completionBox, options);
-    },
-
-    updateLayout: function()
-    {
-        // Make sure the completion box stays in sync with the input box.
-        Firebug.InlineEditor.prototype.updateLayout.apply(this, arguments);
-        this.completionBox.style.width = this.input.style.width;
-        this.completionBox.style.height = this.input.style.height;
-    },
-
-    destroy: function()
-    {
-        this.autoCompleter.destroy();
-        Firebug.InlineEditor.prototype.destroy.call(this);
-    },
-
-    onKeyPress: function(event)
-    {
-        var context = this.panel.context;
-
-        if (this.getAutoCompleter().handleKeyPress(event, context))
-            return;
-
-        if (event.keyCode === KeyEvent.DOM_VK_TAB ||
-            event.keyCode === KeyEvent.DOM_VK_RETURN)
-        {
-            Firebug.Editor.stopEditing();
-            Events.cancelEvent(event);
-        }
-    },
-
-    onInput: function()
-    {
-        var context = this.panel.context;
-        this.getAutoCompleter().complete(context);
-        Firebug.Editor.update();
-    }
-});
-
-function EditorJSAutoCompleter(box, completionBox, options)
-{
-    var ac = new JSAutoCompleter(box, completionBox, options);
-
-    this.destroy = Obj.bindFixed(ac.shutdown, ac);
-    this.reset = Obj.bindFixed(ac.reset, ac);
-    this.handleKeyPress = Obj.bind(ac.handleKeyPress, ac);
-    this.complete = function(context)
-    {
-        ac.complete(context);
-    };
-}
 
 // ********************************************************************************************* //
 // CodeMirror auto-completer

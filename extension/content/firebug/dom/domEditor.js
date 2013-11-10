@@ -1,14 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firebug",
+    "firebug/lib/dom",
     "firebug/lib/domplate",
     "firebug/lib/events",
-    "firebug/lib/dom",
-    "firebug/lib/css",
-    "firebug/console/autoCompleter",    // Firebug.JSEditor
+    "firebug/console/inlineJSEditor",
 ],
-function(Firebug, Domplate, Events, Dom, Css) {
+function(Dom, Domplate, Events, JSEditor) {
 
 "use strict";
 
@@ -33,7 +31,7 @@ function DOMEditor(doc)
     this.setupCompleter(completionBox, options);
 }
 
-DOMEditor.prototype = domplate(Firebug.JSEditor.prototype,
+DOMEditor.prototype = domplate(JSEditor.prototype,
 {
     tag:
         DIV({style: "position: absolute;"},
@@ -58,7 +56,7 @@ DOMEditor.prototype = domplate(Firebug.JSEditor.prototype,
 
         if (!row)
             this.panel.addWatch(value);
-        else if (Css.hasClass(row, "watchRow"))
+        else if (row.classList.contains("watchRow"))
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
