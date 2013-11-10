@@ -8,10 +8,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/chrome/menu",
-    "firebug/editor/editor",   // xxxHonza: dep on BaseEditor (but BaseEditor is not a module!).
+    "firebug/editor/baseEditor",
+    "firebug/editor/editor",
     "firebug/editor/sourceEditor",
 ],
-function(Firebug, FBTrace, Domplate, Dom, Locale, Events, Menu, Editor, SourceEditor) {
+function(Firebug, FBTrace, Domplate, Dom, Locale, Events, Menu, BaseEditor, Editor, SourceEditor) {
 
 "use strict";
 
@@ -47,7 +48,7 @@ function HTMLEditor(doc)
     this.editor.init(this.box, config, this.onHTMLEditorInitialize.bind(this));
 }
 
-HTMLEditor.prototype = domplate(Firebug.BaseEditor,
+HTMLEditor.prototype = domplate(BaseEditor,
 /** @lends HTMLEditor */
 {
     multiLine: true,
@@ -200,7 +201,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 
     onTextChange: function()
     {
-        Firebug.Editor.update();
+        Editor.update();
     },
 
     onContextMenu: function(event)

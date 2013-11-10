@@ -6,8 +6,9 @@ define([
     "firebug/lib/events",
     "firebug/console/autoCompleter",
     "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
-function(Firebug, Domplate, Events, JSAutoCompleter, Editor) {
+function(Firebug, Domplate, Events, JSAutoCompleter, Editor, InlineEditor) {
 
 "use strict";
 
@@ -18,7 +19,7 @@ function JSEditor()
 {
 }
 
-JSEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
+JSEditor.prototype = Domplate.domplate(InlineEditor.prototype,
 {
     setupCompleter: function(completionBox, options)
     {
@@ -33,7 +34,7 @@ JSEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
     updateLayout: function()
     {
         // Make sure the completion box stays in sync with the input box.
-        Firebug.InlineEditor.prototype.updateLayout.apply(this, arguments);
+        InlineEditor.prototype.updateLayout.apply(this, arguments);
         this.completionBox.style.width = this.input.style.width;
         this.completionBox.style.height = this.input.style.height;
     },
@@ -41,7 +42,7 @@ JSEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
     destroy: function()
     {
         this.autoCompleter.destroy();
-        Firebug.InlineEditor.prototype.destroy.call(this);
+        InlineEditor.prototype.destroy.call(this);
     },
 
     onKeyPress: function(event)

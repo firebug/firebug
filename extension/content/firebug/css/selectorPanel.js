@@ -13,10 +13,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/persist",
     "firebug/css/selectorModule",
-    "firebug/css/selectorEditor"
+    "firebug/css/selectorEditor",
+    "firebug/editor/editor",
 ],
 function(Panel, Rep, FBTrace, Obj, Domplate, Locale, Win, Dom, Css, Events, Persist,
-    CSSSelectorsModule, SelectorEditor) {
+    CSSSelectorsModule, SelectorEditor, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -82,7 +83,7 @@ CSSSelectorsPanel.prototype = Obj.extend(Panel,
         {
             var target = event.currentTarget;
             var panel = Firebug.getElementPanel(target);
-            Firebug.Editor.startEditing(target, "");
+            Editor.startEditing(target, "");
         }
     }),
 
@@ -393,7 +394,7 @@ function CSSSelectorsPanelEditor(doc)
     this.box = this.tag.replace({}, doc, this);
     this.input = this.box;
 
-    Firebug.InlineEditor.prototype.initialize.call(this);
+    SelectorEditor.prototype.initialize.call(this);
     this.tabNavigation = false;
     this.fixedWidth = true;
 }
