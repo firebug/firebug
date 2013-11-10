@@ -27,6 +27,7 @@ define([
     "firebug/css/selectorEditor",
     "firebug/css/cssReps",
     "firebug/chrome/module",
+    "firebug/editor/baseEditor",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
     "firebug/js/breakpoint",
@@ -37,7 +38,7 @@ define([
 ],
 function(Panel, Rep, Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events, System,
     SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu, Url, CSSModule,
-    CSSSelectorEditor, CSSInfoTip, Module, Editor, InlineEditor) {
+    CSSSelectorEditor, CSSInfoTip, Module, BaseEditor, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -2563,7 +2564,7 @@ function HTMLEditor(doc)
     this.arrowCompletion = false;
 }
 
-HTMLEditor.prototype = domplate(Firebug.BaseEditor,
+HTMLEditor.prototype = domplate(BaseEditor,
 {
     tag:
         DIV(

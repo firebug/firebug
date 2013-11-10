@@ -28,6 +28,7 @@ define([
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
+    "firebug/editor/baseEditor",
     "firebug/editor/editor",
     "firebug/editor/inlineEditor",
     "firebug/chrome/searchBox",
@@ -35,7 +36,7 @@ define([
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
     Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, Editor, InlineEditor) {
+    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor, InlineEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1472,7 +1473,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         if (target.nodeName == "TEXTAREA")
         {
-            items = Firebug.BaseEditor.getContextMenuItems();
+            items = BaseEditor.getContextMenuItems();
             items.push(
                 "-",
                 {
@@ -3001,7 +3002,7 @@ function StyleSheetEditor(doc)
     this.input = this.box.firstChild;
 }
 
-StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
+StyleSheetEditor.prototype = domplate(BaseEditor,
 {
     multiLine: true,
 

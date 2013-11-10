@@ -11,9 +11,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/chrome/menu",
+    "firebug/editor/baseEditor",
     "firebug/editor/editor",
 ],
-function(Firebug, FBTrace, Domplate, Events, Css, Dom, Str, Menu, Editor) {
+function(Firebug, FBTrace, Domplate, Events, Css, Dom, Str, Menu, BaseEditor, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -32,7 +33,7 @@ function InlineEditor(doc)
     this.initializeInline(doc);
 }
 
-InlineEditor.prototype = domplate(Firebug.BaseEditor,
+InlineEditor.prototype = domplate(BaseEditor,
 {
     enterOnBlur: true,
 
