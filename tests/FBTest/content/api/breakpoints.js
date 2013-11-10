@@ -41,6 +41,13 @@ this.setBreakpoint = function(chrome, url, lineNo, attributes, callback)
 
         if (false && attributes && attributes.condition)
         {
+            // Right click on the target element.
+            var eventDetails = {type: "mousedown", button: 2};
+            FBTest.synthesizeMouse(target, 2, 2, eventDetails);
+
+            var editor = panel.panelNode.querySelector(".conditionEditor .completionInput");
+            FBTest.ok(editor, "Editor must exist");
+
             // xxxHonza: TODO
         }
         else
