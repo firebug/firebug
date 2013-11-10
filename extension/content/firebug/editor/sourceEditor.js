@@ -578,6 +578,8 @@ SourceEditor.prototype =
         var contentHintFunction = function()
         {
             var ret = hintFunction.apply(this, arguments);
+            if (!ret)
+                return;
             var clone = Wrapper.cloneIntoContentScope.bind(Wrapper, view);
             return clone({
                 list: clone(ret.list.map(function(prop)

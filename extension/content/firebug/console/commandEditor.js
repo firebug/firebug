@@ -135,7 +135,7 @@ Firebug.CommandEditor = Obj.extend(Module,
         return out.attemptedCompletion;
     },
 
-    onTab: function(event)
+    onTab: function()
     {
         if (!this.editor.hasSelection() && this.autoComplete(false))
             return;
