@@ -28,15 +28,17 @@ define([
     "firebug/lib/trace",
     "firebug/css/cssPanelUpdater",
     "firebug/lib/wrapper",
-    "firebug/editor/sourceEditor",
+    "firebug/editor/baseEditor",
     "firebug/editor/editor",
-    "firebug/editor/editorSelector",
+    "firebug/editor/inlineEditor",
+    "firebug/editor/sourceEditor",
     "firebug/chrome/searchBox",
     "firebug/css/cssPanelMutationObserver",
 ],
 function(Panel, Obj, Firebug, Domplate, FirebugReps, Locale, Events, Url, SourceLink, Css, Dom,
     Win, Search, Str, Arr, Fonts, Xml, Persist, System, Menu, Options, CSSModule, CSSInfoTip,
-    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, SourceEditor) {
+    SelectorEditor, FBTrace, CSSPanelUpdater, Wrapper, BaseEditor, Editor, InlineEditor,
+    SourceEditor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -574,7 +576,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             : this.location;
 
         this.stylesheetEditor.styleSheet = this.location;
-        Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
+        Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
         this.stylesheetEditor.editor.scrollTo(this.panelNode.scrollLeft, this.panelNode.scrollTop);
     },
@@ -618,7 +620,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
         }
         else
         {
-            Firebug.Editor.stopEditing();
+            Editor.stopEditing();
         }
     },
 
@@ -1038,7 +1040,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
         }
 
-        Firebug.Editor.insertRowForObject(styleRuleBox);
+        Editor.insertRowForObject(styleRuleBox);
     },
 
     addRelatedRule: function()
@@ -1066,7 +1068,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             ruleBox = this.template.newRuleTag.append({}, container);
 
         var before = ruleBox.getElementsByClassName("insertBefore")[0];
-        Firebug.Editor.insertRow(before, "before");
+        Editor.insertRow(before, "before");
 
         // Auto-fill the selector field with something reasonable, like
         // ".some-class" or "#table td".
@@ -1105,19 +1107,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         this.ruleEditor.setValue(autofill);
         this.ruleEditor.input.select();
-        Firebug.Editor.update(true);
+        Editor.update(true);
     },
 
     editMediaQuery: function(target)
     {
         var row = Dom.getAncestorByClass(target, "cssRule");
         var mediaQueryBox = Dom.getChildByClass(row, "cssMediaQuery");
-        Firebug.Editor.startEditing(mediaQueryBox);
+        Editor.startEditing(mediaQueryBox);
     },
 
     insertPropertyRow: function(row)
     {
-        Firebug.Editor.insertRowForObject(row);
+        Editor.insertRowForObject(row);
     },
 
     insertRule: function(row)
@@ -1132,18 +1134,18 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
                 this.template.tag.replace({rules: []}, this.panelNode);
 
             location = Dom.getChildByClass(this.panelNode, "cssSheet");
-            Firebug.Editor.insertRowForObject(location);
+            Editor.insertRowForObject(location);
         }
         else
         {
-            Firebug.Editor.insertRow(location, "before");
+            Editor.insertRow(location, "before");
         }
     },
 
     editPropertyRow: function(row)
     {
         var propValueBox = Dom.getChildByClass(row, "cssPropValue");
-        Firebug.Editor.startEditing(propValueBox);
+        Editor.startEditing(propValueBox);
     },
 
     deletePropertyRow: function(row)
@@ -1470,7 +1472,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
 
         if (target.nodeName == "TEXTAREA")
         {
-            items = Firebug.BaseEditor.getContextMenuItems();
+            items = BaseEditor.getContextMenuItems();
             items.push(
                 "-",
                 {
@@ -2088,7 +2090,7 @@ function CSSEditor(doc)
     this.initializeInline(doc);
 }
 
-CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+CSSEditor.prototype = domplate(InlineEditor.prototype,
 {
     insertNewRow: function(target, insertWhere)
     {
@@ -2668,7 +2670,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
 
-            return Firebug.InlineEditor.prototype.doIncrementValue
+            return InlineEditor.prototype.doIncrementValue
                 .call(this, value, amt, offset, offsetEnd, info);
         }
 
@@ -2790,6 +2792,28 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
             return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
+    beginEditing: function()
+    {
+        if (this.panel.name === "stylesheet" && this.panel.location)
+        {
+            this.doc = Css.getDocumentForStyleSheet(this.panel.location);
+        }
+        else if (this.panel.name === "css" && this.panel.selection)
+        {
+            this.doc = this.panel.selection.ownerDocument;
+        }
+        else
+        {
+            this.doc = this.panel.context.window.document;
+        }
+    },
+
+    endEditing: function()
+    {
+        this.doc = null;
+        return true;
+    },
+
     saveEdit: function(target, value, previousValue)
     {
         var context = this.panel.context;
@@ -2816,10 +2840,9 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 return;
 
             var cssRules = styleSheet.cssRules;
-            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex];
-                ruleIndex++)
-            {
-            }
+            ruleIndex = 0;
+            while (ruleIndex < cssRules.length && searchRule != cssRules[ruleIndex])
+                ruleIndex++;
 
             if (rule)
                 oldRule = searchRule;
@@ -2844,7 +2867,7 @@ CSSRuleEditor.prototype = domplate(SelectorEditor.prototype,
                 if (this.panel.name !== "css")
                     return;
 
-                var doc = this.panel.selection.ownerDocument.defaultView.document;
+                var doc = this.panel.selection.ownerDocument;
                 styleSheet = CSSModule.getDefaultStyleSheet(doc);
             }
 
@@ -2987,7 +3010,7 @@ function StyleSheetEditor(doc)
     this.editor.init(this.box, config, this.onEditorInitialize.bind(this));
 }
 
-StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
+StyleSheetEditor.prototype = domplate(BaseEditor,
 {
     multiLine: true,
 
@@ -3066,7 +3089,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     onEditorTextChange: function()
     {
-        Firebug.Editor.update();
+        Editor.update();
     },
 
     scrollToLine: function(line, offset)

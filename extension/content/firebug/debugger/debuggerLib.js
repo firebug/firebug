@@ -30,13 +30,12 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // as RDP is supported the entire DebuggerLib module should be used only on the server side.
 
 /**
- * Unwraps the value of a debuggee object.
+ * Unwraps the value of a debuggee object. Primitive values are also allowed
+ * and are let through unharmed.
  *
- * @param obj {Debugger.Object} The debuggee object to unwrap
- * @param global {Window} The unwrapped global (window)
- * @param dbgGlobal {Debugger.Object} The debuggee global object
+ * @param obj {Debugger.Object} The debuggee object to unwrap, or a primitive
  *
- * @return {object} the unwrapped object
+ * @return {object} the unwrapped object, or the same primitive
  */
 DebuggerLib.unwrapDebuggeeValue = function(obj)
 {
@@ -50,8 +49,8 @@ DebuggerLib.unwrapDebuggeeValue = function(obj)
 /**
  * Gets or creates the debuggee global for the given global object
  *
- * @param {Window} global The global object
  * @param {*} context The Firebug context
+ * @param {Window} global The global object
  *
  * @return {Debuggee Window} The debuggee global
  */
@@ -70,8 +69,15 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
         // As a workaround, we unwrap the global object.
         // TODO see what cause that behavior, why, and if there are no other add-ons in that case.
         var contentView = Wrapper.getContentView(global);
-        dbgGlobal = dbg.addDebuggee(contentView);
-        dbg.removeDebuggee(contentView);
+        if (dbg.makeGlobalObjectReference)
+        {
+            dbgGlobal = dbg.makeGlobalObjectReference(contentView);
+        }
+        else
+        {
+            dbgGlobal = dbg.addDebuggee(contentView);
+            dbg.removeDebuggee(contentView);
+        }
         dbgGlobalWeakMap.set(global.document, dbgGlobal);
 
         if (FBTrace.DBG_DEBUGGER)

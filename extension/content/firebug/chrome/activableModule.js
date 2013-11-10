@@ -118,14 +118,6 @@ var ActivableModule = Obj.extend(Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module enable/disable APIs.
 
-    setDefaultState: function(enable)
-    {
-        //@deprecated
-        // xxxHonza: can we remove? (including firebug/console/console causes cycle dependencies)
-        Firebug.Console.log("Deprecated: don't use ActivableModule.setDefaultState!",
-            Firebug.currentContext);
-    },
-
     isEnabled: function()
     {
         return this.hasObservers();

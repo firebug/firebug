@@ -12,11 +12,11 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/chrome/menu",
-    "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
     "firebug/chrome/measureBox",
 ],
 function(Firebug, Panel, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Xml, Menu,
-    Editor, MeasureBox) {
+    InlineEditor, MeasureBox) {
 
 "use strict"
 
@@ -518,7 +518,7 @@ function LayoutEditor(doc)
 /**
  * @editor Represents an inline editor that is used by {@LayoutPanel} to modify layout data.
  */
-LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+LayoutEditor.prototype = domplate(InlineEditor.prototype,
 /** @lends LayoutEditor */
 {
     saveEdit: function(target, value, previousValue)

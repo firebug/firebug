@@ -172,7 +172,10 @@ Firebug.Search = Obj.extend(Module,
                 if (!found && value)
                 {
                     var shouldIgnore = panel.shouldIgnoreIntermediateSearchFailure;
-                    sBox.onNotFound(shouldIgnore && shouldIgnore.call(panel, value));
+                    if (shouldIgnore && shouldIgnore.call(panel, value))
+                        found = true;
+                    else
+                        sBox.onNotFound();
                 }
 
                 if (value)
@@ -196,15 +199,10 @@ Firebug.Search = Obj.extend(Module,
         }
     },
 
-    onNotFound: function(ignore)
+    onNotFound: function()
     {
         if (this.status != "notfound")
-            this.searchHasBeeped = false;
-        if (!ignore && !this.searchHasBeeped)
-        {
             System.beep();
-            this.searchHasBeeped = true;
-        }
     },
 
     isCaseSensitive: function(text)

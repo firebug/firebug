@@ -27,6 +27,7 @@ var Cu = Components.utils;
 // CodeMirror files. These scripts are dynamically included into panel.html
 // Note that panel.html runs in content scope with restricted (no chrome) privileges.
 var codeMirrorSrc = "chrome://firebug/content/editor/codemirror/codemirror.js";
+var showHintSrc = "chrome://firebug/content/editor/codemirror/addon/show-hint.js";
 var jsModeSrc = "chrome://firebug/content/editor/codemirror/mode/javascript.js";
 var htmlMixedModeSrc = "chrome://firebug/content/editor/codemirror/mode/htmlmixed.js";
 var xmlModeSrc = "chrome://firebug/content/editor/codemirror/mode/xml.js";
@@ -157,44 +158,21 @@ SourceEditor.prototype =
     {
         var doc = parentNode.ownerDocument;
 
-        // All properties must be read-only so, they can't be modified in the DOM panel.
-        function genPropDesc(value)
-        {
-            return {
-                enumerable: true,
-                configurable: true,
-                writable: true,
-                value: value
-            };
-        }
-
         // Unwrap Firebug content view (panel.html). This view is running in
         // content mode with no chrome privileges.
         var view = Wrapper.getContentView(doc.defaultView);
 
         Trace.sysout("sourceEditor.onInit; " + view.CodeMirror);
 
+        config = Obj.extend(SourceEditor.DefaultConfig, config);
+
         // The config object passed to the view must be content-accessible.
+        // CodeMirror writes to it, so make sure properties are writable (we
+        // cannot use plain cloneIntoContentScope).
         var newConfig = Cu.createObjectIn(view);
-
-        // Compute properties of the final newConfig object.
-        for (var prop in SourceEditor.DefaultConfig)
-        {
-            if (SourceEditor.DefaultConfig.hasOwnProperty(prop))
-            {
-                var value = prop in config ? config[prop] : SourceEditor.DefaultConfig[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
-
         for (var prop in config)
-        {
-            if (!newConfig[prop] && config.hasOwnProperty(prop))
-            {
-                var value = config[prop];
-                Object.defineProperty(newConfig, prop, genPropDesc(value));
-            }
-        }
+            newConfig[prop] = Wrapper.cloneIntoContentScope(view, config[prop]);
+        Cu.makeObjectPropsNormal(newConfig);
 
         var self = this;
 
@@ -256,6 +234,7 @@ SourceEditor.prototype =
         //loader = new ScriptLoader(doc, callback);
 
         loader.addScript(doc, "cm", codeMirrorSrc);
+        loader.addScript(doc, "cm-showhint", showHintSrc);
         loader.addScript(doc, "cm-js", jsModeSrc);
         loader.addScript(doc, "cm-xml", xmlModeSrc);
         loader.addScript(doc, "cm-css", cssModeSrc);
@@ -544,6 +523,11 @@ SourceEditor.prototype =
         };
     },
 
+    hasSelection: function()
+    {
+        return this.getDocument().somethingSelected();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Document Management
 
@@ -586,6 +570,33 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    autoComplete: function(hintFunction)
+    {
+        var doc = this.view.ownerDocument;
+        var view = Wrapper.getContentView(doc.defaultView);
+        var contentHintFunction = function()
+        {
+            var ret = hintFunction.apply(this, arguments);
+            var clone = Wrapper.cloneIntoContentScope.bind(Wrapper, view);
+            return clone({
+                list: clone(ret.list.map(function(prop)
+                {
+                    return clone(prop);
+                })),
+                from: clone(ret.from),
+                to: clone(ret.to)
+            });
+        };
+        view.CodeMirror.showHint(this.editorObject, contentHintFunction);
+    },
+
+    tab: function()
+    {
+        this.editorObject.execCommand("defaultTab");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Cursor Methods
 
     setCursor: function(line, ch)
@@ -613,9 +624,6 @@ SourceEditor.prototype =
     {
         Trace.sysout("sourceEditor.setDebugLocation; line: " + line +
             ", this.debugLocation: " + this.debugLocation);
-
-        if (this.debugLocation == line)
-            return;
 
         if (this.debugLocation != -1)
         {
@@ -812,6 +820,10 @@ SourceEditor.prototype =
         var handle = this.editorObject.getLineHandle(lineNo);
         if (handle)
             this.editorObject.removeLineClass(handle, "wrap", BP_WRAP_CLASS);
+
+        // Make sure the debug location marker is not removed together with the breakpoint.
+        if (this.debugLocation == lineNo)
+            this.setDebugLocation(lineNo);
 
         // dispatch event;
         if (this.bpChangingHandlers)
