@@ -1026,7 +1026,7 @@ JSAutoCompleter.transformScopeOperator = function(expr, fname)
 // ********************************************************************************************* //
 // CodeMirror auto-completer
 
-function codeMirrorAutoComplete(context, allowGlobal, attemptedCompletionOut, editor)
+function codeMirrorAutoComplete(context, allowGlobal, attemptedCompletionOut, sourceEditor, editor)
 {
     var cur = editor.getCursor(), line = cur.line;
     var token = editor.getTokenAt(cur);
@@ -1043,17 +1043,7 @@ function codeMirrorAutoComplete(context, allowGlobal, attemptedCompletionOut, ed
         multiLine: true,
         get additionalGlobalCompletions()
         {
-            var completions = [];
-            var addVars = function(vars)
-            {
-                for (var v = vars; v; v = v.next)
-                    completions.push(v.name);
-            };
-            addVars(token.state.localVars);
-            addVars(token.state.globalVars);
-            for (var c = token.state.context; c && c.vars; c = c.prev)
-                addVars(c.vars);
-            return completions;
+            return sourceEditor.getSurroundingVariablesFromCodeMirrorState(token.state);
         }
     };
     var completer = new JSAutoCompleter(null, null, options);

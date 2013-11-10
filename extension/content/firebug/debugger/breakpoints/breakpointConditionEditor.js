@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/dom",
     "firebug/console/inlineJSEditor",
 ],
-function(Domplate, Locale, Dom, JSEditor) {
+function(FBTrace, Domplate, Locale, Dom, JSEditor) {
 
 "use strict";
 
@@ -15,12 +16,14 @@ function(Domplate, Locale, Dom, JSEditor) {
 
 var {domplate, DIV, INPUT} = Domplate;
 
+var TraceError = FBTrace.to("DBG_ERRORS");
+
 // ********************************************************************************************* //
 // Condition Editor
 
-function ConditionEditor(doc)
+function ConditionEditor(doc, sourceEditor)
 {
-    this.initialize(doc);
+    this.initialize(doc, sourceEditor);
 }
 
 ConditionEditor.prototype = domplate(JSEditor.prototype,
@@ -36,14 +39,20 @@ ConditionEditor.prototype = domplate(JSEditor.prototype,
             )
         ),
 
-    initialize: function(doc)
+    initialize: function(doc, sourceEditor)
     {
         this.box = this.tag.replace({}, doc, this);
         this.input = this.box.getElementsByClassName("completionInput").item(0);
-
         var completionBox = this.box.getElementsByClassName("completionBox").item(0);
+        this.sourceEditor = sourceEditor;
+
+        var self = this;
         var options = {
-            tabWarnings: true
+            tabWarnings: true,
+            get additionalGlobalCompletions()
+            {
+                return self.surroundings || [];
+            }
         };
 
         this.setupCompleter(completionBox, options);
@@ -60,6 +69,8 @@ ConditionEditor.prototype = domplate(JSEditor.prototype,
         panel.panelNode.appendChild(this.box);
 
         this.input.value = value;
+
+        this.setSurroundings();
 
         setTimeout(function()
         {
@@ -84,6 +95,22 @@ ConditionEditor.prototype = domplate(JSEditor.prototype,
             this.input.focus();
             this.input.select();
         }.bind(this));
+    },
+
+    setSurroundings: function()
+    {
+        try
+        {
+            var editor = this.sourceEditor;
+            var line = this.breakpoint.lineNo;
+            var state = editor.getCodeMirrorStateForBreakpointLine(line);
+            this.surroundings = editor.getSurroundingVariablesFromCodeMirrorState(state);
+        }
+        catch (exc)
+        {
+            TraceError.sysout("breakpointConditionEditor.getSurroundings FAILS", exc);
+            this.surroundings = null;
+        }
     },
 
     hide: function()
