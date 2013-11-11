@@ -178,10 +178,10 @@
 }
 
 @keyframes emphasizeFrameResultValue {
-    from {
+    50% {
         background-color: #C4F4FF;
     }
-    to {
+    100% {
         background-color: inherit;
     }
 }
