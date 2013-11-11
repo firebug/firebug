@@ -325,9 +325,6 @@ DebuggerLib.getFrameResultObject = function(context)
         value = frameFinished.throw;
     }
 
-    if (typeof value === "object")
-        value = context.clientCache.getObject(value);
-
     return {
         type: type,
         value: value,
