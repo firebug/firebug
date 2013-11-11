@@ -2844,7 +2844,7 @@ this.TaskList.prototype =
         var args = Array.prototype.slice.call(arguments, 1);
         this.push(function(callback)
         {
-            func.apply(null, args);
+            func.apply(FBTest, args);
             callback();
         });
     },
