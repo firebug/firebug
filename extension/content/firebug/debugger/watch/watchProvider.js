@@ -217,7 +217,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
     },
 
     /**
-     * Adds the completion value ($exception or $return) if it exists to the scopes
+     * Adds the frame result (<exception> or <return value>) if it exists to the scopes
      * listed in the watch panel (even if it is not a scope).
      *
      * @param {object} stackFrame
@@ -229,9 +229,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         if (!frameResultObj || !frameResultObj.type)
             return;
 
-        var frameResultScope;
-
-        frameResultScope = cache.getObject(frameResultObj.value);
+        var frameResultScope = cache.getObject(frameResultObj.value);
 
         frameResultScope.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
         frameResultScope.isFrameResultValue = true;
