@@ -25,11 +25,14 @@ define([
     "firebug/lib/array",
     "firebug/lib/http",
     "firebug/trace/traceListener",
+
+    // xxxHonza: the following dependencies should be also removed.
     "firebug/debugger/clients/clientFactory",
+    "firebug/debugger/clients/objectClient",
     "firebug/console/commandLineExposed",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, Css, Arr,
-    Http, TraceListener, ClientFactory, CommandLineExposed) {
+    Http, TraceListener, ClientFactory, ObjectClient, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1305,12 +1308,15 @@ window.Firebug =
         // Support for objects with dynamic type info. Those objects are mostly remote
         // objects coming from the back-end (server side). We can't use |instanceof|
         // operand for those objects and so we need to provide type.
-        if (object && Obj.isFunction(object.getType))
-            type = object.getType();
-        else if (object && object["class"])
-            type = object["class"];
+        if (object instanceof ObjectClient)
+        {
+            if (object && Obj.isFunction(object.getType))
+                type = object.getType();
+            else if (object && object["class"])
+                type = object["class"];
+        }
 
-        for (var i = 0; i < reps.length; ++i)
+        for (var i = 0; i < reps.length; i++)
         {
             var rep = reps[i];
             try
