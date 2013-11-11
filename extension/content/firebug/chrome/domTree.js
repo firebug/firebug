@@ -245,8 +245,9 @@ DomTree.prototype = domplate(
                 var hasChildren = this.provider.hasChildren(child);
                 var type = this.getType(child);
                 var name = this.getLabel(child);
+                var readOnly = child.readOnly;
 
-                var member = this.createMember(type, name, child, level, hasChildren);
+                var member = this.createMember(type, name, child, level, hasChildren, readOnly);
                 member.provider = this.provider;
 
                 // Domplate inheritance doesn't work properly so, let's store back reference.
@@ -261,8 +262,11 @@ DomTree.prototype = domplate(
                 var valueType = typeof(value);
                 var hasChildren = (valueType === "object" && this.hasProperties(value));
                 var type = this.getType(value);
+                // Only children fetched from a provider can be readonly.
+                // Otherwise, these are evaluated expressions.
+                var readOnly = false;
 
-                var member = this.createMember(type, prop, value, level, hasChildren);
+                var member = this.createMember(type, prop, value, level, hasChildren, readOnly);
                 members.push(member);
             });
         }
@@ -296,7 +300,7 @@ DomTree.prototype = domplate(
         return "dom";
     },
 
-    createMember: function(type, name, value, level, hasChildren)
+    createMember: function(type, name, value, level, hasChildren, readOnly)
     {
         var member = {
             name: name,
@@ -306,6 +310,7 @@ DomTree.prototype = domplate(
             level: level,
             hasChildren: hasChildren,
             value: value,
+            readOnly: readOnly,
         };
 
         return member;

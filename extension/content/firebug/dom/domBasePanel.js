@@ -415,7 +415,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
             var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof StackFrame;
-            var isFrameResultValue = (typeof rowValue === "object" && rowValue.isFrameResultValue);
             var label, tooltiptext;
 
             items.push(
@@ -460,7 +459,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                 tooltiptext = "dom.tip.Edit_Property";
             }
 
-            var readOnly = (!isWatch && !isStackFrame && (member.readOnly || isFrameResultValue));
+            var readOnly = (!isWatch && !isStackFrame && member.readOnly);
             if (!readOnly)
             {
                 items.push(

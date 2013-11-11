@@ -234,6 +234,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         frameResultScope.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
         frameResultScope.isFrameResultValue = true;
+        frameResultScope.readOnly = true;
 
         Trace.sysout("WatchProvider.appendFrameResultValueInScope; frameResultScope",
             frameResultScope);
