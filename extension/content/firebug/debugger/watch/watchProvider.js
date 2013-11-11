@@ -121,6 +121,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         // but useful for debugging.
         var thisScope = cache.getObject(stackFrame.nativeFrame["this"]);
         thisScope.name = "this";
+        thisScope.readOnly = true;
         stackFrame.scopes.push(thisScope);
 
         // Now iterate all parent scopes. This represents the chain of scopes
@@ -128,7 +129,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         var scope = stackFrame.nativeFrame.environment;
         while (scope)
         {
-            stackFrame.scopes.push(new ScopeClient(scope, cache));
+            stackFrame.scopes.push(new ScopeClient(scope, cache, {readOnly: true}));
             scope = scope.parent;
         }
 

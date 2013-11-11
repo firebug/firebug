@@ -19,10 +19,11 @@ var Trace = FBTrace.to("DBG_SCOPECLIENT");
 // ********************************************************************************************* //
 // Scope
 
-function ScopeClient(grip, cache)
+function ScopeClient(grip, cache, options)
 {
     this.grip = grip;
     this.cache = cache;
+    this.readOnly = options.readOnly;
     this.properties = null;
     this.error = null;
 }
