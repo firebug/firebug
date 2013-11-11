@@ -77,27 +77,12 @@ function checkResultNonEditable(callback, watchPanel)
     var resultValue = watchPanel.document.querySelector(".frameResultValueRow .memberValueCell");
     FBTest.ok(resultValue, "Get the element for the result value");
 
-    checkResultNonEditableThroughContextMenu(watchPanel, resultValue);
     checkResultNonEditableThroughDoubleClick(watchPanel, resultValue);
-    FBTest.progress("=== End Test ===");
-
-    callback();
-}
-
-function checkResultNonEditableThroughContextMenu(watchPanel, resultValue)
-{
-    // Check that the context menu does not contain the "Edit Property..." item
-    var contextMenu = ContextMenuController.getContextMenu(resultValue);
-    var menuItems = Array.slice(contextMenu.getElementsByTagName("menuitem"));
-    FBTest.ok(menuItems.length, "There should be context menu items");
-
-    // xxxFlorent: TODO test that carefully
-    var editPropertyExists = menuItems.some(function(elt)
+    checkResultNonEditableThroughContextMenu(watchPanel, resultValue, function()
     {
-        return elt.getAttribute("label") === FW.FBL.$STR("EditProperty");
+        FBTest.progress("=== End Test ===");
+        callback();
     });
-    FBTest.ok(!editPropertyExists, "The property should not be editable through the context "+
-        "menu");
 }
 
 function checkResultNonEditableThroughDoubleClick(watchPanel, resultValue)
@@ -108,6 +93,32 @@ function checkResultNonEditableThroughDoubleClick(watchPanel, resultValue)
     var editorInput = watchPanel.document.querySelector(".completionInput");
 
     FBTest.ok(!editorInput, "No editor should appear after double clicking");
+}
+
+function checkResultNonEditableThroughContextMenu(watchPanel, resultValue, callback)
+{
+    // Check that the context menu does not contain the "Edit Property..." item
+    var contextMenu = ContextMenuController.getContextMenu(resultValue);
+    function onPopupShown()
+    {
+        ContextMenuController.removeListener(resultValue, "popupshown", onPopupShown);
+        var menuItems = Array.slice(contextMenu.getElementsByTagName("menuitem"));
+        FBTest.ok(menuItems.length, "There should be context menu items");
+        contextMenu.hidePopup();
+
+        // xxxFlorent: TODO test that carefully
+        var editPropertyExists = menuItems.some(function(elt)
+        {
+            return elt.getAttribute("label") === FW.FBL.$STR("EditProperty");
+        });
+
+        FBTest.ok(!editPropertyExists, "The property should not be editable through the context "+
+            "menu");
+        callback();
+    }
+    ContextMenuController.addListener(resultValue, "popupshown", onPopupShown);
+    var eventDetails = {type: "contextmenu", button: 2};
+    FBTest.synthesizeMouse(resultValue, 2, 2, eventDetails);
 }
 
 function checkExceptionProperties(callback, watchPanel)
