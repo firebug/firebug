@@ -46,7 +46,7 @@ function triggerBreakpoint(callback, btn, lineNo)
     setTimeout(function()
     {
         FBTest.click(btn);
-    }, 10);
+    }, 0);
     FBTest.progress("Waiting for debugger to break at line " + lineNo);
     var chrome = FW.Firebug.chrome;
     FBTest.waitForBreakInDebugger(chrome, lineNo, false, function()
