@@ -75,15 +75,6 @@ WatchTree.prototype = domplate(BaseTree,
 
     getType: function(object)
     {
-        // xxxHonza: this must be done through a decorator that can be also reused
-        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
-
-        if (object && Obj.isFunction(object.getType))
-        {
-            if (object.getType() == "function")
-                return "userFunction";
-        }
-
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
@@ -91,6 +82,15 @@ WatchTree.prototype = domplate(BaseTree,
             return "scopes";
         else if (object instanceof WatchExpression)
             return "watch";
+
+        // xxxHonza: this must be done through a decorator that can be also reused
+        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
+        // Checking the object type must be done after checking object instance (see issue 6953).
+        if (object && Obj.isFunction(object.getType))
+        {
+            if (object.getType() == "function")
+                return "userFunction";
+        }
 
         return BaseTree.getType.apply(this, arguments);
     },
