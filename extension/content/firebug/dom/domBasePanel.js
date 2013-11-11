@@ -62,7 +62,6 @@ Firebug.DOMBasePanel = function()
 {
 }
 
-Firebug.DOMBasePanel.ToolboxPlate = DOMReps.ToolboxPlate;
 Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 /** @lends Firebug.DOMBasePanel */
 {
