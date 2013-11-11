@@ -8,6 +8,7 @@
     font-family: monospace;
     font-size: 11px;
     line-height: 1.2;
+    cursor: text;
 }
 
 .cm-s-firebug .linehighlighting {
@@ -75,6 +76,7 @@
 .cm-s-firebug .CodeMirror-gutter {
     padding-right:4px;
     width:.5em;
+    cursor: default;
 }
 
 .cm-s-firebug .CodeMirror-gutter-elt {
