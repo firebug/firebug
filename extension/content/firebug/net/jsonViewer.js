@@ -1,9 +1,9 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -12,19 +12,22 @@ define([
     "firebug/lib/http",
     "firebug/lib/string",
     "firebug/lib/json",
-    "firebug/dom/toggleBranch",
     "firebug/lib/array",
     "firebug/lib/system",
-    "firebug/dom/domPanel",
-    "firebug/chrome/reps"
+    "firebug/chrome/module",
+    "firebug/chrome/domTree",
+    "firebug/dom/domMemberProvider",
 ],
-function(Module, Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
-    ToggleBranch, Arr, System) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
+    Arr, System, Module, DomTree, DOMMemberProvider) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var TraceError = FBTrace.to("DBG_ERRORS");
+var Trace = FBTrace.to("DBG_JSONVIEWER");
 
 var {domplate, SPAN, DIV} = Domplate;
 
@@ -46,10 +49,13 @@ var contentTypes =
 // ********************************************************************************************* //
 // Model implementation
 
-Firebug.JSONViewerModel = Obj.extend(Module,
+var JSONViewerModel = Obj.extend(Module,
 {
     dispatchName: "jsonViewer",
     contentTypes: contentTypes,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -62,6 +68,9 @@ Firebug.JSONViewerModel = Obj.extend(Module,
         Firebug.NetMonitor.NetInfoBody.removeListener(this);
         Firebug.unregisterUIListener(this);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
 
     onContextMenu: function(items, object, target, context, panel, popup)
     {
@@ -92,10 +101,11 @@ Firebug.JSONViewerModel = Obj.extend(Module,
             System.copyToClipboard(value);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     initTabBody: function(infoBox, file)
     {
-        if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.initTabBody", {infoBox: infoBox, file: file});
+        Trace.sysout("jsonviewer.initTabBody", {infoBox: infoBox, file: file});
 
         // Let listeners to parse the JSON.
         Events.dispatch(this.fbListeners, "onParseJSON", [file]);
@@ -113,9 +123,8 @@ Firebug.JSONViewerModel = Obj.extend(Module,
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 Locale.$STR("jsonviewer.tab.JSON"));
 
-            if (FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.initTabBody; JSON object available " +
-                    (typeof(file.jsonObject) != "undefined"), file.jsonObject);
+            Trace.sysout("jsonviewer.initTabBody; JSON object available " +
+                (typeof(file.jsonObject) != "undefined"), file.jsonObject);
         }
     },
 
@@ -148,7 +157,9 @@ Firebug.JSONViewerModel = Obj.extend(Module,
         return contentTypes[contentType];
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Update listener for TabView
+
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
@@ -156,8 +167,7 @@ Firebug.JSONViewerModel = Obj.extend(Module,
         if (!Css.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
 
-        if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.updateTabBody", infoBox);
+        Trace.sysout("jsonviewer.updateTabBody", infoBox);
 
         tabBody.updated = true;
         tabBody.context = context;
@@ -174,7 +184,7 @@ Firebug.JSONViewerModel = Obj.extend(Module,
 
 // ********************************************************************************************* //
 
-Firebug.JSONViewerModel.Preview = domplate(
+JSONViewerModel.Preview = domplate(
 {
     bodyTag:
         DIV({"class": "jsonPreview", _repObject: "$file"},
@@ -203,8 +213,7 @@ Firebug.JSONViewerModel.Preview = domplate(
         var body = Dom.getAncestorByClass(sortLink, "netInfoJSONText");
         if (!body)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("jsonViewer.onSort; ERROR body is null");
+            TraceError.sysout("jsonViewer.onSort; ERROR body is null");
             return;
         }
 
@@ -219,49 +228,27 @@ Firebug.JSONViewerModel.Preview = domplate(
             return;
 
         if (!body.jsonTree)
-            body.jsonTree = new JSONTreePlate();
+            body.jsonTree = new DomTree();
 
         var input = {file: file, sorted: Firebug.sortJsonPreview};
         var parentNode = this.bodyTag.replace(input, body, this);
         parentNode = parentNode.getElementsByClassName("jsonPreviewBody").item(0);
 
-        body.jsonTree.render(file.jsonObject, parentNode, context);
+        body.jsonTree.memberProvider = new JSONProvider(context);
+        body.jsonTree.replace(parentNode, {object: file.jsonObject});
     }
 });
 
 // ********************************************************************************************* //
+// JSON Tree Provider
 
-function JSONTreePlate()
+function JSONProvider(context)
 {
-    // Used by Firebug.DOMPanel.DirTable domplate.
-    this.toggles = new ToggleBranch.ToggleBranch();
+    this.context = context;
 }
 
-// xxxHonza: this object is *not* a panel (using Firebug terminology), but
-// there is no other way how to subclass the DOM Tree than to derive from the DOMBasePanel.
-// Better solution would be to have a middle object between DirTablePlate and DOMBasePanel.
-JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
+JSONProvider.prototype = Obj.extend(new DOMMemberProvider(),
 {
-    dispatchName: "JSONTreePlate",
-
-    render: function(jsonObject, parentNode, context)
-    {
-        try
-        {
-            this.panelNode = parentNode;
-            this.context = context;
-
-            var members = this.getMembers(jsonObject, 0);
-            this.expandMembers(members, this.toggles, 0, 0);
-            this.showMembers(members, false, false);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.render; EXCEPTION", err);
-        }
-    },
-
     getMembers: function(object, level)
     {
         if (!level)
@@ -288,9 +275,13 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.JSONViewerModel);
+Firebug.registerModule(JSONViewerModel);
 
-return Firebug.JSONViewerModel;
+// xxxHonza: backward compatibility, used by AmosFrameworkForFirebug extension:
+// https://addons.mozilla.org/en-us/firefox/addon/amosframeworkforfirebug/
+Firebug.JSONViewerModel = JSONViewerModel;
+
+return JSONViewerModel;
 
 // ********************************************************************************************* //
 });
