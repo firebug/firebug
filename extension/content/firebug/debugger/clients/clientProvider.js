@@ -13,9 +13,8 @@ function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy) {
 // ********************************************************************************************* //
 // Watch Panel Provider
 
-function ClientProvider(cache)
+function ClientProvider()
 {
-    this.cache = cache;
 }
 
 /**
