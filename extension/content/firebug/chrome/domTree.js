@@ -38,12 +38,6 @@ function DomTree(provider)
 DomTree.prototype = domplate(
 /** @lends DomTree */
 {
-    sizerRowTag:
-        TR({role: "presentation"},
-            TD({width: "30%"}),
-            TD({width: "70%"})
-        ),
-
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
@@ -70,6 +64,11 @@ DomTree.prototype = domplate(
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Accessors
+
+    getRowTag: function(member)
+    {
+        return this.rowTag;
+    },
 
     hasChildren: function(member)
     {
@@ -117,16 +116,6 @@ DomTree.prototype = domplate(
         var value = this.getValue(member);
         var rep = Firebug.getRep(value);
         return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    getRowTag: function(member)
-    {
-        return this.rowTag;
-    },
-
-    getSizerRowTag: function()
-    {
-        return this.sizerRowTag;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
