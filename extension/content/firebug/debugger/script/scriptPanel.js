@@ -249,9 +249,13 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
     {
         this.removeDebugLocation();
 
-        // Clear the stack on the panel toolbar
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
-        panelStatus.clear();
+        // Clear the stack on the panel toolbar, but only if the Script panel is
+        // the currently selected panel.
+        if (Firebug.chrome.getSelectedPanel() == this)
+        {
+            var panelStatus = Firebug.chrome.getPanelStatusElements();
+            panelStatus.clear();
+        }
 
         this.updateInfoTip();
     },
