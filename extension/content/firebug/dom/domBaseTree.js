@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
     "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/dom",
@@ -11,8 +12,10 @@ define([
     "firebug/chrome/domTree",
     "firebug/dom/toggleBranch",
     "firebug/lib/promise",
+    "firebug/lib/events",
 ],
-function(Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch, Promise) {
+function(Firebug, Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch,
+    Promise, Events) {
 
 "use strict";
 
@@ -150,6 +153,75 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClick: function(event)
+    {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
+        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
+        var target = row.lastChild.firstChild;
+        var isString = Css.hasClass(target, "objectBox-string");
+        var inValueCell = (event.target === valueCell || event.target === target);
+
+        var repNode = Firebug.getRepNode(event.target);
+        var memberRow = Css.hasClass(repNode, "memberRow");
+
+        // Here, we are interested in the object associated with the value rep
+        // (not the rep object associated with the row itself)
+        var object = memberRow ? null : repNode.repObject;
+
+        // Row member object created by the tree widget.
+        var member = row.repObject;
+
+        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        {
+            // Basic row toggling is implemented in {@DomTree}
+            BaseTree.onClick.apply(this, arguments);
+        }
+        else
+        {
+            // 1) Click on functions navigates the user to the right source location
+            // 2) Double click inverts boolean values and opens inline editor for others.
+            if (typeof(object) == "function")
+            {
+                Firebug.chrome.select(object, "script");
+                Events.cancelEvent(event);
+            }
+            else if (Events.isDoubleClick(event))
+            {
+                // The entire logic is part of the parent panel.
+                var panel = Firebug.getElementPanel(row);
+                if (!panel)
+                    return;
+
+                if (!member)
+                {
+                    TraceError.sysout("domBaseTree.onClick; ERROR No member associated!");
+                    return;
+                }
+
+                // Only primitive types can be edited.
+                // xxxHonza: this place requires the panel to have a provider property.
+                // Is that correct?
+                var value = panel.provider.getValue(member.value);
+                if (typeof(value) == "object")
+                    return;
+
+                if (typeof(value) == "boolean")
+                    panel.setPropertyValue(row, "" + !value);
+                else
+                    panel.editProperty(row);
+
+                Events.cancelEvent(event);
+            }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Expanding/Collapsing
 
     toggleRow: function(row, forceOpen)
@@ -226,6 +298,16 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     expandRowAsync: function(row, members)
     {
+        // xxxHonza: TODO
+        // If we are still in the midst of inserting rows, cancel all pending
+        // insertions here - this is a big speedup when stepping in the debugger
+        /*if (this.timeouts)
+        {
+            for (var i = 0; i < this.timeouts.length; ++i)
+                this.context.clearTimeout(this.timeouts[i]);
+            delete this.timeouts;
+        }*/
+
         var lastRow = row;
         var delay = 0;
         var setSize = members.length;
@@ -236,7 +318,7 @@ DomBaseTree.prototype = domplate(BaseTree,
         {
             if (lastRow.parentNode)
             {
-                var result = this.loop.insertRows({members: slice}, lastRow);
+                var result = this.loop.insertRows({members: slice}, lastRow, this);
                 lastRow = result[1];
 
                 // xxxHonza: for a11y

@@ -60,10 +60,6 @@ var ToolboxPlate = domplate(
 
 function WatchPanel()
 {
-    this.watches = [];
-    this.tree = new WatchTree();
-    this.toggles = new ToggleBranch.ToggleBranch();
-
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
     this.onMouseOver = Obj.bind(this.onMouseOver, this);
     this.onMouseOut = Obj.bind(this.onMouseOut, this);
@@ -108,6 +104,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         this.tool = this.context.getTool("debugger");
         this.tool.addListener(this);
+
+        this.watches = [];
+        this.tree = new WatchTree();
+        this.toggles = new ToggleBranch.ToggleBranch();
 
         this.provider = new WatchProvider(this);
         this.tree.provider = this.provider;

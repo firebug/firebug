@@ -6,6 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/array",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -14,7 +15,7 @@ define([
     "firebug/dom/domBasePanel",
     "firebug/dom/domModule",
 ],
-function(Firebug, FBTrace, Obj, Events, Dom, Css, Search, FirebugReps, DOMBasePanel, DOMModule) {
+function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, FirebugReps, DOMBasePanel, DOMModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -171,14 +172,20 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     onClick: function(event)
     {
         var repNode = Firebug.getRepNode(event.target);
-        if (repNode)
+        if (!repNode)
+            return;
+
+        // We are only interested if the click is made on an object that represents
+        // DOM property value (usually a green link). Not in clicks on tree rows where
+        // the repObject is a tree-member object.
+        if (Css.hasClass(repNode, "memberRow"))
+            return;
+
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        if (row)
         {
-            var row = Dom.getAncestorByClass(event.target, "memberRow");
-            if (row)
-            {
-                this.selectRow(row, repNode);
-                Events.cancelEvent(event);
-            }
+            this.selectRow(row, repNode);
+            Events.cancelEvent(event);
         }
     },
 

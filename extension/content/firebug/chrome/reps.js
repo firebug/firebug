@@ -2713,7 +2713,6 @@ Firebug.registerRep(
     FirebugReps.SourceLink,
     FirebugReps.CompilationUnit,
     FirebugReps.NetFile,
-    FirebugReps.Property,
     FirebugReps.XML,
     FirebugReps.Arr,
     FirebugReps.ArrayLikeObject,
