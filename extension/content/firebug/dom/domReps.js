@@ -24,6 +24,15 @@ function(Firebug, FBTrace, Domplate, Locale, Events, Options, Dom, Css, Str,
 "use strict";
 
 // ********************************************************************************************* //
+// Documentation
+
+/**
+ * This entire module is obsolete and is presented only for backward compatibility with
+ * some extensions (e.g. Illumination and spy_eye).
+ * This module is currently only included in {@Firebug.DOMBasePanel}.
+ */
+
+// ********************************************************************************************* //
 // Constants
 
 var insertSliceSize = 18;
@@ -66,6 +75,18 @@ var DirTablePlate = domplate(Rep,
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
                 TAG("$member.tag", {object: "$member.value"})
+            )
+        ),
+
+    tag:
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
+            _repObject: "$object", role: "tree",
+            "aria-label": Locale.$STR("aria.labels.dom properties")},
+            TBODY({role: "presentation"},
+                SizerRow,
+                FOR("member", "$object|memberIterator",
+                    TAG("$memberRowTag", {member: "$member"})
+                )
             )
         ),
 
@@ -304,10 +325,25 @@ var DirTablePlate = domplate(Rep,
     }
 });
 
+var ToolboxPlate = domplate(
+{
+    tag:
+        DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
+            SPAN({"class": "watchDeleteButton closeButton"})
+        ),
+
+    onClick: function(event)
+    {
+        var toolbox = event.currentTarget;
+        toolbox.domPanel.deleteWatch(toolbox.watchRow);
+    }
+});
+
 // ********************************************************************************************* //
 // Registration
 
 return {
+    ToolboxPlate: ToolboxPlate,
     DirTablePlate: DirTablePlate,
     insertSliceSize: insertSliceSize,
     insertInterval: insertInterval,
