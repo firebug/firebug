@@ -7,8 +7,9 @@ define([
     "firebug/lib/array",
     "firebug/debugger/clients/objectClient",
     "firebug/console/errorCopy",
+    "firebug/debugger/debuggerLib",
 ],
-function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy) {
+function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -103,6 +104,50 @@ ClientProvider.prototype =
             return object.value;
 
         return object;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // ID Provider
+
+    getId: function(object)
+    {
+        var label = this.getLabel(object);
+        if (label)
+            return label;
+
+        if (typeof(object.getActor) == "function")
+            return object.getActor();
+
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Private Helpers
+
+    /**
+     * This is the place where we break the RDP feature and access server side objects
+     * locally. It's used for providing data to the Watch panel.
+     *
+     * @param {Object} object Client object with an actor.
+     */
+    getLocalObject: function(object)
+    {
+        var actor;
+
+        if (typeof(object.getActor) == "function")
+        {
+            actor = object.getActor();
+        }
+        else
+        {
+            // The object is already the underlying JS object.
+            return object;
+        }
+
+        if (!actor)
+            return null;
+
+        return DebuggerLib.getObject(this.panel.context, actor);
     },
 }
 
