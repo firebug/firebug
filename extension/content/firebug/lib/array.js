@@ -115,6 +115,9 @@ Arr.sliceArray = function(array, index)
 
 Arr.cloneArray = function(array, fn)
 {
+   if (!array)
+       return array;
+
    var newArray = [], len = array.length;
 
    if (fn)
