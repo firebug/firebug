@@ -171,6 +171,17 @@ SourceFile.findScriptForFunctionInContext = function(context, fn)
 {
     var dbgGlobal = DebuggerLib.getDebuggeeGlobal(context);
     var dbgFn = dbgGlobal.makeDebuggeeValue(fn);
+
+    if (!dbgFn || !dbgFn.script)
+    {
+        TraceError.sysout("sourceFile.findScriptForFunctionInContext; ERROR no script?", {
+            fn: fn,
+            dbgFn: dbgFn,
+        });
+
+        return null;
+    }
+
     return dbgFn.script;
 };
 
