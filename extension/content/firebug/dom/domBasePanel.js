@@ -21,7 +21,6 @@ define([
     "firebug/dom/toggleBranch",
     "firebug/lib/system",
     "firebug/chrome/menu",
-    "firebug/dom/domMemberProvider",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
     "firebug/chrome/panel",
@@ -30,13 +29,11 @@ define([
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
     "firebug/console/autoCompleter",
-    "firebug/dom/domPanelTree",
-    "firebug/dom/domProvider",
 ],
 function(Firebug, FBTrace, Obj, Arr, Rep, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Str, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps, Panel, CommandLine, Editor,
-    SearchBox, DOMModule, JSAutoCompleter, DomPanelTree, DomProvider) {
+    DOMEditor, DOMReps, Panel, CommandLine, Editor,
+    SearchBox, DOMModule, JSAutoCompleter) {
 
 "use strict";
 
@@ -77,17 +74,28 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     {
         // Object path in the toolbar.
         // xxxHonza: the persistence of the object-path would deserve complete refactoring.
+        // The code is messy and hard to understand. The logic should be also moved to
+        // DOM Panel since it doesn't make sense for the WatchPanel that is derived from
+        // DOMBasePanel object.
+        //
+        // There are three arrays used to maintain the presentation state of the DOM panel
+        // objectPath: list of objects displayed in the panel's toolbar. This array is directly
+        //          used by FirebugChrome.syncStatusPath() that asks for it through
+        //          panel.getObjectPath();
+        // propertyPath: list of property names that are displayed in the toolbar (status-path)
+        //          These are used to reconstruct the objectPath array after page reload.
+        //          (after page reload we need to deal with new page objects).
+        // viewPath: list of structures that contains (a) presentation state of the tree
+        //          and (b) vertical scroll position - one for each corresponding object
+        //          in the current path.
+        //
+        // I think that length of these arrays should be always the same, but it isn't true.
+        // There is also a pathIndex member that indicates the currently selected object
+        // in the status path (the one that is displayed in bold font).
         this.objectPath = [];
         this.propertyPath = [];
         this.viewPath = [];
         this.pathIndex = -1;
-
-        // Content rendering
-        this.provider = new DomProvider(this);
-        this.tree = new DomPanelTree();
-        this.tree.provider = this.provider;
-        this.tree.memberProvider = new DOMMemberProvider(this.context);
-        this.toggles = new ToggleBranch.ToggleBranch();
 
         Panel.initialize.apply(this, arguments);
     },
@@ -108,7 +116,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
             state.firstSelection = Persist.persistObject(this.getPathObject(1), this.context);
 
-        this.tree.saveState(this.toggles);
+        // Save tree state into the right toggles object.
+        var toggles = view ? view.toggles : this.toggles;
+        this.tree.saveState(toggles);
+
+        state.toggles = this.toggles;
 
         Panel.destroy.apply(this, arguments);
     },
@@ -134,6 +146,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             if (state.propertyPath)
                 this.propertyPath = state.propertyPath;
 
+            if (state.toggles)
+                this.toggles = state.toggles;
+
             var defaultObject = this.getDefaultSelection();
             var selectObject = defaultObject;
 
@@ -146,7 +161,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                     this.objectPath = [defaultObject, restored];
                 }
                 else
+                {
                     this.objectPath = [defaultObject];
+                }
             }
             else
             {
@@ -234,11 +251,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     updateSelection: function(object)
     {
-        Trace.sysout("dom.updateSelection", object);
-
         var previousIndex = this.pathIndex;
         var previousView = (previousIndex === -1 ? null : this.viewPath[previousIndex]);
 
+        // xxxHonza: this looks like a hack, pathToAppend is set within {@DomPanel.onClick}
+        // Another reason why the related code should belong to the DOMPanel.
         var newPath = this.pathToAppend;
         delete this.pathToAppend;
 
@@ -325,7 +342,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             this.pathIndex = pathIndex;
 
             var view = this.viewPath[pathIndex];
-            this.toggles = view ? view.toggles : new ToggleBranch.ToggleBranch();
+
+            this.toggles = view ? view.toggles : this.toggles;
 
             // Persist the current scroll location
             if (previousView && this.panelNode.scrollTop)

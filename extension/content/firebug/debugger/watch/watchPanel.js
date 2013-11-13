@@ -112,6 +112,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.provider = new WatchProvider(this);
         this.tree.provider = this.provider;
         this.tree.memberProvider = this.provider;
+
+        // Create different tree object and presentation state (toggles) for the default
+        // tree displays the current scope when the debugger is resumed.
+        // xxxHonza: it's state is preserved across page load, but not across pause/resume.
+        this.defaultTree = new WatchTree();
+        this.defaultTree.provider = this.provider;
+        this.defaultTree.memberProvider = this.provider;
+        this.defaultToggles = new ToggleBranch.ToggleBranch();
     },
 
     destroy: function(state)
@@ -119,6 +127,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         state.watches = this.watches;
 
         Firebug.unregisterUIListener(this);
+
+        this.defaultTree.saveState(this.defaultToggles);
+        state.defaultToggles = this.defaultToggles;
 
         this.tool.removeListener(this);
 
@@ -145,8 +156,16 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     show: function(state)
     {
-        if (state && state.watches)
-            this.watches = state.watches;
+        Trace.sysout("watchPanel.show;", state);
+
+        if (state)
+        {
+            if (state.watches)
+                this.watches = state.watches;
+
+            if (state.defaultToggles)
+                this.defaultToggles = state.defaultToggles;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -247,11 +266,18 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.evalWatchesLocally();
 
         // Render the watch panel tree.
-        this.tree.replace(this.panelNode, input);
+        this.defaultTree.replace(this.panelNode, input);
 
         // Auto expand the global scope item.
-        var scope = this.context.getCurrentGlobal();
-        this.tree.expandObject(scope);
+        if (this.defaultToggles.isEmpty())
+        {
+            var scope = this.context.getCurrentGlobal();
+            this.defaultTree.expandObject(scope);
+        }
+        else
+        {
+            this.defaultTree.restoreState(input, this.defaultToggles);
+        }
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
@@ -727,6 +753,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     setPropertyValue: function(row, value)
     {
         // Save state of the tree before evaluation will cause rebuild.
+        // xxxHonza: save state of the default tree?
         this.tree.saveState(this.toggles);
 
         BasePanel.setPropertyValue.apply(this, arguments);

@@ -75,10 +75,21 @@ DomBaseTree.prototype = domplate(BaseTree,
                     toggles = toggles.set(name, new ToggleBranch.ToggleBranch());
             }
         }
+
+        if (Trace.active)
+            Trace.sysout("domBaseTree.saveState", state.clone());
     },
 
     restoreState: function(object, toggles, level)
     {
+        if (Trace.active)
+        {
+            Trace.sysout("domBaseTree.restoreState; " + level, {
+                object: object,
+                toggles: toggles.clone(),
+            });
+        }
+
         level = level || 0;
 
         // Don't try to expand children if there are no expanded items.

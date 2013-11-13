@@ -4,9 +4,9 @@
 
 define([
     "firebug/lib/object",
-    "firebug/dom/domBasePanel",
+    "firebug/dom/domPanel",
 ],
-function(Obj, DOMBasePanel) {
+function(Obj, DOMPanel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -21,7 +21,7 @@ function DOMSidePanel()
 {
 }
 
-DOMSidePanel.prototype = Obj.extend(DOMBasePanel.prototype,
+DOMSidePanel.prototype = Obj.extend(DOMPanel.prototype,
 /** @lends DOMSidePanel */
 {
     name: "domSide",

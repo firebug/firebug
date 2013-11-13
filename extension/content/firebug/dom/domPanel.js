@@ -14,8 +14,13 @@ define([
     "firebug/chrome/reps",
     "firebug/dom/domBasePanel",
     "firebug/dom/domModule",
+    "firebug/dom/domPanelTree",
+    "firebug/dom/domProvider",
+    "firebug/dom/domMemberProvider",
+    "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, FirebugReps, DOMBasePanel, DOMModule) {
+function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, FirebugReps, DOMBasePanel,
+    DOMModule, DomPanelTree, DomProvider, DOMMemberProvider, ToggleBranch) {
 
 // ********************************************************************************************* //
 // Constants
@@ -55,6 +60,13 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     initialize: function()
     {
         this.onClick = Obj.bind(this.onClick, this);
+
+        // Content rendering
+        this.provider = new DomProvider(this);
+        this.tree = new DomPanelTree();
+        this.tree.provider = this.provider;
+        this.tree.memberProvider = new DOMMemberProvider(this.context);
+        this.toggles = new ToggleBranch.ToggleBranch();
 
         DOMModule.addListener(this);
 
