@@ -34,10 +34,12 @@ function WatchTree(provider)
 }
 
 /**
- * @domplate Represents a tree of properties/objects
+ * @domplate This tree widget extends {@DomBaseTree} and appends support for watch expressions.
+ * The tree is responsible for rendering content within the {@WatchPanel}.
  */
 var BaseTree = DomBaseTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
+/** @lends WatchTree */
 {
     watchNewRowTag:
         TR({"class": "watchNewRow", level: 0},

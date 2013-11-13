@@ -150,7 +150,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         if (!object || !this.supportsObject(object, type))
             return;
 
-        this.pathToAppend = DOMBasePanel.getPath(row);
+        this.pathToAppend = this.tree.getPath(row);
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;

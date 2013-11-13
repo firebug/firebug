@@ -67,7 +67,7 @@ ClientProvider.prototype =
         if (object instanceof ObjectClient.Property)
             text = object.name;
 
-        if (Obj.isFunction(object.getName))
+        if (object && Obj.isFunction(object.getName))
             text = object.getName();
 
         // Support for string type (children are String instances).
@@ -80,9 +80,10 @@ ClientProvider.prototype =
         // Make sure it's a string
         text += "";
 
-        // Cropping is usually based on extensions.firebug.stringCropLength pref
-        // But 50 chars (default value) is not short enough. We need a new pref
-        // extensions.firebug.stringCropLengthSmall? (see issue 5898)
+        // Cropping is usually based on extensions.firebug.stringCropLength preference
+        // But 50 chars (default value) is not short enough.
+        // xxxHonza: Do we need a new one like e.g.: extensions.firebug.stringCropLengthSmall?
+        // (see issue 5898)
         return Str.cropString(text, 25);
     },
 

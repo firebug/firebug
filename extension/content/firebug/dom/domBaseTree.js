@@ -375,7 +375,12 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Path for persistence
 
+    /**
+     * Returns an array of parts that uniquely identifies a row (not always all JavaScript)
+     * This is used for persistence of expanded nodes.
+     */
     getPath: function(row)
     {
         var name = this.getRowName(row);

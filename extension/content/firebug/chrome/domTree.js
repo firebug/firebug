@@ -1,16 +1,16 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, FBTrace) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr) {
 
 "use strict";
 
@@ -31,7 +31,7 @@ function DomTree(provider)
 }
 
 /**
- * @domplate This object represents UI DomTree widget based on Domplate. You can use
+ * @domplate This object represents generic DomTree widget based on Domplate. You can use
  * data provider to populate the tree with custom data. Or just pass a JS object as
  * an input.
  */
@@ -233,8 +233,12 @@ DomTree.prototype = domplate(
                 var child = children[i];
                 var hasChildren = this.provider.hasChildren(child);
                 var type = this.getType(child);
-                var name = this.getLabel(child);
 
+                // We can't use DomTree.getLabel() at this moment since it expects a member
+                // object as the argument. But the member doesn't exist yet (it's going to
+                // be created at the next row). So, derived objects should not override
+                // getLabel() method, but rather provide custom provider.
+                var name = this.provider.getLabel(child);
                 var member = this.createMember(type, name, child, level, hasChildren);
                 member.provider = this.provider;
 
@@ -282,6 +286,8 @@ DomTree.prototype = domplate(
 
     getType: function(object)
     {
+        // xxxHonza: A type provider (or a decorator) should be used here.
+        // (see also a comment in {@WatchTree.getType} 
         return "dom";
     },
 

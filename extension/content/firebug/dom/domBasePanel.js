@@ -623,6 +623,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         var member = row.domObject;
         var name = member.name + "";
 
+        // The name should be always set.
+        if (!name)
+            TraceError.sysout("domBasePanel.getRowPathName; ERROR missing tree-member name!");
+
         // Fake "(closure)" properties.
         if (member.ignoredPath)
             return ["", ""];
@@ -646,7 +650,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     copyName: function(row)
     {
         var value = this.getRowPathName(row);
-        value = value[1]; //don't want the separator
+
+        // don't want the separator
+        value = value[1];
+
         System.copyToClipboard(value);
     },
 
@@ -665,7 +672,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         var path = [];
         for (var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
-        path.shift(); //don't want the first separator
+
+        // don't want the first separator
+        path.shift();
+
         return path;
     },
 
@@ -861,6 +871,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
 function getRowName(row)
 {
+    // xxxHonza: DomBaseTree.getRowName() should replace this function (it has the same logic)
+
     // XXX This can return not only property names but also just descriptive ones,
     // like "(closure)", and indeed the collapse remembering logic relies on that.
     var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
@@ -891,29 +903,6 @@ function getParentRow(row)
         if (row.getAttribute("level") === level)
             return row;
     }
-}
-
-/**
- * Returns an array of parts that uniquely identifies a row (not always all JavaScript)
- */
-function getPath(row)
-{
-    var name = getRowName(row);
-    var path = [name];
-
-    var level = parseInt(row.getAttribute("level"), 10) - 1;
-    for (row = row.previousSibling; row && level >= 0; row = row.previousSibling)
-    {
-        if (parseInt(row.getAttribute("level"), 10) === level)
-        {
-            name = getRowName(row);
-            path.splice(0, 0, name);
-
-            --level;
-        }
-    }
-
-    return path;
 }
 
 // ********************************************************************************************* //
@@ -953,9 +942,6 @@ var PropertyObj = function(object, name)
 // Registration
 
 Firebug.registerRep(Property);
-
-// Expose so, it can be used by derived objects.
-Firebug.DOMBasePanel.getPath = getPath;
 
 return Firebug.DOMBasePanel;
 
