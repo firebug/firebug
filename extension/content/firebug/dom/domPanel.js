@@ -17,10 +17,9 @@ define([
     "firebug/dom/domPanelTree",
     "firebug/dom/domProvider",
     "firebug/dom/domMemberProvider",
-    "firebug/dom/toggleBranch",
 ],
 function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, FirebugReps, DOMBasePanel,
-    DOMModule, DomPanelTree, DomProvider, DOMMemberProvider, ToggleBranch) {
+    DOMModule, DomPanelTree, DomProvider, DOMMemberProvider) {
 
 // ********************************************************************************************* //
 // Constants
@@ -66,7 +65,6 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         this.tree = new DomPanelTree();
         this.tree.provider = this.provider;
         this.tree.memberProvider = new DOMMemberProvider(this.context);
-        this.toggles = new ToggleBranch.ToggleBranch();
 
         DOMModule.addListener(this);
 

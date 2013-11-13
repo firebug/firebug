@@ -97,6 +97,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         this.viewPath = [];
         this.pathIndex = -1;
 
+        this.toggles = new ToggleBranch.ToggleBranch();
+
         Panel.initialize.apply(this, arguments);
     },
 

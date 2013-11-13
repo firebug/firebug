@@ -107,15 +107,14 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
         this.watches = [];
         this.tree = new WatchTree();
-        this.toggles = new ToggleBranch.ToggleBranch();
 
         this.provider = new WatchProvider(this);
         this.tree.provider = this.provider;
         this.tree.memberProvider = this.provider;
 
         // Create different tree object and presentation state (toggles) for the default
-        // tree displays the current scope when the debugger is resumed.
-        // xxxHonza: it's state is preserved across page load, but not across pause/resume.
+        // tree that displays the current scope when the debugger is resumed.
+        // xxxHonza: its state is preserved across page load, but not across pause/resume.
         this.defaultTree = new WatchTree();
         this.defaultTree.provider = this.provider;
         this.defaultTree.memberProvider = this.provider;

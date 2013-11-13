@@ -10,10 +10,8 @@ define([
     "firebug/dom/domPanelTree",
     "firebug/dom/domProvider",
     "firebug/dom/domMemberProvider",
-    "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Obj, DOMBasePanel, DomPanelTree, DomProvider, DOMMemberProvider,
-    ToggleBranch) {
+function(Firebug, FBTrace, Obj, DOMBasePanel, DomPanelTree, DomProvider, DOMMemberProvider) {
 
 "use strict";
 
@@ -49,7 +47,6 @@ DOMSidePanel.prototype = Obj.extend(DOMBasePanel.prototype,
         this.tree = new DomPanelTree();
         this.tree.provider = this.provider;
         this.tree.memberProvider = new DOMMemberProvider(this.context);
-        this.toggles = new ToggleBranch.ToggleBranch();
 
         DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
