@@ -751,9 +751,12 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     setPropertyValue: function(row, value)
     {
-        // Save state of the tree before evaluation will cause rebuild.
-        // xxxHonza: save state of the default tree?
-        this.tree.saveState(this.toggles);
+        // The current tree is refreshed after editing a property (set by evaluation)
+        // So, make sure to persist the proper tree state.
+        if (this.selection instanceof StackFrame)
+            this.tree.saveState(this.toggles);
+        else
+            this.defaultTree.saveState(this.defaultToggles);
 
         BasePanel.setPropertyValue.apply(this, arguments);
     },
