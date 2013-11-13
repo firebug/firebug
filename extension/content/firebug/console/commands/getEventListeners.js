@@ -175,7 +175,7 @@ function onExecuteCommand(context, args)
         // later (within 'log' event handler) to figure out whether additional
         // pretty-printed logs should be appended in to the Console.
         // See {@GetEventListenersModule} above.
-        context.getEventListenersCache.set(object, {
+        context.getEventListenersCache.set(Wrapper.wrapObject(object), {
             target: target,
             listeners: listeners,
             observers: observers
