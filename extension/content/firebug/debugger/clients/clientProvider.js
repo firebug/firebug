@@ -8,8 +8,9 @@ define([
     "firebug/debugger/clients/objectClient",
     "firebug/console/errorCopy",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/stack/stackFrame",
 ],
-function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy, DebuggerLib) {
+function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy, DebuggerLib, StackFrame) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -135,7 +136,9 @@ ClientProvider.prototype =
     {
         var actor;
 
-        if (typeof(object.getActor) == "function")
+        // xxxHonza: StackFrame should be derived from ObjectClient in the future,
+        // but for now it needs to be explicitly checked in the condition.
+        if (object instanceof StackFrame || object instanceof ObjectClient)
         {
             actor = object.getActor();
         }
