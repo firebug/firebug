@@ -17,7 +17,8 @@ function (FBTrace, Obj, Promise, Arr, Wrapper, RDP, DebuggerLib, Grip) {
 
 function ObjectClient(grip, cache)
 {
-    this.grip = grip;
+    Grip.call(this, grip);
+
     this.cache = cache;
     this.properties = null;
     this.error = null;

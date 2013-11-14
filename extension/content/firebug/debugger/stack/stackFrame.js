@@ -22,6 +22,8 @@ var Trace = FBTrace.to("DBG_STACK");
 
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
+    Grip.call(this, nativeFrame);
+
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
@@ -42,9 +44,6 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
 
     // Mozilla
     this.nativeFrame = nativeFrame;
-
-    // Set grip (derived from the super object)
-    this.grip = this.nativeFrame;
 
     this.pc = pc;
     this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
