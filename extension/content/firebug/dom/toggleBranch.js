@@ -70,7 +70,7 @@ ToggleBranch.prototype =
     clone: function()
     {
         var newToggles = new ToggleBranch();
-        this.props.forEach(function(name, value)
+        this.props.forEach(function(value, name)
         {
             newToggles.set(name, value.clone());
         });
