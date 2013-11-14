@@ -5,12 +5,12 @@ define([
     "firebug/lib/object",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/clients/objectClient",
     "firebug/console/errorCopy",
     "firebug/debugger/debuggerLib",
-    "firebug/debugger/stack/stackFrame",
 ],
-function (FBTrace, Obj, Str, Arr, ObjectClient, ErrorCopy, DebuggerLib, StackFrame) {
+function (FBTrace, Obj, Str, Arr, Grip, ObjectClient, ErrorCopy, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Watch Panel Provider
@@ -136,9 +136,7 @@ ClientProvider.prototype =
     {
         var actor;
 
-        // xxxHonza: StackFrame should be derived from ObjectClient in the future,
-        // but for now it needs to be explicitly checked in the condition.
-        if (object instanceof StackFrame || object instanceof ObjectClient)
+        if (object instanceof Grip)
         {
             actor = object.getActor();
         }

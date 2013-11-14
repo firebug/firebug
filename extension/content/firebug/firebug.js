@@ -28,11 +28,11 @@ define([
 
     // xxxHonza: the following dependencies should be also removed.
     "firebug/debugger/clients/clientFactory",
-    "firebug/debugger/clients/objectClient",
+    "firebug/debugger/clients/grip",
     "firebug/console/commandLineExposed",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, Css, Arr,
-    Http, TraceListener, ClientFactory, ObjectClient, CommandLineExposed) {
+    Http, TraceListener, ClientFactory, Grip, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1306,9 +1306,8 @@ window.Firebug =
             type = "string";
 
         // Support for objects with dynamic type info. Those objects are mostly remote
-        // objects coming from the back-end (server side). We can't use |instanceof|
-        // operand for those objects and so we need to provide type.
-        if (object instanceof ObjectClient)
+        // objects coming from the back-end (server side).
+        if (object instanceof Grip)
         {
             if (object && Obj.isFunction(object.getType))
                 type = object.getType();
