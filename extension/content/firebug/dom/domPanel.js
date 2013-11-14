@@ -11,20 +11,26 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/search",
+    "firebug/lib/domplate",
+    "firebug/lib/locale",
+    "firebug/lib/persist",
+    "firebug/chrome/rep",
     "firebug/chrome/reps",
     "firebug/dom/domBasePanel",
     "firebug/dom/domModule",
     "firebug/dom/domPanelTree",
     "firebug/dom/domProvider",
     "firebug/dom/domMemberProvider",
+    "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, FirebugReps, DOMBasePanel,
-    DOMModule, DomPanelTree, DomProvider, DOMMemberProvider) {
+function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale, Persist, Rep,
+    FirebugReps, DOMBasePanel, DOMModule, DomPanelTree, DomProvider, DOMMemberProvider,
+    ToggleBranch) {
 
 // ********************************************************************************************* //
 // Constants
 
-var Trace = FBTrace.to("DBG_DOM");
+var Trace = FBTrace.to("DBG_DOMPANEL");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
@@ -37,10 +43,11 @@ function DOMPanel()
 {
 }
 
-DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
 DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 /** @lends DOMPanel */
 {
+    dispatchName: "DOMPanel",
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
@@ -58,7 +65,14 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
     initialize: function()
     {
-        this.onClick = Obj.bind(this.onClick, this);
+        // Support for status path update when clicking on DOM object (must be done before
+        // super class initialization).
+        this.onClick = this.onClick.bind(this);
+
+        DOMBasePanel.prototype.initialize.apply(this, arguments);
+
+        // Support for breakpoints
+        DOMModule.addListener(this);
 
         // Content rendering
         this.provider = new DomProvider(this);
@@ -66,13 +80,52 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         this.tree.provider = this.provider;
         this.tree.memberProvider = new DOMMemberProvider(this.context);
 
-        DOMModule.addListener(this);
-
-        DOMBasePanel.prototype.initialize.apply(this, arguments);
+        // Object path in the toolbar.
+        // xxxHonza: the persistence of the object-path would deserve complete refactoring.
+        // The code is messy and hard to understand.
+        //
+        // There are three arrays used to maintain the presentation state of the DOM panel
+        // objectPath: list of objects displayed in the panel's toolbar. This array is directly
+        //          used by FirebugChrome.syncStatusPath() that asks for it through
+        //          panel.getObjectPath();
+        // propertyPath: list of property names that are displayed in the toolbar (status-path)
+        //          These are used to reconstruct the objectPath array after page reload.
+        //          (after page reload we need to deal with new page objects).
+        // viewPath: list of structures that contains (a) presentation state of the tree
+        //          and (b) vertical scroll position - one for each corresponding object
+        //          in the current path.
+        //
+        // I think that length of these arrays should be always the same, but it isn't true.
+        // There is also a pathIndex member that indicates the currently selected object
+        // in the status path (the one that is displayed in bold font).
+        this.objectPath = [];
+        this.propertyPath = [];
+        this.viewPath = [];
+        this.pathIndex = -1;
     },
 
     destroy: function(state)
     {
+        var view = this.viewPath[this.pathIndex];
+        if (view && this.panelNode.scrollTop)
+            view.scrollTop = this.panelNode.scrollTop;
+
+        if (this.pathIndex > -1)
+            state.pathIndex = this.pathIndex;
+        if (this.viewPath)
+            state.viewPath = this.viewPath;
+        if (this.propertyPath)
+            state.propertyPath = this.propertyPath;
+
+        if (this.propertyPath.length > 0 && !this.propertyPath[1])
+            state.firstSelection = Persist.persistObject(this.getPathObject(1), this.context);
+
+        // Save tree state into the right toggles object.
+        var toggles = view ? view.toggles : this.toggles;
+        this.tree.saveState(toggles);
+
+        state.toggles = this.toggles;
+
         DOMModule.removeListener(this);
 
         DOMBasePanel.prototype.destroy.apply(this, arguments);
@@ -90,6 +143,298 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
         DOMBasePanel.prototype.destroyNode.apply(this, arguments);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    show: function(state)
+    {
+        this.showToolbarButtons("fbStatusButtons", true);
+
+        if (!this.selection)
+        {
+            if (!state)
+            {
+                this.select(null);
+                return;
+            }
+
+            if (state.pathIndex > -1)
+                this.pathIndex = state.pathIndex;
+            if (state.viewPath)
+                this.viewPath = state.viewPath;
+            if (state.propertyPath)
+                this.propertyPath = state.propertyPath;
+
+            if (state.toggles)
+                this.toggles = state.toggles;
+
+            var defaultObject = this.getDefaultSelection();
+            var selectObject = defaultObject;
+
+            if (state.firstSelection)
+            {
+                var restored = state.firstSelection(this.context);
+                if (restored)
+                {
+                    selectObject = restored;
+                    this.objectPath = [defaultObject, restored];
+                }
+                else
+                {
+                    this.objectPath = [defaultObject];
+                }
+            }
+            else
+            {
+                this.objectPath = [defaultObject];
+            }
+
+            if (this.propertyPath.length > 1)
+            {
+                selectObject = this.resetPaths(selectObject);
+            }
+            else
+            {
+                // Sync with objectPath always containing a default object.
+                this.propertyPath.push(null);
+            }
+
+            var selection = (state.pathIndex < this.objectPath.length ?
+                this.getPathObject(state.pathIndex) :
+                this.getPathObject(this.objectPath.length-1));
+
+            Trace.sysout("dom.show; selection:", selection);
+
+            this.select(selection);
+        }
+    },
+
+    resetPaths: function(selectObject)
+    {
+        for (var i = 1; i < this.propertyPath.length; i++)
+        {
+            var name = this.propertyPath[i];
+            if (!name)
+                continue;
+
+            var object = selectObject;
+            try
+            {
+                selectObject = object[name];
+            }
+            catch (exc)
+            {
+                selectObject = null;
+            }
+
+            if (selectObject)
+            {
+                this.objectPath.push(new PropertyObj(object, name));
+            }
+            else
+            {
+                // If we can't access a property, just stop
+                this.viewPath.splice(i);
+                this.propertyPath.splice(i);
+                this.objectPath.splice(i);
+                selectObject = this.getPathObject(this.objectPath.length-1);
+                break;
+            }
+        }
+    },
+
+    hide: function()
+    {
+        var view = this.viewPath[this.pathIndex];
+        if (view && this.panelNode.scrollTop)
+            view.scrollTop = this.panelNode.scrollTop;
+    },
+
+    updateSelection: function(object)
+    {
+        var previousIndex = this.pathIndex;
+        var previousView = (previousIndex === -1 ? null : this.viewPath[previousIndex]);
+
+        // pathToAppend is set within onClick
+        var newPath = this.pathToAppend;
+        delete this.pathToAppend;
+
+        var pathIndex = this.findPathIndex(object);
+        if (newPath || pathIndex === -1)
+        {
+            this.toggles = new ToggleBranch.ToggleBranch();
+
+            if (newPath)
+            {
+                // Remove everything after the point where we are inserting, so we
+                // essentially replace it with the new path
+                if (previousView)
+                {
+                    if (this.panelNode.scrollTop)
+                        previousView.scrollTop = this.panelNode.scrollTop;
+
+                    this.objectPath.splice(previousIndex+1);
+                    this.propertyPath.splice(previousIndex+1);
+                    this.viewPath.splice(previousIndex+1);
+                }
+
+                var value = this.getPathObject(previousIndex);
+                if (!value)
+                {
+                    TraceError.sysout("dom.updateSelection no pathObject for " + previousIndex);
+                    return;
+                }
+
+                // XXX This is wrong with closures, but I haven't noticed anything
+                // break and I don't know how to fix, so let's just leave it...
+                for (var i = 0; i < newPath.length; i++)
+                {
+                    var name = newPath[i];
+                    object = value;
+
+                    try
+                    {
+                        value = value[name];
+                    }
+                    catch (exc)
+                    {
+                        TraceError.sysout("dom.updateSelection FAILS at path_i=" + i +
+                            " for name: " + name);
+                        return;
+                    }
+
+                    this.pathIndex++;
+
+                    this.objectPath.push(new PropertyObj(object, name));
+                    this.propertyPath.push(name);
+                    this.viewPath.push({toggles: this.toggles, scrollTop: 0});
+                }
+            }
+            else
+            {
+                this.toggles = new ToggleBranch.ToggleBranch();
+
+                var win = this.getDefaultSelection();
+                if (object === win)
+                {
+                    this.pathIndex = 0;
+                    this.objectPath = [win];
+                    this.propertyPath = [null];
+                    this.viewPath = [{toggles: this.toggles, scrollTop: 0}];
+                }
+                else
+                {
+                    this.pathIndex = 1;
+                    this.objectPath = [win, object];
+                    this.propertyPath = [null, null];
+                    this.viewPath = [
+                        {toggles: new ToggleBranch.ToggleBranch(), scrollTop: 0},
+                        {toggles: this.toggles, scrollTop: 0}
+                    ];
+                }
+            }
+
+            this.panelNode.scrollTop = 0;
+            this.rebuild(false);
+        }
+        else
+        {
+            this.pathIndex = pathIndex;
+
+            var view = this.viewPath[pathIndex];
+
+            this.toggles = view ? view.toggles : this.toggles;
+
+            // Persist the current scroll location
+            if (previousView && this.panelNode.scrollTop)
+                previousView.scrollTop = this.panelNode.scrollTop;
+
+            this.rebuild(false, view ? view.scrollTop : 0);
+        }
+    },
+
+    findPathIndex: function(object)
+    {
+        var pathIndex = -1;
+        for (var i = 0; i < this.objectPath.length; ++i)
+        {
+            if (this.getPathObject(i) === object)
+                return i;
+        }
+
+        return -1;
+    },
+
+    getPathObject: function(index)
+    {
+        var object = this.objectPath[index];
+        if (object instanceof PropertyObj)
+            return object.getObject();
+        else
+            return object;
+    },
+
+    /**
+     * Used by {@FirebugChrome.syncStatusPath}
+     */
+    getObjectPath: function(object)
+    {
+        return this.objectPath;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Status Path
+
+    onClick: function(event)
+    {
+        var repNode = Firebug.getRepNode(event.target);
+        if (!repNode)
+            return;
+
+        // We are only interested if the click is made on an object that represents
+        // DOM property value (usually a green link). Not in clicks on tree rows where
+        // the repObject is a tree-member object.
+        if (Css.hasClass(repNode, "memberRow"))
+            return;
+
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        if (row)
+        {
+            this.selectRow(row, repNode);
+            Events.cancelEvent(event);
+        }
+    },
+
+    selectRow: function(row, target)
+    {
+        Trace.sysout("domPanel.selectRow;", {
+            row: row,
+            target: target
+        });
+
+        if (!target)
+            target = row.lastChild.firstChild;
+
+        var object = target && target.repObject, type = typeof object;
+        if (!object || !this.supportsObject(object, type))
+            return;
+
+        this.pathToAppend = this.tree.getPath(row);
+
+        // If the object is inside an array, look up its index
+        var valueBox = row.lastChild.firstChild;
+        if (Css.hasClass(valueBox, "objectBox-array"))
+        {
+            var arrayIndex = FirebugReps.Arr.getItemIndex(target);
+            this.pathToAppend.push(arrayIndex);
+        }
+
+        // Make sure we get a fresh status path for the object, since otherwise
+        // it might find the object in the existing path and not refresh it
+        Firebug.chrome.clearStatusPath();
+
+        this.select(object, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -150,61 +495,11 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    selectRow: function(row, target)
-    {
-        if (!target)
-            target = row.lastChild.firstChild;
-
-        var object = target && target.repObject, type = typeof object;
-        if (!object || !this.supportsObject(object, type))
-            return;
-
-        this.pathToAppend = this.tree.getPath(row);
-
-        // If the object is inside an array, look up its index
-        var valueBox = row.lastChild.firstChild;
-        if (Css.hasClass(valueBox, "objectBox-array"))
-        {
-            var arrayIndex = FirebugReps.Arr.getItemIndex(target);
-            this.pathToAppend.push(arrayIndex);
-        }
-
-        // Make sure we get a fresh status path for the object, since otherwise
-        // it might find the object in the existing path and not refresh it
-        Firebug.chrome.clearStatusPath();
-
-        this.select(object, true);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onClick: function(event)
-    {
-        var repNode = Firebug.getRepNode(event.target);
-        if (!repNode)
-            return;
-
-        // We are only interested if the click is made on an object that represents
-        // DOM property value (usually a green link). Not in clicks on tree rows where
-        // the repObject is a tree-member object.
-        if (Css.hasClass(repNode, "memberRow"))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "memberRow");
-        if (row)
-        {
-            this.selectRow(row, repNode);
-            Events.cancelEvent(event);
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints, DOMModule Listener
 
     onDomBreakpointAdded: function(context, object, name)
     {
-        Trace.sysout("domBasePanel.onDomBreakpointAdded; propName: " + name +
+        Trace.sysout("domPanel.onDomBreakpointAdded; propName: " + name +
             " (panel: " + this.name + ")", object);
 
         this.updateBreakpoints(object);
@@ -212,7 +507,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
     onDomBreakpointRemoved: function(context, object, name)
     {
-        Trace.sysout("domBasePanel.onDomBreakpointRemoved; propName: " + name +
+        Trace.sysout("domPanel.onDomBreakpointRemoved; propName: " + name +
             " (panel: " + this.name + ")", object);
 
         this.updateBreakpoints(object);
@@ -248,14 +543,54 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
         return null;
     },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? Locale.$STR("dom.disableBreakOnPropertyChange") :
+            Locale.$STR("dom.label.breakOnPropertyChange"));
+    },
+});
+
+// ********************************************************************************************* //
+// Property Object Implementation
+
+var PropertyObj = function(object, name)
+{
+    this.object = object;
+    this.name = name;
+
+    this.getObject = function()
+    {
+        return object[name];
+    };
+};
+
+var Property = Domplate.domplate(Rep,
+{
+    supportsObject: function(object, type)
+    {
+        return object instanceof PropertyObj;
+    },
+
+    getRealObject: function(prop, context)
+    {
+        return prop.object[prop.name];
+    },
+
+    getTitle: function(prop, context)
+    {
+        return prop.name;
+    }
 });
 
 // ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(DOMPanel);
+Firebug.registerRep(Property);
 
 // xxxHonza: backward compatibility
+DOMPanel.DirTable = DOMBasePanel.prototype.dirTablePlate;
 Firebug.DOMPanel = DOMPanel;
 
 return DOMPanel;
