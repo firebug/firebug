@@ -54,7 +54,7 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
  * created when the debugger pauses JS execution.
  * xxxHonza: should be derived from a client object?
  */
-StackFrame.prototype = Obj.descend(new Grip(),
+StackFrame.prototype = Obj.descend(Grip.prototype,
 /** @lends StackFrame */
 {
     getURL: function()

@@ -24,7 +24,7 @@ function ObjectClient(grip, cache)
     this.error = null;
 }
 
-ObjectClient.prototype = Obj.descend(new Grip(),
+ObjectClient.prototype = Obj.descend(Grip.prototype,
 {
     getValue: function()
     {
@@ -212,7 +212,7 @@ ObjectClient.Property = function(name, desc, cache)
     this.cache = cache;
 }
 
-ObjectClient.Property.prototype = Obj.descend(new Grip(),
+ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
 {
     getActor: function()
     {
