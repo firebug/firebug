@@ -37,7 +37,8 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // DOM Panel
 
 /**
- * @panel This object represents a DOM panel in the main Firebug UI.
+ * @panel This object represents DOM panel in the main Firebug UI.
+ * See wiki for feature description: https://getfirebug.com/wiki/index.php/DOM_Panel
  */
 function DOMPanel()
 {

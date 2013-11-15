@@ -123,14 +123,17 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     destroy: function(state)
     {
-        state.watches = this.watches;
-
-        Firebug.unregisterUIListener(this);
-
+        // Get tree state.
         this.defaultTree.saveState(this.defaultToggles);
+
+        // Store all persistent info into the state object.
+        state.watches = this.watches;
+        state.scrollTop = this.panelNode.scrollTop;
         state.defaultToggles = this.defaultToggles;
 
         this.tool.removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -155,6 +158,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     show: function(state)
     {
+        BasePanel.show.apply(this, arguments);
+
         Trace.sysout("watchPanel.show;", state);
 
         if (state)
@@ -164,6 +169,9 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
             if (state.defaultToggles)
                 this.defaultToggles = state.defaultToggles;
+
+            if (state.scrollTop)
+                this.defaultScrollTop = state.scrollTop;
         }
     },
 
@@ -275,7 +283,26 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         }
         else
         {
-            this.defaultTree.restoreState(input, this.defaultToggles);
+            // The restoration process is asynchronous, so make sure that the vertical scroll
+            // position is set after the tree is properly expanded and the scroll offset ready.
+            // xxxHonza: the restoration of the default global scope-tree doesn't work cross
+            // debugger pause/resume.
+            var done = this.defaultTree.restoreState(input, this.defaultToggles);
+            done.then(() =>
+            {
+                Trace.sysout("watchPanel.showEmptyMembers; state restored " +
+                    "set default scroll top: " + this.defaultScrollTop);
+
+                // xxxHonza: a little better would be to set the scroll position as soon
+                // as the scroll offset reaches the scrollTop. This would improve the UX
+                // since the scroll could happen synchronously in most cases and the UI
+                // wouldn't blink. This would have to be done as part of the restoration
+                // process within {@DomBaseTree}.
+                if (this.defaultScrollTop)
+                    this.panelNode.scrollTop = this.defaultScrollTop;
+
+                this.defaultScrollTop = null;
+            });
         }
 
         // The direction needs to be adjusted according to the direction
