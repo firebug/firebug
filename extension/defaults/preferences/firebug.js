@@ -25,10 +25,13 @@ pref("extensions.firebug.activateSameOrigin", true);
 pref("extensions.firebug.toolbarCustomizationDone", false);
 pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.stringCropLength", 50);
-pref("extensions.firebug.hideDefaultInspector", false);
 pref("extensions.firebug.delayLoad", true);
 pref("extensions.firebug.enableOrion", true);
 pref("extensions.firebug.clearAnnotationsConfirmation", true);
+
+// Default DevTools (xxxHonza: these preferences should be probably unified into one)
+pref("extensions.firebug.hideDefaultInspector", false);
+pref("extensions.firebug.defaultDevToolsSetting", false);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);

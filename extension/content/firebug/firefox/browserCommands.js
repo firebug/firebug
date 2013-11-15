@@ -40,6 +40,8 @@ var BrowserCommands =
     {
         this.overlayCommands(doc);
         this.overlayShortcuts(doc);
+
+        this.removeInspectorShortcutAsync(doc);
     },
 
     overlayCommands: function(doc)
@@ -95,6 +97,35 @@ var BrowserCommands =
         }
 
         keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
+    },
+
+    /**
+     * Remove the default Inspector shortcut (Ctrl+Shift+C), Firebug's one is used instead.
+     */
+    removeInspectorShortcutAsync: function(doc)
+    {
+        var defaultSettings = Options.get("defaultDevToolsSetting");
+        if (defaultSettings)
+            return;
+
+        if (this.removeInspectorShortcut(doc))
+            return;
+
+        // The shortcut is lazy loaded, so we need a timeout loop. Not nice, but it works.
+        var self = this;
+        doc.defaultView.setTimeout(function()
+        {
+            self.removeInspectorShortcutAsync(doc);
+        }, 100);
+    },
+
+    removeInspectorShortcut: function(doc)
+    {
+        var broadcaster = doc.getElementById("key_inspector");
+        if (broadcaster)
+            broadcaster.parentNode.removeChild(broadcaster);
+
+        return broadcaster;
     }
 };
 
