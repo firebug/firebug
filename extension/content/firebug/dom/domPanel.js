@@ -107,10 +107,6 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
     destroy: function(state)
     {
-        var view = this.viewPath[this.pathIndex];
-        if (view && this.panelNode.scrollTop)
-            view.scrollTop = this.panelNode.scrollTop;
-
         if (this.pathIndex > -1)
             state.pathIndex = this.pathIndex;
         if (this.viewPath)
@@ -122,12 +118,19 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             state.firstSelection = Persist.persistObject(this.getPathObject(1), this.context);
 
         // Save tree state into the right toggles object.
+        var view = this.viewPath[this.pathIndex];
         var toggles = view ? view.toggles : this.toggles;
         this.tree.saveState(toggles);
 
         state.toggles = this.toggles;
 
         DOMModule.removeListener(this);
+
+        Trace.sysout("domPanel.destroy; state.pathIndex: " + state.pathIndex, {
+            viewPath: state.viewPath,
+            propertyPath: state.propertyPath,
+            toggles: state.toggles
+        });
 
         DOMBasePanel.prototype.destroy.apply(this, arguments);
     },
@@ -160,6 +163,12 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
                 return;
             }
 
+            Trace.sysout("domPanel.show; state.pathIndex: " + state.pathIndex, {
+                viewPath: state.viewPath,
+                propertyPath: state.propertyPath,
+                toggles: state.toggles
+            });
+
             if (state.pathIndex > -1)
                 this.pathIndex = state.pathIndex;
             if (state.viewPath)
@@ -169,6 +178,9 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
             if (state.toggles)
                 this.toggles = state.toggles;
+
+            if (!this.viewPath.length)
+                this.viewPath = [{toggles: new ToggleBranch.ToggleBranch(), scrollTop: 0}];
 
             var defaultObject = this.getDefaultSelection();
             var selectObject = defaultObject;
@@ -247,8 +259,13 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
     hide: function()
     {
+        Trace.sysout("domPanel.hide; scrollTop: " + this.panelNode.scrollTop +
+            ", pathIndex; " + this.pathIndex, {viewPath: this.viewPath});
+
+        // Safe the scroll position. It can't be done in destroy() since the
+        // scrollTop is always set to zero at that moment.
         var view = this.viewPath[this.pathIndex];
-        if (view && this.panelNode.scrollTop)
+        if (view)
             view.scrollTop = this.panelNode.scrollTop;
     },
 
@@ -264,6 +281,9 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         var pathIndex = this.findPathIndex(object);
         if (newPath || pathIndex === -1)
         {
+            Trace.sysout("dom.updateSelection; newPath: " + newPath +
+                ", pathIndex: " + pathIndex);
+
             this.toggles = new ToggleBranch.ToggleBranch();
 
             if (newPath)
@@ -272,8 +292,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
                 // essentially replace it with the new path
                 if (previousView)
                 {
-                    if (this.panelNode.scrollTop)
-                        previousView.scrollTop = this.panelNode.scrollTop;
+                    previousView.scrollTop = this.panelNode.scrollTop;
 
                     this.objectPath.splice(previousIndex+1);
                     this.propertyPath.splice(previousIndex+1);
@@ -348,11 +367,24 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             this.toggles = view ? view.toggles : this.toggles;
 
             // Persist the current scroll location
-            if (previousView && this.panelNode.scrollTop)
+            if (previousView && previousView != view)
+            {
                 previousView.scrollTop = this.panelNode.scrollTop;
+                this.tree.saveState(previousView.toggles);
+            }
 
-            this.rebuild(false, view ? view.scrollTop : 0);
+            var scrollTop = view ? view.scrollTop : 0;
+            var toggles = view ? view.toggles : null;
+
+            this.rebuild(false, scrollTop, toggles);
         }
+
+        Trace.sysout("domPanel.updateSelection; this.pathIndex: " + this.pathIndex, {
+            viewPath: this.viewPath,
+            propertyPath: this.propertyPath,
+            toggles: this.toggles
+        });
+
     },
 
     findPathIndex: function(object)

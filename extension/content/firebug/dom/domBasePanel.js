@@ -303,9 +303,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         return object;
     },
 
-    rebuild: function(update, scrollTop)
+    rebuild: function(update, scrollTop, toggles)
     {
-        Trace.sysout("domBasePanel.rebuild;");
+        Trace.sysout("domBasePanel.rebuild; scrollTop: " + scrollTop);
 
         Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
 
@@ -315,10 +315,18 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         };
 
         this.tree.replace(this.panelNode, input);
-        this.tree.restoreState(input, this.toggles);
 
-        // xxxHonza: show a message if there are no DOM members
-        // FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
+        // Restore presentation state if possible.
+        if (toggles)
+            this.tree.restoreState(input, toggles);
+
+        // Restore scroll position if provided.
+        if (scrollTop)
+            this.panelNode.scrollTop = scrollTop;
+
+        // Display no-members message.
+        if (this.tree.isEmpty())
+            FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
     },
 
     getRowObject: function(row)

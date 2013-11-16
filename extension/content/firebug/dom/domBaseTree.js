@@ -120,14 +120,14 @@ DomBaseTree.prototype = domplate(BaseTree,
         {
             Trace.sysout("domBaseTree.restoreState; level: " + level, {
                 object: object,
-                toggles: toggles.clone(),
+                toggles: toggles ? toggles.clone() : null,
             });
         }
 
         level = level || 0;
 
         // Don't try to expand children if there are no expanded items.
-        if (toggles.isEmpty())
+        if (!toggles || toggles.isEmpty())
         {
             Trace.sysout("domBaseTree.restoreState; No toggles in level: " + level);
             return Promise.resolve(level);
