@@ -165,15 +165,13 @@ Arr.unique = function(ar, sorted)
     }
     else
     {
-        // Keep a map whose ","-prefixed keys represent the values that have
-        // occurred so far in the array (this avoids overwriting e.g. __proto__).
-        var map = {};
+        var set = new Set();
         for (var i = 0; i < len; ++i)
         {
-            if (!map.hasOwnProperty("," + ar[i]))
+            if (!set.has(ar[i]))
             {
                 ret.push(ar[i]);
-                map["," + ar[i]] = 1;
+                set.add(ar[i]);
             }
         }
     }
