@@ -30,13 +30,11 @@ Arr.isArrayLike = function(obj)
             return false;
         if (Arr.isArray(obj))
             return true;
-        if (typeof obj.callee === "function") // arguments
-            return true;
         if (typeof obj.splice === "function") // jQuery etc.
             return true;
         var str = Object.prototype.toString.call(obj);
         if (str === "[object HTMLCollection]" || str === "[object NodeList]" ||
-            str === "[object DOMTokenList]")
+            str === "[object DOMTokenList]" || str === "[object Arguments]")
         {
             return true;
         }

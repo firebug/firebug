@@ -754,18 +754,9 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
         Firebug.chrome.select(obj);
     },
 
-    // http://code.google.com/p/fbug/issues/detail?id=874
     isArray: function(obj)
     {
-        try
-        {
-            if (Arr.isArray(obj))
-                return true;
-            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
-                return true;
-        }
-        catch (exc) {}
-        return false;
+        return Array.isArray(obj) || Object.prototype.toString.call(obj) === "[object Arguments]";
     }
 });
 
