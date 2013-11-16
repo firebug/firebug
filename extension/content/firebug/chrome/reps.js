@@ -1559,7 +1559,7 @@ FirebugReps.Document = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof window.Document || object instanceof window.XMLDocument;
+        return object instanceof window.Document;
     },
 
     browseObject: function(doc, context)

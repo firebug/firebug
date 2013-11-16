@@ -859,7 +859,7 @@ Dom.getDOMMembers = function(object)
 
     if (object instanceof Window)
         { return domMemberCache.Window; }
-    else if (object instanceof Document || object instanceof XMLDocument)
+    else if (object instanceof Document)
         { return domMemberCache.Document; }
     else if (object instanceof Location)
         { return domMemberCache.Location; }
