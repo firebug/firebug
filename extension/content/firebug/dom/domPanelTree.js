@@ -50,7 +50,7 @@ DomPanelTree.prototype = domplate(BaseTree,
         ),
 
     memberRowTag:
-        TR({"class": "aaa memberRow $member.open $member.type\\Row",
+        TR({"class": "memberRow $member.open $member.type\\Row",
             _domObject: "$member",
             _repObject: "$member",
             $hasChildren: "$member.hasChildren",
@@ -104,19 +104,10 @@ DomPanelTree.prototype = domplate(BaseTree,
 
     memberIterator: function(object)
     {
-        // xxxHonza: using DOMMemberProvider here is a hack
+        // xxxHonza: using new instance of DOMMemberProvider here is a hack,
+        // the current existing provider must be used.
         var memberProvider = new DOMMemberProvider(null);
-        var members = memberProvider.getMembers(object, 0);
-        if (members.length)
-            return members;
-
-        return [{
-            name: Locale.$STR("firebug.dom.noChildren2"),
-            type: "string",
-            rowClass: "memberRow-string",
-            tag: Rep.tag,
-            prefix: ""
-        }];
+        return memberProvider.getMembers(object, 0);
     },
 
     isCropped: function(value)
