@@ -509,6 +509,15 @@ DomTree.prototype = domplate(
             else
                 this.collapseObject(object);
         }
+    },
+
+    isEmpty: function()
+    {
+        if (!this.element)
+            return true;
+
+        var rows = this.element.querySelectorAll(".memberRow");
+        return !rows.length;
     }
 });
 
