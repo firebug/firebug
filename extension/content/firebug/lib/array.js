@@ -15,20 +15,17 @@ var Arr = {};
 // ********************************************************************************************* //
 // Arrays
 
-Arr.isArray = Array.isArray || function(obj)
-{
-    return Object.prototype.toString.call(obj) === "[object Array]";
-};
+Arr.isArray = Array.isArray;
 
 Arr.isArrayLike = function(obj)
 {
     try
     {
-        if (typeof obj !== "object")
+        if (!obj || typeof obj !== "object")
             return false;
         if (!isFinite(obj.length))
             return false;
-        if (Arr.isArray(obj))
+        if (Array.isArray(obj))
             return true;
         if (typeof obj.splice === "function") // jQuery etc.
             return true;

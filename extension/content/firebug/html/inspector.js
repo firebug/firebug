@@ -144,7 +144,7 @@ Firebug.Inspector = Obj.extend(Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = Arr.isArray(colorObj);
+            usingColorArray = Array.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {
