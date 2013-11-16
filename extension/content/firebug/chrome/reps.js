@@ -190,34 +190,6 @@ FirebugReps.String = domplate(Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.XML = domplate(Rep,
-{
-    tag: OBJECTBOX("$object|asString"),
-
-    shortTag: OBJECTBOX("$object|asShortString"),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "xml",
-
-    supportsObject: function(object, type)
-    {
-        return type == "xml";
-    },
-
-    asString: function(object)
-    {
-        return object.toXMLString();
-    },
-
-    asShortString: function(object)
-    {
-        return cropMultipleLines(this.asString(object));
-    },
-});
-
-// ********************************************************************************************* //
-
 FirebugReps.Text = domplate(Rep,
 {
     tag: OBJECTBOX("$object"),
@@ -912,24 +884,6 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
         return NetUtils.getRealObject(file, context);
     }
 });
-
-// ********************************************************************************************* //
-
-function instanceOf(object, Klass)
-{
-    while (object != null)
-    {
-        if (object == Klass.prototype)
-           return true;
-
-        if (typeof(object) === "xml")
-            return (Klass.prototype === Xml.prototype);
-
-        object = object.__proto__;
-    }
-
-    return false;
-}
 
 // ********************************************************************************************* //
 
@@ -3000,7 +2954,6 @@ Firebug.registerRep(
     FirebugReps.StackFrame,
     FirebugReps.NetFile,
     FirebugReps.Property,
-    FirebugReps.XML,
     FirebugReps.Arr,
     FirebugReps.ArrayLikeObject,
     FirebugReps.XPathResult,
