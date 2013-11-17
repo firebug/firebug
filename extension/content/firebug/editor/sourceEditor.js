@@ -417,8 +417,7 @@ SourceEditor.prototype =
         if (line != null)
             return this.getDocument().getLine(line).length;
 
-        // The newline characters shouldn't be counted.
-        return this.editorObject.getValue().replace(/\n/g, "").length;
+        return this.editorObject.getValue().length;
     },
 
     getLineCount: function()
@@ -468,22 +467,21 @@ SourceEditor.prototype =
 
         var charCount = 0;
 
-        // Since Codemirror only accepts the start/end lines and chars in the lines
-        // to set selection, It needs to go through the editor lines to find the
-        // location of the inputs.
+        // Since Codemirror only accepts the positions in (line, ch) format, we
+        // need to go through the editor lines and manually convert the positions.
         for (var i = 0; i < lineCount; i++)
         {
-            charCount += this.getCharCount(i);
-            if (startLine == -1 && charCount >= start)
+            charCount += this.getCharCount(i) + 1;
+            if (startLine == -1 && charCount > start)
             {
                 startLine = i;
-                startChar = start - (charCount - this.getCharCount(i));
+                startChar = start - (charCount - this.getCharCount(i) - 1);
             }
 
-            if (charCount >= end)
+            if (charCount > end)
             {
                 endLine = i;
-                endChar = end - (charCount - this.getCharCount(i));
+                endChar = end - (charCount - this.getCharCount(i) - 1);
                 break;
             }
         }
@@ -502,14 +500,14 @@ SourceEditor.prototype =
         var endOffset = 0;
 
         // Count the chars of the lines before the
-        // end/start lines.
+        // end/start lines, including newlines.
         for (var i = 0; i < end.line; i++)
         {
             var lineCharCount = this.getCharCount(i);
             if (start.line > i)
-                startOffset += lineCharCount;
+                startOffset += lineCharCount + 1;
 
-            endOffset += lineCharCount;
+            endOffset += lineCharCount + 1;
         }
 
         // Add the number of chars between the first char
