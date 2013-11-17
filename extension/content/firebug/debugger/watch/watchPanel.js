@@ -241,7 +241,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.evalWatchesLocally();
 
         this.tree.replace(this.panelNode, input);
-        this.tree.restoreState(input, this.toggles);
+        this.tree.restoreState(this.toggles);
 
         // Throw out the old state object.
         this.toggles = new ToggleBranch.ToggleBranch();
@@ -287,7 +287,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             // position is set after the tree is properly expanded and the scroll offset ready.
             // xxxHonza: the restoration of the default global scope-tree doesn't work cross
             // debugger pause/resume.
-            var done = this.defaultTree.restoreState(input, this.defaultToggles);
+            var done = this.defaultTree.restoreState(this.defaultToggles);
             done.then(() =>
             {
                 Trace.sysout("watchPanel.showEmptyMembers; state restored " +

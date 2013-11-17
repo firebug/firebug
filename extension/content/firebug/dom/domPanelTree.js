@@ -8,15 +8,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/lib/array",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/dom/domBaseTree",
-    "firebug/dom/domMemberProvider",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, Locale, Events, Options,
-    DomBaseTree, DOMMemberProvider) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Locale, Events, Options,
+    DomBaseTree) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,9 +27,10 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
-function DomPanelTree(provider)
+function DomPanelTree(provider, memberProvider)
 {
     this.provider = provider;
+    this.memberProvider = memberProvider;
 }
 
 /**
@@ -104,10 +103,7 @@ DomPanelTree.prototype = domplate(BaseTree,
 
     memberIterator: function(object)
     {
-        // xxxHonza: using new instance of DOMMemberProvider here is a hack,
-        // the current existing provider must be used.
-        var memberProvider = new DOMMemberProvider(null);
-        return memberProvider.getMembers(object, 0);
+        return this.memberProvider.getMembers(object, 0);
     },
 
     isCropped: function(value)

@@ -77,9 +77,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
 
         // Content rendering
         this.provider = new DomProvider(this);
-        this.tree = new DomPanelTree();
-        this.tree.provider = this.provider;
-        this.tree.memberProvider = new DOMMemberProvider(this.context);
+        this.tree = new DomPanelTree(this.provider, new DOMMemberProvider(this.context));
 
         // Object path in the toolbar.
         // xxxHonza: the persistence of the object-path would deserve complete refactoring.

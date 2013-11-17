@@ -318,7 +318,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
         // Restore presentation state if possible.
         if (toggles)
-            this.tree.restoreState(input, toggles);
+            this.tree.restoreState(toggles);
 
         // Restore scroll position if provided.
         if (scrollTop)

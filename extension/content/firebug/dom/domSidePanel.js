@@ -31,6 +31,11 @@ function DOMSidePanel()
 DOMSidePanel.prototype = Obj.extend(DOMBasePanel.prototype,
 /** @lends DOMSidePanel */
 {
+    dispatchName: "DOMSidePanel",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // extends Panel
+
     name: "domSide",
     parentPanel: "html",
     order: 3,
@@ -44,9 +49,7 @@ DOMSidePanel.prototype = Obj.extend(DOMBasePanel.prototype,
     {
         // Content rendering
         this.provider = new DomProvider(this);
-        this.tree = new DomPanelTree();
-        this.tree.provider = this.provider;
-        this.tree.memberProvider = new DOMMemberProvider(this.context);
+        this.tree = new DomPanelTree(this.provider, new DOMMemberProvider(this.context));
 
         DOMBasePanel.prototype.initialize.apply(this, arguments);
     },

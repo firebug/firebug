@@ -69,7 +69,7 @@ DomBaseTree.prototype = domplate(BaseTree,
     /**
      * Save DomTree state (i.e. a structure of expanded nodes), so they can be re-expanded later.
      * The method executes synchronously and stores all data into the passed state object.
-     * 
+     *
      * @param {@ToggleBranch} The state info is stored into this object.
      */
     saveState: function(state)
@@ -100,7 +100,21 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     /**
-     * Restore presentation state of a DomTree. Note that the restoration process
+     * Restore presentation state of DomTree. The restoration process is asynchronous.
+     * Use the return {@Promise} object to watch when the state is fully restored.
+     *
+     * @param {@ToggleBranch} The state info is loaded from this object.
+     *
+     * @return The method returns a promise that is resolved when the restoration process
+     * is fully completed.
+     */
+    restoreState: function(toggles)
+    {
+        return this.restoreStateInternal(toggles, null, 0);
+    },
+
+    /**
+     * Internal implementation used for recursion. Note that the restoration process
      * is composed from two asynchronous tasks.
      * 1) Fetch data from the server (e.g. over RDP protocol). This process doesn't have to
      * be always asynchronous, it depends on the actual data provider.
@@ -110,16 +124,13 @@ DomBaseTree.prototype = domplate(BaseTree,
      *
      * These tasks are done for every branch that is expanded as part of the restoration
      * process. 'restoreState' is executed recursively for every tree-branch that is expanded.
-     *
-     * @return The method returns a promise that is resolved when the restoration process
-     * is fully completed.
      */
-    restoreState: function(object, toggles, level)
+    restoreStateInternal: function(toggles, member, level)
     {
         if (Trace.active)
         {
             Trace.sysout("domBaseTree.restoreState; level: " + level, {
-                object: object,
+                member: member,
                 toggles: toggles ? toggles.clone() : null,
             });
         }
@@ -134,12 +145,12 @@ DomBaseTree.prototype = domplate(BaseTree,
         }
 
         // Async restore handler for recursion (see the loop below).
-        function onRestore(value, toggles, level, restored)
+        function onRestore(toggles, member, level, restored)
         {
             // As soon as the entire subtree is restored (data fetched from the server
             // and displayed in the UI, both asynchronous). Resolve the promise
             // passed in, to notify the parent task.
-            this.restoreState(value, toggles, level).then(function()
+            this.restoreStateInternal(toggles, member, level).then(function()
             {
                 Trace.sysout("domBaseTree.restoreState; level: " + level + " DONE", arguments);
                 restored.resolve();
@@ -151,16 +162,16 @@ DomBaseTree.prototype = domplate(BaseTree,
         // is called recursively) is completely restored.
         var restoration = [];
 
-        var rows = this.getChildRows(object, level);
+        var rows = this.getChildRows(member, level);
         for (var i = 0; i < rows.length; i++)
         {
             var row = rows[i];
-            var member = row.repObject;
-            if (!member)
+            var repObject = row.repObject;
+            if (!repObject)
                 continue;
 
             // Don't expand if the member doesn't have children any more.
-            if (!member.hasChildren)
+            if (!repObject.hasChildren)
                 continue;
 
             var name = this.getRowName(row);
@@ -173,9 +184,8 @@ DomBaseTree.prototype = domplate(BaseTree,
 
             toggles.remove(name);
 
-            // Get the member's object (the value) and expand it.
-            var value = member.value;
-            var promise = this.expandObject(value);
+            // Expand appropriate tree row.
+            var promise = this.expandMember(repObject);
 
             // If no children are expanded bail out, we don't have to recursively
             // restore this node (child branch).
@@ -208,7 +218,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             // The handler will be executed as soon as members of the child level are fetched
             // from the server. The purpose of 'restoreChildren' is then to restore state of the
             // level.
-            var restoreChildren = onRestore.bind(this, value, newToggles, level + 1, restored);
+            var restoreChildren = onRestore.bind(this, newToggles, repObject, level + 1, restored);
             promise.then(restoreChildren);
         }
 
@@ -218,11 +228,11 @@ DomBaseTree.prototype = domplate(BaseTree,
         return Promise.all(restoration);
     },
 
-    getChildRows: function(object, level)
+    getChildRows: function(member, level)
     {
         var rows = [];
 
-        var row = this.getRow(object);
+        var row = this.getMemberRow(member);
         if (!row && !level)
             row = this.element.firstChild.firstChild;
 

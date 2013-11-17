@@ -367,6 +367,22 @@ DomTree.prototype = domplate(
         return null;
     },
 
+    getMemberRow: function(member)
+    {
+        if (!this.element)
+            return;
+
+        var rows = Dom.getElementsByClass(this.element, "memberRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            if (member == row.repObject)
+                return row;
+        }
+
+        return null;
+    },
+
     resolvePromise: function(promise, object)
     {
         var result;
@@ -423,6 +439,13 @@ DomTree.prototype = domplate(
         var firstRow = this.element.firstChild.firstChild;
         if (firstRow && !value)
             this.toggleRow(firstRow);
+    },
+
+    expandMember: function(member)
+    {
+        var row = this.getMemberRow(member);
+        if (row)
+            return this.toggleRow(row, true);
     },
 
     expandObject: function(object)
