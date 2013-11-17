@@ -209,6 +209,12 @@ Firebug.CommandEditor = Obj.extend(Module,
             this.editor.setSelection(start, end);
     },
 
+    getSelection: function()
+    {
+        if (this.editor)
+            return this.editor.getSelection();
+    },
+
     select: function()
     {
         // TODO xxxHonza
@@ -364,7 +370,7 @@ TextEditor.prototype =
         return this.textBox.value;
     },
 
-    setSelection: function(start, end)
+    setSelectionRange: function(start, end)
     {
         this.textBox.setSelectionRange(start, end);
     },
