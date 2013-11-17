@@ -318,11 +318,15 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
         // Restore presentation state if possible.
         if (toggles)
-            this.tree.restoreState(toggles);
-
-        // Restore scroll position if provided.
-        if (scrollTop)
-            this.panelNode.scrollTop = scrollTop;
+        {
+            this.tree.restoreState(toggles).then(() =>
+            {
+                // Scroll position must be set after the tree is completely restored
+                // (and so, the scroll offset exists).
+                if (scrollTop)
+                    this.panelNode.scrollTop = scrollTop;
+            });
+        }
 
         // Display no-members message.
         if (this.tree.isEmpty())
