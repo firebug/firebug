@@ -2988,17 +2988,14 @@ FirebugReps.ClosureScope = domplate(Firebug.Rep,
 
     getTitle: function(object)
     {
-        var scope = ClosureInspector.getScopeFromWrapper(object);
-        var type = scope.type, title;
+        var type = ClosureInspector.getScopeTypeFromWrapper(object);
         if (type === "declarative")
-            title = Locale.$STR("firebug.reps.declarativeScope");
-        else if (type === "object")
-            title = Locale.$STR("firebug.reps.objectScope");
-        else if (type === "with")
-            title = Locale.$STR("firebug.reps.withScope");
-        else
-            title = "<unknown scope \"" + type + "\">"; // shouldn't happen
-        return title;
+            return Locale.$STR("firebug.reps.declarativeScope");
+        if (type === "object")
+            return Locale.$STR("firebug.reps.objectScope");
+        if (type === "with")
+            return Locale.$STR("firebug.reps.withScope");
+        return "<unknown scope \"" + type + "\">"; // shouldn't happen
     },
 
     supportsObject: function(object, type)

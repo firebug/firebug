@@ -84,7 +84,7 @@ DOMMemberProvider.prototype =
                 // __proto__ never shows in enumerations, so add it here. We currently
                 // we don't want it when only showing own properties.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
-                    properties.indexOf("__proto__") === -1 && !Firebug.showOwnProperties)
+                    properties.indexOf("__proto__") === -1 && !ownOnly)
                 {
                     properties.push("__proto__");
                 }
@@ -302,8 +302,10 @@ DOMMemberProvider.prototype =
             try
             {
                 var win = this.context.getCurrentGlobal();
-                ClosureInspector.getEnvironmentForObject(win, value, this.context);
-                hasChildren = true;
+                ClosureInspector.withEnvironmentForObject(win, value, this.context, function(env)
+                {
+                    hasChildren = true;
+                });
             }
             catch (e) {}
         }

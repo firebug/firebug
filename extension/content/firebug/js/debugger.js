@@ -19,10 +19,11 @@ define([
     "firebug/trace/debug",
     "firebug/js/fbs",
     "firebug/lib/events",
+    "firebug/debugger/debuggerLib",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
-    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events) {
+    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events, DebuggerLib) {
 
 // ********************************************************************************************* //
 // Constants
@@ -122,9 +123,18 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
     },
 
+    _temporaryRunWithJSD2Debugger: function(context, callback)
+    {
+        return DebuggerLib.withTemporaryDebugger(context, context.getCurrentGlobal(), callback);
+    },
+
     _temporaryTransformSyntax: function(expr, win, context)
     {
-        return Firebug.ClosureInspector.extendLanguageSyntax(expr, win, context);
+        return Firebug.ClosureInspector.withExtendedLanguageSyntax(expr, win, context,
+            function(newExpr)
+        {
+            return newExpr;
+        });
     },
 
     /**

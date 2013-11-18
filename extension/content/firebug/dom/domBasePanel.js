@@ -24,15 +24,17 @@ define([
     "firebug/dom/domMemberProvider",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
+    "firebug/chrome/panelActivation",
+    "firebug/debugger/debuggerLib",
     "firebug/editor/editor",
     "firebug/js/breakpoint",
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
-    "firebug/console/autoCompleter"
+    "firebug/console/autoCompleter",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, SourceLink, StackFrame,
     Dom, Css, Search, Str, Arr, Persist, ClosureInspector, ToggleBranch, System, Menu,
-    DOMMemberProvider, DOMEditor, DOMReps) {
+    DOMMemberProvider, DOMEditor, DOMReps, PanelActivation, DebuggerLib) {
 
 "use strict";
 
@@ -362,6 +364,20 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             this.rebuild(true);
     },
 
+    getShowClosuresMenuItem: function()
+    {
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        var label = Locale.$STR("ShowClosures");
+        var tooltip = Locale.$STR("dom.option.tip.Show_Closures2");
+        if (requireScriptPanel)
+            tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+        var menuItem = Menu.optionMenu(label, "showClosures", tooltip);
+        menuItem.nol10n = true;
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            menuItem.disabled = true;
+        return menuItem;
+    },
+
     getOptionsMenuItems: function()
     {
         return [
@@ -377,8 +393,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
-            Menu.optionMenu("ShowClosures", "showClosures",
-                "dom.option.tip.Show_Closures"),
+            this.getShowClosuresMenuItem(),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),
