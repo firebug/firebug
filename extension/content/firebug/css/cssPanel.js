@@ -1562,7 +1562,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Panel,
             }
         }
 
-        if (!Url.isSystemStyleSheet(this.selection))
+        // Make sure this item always get appended for the Style panel (name == "css");
+        // it acts as a placeholder and gets replaced by other menu items.
+        // This is a bit of a hack.
+        if (this.name == "css" || !Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                 "-",

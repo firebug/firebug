@@ -15,28 +15,23 @@ var Arr = {};
 // ********************************************************************************************* //
 // Arrays
 
-Arr.isArray = Array.isArray || function(obj)
-{
-    return Object.prototype.toString.call(obj) === "[object Array]";
-};
+Arr.isArray = Array.isArray;
 
 Arr.isArrayLike = function(obj)
 {
     try
     {
-        if (typeof obj !== "object")
+        if (!obj || typeof obj !== "object")
             return false;
         if (!isFinite(obj.length))
             return false;
-        if (Arr.isArray(obj))
-            return true;
-        if (typeof obj.callee === "function") // arguments
+        if (Array.isArray(obj))
             return true;
         if (typeof obj.splice === "function") // jQuery etc.
             return true;
         var str = Object.prototype.toString.call(obj);
         if (str === "[object HTMLCollection]" || str === "[object NodeList]" ||
-            str === "[object DOMTokenList]")
+            str === "[object DOMTokenList]" || str === "[object Arguments]")
         {
             return true;
         }
@@ -170,15 +165,13 @@ Arr.unique = function(ar, sorted)
     }
     else
     {
-        // Keep a map whose ","-prefixed keys represent the values that have
-        // occurred so far in the array (this avoids overwriting e.g. __proto__).
-        var map = {};
+        var set = new Set();
         for (var i = 0; i < len; ++i)
         {
-            if (!map.hasOwnProperty("," + ar[i]))
+            if (!set.has(ar[i]))
             {
                 ret.push(ar[i]);
-                map["," + ar[i]] = 1;
+                set.add(ar[i]);
             }
         }
     }

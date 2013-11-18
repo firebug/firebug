@@ -142,13 +142,13 @@ var TableRep = domplate(Rep,
 
         var tabularData = this.isTabularData(obj);
 
-        if (Arr.isArray(obj) && !tabularData)
+        if (Array.isArray(obj) && !tabularData)
         {
             // An array with no child objects (i.e. not tabular data),
             // use two columns (name, value)
             return getArrayProps(obj);
         }
-        else if (Arr.isArray(obj))
+        else if (Array.isArray(obj))
         {
             // Array with inner objects (i.e. tabular data), columns are
             // generated according to props in the first object (i.e. first row).
