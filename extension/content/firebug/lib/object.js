@@ -118,21 +118,9 @@ Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
         }
 
         if (nonEnumProps)
-        {
-            try
-            {
-                props = Object.getOwnPropertyNames(XPCNativeWrapper(ob));
-            }
-            catch (err)
-            {
-                // https://code.google.com/p/fbug/issues/detail?id=6979
-                return true;
-            }
-        }
+            props = Object.getOwnPropertyNames(ob);
         else
-        {
             props = Object.keys(ob);
-        }
 
         if (props.length)
             return true;
