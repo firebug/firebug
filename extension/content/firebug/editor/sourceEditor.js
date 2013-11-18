@@ -136,7 +136,7 @@ SourceEditor.Events =
  * Note that CodeMirror instances are running within Firebug UI (panel.html) that has
  * restricted (content) privileges. All objects passed into CM APIs (such as rectangles,
  * coordinates, positions, etc.) must be properly exposed to the content. You should usually
- * utilize {@Wrapper.cloneIntoContentScope} method for this purpose.
+ * utilize {@SourceEditor.cloneIntoCMScope} method for this purpose.
  *
  * Use {@ScriptLoader} implemented at the bottom of this file if you want to use FBTrace
  * API from within CodeMirror files. See {@SourceEditor.loadScripts} for more details.
@@ -417,8 +417,7 @@ SourceEditor.prototype =
         if (line != null)
             return this.getDocument().getLine(line).length;
 
-        // The newline characters shouldn't be counted.
-        return this.editorObject.getValue().replace(/\n/g, "").length;
+        return this.editorObject.getValue().length;
     },
 
     getLineCount: function()
@@ -468,29 +467,28 @@ SourceEditor.prototype =
 
         var charCount = 0;
 
-        // Since Codemirror only accepts the start/end lines and chars in the lines
-        // to set selection, It needs to go through the editor lines to find the
-        // location of the inputs.
+        // Since Codemirror only accepts the positions in (line, ch) format, we
+        // need to go through the editor lines and manually convert the positions.
         for (var i = 0; i < lineCount; i++)
         {
-            charCount += this.getCharCount(i);
-            if (startLine == -1 && charCount >= start)
+            charCount += this.getCharCount(i) + 1;
+            if (startLine == -1 && charCount > start)
             {
                 startLine = i;
-                startChar = start - (charCount - this.getCharCount(i));
+                startChar = start - (charCount - this.getCharCount(i) - 1);
             }
 
-            if (charCount >= end)
+            if (charCount > end)
             {
                 endLine = i;
-                endChar = end - (charCount - this.getCharCount(i));
+                endChar = end - (charCount - this.getCharCount(i) - 1);
                 break;
             }
         }
 
         this.editorObject.setSelection(
-            {line: startLine, ch: startChar},
-            {line: endLine, ch: endChar}
+            this.cloneIntoCMScope({line: startLine, ch: startChar}),
+            this.cloneIntoCMScope({line: endLine, ch: endChar})
         );
     },
 
@@ -502,14 +500,14 @@ SourceEditor.prototype =
         var endOffset = 0;
 
         // Count the chars of the lines before the
-        // end/start lines.
+        // end/start lines, including newlines.
         for (var i = 0; i < end.line; i++)
         {
             var lineCharCount = this.getCharCount(i);
             if (start.line > i)
-                startOffset += lineCharCount;
+                startOffset += lineCharCount + 1;
 
-            endOffset += lineCharCount;
+            endOffset += lineCharCount + 1;
         }
 
         // Add the number of chars between the first char
@@ -529,11 +527,16 @@ SourceEditor.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Document Management
+    // CodeMirror internals
 
     getDocument: function()
     {
         return this.editorObject.getDoc();
+    },
+
+    cloneIntoCMScope: function(obj)
+    {
+        return Wrapper.cloneIntoContentScope(this.view, obj);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -575,12 +578,12 @@ SourceEditor.prototype =
     {
         var doc = this.view.ownerDocument;
         var view = Wrapper.getContentView(doc.defaultView);
+        var clone = this.cloneIntoCMScope.bind(this);
         var contentHintFunction = function()
         {
             var ret = hintFunction.apply(this, arguments);
             if (!ret)
                 return;
-            var clone = Wrapper.cloneIntoContentScope.bind(Wrapper, view);
             return clone({
                 list: clone(ret.list.map(function(prop)
                 {
@@ -700,9 +703,7 @@ SourceEditor.prototype =
         line = line || 0;
         options = options || {};
 
-        // The pos object is passed into CodeMirror that is running within
-        // a content scope (restricted privileges, in panel.html).
-        var pos = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+        var pos = this.cloneIntoCMScope({line: line, ch: 0});
         var coords = this.editorObject.charCoords(pos, "local");
 
         // If direct scroll (pixel) position is specified use it.
@@ -744,14 +745,14 @@ SourceEditor.prototype =
     getTopIndex: function()
     {
         var scrollInfo = this.getScrollInfo();
-        scrollInfo = Wrapper.cloneIntoContentScope(this.view, scrollInfo);
+        scrollInfo = this.cloneIntoCMScope(scrollInfo);
         var coords = this.editorObject.coordsChar(scrollInfo, "local");
         return coords.line;
     },
 
     setTopIndex: function(line)
     {
-        var coords = Wrapper.cloneIntoContentScope(this.view, {line: line, ch: 0});
+        var coords = this.cloneIntoCMScope({line: line, ch: 0});
         this.editorObject.scrollTo(0, this.editor.charCoords(coords, "local").top);
     },
 
