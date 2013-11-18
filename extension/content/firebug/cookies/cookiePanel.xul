@@ -19,7 +19,7 @@
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_firebug_removeAllCookies" key="o" modifiers="control,shift" command="cmd_firebug_cookieRemoveAll" class="fbOnlyKey"/>
+        <key id="key_firebug_removeAllCookies" key="o" modifiers="accel,shift" command="cmd_firebug_cookieRemoveAll" class="fbOnlyKey"/>
     </keyset>
 
     <!-- Firebug toolbar -->
