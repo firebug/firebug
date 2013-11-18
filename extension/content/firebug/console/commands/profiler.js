@@ -1,25 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/chrome/rep",
-    "firebug/lib/object",
-    "firebug/lib/trace",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
-    "firebug/debugger/stack/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/chrome/reps",
+    "firebug/chrome/module",
+    "firebug/chrome/rep",
+    "firebug/debugger/stack/stackFrame",
     "firebug/console/profilerEngine",
 ],
-function(Module, Rep, Obj, FBTrace, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
-    StackFrame, Events, Css, Dom, Str, ProfilerEngine) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Wrapper, Url, Events, Css, Dom, Str,
+    FirebugReps, Module, Rep, StackFrame, ProfilerEngine) {
 
 // ********************************************************************************************* //
 // Constants
