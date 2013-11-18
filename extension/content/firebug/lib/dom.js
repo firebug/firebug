@@ -901,6 +901,8 @@ Dom.getDOMMembers = function(object)
         { return domMemberCache.Node; }
     else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
+    else if (Array.isArray(object))
+        { return domMemberCache.Array; }
 
     return null;
 };
@@ -2454,6 +2456,11 @@ domMemberMap.Event =
     "preventDefault",
     "stopPropagation"
 ];
+
+domMemberMap.Array = Object.getOwnPropertyNames(Array.prototype).filter(function(name)
+{
+    return name !== "length";
+});
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
