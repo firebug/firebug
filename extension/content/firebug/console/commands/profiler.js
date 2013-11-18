@@ -36,11 +36,20 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // Profiler
 
+/**
+ * @module
+ */
 var Profiler = Obj.extend(Module,
+/** @lends Profiler */
 {
     dispatchName: "profiler",
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     profilerEnabled: false,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initialize: function()
     {
@@ -62,8 +71,8 @@ var Profiler = Obj.extend(Module,
 
     showPanel: function(browser, panel)
     {
-        if (FBTrace.DBG_PROFILER)
-            FBTrace.sysout("Profiler.showPanel");
+        Trace.sysout("Profiler.showPanel;");
+
         this.setEnabled();
     },
 
@@ -125,13 +134,13 @@ var Profiler = Obj.extend(Module,
 
     startProfiling: function(context, title)
     {
+        if (context.profiling)
+            return;
+
         context.profiling = new ProfilerEngine(context);
         context.profiling.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleProfiling", "checked", "true");
-
-        if (context.profiling)
-            return;
 
         var originalTitle = title;
         var isCustomMessage = !!title;
@@ -235,12 +244,12 @@ var Profiler = Obj.extend(Module,
             }
         }});
 
-        for (var i = 0; i < calls.length; ++i)
+        for (var i = 0; i < calls.length; i++)
             calls[i].percent = Math.round((calls[i].totalOwnTime/totalTime) * 100 * 100) / 100;
 
         calls.sort(function(a, b)
         {
-           return a.totalOwnTime < b.totalOwnTime ? 1 : -1;
+            return a.totalOwnTime < b.totalOwnTime ? 1 : -1;
         });
 
         totalTime = Math.round(totalTime * 1000) / 1000;
@@ -269,7 +278,7 @@ var Profiler = Obj.extend(Module,
             var tag = Profiler.ProfileCall.tag;
             var insert = tag.insertRows;
 
-            for (var i = 0; i < calls.length; ++i)
+            for (var i = 0; i < calls.length; i++)
             {
                 calls[i].index = i;
                 context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
@@ -297,6 +306,7 @@ var Profiler = Obj.extend(Module,
             Firebug.Console.logFormatted([msg], context, "warn");
             return;
         }
+
         Firebug.Profiler.startProfiling(context, title);
     },
 
@@ -382,7 +392,7 @@ Profiler.ProfileTable = domplate(
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
-            ++colIndex;
+            colIndex++;
 
         this.sort(table, colIndex, numerical);
     },
@@ -397,7 +407,7 @@ Profiler.ProfileTable = domplate(
 
             header.sorted = -1;
 
-            for (var i = 0; i < values.length; ++i)
+            for (var i = 0; i < values.length; i++)
                 tbody.appendChild(values[i].row);
         },
 
@@ -409,7 +419,7 @@ Profiler.ProfileTable = domplate(
 
           header.sorted = 1;
 
-          for (var i = values.length-1; i >= 0; --i)
+          for (var i = values.length-1; i >= 0; i--)
               tbody.appendChild(values[i].row);
         };
 
@@ -438,24 +448,16 @@ Profiler.ProfileTable = domplate(
         if (numerical)
         {
             if (!header.sorted || header.sorted == -1)
-            {
                 sortDescending();
-            }
             else
-            {
                 sortAscending();
-            }
         }
         else
         {
             if (!header.sorted || header.sorted == -1)
-            {
                 sortAscending();
-            }
             else
-            {
                 sortDescending();
-            }
         }
     }
 });
@@ -480,6 +482,10 @@ Profiler.ProfileCaption = domplate(Rep,
 
 Profiler.ProfileCall = domplate(Rep,
 {
+    className: "profile",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
@@ -521,8 +527,6 @@ Profiler.ProfileCall = domplate(Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    className: "profile",
-
     supportsObject: function(object, type)
     {
         return object instanceof ProfileCall;
@@ -543,8 +547,7 @@ Profiler.ProfileCall = domplate(Rep,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("profiler.getTooltip FAILS ", exc);
+            TraceError.sysout("profiler.getTooltip; EXCEPTION " + exc, exc);
         }
     },
 
