@@ -25,6 +25,8 @@ function(Firebug, Rep, FBTrace, Domplate, Locale, Dom, Css, Arr, FirebugReps) {
 
 var {domplate, DIV, TABLE, THEAD, TR, FOR, TH, TBODY, TD, TAG} = Domplate;
 
+var TABLE_INDEX_KEY = Object.create(null);
+
 // Tracing
 var Trace = FBTrace.to("DBG_TABLEREP");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -113,7 +115,7 @@ var TableRep = domplate(Rep,
             {
                 value = row;
             }
-            else if (prop === "__fb_table_index")
+            else if (prop === TABLE_INDEX_KEY)
             {
                 value = indexes.shift();
             }
@@ -281,7 +283,7 @@ var TableRep = domplate(Rep,
             var obj = object || {};
             obj.data = data;
             obj.columns = columns;
-            if (columns[0].property === "__fb_table_index")
+            if (columns[0].property === TABLE_INDEX_KEY)
                 obj.indexes = this.getIndexes(data);
 
             var row = Firebug.Console.log(obj, context, "table", this, true);
@@ -354,7 +356,7 @@ var TableRep = domplate(Rep,
         if (columns.length)
         {
             columns.unshift({
-                property: "__fb_table_index",
+                property: TABLE_INDEX_KEY,
                 label: Locale.$STR("firebug.reps.table.Index"),
                 alphaValue: isAlphaValue,
                 index: true,
