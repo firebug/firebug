@@ -11,11 +11,12 @@ define([
     "firebug/lib/array",
     "firebug/dom/domBaseTree",
     "firebug/lib/locale",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale,
-    ScopeClient, WatchExpression) {
+    Grip, ScopeClient, WatchExpression) {
 
 // ********************************************************************************************* //
 // Constants
@@ -77,18 +78,22 @@ WatchTree.prototype = domplate(BaseTree,
 
     getType: function(object)
     {
+        // xxxHonza: this must be done through a decorator that can be also reused
+        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
+        // Checking the object type must be done after checking object instance (see issue 6953).
+
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
         if (object instanceof ScopeClient)
+        {
             return "scopes";
+        }
         else if (object instanceof WatchExpression)
+        {
             return "watch";
-
-        // xxxHonza: this must be done through a decorator that can be also reused
-        // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
-        // Checking the object type must be done after checking object instance (see issue 6953).
-        if (object && Obj.isFunction(object.getType))
+        }
+        else if (object instanceof Grip)
         {
             if (object.getType() == "function")
                 return "userFunction";
