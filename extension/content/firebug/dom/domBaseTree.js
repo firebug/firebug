@@ -302,7 +302,9 @@ DomBaseTree.prototype = domplate(BaseTree,
 
                 // Only primitive types can be edited.
                 // xxxHonza: this place requires the panel to have a provider property.
-                // Is that correct?
+                // it also requires the panel to have setPropertyValue and editProperty,
+                // which is all implemented by {@DomBasePanel}.
+                // Shouldn't the logic be rather part of the DomBasePanel?
                 var value = panel.provider.getValue(member.value);
                 if (typeof(value) == "object")
                     return;

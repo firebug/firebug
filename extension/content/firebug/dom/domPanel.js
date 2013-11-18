@@ -28,6 +28,11 @@ function(Firebug, FBTrace, Obj, Arr, Events, Dom, Css, Search, Domplate, Locale,
     ToggleBranch) {
 
 // ********************************************************************************************* //
+// Resources
+
+// Firebug wiki: https://getfirebug.com/wiki/index.php/DOM_Panel
+
+// ********************************************************************************************* //
 // Constants
 
 var Trace = FBTrace.to("DBG_DOMPANEL");
@@ -38,13 +43,19 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 /**
  * @panel This object represents DOM panel in the main Firebug UI.
- * See wiki for feature description: https://getfirebug.com/wiki/index.php/DOM_Panel
+ *
+ * The panel is derived from {@DOMBasePanel} and adds logic related to 'object path'.
+ * It's a path displayed in the panel's toolbar and synchronized through {@Panel.getObjectPath}
+ * and {@FirebugChrome.syncStatusPath}.
+ *
+ * The panel also knows how to create/show/update DOM breakpoints.
  */
 function DOMPanel()
 {
 }
 
-DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
+var BasePanel = DOMBasePanel.prototype
+DOMPanel.prototype = Obj.extend(BasePanel,
 /** @lends DOMPanel */
 {
     dispatchName: "DOMPanel",
@@ -70,7 +81,7 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
         // super class initialization).
         this.onClick = this.onClick.bind(this);
 
-        DOMBasePanel.prototype.initialize.apply(this, arguments);
+        BasePanel.initialize.apply(this, arguments);
 
         // Support for breakpoints
         DOMModule.addListener(this);
@@ -130,21 +141,21 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
             toggles: state.toggles
         });
 
-        DOMBasePanel.prototype.destroy.apply(this, arguments);
+        BasePanel.destroy.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
     {
         Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
-        DOMBasePanel.prototype.initializeNode.apply(this, arguments);
+        BasePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
         Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
-        DOMBasePanel.prototype.destroyNode.apply(this, arguments);
+        BasePanel.destroyNode.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -579,6 +590,22 @@ DOMPanel.prototype = Obj.extend(DOMBasePanel.prototype,
     {
         return (enabled ? Locale.$STR("dom.disableBreakOnPropertyChange") :
             Locale.$STR("dom.label.breakOnPropertyChange"));
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Editing
+
+    setPropertyValue: function(row, value)
+    {
+        // Save tree presentation state before editing.
+        var toggles = new ToggleBranch.ToggleBranch();
+        this.tree.saveState(toggles);
+
+        // Change property value (evaluation + tree refresh)
+        BasePanel.setPropertyValue.apply(this, arguments);
+
+        // Restore tree state.
+        this.tree.restoreState(toggles);
     },
 });
 
