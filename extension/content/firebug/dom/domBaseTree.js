@@ -1,18 +1,18 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/domplate",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/lib/array",
     "firebug/lib/string",
-    "firebug/lib/trace",
+    "firebug/lib/promise",
+    "firebug/lib/events",
     "firebug/chrome/domTree",
     "firebug/dom/toggleBranch",
-    "firebug/lib/promise",
 ],
-function(Obj, Domplate, Dom, Css, Arr, Str, FBTrace, DomTree, ToggleBranch, Promise) {
+function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, DomTree, ToggleBranch) {
 
 "use strict";
 
@@ -24,9 +24,14 @@ var {domplate} = Domplate;
 var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
-// Asynchronous append is good to avoid UI freezing, but bad for UI flickering
-// Bump the slice size, we'll see what the UX will be.
-var insertSliceSize = 100;//18;
+// Asynchronous tree population is good for UI (avoids UI freezing), but causes flickering.
+// Bump the slice size, we'll see what the UX will be. Note that the first slice of data
+// is inserted synchronously, so the tree population can be actually synchronous (no UI fleshing)
+// in most cases (i.e. in cases where the number of children isn't bigger than 'insertSliceSize').
+// Of course it assumes that the data provider is also synchronous (it is in most cases, even
+// asynchronous data from the back-end are cached after fetch and the access is synchronous
+// since then).
+var insertSliceSize = 100;
 var insertInterval = 40;
 
 // ********************************************************************************************* //
@@ -38,10 +43,21 @@ function DomBaseTree()
 
 /**
  * @domplate This tree widget is derived from basic {@DomTree} and appends logic such as:
- * 1) Long string expansion
- * 2) State persistence
+ * 1) Long string expansion.
+ * 2) Presentation state persistence (expanded tree nodes).
  * 3) Asynchronous population (so, the UI doesn't freeze when an item is expanded and
- *    there is a lot of children)
+ * there is a lot of children).
+ *
+ * xxxHonza TODOs:
+ * - expandRowAsync: it should be possible to cancel the population process, e.g. if the user
+ * closes the node before it's fully populated or if the tree is refreshed/destroyed.
+ * This is very important performance improvement (especially when the user is stepping
+ * quickly in the debugger, which requires a lot of UI tree-updates).
+ * - restoreState: it should be possible to expand/restore a node as soon as it's available in
+ * the tree. The logic doesn't have to wait till the entire tree-level is populated.
+ * - Fire events for a11y?
+ * - expandRowAsync: should not generate bunch of timeouts in advance. It should be done
+ * step by step, which would also support cancel.
  */
 var BaseTree = DomTree.prototype;
 DomBaseTree.prototype = domplate(BaseTree,
@@ -50,6 +66,12 @@ DomBaseTree.prototype = domplate(BaseTree,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Persistence
 
+    /**
+     * Save DomTree state (i.e. a structure of expanded nodes), so they can be re-expanded later.
+     * The method executes synchronously and stores all data into the passed state object.
+     *
+     * @param {@ToggleBranch} The state info is stored into this object.
+     */
     saveState: function(state)
     {
         if (!this.element)
@@ -72,68 +94,145 @@ DomBaseTree.prototype = domplate(BaseTree,
                     toggles = toggles.set(name, new ToggleBranch.ToggleBranch());
             }
         }
+
+        if (Trace.active)
+            Trace.sysout("domBaseTree.saveState", state.clone());
     },
 
-    restoreState: function(object, toggles, level)
+    /**
+     * Restore presentation state of DomTree. The restoration process is asynchronous.
+     * Use the return {@Promise} object to watch when the state is fully restored.
+     *
+     * @param {@ToggleBranch} The state info is loaded from this object.
+     *
+     * @return The method returns a promise that is resolved when the restoration process
+     * is fully completed.
+     */
+    restoreState: function(toggles)
     {
+        return this.restoreStateInternal(toggles, null, 0);
+    },
+
+    /**
+     * Internal implementation used for recursion. Note that the restoration process
+     * is composed from two asynchronous tasks.
+     * 1) Fetch data from the server (e.g. over RDP protocol). This process doesn't have to
+     * be always asynchronous, it depends on the actual data provider.
+     * 2) Populate the UI. Must be done asynchronously, so big amount of data doesn't freeze
+     * the UI. This also doesn't have to be always asynchronous. The first piece of items
+     * is populated synchronously (so, if there is no more items it's done).
+     *
+     * These tasks are done for every branch that is expanded as part of the restoration
+     * process. 'restoreState' is executed recursively for every tree-branch that is expanded.
+     */
+    restoreStateInternal: function(toggles, member, level)
+    {
+        if (Trace.active)
+        {
+            Trace.sysout("domBaseTree.restoreState; level: " + level, {
+                member: member,
+                toggles: toggles ? toggles.clone() : null,
+            });
+        }
+
         level = level || 0;
 
         // Don't try to expand children if there are no expanded items.
-        if (toggles.isEmpty())
-            return;
-
-        // Async restore handler for recursion (see the loop below).
-        var onRestore = function(value, toggles, level)
+        if (!toggles || toggles.isEmpty())
         {
-            this.restoreState(value, toggles, level);
+            Trace.sysout("domBaseTree.restoreState; No toggles in level: " + level);
+            return Promise.resolve(level);
         }
 
-        var rows = this.getChildRows(object, level);
-        for (var i=0; i<rows.length; i++)
+        // Async restore handler for recursion (see the loop below).
+        function onRestore(toggles, member, level, restored)
+        {
+            // As soon as the entire subtree is restored (data fetched from the server
+            // and displayed in the UI, both asynchronous). Resolve the promise
+            // passed in, to notify the parent task.
+            this.restoreStateInternal(toggles, member, level).then(function()
+            {
+                Trace.sysout("domBaseTree.restoreState; level: " + level + " DONE", arguments);
+                restored.resolve();
+            })
+        }
+
+        // This is the return value promise. It's resolved when all (sub)children are resolved.
+        // It allows the caller to wait till the tree (or subtree since 'restoreState'
+        // is called recursively) is completely restored.
+        var restoration = [];
+
+        var rows = this.getChildRows(member, level);
+        for (var i = 0; i < rows.length; i++)
         {
             var row = rows[i];
-            var member = row.repObject;
-            if (!member)
+            var repObject = row.repObject;
+            if (!repObject)
                 continue;
 
             // Don't expand if the member doesn't have children any more.
-            if (!member.hasChildren)
+            if (!repObject.hasChildren)
                 continue;
 
             var name = this.getRowName(row);
 
+            // Check if the current row-name should be expanded. It should if there is
+            // an existing toggles entry for it.
             var newToggles = toggles.get(name);
             if (!newToggles)
                 continue;
 
             toggles.remove(name);
 
-            // Get the member's object (the value) and expand it.
-            var value = member.value;
-            var promise = this.expandObject(value);
+            // Expand appropriate tree row.
+            var promise = this.expandMember(repObject);
 
-            // If no children are expanded bail out.
+            // If no children are expanded bail out, we don't have to recursively
+            // restore this node (child branch).
             if (newToggles.isEmpty())
-                continue;
+            {
+                Trace.sysout("domBaseTree.restoreState; no toggles level: " + level +
+                    ", expand promise: " + promise);
 
+                // OK, There are no toggles inside this object, but we still need to wait
+                // at least till it's fully expanded.
+                if (promise)
+                    restoration.push(promise);
+
+                continue;
+            }
+
+            // xxxHonza: Not sure when this happen.
             if (!promise)
             {
                 TraceError.sysout("domBaseTree.restoreState; No promise!?");
                 continue;
             }
 
-            // Bind the handler to the current arguments. They can change
-            // within the loop. The handler will be executed as soon as the
-            // promise is resolved.
-            promise.then(onRestore.bind(this, value, newToggles, level+1));
+            // Use another promise, so we can figure out when children in this sub-tree
+            // are all completely restored (data fetched from the server and displayed in the UI).
+            var restored = Promise.defer();
+            restoration.push(restored.promise);
+
+            // Bind the handler to the current arguments. They can change within the loop.
+            // The handler will be executed as soon as members of the child level are fetched
+            // from the server. The purpose of 'restoreChildren' is then to restore state of the
+            // level.
+            var restoreChildren = onRestore.bind(this, newToggles, repObject, level + 1, restored);
+            promise.then(restoreChildren);
         }
+
+        // The return value is a promise that is resolved as soon as all the
+        // promises in the array are resolved - i.e. all the sub tree-nodes completely
+        // fetched from the server and expanded.
+        return Promise.all(restoration);
     },
 
-    getChildRows: function(object, level)
+    getChildRows: function(member, level)
     {
         var rows = [];
 
-        var row = this.getRow(object);
+        var row = this.getMemberRow(member);
         if (!row && !level)
             row = this.element.firstChild.firstChild;
 
@@ -147,6 +246,81 @@ DomBaseTree.prototype = domplate(BaseTree,
         }
 
         return rows;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Events
+
+    onClick: function(event)
+    {
+        if (!Events.isLeftClick(event))
+            return;
+
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
+        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
+        var target = row.lastChild.firstChild;
+        var isString = Css.hasClass(target, "objectBox-string");
+        var inValueCell = (event.target === valueCell || event.target === target);
+
+        var repNode = Firebug.getRepNode(event.target);
+        var memberRow = Css.hasClass(repNode, "memberRow");
+
+        // Here, we are interested in the object associated with the value rep
+        // (not the rep object associated with the row itself)
+        var object = memberRow ? null : repNode.repObject;
+
+        // Row member object created by the tree widget.
+        var member = row.repObject;
+
+        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        {
+            // Basic row toggling is implemented in {@DomTree}
+            BaseTree.onClick.apply(this, arguments);
+        }
+        else
+        {
+            // 1) Click on functions navigates the user to the right source location
+            // 2) Double click inverts boolean values and opens inline editor for others.
+            if (typeof(object) == "function")
+            {
+                Firebug.chrome.select(object, "script");
+                Events.cancelEvent(event);
+            }
+            else if (Events.isDoubleClick(event))
+            {
+                // The entire logic is part of the parent panel.
+                var panel = Firebug.getElementPanel(row);
+                if (!panel)
+                    return;
+
+                if (!member)
+                {
+                    TraceError.sysout("domBaseTree.onClick; ERROR No member associated!");
+                    return;
+                }
+
+                // Only primitive types can be edited.
+                // xxxHonza: this place requires the panel to have a provider property.
+                // it also requires the panel to have setPropertyValue and editProperty,
+                // which is all implemented by {@DomBasePanel}.
+                // Shouldn't the logic be rather part of the DomBasePanel?
+                var value = panel.provider.getValue(member.value);
+                if (typeof(value) == "object")
+                    return;
+
+                // Don't edit completion values.
+                if (member.type === "frameResultValue")
+                    return;
+
+                if (typeof(value) == "boolean")
+                    panel.setPropertyValue(row, "" + !value);
+                else
+                    panel.editProperty(row);
+
+                Events.cancelEvent(event);
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -206,7 +380,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             var members = this.getMembers(member.value, level + 1);
             var isPromise = DomTree.isPromise(members);
 
-            Trace.sysout("DomBaseTree.toggleRow; level: " + level + ", members: " +
+            Trace.sysout("DomBaseTree.toggleRow; level: " + (level + 1) + ", members: " +
                 (members && members.length ? members.length : (isPromise ?
                 "(promise)" : "null")) + ", ", members);
 
@@ -226,17 +400,29 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     expandRowAsync: function(row, members)
     {
+        // xxxHonza: TODO
+        // If we are still in the midst of inserting rows, cancel all pending
+        // insertions here - this is a big speedup when stepping in the debugger
+        /*if (this.timeouts)
+        {
+            for (var i = 0; i < this.timeouts.length; ++i)
+                this.context.clearTimeout(this.timeouts[i]);
+            delete this.timeouts;
+        }*/
+
         var lastRow = row;
         var delay = 0;
         var setSize = members.length;
         var rowCount = 1;
         var deferred = Promise.defer();
 
+        Trace.sysout("domBaseTree.expandRowAsync; members: " + setSize);
+
         function insertSlice(slice, isLast)
         {
             if (lastRow.parentNode)
             {
-                var result = this.loop.insertRows({members: slice}, lastRow);
+                var result = this.loop.insertRows({members: slice}, lastRow, this);
                 lastRow = result[1];
 
                 // xxxHonza: for a11y
@@ -244,6 +430,9 @@ DomBaseTree.prototype = domplate(BaseTree,
                 //    [null, result, rowCount, setSize]);
 
                 rowCount += insertSliceSize;
+
+                Trace.sysout("domBaseTree.insertSlice; slice size: " + slice.length +
+                    ", isLast: " + isLast);
             }
 
             if (isLast)
@@ -252,6 +441,9 @@ DomBaseTree.prototype = domplate(BaseTree,
                 deferred.resolve(lastRow);
             }
         };
+
+        // First slice is inserted synchronously.
+        var first = true;
 
         // xxxHonza: the logic should be improved
         // The while loop generates bunch if timeouts in advance and if the row is
@@ -262,10 +454,18 @@ DomBaseTree.prototype = domplate(BaseTree,
             var slice = members.splice(0, insertSliceSize);
             var isLast = !members.length;
 
-            // xxxHonza: it would be a bit safer to use context.setTimeout, so the
-            // any active timeout is cleared if the page is suddenly refreshed.
-            setTimeout(insertSlice.bind(this, slice, isLast), delay);
+            if (first)
+            {
+                insertSlice.call(this, slice, isLast);
+            }
+            else
+            {
+                // xxxHonza: it would be a bit safer to use context.setTimeout, so the
+                // any active timeout is cleared if the page is suddenly refreshed.
+                setTimeout(insertSlice.bind(this, slice, isLast), delay);
+            }
 
+            first = false;
             delay += insertInterval;
         }
 
@@ -293,7 +493,12 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Path for persistence
 
+    /**
+     * Returns an array of parts that uniquely identifies a row (not always all JavaScript)
+     * This is used for persistence of expanded nodes.
+     */
     getPath: function(row)
     {
         var name = this.getRowName(row);

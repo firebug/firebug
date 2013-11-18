@@ -24,6 +24,15 @@ function(Firebug, FBTrace, Domplate, Locale, Events, Options, Dom, Css, Str,
 "use strict";
 
 // ********************************************************************************************* //
+// Documentation
+
+/**
+ * This entire module is obsolete and is presented only for backward compatibility with
+ * some extensions (e.g. Illumination and spy_eye).
+ * This module is currently only included in {@Firebug.DOMBasePanel}.
+ */
+
+// ********************************************************************************************* //
 // Constants
 
 var insertSliceSize = 18;
@@ -202,7 +211,7 @@ var DirTablePlate = domplate(Rep,
             {
                 if (toggles)
                 {
-                    var path = Firebug.DOMBasePanel.getPath(row);
+                    var path = getPath(row);
 
                     // Remove the path from the toggle tree
                     for (var i = 0; i < path.length; ++i)
@@ -241,7 +250,7 @@ var DirTablePlate = domplate(Rep,
             {
                 if (toggles)
                 {
-                    var path = Firebug.DOMBasePanel.getPath(row);
+                    var path = getPath(row);
 
                     // Mark the path in the toggle tree
                     for (var i = 0; i < path.length; ++i)
@@ -329,6 +338,32 @@ var ToolboxPlate = domplate(
         toolbox.domPanel.deleteWatch(toolbox.watchRow);
     }
 });
+
+// ********************************************************************************************* //
+// Helpers
+
+/**
+ * Returns an array of parts that uniquely identifies a row (not always all JavaScript)
+ */
+function getPath(row)
+{
+    var name = getRowName(row);
+    var path = [name];
+
+    var level = parseInt(row.getAttribute("level"), 10) - 1;
+    for (row = row.previousSibling; row && level >= 0; row = row.previousSibling)
+    {
+        if (parseInt(row.getAttribute("level"), 10) === level)
+        {
+            name = getRowName(row);
+            path.splice(0, 0, name);
+
+            --level;
+        }
+    }
+
+    return path;
+}
 
 // ********************************************************************************************* //
 // Registration

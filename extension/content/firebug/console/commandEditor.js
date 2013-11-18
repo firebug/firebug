@@ -135,7 +135,7 @@ Firebug.CommandEditor = Obj.extend(Module,
         return out.attemptedCompletion;
     },
 
-    onTab: function(event)
+    onTab: function()
     {
         if (!this.editor.hasSelection() && this.autoComplete(false))
             return;
@@ -207,6 +207,12 @@ Firebug.CommandEditor = Obj.extend(Module,
     {
         if (this.editor)
             this.editor.setSelection(start, end);
+    },
+
+    getSelection: function()
+    {
+        if (this.editor)
+            return this.editor.getSelection();
     },
 
     select: function()
@@ -364,7 +370,7 @@ TextEditor.prototype =
         return this.textBox.value;
     },
 
-    setSelection: function(start, end)
+    setSelectionRange: function(start, end)
     {
         this.textBox.setSelectionRange(start, end);
     },

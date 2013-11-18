@@ -60,10 +60,6 @@ var ToolboxPlate = domplate(
 
 function WatchPanel()
 {
-    this.watches = [];
-    this.tree = new WatchTree();
-    this.toggles = new ToggleBranch.ToggleBranch();
-
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
     this.onMouseOver = Obj.bind(this.onMouseOver, this);
     this.onMouseOut = Obj.bind(this.onMouseOut, this);
@@ -109,18 +105,35 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.tool = this.context.getTool("debugger");
         this.tool.addListener(this);
 
+        this.watches = [];
+        this.tree = new WatchTree();
+
         this.provider = new WatchProvider(this);
         this.tree.provider = this.provider;
         this.tree.memberProvider = this.provider;
+
+        // Create different tree object and presentation state (toggles) for the default
+        // tree that displays the current scope when the debugger is resumed.
+        // xxxHonza: its state is preserved across page load, but not across pause/resume.
+        this.defaultTree = new WatchTree();
+        this.defaultTree.provider = this.provider;
+        this.defaultTree.memberProvider = this.provider;
+        this.defaultToggles = new ToggleBranch.ToggleBranch();
     },
 
     destroy: function(state)
     {
-        state.watches = this.watches;
+        // Get tree state.
+        this.defaultTree.saveState(this.defaultToggles);
 
-        Firebug.unregisterUIListener(this);
+        // Store all persistent info into the state object.
+        state.watches = this.watches;
+        state.scrollTop = this.panelNode.scrollTop;
+        state.defaultToggles = this.defaultToggles;
 
         this.tool.removeListener(this);
+
+        Firebug.unregisterUIListener(this);
 
         BasePanel.destroy.apply(this, arguments);
     },
@@ -145,8 +158,21 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     show: function(state)
     {
-        if (state && state.watches)
-            this.watches = state.watches;
+        BasePanel.show.apply(this, arguments);
+
+        Trace.sysout("watchPanel.show;", state);
+
+        if (state)
+        {
+            if (state.watches)
+                this.watches = state.watches;
+
+            if (state.defaultToggles)
+                this.defaultToggles = state.defaultToggles;
+
+            if (state.scrollTop)
+                this.defaultScrollTop = state.scrollTop;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -215,7 +241,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.evalWatchesLocally();
 
         this.tree.replace(this.panelNode, input);
-        this.tree.restoreState(input, this.toggles);
+        this.tree.restoreState(this.toggles);
 
         // Throw out the old state object.
         this.toggles = new ToggleBranch.ToggleBranch();
@@ -247,11 +273,37 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.evalWatchesLocally();
 
         // Render the watch panel tree.
-        this.tree.replace(this.panelNode, input);
+        this.defaultTree.replace(this.panelNode, input);
 
         // Auto expand the global scope item.
-        var scope = this.context.getCurrentGlobal();
-        this.tree.expandObject(scope);
+        if (this.defaultToggles.isEmpty())
+        {
+            var scope = this.context.getCurrentGlobal();
+            this.defaultTree.expandObject(scope);
+        }
+        else
+        {
+            // The restoration process is asynchronous, so make sure that the vertical scroll
+            // position is set after the tree is properly expanded and the scroll offset ready.
+            // xxxHonza: the restoration of the default global scope-tree doesn't work cross
+            // debugger pause/resume.
+            var done = this.defaultTree.restoreState(this.defaultToggles);
+            done.then(() =>
+            {
+                Trace.sysout("watchPanel.showEmptyMembers; state restored " +
+                    "set default scroll top: " + this.defaultScrollTop);
+
+                // xxxHonza: a little better would be to set the scroll position as soon
+                // as the scroll offset reaches the scrollTop. This would improve the UX
+                // since the scroll could happen synchronously in most cases and the UI
+                // wouldn't blink. This would have to be done as part of the restoration
+                // process within {@DomBaseTree}.
+                if (this.defaultScrollTop)
+                    this.panelNode.scrollTop = this.defaultScrollTop;
+
+                this.defaultScrollTop = null;
+            });
+        }
 
         // The direction needs to be adjusted according to the direction
         // of the user agent. See issue 5073.
@@ -726,8 +778,12 @@ WatchPanel.prototype = Obj.extend(BasePanel,
 
     setPropertyValue: function(row, value)
     {
-        // Save state of the tree before evaluation will cause rebuild.
-        this.tree.saveState(this.toggles);
+        // The current tree is refreshed after editing a property (set by evaluation)
+        // So, make sure to persist the proper tree state.
+        if (this.selection instanceof StackFrame)
+            this.tree.saveState(this.toggles);
+        else
+            this.defaultTree.saveState(this.defaultToggles);
 
         BasePanel.setPropertyValue.apply(this, arguments);
     },

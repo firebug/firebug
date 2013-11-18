@@ -2,12 +2,14 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/script/sourceLink",
 ],
-function (FBTrace, Url, Locale, Str, SourceLink) {
+function (FBTrace, Obj, Url, Locale, Str, Grip, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,9 +20,10 @@ var Trace = FBTrace.to("DBG_STACK");
 // ********************************************************************************************* //
 // Stack Frame
 
-// xxxHonza: should be derived from a client object
 function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
+    Grip.call(this, nativeFrame);
+
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
@@ -41,6 +44,7 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
 
     // Mozilla
     this.nativeFrame = nativeFrame;
+
     this.pc = pc;
     this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
 };
@@ -48,8 +52,9 @@ function StackFrame(sourceFile, lineNo, functionName, args, nativeFrame, pc, con
 /**
  * This object represents JavaScript execution frame. Instance of this object are usually
  * created when the debugger pauses JS execution.
+ * xxxHonza: should be derived from a client object?
  */
-StackFrame.prototype =
+StackFrame.prototype = Obj.descend(Grip.prototype,
 /** @lends StackFrame */
 {
     getURL: function()
@@ -135,11 +140,6 @@ StackFrame.prototype =
         return this.getActor();
     },
 
-    getActor: function()
-    {
-        return this.nativeFrame.actor;
-    },
-
     /**
      * Compare two StackFrame instances and returns true if their actor is the same.
      * (Used in bindings.xml in getObjectItem())
@@ -153,7 +153,7 @@ StackFrame.prototype =
         return other.nativeFrame && this.nativeFrame &&
             other.nativeFrame.actor === this.nativeFrame.actor;
     }
-};
+});
 
 // ********************************************************************************************* //
 // Static Methods

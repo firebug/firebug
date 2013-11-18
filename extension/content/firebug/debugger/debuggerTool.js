@@ -335,7 +335,13 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
 
     resumed: function()
     {
-        Trace.sysout("debuggerTool.resumed; ", arguments);
+        Trace.sysout("debuggerTool.resumed; stopped before: " + this.context.stopped, arguments);
+
+        // When the current page is refreshed, the backend sends fake resume event
+        // to make sure the client side is resumed it isn't needed for Firebug, so
+        // ignore it to safe UI update.
+        if (!this.context.stopped)
+            return;
 
         if (this.context.clientCache)
             this.context.clientCache.clear();

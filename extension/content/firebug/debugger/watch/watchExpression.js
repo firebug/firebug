@@ -22,7 +22,7 @@ function WatchExpression(expr)
  * @object Represents user watch expression created within the {@WatchPanel} side panel.
  * Evaluation of the expression is done automatically by the {@WatchPanel} object.
  */
-WatchExpression.prototype = Obj.descend(new ObjectClient.Property(),
+WatchExpression.prototype = Obj.descend(ObjectClient.Property.prototype,
 /** @lends WatchExpression */
 {
     getName: function()

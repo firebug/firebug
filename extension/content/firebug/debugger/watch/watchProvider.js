@@ -168,21 +168,6 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // ID Provider
-
-    getId: function(object)
-    {
-        var label = this.getLabel(object);
-        if (label)
-            return label;
-
-        if (typeof(object.getActor) == "function")
-            return object.getActor();
-
-        return null;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private Helpers
 
     /**
@@ -193,27 +178,19 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
      */
     getLocalObject: function(object)
     {
-        var actor;
-
         if (object instanceof ScopeClient)
         {
             if (object.grip.object)
-                actor = object.grip.object.actor;
-        }
-        else if (typeof(object.getActor) == "function")
-        {
-            actor = object.getActor();
-        }
-        else
-        {
-            // The object is already the underlying JS object.
-            return object;
+            {
+                var actor = object.grip.object.actor;
+                if (!actor)
+                    return null;
+
+                return DebuggerLib.getObject(this.panel.context, actor);
+            }
         }
 
-        if (!actor)
-            return null;
-
-        return DebuggerLib.getObject(this.panel.context, actor);
+        return BaseProvider.getLocalObject.apply(this, arguments);
     },
 
     /**

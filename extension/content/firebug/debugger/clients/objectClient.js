@@ -2,43 +2,30 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/debugger/rdp",
+    "firebug/lib/object",
     "firebug/lib/promise",
     "firebug/lib/array",
     "firebug/lib/wrapper",
+    "firebug/debugger/rdp",
     "firebug/debugger/debuggerLib",
+    "firebug/debugger/clients/grip",
 ],
-function (FBTrace, RDP, Promise, Arr, Wrapper, DebuggerLib) {
+function (FBTrace, Obj, Promise, Arr, Wrapper, RDP, DebuggerLib, Grip) {
 
 // ********************************************************************************************* //
 // Object Grip
 
 function ObjectClient(grip, cache)
 {
-    this.grip = grip;
+    Grip.call(this, grip);
+
     this.cache = cache;
     this.properties = null;
     this.error = null;
 }
 
-ObjectClient.prototype =
+ObjectClient.prototype = Obj.descend(Grip.prototype,
 {
-    getActor: function()
-    {
-        return this.grip.actor;
-    },
-
-    getType: function()
-    {
-        if (!this.grip)
-            return "";
-
-        if (this.grip.prototype)
-            return this.grip.prototype["class"];
-
-        return this.grip["class"];
-    },
-
     getValue: function()
     {
         // If the grip is a raw and standalone value (number, boolean, or string)
@@ -195,7 +182,7 @@ ObjectClient.prototype =
             result.push(this.createProperty(name, props[name], this.cache));
         return result;
     },
-}
+});
 
 // ********************************************************************************************* //
 // ProxyGrip
@@ -230,7 +217,7 @@ ObjectClient.Property = function(name, desc, cache)
     this.cache = cache;
 }
 
-ObjectClient.Property.prototype =
+ObjectClient.Property.prototype = Obj.descend(Grip.prototype,
 {
     getActor: function()
     {
@@ -278,7 +265,7 @@ ObjectClient.Property.prototype =
 
         return typeof(this.value);
     }
-}
+});
 
 // ********************************************************************************************* //
 // Registration

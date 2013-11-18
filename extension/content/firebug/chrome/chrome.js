@@ -1459,12 +1459,7 @@ var FirebugChrome =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = false;
-                    if (option == "profiling")
-                        checked = false;//xxxHonza; FBS doesn't exist now FBS.profiling;
-                    else
-                        checked = Firebug.Options.get(option);
-
+                    var checked = Firebug.Options.get(option);
                     child.setAttribute("checked", checked);
                 }
             }

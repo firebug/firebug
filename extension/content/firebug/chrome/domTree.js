@@ -1,16 +1,16 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
     "firebug/lib/events",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/array",
-    "firebug/lib/trace",
 ],
-function(Obj, Firebug, Domplate, Events, Dom, Css, Arr, FBTrace) {
+function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr) {
 
 "use strict";
 
@@ -31,19 +31,13 @@ function DomTree(provider)
 }
 
 /**
- * @domplate This object represents UI DomTree widget based on Domplate. You can use
+ * @domplate This object represents generic DomTree widget based on Domplate. You can use
  * data provider to populate the tree with custom data. Or just pass a JS object as
  * an input.
  */
 DomTree.prototype = domplate(
 /** @lends DomTree */
 {
-    sizerRowTag:
-        TR({role: "presentation"},
-            TD({width: "30%"}),
-            TD({width: "70%"})
-        ),
-
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
@@ -70,6 +64,11 @@ DomTree.prototype = domplate(
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Accessors
+
+    getRowTag: function(member)
+    {
+        return this.rowTag;
+    },
 
     hasChildren: function(member)
     {
@@ -117,16 +116,6 @@ DomTree.prototype = domplate(
         var value = this.getValue(member);
         var rep = Firebug.getRep(value);
         return rep.shortTag ? rep.shortTag : rep.tag;
-    },
-
-    getRowTag: function(member)
-    {
-        return this.rowTag;
-    },
-
-    getSizerRowTag: function()
-    {
-        return this.sizerRowTag;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -244,10 +233,16 @@ DomTree.prototype = domplate(
                 var child = children[i];
                 var hasChildren = this.provider.hasChildren(child);
                 var type = this.getType(child);
+
+                // We can't use DomTree.getLabel() at this moment since it expects a member
+                // object as the argument. But the member doesn't exist yet (it's going to
+                // be created at the next row). So, derived objects should not override
+                // getLabel() method, but rather provide custom provider.
                 var name = this.getLabel(child);
                 var readOnly = child.readOnly;
 
                 var member = this.createMember(type, name, child, level, hasChildren, readOnly);
+
                 member.provider = this.provider;
 
                 // Domplate inheritance doesn't work properly so, let's store back reference.
@@ -297,6 +292,8 @@ DomTree.prototype = domplate(
 
     getType: function(object)
     {
+        // xxxHonza: A type provider (or a decorator) should be used here.
+        // (see also a comment in {@WatchTree.getType} 
         return "dom";
     },
 
@@ -377,6 +374,22 @@ DomTree.prototype = domplate(
         return null;
     },
 
+    getMemberRow: function(member)
+    {
+        if (!this.element)
+            return;
+
+        var rows = Dom.getElementsByClass(this.element, "memberRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            if (member == row.repObject)
+                return row;
+        }
+
+        return null;
+    },
+
     resolvePromise: function(promise, object)
     {
         var result;
@@ -433,6 +446,13 @@ DomTree.prototype = domplate(
         var firstRow = this.element.firstChild.firstChild;
         if (firstRow && !value)
             this.toggleRow(firstRow);
+    },
+
+    expandMember: function(member)
+    {
+        var row = this.getMemberRow(member);
+        if (row)
+            return this.toggleRow(row, true);
     },
 
     expandObject: function(object)
@@ -519,6 +539,15 @@ DomTree.prototype = domplate(
             else
                 this.collapseObject(object);
         }
+    },
+
+    isEmpty: function()
+    {
+        if (!this.element)
+            return true;
+
+        var rows = this.element.querySelectorAll(".memberRow");
+        return !rows.length;
     }
 });
 

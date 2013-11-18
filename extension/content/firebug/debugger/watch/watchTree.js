@@ -11,11 +11,12 @@ define([
     "firebug/lib/array",
     "firebug/dom/domBaseTree",
     "firebug/lib/locale",
+    "firebug/debugger/clients/grip",
     "firebug/debugger/clients/scopeClient",
     "firebug/debugger/watch/watchExpression",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Events, Dom, Css, Arr, DomBaseTree, Locale,
-    ScopeClient, WatchExpression) {
+    Grip, ScopeClient, WatchExpression) {
 
 // ********************************************************************************************* //
 // Constants
@@ -34,10 +35,12 @@ function WatchTree(provider)
 }
 
 /**
- * @domplate Represents a tree of properties/objects
+ * @domplate This tree widget extends {@DomBaseTree} and appends support for watch expressions.
+ * The tree is responsible for rendering content within the {@WatchPanel}.
  */
 var BaseTree = DomBaseTree.prototype;
 WatchTree.prototype = domplate(BaseTree,
+/** @lends WatchTree */
 {
     watchNewRowTag:
         TR({"class": "watchNewRow", level: 0},
@@ -77,89 +80,30 @@ WatchTree.prototype = domplate(BaseTree,
     {
         // xxxHonza: this must be done through a decorator that can be also reused
         // in the DOM panel (applying types like: userFunction, DOM Function, domClass, etc.)
-
-        if (object && Obj.isFunction(object.getType))
-        {
-            if (object.getType() == "function")
-                return "userFunction";
-        }
+        // Checking the object type must be done after checking object instance (see issue 6953).
 
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
         if (object instanceof ScopeClient)
+        {
             return "scopes";
+        }
         else if (object instanceof WatchExpression)
+        {
             return "watch";
+        }
         else if (object && object.isFrameResultValue)
+        {
             return "frameResultValue";
+        }
+        else if (object instanceof Grip)
+        {
+            if (object.getType() == "function")
+                return "userFunction";
+        }
 
         return BaseTree.getType.apply(this, arguments);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Events
-
-    onClick: function(event)
-    {
-        if (!Events.isLeftClick(event))
-            return;
-
-        var row = Dom.getAncestorByClass(event.target, "memberRow");
-        var label = Dom.getAncestorByClass(event.target, "memberLabel");
-        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
-        var target = row.lastChild.firstChild;
-        var isString = Css.hasClass(target, "objectBox-string");
-        var inValueCell = (event.target === valueCell || event.target === target);
-
-        var repNode = Firebug.getRepNode(event.target);
-        var memberRow = Css.hasClass(repNode, "memberRow");
-
-        // Here, we are interested in the object associated with the value rep
-        // (not the rep object associated with the row itself)
-        var object = memberRow ? null : repNode.repObject;
-
-        // Row member object created by the tree widget.
-        var member = row.repObject;
-
-        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
-        {
-            // Basic row toggling is implemented in {@DomTree}
-            BaseTree.onClick.apply(this, arguments);
-        }
-        else
-        {
-            // 1) Click on functions navigates the user to the right source location
-            // 2) Double click inverts boolean values and opens inline editor for others.
-            if (typeof(object) == "function")
-            {
-                Firebug.chrome.select(object, "script");
-                Events.cancelEvent(event);
-            }
-            else if (Events.isDoubleClick(event))
-            {
-                // The entire logic is part of the parent panel.
-                var panel = Firebug.getElementPanel(row);
-                if (!panel)
-                    return;
-
-                // Only primitive types can be edited.
-                var value = panel.provider.getValue(member.value);
-                if (typeof(value) == "object")
-                    return;
-
-                // Don't edit completion values.
-                if (member.type === "frameResultValue")
-                    return;
-
-                if (typeof(value) == "boolean")
-                    panel.setPropertyValue(row, "" + !value);
-                else
-                    panel.editProperty(row);
-
-                Events.cancelEvent(event);
-            }
-        }
     },
 });
 

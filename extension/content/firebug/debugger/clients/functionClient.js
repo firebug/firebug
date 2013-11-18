@@ -23,7 +23,7 @@ function FunctionClient(grip, cache)
     this.displayName = grip.name;
 }
 
-FunctionClient.prototype = Obj.descend(new ObjectClient(),
+FunctionClient.prototype = Obj.descend(ObjectClient.prototype,
 {
     toString: function()
     {
