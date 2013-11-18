@@ -65,6 +65,11 @@
     outline-offset: -2px;
 }
 
+/* The (index) column */
+.dataTableIndex {
+    font-style: italic;
+}
+
 /*****************************************************************************************/
 /* Console panel filter */
 

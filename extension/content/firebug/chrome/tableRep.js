@@ -56,7 +56,8 @@ var TableRep = domplate(Rep,
                         onclick: "$onClickHeader"},
                         FOR("column", "$object.columns",
                             TH({"class": "headerCell a11yFocus", "role": "columnheader",
-                                $alphaValue: "$column.alphaValue"},
+                                $alphaValue: "$column.alphaValue", 
+                                $dataTableIndex: "$column.index"},
                                 DIV({"class": "headerCellBox"},
                                     "$column.label"
                                 )
@@ -356,6 +357,7 @@ var TableRep = domplate(Rep,
                 property: "__fb_table_index",
                 label: Locale.$STR("firebug.reps.table.Index"),
                 alphaValue: isAlphaValue,
+                index: true,
             });
         }
     },
