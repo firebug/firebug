@@ -1,11 +1,14 @@
 /* See license.txt for terms of usage */
-/*jshint esnext:true, es5:true, curly:false*/
-/*global FBTrace:true, Components:true, define:true */
+/*global define:1, Components:1*/
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/wrapper",
+    "firebug/lib/xpcom",
+    "firebug/chrome/panelActivation",
 ],
-function(Wrapper) {
+function(Firebug, FBTrace, Wrapper, Xpcom, PanelActivation) {
 
 "use strict";
 
@@ -13,6 +16,10 @@ function(Wrapper) {
 // Constants
 
 var Cu = Components.utils;
+
+var comparator = Xpcom.CCSV("@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+var appInfo = Xpcom.CCSV("@mozilla.org/xre/app-info;1", "nsIXULAppInfo");
+var pre27 = (comparator.compare(appInfo.version, "27.0*") < 0);
 
 // Debuggees
 var dbgGlobalWeakMap = new WeakMap();
@@ -80,6 +87,40 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
     return dbgGlobal;
 };
 
+// temporary version-dependent check, should be removed when minVersion = 27
+DebuggerLib._closureInspectionRequiresDebugger = function()
+{
+    return !pre27;
+};
+
+/**
+ * Runs a callback with a debugger for a global temporarily enabled.
+ *
+ * Currently this throws an exception unless the Script panel is enabled, because
+ * otherwise debug GCs kill us.
+ */
+DebuggerLib.withTemporaryDebugger = function(context, global, callback)
+{
+    // Pre Fx27, cheat and pass a disabled debugger, because closure inspection
+    // works with disabled debuggers, and that's all we need this API for.
+    if (!DebuggerLib._closureInspectionRequiresDebugger())
+        return callback(DebuggerLib.getDebuggeeGlobal(context, global));
+
+    if (!PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+        throw new Error("Script panel must be enabled");
+
+    var dbg = getInactiveDebuggerForContext(context);
+    var dbgGlobal = dbg.addDebuggee(global);
+    try
+    {
+        return callback(dbgGlobal);
+    }
+    finally
+    {
+        dbg.removeDebuggee(dbgGlobal);
+    }
+};
+
 /**
  * Returns true if the frame location refers to the command entered by the user
  * through the command line.
@@ -93,7 +134,7 @@ DebuggerLib.getDebuggeeGlobal = function(context, global)
 DebuggerLib.isFrameLocationEval = function(frameFilename)
 {
     return frameFilename === "debugger eval code" || frameFilename === "self-hosted";
-}
+};
 
 // ********************************************************************************************* //
 // Local helpers
