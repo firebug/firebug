@@ -3,14 +3,13 @@
 define([
     "firebug/firebug",
     "firebug/lib/domplate",
-    "firebug/lib/locale",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/chrome/window",
-    "firebug/editor/editor",
+    "firebug/editor/inlineEditor",
 ],
-function(Firebug, Domplate, Locale, Css, Str, Arr, Win) {
+function(Firebug, Domplate, Css, Str, Arr, Win, InlineEditor) {
 
 "use strict";
 
@@ -24,7 +23,7 @@ const reSelectorChar = /[-_0-9a-zA-Z]/;
 
 function SelectorEditor() {}
 
-SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
+SelectorEditor.prototype = Domplate.domplate(InlineEditor.prototype,
 {
     // 'null' means every document in the context.
     doc: null,
@@ -67,6 +66,9 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
                 return [];
         }
 
+        var preSelector = preExpr.split(",").reverse()[0].trimLeft();
+        var hasCombinator = (preSelector && " >+~".indexOf(preSelector.slice(-1)) !== -1);
+
         var includeTagNames = true;
         var includeIds = true;
         var includeClasses = true;
@@ -92,6 +94,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             includeTagNames = false;
 
         var ret = [];
+        var hasAnyElements = false;
         var traverseDom = function(doc)
         {
             // Traverse the DOM to get the used ids/classes/tag names that
@@ -101,23 +104,12 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             // are not used, and works in other contexts than HTML.)
             // This isn't actually that bad, performance-wise.
             var els = null;
-            var preSelector = preExpr.split(",").reverse()[0].trimLeft();
             if (preSelector)
-            {
-                try
-                {
-                    var hasCombinator = (" >+~".indexOf(preSelector.slice(-1)) !== -1);
-                    els = doc.querySelectorAll(preSelector + (hasCombinator ? "*" : ""));
-                }
-                catch (exc)
-                {
-                    if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("Invalid previous selector part \"" + preSelector + "\"", exc);
-                }
-            }
-            if (!els)
+                els = doc.querySelectorAll(preSelector + (hasCombinator ? "*" : ""));
+            else
                 els = doc.getElementsByTagName("*");
             els = [].slice.call(els);
+            hasAnyElements = hasAnyElements || (els.length > 0);
 
             if (includeTagNames)
             {
@@ -162,7 +154,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             }
         };
 
-        if (includeTagNames || includeIds || includeClasses)
+        try
         {
             if (this.doc)
             {
@@ -176,8 +168,14 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
                 });
             }
         }
+        catch (exc)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("Invalid previous selector part \"" + preSelector + "\"", exc);
+            return [];
+        }
 
-        if (includePseudoClasses)
+        if (includePseudoClasses && hasAnyElements)
         {
             // Add the pseudo-class-looking :before, :after.
             ret.push(
@@ -188,7 +186,7 @@ SelectorEditor.prototype = Domplate.domplate(Firebug.InlineEditor.prototype,
             ret.push.apply(ret, SelectorEditor.stripCompletedParens(Css.pseudoClasses, postExpr));
         }
 
-        if (includePseudoElements)
+        if (includePseudoElements && hasAnyElements)
         {
             ret.push.apply(ret, Css.pseudoElements);
         }

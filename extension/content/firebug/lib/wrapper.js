@@ -108,7 +108,9 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
  */
 Wrapper.cloneIntoContentScope = function(global, obj)
 {
-    var newObj = Cu.createObjectIn(global);
+    if (!obj || typeof obj !== "object")
+        return obj;
+    var newObj = (Array.isArray(obj) ? Cu.createArrayIn(global) : Cu.createObjectIn(global));
     for (var prop in obj)
     {
         var desc = Object.getOwnPropertyDescriptor(obj, prop);
