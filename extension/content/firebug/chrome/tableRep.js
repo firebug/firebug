@@ -102,7 +102,6 @@ var TableRep = domplate(Rep,
         for (var i=0; i<this.columns.length; i++)
         {
             var prop = this.columns[i].property;
-            var label = this.columns[i].label;
 
             // Object property is not set for this column, so display entire
             // row-value in the cell. This can happen in cases where a generic
@@ -113,10 +112,9 @@ var TableRep = domplate(Rep,
             {
                 value = row;
             }
-            else if (prop === "__fb_table_index" || label === "(index)" ||
-                label === Locale.$STR("firebug.reps.table.Index"))
+            else if (prop === "__fb_table_index")
             {
-                value = indexes[0];
+                value = indexes.shift();
             }
             else if (typeof row[prop] == "undefined")
             {
@@ -133,8 +131,6 @@ var TableRep = domplate(Rep,
 
             cols.push(value);
         }
-
-        indexes.shift();
 
         Trace.sysout("tableRep.getColumns", {cols: cols, row: row});
 
@@ -284,7 +280,8 @@ var TableRep = domplate(Rep,
             var obj = object || {};
             obj.data = data;
             obj.columns = columns;
-            obj.indexes = this.getIndexes(data);
+            if (columns[0].property === "__fb_table_index")
+                obj.indexes = this.getIndexes(data);
 
             var row = Firebug.Console.log(obj, context, "table", this, true);
 
@@ -323,11 +320,11 @@ var TableRep = domplate(Rep,
         }
 
         if (showIndex)
-            this.prependIndexColumn(columns, cols, false);
+            this.prependIndexColumn(columns, false);
 
         // Generate header info from the data dynamically.
         if (!columns.length)
-            columns = this.getHeaderColumns(data, cols, showIndex);
+            columns = this.getHeaderColumns(data, showIndex);
 
         Trace.sysout("tableRep.computeColumns; columns:", columns);
 
@@ -351,14 +348,13 @@ var TableRep = domplate(Rep,
         return indexes;
     },
 
-    prependIndexColumn: function(columns, cols, isAlphaValue)
+    prependIndexColumn: function(columns, isAlphaValue)
     {
-        var localizedIndex = Locale.$STR("firebug.reps.table.Index");
-        if (columns.length && !cols)
+        if (columns.length)
         {
             columns.unshift({
                 property: "__fb_table_index",
-                label: localizedIndex,
+                label: Locale.$STR("firebug.reps.table.Index"),
                 alphaValue: isAlphaValue,
             });
         }
@@ -385,7 +381,7 @@ var TableRep = domplate(Rep,
      * Analyze data and return dynamically created list of columns.
      * @param {Object} data
      */
-    getHeaderColumns: function(data, cols, showIndex)
+    getHeaderColumns: function(data, showIndex)
     {
         var firstRow = this.getFirstRow(data);
 
@@ -418,7 +414,7 @@ var TableRep = domplate(Rep,
 
         // Prepend the "(index)" column.
         if (showIndex)
-            this.prependIndexColumn(header, cols, true);
+            this.prependIndexColumn(header, true);
 
         return header;
     },

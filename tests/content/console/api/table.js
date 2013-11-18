@@ -12,7 +12,7 @@ function runTest()
             var doc = win.document;
 
             // #1 table with 3 columns, 2 rows and specified text content.
-            var table1 = {cols: 3, rows: 3, content: "abc123234345"};
+            var table1 = {cols: 4, rows: 3, content: "(index)abc012312342345"};
             var table2 = table1;
 
             var text3 = "(index)firstNamelastNameagedesc\"mother\"\"Susan\"\"Doyle\"32\"mother\"\"father\"\"John\"\"Doyle\"33\"father\"\"daughter\"\"Lily\"\"Doyle\"5undefined\"son\"\"Mike\"\"Doyle\"8undefined";
@@ -24,14 +24,14 @@ function runTest()
             var table4 = {cols: 2, rows: 3, content: text4};
 
             var table5 = table3;
-            var table6 = {cols: 2, rows: 3, content: "12233445"};
-            var table7 = {cols: 2, rows: 3, content: "2nd3rd233445"};
+            var table6 = {cols: 3, rows: 3, content: "(index)12023134245"};
+            var table7 = {cols: 3, rows: 3, content: "(index)2nd3rd023134245"};
 
-            var text8 = "firstNamelastName\"Susan\"\"Doyle\"\"John\"\"Doyle\"\"Lily\"\"Doyle\"\"Mike\"\"Doyle\"";
-            var table8 = {cols: 2, rows: 4, content: text8};
+            var text8 = "(index)firstNamelastName\"mother\"\"Susan\"\"Doyle\"\"father\"\"John\"\"Doyle\"\"daughter\"\"Lily\"\"Doyle\"\"son\"\"Mike\"\"Doyle\"";
+            var table8 = {cols: 3, rows: 4, content: text8};
 
             var text9 = text8;
-            var table9 = {cols: 2, rows: 4, content: text9};
+            var table9 = {cols: 3, rows: 4, content: text9};
 
             var tasks = new FBTest.TaskList();
             tasks.push(executeTest, "testButton1", doc, null, [table1]);
@@ -51,15 +51,6 @@ function runTest()
             var text11 = "Object PropertiesValues011223";
             var table11 = {cols: 2, rows: 3, content: text11};
             tasks.push(executeTest, "testButton11", doc, null, [table11]);
-
-            var resTest12 = doc.getElementById("resTest12");
-            var text12 = resTest12.textContent.replace(/\s/g, "");
-            var table12 = {
-                cols: resTest12.querySelectorAll("th").length,
-                rows: resTest12.rows.length - 1,
-                content: text12
-            };
-            tasks.push(executeTest, "testButton12", doc, null, [table12]);
 
             tasks.run(function() {
                 FBTest.testDone("console.table.DONE");
