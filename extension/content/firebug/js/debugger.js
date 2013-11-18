@@ -2372,7 +2372,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         //Firebug.connection.unregisterTool(this.asTool);
 
-        Firebug.ActivableModule.destroy.apply(this, arguments);
+        Firebug.ActivableModule.shutdown.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -44,6 +44,13 @@ var BrowserCommands =
         this.removeInspectorShortcutAsync(doc);
     },
 
+    shutdown: function(doc)
+    {
+        this.restoreInspectorShortcut(doc);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     overlayCommands: function(doc)
     {
         $command(doc, "cmd_firebug_closeFirebug", "Firebug.closeFirebug(true);");
@@ -104,8 +111,17 @@ var BrowserCommands =
      */
     removeInspectorShortcutAsync: function(doc)
     {
+        // Don't remove the devtools inspector shortcut if default
+        // devtools settings should be used.
         var defaultSettings = Options.get("defaultDevToolsSetting");
         if (defaultSettings)
+            return;
+
+        // Don't remove the devtools inspector shortcut if Firebug's one is customized
+        // and, so different.
+        var inspectorShortcut = Options.get("key.shortcut.toggleInspecting");
+        var inspectorShortcutDefault = Options.getDefault("key.shortcut.toggleInspecting");
+        if (inspectorShortcut != inspectorShortcutDefault)
             return;
 
         if (this.removeInspectorShortcut(doc))
@@ -121,11 +137,26 @@ var BrowserCommands =
 
     removeInspectorShortcut: function(doc)
     {
-        var broadcaster = doc.getElementById("key_inspector");
-        if (broadcaster)
-            broadcaster.parentNode.removeChild(broadcaster);
+        this.keyInspector = doc.getElementById("key_inspector");
+        if (!this.keyInspector)
+            return;
 
-        return broadcaster;
+        this.devtoolsKeyset = this.keyInspector.parentNode;
+        this.devtoolsKeyset.removeChild(this.keyInspector);
+
+        return this.keyInspector;
+    },
+
+    restoreInspectorShortcut: function(doc)
+    {
+        if (!this.keyInspector)
+            return;
+
+        // xxxHonza: I don't know why, but the built-in inspector shortcut must be restored
+        // within the "mainKeyset" group instead of "devtoolsKeyset" otherwise
+        // it doesn't work after Firebug extension is disabled in the Add-on manager.
+        var keyset = $(doc, "mainKeyset");
+        keyset.appendChild(this.keyInspector);
     }
 };
 
