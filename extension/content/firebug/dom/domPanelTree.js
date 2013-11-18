@@ -52,7 +52,7 @@ DomPanelTree.prototype = domplate(BaseTree,
         TR({"class": "memberRow $member.open $member.type\\Row",
             _domObject: "$member",
             _repObject: "$member",
-            $hasChildren: "$member.hasChildren",
+            $hasChildren: "$member|hasChildren",
             $cropped: "$member.value|isCropped",
             role: "presentation",
             level: "$member.level",
@@ -104,6 +104,15 @@ DomPanelTree.prototype = domplate(BaseTree,
     memberIterator: function(object)
     {
         return this.memberProvider.getMembers(object, 0);
+    },
+
+    hasChildren: function(member)
+    {
+        // hasChildren class is set even for cropped strings (there are no real children),
+        // so the tree logic treat them as an expandable tree-items and the user can
+        // 'expand' to see the entire string.
+        var isExpandable = member.hasChildren || this.isCropped(member.value);
+        return isExpandable ? "hasChildren" : "";
     },
 
     isCropped: function(value)
