@@ -91,7 +91,7 @@ CustomizeShortcuts.prototype =
 
         var resetBtns = this.win.document.getElementsByClassName("shortcutResetBtn");
         for (var i=0; i<resetBtns.length; i++)
-            resetBtns[i].addEventListener("command", this.handleResetBtn.bind(this), false);
+            resetBtns[i].addEventListener("command", this.resetShortcut.bind(this), false);
     },
 
     saveChanges: function()
@@ -113,22 +113,27 @@ CustomizeShortcuts.prototype =
     saveShortcut: function(shortcutId, index, array)
     {
         if (shortcutId in updatedShortcuts)
-            branch.setCharPref(shortcutId, updatedShortcuts[shortcutId]);
+        {
+            if (updatedShortcuts[shortcutId] === "reset")
+                branch.clearUserPref(shortcutId);
+            else
+                branch.setCharPref(shortcutId, updatedShortcuts[shortcutId]);
+        }
     },
 
-    handleResetBtn: function(event)
+    resetShortcut: function(event)
     {
         var element = event.target.id.replace("_reset", "");
         if (branch.prefHasUserValue(element))
         {
-            branch.clearUserPref(element);
+            updatedShortcuts[element] = "reset";
             modified = true;
         }
 
         event.target.hidden = true;
         var textbox = this.win.document.getElementById(element + "_shortcut");
         if (textbox)
-            textbox.value = this.getHumanShortcut(element);
+            textbox.value = this.getHumanShortcut(element, true);
     },
 
     getHumanShortcut: function(element, getDefault)
