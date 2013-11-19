@@ -1,30 +1,36 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/domplate",
-    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/search",
-    "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/lib/wrapper",
     "firebug/lib/xpcom",
-    "firebug/console/errorMessageObj",
+    "firebug/chrome/menu",
+    "firebug/chrome/reps",
+    "firebug/chrome/searchBox",
     "firebug/chrome/panelNotification",
     "firebug/chrome/activablePanel",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/breakpoints/breakpointStore",
     "firebug/console/commands/profiler",
-    "firebug/chrome/searchBox",
+    "firebug/console/errorMessageObj",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options,
-    Wrapper, Xpcom, ErrorMessageObj, PanelNotification, ActivablePanel, DebuggerLib,
-    BreakpointStore) {
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Search, Options, Wrapper,
+    Xpcom, Menu, FirebugReps, SearchBox, PanelNotification, ActivablePanel, DebuggerLib,
+    BreakpointStore, Profiler, ErrorMessageObj) {
+
+// ********************************************************************************************* //
+// Resources
+
+// Firebug wiki: https://getfirebug.com/wiki/index.php/Console_Panel
 
 // ********************************************************************************************* //
 // Constants
@@ -61,10 +67,20 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // ConsolePanel Implementation
 
-Firebug.ConsolePanel = function () {};
-
-Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
+/**
+ * @panel This object represents the Console panel.
+ */
+function ConsolePanel()
 {
+}
+
+ConsolePanel.prototype = Obj.extend(ActivablePanel,
+/** @lends ConsolePanel */
+{
+    dispatchName: "ConsolePanel",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     template: domplate(
     {
         logRowTag:
@@ -109,7 +125,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
     initialize: function()
     {
-        ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
+        // Loads persisted content.
+        ActivablePanel.initialize.apply(this, arguments);
 
         this.filterMatchSet = [];
 
@@ -1121,6 +1138,11 @@ Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (!exc)
             return false;
 
+        // If 'break on exceptions' is set don't resume the debugger, the user wants
+        // to break and see where it happens.
+        if (Options.get("breakOnExceptions"))
+            return false;
+
         if (BreakpointStore.isBreakpointDisabled(exc.fileName, exc.lineNumber - 1))
         {
             Trace.sysout("consolePanel.shouldResumeDebugger; Do not break, disabled BP found.");
@@ -1130,7 +1152,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(ActivablePanel,
         if (!context.breakingCause)
         {
             // This is to avoid repeated break-on-error in every frame when an error happens.
-            Trace.sysout("context.breakingCause; No braking cause resume debugger");
+            Trace.sysout("context.breakingCause; No breaking cause, resume debugger");
             return true;
         }
 
@@ -1229,9 +1251,12 @@ function parseFormat(format)
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerPanel(Firebug.ConsolePanel);
+Firebug.registerPanel(ConsolePanel);
 
-return Firebug.ConsolePanel;
+// xxxHonza: backward compatibility
+Firebug.ConsolePanel = ConsolePanel;
+
+return ConsolePanel;
 
 // ********************************************************************************************* //
 });
