@@ -2617,7 +2617,6 @@ Firebug.registerRep(
     FirebugReps.SourceLink,
     FirebugReps.CompilationUnit,
     FirebugReps.NetFile,
-    FirebugReps.XML,
     FirebugReps.Arr,
     FirebugReps.ArrayLikeObject,
     FirebugReps.XPathResult,
