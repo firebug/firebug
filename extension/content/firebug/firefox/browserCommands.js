@@ -141,8 +141,7 @@ var BrowserCommands =
         if (!this.keyInspector)
             return;
 
-        this.devtoolsKeyset = this.keyInspector.parentNode;
-        this.devtoolsKeyset.removeChild(this.keyInspector);
+        this.keyInspector.setAttribute("disabled", "true");
 
         return this.keyInspector;
     },
@@ -152,11 +151,7 @@ var BrowserCommands =
         if (!this.keyInspector)
             return;
 
-        // xxxHonza: I don't know why, but the built-in inspector shortcut must be restored
-        // within the "mainKeyset" group instead of "devtoolsKeyset" otherwise
-        // it doesn't work after Firebug extension is disabled in the Add-on manager.
-        var keyset = $(doc, "mainKeyset");
-        keyset.appendChild(this.keyInspector);
+        this.keyInspector.removeAttribute("disabled");
     }
 };
 
