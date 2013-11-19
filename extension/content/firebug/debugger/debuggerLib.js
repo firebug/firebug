@@ -287,6 +287,51 @@ DebuggerLib.isExecutableLine = function(context, location)
 }
 
 // ********************************************************************************************* //
+// Scopes (+ this + frame result value)
+
+/**
+ * If the debugger is stopped and has reached a return / yield statement or an exception,
+ * return the Frame Result type and value of it. Otherwise, return null.
+ *
+ * The object returned has this form: {type: <type>, value: <frame result value>}
+ *
+ * If the debugger has reached a return statement, <type> is "return".
+ * If an exception has been raised, <type> is "exception".
+ *
+ * @param {object} context
+ *
+ * @return {object}
+ */
+DebuggerLib.getFrameResultObject = function(context)
+{
+    if (!context.stopped || !context.currentPacket || !context.currentPacket.why)
+        return null;
+
+    var frameFinished = context.currentPacket.why.frameFinished;
+    if (!frameFinished)
+        return null;
+
+    var type = null;
+    var value = null;
+
+    if ("return" in frameFinished)
+    {
+        type = "return";
+        value = frameFinished.return;
+    }
+    else if ("throw" in frameFinished)
+    {
+        type = "exception";
+        value = frameFinished.throw;
+    }
+
+    return {
+        type: type,
+        value: value,
+    };
+};
+
+// ********************************************************************************************* //
 // Debugger
 
 DebuggerLib.breakNow = function(context)

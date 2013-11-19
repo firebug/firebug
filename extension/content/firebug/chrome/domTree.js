@@ -239,6 +239,11 @@ DomTree.prototype = domplate(
                 // be created at the next row). So, derived objects should not override
                 // getLabel() method, but rather provide custom provider.
                 var name = this.provider.getLabel(child);
+
+                // Create a member object that represents row-value descriptor. Every row in the
+                // tree is associated (via repObject) with an instance of this meta structure.
+                // You might want to override this method in derived tree objects to provide
+                // custom meta-data.
                 var member = this.createMember(type, name, child, level, hasChildren);
                 member.provider = this.provider;
 

@@ -309,6 +309,10 @@ DomBaseTree.prototype = domplate(BaseTree,
                 if (typeof(value) == "object")
                     return;
 
+                // Read only values can't be edited.
+                if (member.readOnly)
+                    return;
+
                 if (typeof(value) == "boolean")
                     panel.setPropertyValue(row, "" + !value);
                 else

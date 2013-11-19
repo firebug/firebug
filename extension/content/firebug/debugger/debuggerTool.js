@@ -284,6 +284,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         var frame = StackFrame.buildStackFrame(packet.frame, this.context);
         this.context.stoppedFrame = frame;
         this.context.currentFrame = frame;
+        this.context.currentPacket = packet;
         this.context.stopped = true;
         this.context.currentPauseActor = packet.actor;
 
@@ -349,6 +350,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         this.context.stoppedFrame = null;
         this.context.currentFrame = null;
         this.context.currentTrace = null;
+        this.context.currentPacket = null;
 
         this.dispatch("onStopDebugging", [this.context]);
     },

@@ -28,6 +28,11 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
 {
     getValue: function()
     {
+        // If the grip is a raw and standalone value (number, boolean, or string)
+        // return direcly this grip as the value.
+        if (typeof this.grip !== "object")
+            return this.grip;
+
         switch (this.grip.type)
         {
             case "null":
@@ -62,7 +67,7 @@ ObjectClient.prototype = Obj.descend(Grip.prototype,
 
         // If the value isn't an object, but a primitive there are no children.
         if (this.grip.type != "object")
-            result = false;;
+            result = false;
 
         // It could happen that some loaded objects dosn't have any properties
         // (even if at least prototype should be always there). In this case

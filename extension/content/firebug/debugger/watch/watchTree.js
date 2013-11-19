@@ -53,7 +53,7 @@ WatchTree.prototype = domplate(BaseTree,
         ),
 
     tag:
-        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
+        TABLE({"class": "domTable watchTable", cellpadding: 0, cellspacing: 0,
             _domPanel: "$domPanel", onclick: "$onClick", role: "tree"},
             TBODY({role: "presentation"},
                 TAG("$watchNewRow|getWatchNewRowTag"),
@@ -66,7 +66,7 @@ WatchTree.prototype = domplate(BaseTree,
         TR(
             TD({colspan: 2})
         ),
- 
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getWatchNewRowTag: function(show)
@@ -85,6 +85,8 @@ WatchTree.prototype = domplate(BaseTree,
         // Customize CSS style for a memberRow. The type creates additional class name
         // for the row: 'type' + Row. So, the following creates "scopesRow" class that
         // decorates Scope rows.
+        // Always use 'instanceof' when checking specific object properties. Even content
+        // object can appear here.
         if (object instanceof ScopeClient)
         {
             return "scopes";
@@ -97,10 +99,27 @@ WatchTree.prototype = domplate(BaseTree,
         {
             if (object.getType() == "function")
                 return "userFunction";
+            else if (object.isFrameResultValue)
+                return "frameResultValue";
         }
 
         return BaseTree.getType.apply(this, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    // xxxHonza: we might want to move this into {@DomBaseTree} to use the same logic
+    // within the DOM panel.
+    createMember: function(type, name, value, level, hasChildren)
+    {
+        var member = BaseTree.createMember.apply(this, arguments);
+
+        // Disable editing for read only values.
+        if (value instanceof Grip)
+            member.readOnly = value.readOnly;
+
+        return member;
+    }
 });
 
 // ********************************************************************************************* //

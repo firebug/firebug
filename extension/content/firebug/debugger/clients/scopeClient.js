@@ -25,6 +25,9 @@ function ScopeClient(grip, cache)
     this.cache = cache;
     this.properties = null;
     this.error = null;
+
+    // It should never be possible to edit the scope object in the Watch/DOM panels.
+    this.readOnly = true;
 }
 
 ScopeClient.prototype = Obj.descend(ObjectClient.prototype,

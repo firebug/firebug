@@ -3,6 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
+    "firebug/lib/locale",
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
@@ -10,7 +11,7 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider,
+function (FBTrace, Obj, Locale, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider, 
     DebuggerLib, WatchExpression) {
 
 "use strict";
@@ -114,10 +115,18 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
         var cache = stackFrame.context.clientCache;
 
+        // If frame-return value is available display it in the Watch panel too.
+        // (together with the scope chain).
+        var clientObject = this.getFrameResultClientObject(stackFrame, cache);
+        if (clientObject)
+            stackFrame.scopes.push(clientObject);
+
         // Append 'this' as the first scope. This is not a real 'scope',
-        // but useful for debugging.
+        // but useful for debugging. The scope can't be edited in the Watch panel,
+        // so set to read only.
         var thisScope = cache.getObject(stackFrame.nativeFrame["this"]);
         thisScope.name = "this";
+        thisScope.readOnly = true;
         stackFrame.scopes.push(thisScope);
 
         // Now iterate all parent scopes. This represents the chain of scopes
@@ -125,6 +134,8 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         var scope = stackFrame.nativeFrame.environment;
         while (scope)
         {
+            // xxxHonza: All instances of the ScopeClient should be probably
+            // created by {@ClientFactory}.
             stackFrame.scopes.push(new ScopeClient(scope, cache));
             scope = scope.parent;
         }
@@ -134,8 +145,14 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 
     getTopScope: function(stackFrame)
     {
+        // Return the first real scope object.
         var scopes = this.getScopes(stackFrame);
-        return (scopes.length > 1) ? scopes[1] : null;
+        for (var i = 0; i < scopes.length; i++)
+        {
+            var scope = scopes[i];
+            if (scope instanceof ScopeClient)
+                return scope;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -187,6 +204,32 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
         }
 
         return BaseProvider.getLocalObject.apply(this, arguments);
+    },
+
+    /**
+     * Adds the frame result (<exception> or <return value>) if it exists to the scopes
+     * listed in the watch panel (even if it is not a scope).
+     *
+     * @param {object} stackFrame
+     * @param {object} cache
+     */
+    getFrameResultClientObject: function(stackFrame, cache)
+    {
+        var frameResultObj = DebuggerLib.getFrameResultObject(stackFrame.context);
+        if (!frameResultObj || !frameResultObj.type)
+            return;
+
+        // Create and initialize fake 'scope' client object that displays the frame-result value
+        // within other scopes in the Watch panel.
+        var clientObject = cache.getObject(frameResultObj.value);
+        clientObject.name = Locale.$STR("watch.frameResultType." + frameResultObj.type);
+        clientObject.isFrameResultValue = true;
+        clientObject.readOnly = true;
+
+        Trace.sysout("watchProvider.appendFrameResultValueInScope; frameResultScope",
+            clientObject);
+
+        return clientObject;
     },
 });
 
