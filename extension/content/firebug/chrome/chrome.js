@@ -2,30 +2,34 @@
 
 /**
  * The 'context' in this file is always 'Firebug.currentContext'
+ *
+ * xxxHonza: firebug/firebug should be also included in this file, but as soon as
+ * the cycle dependency problem (chrome included in firebug) is solved.
  */
 define([
     "firebug/lib/object",
-    "firebug/chrome/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/system",
-    "firebug/chrome/menu",
-    "firebug/chrome/toolbar",
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/chrome/window",
-    "firebug/lib/options"
+    "firebug/chrome/firefox",
+    "firebug/chrome/menu",
+    "firebug/chrome/toolbar",
 ],
-function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
-    Events, Win, Options) {
+function (Obj, Dom, Css, System, Url, Locale, String, Events, Options, Win, Firefox,
+    Menu, Toolbar) {
 
 // ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
 const nsIWebNavigation = Ci.nsIWebNavigation;
 
 const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
@@ -1155,7 +1159,7 @@ var FirebugChrome =
                 pos = this.framePosition || 'bottom';
         }
 
-        Firebug.Options.set("framePosition", pos);
+        Options.set("framePosition", pos);
         return Firebug.framePosition = pos;
     },
 
@@ -1318,7 +1322,7 @@ var FirebugChrome =
         if (!panelBar1)
             return;
 
-        var zoom = Firebug.Options.getZoomByTextSize(value);
+        var zoom = Options.getZoomByTextSize(value);
         var zoomString = (zoom * 100) + "%";
 
         // scale the aspect relative to 11pt Lucida Grande
@@ -1459,7 +1463,7 @@ var FirebugChrome =
                 var option = child.getAttribute("option");
                 if (option)
                 {
-                    var checked = Firebug.Options.get(option);
+                    var checked = Options.get(option);
                     child.setAttribute("checked", checked);
                 }
             }
@@ -1471,7 +1475,7 @@ var FirebugChrome =
         var option = menuitem.getAttribute("option");
         var checked = menuitem.getAttribute("checked") == "true";
 
-        Firebug.Options.set(option, checked);
+        Options.set(option, checked);
     },
 
     onContextShowing: function(event)
@@ -2020,7 +2024,7 @@ function onMouseScroll(event)
     if (Events.isControlAlt(event))
     {
         Events.cancelEvent(event);
-        Firebug.Options.changeTextSize(-event.detail);
+        Options.changeTextSize(-event.detail);
     }
 }
 
@@ -2111,7 +2115,7 @@ function onPanelMouseDown(event)
     else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
         Events.cancelEvent(event);
-        Firebug.Options.setTextSize(0);
+        Options.setTextSize(0);
     }
     else if (Events.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {

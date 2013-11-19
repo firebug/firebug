@@ -12,13 +12,14 @@ define([
     "firebug/lib/http",
     "firebug/lib/string",
     "firebug/lib/json",
+    "firebug/lib/options",
     "firebug/lib/array",
     "firebug/lib/system",
     "firebug/chrome/module",
     "firebug/chrome/domTree",
     "firebug/dom/domMemberProvider",
 ],
-function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
+function(Firebug, FBTrace, Obj, Domplate, Locale, Events, Css, Dom, Http, Str, Json, Options,
     Arr, System, Module, DomTree, DOMMemberProvider) {
 
 "use strict";
@@ -207,7 +208,7 @@ JSONViewerModel.Preview = domplate(
         Events.cancelEvent(event);
 
         Css.toggleClass(sortLink, "sorted");
-        Firebug.Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
+        Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
 
         var preview = Dom.getAncestorByClass(sortLink, "jsonPreview");
         var body = Dom.getAncestorByClass(sortLink, "netInfoJSONText");

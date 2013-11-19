@@ -3,33 +3,35 @@
 /*global FBTrace:true, Components:true, define:true, KeyEvent:true */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/chrome/reps",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/dom",
-    "firebug/chrome/firefox",
-    "firebug/chrome/window",
     "firebug/lib/system",
     "firebug/lib/string",
     "firebug/lib/persist",
+    "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/chrome/reps",
+    "firebug/chrome/firefox",
+    "firebug/chrome/window",
     "firebug/debugger/script/sourceLink",
+    "firebug/debugger/debuggerLib",
     "firebug/console/console",
     "firebug/console/commandLineExposed",
     "firebug/console/closureInspector",
     "firebug/console/commandLineAPI",
-    "firebug/debugger/debuggerLib",
     "firebug/console/autoCompleter",
     "firebug/console/commandHistory",
     "firebug/console/commands/commandLineHelp",
     "firebug/console/commands/commandLineInclude",
 ],
-function(Module, Obj, Firebug, FirebugReps, Locale, Events, Url, Dom, Firefox, Win, System, Str,
-    Persist, SourceLink, Console, CommandLineExposed, ClosureInspector, CommandLineAPI,
-    DebuggerLib) {
+function(Firebug, FBTrace, Obj, Locale, Events, Url, Dom, System, Str, Persist, Options,
+    Module, FirebugReps, Firefox, Win, SourceLink, DebuggerLib, Console, CommandLineExposed,
+    ClosureInspector, CommandLineAPI) {
 
 "use strict";
 
@@ -437,7 +439,7 @@ var CommandLine = Obj.extend(Module,
     {
         var showCommandEditor = !!forceCommandEditor || !Firebug.commandEditor;
         if (showCommandEditor != Firebug.commandEditor)
-            Firebug.Options.set("commandEditor", showCommandEditor);
+            Options.set("commandEditor", showCommandEditor);
     },
 
     checkOverflow: function(context)
@@ -450,7 +452,7 @@ var CommandLine = Obj.extend(Module,
         {
             setTimeout(Obj.bindFixed(function()
             {
-                Firebug.Options.set("commandEditor", true);
+                Options.set("commandEditor", true);
 
                 // Switch to the Console panel, where the multiline command line
                 // is actually displayed. This should be improved see issue 5146
@@ -488,7 +490,7 @@ var CommandLine = Obj.extend(Module,
         var completionBox = this.getCompletionBox();
 
         var options = {
-            showCompletionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+            showCompletionPopup: Options.get("commandLineShowCompleterPopup"),
             completionPopup: Firebug.chrome.$("fbCommandLineCompletionList"),
             popupMeasurer: Firebug.chrome.$("fbCommandLineMeasurer"),
             tabWarnings: true,

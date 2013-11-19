@@ -14,8 +14,6 @@
 define([
     "firebug/lib/lib",
     "firebug/lib/object",
-    "firebug/chrome/firefox",
-    "firebug/chrome/chrome",
     "firebug/lib/domplate",
     "firebug/lib/options",
     "firebug/lib/locale",
@@ -27,12 +25,14 @@ define([
     "firebug/trace/traceListener",
 
     // xxxHonza: the following dependencies should be also removed.
+    "firebug/chrome/firefox",
+    "firebug/chrome/chrome",
     "firebug/debugger/clients/clientFactory",
     "firebug/debugger/clients/grip",
     "firebug/console/commandLineExposed",
 ],
-function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, Css, Arr,
-    Http, TraceListener, ClientFactory, Grip, CommandLineExposed) {
+function(FBL, Obj, Domplate, Options, Locale, Events, Wrapper, Css, Arr, Http, TraceListener,
+    Firefox, ChromeFactory, ClientFactory, Grip, CommandLineExposed) {
 
 // ********************************************************************************************* //
 // Constants
@@ -155,7 +155,7 @@ window.Firebug =
 
         // Firebug is getting option-updates from the connection so,
         // do not register it again here (see issue 6035)
-        //Firebug.Options.addListener(this);
+        //Options.addListener(this);
 
         this.isInitialized = true;
 
@@ -459,7 +459,7 @@ window.Firebug =
      */
     registerPreference: function(name, value)
     {
-        Firebug.Options.register(name, value);
+        Options.register(name, value);
     },
 
     registerModule: function()
@@ -733,13 +733,13 @@ window.Firebug =
     getPref: function()
     {
         // TODO deprecated
-        return Options.getPref.apply(Firebug.Options, arguments);
+        return Options.getPref.apply(Options, arguments);
     },
 
     setPref: function()
     {
         // TODO deprecated
-        return Options.setPref.apply(Firebug.Options, arguments);
+        return Options.setPref.apply(Options, arguments);
     },
 
     clearPref: function()
@@ -1565,6 +1565,7 @@ if (preFirebugKeys)
 // ********************************************************************************************* //
 // Registration
 
+// xxxHonza: backward compatibility
 Firebug.Firefox = Firefox;
 Firebug.ChromeFactory = ChromeFactory;
 Firebug.Options = Options;

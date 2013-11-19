@@ -1,20 +1,25 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/chrome/module",
-    "firebug/lib/object",
     "firebug/firebug",
-    "firebug/console/commandLine",
+    "firebug/lib/trace",
+    "firebug/lib/object",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/lib/events",
+    "firebug/lib/options",
+    "firebug/chrome/module",
+    "firebug/console/commandLine",
 ],
-function(Module, Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
+function(Firebug, FBTrace, Obj, Css, Dom, Str, Xml, Events, Options, Module, CommandLine) {
 
 // ************************************************************************************************
 // Constants
+
+var Trace = FBTrace.to("DBG_COMMANDLINE");
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ************************************************************************************************
 // Implementation
@@ -22,10 +27,14 @@ function(Module, Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Popup = Obj.extend(Module,
+var CommandLinePopup = Obj.extend(Module,
 {
     dispatchName: "commandLinePopup",
+
     lastFocused : null,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Initialization
 
     initializeUI: function()
     {
@@ -44,19 +53,20 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
         Events.removeEventListener(contentBox, "keypress", this.onKeyPress, false);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     initContext: function(context)
     {
         Module.showContext.apply(this, arguments);
 
-        var show = Firebug.Options.get("alwaysShowCommandLine");
+        var show = Options.get("alwaysShowCommandLine");
         if (show && !this.isVisible())
             this.toggle(context);
     },
 
     showPanel: function(browser, panel)
     {
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Popup.showPanel; " + (panel?panel.name:"null panel"));
+        Trace.sysout("commandLinePopup.showPanel; " + (panel ? panel.name : "null panel"));
 
         var chrome = Firebug.chrome;
         var visible = this.isVisible();
@@ -77,6 +87,7 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
             Dom.collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
             Dom.collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
             Dom.collapse(chrome.$("fbCommandBox"), true);
+
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbCommandEditorBox");
         }
 
@@ -122,12 +133,11 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
         if (panel && panel.name == "console")
             return;
 
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Popup.toggle;");
+        Trace.sysout("commandLinePopup.toggle;");
 
         var newState = !this.isVisible();
         Firebug.chrome.setGlobalAttribute("cmd_firebug_toggleCommandPopup", "checked", newState);
-        Firebug.Options.set("alwaysShowCommandLine", newState);
+        Options.set("alwaysShowCommandLine", newState);
 
         this.updateVisibility(newState);
 
@@ -169,8 +179,8 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
         // The command line can't be multiline in other panels.
         Dom.collapse(toggle, visible);
 
-        var commandLine = Firebug.CommandLine.getSingleRowCommandLine();
-        var commandEditor = Firebug.CommandLine.getCommandEditor();
+        var commandLine = CommandLine.getSingleRowCommandLine();
+        var commandEditor = CommandLine.getCommandEditor();
 
         // Focus the command line if it has been just displayed.
         if (visible)
@@ -204,8 +214,7 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
     {
         if (!context)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("commandLinePopup.reattach; ERROR No context");
+            TraceError.sysout("commandLinePopup.reattach; ERROR No context");
             return;
         }
 
@@ -218,7 +227,7 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
             panel.reattach(doc);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Event Listeners
 
     onKeyPress: function(event)
@@ -235,12 +244,15 @@ Firebug.CommandLine.Popup = Obj.extend(Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.CommandLine.Popup);
+Firebug.registerModule(CommandLinePopup);
 
-return Firebug.CommandLine.Popup;
+// xxxHonza: backward compatibility
+CommandLine.Popup = CommandLinePopup
+
+return CommandLinePopup;
 
 // ************************************************************************************************
 });

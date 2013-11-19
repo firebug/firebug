@@ -3,28 +3,30 @@
 /*global FBTrace:true, Components:true, define:true */
 
 define([
+    "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
-    "firebug/firebug",
+    "firebug/lib/options",
     "firebug/debugger/debuggerHalter",
     "firebug/debugger/debuggerLib",
     "firebug/debugger/clients/clientCache",
     "firebug/remoting/debuggerClientModule",
 ],
-function(FBTrace, Obj, Locale, Firebug, DebuggerHalter, DebuggerLib, ClientCache,
+function(Firebug, FBTrace, Obj, Locale, Options, DebuggerHalter, DebuggerLib, ClientCache,
     DebuggerClientModule) {
 
 // ********************************************************************************************* //
 // Constants
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 var Trace = FBTrace.to("DBG_DEBUGGER");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
+// Implementation
 
 /**
  * @module
@@ -35,7 +37,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     dispatchName: "Debugger",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Module
+    // Initialization
 
     initialize: function()
     {
@@ -436,14 +438,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
     {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("onScriptFilterMenuTooltipShowing not implemented");
+        Trace.sysout("onScriptFilterMenuTooltipShowing not implemented");
     },
 
     onScriptFilterMenuCommand: function(event, context)
     {
         var menu = event.target;
-        Firebug.Options.set("scriptsFilter", menu.value);
+        Options.set("scriptsFilter", menu.value);
         Firebug.Debugger.filterMenuUpdate();
     },
 
@@ -496,15 +497,15 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     filterMenuUpdate: function()
     {
-        var value = Firebug.Options.get("scriptsFilter");
+        var value = Options.get("scriptsFilter");
+
         this.filterButton.value = value;
         this.filterButton.label = this.menuShortLabel[value];
         this.filterButton.removeAttribute("disabled");
         this.filterButton.setAttribute("value", value);
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("debugger.filterMenuUpdate value: "+value+" label:"+
-                this.filterButton.label+'\n');
+        Trace.sysout("debugger.filterMenuUpdate value: " + value + " label: " +
+            this.filterButton.label);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

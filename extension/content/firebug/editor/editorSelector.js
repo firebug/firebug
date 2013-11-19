@@ -3,21 +3,24 @@
 define([
     "firebug/firebug",
     "firebug/lib/events",
+    "firebug/lib/options",
 ],
-function(Firebug, Events) {
+function(Firebug, Events, Options) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing
 
 Firebug.EditorSelector =
 {
+    editors: {},
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     // Override for each module
     getEditorOptionKey: function()
     {
         return "cssEditMode";
     },
-
-    editors: {},
 
     registerEditor: function(name, editor)
     {
@@ -48,13 +51,13 @@ Firebug.EditorSelector =
     setCurrentEditorName: function(name)
     {
         this.currentEditorName = name;
-        Firebug.Options.set(this.getEditorOptionKey(), name);
+        Options.set(this.getEditorOptionKey(), name);
     },
 
     getCurrentEditorName: function()
     {
         if (!this.currentEditorName)
-            this.currentEditorName = Firebug.Options.get(this.getEditorOptionKey());
+            this.currentEditorName = Options.get(this.getEditorOptionKey());
 
         return this.currentEditorName;
     },
