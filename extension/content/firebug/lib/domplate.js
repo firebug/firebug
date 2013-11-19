@@ -240,10 +240,7 @@ DomplateTag.prototype =
             return ' ' + name + '="' + __escape__(value) + '"';
         }
 
-        function isArray(it)
-        {
-            return Object.prototype.toString.call(it) === "[object Array]";
-        }
+        var isArray = Array.isArray;
 
         function __loop__(iter, outputs, fn)
         {

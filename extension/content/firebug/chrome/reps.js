@@ -182,34 +182,6 @@ FirebugReps.String = domplate(Rep,
 
 // ********************************************************************************************* //
 
-FirebugReps.XML = domplate(Rep,
-{
-    tag: OBJECTBOX("$object|asString"),
-
-    shortTag: OBJECTBOX("$object|asShortString"),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    className: "xml",
-
-    supportsObject: function(object, type)
-    {
-        return type == "xml";
-    },
-
-    asString: function(object)
-    {
-        return object.toXMLString();
-    },
-
-    asShortString: function(object)
-    {
-        return cropMultipleLines(this.asString(object));
-    },
-});
-
-// ********************************************************************************************* //
-
 FirebugReps.Text = domplate(Rep,
 {
     tag: OBJECTBOX("$object"),
@@ -777,18 +749,9 @@ FirebugReps.Arr = domplate(FirebugReps.ArrBase,
         Firebug.chrome.select(obj);
     },
 
-    // http://code.google.com/p/fbug/issues/detail?id=874
     isArray: function(obj)
     {
-        try
-        {
-            if (Arr.isArray(obj))
-                return true;
-            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
-                return true;
-        }
-        catch (exc) {}
-        return false;
+        return Array.isArray(obj) || Object.prototype.toString.call(obj) === "[object Arguments]";
     }
 });
 
@@ -853,39 +816,6 @@ FirebugReps.ArrayLikeObject = domplate(FirebugReps.ArrBase,
 
 // ********************************************************************************************* //
 
-FirebugReps.Property = domplate(Rep,
-{
-    supportsObject: function(object, type)
-    {
-        return object instanceof FirebugReps.PropertyObj;
-    },
-
-    getRealObject: function(prop, context)
-    {
-        return prop.object[prop.name];
-    },
-
-    getTitle: function(prop, context)
-    {
-        return prop.name;
-    }
-});
-
-// ********************************************************************************************* //
-
-FirebugReps.PropertyObj = function(object, name)
-{
-    this.object = object;
-    this.name = name;
-
-    this.getObject = function()
-    {
-        return object[name];
-    };
-};
-
-// ********************************************************************************************* //
-
 FirebugReps.NetFile = domplate(FirebugReps.Obj,
 {
     supportsObject: function(object, type)
@@ -907,24 +837,6 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
         return NetUtils.getRealObject(file, context);
     }
 });
-
-// ********************************************************************************************* //
-
-function instanceOf(object, Klass)
-{
-    while (object != null)
-    {
-        if (object == Klass.prototype)
-           return true;
-
-        if (typeof(object) === "xml")
-            return (Klass.prototype === Xml.prototype);
-
-        object = object.__proto__;
-    }
-
-    return false;
-}
 
 // ********************************************************************************************* //
 
@@ -1566,15 +1478,7 @@ FirebugReps.RegExp = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        try
-        {
-            return type == "object" && Object.prototype.toString.call(object) === "[object RegExp]";
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.RegExp.supportsObject; EXCEPTION " + err, err);
-        }
+        return Object.prototype.toString.call(object) === "[object RegExp]";
     },
 
     getSource: function(object)
@@ -1605,7 +1509,7 @@ FirebugReps.Document = domplate(Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof window.Document || object instanceof window.XMLDocument;
+        return object instanceof window.Document;
     },
 
     browseObject: function(doc, context)

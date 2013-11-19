@@ -314,7 +314,7 @@ DOMMemberProvider.prototype =
 
         // Special case for "arguments", which is not enumerable by for...in statement
         // and so, Obj.hasProperties always returns false.
-        hasChildren = hasChildren || (!!value && isArguments(value));
+        hasChildren = hasChildren || (!!value && isArguments(value) && value.length > 0);
 
         if (valueType === "function" && !hasChildren)
         {
@@ -493,15 +493,7 @@ DOMMemberProvider.prototype =
 
 function isArguments(obj)
 {
-    try
-    {
-        return isFinite(obj.length) && obj.length > 0 && typeof obj.callee === "function";
-    }
-    catch (exc)
-    {
-    }
-
-    return false;
+    return Object.prototype.toString.call(obj) === "[object Arguments]";
 }
 
 function isClassFunction(fn)

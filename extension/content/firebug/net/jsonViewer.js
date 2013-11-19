@@ -265,7 +265,7 @@ JSONProvider.prototype = Obj.extend(new DOMMemberProvider(),
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
 
         // Sort only if it isn't an array (issue 4382).
-        if (Firebug.sortJsonPreview && !Arr.isArray(object, this.context.window))
+        if (Firebug.sortJsonPreview && !Array.isArray(object, this.context.window))
             members.sort(sortName);
 
         return members;
