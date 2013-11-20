@@ -60,7 +60,7 @@ DomPanelTree.prototype = domplate(BaseTree,
             breakpoint: "$member.breakpoint",
             disabledBreakpoint: "$member.disabledBreakpoint"},
             TD({"class": "memberHeaderCell"},
-                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
+                DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickBreakpointColumn"},
                     "&nbsp;"
                )
             ),
@@ -106,28 +106,10 @@ DomPanelTree.prototype = domplate(BaseTree,
         return this.memberProvider.getMembers(object, 0);
     },
 
-    hasChildren: function(member)
-    {
-        // hasChildren class is set even for cropped strings (there are no real children),
-        // so the tree logic treat them as an expandable tree-items and the user can
-        // 'expand' to see the entire string.
-        var isExpandable = member.hasChildren || this.isCropped(member.value);
-        return isExpandable ? "hasChildren" : "";
-    },
-
-    isCropped: function(value)
-    {
-        return typeof value == "string" && value.length > Options.get("stringCropLength");
-    },
-
-    getMemberNameTooltip: function(member)
-    {
-        return member.title || member.scopeNameTooltip;
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoints
 
-    onClickRowHeader: function(event)
+    onClickBreakpointColumn: function(event)
     {
         Events.cancelEvent(event);
 

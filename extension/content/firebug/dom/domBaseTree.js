@@ -9,17 +9,19 @@ define([
     "firebug/lib/string",
     "firebug/lib/promise",
     "firebug/lib/events",
+    "firebug/lib/options",
     "firebug/chrome/domTree",
     "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, DomTree, ToggleBranch) {
+function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, Options, DomTree,
+    ToggleBranch) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
 
-var {domplate} = Domplate;
+var {domplate, TR, TD, DIV, SPAN, TAG} = Domplate;
 
 var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
@@ -47,6 +49,7 @@ function DomBaseTree()
  * 2) Presentation state persistence (expanded tree nodes).
  * 3) Asynchronous population (so, the UI doesn't freeze when an item is expanded and
  * there is a lot of children).
+ * 4) Read only flag (has custom styling).
  *
  * xxxHonza TODOs:
  * - expandRowAsync: it should be possible to cancel the population process, e.g. if the user
@@ -63,6 +66,68 @@ var BaseTree = DomTree.prototype;
 DomBaseTree.prototype = domplate(BaseTree,
 /** @lends DomBaseTree */
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    domRowTag:
+        TR({"class": "memberRow $member.open $member.type\\Row",
+            _domObject: "$member",
+            _repObject: "$member",
+            $hasChildren: "$member|hasChildren",
+            $cropped: "$member|getValue|isCropped",
+            role: "presentation",
+            level: "$member.level"},
+            TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
+                role: "presentation"},
+                DIV({"class": "memberLabel $member.type\\Label", title: "$member|getTitle"},
+                    SPAN({"class": "memberLabelPrefix"}, "$member|getPrefix"),
+                    SPAN({title: "$member|getMemberNameTooltip"}, "$member|getLabel")
+                )
+            ),
+            TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
+                role: "presentation"},
+                TAG("$member|getValueTag", {object: "$member|getValue"})
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate Accessors
+
+    getRowTag: function(member)
+    {
+        return this.domRowTag;
+    },
+
+    hasChildren: function(member)
+    {
+        // hasChildren class is set even for cropped strings (there are no real children),
+        // so the tree logic treat them as an expandable tree-items and the user can
+        // 'expand' to see the entire string.
+        var isExpandable = member.hasChildren || this.isCropped(member.value);
+        return isExpandable ? "hasChildren" : "";
+    },
+
+    isCropped: function(value)
+    {
+        var cropLength = Options.get("stringCropLength");
+        return typeof(value) == "string" && value.length > cropLength;
+    },
+
+    getMemberNameTooltip: function(member)
+    {
+        return member.title || member.scopeNameTooltip;
+    },
+
+    getPrefix: function(member)
+    {
+        return member.prefix || "";
+    },
+
+    getTitle: function(member)
+    {
+        return member.title || "";
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Persistence
 
@@ -324,7 +389,7 @@ DomBaseTree.prototype = domplate(BaseTree,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Expanding/Collapsing
+    // Asynchronous Expanding/Collapsing
 
     toggleRow: function(row, forceOpen)
     {
@@ -480,6 +545,7 @@ DomBaseTree.prototype = domplate(BaseTree,
         var tbody = row.parentNode;
         var timeout = row.insertTimeout ? row.insertTimeout : 0;
 
+        // xxxHonza: what if the row is expanded again before the timeouts are done?
         var self = this;
         setTimeout(function()
         {
