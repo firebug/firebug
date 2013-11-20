@@ -14,6 +14,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
+    "firebug/lib/locale",
     "firebug/console/closureInspector",
     "firebug/dom/toggleBranch",
     "firebug/lib/system",
@@ -22,14 +23,16 @@ define([
     "firebug/dom/domReps",
     "firebug/chrome/panel",
     "firebug/console/commandLine",
+    "firebug/chrome/panelActivation",
+    "firebug/debugger/debuggerLib",
     "firebug/editor/editor",
     "firebug/chrome/searchBox",
     "firebug/dom/domModule",
     "firebug/console/autoCompleter",
 ],
 function(Firebug, FBTrace, Obj, Arr, Events, Wrapper, SourceLink, StackFrame,
-    Dom, Css, Str, ClosureInspector, ToggleBranch, System, Menu,
-    DOMEditor, DOMReps, Panel, CommandLine, Editor,
+    Dom, Css, Str, Locale, ClosureInspector, ToggleBranch, System, Menu,
+    DOMEditor, DOMReps, Panel, CommandLine, PanelActivation, DebuggerLib, Editor,
     SearchBox, DOMModule, JSAutoCompleter) {
 
 "use strict";
@@ -131,6 +134,20 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
             this.rebuild(true);
     },
 
+    getShowClosuresMenuItem: function()
+    {
+        var requireScriptPanel = DebuggerLib._closureInspectionRequiresDebugger();
+        var label = Locale.$STR("ShowClosures");
+        var tooltip = Locale.$STR("dom.option.tip.Show_Closures2");
+        if (requireScriptPanel)
+            tooltip = Locale.$STRF("script.Script_panel_must_be_enabled", [tooltip]);
+        var menuItem = Menu.optionMenu(label, "showClosures", tooltip);
+        menuItem.nol10n = true;
+        if (requireScriptPanel && !PanelActivation.isPanelEnabled(Firebug.getPanelType("script")))
+            menuItem.disabled = true;
+        return menuItem;
+    },
+
     getOptionsMenuItems: function()
     {
         return [
@@ -146,8 +163,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
                 "dom.option.tip.Show_DOM_Constants"),
             Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
                 "ShowInlineEventHandlersTooltip"),
-            Menu.optionMenu("ShowClosures", "showClosures",
-                "dom.option.tip.Show_Closures"),
+            this.getShowClosuresMenuItem(),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties",
                 "ShowOwnPropertiesTooltip"),

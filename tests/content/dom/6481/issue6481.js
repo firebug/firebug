@@ -3,10 +3,12 @@ function runTest()
     FBTest.sysout("issue6481.START");
     FBTest.setPref("showClosures", true);
 
-    FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function(win)
+    FBTest.openNewTab(basePath + "dom/6481/issue6481.html", function()
     {
         FBTest.openFirebug();
-        FBTest.selectPanel("dom");
+        FBTest.enableScriptPanel(function(win)
+        {
+            FBTest.selectPanel("dom");
 
             var panel = FBTest.getPanel("dom");
 
@@ -34,7 +36,7 @@ function runTest()
                                 FBTest.progress("Property _unused is visible");
 
                                 var value = row.querySelector(".memberValueCell .objectBox-optimizedAway");
-                                FBTest.compare("(optimized away)", value.textContent,
+                                FBTest.compare(FW.FBL.$STR("firebug.reps.optimizedAway"), value.textContent,
                                     "The value must match");
 
                                 FBTest.testDone("issue6481.DONE");
@@ -53,5 +55,6 @@ function runTest()
                 // Click to expand the 'someone' property
                 FBTest.click(FW.FBL.getElementByClass(row, "memberLabel", "userLabel"));
             }, true);
+        });
     });
 }
