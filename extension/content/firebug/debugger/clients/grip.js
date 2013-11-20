@@ -6,6 +6,11 @@ define([
 function (FBTrace) {
 
 // ********************************************************************************************* //
+// Resources
+
+// https://wiki.mozilla.org/Remote_Debugging_Protocol#Grips
+
+// ********************************************************************************************* //
 // Object Grip
 
 function Grip(grip)
