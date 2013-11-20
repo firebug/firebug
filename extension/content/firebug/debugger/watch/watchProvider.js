@@ -245,7 +245,7 @@ WatchProvider.prototype = Obj.extend(BaseProvider,
 WatchProvider.DefaultWatchPanelInput = function(panel)
 /** @lends WatchProvider.DefaultWatchPanelInput */
 {
-    this.panel = panel
+    this.panel = panel;
 }
 
 WatchProvider.DefaultWatchPanelInput.prototype.getChildren = function()
