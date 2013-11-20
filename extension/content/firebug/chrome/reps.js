@@ -2869,6 +2869,7 @@ FirebugReps.ClosureScope = domplate(Rep,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "scope",
+    inspectable: false,
 
     getTitle: function(object)
     {
