@@ -561,17 +561,20 @@ var ErrorMessageUpdater = Obj.extend(Module,
         if (!panel)
             return;
 
-        var rows = panel.panelNode.querySelectorAll(".logRow-errorMessage");
-        for (var i=0; i<rows.length; i++)
+        // Look directly for messages not for 'logRow-errorMessage'. In case an exception
+        // is logged using console.log() the row is using standard 'logRow-log' class.
+        // But in all cases the 'objectBox-errorMessage' class (i.e. the same rep) should be
+        // used inside the log.
+        var messages = panel.panelNode.querySelectorAll(".objectBox-errorMessage");
+        for (var i=0; i<messages.length; i++)
         {
-            var row = rows[i];
-            var log = row.getElementsByClassName("objectBox-errorMessage")[0];
-            var errorObject = Firebug.getRepObject(log);
+            var message = messages[i];
+            var errorObject = Firebug.getRepObject(message);
 
             if (sourceFile.href == errorObject.href)
             {
                 var rep = Firebug.getRep(errorObject, context);
-                var content = row.getElementsByClassName("logContent")[0];
+                var content = Dom.getAncestorByClass(message, "logContent");
 
                 // Render content again. The group counter is preserved since it's
                 // located outside of the replaced area.
