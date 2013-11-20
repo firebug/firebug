@@ -48,8 +48,10 @@ DomTree.prototype = domplate(
 
     rowTag:
         TR({"class": "memberRow $member.open $member.type\\Row",
-            $hasChildren: "$member|hasChildren", _domObject: "$member",
-            _repObject: "$member", level: "$member.level"},
+            _domObject: "$member",
+            _repObject: "$member",
+            $hasChildren: "$member|hasChildren",
+            level: "$member.level"},
             TD({"class": "memberLabelCell", style: "padding-left: $member|getIndent\\px"},
                 SPAN({"class": "memberLabel $member.type\\Label"}, "$member|getLabel")
             ),
