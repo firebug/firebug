@@ -64,7 +64,7 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
         // Since ThreadClient.pauseOnException is calling interrupt+resume if the thread
         // is not paused.
         if (!reload)
-            this.breakOnExceptions(Options.get("breakOnExceptions"));
+            this.updateBreakOnErrors();
     },
 
     detach: function()
@@ -548,15 +548,19 @@ DebuggerTool.prototype = Obj.extend(new EventSource(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break On Exceptions
 
-    breakOnExceptions: function(pause)
+    updateBreakOnErrors: function()
     {
+        // Either 'breakOnExceptions' option can be set (from within the Script panel options
+        // menu) or 'break on next' (BON) can be activated (on the Console panel).
+        var pause = Options.get("breakOnExceptions") || this.context.breakOnErrors;
         var ignore = Options.get("ignoreCaughtExceptions");
 
-        Trace.sysout("debuggerTool.breakOnExceptions; " + pause + ", " + ignore);
+        Trace.sysout("debuggerTool.updateBreakOnErrors; break on errors: " + pause +
+            ", ignore: " + ignore);
 
         return this.context.activeThread.pauseOnExceptions(pause, ignore, function(response)
         {
-            Trace.sysout("debuggerTool.breakOnExceptions; response received: ", response);
+            Trace.sysout("debuggerTool.updateBreakOnErrors; response received:", response);
         });
     },
 });

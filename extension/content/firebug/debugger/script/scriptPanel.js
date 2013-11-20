@@ -879,8 +879,8 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
     updateOption: function(name, value)
     {
-        if (name == "breakOnExceptions")
-            this.tool.breakOnExceptions(value);
+        if (name == "breakOnExceptions" || name == "ignoreCaughtExceptions")
+            this.tool.updateBreakOnErrors();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

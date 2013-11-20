@@ -1175,7 +1175,7 @@ ConsolePanel.prototype = Obj.extend(ActivablePanel,
 
         // Set the flag on the server.
         var tool = this.context.getTool("debugger");
-        tool.breakOnExceptions(breaking);
+        tool.updateBreakOnErrors();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
