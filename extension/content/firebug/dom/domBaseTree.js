@@ -125,7 +125,9 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     getTitle: function(member)
     {
-        return member.title || "";
+        // If the title is empty return undefined, so the 'title' attribute
+        // is not even created.
+        return member.title || undefined;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
