@@ -98,9 +98,17 @@ WatchTree.prototype = domplate(BaseTree,
         else if (object instanceof Grip)
         {
             if (object.getType() == "function")
+            {
                 return "userFunction";
+            }
             else if (object.isFrameResultValue)
-                return "frameResultValue";
+            {
+                // Return a different class when the return value has already been emphasized.
+                if (!object.alreadyEmphasized)
+                    return "frameResultValue";
+                else
+                    return "frameResultValueEmphasized";
+            }
         }
 
         return BaseTree.getType.apply(this, arguments);

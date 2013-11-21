@@ -250,6 +250,19 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         var scope = this.tree.provider.getTopScope(frame);
         this.tree.expandObject(scope);
 
+        // Each time a watch expression is added, the rows representing the watches are built again.
+        // This makes the return value animation (emphasis), that should be only run the first time
+        // the value is displayed, be played a second time after a watch is added (see Issue 6989).
+        // To avoid that, put a flag to tell that the return value has already been emphasized.
+        var frameResultNode = this.panelNode.querySelector(".frameResultValueRow");
+        if (frameResultNode)
+        {
+            var frameResultObject = Firebug.getRepObject(frameResultNode);
+            var frameResultValue = frameResultObject.value;
+            // Put the flag on the ClientObject (which is cached) representing the return value.
+            frameResultValue.alreadyEmphasized = true;
+        }
+
         // Asynchronously evaluate all user-expressions, but make sure it isn't
         // already in-progress (to avoid infinite recursion).
         // xxxHonza: disable for now. Evaluation is done synchronously through

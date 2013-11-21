@@ -24,7 +24,8 @@
     animation: emphasizeFrameResultValue 2s ease;
 }
 
-.memberRow.frameResultValueRow .memberLabel {
+.memberRow.frameResultValueRow .memberLabel,
+.memberRow.frameResultValueEmphaizedRow .memberLabel {
     font-weight: bold;
 }
 
