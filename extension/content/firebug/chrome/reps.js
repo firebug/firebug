@@ -1209,7 +1209,7 @@ FirebugReps.Element = domplate(Rep,
     {
         // Remote objects can't use instanceof operand so, they use 'type' instead.
         // All HTML element types starts with 'HTML' prefix.
-        if (Str.hasPrefix(type, "HTML"))
+        if (type && Str.hasPrefix(type, "HTML"))
             return true;
 
         return object instanceof window.Element;
