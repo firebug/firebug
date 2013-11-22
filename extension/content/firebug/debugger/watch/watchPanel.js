@@ -200,19 +200,20 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     {
         Trace.sysout("WatchPanel.rebuild", this.selection);
 
-        this.updateSelection(this.selection);
+        this.doUpdateSelection(this.selection);
     },
 
-    updateSelection: function(frame)
+    updateSelection: function(object)
     {
-        try
-        {
-            this.doUpdateSelection(frame);
-        }
-        catch (exc)
-        {
-            TraceError.sysout("WatchPanel.updateSelection; EXCEPTION " + exc, exc);
-        }
+        Trace.sysout("WatchPanel.updateSelection", object);
+
+        // Do not synchronize the content of the {@WatchPanel} with
+        // selection changes (e.g. in the Script panel). Clicking on any object
+        // anywhere in the UI should not affect its content.
+
+        // Content of the Watch panel is synchronized/updated through debugging
+        // events such as 'onStartDebugging' and 'onStopDebugging' sent by
+        // {@DebuggerTool} object.
     },
 
     doUpdateSelection: function(frame)
@@ -558,6 +559,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
     onStartDebugging: function(context, event, packet)
     {
         Trace.sysout("watchPanel.onStartDebugging;");
+
+        // Debugger is paused, display the current scope chain.
+        this.selection = this.context.currentFrame;
+        this.doUpdateSelection(this.selection);
     },
 
     onStopDebugging: function(context, event, packet)
@@ -567,11 +572,11 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Save state of the Watch panel for the next pause.
         this.tree.saveState(this.toggles);
 
-        // Debugger is resumed so, don't forget to remove the stopped frame.
+        // Debugger is resumed, display the default content (current global scope).
+        // xxxHonza: when stepping the default selection is displayed for a short
+        // time, which causes content flashing. This should be fixed by issue 6943.
         this.selection = this.getDefaultSelection();
-
-        // Update the panel content.
-        this.updateSelection(this.selection);
+        this.doUpdateSelection(this.selection);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

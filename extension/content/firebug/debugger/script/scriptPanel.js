@@ -468,7 +468,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         // Invoke breadcrumbs update.
         Firebug.chrome.syncStatusPath();
 
-        // This is how the selected side panel is synchronized (e.g. the Watch panel).
+        // This is how the selected side panel can be synchronized (e.g. the Callstack panel).
         Firebug.chrome.select(this.context.currentFrame, "script");
     },
 
@@ -493,6 +493,10 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("scriptPanel.showSource; " + sourceLink, sourceLink);
 
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
+
+        // xxxHonza: fix me, compilation unit is expected, but getDefaultLocation
+        // return SourceLink, so it fails at the bottom of this function when
+        // getSourceLines is called.
         if (!compilationUnit)
             compilationUnit = this.getDefaultLocation();
 
@@ -1242,9 +1246,6 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
 
             // Update Break on Next lightning
             //Firebug.Breakpoint.updatePanelTab(this, false);
-
-            // This is how the selected side panel is synchronized (e.g. the Watch panel).
-            Firebug.chrome.select(this.context.currentFrame, "script");
 
             // issue 3463 and 4213
             Firebug.chrome.syncPanel("script");
