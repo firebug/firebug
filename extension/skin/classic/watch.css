@@ -25,7 +25,7 @@
 }
 
 .memberRow.frameResultValueRow .memberLabel,
-.memberRow.frameResultValueEmphaizedRow .memberLabel {
+.memberRow.frameResultValueEmphasizedRow .memberLabel {
     font-weight: bold;
 }
 
