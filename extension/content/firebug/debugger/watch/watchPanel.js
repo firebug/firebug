@@ -173,6 +173,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
             if (state.scrollTop)
                 this.defaultScrollTop = state.scrollTop;
         }
+
+        // Make sure the default content is displayed at the beginning.
+        if (this.tree.isEmpty() || this.defaultTree.isEmpty())
+            this.showEmptyMembers();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
