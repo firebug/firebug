@@ -44,8 +44,9 @@ DomPanelTree.prototype = domplate(BaseTree,
     sizerRowTag:
         TR({role: "presentation"},
             TD(),
-            TD({width: "30%"}),
-            TD({width: "70%"})
+            TD({width: "20%"}),
+            TD(),
+            TD({width: "80%"})
         ),
 
     memberRowTag:
@@ -70,6 +71,9 @@ DomPanelTree.prototype = domplate(BaseTree,
                     SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
                     SPAN({title: "$member|getMemberNameTooltip"}, "$member.name")
                 )
+            ),
+            TD({"class": "memberValueIcon", $readOnly: "$member.readOnly"},
+                DIV("&nbsp;")
             ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},

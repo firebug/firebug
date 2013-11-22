@@ -19,6 +19,16 @@
     opacity: 0.5;
 }
 
+.memberValueIcon.readOnly {
+    background: url("chrome://firebug/skin/readOnlyProp.svg") no-repeat;
+    background-position: 3px 3px;
+    background-size: 12px 12px;
+}
+
+.memberValueIcon.readOnly > DIV {
+    width: 15px;
+}
+
 .memberLabel {
     cursor: default;
     overflow: hidden;
