@@ -9,36 +9,38 @@ define([
     "firebug/lib/array",
     "firebug/lib/events",
     "firebug/lib/wrapper",
-    "firebug/debugger/script/sourceLink",
-    "firebug/debugger/stack/stackFrame",
+    "firebug/lib/domplate",
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
     "firebug/lib/locale",
-    "firebug/console/closureInspector",
-    "firebug/dom/toggleBranch",
     "firebug/lib/system",
-    "firebug/chrome/menu",
+    "firebug/dom/toggleBranch",
     "firebug/dom/domEditor",
     "firebug/dom/domReps",
+    "firebug/dom/domModule",
+    "firebug/chrome/menu",
     "firebug/chrome/panel",
-    "firebug/console/commandLine",
+    "firebug/chrome/searchBox",
     "firebug/chrome/panelActivation",
+    "firebug/debugger/script/sourceLink",
+    "firebug/debugger/stack/stackFrame",
     "firebug/debugger/debuggerLib",
     "firebug/editor/editor",
-    "firebug/chrome/searchBox",
-    "firebug/dom/domModule",
+    "firebug/console/commandLine",
     "firebug/console/autoCompleter",
+    "firebug/console/closureInspector",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Wrapper, SourceLink, StackFrame,
-    Dom, Css, Str, Locale, ClosureInspector, ToggleBranch, System, Menu,
-    DOMEditor, DOMReps, Panel, CommandLine, PanelActivation, DebuggerLib, Editor,
-    SearchBox, DOMModule, JSAutoCompleter) {
+function(Firebug, FBTrace, Obj, Arr, Events, Wrapper, Domplate, Dom, Css, Str, Locale, System,
+    ToggleBranch, DOMEditor, DOMReps, DOMModule, Menu, Panel, SearchBox, PanelActivation,
+    SourceLink, StackFrame, DebuggerLib, Editor, CommandLine, JSAutoCompleter, ClosureInspector) {
 
 "use strict";
 
 // ********************************************************************************************* //
 // Constants
+
+var {domplate, DIV, SPAN} = Domplate;
 
 var rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/;
 
@@ -66,6 +68,19 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     // amfExplorer.js is using getRowProperty.
     tag: DOMReps.DirTablePlate.tableTag,
     dirTablePlate: DOMReps.DirTablePlate,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Domplate
+
+    readOnlyInfoTipTag:
+        DIV({"class": "readOnlyInfoTip"},
+            DIV({"class": "name"}, "$desc.name"),
+            DIV({"class": "$desc.configurable"}, "configurable"),
+            DIV({"class": "$desc.enumerable"}, "enumerable"),
+            DIV({"class": "$desc.writable"}, "writable"),
+            DIV({"class": "$desc.set"}, "setter"),
+            DIV({"class": "$desc.get"}, "getter")
+        ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
@@ -630,6 +645,63 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         var object = this.getRowObject(row);
         if (object)
             DOMModule.toggleBreakpoint(this.context, object, name);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Info Tips
+
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        if (Dom.getAncestorByClass(target, "memberValueIcon"))
+            return this.populateReadOnlyInfoTip(infoTip, target);
+
+        // Do not show anything.
+        return false;
+    },
+
+    populateReadOnlyInfoTip: function(infoTip, target)
+    {
+        var member = Firebug.getRepObject(target);
+        if (!member.descriptor)
+        {
+            // xxxHonza: this happens quite often why?
+            // FBTrace.sysout("no descriptor? " + member.name, member)
+            return false;
+        }
+
+        var input = {
+            name: member.name,
+            configurable: member.descriptor.configurable ? "yes" : "no",
+            enumerable: member.descriptor.enumerable ? "yes" : "no",
+            writable: member.descriptor.writable ? "yes" : "no",
+            get: member.descriptor.get ? "yes" : "no",
+            set: member.descriptor.set ? "yes" : "no",
+        }
+
+        this.readOnlyInfoTipTag.replace({desc: input}, infoTip);
+
+        return true;
+    },
+
+    populateBreakpointInfoTip: function(infoTip, target)
+    {
+        var lineNo = this.scriptView.getLineIndex(target);
+        var bp = BreakpointStore.findBreakpoint(this.getCurrentURL(), lineNo);
+        if (!bp)
+            return false;
+
+        var expr = bp.condition;
+        if (!expr)
+            return false;
+
+        if (expr == this.infoTipExpr)
+            return true;
+
+        BreakpointInfoTip.render(infoTip, expr);
+
+        this.infoTipExpr = expr;
+
+        return true;
     },
 });
 

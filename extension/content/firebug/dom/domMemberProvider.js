@@ -347,6 +347,7 @@ DOMMemberProvider.prototype =
             hasChildren: hasChildren,
             tag: tag,
             prefix: "",
+            descriptor: descriptor,
             readOnly: (descriptor && !descriptor.writable && !descriptor.set),
             // XXX should probably move the tests from getContextMenuItems here
             deletable: (!parentIsScope && !(descriptor && !descriptor.configurable))

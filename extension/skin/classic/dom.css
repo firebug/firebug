@@ -15,6 +15,22 @@
     overflow: hidden;
 }
 
+.memberLabel {
+    cursor: default;
+    overflow: hidden;
+    padding-left: 18px;
+    white-space: nowrap;
+}
+
+.memberLabelPrefix {
+    color: gray;
+    margin-right: 3px;
+    font-weight: normal;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Read Only Properties */
+
 .memberValueCell.readOnly > SPAN {
     opacity: 0.5;
 }
@@ -29,17 +45,25 @@
     width: 15px;
 }
 
-.memberLabel {
-    cursor: default;
-    overflow: hidden;
-    padding-left: 18px;
-    white-space: nowrap;
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Read Only InfoTip */
+
+.readOnlyInfoTip {
+    margin: 3px;
 }
 
-.memberLabelPrefix {
-    color: gray;
-    margin-right: 3px;
-    font-weight: normal;
+.readOnlyInfoTip > .name {
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.readOnlyInfoTip > DIV {
+    padding: 0 2px 0 2px; 
+}
+
+.readOnlyInfoTip > DIV.no {
+    text-decoration: line-through;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
