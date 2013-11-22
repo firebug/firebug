@@ -49,7 +49,10 @@ function DomBaseTree()
  * 2) Presentation state persistence (expanded tree nodes).
  * 3) Asynchronous population (so, the UI doesn't freeze when an item is expanded and
  * there is a lot of children).
- * 4) Read only flag (has custom styling).
+ * 4) Read only flag and custom styling.
+ * 5) Custom rowTag for displaying DOM objects and properties.
+ * 6) Support for tooltips
+ * 7) Support for label prefixes (getters and setters)
  *
  * xxxHonza TODOs:
  * - expandRowAsync: it should be possible to cancel the population process, e.g. if the user
@@ -137,7 +140,7 @@ DomBaseTree.prototype = domplate(BaseTree,
      * Save DomTree state (i.e. a structure of expanded nodes), so they can be re-expanded later.
      * The method executes synchronously and stores all data into the passed state object.
      *
-     * @param {@ToggleBranch} The state info is stored into this object.
+     * @param {@ToggleBranch} state The state info is stored into this object.
      */
     saveState: function(state)
     {
@@ -170,8 +173,8 @@ DomBaseTree.prototype = domplate(BaseTree,
      * Restore presentation state of DomTree. The restoration process is asynchronous.
      * Use the return {@Promise} object to watch when the state is fully restored.
      *
-     * @param {@ToggleBranch} The state info is loaded from this object.
-     *
+     * @param {@ToggleBranch} toggles The state info is loaded from this object.
+     * @param {Function} callback xxxHonza: there should be support for a standard callback.
      * @return The method returns a promise that is resolved when the restoration process
      * is fully completed.
      */
@@ -313,6 +316,40 @@ DomBaseTree.prototype = domplate(BaseTree,
         }
 
         return rows;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
+     * Properly destroy the tree if it isn't needed anymore. The method ensures that any
+     * ongoing asynchronous processes related to the tree (row expansion or presentation
+     * state restoration) are properly canceled.
+     *
+     * xxxHonza: TODO implement + check all places where it should be called (Watch panel
+     * and DOM panels)
+     */
+    destroy: function()
+    {
+        if (!this.deferreds)
+            return;
+
+        // xxxHonza: we need to make sure no timeouts are used and all deferred objects
+        // are registered in the following array.
+        // Reject all waiting deferred objects (promises).
+        for (var i=0; i<this.deferreds.length; i++)
+            this.deffereds[i].reject();
+    },
+
+    // xxxHonza: we might want to have a render() method.
+    replace: function(parentNode, input)
+    {
+        // If any asynchronous processes are in progress (tree insertion or restoration),
+        // they will be canceled. This is a big speedup when a tree is often refreshed
+        // (e.g. during debugger stepping).
+        this.destroy();
+
+        // Render the passed input object.
+        BaseTree.replace.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
