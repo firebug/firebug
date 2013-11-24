@@ -108,17 +108,7 @@ Firebug.ShortcutsModel = Obj.extend(Module,
         }
 
         // Disable existing global shortcuts
-        var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
-            key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
-            ":not([id='key_firebug_" + element + "']):not([disabled='true'])";
-
-        var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
-        for (var i=existingKeyElements.length-1; i>=0; i--)
-        {
-            var existingKeyElement = existingKeyElements[i];
-            existingKeyElement.setAttribute("disabled", "true");
-            this.disabledKeyElements.push(existingKeyElement);
-        }
+        disableExistingShortcuts(keyElem.ownerDocument, attr, key, modifiers);
 
         keyElem.setAttribute("modifiers", modifiers);
         keyElem.setAttribute(attr, key);
@@ -126,6 +116,20 @@ Firebug.ShortcutsModel = Obj.extend(Module,
 
         if (this.keysets.indexOf(keyElem.parentNode) == -1)
             this.keysets.push(keyElem.parentNode);
+    },
+
+    disableExistingShortcuts: function(doc, attr, key, modifiers)
+    {
+        var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
+            key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
+            ":not([id*='firebug']):not([disabled='true'])";
+
+        var existingKeyElements = doc.querySelectorAll(selector);
+        for (var i = existingKeyElements.length - 1; i >= 0; i--)
+        {
+            existingKeyElements[i].setAttribute("disabled", "true");
+            this.disabledKeyElements.push(existingKeyElements[i]);
+        }
     },
 
     resetDisabledKeys: function()
