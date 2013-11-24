@@ -25,7 +25,7 @@ function(Module, FirebugReps, Domplate, Locale, Dom, Win, Css, Str, Options, Men
 // ********************************************************************************************* //
 // Constants
 
-var {domplate, SPAN, TR, P, LI, A, BUTTON} = Domplate;
+var {domplate, DomplateTag, SPAN, TR, P, LI, A, BUTTON} = Domplate;
 
 const Ci = Components.interfaces;
 const Cu = Components.utils;
