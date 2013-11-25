@@ -56,19 +56,14 @@ function DomBaseTree(context)
  * there is a lot of children).
  * 4) Read only flag and custom styling.
  * 5) Custom rowTag for displaying DOM objects and properties.
- * 6) Support for tooltips
- * 7) Support for label prefixes (getters and setters)
+ * 6) Support for tooltips.
+ * 7) Support for label prefixes (getters and setters).
+ * 8) Destroy (stopping all asynchronous tasks).
  *
  * xxxHonza TODOs:
- * - expandRowAsync: it should be possible to cancel the population process, e.g. if the user
- * closes the node before it's fully populated or if the tree is refreshed/destroyed.
- * This is very important performance improvement (especially when the user is stepping
- * quickly in the debugger, which requires a lot of UI tree-updates).
  * - restoreState: it should be possible to expand/restore a node as soon as it's available in
  * the tree. The logic doesn't have to wait till the entire tree-level is populated.
  * - Fire events for a11y?
- * - expandRowAsync: should not generate bunch of timeouts in advance. It should be done
- * step by step, which would also support cancel.
  */
 var BaseTree = DomTree.prototype;
 DomBaseTree.prototype = domplate(BaseTree,
@@ -329,9 +324,6 @@ DomBaseTree.prototype = domplate(BaseTree,
      * Properly destroy the tree if it isn't needed anymore. The method ensures that any
      * ongoing asynchronous processes related to the tree (row expansion or presentation
      * state restoration) are properly canceled.
-     *
-     * xxxHonza: TODO implement + check all places where it should be called (Watch panel
-     * and DOM panels) and/or call automatically (e.g. as part of the context destroy).
      */
     destroy: function()
     {
