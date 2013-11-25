@@ -31,14 +31,14 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Read Only Properties */
 
-.memberValueCell.readOnly > SPAN {
+.memberValueCell.readOnly {
     opacity: 0.5;
 }
 
 .memberValueIcon.readOnly {
     background: url("chrome://firebug/skin/readOnlyProp.svg") no-repeat;
-    background-position: 3px 3px;
-    background-size: 12px 12px;
+    background-position: 4px 4px;
+    background-size: 10px 10px;
 }
 
 .memberValueIcon.readOnly > DIV {
@@ -131,11 +131,11 @@
     text-decoration: underline;
 }
 
-.panelNode-dom .memberRow:hover {
+.memberRow:hover {
     background-color: #EFEFEF;
 }
 
-.panelNode-dom .memberRow td {
+.memberRow td {
     border-bottom: 1px solid #EFEFEF;
 }
 

@@ -74,7 +74,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     readOnlyInfoTipTag:
         DIV({"class": "readOnlyInfoTip"},
-            DIV({"class": "name"}, "$desc.name"),
             DIV({"class": "$desc.configurable"}, "configurable"),
             DIV({"class": "$desc.enumerable"}, "enumerable"),
             DIV({"class": "$desc.writable"}, "writable"),
@@ -670,7 +669,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         }
 
         var input = {
-            name: member.name,
             configurable: member.descriptor.configurable ? "yes" : "no",
             enumerable: member.descriptor.enumerable ? "yes" : "no",
             writable: member.descriptor.writable ? "yes" : "no",

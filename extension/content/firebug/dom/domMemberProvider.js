@@ -334,6 +334,12 @@ DOMMemberProvider.prototype =
         }
 
         var descriptor = getPropertyDescriptor(object, name);
+        if (!descriptor)
+        {
+            // xxxHonza: temporary tracing.
+            TraceError.sysout("domMemberProvider.addMemberInternal; ERROR no descriptor for" +
+                name, object);
+        }
 
         var member = {
             object: object,

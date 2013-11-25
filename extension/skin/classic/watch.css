@@ -10,11 +10,11 @@
 }
 
 .scopesRow td {
-    border-top: 1px solid #BEBEBE;
+    /*border-top: 1px solid #BEBEBE;*/
 }
 
 .scopesLabel {
-    background-color:  LightYellow;
+    background-color: transparent;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -79,7 +79,8 @@
 }
 
 .watchRow > .memberLabelCell,
-.watchRow > .memberValueCell {
+.watchRow > .memberValueCell,
+.watchRow > .memberValueIcon {
     background-color: #F5F5F5;
     border-bottom: 1px solid #BEBEBE;
 }
