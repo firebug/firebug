@@ -25,13 +25,13 @@
 }
 
 .memberRow.frameResultValueRow .memberLabel,
-.memberRow.frameResultValueEmphaizedRow .memberLabel {
+.memberRow.frameResultValueEmphasizedRow .memberLabel {
     font-weight: bold;
 }
 
 /* A simple animation to emphasize the row with frame-result value */
 @keyframes emphasizeFrameResultValue {
-    50% {
+    0%, 50% {
         background-color: #C4F4FF;
     }
     100% {

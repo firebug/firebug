@@ -158,6 +158,21 @@ Dom.getNonFrameBody = function(elt)
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
+/**
+ * @return {@Boolean} true if the given element is currently attached to the document.
+ */
+Dom.isAttached = function(element)
+{
+    var doc = element.ownerDocument;
+    if (!doc)
+        return false;
+
+    while (element != doc && element.parentNode)
+        element = element.parentNode;
+
+    return element == doc;
+}
+
 // ********************************************************************************************* //
 // DOM Modification
 

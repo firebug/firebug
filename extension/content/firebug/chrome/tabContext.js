@@ -501,6 +501,9 @@ Firebug.TabContext.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Timeouts and Intervals
 
+    // xxxHonza: contex.setTimeout is used a lot in the code, but finished timeouts often
+    // doesn't call clearTimeout, and so they are not removed from the array.
+    // It grows till the context is destroyed. Can we auto-remove as soon as the timeout executes?
     setTimeout: function(fn, delay)
     {
         if (setTimeout == this.setTimeout)
