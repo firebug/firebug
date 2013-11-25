@@ -1,30 +1,35 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug",
+    "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/array",
-    "arch/compilationunit",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/chrome/window",
     "firebug/lib/css",
     "firebug/lib/wrapper",
+    "arch/compilationunit",
+    "firebug/chrome/window",
     "firebug/chrome/plugin",
 ],
-function(Obj, Arr, CompilationUnit, Events, Url, Win, Css, Wrapper) {
+function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, CompilationUnit, Win, Plugin) {
 
 // ********************************************************************************************* //
 // Constants
 
-const throttleTimeWindow = 200;
-const throttleMessageLimit = 30;
-const throttleInterval = 30;
-const throttleFlushCount = 20;
-const refreshDelay = 300;
+var throttleTimeWindow = 200;
+var throttleMessageLimit = 30;
+var throttleInterval = 30;
+var throttleFlushCount = 20;
+var refreshDelay = 300;
+
+// Tracing support
+var TraceError = FBTrace.to("DBG_ERRORS");
 
 // ********************************************************************************************* //
 
-Firebug.TabContext = function(win, browser, chrome, persistedState)
+function TabContext(win, browser, chrome, persistedState)
 {
     this.window = win;
     this.browser = browser;
@@ -49,6 +54,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     else
         this.sourceCache = new Firebug.SourceCache(this);
 
+    // xxxHonza: remove?
     // Used by chromebug.
     this.global = win; 
 
@@ -57,9 +63,15 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
     // -- Back end support --
     this.sourceFileMap = {};  // backend
-};
+}
 
-Firebug.TabContext.prototype =
+/**
+ * @object The object is responsible for storing data related to the current page.
+ * You can also see this object as a 'Document' where the 'View' is represented by
+ * the {@Panel} object. The life cycle of this object is tied to the associated page.
+ */
+TabContext.prototype =
+/** @lends TabContext */
 {
     getId: function()
     {
@@ -183,9 +195,8 @@ Firebug.TabContext.prototype =
         var compilationUnit = this.getCompilationUnit(url);
         if (!compilationUnit)
         {
-            if (FBTrace.DBG_COMPILATION_UNITS || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabContext.addSourceFile; ERROR Unknown URL: " + url,
-                    this.compilationUnits);
+            TraceError.sysout("tabContext.addSourceFile; ERROR Unknown URL: " + url,
+                this.compilationUnits);
             return;
         }
 
@@ -378,9 +389,8 @@ Firebug.TabContext.prototype =
             else
             {
                 // then our panel map is broken, maybe by an extension failure.
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing " +
-                        panel.name + " from " + panel.parentPanel.name);
+                TraceError.sysout("tabContext.createPanel panel.mainPanel missing " +
+                    panel.name + " from " + panel.parentPanel.name);
             }
         }
 
@@ -412,8 +422,7 @@ Firebug.TabContext.prototype =
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabContext.destroy FAILS (" + panelName + ") " + exc, exc);
+            TraceError.sysout("tabContext.destroy FAILS (" + panelName + ") " + exc, exc);
 
             // the destroy failed, don't keep the bad state
             delete state.panelState[panelName];
@@ -499,18 +508,36 @@ Firebug.TabContext.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Timeouts and Intervals
+    // Timeouts
 
-    // xxxHonza: contex.setTimeout is used a lot in the code, but finished timeouts often
-    // doesn't call clearTimeout, and so they are not removed from the array.
-    // It grows till the context is destroyed. Can we auto-remove as soon as the timeout executes?
+    /**
+     * Most of the timeouts in Firebug should be spawned through this method. {@TabContext}
+     * object keeps track of all awaiting timeouts and makes sure to clear them if the
+     * current context is destroyed (e.g. the page is refreshed or Firebug deactivated for it).
+     */
     setTimeout: function(fn, delay)
     {
         if (setTimeout == this.setTimeout)
             throw new Error("setTimeout recursion");
 
-        // we're using a sandboxed setTimeout function
-        var timeout = setTimeout(fn, delay);
+        // We're using a sandboxed setTimeout function.
+        var self = this;
+        var timeout = setTimeout(function()
+        {
+            // Make sure to remove the timeout ID from the array of ongoing timeouts, so
+            // the 'setTimeout' caller doesn't have to explicitly do it.
+            if (self.timeouts)
+                delete self.timeouts[timeout];
+
+            try
+            {
+                fn();
+            }
+            catch (err)
+            {
+                TraceError.sysout("tabContext.setTimeout; EXCEPTION " + err, err);
+            }
+        }, delay);
 
         if (!this.timeouts)
             this.timeouts = {};
@@ -522,17 +549,35 @@ Firebug.TabContext.prototype =
 
     clearTimeout: function(timeout)
     {
-        // we're using a sandboxed clearTimeout function
+        // We're using a sandboxed clearTimeout function.
         clearTimeout(timeout);
 
         if (this.timeouts)
             delete this.timeouts[timeout];
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Intervals
+
+    /**
+     * Calls a function repeatedly, with a fixed time delay between each call to that function.
+     * The caller should always stop created interval using {@TabContext.clearInterval}.
+     */
     setInterval: function(fn, delay)
     {
-        // we're using a sandboxed setInterval function
-        var timeout = setInterval(fn, delay);
+        // We're using a sandboxed setInterval function.
+        var self = this;
+        var timeout = setInterval(function()
+        {
+            try
+            {
+                fn();
+            }
+            catch (err)
+            {
+                TraceError.sysout("tabContext.setInterval; EXCEPTION " + err, err);
+            }
+        }, delay);
 
         if (!this.intervals)
             this.intervals = {};
@@ -544,19 +589,20 @@ Firebug.TabContext.prototype =
 
     clearInterval: function(timeout)
     {
-        // we're using a sandboxed clearInterval function
+        // We're using a sandboxed clearInterval function.
         clearInterval(timeout);
 
         if (this.intervals)
             delete this.intervals[timeout];
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Throttling
+
     delay: function(message, object)
     {
         this.throttle(message, object, null, true);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // queue the call |object.message(arg)| or just delay it if forceDelay
     throttle: function(message, object, args, forceDelay)
@@ -597,8 +643,7 @@ Firebug.TabContext.prototype =
                 }
                 catch (e)
                 {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("tabContext.throttle; EXCEPTION " + e, e);
+                    TraceError.sysout("tabContext.throttle; EXCEPTION " + e, e);
                 }
 
                 return false;
@@ -636,8 +681,7 @@ Firebug.TabContext.prototype =
             }
             catch (e)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("tabContext.flushThrottleQueue; EXCEPTION " + e, e);
+                TraceError.sysout("tabContext.flushThrottleQueue; EXCEPTION " + e, e);
             }
         }
 
@@ -721,11 +765,8 @@ Firebug.TabContext.prototype =
             }
             catch (e)
             {
-                if (FBTrace.DBG_ERRORS)
-                {
-                    FBTrace.sysout("tabContext.unregisterAllListeners; (" + l.eventId +
-                        ") " + e, e);
-                }
+                TraceError.sysout("tabContext.unregisterAllListeners; (" +
+                    l.eventId + ") " + e, e);
             }
         }
 
@@ -736,7 +777,10 @@ Firebug.TabContext.prototype =
 // ********************************************************************************************* //
 // Registration
 
-return Firebug.TabContext;
+// xxxHonza: backward compatibility
+Firebug.TabContext = TabContext;
+
+return TabContext;
 
 // ********************************************************************************************* //
 });

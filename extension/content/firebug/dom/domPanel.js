@@ -88,7 +88,8 @@ DOMPanel.prototype = Obj.extend(BasePanel,
 
         // Content rendering
         this.provider = new DomProvider(this);
-        this.tree = new DomPanelTree(this.provider, new DOMMemberProvider(this.context));
+        this.tree = new DomPanelTree(this.context, this.provider,
+            new DOMMemberProvider(this.context));
 
         // Object path in the toolbar.
         // xxxHonza: the persistence of the object-path would deserve complete refactoring.
@@ -132,6 +133,9 @@ DOMPanel.prototype = Obj.extend(BasePanel,
         this.tree.saveState(toggles);
 
         state.toggles = this.toggles;
+
+        // Explicitly destroy the tree, there might be active asynchronous tasks.
+        this.tree.destroy();
 
         DOMModule.removeListener(this);
 

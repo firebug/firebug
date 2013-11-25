@@ -29,11 +29,12 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
-function WatchTree(provider)
+function WatchTree(context, provider, memberProvider)
 {
-    DomBaseTree.call(this);
+    DomBaseTree.call(this, context);
 
     this.provider = provider;
+    this.memberProvider = memberProvider;
 }
 
 /**

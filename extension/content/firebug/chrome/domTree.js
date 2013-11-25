@@ -559,6 +559,7 @@ function isPromise(object)
     return object && typeof(object.then) == "function";
 }
 
+// xxxHonza: this is a hack, fix me.
 // Expose for {@DomBaseTree}
 DomTree.isPromise = isPromise;
 

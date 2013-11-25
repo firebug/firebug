@@ -10,11 +10,10 @@ define([
     "firebug/lib/promise",
     "firebug/lib/events",
     "firebug/lib/options",
-    "firebug/lib/array",
     "firebug/chrome/domTree",
     "firebug/dom/toggleBranch",
 ],
-function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, Options, Arr, DomTree,
+function(Firebug, FBTrace, Domplate, Dom, Css, Str, Promise, Events, Options, DomTree,
     ToggleBranch) {
 
 "use strict";
@@ -28,22 +27,25 @@ var Trace = FBTrace.to("DBG_DOMBASETREE");
 var TraceError = FBTrace.to("DBG_ERRORS");
 
 // Asynchronous tree population is good for UI (avoids UI freezing), but causes flickering.
-// Bump the slice size, we'll see what the UX will be. Note that the first slice of data
-// is inserted synchronously, so the tree population can be actually synchronous (no UI fleshing)
-// in most cases (i.e. in cases where the number of children isn't bigger than 'insertSliceSize').
+// Note that the first slice of data is inserted synchronously, so the tree population can be
+// actually synchronous (no UI fleshing) in most cases (i.e. in cases where the number
+// of children isn't bigger than 'firstInsertSliceSize').
 // Of course it assumes that the data provider is also synchronous (it is in most cases, even
 // asynchronous data from the back-end are cached after fetch and the access is synchronous
 // since then).
-var insertSliceSize = 100;
-var insertInterval = 50;
+var firstInsertSliceSize = 100;
+var insertSliceSize = 18;
+var insertInterval = 40;
 
 // ********************************************************************************************* //
 // DOM Tree Implementation
 
-function DomBaseTree()
+function DomBaseTree(context)
 {
-    this.timeouts = [];
-    this.deferreds = [];
+    this.context = context;
+
+    this.timeouts = new Set();
+    this.deferreds = new Set();
 }
 
 /**
@@ -334,16 +336,17 @@ DomBaseTree.prototype = domplate(BaseTree,
     destroy: function()
     {
         // Clear all insertion timeouts.
-        for (var i=0; i<this.timeouts.length; i++)
-            clearTimeout(this.timeouts[i]);
+        for (var timeout of this.timeouts)
+            this.context.clearTimeout(timeout);
 
         // Reject all waiting deferred objects. Promises are used to wait for data from an
         // asynchronous data source and also for finished insertion processes.
-        for (var i=0; i<this.deferreds.length; i++)
-            this.deferreds[i].reject();
+        // xxxHonza: we should use: this.context.rejectDeferred(deferred);
+        for (var deferred of this.deferreds)
+            deferred.reject();
 
-        this.timeouts = [];
-        this.deferreds = [];
+        this.timeouts = new Set();
+        this.deferreds = new Set();
     },
 
     // xxxHonza: we might want to have a render() method.
@@ -517,17 +520,17 @@ DomBaseTree.prototype = domplate(BaseTree,
         // The first slice is inserted synchronously, the others asynchronously.
         // The number of members (children) is small in most cases and they will
         // be inserted in the first step, and so synchronously.
-        this.insertSlice(row, row, members, deferred);
+        this.insertSlice(row, row, members, deferred, firstInsertSliceSize);
 
         // The promise will be resolved as soon as the last member is
         // inserted (rendered) in the tree.
         return deferred.promise;
     },
 
-    insertSlice: function(parentRow, after, members, done)
+    insertSlice: function(parentRow, after, members, done, sliceSize)
     {
         if (parentRow.insertTimeout)
-            Arr.remove(this.timeouts, parentRow.insertTimeout);
+            this.timeouts.delete(parentRow.insertTimeout);
 
         parentRow.insertTimeout = null;
 
@@ -540,7 +543,7 @@ DomBaseTree.prototype = domplate(BaseTree,
             return;
         }
 
-        var slice = members.splice(0, insertSliceSize);
+        var slice = members.splice(0, sliceSize);
         var result = this.loop.insertRows({members: slice}, after, this);
 
         Trace.sysout("domBaseTree.insertSlice; inserted: " + slice.length +
@@ -551,10 +554,14 @@ DomBaseTree.prototype = domplate(BaseTree,
             // Insert the rest (recursively) on timeout. New tree-rows will be
             // inserted after the current last row.
             var lastRow = result[1];
-            var callback = this.insertSlice.bind(this, parentRow, lastRow, members, done);
+            var callback = this.insertSlice.bind(this, parentRow, lastRow, members,
+                done, insertSliceSize);
 
             // Next slice of rows will be inserted on timeout, so the UI doesn't freeze.
-            var timeout = this.setTimeout(callback, insertInterval);
+            // Don't forget to remember the timeout ID, so we can clear it if the tree
+            // is destroyed before the insertion process finish.
+            var timeout = this.context.setTimeout(callback, insertInterval);
+            this.timeouts.add(timeout);
 
             // Also associate the timeout with the clicked (expanding) row, so we can
             // clear it if the user collapses the row again yet before the expanding
@@ -575,8 +582,8 @@ DomBaseTree.prototype = domplate(BaseTree,
         // Clear insertion timeout if the row is still expanding (to stop the insertion process).
         if (row.insertTimeout)
         {
-            clearTimeout(row.insertTimeout);
-            Arr.remove(this.timeouts, row.insertTimeout);
+            this.context.clearTimeout(row.insertTimeout);
+            this.timeouts.delete(row.insertTimeout);
             row.insertTimeout = null;
         }
 
@@ -637,6 +644,7 @@ DomBaseTree.prototype = domplate(BaseTree,
         // xxxHonza: all Promises should be created through the current |context| (Factory
         // pattern), so we can reject them all automatically when the context is destroyed.
         // Just like we clear all active timeouts.
+        // Example: this.context.defer();
 
         // xxxHonza: auto-remove deferred objects from the array just like timeouts.
 
@@ -644,27 +652,9 @@ DomBaseTree.prototype = domplate(BaseTree,
         // all at once in case the tree is being destroyed before all asynchronous
         // processes finish (e.g. re-rendered).
         var deferred = Promise.defer();
-        this.deferreds.push(deferred);
+        this.deferreds.add(deferred);
         return deferred;
     },
-
-    setTimeout: function(callback, delay)
-    {
-        // xxxHonza: use context.setTimeout.
-        // xxxHonza: contex.setTimeout should clear itself from the array too.
-        var self = this;
-        var timeout = setTimeout(function()
-        {
-            Arr.remove(self.timeouts, timeout);
-            callback();
-        }, delay);
-
-        // Insert the timeout into an array of all active timeouts, so we can clear
-        // them all at once if the tree is destroyed before they finish.
-        this.timeouts.push(timeout);
-
-        return timeout;
-    }
 });
 
 // ********************************************************************************************* //

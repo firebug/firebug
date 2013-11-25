@@ -57,7 +57,8 @@ DOMSidePanel.prototype = Obj.extend(BasePanel,
 
         // Content rendering
         this.provider = new DomProvider(this);
-        this.tree = new DomPanelTree(this.provider, new DOMMemberProvider(this.context));
+        this.tree = new DomPanelTree(this.context, this.provider,
+            new DOMMemberProvider(this.context));
         this.toggles = new ToggleBranch.ToggleBranch();
         this.scrollTop = 0;
     },
@@ -71,6 +72,8 @@ DOMSidePanel.prototype = Obj.extend(BasePanel,
         // Save tree state
         state.toggles = this.toggles;
         this.tree.saveState(state.toggles);
+
+        this.tree.destroy();
 
         // Save scroll position
         state.scrollTop = this.panelNode.scrollTop;

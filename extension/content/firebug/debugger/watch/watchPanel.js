@@ -106,18 +106,13 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.tool.addListener(this);
 
         this.watches = [];
-        this.tree = new WatchTree();
-
         this.provider = new WatchProvider(this);
-        this.tree.provider = this.provider;
-        this.tree.memberProvider = this.provider;
+        this.tree = new WatchTree(this.context, this.provider, this.provider);
 
         // Create different tree object and presentation state (toggles) for the default
         // tree that displays the current scope when the debugger is resumed.
         // xxxHonza: its state is preserved across page load, but not across pause/resume.
-        this.defaultTree = new WatchTree();
-        this.defaultTree.provider = this.provider;
-        this.defaultTree.memberProvider = this.provider;
+        this.defaultTree = new WatchTree(this.context, this.provider, this.provider);
         this.defaultToggles = new ToggleBranch.ToggleBranch();
     },
 
@@ -130,6 +125,10 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         state.watches = this.watches;
         state.scrollTop = this.panelNode.scrollTop;
         state.defaultToggles = this.defaultToggles;
+
+        // Destroy tree objects, so e.g. any ongoing asynchronous tasks are stopped.
+        this.defaultTree.destroy();
+        this.tree.destroy();
 
         this.tool.removeListener(this);
 
