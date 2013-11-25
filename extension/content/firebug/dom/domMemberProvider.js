@@ -60,21 +60,20 @@ DOMMemberProvider.prototype =
                 object = Arr.cloneArray(object);
 
             var properties;
-            var contentView = this.getObjectView(object);
             try
             {
                 // Make sure not to touch the prototype chain of the magic scope objects.
                 var ownOnly = Firebug.showOwnProperties || isScope;
                 var enumerableOnly = Firebug.showEnumerableProperties;
 
-                properties = this.getObjectProperties(contentView, enumerableOnly, ownOnly);
+                properties = this.getObjectProperties(object, enumerableOnly, ownOnly);
                 properties = Arr.sortUnique(properties);
 
                 var addOwn = function(prop)
                 {
-                    // Apparently, Object.prototype.hasOwnProperty.call(contentView, p) lies
-                    // when 'contentView' is content and 'Object' is chrome... Bug 658909?
-                    if (Object.getOwnPropertyDescriptor(contentView, prop) &&
+                    // Apparently, Object.prototype.hasOwnProperty.call(object, p) lies
+                    // when 'object' is content and 'Object' is chrome... Bug 658909?
+                    if (Object.getOwnPropertyDescriptor(object, prop) &&
                         properties.indexOf(prop) === -1)
                     {
                         properties.push(prop);
@@ -86,7 +85,7 @@ DOMMemberProvider.prototype =
 
                 // __proto__ never shows in enumerations, so add it here. We currently
                 // we don't want it when only showing own properties.
-                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
+                if (object.__proto__ && Obj.hasProperties(object.__proto__) &&
                     properties.indexOf("__proto__") === -1 && !ownOnly)
                 {
                     properties.push("__proto__");
@@ -121,7 +120,7 @@ DOMMemberProvider.prototype =
 
                 try
                 {
-                    val = contentView[name];
+                    val = object[name];
                 }
                 catch (exc)
                 {
@@ -374,13 +373,12 @@ DOMMemberProvider.prototype =
 
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
-        // XXX This should be rewritten to use 'descriptor', and I believe the unwrapping
-        // test is wrong (see issue 5377).
-        var o = this.getObjectView(object);
-        if (o && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
+        // XXX This should be rewritten to use 'descriptor', and the unwrapping test is
+        // always false! See issue 5377.
+        if (object && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object))
         {
-            var getter = (o.__lookupGetter__) ? o.__lookupGetter__(name) : null;
-            var setter = (o.__lookupSetter__) ? o.__lookupSetter__(name) : null;
+            var getter = (object.__lookupGetter__) ? object.__lookupGetter__(name) : null;
+            var setter = (object.__lookupSetter__) ? object.__lookupSetter__(name) : null;
 
             // both, getter and setter
             if (getter && setter)
@@ -472,21 +470,6 @@ DOMMemberProvider.prototype =
         // Push everything onto the returned array, to avoid O(nm) runtime behavior.
         inheritedProps.push.apply(inheritedProps, props);
         return inheritedProps;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Wrappers
-
-    getObjectView: function(object)
-    {
-        if (!Firebug.viewChrome)
-        {
-            // Unwrap native, wrapped objects.
-            var contentView = Wrapper.getContentView(object);
-            if (contentView)
-                return contentView;
-        }
-        return object;
     },
 }
 

@@ -4,6 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/object",
     "firebug/lib/locale",
+    "firebug/lib/wrapper",
     "firebug/debugger/clients/clientProvider",
     "firebug/debugger/stack/stackFrame",
     "firebug/debugger/clients/scopeClient",
@@ -11,8 +12,8 @@ define([
     "firebug/debugger/debuggerLib",
     "firebug/debugger/watch/watchExpression",
 ],
-function (FBTrace, Obj, Locale, ClientProvider, StackFrame, ScopeClient, DOMMemberProvider, 
-    DebuggerLib, WatchExpression) {
+function (FBTrace, Obj, Locale, Wrapper, ClientProvider, StackFrame, ScopeClient,
+    DOMMemberProvider, DebuggerLib, WatchExpression) {
 
 "use strict";
 
@@ -252,7 +253,8 @@ WatchProvider.DefaultWatchPanelInput.prototype.getChildren = function()
 {
     var children = [];
     children.push.apply(children, this.panel.watches);
-    children.push(this.panel.context.getCurrentGlobal());
+    var global = this.panel.context.getCurrentGlobal();
+    children.push(Wrapper.getContentView(global));
     return children;
 }
 

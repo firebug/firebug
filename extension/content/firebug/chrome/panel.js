@@ -292,8 +292,13 @@ var Panel = Obj.extend(new EventSource(),
         if (!object)
             object = this.getDefaultSelection();
 
-        Trace.sysout("firebug.select " + this.name + " forceUpdate: " + forceUpdate + " " +
-            object + ((object == this.selection) ? "==" : "!=") + this.selection);
+        object = this.normalizeSelection(object);
+
+        if (Trace.active)
+        {
+            Trace.sysout("firebug.select " + this.name + " forceUpdate: " + forceUpdate + " " +
+                object + ((object == this.selection) ? "==" : "!=") + this.selection);
+        }
 
         if (forceUpdate || object != this.selection)
         {
@@ -302,6 +307,15 @@ var Panel = Obj.extend(new EventSource(),
 
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
         }
+    },
+
+    /**
+     * Compute a normal form for an object to be selected in the panel.
+     * E.g. for the DOM panel this involves unwrapping the object.
+     */
+    normalizeSelection: function(object)
+    {
+        return object;
     },
 
     /**

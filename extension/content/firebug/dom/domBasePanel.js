@@ -110,7 +110,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
     getDefaultSelection: function()
     {
         // Default to showing the top window.
-        return this.getObjectView(this.context.window);
+        return Wrapper.getContentView(this.context.window);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -306,17 +306,16 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         return this.editor;
     },
 
+    normalizeSelection: function(object)
+    {
+        // Unwrap everything we show in the DOM panel - exposing chrome views
+        // of objects to the user doesn't make sense.
+        return this.getObjectView(object);
+    },
+
     getObjectView: function(object)
     {
-        if (!Firebug.viewChrome)
-        {
-            // Unwrap native, wrapped objects.
-            var contentView = Wrapper.getContentView(object);
-            if (contentView)
-                return contentView;
-        }
-
-        return object;
+        return Wrapper.unwrapObject(object);
     },
 
     rebuild: function(update, scrollTop, toggles)
@@ -357,8 +356,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
     getRealRowObject: function(row)
     {
-        var object = this.getRowObject(row);
-        return this.getObjectView(object);
+        return this.getRowObject(row);
     },
 
     getRowPropertyValue: function(row)
@@ -514,7 +512,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         else
         {
             var member = row.domObject;
-            var object = this.getObjectView(member.object);
+            var object = member.object;
 
             if (member.deletable)
             {

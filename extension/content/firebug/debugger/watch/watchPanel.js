@@ -12,9 +12,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/chrome/menu",
-    "firebug/debugger/stack/stackFrame",
     "firebug/lib/locale",
     "firebug/lib/string",
+    "firebug/lib/wrapper",
+    "firebug/debugger/stack/stackFrame",
     "firebug/debugger/watch/watchEditor",
     "firebug/debugger/watch/watchTree",
     "firebug/debugger/watch/watchProvider",
@@ -24,7 +25,7 @@ define([
     "firebug/console/commandLine",
 ],
 function(Firebug, FBTrace, Obj, Domplate, Firefox, ToggleBranch, Events, Dom, Css, Arr, Menu,
-    StackFrame, Locale, Str, WatchEditor, WatchTree, WatchProvider, WatchExpression,
+    Locale, Str, Wrapper, StackFrame, WatchEditor, WatchTree, WatchProvider, WatchExpression,
     DOMBasePanel, ErrorCopy, CommandLine) {
 
 "use strict";
@@ -296,7 +297,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (this.defaultToggles.isEmpty())
         {
             var scope = this.context.getCurrentGlobal();
-            this.defaultTree.expandObject(scope);
+            var uwScope = Wrapper.getContentView(scope);
+            this.defaultTree.expandObject(uwScope);
         }
         else
         {
@@ -564,8 +566,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("watchPanel.onStartDebugging;");
 
         // Debugger is paused, display the current scope chain.
-        this.selection = this.context.currentFrame;
-        this.doUpdateSelection(this.selection);
+        this.select(this.context.currentFrame);
     },
 
     onStopDebugging: function(context, event, packet)
@@ -578,8 +579,7 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Debugger is resumed, display the default content (current global scope).
         // xxxHonza: when stepping the default selection is displayed for a short
         // time, which causes content flashing. This should be fixed by issue 6943.
-        this.selection = this.getDefaultSelection();
-        this.doUpdateSelection(this.selection);
+        this.select(null, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
