@@ -29,6 +29,8 @@ var TraceError = FBTrace.to("DBG_ERRORS");
 
 function DomPanelTree(provider, memberProvider)
 {
+    DomBaseTree.call(this);
+
     this.provider = provider;
     this.memberProvider = memberProvider;
 }
