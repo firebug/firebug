@@ -341,9 +341,8 @@ DomBaseTree.prototype = domplate(BaseTree,
 
         // Reject all waiting deferred objects. Promises are used to wait for data from an
         // asynchronous data source and also for finished insertion processes.
-        // xxxHonza: we should use: this.context.rejectDeferred(deferred);
         for (var deferred of this.deferreds)
-            deferred.reject();
+            this.context.rejectDeferred(deferred, "tree destroyed");
 
         this.timeouts = new Set();
         this.deferreds = new Set();
@@ -641,17 +640,12 @@ DomBaseTree.prototype = domplate(BaseTree,
 
     defer: function()
     {
-        // xxxHonza: all Promises should be created through the current |context| (Factory
-        // pattern), so we can reject them all automatically when the context is destroyed.
-        // Just like we clear all active timeouts.
-        // Example: this.context.defer();
-
-        // xxxHonza: auto-remove deferred objects from the array just like timeouts.
-
         // All deferred objects (promises) are stored in an array, so we can reject
         // all at once in case the tree is being destroyed before all asynchronous
         // processes finish (e.g. re-rendered).
-        var deferred = Promise.defer();
+        // Promises are used to wait for asynchronous data fetch and for end of
+        // the asynchronous insertion process.
+        var deferred = this.context.defer();
         this.deferreds.add(deferred);
         return deferred;
     },

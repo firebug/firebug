@@ -9,11 +9,13 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/lib/wrapper",
+    "firebug/lib/promise",
     "arch/compilationunit",
     "firebug/chrome/window",
     "firebug/chrome/plugin",
 ],
-function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, CompilationUnit, Win, Plugin) {
+function(Firebug, FBTrace, Obj, Arr, Events, Url, Css, Wrapper, Promise,
+    CompilationUnit, Win, Plugin) {
 
 // ********************************************************************************************* //
 // Constants
@@ -69,6 +71,15 @@ function TabContext(win, browser, chrome, persistedState)
  * @object The object is responsible for storing data related to the current page.
  * You can also see this object as a 'Document' where the 'View' is represented by
  * the {@Panel} object. The life cycle of this object is tied to the associated page.
+ *
+ * This objects acts also as a 'Factory' and its directly responsible for creating
+ * instances of registered {@Panel} objects. A panel (a view) is always associated
+ * with a context (a document).
+ *
+ * The context is also responsible for maintaining asynchronous tasks (at least those
+ * that are related to the current page). Any such task (a timeout, an interval, message
+ * throttling or a promise) should be created through the context, so any ongoing
+ * asynchronous task can be automatically stopped when the context is destroyed.
  */
 TabContext.prototype =
 /** @lends TabContext */
@@ -256,15 +267,22 @@ TabContext.prototype =
         // All existing timeouts need to be cleared
         if (this.timeouts)
         {
-            for (var timeout in this.timeouts)
+            for (var timeout of this.timeouts)
                 clearTimeout(timeout);
         }
 
         // Also all waiting intervals must be cleared.
         if (this.intervals)
         {
-            for (var timeout in this.intervals)
+            for (var timeout of this.intervals)
                 clearInterval(timeout);
+        }
+
+        // All deferred objects must be rejected.
+        if (this.deferreds)
+        {
+            for (var deferred of this.deferreds)
+                deferred.reject("context destroyed");
         }
 
         if (this.throttleTimeout)
@@ -540,9 +558,9 @@ TabContext.prototype =
         }, delay);
 
         if (!this.timeouts)
-            this.timeouts = {};
+            this.timeouts = new Set();
 
-        this.timeouts[timeout] = 1;
+        this.timeouts.add(timeout);
 
         return timeout;
     },
@@ -553,7 +571,7 @@ TabContext.prototype =
         clearTimeout(timeout);
 
         if (this.timeouts)
-            delete this.timeouts[timeout];
+            this.timeouts.delete(timeout);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -580,9 +598,9 @@ TabContext.prototype =
         }, delay);
 
         if (!this.intervals)
-            this.intervals = {};
+            this.intervals = new Set();
 
-        this.intervals[timeout] = 1;
+        this.intervals.add(timeout);
 
         return timeout;
     },
@@ -593,7 +611,28 @@ TabContext.prototype =
         clearInterval(timeout);
 
         if (this.intervals)
-            delete this.intervals[timeout];
+            this.intervals.delete(timeout);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Promises
+
+    defer: function()
+    {
+        if (!this.deferreds)
+            this.deferreds = new Set();
+
+        var deferred = Promise.defer();
+        this.deferreds.add(deferred);
+        return deferred;
+    },
+
+    rejectDeferred: function(deferred, reason)
+    {
+        deferred.reject(reason);
+
+        if (this.deferreds)
+            this.deferreds.delete(deferred);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
