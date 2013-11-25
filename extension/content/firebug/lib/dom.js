@@ -167,10 +167,7 @@ Dom.isAttached = function(element)
     if (!doc)
         return false;
 
-    while (element != doc && element.parentNode)
-        element = element.parentNode;
-
-    return element == doc;
+    return doc.contains(element);
 }
 
 // ********************************************************************************************* //
