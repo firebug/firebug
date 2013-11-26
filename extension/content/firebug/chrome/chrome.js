@@ -2114,7 +2114,14 @@ function onPanelMouseUp(event)
 {
     if (Events.isLeftClick(event))
     {
-        var selection = event.target.ownerDocument.defaultView.getSelection();
+        var doc = event.target.ownerDocument;
+
+        // This happens e.g. if you click in a panel, move mouse out from the browser
+        // window and release the button.
+        if (!doc)
+            return;
+
+        var selection = doc.defaultView.getSelection();
         var target = selection.focusNode || event.target;
 
         if (Dom.getAncestorByClass(selection.focusNode, "editable") ===
@@ -2124,7 +2131,7 @@ function onPanelMouseUp(event)
             if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
-                var unselectedRange = event.target.ownerDocument.createRange();
+                var unselectedRange = doc.createRange();
                 var selectedRange = selection.getRangeAt(0);
                 var referenceElement = editable || event.target;
                 unselectedRange.setStart(referenceElement.firstElementChild ||
