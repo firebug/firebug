@@ -47,7 +47,7 @@ WatchTree.prototype = domplate(BaseTree,
 {
     watchNewRowTag:
         TR({"class": "watchNewRow", level: 0},
-            TD({"class": "watchEditCell", colspan: 2},
+            TD({"class": "watchEditCell", colspan: 3},
                 DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
                     "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
                         Locale.$STR("NewWatch")
@@ -67,7 +67,7 @@ WatchTree.prototype = domplate(BaseTree,
 
     emptyTag:
         TR(
-            TD({colspan: 2})
+            TD({colspan: 3})
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

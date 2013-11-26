@@ -87,6 +87,9 @@ DomBaseTree.prototype = domplate(BaseTree,
                     SPAN({title: "$member|getMemberNameTooltip"}, "$member|getLabel")
                 )
             ),
+            TD({"class": "memberValueIcon", $readOnly: "$member.readOnly"},
+                DIV("&nbsp;")
+            ),
             TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
                 role: "presentation"},
                 TAG("$member|getValueTag", {object: "$member|getValue"})

@@ -333,6 +333,12 @@ DOMMemberProvider.prototype =
         }
 
         var descriptor = getPropertyDescriptor(object, name);
+        if (!descriptor)
+        {
+            // xxxHonza: temporary tracing.
+            TraceError.sysout("domMemberProvider.addMemberInternal; ERROR no descriptor for" +
+                name, object);
+        }
 
         var member = {
             object: object,
@@ -346,6 +352,7 @@ DOMMemberProvider.prototype =
             hasChildren: hasChildren,
             tag: tag,
             prefix: "",
+            descriptor: descriptor,
             readOnly: (descriptor && !descriptor.writable && !descriptor.set),
             // XXX should probably move the tests from getContextMenuItems here
             deletable: (!parentIsScope && !(descriptor && !descriptor.configurable))

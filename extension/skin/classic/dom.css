@@ -15,10 +15,6 @@
     overflow: hidden;
 }
 
-.memberValueCell.readOnly > SPAN {
-    opacity: 0.5;
-}
-
 .memberLabel {
     cursor: default;
     overflow: hidden;
@@ -30,6 +26,44 @@
     color: gray;
     margin-right: 3px;
     font-weight: normal;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Read Only Properties */
+
+.memberValueCell.readOnly {
+    opacity: 0.5;
+}
+
+.memberValueIcon.readOnly {
+    background: url("chrome://firebug/skin/readOnlyProp.svg") no-repeat;
+    background-position: 4px 4px;
+    background-size: 10px 10px;
+}
+
+.memberValueIcon.readOnly > DIV {
+    width: 15px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Read Only InfoTip */
+
+.readOnlyInfoTip {
+    margin: 3px;
+}
+
+.readOnlyInfoTip > .name {
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.readOnlyInfoTip > DIV {
+    padding: 0 2px 0 2px; 
+}
+
+.readOnlyInfoTip > DIV.no {
+    text-decoration: line-through;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -97,11 +131,11 @@
     text-decoration: underline;
 }
 
-.panelNode-dom .memberRow:hover {
+.memberRow:hover {
     background-color: #EFEFEF;
 }
 
-.panelNode-dom .memberRow td {
+.memberRow td {
     border-bottom: 1px solid #EFEFEF;
 }
 
