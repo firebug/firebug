@@ -191,7 +191,7 @@
                 }
 
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
-                var position = (Firebug.getPlacement() == "detached" ? "after_start" : "before_start");
+                var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
 
                 this.focused = true;
                 optionsPopup.setAttribute("position", position);
