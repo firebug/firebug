@@ -15,23 +15,27 @@
             onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
             <xul:box class="fbsearch-icon" onclick="onSearchIconClick(event, this.parentNode)"/>
         </xul:textbox>
+        <xul:toolbarbutton anonid="searchPrev"
+            class="fbsearch-options-buttons prev a11yFocus"
+            tooltiptext="search.tip.Previous"
+            role="menuitem"
+            oncommand="searchPrev();"/>
+        <xul:toolbarbutton anonid="searchNext"
+            class="fbsearch-options-buttons next a11yFocus"
+            tooltiptext="search.tip.Next"
+            role="menuitem"
+            oncommand="searchNext();"/>
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            ignorekeys="true" role="presentation">
-            <xul:description id="fbSearchBoxIsSensitive" value="search.Case_AutoSensitive"/>
-            <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case_Insensitive"/>
-            <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
-              <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
-              <xul:vbox anonid="searchOptionsList" role="presentation" />
-              <xul:hbox pack="center" align="center" role="presentation">
-                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons prev a11yFocus"
-                      label="search.Previous" tooltiptext="search.tip.Previous"
-                      oncommand="searchPrev()" role="menuitem" />
-                  <xul:button anonid="searchNext" class="fbsearch-options-buttons next a11yFocus"
-                      label="search.Next" tooltiptext="search.tip.Next"
-                      oncommand="searchNext()" role="menuitem" />
-              </xul:hbox>
-              <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
+            ignorekeys="true" role="presentation" type="arrow">
+            <xul:vbox>
+                <xul:label id="fbSearchBoxIsSensitive" value="search.Case_AutoSensitive"/>
+                <xul:label id="fbSearchBoxIsNotSensitive" value="search.Case_Insensitive"/>
+                <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
+                    <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
+                    <xul:vbox anonid="searchOptionsList" role="presentation" />
+                    <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
+                </xul:vbox>
             </xul:vbox>
         </xul:panel>
         <xul:box anonid="endTextFocus" class="panelFocusBound" onfocus="endTextFocusHandler()" />
@@ -187,7 +191,7 @@
                 }
 
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
-                var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
+                var position = (Firebug.getPlacement() == "detached" ? "after_start" : "before_start");
 
                 this.focused = true;
                 optionsPopup.setAttribute("position", position);

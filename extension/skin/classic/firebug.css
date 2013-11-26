@@ -156,25 +156,24 @@
 .fbsearch-textbox {
     -moz-appearance: none;
     -moz-box-align: center;
-    margin: 0 0px 1px 2px;
-    border: 1px solid;
-    border-radius: 5px;  /* Matched to the a11y outline impl */
-    -moz-border-top-colors: #96969D;
-    -moz-border-right-colors: #96969D;
-    -moz-border-bottom-colors: #96969D;
-    -moz-border-left-colors: #96969D;
+    margin: 0;
+    border: 1px solid #96969D;
+    border-radius: 3px 0 0 3px;
     font: message-box;
     font-size: 11px;
     font-size-adjust: inherit;
     direction: ltr;
+    height: 19px;
 }
 
+/* xxxHonza: the icon is too big
 .fbsearch-icon {
-    cursor: default!important;
+    cursor: default !important;
     background: url(chrome://firebug/skin/search.png) no-repeat 0 0;
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
 }
+*/
 
 /* Need to use images instead of filters due to https://bugzil.la/891777 */ 
 .fbsearch-icon:hover {
@@ -190,7 +189,7 @@
 }
 
 #fbSearchOptionsPanel {
-
+    font-size: 11px;
 }
 
 .fbsearch-options-label {
@@ -198,7 +197,32 @@
 }
 
 .fbsearch-options-buttons {
+    -moz-margin-start: 0;
+    -moz-appearance: none;
+    background: -moz-linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.2));
+    border: 1px solid ThreeDShadow;
+    box-shadow: 0 1px #fff inset;
+    list-style-image: url("chrome://firebug/skin/find-arrows.png");
+    padding: 1px 5px;
+    line-height: 1em;
+    width: 22px;
+    height: 19px;
+    border-left: none;
+}
 
+.fbsearch-options-buttons.prev {
+    -moz-image-region: rect(0, 12px, 9px, 0);
+}
+
+.fbsearch-options-buttons.next {
+    -moz-image-region: rect(0, 24px, 9px, 12px);
+    border-radius: 0 3px 3px 0;
+}
+
+.fbsearch-options-buttons:not([disabled]):active,
+.fbsearch-options-buttons:not([disabled]):active {
+  background: rgba(23,50,76,.2);
+  box-shadow: 0 1px 2px rgba(10,31,51,.2) inset;
 }
 
 textbox[type="fbSearchBox"] > panel {
@@ -220,6 +244,11 @@ textbox[type="fbSearchBox"] > panel {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Case sensitive/insensitive search */
+
+#fbSearchBoxIsSensitive,
+#fbSearchBoxIsNotSensitive {
+    padding-bottom: 8px;
+}
 
 #fbSearchBoxIsSensitive {
     display: none;
