@@ -125,12 +125,17 @@ FirebugReps.Nada = domplate(Rep,
 
 FirebugReps.Number = domplate(Rep,
 {
-    tag: OBJECTBOX({"_repObject": "$object"}, "$object"),
+    tag: OBJECTBOX({"_repObject": "$object"}, "$object|stringify"),
     tinyTag: OBJECTBOX("$object"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "number",
+
+    stringify: function(object)
+    {
+        return (Object.is(object, -0) ? "-0" : "" + object);
+    },
 
     supportsObject: function(object, type)
     {
