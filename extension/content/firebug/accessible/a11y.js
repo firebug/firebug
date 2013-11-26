@@ -693,7 +693,7 @@ Firebug.A11yModel = Obj.extend(Module,
             if (focusRow)
             {
                 this.setPanelTabStop(panel, focusRow);
-                focusRow.setAttribute("aria-expanded", Css.hasClass(row, "opened") + "");
+                focusRow.setAttribute("aria-expanded", String(Css.hasClass(row, "opened")));
                 if (!Css.hasClass(row, "logRow-profile"))
                     this.insertHiddenText(panel, focusRow, "group label: ");
             }
@@ -708,7 +708,7 @@ Firebug.A11yModel = Obj.extend(Module,
             {
                 this.setPanelTabStop(panel, focusRow);
                 focusRow.setAttribute("aria-expanded",
-                    Css.hasClass(focusRow.parentNode, "opened") + "");
+                    String(Css.hasClass(focusRow.parentNode, "opened")));
             }
         }
         else if (Css.hasClass(row, "logRow-stackTrace"))
@@ -849,7 +849,7 @@ Firebug.A11yModel = Obj.extend(Module,
                         }
                         else if (level > 0)
                         {
-                            var targetLevel = (level - 1) + "";
+                            var targetLevel = String(level - 1);
                             var newRows = Array.filter(row.parentNode.rows, function(e, i, a)
                             {
                                 return e.rowIndex < row.rowIndex &&
@@ -992,7 +992,7 @@ Firebug.A11yModel = Obj.extend(Module,
                     if (objectBox)
                     {
                         target.setAttribute("aria-checked",
-                            Css.hasClass(objectBox, "breakForError") + "");
+                            String(Css.hasClass(objectBox, "breakForError")));
                     }
                 }
                 else if (Css.hasClass(target, "breakpointRow"))
@@ -2565,7 +2565,7 @@ Firebug.A11yModel = Obj.extend(Module,
             if ((Css.hasClass(row, "netRow") ||
                 Css.hasClass(row, "spyHeadTable")) && !row.hasAttribute("aria-expanded"))
             {
-                row.setAttribute("aria-expanded", Css.hasClass(row, "opened") + "");
+                row.setAttribute("aria-expanded", String(Css.hasClass(row, "opened")));
             }
             var focusObjects = this.getFocusObjects(row);
             Array.forEach(focusObjects, function(e, i, a) {

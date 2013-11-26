@@ -427,7 +427,7 @@ Str.cropString = function(text, limit, alterText)
         alterText = "...";
 
     // Make sure it's a string.
-    text = text + "";
+    text = String(text);
 
     // Use default limit if necessary.
     if (!limit)
@@ -452,7 +452,7 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
         alterText = "...";
 
     // Make sure it's a string.
-    text = text + "";
+    text = String(text);
 
     // Use default limit if necessary.
     if (!limit)

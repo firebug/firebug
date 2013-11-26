@@ -433,9 +433,9 @@ var NetUtils =
 
     getTimeLabel: function(date)
     {
-        var m = date.getMinutes() + "";
-        var s = date.getSeconds() + "";
-        var ms = date.getMilliseconds() + "";
+        var m = String(date.getMinutes());
+        var s = String(date.getSeconds());
+        var ms = String(date.getMilliseconds());
         return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
             ((s.length > 1) ? s : "0" + s) + "." +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";

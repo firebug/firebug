@@ -849,7 +849,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
                 var type = typeof propValue;
                 if (type === "undefined" || type === "number" || type === "boolean")
-                    editValue = "" + propValue;
+                    editValue = String(propValue);
                 else if (type === "string")
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue === null)
@@ -1032,7 +1032,7 @@ function getRowOwnerObject(row)
 
 function getParentRow(row)
 {
-    var level = "" + (parseInt(row.getAttribute("level"), 10) - 1);
+    var level = String(parseInt(row.getAttribute("level"), 10) - 1);
     if (level === "-1")
         return;
     for (row = row.previousSibling; row; row = row.previousSibling)
