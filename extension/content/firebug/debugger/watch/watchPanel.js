@@ -297,8 +297,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         if (this.defaultToggles.isEmpty())
         {
             var scope = this.context.getCurrentGlobal();
-            var uwScope = Wrapper.getContentView(scope);
-            this.defaultTree.expandObject(uwScope);
+            var unwrappedScope = Wrapper.getContentView(scope);
+            this.defaultTree.expandObject(unwrappedScope);
         }
         else
         {
@@ -566,7 +566,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         Trace.sysout("watchPanel.onStartDebugging;");
 
         // Debugger is paused, display the current scope chain.
-        this.select(this.context.currentFrame);
+        this.selection = this.context.currentFrame;
+        this.doUpdateSelection(this.selection);
     },
 
     onStopDebugging: function(context, event, packet)
@@ -579,7 +580,8 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         // Debugger is resumed, display the default content (current global scope).
         // xxxHonza: when stepping the default selection is displayed for a short
         // time, which causes content flashing. This should be fixed by issue 6943.
-        this.select(null, true);
+        this.selection = this.getDefaultSelection();
+        this.doUpdateSelection(this.selection);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
