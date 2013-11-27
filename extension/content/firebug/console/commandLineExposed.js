@@ -11,7 +11,6 @@ define([
 ],
 function(Obj, Wrapper, Locale, DebuggerLib, CommandLineAPI) {
 
-
 "use strict";
 
 // ********************************************************************************************* //
@@ -507,12 +506,17 @@ function handleException(exc, origExpr, context, onError)
  */
 function executeInWindowContext(win, func, args)
 {
+    Trace.sysout("commandLineExposed.executeInWindowContext; " + func, args);
+
     var listener = function()
     {
         win.document.removeEventListener("firebugCommandLine", listener);
-        func.apply(null, args);
-    };
+        if (func)
+            func.apply(null, args);
+    }
+
     win.document.addEventListener("firebugCommandLine", listener);
+
     var event = document.createEvent("Events");
     event.initEvent("firebugCommandLine", true, false);
     win.document.dispatchEvent(event);

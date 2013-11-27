@@ -556,7 +556,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
         var member = row.domObject;
         var name = member.name;
 
-        Trace.sysout("setPropertyValue: " + name + " set to " +
+        Trace.sysout("domBasePanel.setPropertyValue; " + name + " set to " +
             (typeof value === "string" ? "\"" + value + "\"" : "non-string!?!?"), row);
 
         if (name === "this")
@@ -566,7 +566,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
         function success(result, context)
         {
-            Trace.sysout("setPropertyValue evaluate success object[" + name + "]" +
+            Trace.sysout("domBasePanel.setPropertyValue; evaluate success object[" + name + "]" +
                 " set to type " + typeof result, result);
 
             object[name] = result;
@@ -574,7 +574,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Panel,
 
         function failure(exc, context)
         {
-            Trace.sysout("setPropertyValue evaluate FAILED", exc);
+            Trace.sysout("domBasePanel.setPropertyValue; evaluate FAILED " + exc, exc);
 
             try
             {

@@ -584,6 +584,17 @@ WatchPanel.prototype = Obj.extend(BasePanel,
         this.doUpdateSelection(this.selection);
     },
 
+    framesadded: function(stackTrace)
+    {
+        Trace.sysout("watchPanel.framesadded;", stackTrace);
+
+        // When a variable within the scope chain is edited the {@WatchPanel.refresh} method
+        // calls {@DebuggerTool.cleanScopes} to get fresh scopes including the new value.
+        // So, when we get new frames from the backend we need to refresh the content.
+        this.selection = this.context.currentFrame;
+        this.doUpdateSelection(this.selection);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     showToolbox: function(row)
