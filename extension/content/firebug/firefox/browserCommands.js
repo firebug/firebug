@@ -71,29 +71,40 @@ var BrowserCommands =
     overlayShortcuts: function(doc)
     {
         var win = $(doc, "main-window");
-        var keyset = $el(doc, "keyset", {id: "firebugKeyset"},
-            win);
+        var keyset = $el(doc, "keyset", {id: "firebugKeyset"}, win);
 
-        for (var i=0; i<shortcuts.length; i++)
+        for (var i = 0; i < shortcuts.length; i++)
         {
             var id = shortcuts[i];
             var shortcut = Options.get("key.shortcut." + id);
             var tokens = shortcut.split(" ");
             var key = tokens.pop();
+            var modifiers = tokens.join(",");
 
             var keyProps = {
                 id: "key_firebug_" + id,
-                modifiers: tokens.join(","),
+                modifiers: modifiers,
                 command: "cmd_firebug_" + id,
                 position: 1
             };
 
+            var attr = "";
             if (key.length <= 1)
-                keyProps.key = key;
+                attr = "key";
             else if (doc.defaultView.KeyEvent["DOM_"+key])
-                keyProps.keycode = key;
+                attr = "keycode";
+            keyProps[attr] = key;
 
             $el(doc, "key", keyProps, keyset);
+
+            // Disable existing global shortcuts
+            var selector = ":-moz-any(key[" + attr + "='" + key + "'], key[" + attr + "='" +
+                key.toUpperCase() + "'])[modifiers='" + modifiers + "']" +
+                ":not([id*='firebug']):not([disabled='true'])";
+
+            var existingKeyElements = doc.querySelectorAll(selector);
+            for (var j = existingKeyElements.length - 1; j >= 0; j--)
+                existingKeyElements[j].setAttribute("disabled", "true");
         }
 
         keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
