@@ -685,7 +685,7 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
             // Reference to the edited breakpoint.
             editor.breakpoint = bp;
 
-            // if there is alreay a bp, the line is executable, so we just need to
+            // If there is already a bp, the line is executable, so we just need to
             // open the editor.
             this.openBreakpointConditionEditor(lineNo, bp.condition);
             return;
@@ -1015,6 +1015,14 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 }
             )
         }
+
+        items.push("-");
+        items.push({
+            label: "script.updateExecutableLines",
+            tooltiptext: "script.tip.updateExecutableLines",
+            command: Obj.bindFixed(this.markExecutableLines, this, 0,
+                this.scriptView.editor.getLineCount())
+        });
 
         return items;
     },
@@ -1437,14 +1445,18 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
         var currentLine = from;
         var editor = this.scriptView.editor.editorObject;
 
+        Trace.sysout("scriptPanel.markExecutableLines; from: " + from + ", to: " + to);
+
         // Iterate over all visible lines.
         editor.eachLine(from, to, function(handle)
         {
             currentLine++;
 
             // Bail out if the exe-flag for this line has been already computed.
-            if (typeof(handle.executableLine) != "undefined")
-                return;
+            // xxxHonza: don't bail out, some scripts could have been garbage collected,
+            // and we need to make sure the executable status is properly updated.
+            //if (typeof(handle.executableLine) != "undefined")
+            //    return;
 
             // Check if the line is executable (performance expensive operation).
             handle.executableLine = DebuggerLib.isExecutableLine(self.context, {
@@ -1452,9 +1464,11 @@ ScriptPanel.prototype = Obj.extend(BasePanel,
                 line: currentLine,
             });
 
-            // Mark the line as executable.
+            // Update line executable style.
             if (handle.executableLine)
                 editor.addLineClass(handle, "executable", "CodeMirror-executableLine");
+            else
+                editor.removeLineClass(handle, "executable", "CodeMirror-executableLine");
         });
     },
 });
