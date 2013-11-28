@@ -839,9 +839,9 @@
                 popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
                 var style = this.ownerDocument.defaultView.getComputedStyle(this.popup, null);
                 var rtlLanguage = style.direction == "rtl";
-                this.popup.showPopup(anchor || this, -1, -1, "popup",
-                    rtlLanguage ? "bottomright" : "bottomleft",
-                    rtlLanguage ? "topright" : "topleft");
+
+                var position = rtlLanguage ? "after_end" : "after_start";
+                this.popup.openPopup(this.parentNode, position, 0, -1, false, false);
             ]]></body>
         </method>
 
