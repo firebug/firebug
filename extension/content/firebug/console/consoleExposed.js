@@ -421,7 +421,7 @@ function createFirebugConsole(context, win)
                 continue;
 
             // command line
-            var fn = frames[i].getFunctionName() + "";
+            var fn = String(frames[i].getFunctionName());
             if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
                 continue;
 

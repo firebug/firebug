@@ -1225,7 +1225,7 @@ function updateHttpSpyInfo(spy, updateInfoBody)
         return;
 
     if (!spy.params)
-        spy.params = Url.parseURLParams(spy.href + "");
+        spy.params = Url.parseURLParams(String(spy.href));
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
