@@ -423,7 +423,9 @@
                         </deck>
                     </vbox>
 
-                    <splitter id="fbPanelSplitter"/>
+                    <splitter id="fbPanelSplitter" valign="top">
+                        <box id="fbPanelSplitterBox" />
+                    </splitter>
 
                     <deck id="fbSidePanelDeck" persist="width,height">
                         <panelBar id="fbPanelBar2" class="panelBar">
