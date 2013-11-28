@@ -142,7 +142,7 @@ FirebugReps.Number = domplate(Rep,
 
     stringify: function(object)
     {
-        return (Object.is(object, -0) ? "-0" : "" + object);
+        return (Object.is(object, -0) ? "-0" : String(object));
     },
 
     supportsObject: function(object, type)
@@ -2444,13 +2444,13 @@ FirebugReps.SourceText = domplate(Rep,
 
     lineIterator: function(sourceText)
     {
-        var maxLineNoChars = (sourceText.lines.length + "").length;
+        var maxLineNoChars = String(sourceText.lines.length).length;
         var list = [];
 
         for (var i = 0; i < sourceText.lines.length; ++i)
         {
             // Make sure all line numbers are the same width (with a fixed-width font)
-            var lineNo = (i+1) + "";
+            var lineNo = String(i + 1);
             while (lineNo.length < maxLineNoChars)
                 lineNo = " " + lineNo;
 

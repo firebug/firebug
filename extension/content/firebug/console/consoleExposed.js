@@ -429,7 +429,7 @@ function createFirebugConsole(context, win)
                 continue;
 
             // command line
-            var fn = frames[i].getFunctionName() + "";
+            var fn = String(frames[i].getFunctionName());
             if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
                 continue;
 
@@ -477,7 +477,8 @@ function createFirebugConsole(context, win)
                         else
                         {
                             var argValues = Array.prototype.slice.call(func.arguments);
-                            var argNames = StackFrame.guessFunctionArgNamesFromSource(func + "");
+                            var argNames =
+                                StackFrame.guessFunctionArgNamesFromSource(String(func));
                             if (argNames && argNames.length === func.length)
                             {
                                 for (var i = 0; i < func.length; i++)
